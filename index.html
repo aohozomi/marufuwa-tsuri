@@ -59,6 +59,8 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .areas button{min-height:48px;padding:4px 2px;font-size:.82rem;line-height:1.25;border-radius:22px}
 .areas button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36}
 .times button[aria-pressed=true]{--c1:#e6dcff;--c2:#b79cf0;--side:#8a6bd0;--ink:#33205f}
+.hud button,.hud .pill{white-space:nowrap;padding:8px 6px;font-size:.88rem;min-width:0}
+.hud .plaza{--c1:#fff1dc;--c2:#ffc98f;--side:#d98a45;--ink:#5a2f0c;text-shadow:none;min-height:52px}
 .hud button{--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
 .hud button::after{content:"";position:absolute;right:14%;bottom:16%;width:9px;height:9px;border-radius:50%;background:#ffffffe6;pointer-events:none}
 .areas small{display:block;font-weight:600;font-size:.7rem}
@@ -213,7 +215,8 @@ body.gazing #scene{box-shadow:0 18px 40px #24465340}
 
 #reel{position:absolute;z-index:5;width:36%;aspect-ratio:1/1;transform:translate(-50%,-50%);display:none;pointer-events:none}
 #scene[data-phase=reel] #reel{display:block}
-#reel .back{position:absolute;inset:0;border-radius:50%;background:#17323d59}
+#reel .back{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#ffffff2e 0%,#17323d2e 70%,#17323d14 100%);box-shadow:inset 0 0 0 2px #ffffff55}
+#scene #keeper:disabled{opacity:1}
 /* まと：わが ここに かさなったら「いまだ」。かさなって いる あいだ、きんいろに ひかる */
 #reel .target{position:absolute;left:50%;top:50%;width:30%;height:30%;transform:translate(-50%,-50%);border-radius:50%;background:#fff6c94d;border:4px solid #e0a61c;transition:background .08s,box-shadow .08s,scale .08s}
 #reel[data-hot=true] .target{background:#ffe14dd9;box-shadow:0 0 0 5px #fff6a8,0 0 22px 8px #ffd34d;scale:1.1}
@@ -243,15 +246,16 @@ body.gazing #scene{box-shadow:0 18px 40px #24465340}
 .shadow[data-nushi=true][data-rare="4"]{background:#ffd34de0}
 #card h2{margin:2px 0;font-size:1.25rem}
 #card p{margin:1px 0;line-height:1.5;font-size:.9rem}
-.held{position:absolute;z-index:3;font-size:clamp(1.7rem,9vw,2.8rem);line-height:1;transform:translate(-50%,-100%) rotate(-90deg);pointer-events:none}
+.held{position:absolute;z-index:4;font-size:clamp(1.7rem,9vw,2.8rem);line-height:1;transform:translate(-50%,-100%);pointer-events:none}
 .held[data-rare="3"]{filter:drop-shadow(0 0 5px #fff)}
 .held[data-rare="4"]{filter:sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 7px #ffd34d)}
 .held[hidden]{display:none}
 #card .tag{display:inline-block;margin:2px 4px;padding:2px 10px;border-radius:12px;background:#fff3ce;border:2px solid #a56c19;color:#593700;font-weight:800;font-size:.9rem}
 
 .actions{display:flex;gap:10px;margin-top:12px}
-.actions{gap:12px;margin:16px 0 6px}
-#main-button{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;flex:1;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
+.actions{gap:12px;margin:16px 0 6px;flex-wrap:wrap}
+#take-photo,#gaze{flex:1 1 40%;min-height:54px}
+#main-button{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;flex:1 1 100%;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
 #main-button[data-hot=true]{--c1:#ffa98f;--c2:#ee5a3c;--side:#b23a20;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
 .note{text-align:center;font-size:.85rem;color:#506874;line-height:2.3;margin-top:18px}
@@ -314,6 +318,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   <div class="hud">
     <button id="open-bucket" type="button" style="flex:1">バケツ</button>
     <button id="open-book" type="button" style="flex:1">ずかん</button>
+    <a class="pill plaza" href="hiroba/" style="flex:1">ひろば</a>
   </div>
 
   <div class="areas" id="areas" role="group" aria-label="つりばを えらぶ"></div>
@@ -860,7 +865,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     setPhase('caught');
     // つれた さかなを、まるふわが かかげる
     const held = $('held'), f = feet(mine);
-    held.textContent = fish.icon; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.7' : ''; place(held, {x: f.x + (nushi ? 14 : 11), y: f.y - 3}); held.hidden = false;
+    held.textContent = fish.icon; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.7' : ''; place(held, {x: f.x, y: f.y - (nushi ? 27 : 24)}); held.hidden = false;   // あたまの うえに かかげる（バケツや なかまと かさならない）
     if (!reduce()) {
       held.animate([{translate: '0 30px', opacity: 0}, {translate: '0 -8px', opacity: 1}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
       // やったー：ぴょん、ぴょんと とびはねる。ぬしと スペシャルは 3かい
@@ -899,7 +904,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
       if (bubble.textContent === 'つれた！') {   // なかまも、つれた さかなを かかげる
         const theirs = $('held-friend');
-        theirs.textContent = ['🐟', '🐠', '🐡'][Math.floor(Math.random() * 3)]; place(theirs, {x: f.x + 9, y: f.y - 2}); theirs.hidden = false;
+        theirs.textContent = ['🐟', '🐠', '🐡'][Math.floor(Math.random() * 3)]; place(theirs, {x: f.x, y: f.y - 18}); theirs.style.fontSize = 'clamp(1.2rem,6vw,1.9rem)'; theirs.hidden = false;
         setTimeout(() => { theirs.hidden = true; }, 7000);
       }
       if (!reduce()) $(who ? 'friend-b' : 'friend-a').animate(bubble.textContent === 'つれた！' ? [{translate: '0 0', rotate: '0deg'}, {translate: '0 -14px', rotate: '-8deg'}, {translate: '0 0', rotate: '0deg'}, {translate: '0 -9px', rotate: '8deg'}, {translate: '0 0', rotate: '0deg'}] : [{rotate: '0deg'}, {rotate: '7deg'}, {rotate: '-5deg'}, {rotate: '0deg'}], {duration: 700, easing: 'ease-out'});   // しゃべる ときに、からだも うごく
