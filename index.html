@@ -195,7 +195,10 @@ main{background:#f4fbfff5;border-radius:32px;margin-top:10px;margin-bottom:24px;
 #main-button[data-hot=true]{--c1:#ffa98f;--c2:#ee5a3c;--side:#b23a20;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
 .note{text-align:center;font-size:.85rem;color:#506874;line-height:2.3;margin-top:18px}
-rt{font-size:.6em;letter-spacing:.02em}
+rt{font-size:.5em;letter-spacing:.02em;font-weight:700}
+.lead{line-height:2.1}
+#card h2{line-height:1.9}
+#book-grid div{line-height:1.9}
 
 dialog{border:2px solid #bfdce8;border-radius:24px;padding:16px;max-width:min(560px,94vw);width:100%;color:#244653}
 dialog::backdrop{background:#17323d66}
@@ -242,7 +245,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <path d="M0 780 Q400 730 800 790 T1600 770 V900 H0Z" fill="#a7dba0"/>
   </svg>
   <h1 class="logo" aria-label="まるふわ つりびより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">つ</span><span aria-hidden="true">り</span><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
-  <p class="lead">いそがなくて、だいじょうぶ。にがしても、へらないよ。</p>
+  <p class="lead"><ruby>急<rt>いそ</rt></ruby>がなくて、<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>。<ruby>逃<rt>に</rt></ruby>がしても、<ruby>減<rt>へ</rt></ruby>らないよ。</p>
   <div class="hud">
     <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
     <span>つれた かず <strong id="total">0</strong></span>
@@ -410,6 +413,24 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ['みずいろのこ','🐟',12,30,3,'a','L'],['みんとのこ','🐟',12,30,3,'h','R'],['あぷりこっとのこ','🐟',12,30,3,'y','H'],
     ['らべんだーのこ','🐟',12,30,3,'n','B'],['きんのまるごい','🐟',40,90,4,'','L'],['まるくじら','🐳',200,400,4,'n','B']
   ].map(([name, icon, min, max, rare, time, area], id) => ({id, name, icon, min, max, rare, time, area}));
+  // かんじの なまえ（よみがな つき）。あそびながら、さかなの かんじを おぼえられる。{かんじ|よみ} の かきかた
+  ['{丸|まる}{鯵|あじ}', 'ふわ{河豚|ふぐ}', 'もち{鯛|だい}', 'ころ{鰯|いわし}', 'ぽて{鰈|かれい}', '{白玉|しらたま}{海老|えび}',
+    'ぷか{海月|くらげ}', '{小粒|こつぶ}{蟹|がに}', 'わたあめ{金魚|きんぎょ}', 'まんまる{烏賊|いか}', 'ふくふく{蛸|たこ}', '{虹色|にじいろ}べら',
+    '{朝焼|あさや}け{鯛|だい}', '{夕焼|ゆうや}け{鯖|さば}', '{星空|ほしぞら}{穴子|あなご}', 'おもち{鮃|ひらめ}', '{桜|さくら}{鱒|ます}', 'ぽんぽん{針千本|はりせんぼん}',
+    'ころころ{亀|かめ}', '{眠|ねむ}り{海豚|いるか}', '{月見|つきみ}まんぼう', '{日|ひ}だまり{鱏|えい}', '{三日月|みかづき}{太刀魚|たちうお}', 'しゃぼん{玉|だま}{魚|うお}',
+    '{水色|みずいろ}の{子|こ}', 'ミントの{子|こ}', 'アプリコットの{子|こ}', 'ラベンダーの{子|こ}', '{金|きん}の{丸鯉|まるごい}', '{丸|まる}{鯨|くじら}'
+  ].forEach((kanji, id) => { FISH[id].kanji = kanji; });
+  // {かんじ|よみ} を、ふりがなつきの もじに する
+  function ruby(text) {
+    const out = document.createDocumentFragment();
+    String(text).split(/(\{[^|}]+\|[^}]+\})/).forEach(part => {
+      const hit = /^\{([^|}]+)\|([^}]+)\}$/.exec(part);
+      if (!hit) { if (part) out.append(part); return; }
+      const word = document.createElement('ruby'), reading = document.createElement('rt');
+      reading.textContent = hit[2]; word.append(hit[1], reading); out.append(word);
+    });
+    return out;
+  }
   // つりば。need は「ぜんぶで なんびき つったら いけるか」
   const AREAS = [
     {id: 'L', name: 'みずうみ', need: 0}, {id: 'R', name: 'かわ', need: 5},
@@ -705,7 +726,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (found) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[found] = (save.decor[found] || 0) + 1; }
     store(); hud(); drawEquip();
     const gift = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))].filter(item => !had.includes(item)).map(item => item.name);
-    $('card-fish').textContent = fish.icon; $('card-name').textContent = fish.name;
+    $('card-fish').textContent = fish.icon; $('card-name').replaceChildren(ruby(fish.kanji));
     const stars = document.createElement('span'); stars.className = 'stars'; stars.textContent = starsOf(fish, nushi); stars.setAttribute('aria-label', 'めずらしさ ' + starCount(fish, nushi) + ' / 5');
     $('card-size').replaceChildren(cm(size) + ' センチ　', stars);
     if (found) gift.push(found + '（さかなが もって いたよ）');
@@ -876,7 +897,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const f = FISH[item.id], row = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), when = document.createElement('small');
       icon.textContent = f.icon; icon.setAttribute('aria-hidden', 'true');
       when.textContent = clock.format(new Date(item.at)) + '　' + starsOf(f, item.nushi) + (item.nushi ? '　ぬし' : '');
-      text.append(f.name + '　' + cm(item.size) + 'センチ', when); row.append(icon, text); return row;
+      text.append(ruby(f.kanji), '　' + cm(item.size) + 'センチ', when); row.append(icon, text); return row;
     }) : ['まだ からっぽ。のんびり いこう。']));
     const decor = save.decor && typeof save.decor === 'object' ? Object.entries(save.decor) : [];
     $('decor-list').textContent = decor.length ? decor.map(([name, count]) => name + ' ×' + count).join('　') : 'まだ ないよ。さかなが ときどき もって くるよ。';
@@ -897,7 +918,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
       const icon = document.createElement('b'); icon.textContent = got ? f.icon : '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
-      cell.append(icon, got ? f.name : 'まだ あってない', document.createElement('br'), got ? 'さいだい ' + cm(got.best) + 'cm（' + got.count + 'ひき）' + (got.nushi ? ' ぬし◎' : '') : when);
+      cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), got ? 'さいだい ' + cm(got.best) + 'cm（' + got.count + 'ひき）' + (got.nushi ? ' ぬし◎' : '') : when);
       return cell;
     }));
     book.showModal();
