@@ -29,7 +29,8 @@ button,.pill{--c1:#ffffffd9;--c2:#bfe6f9b3;--side:#9cc9e0;--ink:#244653;-webkit-
   transition:transform .09s ease-out,box-shadow .09s ease-out}
 button::before,.pill::before{content:"";position:absolute;left:10%;right:10%;top:7%;height:36%;border-radius:999px;background:linear-gradient(#ffffffd9,#ffffff00);pointer-events:none}
 button:active:not(:disabled),.pill:active{transform:translateY(4px) scale(.98,.93);box-shadow:0 1px 0 var(--side),0 3px 6px #2446532b,inset 0 -3px 6px #00000014,inset 0 3px 5px #ffffffcc}
-button:disabled{opacity:.6;cursor:default;box-shadow:0 2px 0 var(--side),inset 0 -4px 6px #0000000f}
+button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-shadow:0 2px 0 var(--side),inset 0 -4px 6px #0000000f}
+#main-button[aria-disabled=true]:active{transform:none}
 .spot::before,#keeper::before{display:none}
 #scene .spot,#scene #keeper{box-shadow:none;transition:none}
 #scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
@@ -528,6 +529,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const $ = id => document.getElementById(id);
   const scene = $('scene'), button = $('main-button'), status = $('status'), marufuwa = $('marufuwa');
   const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // 「なげる」は、おせない あいだも disabled に しない（Firefox・Safari では、フォーカスが きえて、キーボード・よみあげの いる ばしょが なくなる）。ようすだけ うすくして、act() が むしする
+  const lock = on => { if (on) button.setAttribute('aria-disabled', 'true'); else button.removeAttribute('aria-disabled'); };
 
   // rare: 1 ふつう / 2 ちょっと めずらしい / 3 めずらしい / 4 ぬし
   // time: a あさ(5-10) h ひる(10-16) y ゆうがた(16-19) n よる(19-5)。'' は いつでも
@@ -599,7 +602,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const RARE_LABEL = {2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル', 5: 'まぼろし'};
   const starCount = (f, nushi) => Math.min(5, f.rare + (nushi ? 1 : 0));
   const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
-  const cm = value => Number(value).toFixed(2);
+  const cm = value => { const n = Number(value); return n >= 100 ? String(Math.round(n)) : n.toFixed(1).replace(/\.0$/, ''); };   // 「18.83」より「18.8」。100センチを こえたら 整数
   const DECOR = ['かいがら', 'きれいな いし', 'ながれぎ', 'みずくさ', 'ちいさな びん', 'ほしの かけら'];
   const TIME_LABEL = {a: 'あさ', h: 'ひる', y: 'ゆうがた', n: 'よる'};
   const TIME_NAME = {a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru'};
@@ -796,7 +799,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false;
-  function setPhase(next) { phase = next; if (next === 'idle') button.disabled = false; scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { phase = next; if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
   function face(name) { marufuwa.src = 'img/game-' + name + '.webp'; }
   function hud() {
@@ -809,7 +812,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     fish = pickFish(); face('blue'); $('held').hidden = true;
     flying = !reduce(); setPhase('waiting'); if (flying) throwRod();
     tone(220, .28, 'square', .2, .04, 880); tone(330, .1, 'triangle', .9, .06, 110); zap(.14, .9);   // ヒュ〜ッ…ポチャ
-    button.textContent = 'まってる…'; button.disabled = true; button.dataset.hot = 'false';
+    button.textContent = 'まってる…'; lock(true); button.dataset.hot = 'false';
     say('ぽちゃん。のんびり まとう。');
     // さいしょの 1ぴきは、すぐに くる（はじめての ひとを またせない）
     const wait = Number(query.get('wait')) || (save.total === 0 ? 1300 : 2200 + Math.random() * 3300);
@@ -844,7 +847,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function bite() {
     flying = false; tone(1568, .06); tone(1568, .06, 'square', .1); tone(2093, .12, 'square', .2); buzz([120, 80, 120]);   // ピピッ、ピーン
     setPhase('bite');
-    button.textContent = 'ひく！'; button.disabled = false; button.dataset.hot = 'true';
+    button.textContent = 'ひく！'; lock(false); button.dataset.hot = 'true';
     say((fish.legend ? 'にじいろに ひかる かげ…！ なんだろう。' : nushi ? 'とても おおきな かげ…！ ぬしかも。' : fish.rare === 4 ? 'きんいろの かげ…！ スペシャルな こかも。' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
     button.focus();
   }
@@ -979,8 +982,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
       [$('friend-a'), $('friend-b')].forEach((pal, i) => pal.animate([{translate: '0 0'}, {translate: '0 -12px'}, {translate: '0 0'}, {translate: '0 -8px'}, {translate: '0 0'}], {duration: 620, delay: 180 + i * 140, easing: 'ease-out'}));
     }
     // れんだ しても、うれしい しゅんかんが きえない ように、すこしだけ まつ
-    button.textContent = 'もういちど なげる'; button.dataset.hot = 'false'; button.disabled = true; caughtAt = performance.now();
-    setTimeout(() => { if (phase === 'caught') button.disabled = false; }, 1000);
+    button.textContent = 'もういちど なげる'; button.dataset.hot = 'false'; lock(true); caughtAt = performance.now();
+    setTimeout(() => { if (phase === 'caught') lock(false); }, 1000);
     say(fish.name + 'が つれた。' + cm(size) + 'センチ。' + tags.join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : ''));
   }
 
@@ -993,11 +996,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
   button.addEventListener('click', act);
   // キーボード：スペースか エンターで、なげる・ひく（ボタンや もじの いれものに いる ときは、その うごきを じゃま しない）
+  // 「なげる」ボタンに いる ときも、おした しゅんかんに うごく（スペースは ふつう はなした ときに うごくので、タイミングが ずれる。アタリの あとは いつも ここに いる）
   document.addEventListener('keydown', event => {
     if ((event.key !== ' ' && event.key !== 'Enter') || event.repeat || document.querySelector('dialog[open]')) return;
-    if (event.target.closest && event.target.closest('button, a, input, textarea, summary, select')) return;
-    event.preventDefault(); if (!button.disabled) act();
+    if (event.target !== button && event.target.closest && event.target.closest('button, a, input, textarea, summary, select')) return;
+    event.preventDefault(); act();
   });
+  document.addEventListener('keyup', event => { if (event.key === ' ' && event.target === button) event.preventDefault(); });   // はなした ときの 2かいめを ふせぐ
   // わや みずを じかに おしても、ひける
   scene.addEventListener('click', event => { if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') ringStart = performance.now(); });
@@ -1028,42 +1033,40 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   // つりばを えらぶ
   const areaName = id => AREAS.find(a => a.id === id).name;
+  // ボタンを つくりなおさず、ようすだけ かきかえる（つくりなおすと、キーボード・よみあげの「いま いる ばしょ」が きえる）
+  function syncTabs(box, specs) {
+    const have = new Map([...box.children].map(b => [b.dataset.k, b]));
+    specs.forEach(s => {
+      let tab = have.get(s.k);
+      if (!tab) { tab = document.createElement('button'); tab.type = 'button'; tab.dataset.k = s.k; tab.addEventListener('click', s.click); box.append(tab); }
+      tab.disabled = s.disabled; tab.setAttribute('aria-pressed', String(s.pressed));
+      const sig = s.text + '|' + (s.small || '');
+      if (tab.dataset.t !== sig) { tab.replaceChildren(s.text); if (s.small) { const left = document.createElement('small'); left.textContent = s.small; tab.append(left); } tab.dataset.t = sig; }
+    });
+  }
   function drawAreas() {
     if ($('area-now')) $('area-now').textContent = areaName(save.area);
-    $('areas').replaceChildren(...AREAS.map(area => {
-      const tab = document.createElement('button'), open = save.total >= area.need;
-      tab.type = 'button'; tab.textContent = area.name; tab.disabled = !open || !(phase === 'idle' || phase === 'caught');
-      tab.setAttribute('aria-pressed', String(save.area === area.id));
-      if (!open) { const left = document.createElement('small'); left.textContent = 'あと ' + (area.need - save.total) + 'ひき'; tab.append(left); }
-      tab.addEventListener('click', () => {
-        if (save.area === area.id) return;
-        save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals();
-        setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false';
-        say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
-      });
-      return tab;
-    }));
+    syncTabs($('areas'), AREAS.map(area => ({k: area.id, text: area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: save.total < area.need || !(phase === 'idle' || phase === 'caught'), pressed: save.area === area.id, click: () => {
+      if (save.area === area.id) return;
+      save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals();
+      setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false';
+      say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
+    }})));
   }
   // じかんを えらぶ。「いまの じかん」は とけいに あわせる
   function drawTimes() {
     const hour = new Date().getHours(), night = hour >= 19 || hour < 5;
     scene.dataset.dim = String(night && timeOfDay() !== 'n');
     $('time-now').textContent = TIME_LABEL[timeOfDay()];
-    $('times').replaceChildren(...[['', 'いまの じかん'], ['a', 'あさ'], ['h', 'ひる'], ['y', 'ゆうがた'], ['n', 'よる']].map(([id, name]) => {
-      const tab = document.createElement('button');
-      tab.type = 'button'; tab.textContent = name; tab.disabled = !(phase === 'idle' || phase === 'caught');
-      tab.setAttribute('aria-pressed', String((save.time || '') === id));
-      tab.addEventListener('click', () => {
-        save.time = id; store(); scene.dataset.time = TIME_NAME[timeOfDay()]; drawTimes();
-        say(TIME_LABEL[timeOfDay()] + 'に なったよ。' + (id ? '' : '（とけいに あわせて いるよ）'));
-      });
-      return tab;
-    }));
+    syncTabs($('times'), [['', 'いまの じかん'], ['a', 'あさ'], ['h', 'ひる'], ['y', 'ゆうがた'], ['n', 'よる']].map(([id, name]) => ({k: 't' + id, text: name, disabled: !(phase === 'idle' || phase === 'caught'), pressed: (save.time || '') === id, click: () => {
+      save.time = id; store(); scene.dataset.time = TIME_NAME[timeOfDay()]; drawTimes();
+      say(TIME_LABEL[timeOfDay()] + 'に なったよ。' + (id ? '' : '（とけいに あわせて いるよ）'));
+    }})));
   }
   $('go-area').addEventListener('click', event => {
     event.stopPropagation(); const area = AREAS.find(a => a.id === $('go-area').dataset.area); if (!area || save.total < area.need) return;
     save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals();
-    setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false'; button.disabled = false;
+    setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false'; lock(false);
     say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
   });
   function drawEquip() { $('equip').textContent = RODS[save.rod].icon + ' ' + RODS[save.rod].name + '　' + BAITS[save.bait].icon + ' ' + BAITS[save.bait].name; }
@@ -1079,14 +1082,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
       list.forEach((item, i) => {
         const pick = document.createElement('button'), open = item.open(save), note = document.createElement('small');
         const icon = document.createElement('b'); icon.textContent = open ? item.icon : '？'; icon.setAttribute('aria-hidden', 'true');
-        pick.type = 'button'; pick.append(icon, open ? item.name : '？？？'); pick.disabled = !open;
+        pick.type = 'button'; pick.dataset.k = key + i; pick.append(icon, open ? item.name : '？？？'); pick.disabled = !open;
         pick.setAttribute('aria-pressed', String(save[key] === i));
         note.textContent = open ? item.note + (save[key] === i ? '（つかって いる）' : '') : item.how; pick.append(note);
         pick.addEventListener('click', () => { save[key] = i; store(); drawEquip(); drawShop(); });
         rows.push(pick);
       });
     }
+    const on = document.activeElement && $('shop-list').contains(document.activeElement) ? document.activeElement.dataset.k : '';   // つくりなおしても、いま いる ボタンに もどる
     $('shop-list').replaceChildren(...rows);
+    if (on) { const again = $('shop-list').querySelector('[data-k="' + on + '"]'); if (again && !again.disabled) again.focus({preventScroll: true}); }
   }
   $('keeper').addEventListener('click', () => { drawShop(); shop.showModal(); });
   $('close-shop').addEventListener('click', () => shop.close());
@@ -1391,12 +1396,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
   $('all').textContent = String(BASE);
   // ならびじゅん：けしきと「なげる」を いちばん うえに。あまり つかわない ものは したへ（はじめての こが まよわない ように）
   {
-    const rows = document.querySelectorAll('main > .hud'), label = text => { const p = document.createElement('p'); p.className = 'menu-label'; p.textContent = text; return p; };
+    const rows = document.querySelectorAll('main > .hud'), label = text => { const h = document.createElement('h2'); h.className = 'menu-label'; h.textContent = text; return h; };
     // ばしょは、ふだんは しまって おく。おすと、4つ ぜんぶ でる
-    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('take-photo'), $('easy'), $('gaze')); document.querySelector('.actions').after(sub);
+    // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）
+    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('easy'), $('gaze')); document.querySelector('.actions').after(sub);
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
-    status.after(where, label('みる・いく'), rows[1], label('せってい'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
+    status.after(where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
   }
   // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる
   function drawEasy() { const on = !!save.easy; $('easy').textContent = on ? 'らくちん：ON' : 'らくちん：OFF'; $('easy').setAttribute('aria-pressed', String(on)); scene.dataset.easy = String(on); }
