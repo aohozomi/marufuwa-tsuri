@@ -247,7 +247,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   <p class="note">じかんで つれる さかなが かわるよ（あさ・ひる・ゆうがた・よる）。<br>
   きろくは この たんまつの なかだけに のこります。ログインも インストールも いりません。<br>
-  はいけいと さかなの えは、いまは かりの ものです。</p>
+  はいけいと さかなの えは、いまは かりの ものです。<br>
+  キャラクター画像はAIを使用して制作しています。</p>
 
   <dialog id="book" aria-labelledby="book-title">
     <h2 id="book-title">おさかな ずかん</h2>
@@ -628,7 +629,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.fillStyle = color('--star') === '1' ? '#fff' : '#244653'; ctx.textAlign = 'left';
     ctx.font = 'bold 42px system-ui,sans-serif'; ctx.fillText('まるふわ つりびより', 46, 74);
     ctx.font = '30px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + last.area, 48, 122);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText('#まるふわまるいろ　' + HOME.replace('https://', ''), 46, 640);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText('#まるふわまるいろ', 46, 640);   // えの なかには なまえも URLも いれない。URLは とうこうの ぶんに だけ
     const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(Error('png')), 'image/png'));
     if (photoURL) URL.revokeObjectURL(photoURL);
     photoFile = new File([blob], 'marufuwa-tsuri-' + last.fish.id + '.png', {type: 'image/png'}); photoURL = URL.createObjectURL(blob);
