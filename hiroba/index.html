@@ -150,7 +150,14 @@ button[data-dest=onigiri]{--c1:#f0ffea;--c2:#a6e3ae;--side:#52b066;--ink:#123f1c
 .note{text-align:center;font-size:.8rem;color:#506874;line-height:1.9;margin:14px 0 0}
 #curtain{position:fixed;inset:0;z-index:5000;background:#b9edf5;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-weight:900;font-size:1.4rem;color:#1d5a78;text-align:center;padding:24px}
 #curtain b{font-size:3rem;line-height:1}
-dialog{border:2px solid #bfdce8;border-radius:24px;padding:16px;color:#244653}
+.pill{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #0e4a66}
+dialog{border:2px solid #bfdce8;border-radius:24px;padding:16px;color:#244653;max-width:min(560px,94vw);width:100%}
+dialog::backdrop{background:#17323d66}
+dialog h2{margin:0 0 8px;text-align:center}
+#photo-img{display:block;margin:0 auto 10px;width:auto;max-width:100%;max-height:62vh;height:auto;border-radius:14px;border:2px solid #d5e6ed}
+.photo-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
+dialog .count{text-align:center;margin:0 0 12px;font-size:.9rem;line-height:1.7}
+dialog .close{display:block;margin:auto;min-width:160px}
 @media(prefers-reduced-motion:reduce){
   .logo span,.bd-trees circle,.waves path,.tuft,.cloud,.canopy,.jet,.arm,.mark,.actor img,#rain{animation:none !important}
   .prop,.door{transition:none}
@@ -256,6 +263,7 @@ body.calm .cloud.c2{left:56%}
     <div class="row">
       <button id="find" type="button">ともだちに あいにいく</button>
       <button id="listen" type="button">まわりを きく</button>
+      <button id="snap" type="button">しゃしんを とる</button>
     </div>
     <details id="touch"><summary>さわれる もの</summary>
       <div class="row">
@@ -274,6 +282,16 @@ body.calm .cloud.c2{left:56%}
   </details>
   <p class="note">おとの せっていは、つりびよりと おなじ ものを つかうよ。<br>きろくは この たんまつの なかだけに のこります。</p>
 </main>
+<dialog id="photo" aria-labelledby="photo-title">
+  <h2 id="photo-title">しゃしん</h2>
+  <img id="photo-img" alt="" width="540" height="960">
+  <div class="photo-actions">
+    <a id="photo-save" class="pill" download="marufuwa-hiroba.png">ほぞんする</a>
+    <button id="photo-share" type="button" class="pill" hidden>みせる（きょうゆう）</button>
+  </div>
+  <p class="count" id="photo-status" role="status">かってに とうこうは しません。</p>
+  <button class="close" type="button" id="close-photo">とじる</button>
+</dialog>
 <div id="curtain" aria-hidden="true"><b>✨</b><span></span></div>
 <noscript><p style="text-align:center;padding:16px">JavaScriptを ONに すると あそべるよ。<br><a href="../">つりば</a></p></noscript>
 
@@ -443,9 +461,9 @@ const PALS = {
   hiyoko: { name: 'レモンの ひよこ', size: .606, pitch: [1568, 1760, 1568], hello: 'ぴよ！ きょうも いい ひ',
     lines: ['ぴよ ぴよ。いっしょに あるく？', 'ちいさくても、げんき いっぱい', 'レモンの かおり、するかな？', 'ころんでも、ぴよって おきれば いいんだ', 'おひさま、まぶしい ね', 'ぴよ。ここ、たのしい ね'],
     rain: ['あめの ひは、みずたまりで ぴちゃぴちゃ', 'ぬれたら、ふるふる するよ'], night: ['ねむい ぴよ… おやすみの じかん', 'ほしが おおきな たまごみたい'], morning: ['ぴよ！ あさだよ、おきよう'], evening: ['そろそろ おうちへ かえろうかな'] },
-  hoho: { name: 'ほほきずの ねこ', size: .697, pitch: [587, 784, 659], hello: 'へっちゃら だよ。きに しないで',
+  hoho: { name: 'ほほきずの ねこ', size: .697, pitch: [587, 784, 659], hello: 'きょうも きたよ。いっしょに いようね',
     lines: ['この ほっぺの きず、なかよしの しるし', 'きずが あっても、いまは たのしいよ', 'むりして わらわなくて いいからね', 'つらい ときは、ここで やすんで いきな', 'ぼくも、ころんだ ことが いっぱい あるよ', 'いっしょに ひなたぼっこ、しよう'],
-    rain: ['あめの ひは、きずが すこし うずくんだ。でも へっちゃら', 'あまやどり、いっしょに する？'], night: ['よるは しずかで いいね', 'ねむれない よるも あるよね。ここに いて いいよ'], morning: ['あさは、ゆっくりで いいんだよ'], evening: ['いちにち、おつかれさま'] },
+    rain: ['あめの ひは、きずが すこし うずくんだ。でも いっしょなら だいじょうぶ', 'あまやどり、いっしょに する？'], night: ['よるは しずかで いいね', 'ねむれない よるも あるよね。ここに いて いいよ'], morning: ['あさは、ゆっくりで いいんだよ'], evening: ['いちにち、おつかれさま'] },
   kawauso: { name: 'ラテの かわうそ', size: .647, pitch: [698, 880, 784], hello: 'いい いし、みつけたよ',
     lines: ['この いし、つるつる。あげよっか？', 'ラテ、のむ？ あったかいよ', 'みずの なかは、きもちいいよ', 'たからものは、ポケットに いれとくんだ', 'ぷかぷか うくの、とくいだよ', 'いっしょに ひとやすみ しよう'],
     rain: ['あめの ひは、みずあそび びより', 'いしが つやつやに なるよ'], night: ['よるの みずは、つきが うつるよ', 'ラテで ほっと するよ'], morning: ['あさの ラテは おいしいよ'], evening: ['ゆうやけの いけ、きれいだよ'] },
@@ -971,6 +989,97 @@ function update(dt) {
 let last = 0;
 function frame(t) { requestAnimationFrame(frame); const dt = Math.min(.05, (t - last) / 1000 || 0); last = t; if (document.hidden || api.paused || (window.TsuriTank && window.TsuriTank.isOpen && window.TsuriTank.isOpen())) return; update(dt); render(); }
 
+// ─── しゃしん：きょうの ひろばを 1まいの えに（1080×1920）。なまえ・URLは えに いれない ───
+const svgImage = svg => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+function svgText(svgEl, cs, w, h) {   // いろの へんすう（var(--x)）を その ばで 実際の いろに して、えに できる かたちに する
+  const c = svgEl.cloneNode(true); c.setAttribute('width', String(Math.round(w))); c.setAttribute('height', String(Math.round(h)));
+  return new XMLSerializer().serializeToString(c).replace(/var\(--([a-z0-9-]+)\s*(?:,\s*([^)]*))?\)/gi, (m, name, fallback) => cs.getPropertyValue('--' + name).trim() || (fallback || '').trim() || 'none');
+}
+function roundPath(ctx, x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); }
+async function makePhoto() {
+  measure();
+  const OW = 1080, OH = 1920, S = 2.9, PX = (OW - W * S) / 2, PY = 104, K3 = 3;
+  const cvs = document.createElement('canvas'); cvs.width = OW; cvs.height = OH;
+  const ctx = cvs.getContext('2d'), css = getComputedStyle(scene), hasFilter = 'filter' in ctx;
+  const grad = ctx.createLinearGradient(0, 0, 0, OH); grad.addColorStop(0, '#dff2fb'); grad.addColorStop(1, '#f4fbff'); ctx.fillStyle = grad; ctx.fillRect(0, 0, OW, OH);
+  // だいめい
+  const title = 'まるふわの ひろば', colors = ['#4bb3e0', '#46c79a', '#ff9a6b', '#a98be8'];
+  ctx.save(); ctx.font = '900 66px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  const glyphs = [...title], gw = glyphs.map(ch => ch === ' ' ? 30 : ctx.measureText(ch).width + 6), total = gw.reduce((a, b) => a + b, 0); let gx = (OW - total) / 2, gi = 0;
+  glyphs.forEach((ch, i) => { if (ch !== ' ') { ctx.lineWidth = 15; ctx.strokeStyle = colors[gi % 4]; ctx.strokeText(ch, gx, 52); ctx.fillStyle = '#fff'; ctx.fillText(ch, gx, 52); gi++; } gx += gw[i]; });
+  ctx.restore();
+  // ひろば（かどを まるく）
+  ctx.save(); ctx.fillStyle = '#fff'; roundPath(ctx, PX - 8, PY - 8, W * S + 16, H * S + 16, 46); ctx.fill();
+  roundPath(ctx, PX, PY, W * S, H * S, 38); ctx.clip(); ctx.translate(PX, PY); ctx.scale(S, S);
+  const rainy = scene.dataset.rain === 'true', dimF = css.getPropertyValue('--dim').trim() || 'brightness(1)';
+  if (hasFilter) ctx.filter = dimF + (rainy ? ' brightness(.85) saturate(.8)' : '');
+  ctx.drawImage(await svgImage(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H);
+  ctx.filter = 'none';
+  // おひさま・おつきさま・くも
+  const orb = css.getPropertyValue('--orb').trim() || '#fff2a8', night = curTime === 'n';
+  ctx.save(); ctx.shadowColor = '#fff6c0'; ctx.shadowBlur = 26; const og = ctx.createRadialGradient(295, 52, 2, 300, 58, 24);
+  if (night) { og.addColorStop(0, '#fff'); og.addColorStop(.6, '#fff6cf'); og.addColorStop(1, '#f0e4b0'); ctx.fillStyle = og; } else ctx.fillStyle = orb;
+  ctx.beginPath(); ctx.arc(300, 58, 23, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  const sceneBox = scene.getBoundingClientRect(), k = sceneBox.width / W;
+  const unit = el => { const r = el.getBoundingClientRect(); return { x: (r.left - sceneBox.left) / k, y: (r.top - sceneBox.top) / k, w: r.width / k, h: r.height / k }; };
+  for (const c of scene.querySelectorAll('.cloud')) { const u = unit(c); ctx.save(); ctx.globalAlpha = parseFloat(getComputedStyle(c).opacity) || .9; ctx.drawImage(await svgImage(svgText(c, css, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.restore(); }
+  // たてもの・かざり・ひと（ならびは ふだんの がめんと おなじ：あしもとの たかさ じゅん）
+  const items = [...layerProps.querySelectorAll('.prop'), ...layerActors.querySelectorAll('.actor')].sort((a, b) => (Number(a.style.zIndex) || 0) - (Number(b.style.zIndex) || 0));
+  for (const el of items) {
+    const u = unit(el);
+    if (el.classList.contains('prop')) {
+      const svg = el.querySelector('svg'); if (!svg) continue;
+      const ecs = getComputedStyle(el), lamp = /^lamp/.test(el.dataset.id || '');
+      if (hasFilter && !lamp) ctx.filter = ((ecs.getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim();
+      ctx.drawImage(await svgImage(svgText(svg, ecs, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.filter = 'none';
+    } else {
+      if (getComputedStyle(el).opacity === '0') continue;
+      ctx.save(); ctx.fillStyle = '#0b2a4a2e'; ctx.beginPath(); ctx.ellipse(u.x + u.w / 2, u.y + u.h * .97, u.w * .36, u.h * .06, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      if (hasFilter) ctx.filter = dimF; ctx.drawImage(el.querySelector('img'), u.x, u.y, u.w, u.h); ctx.filter = 'none';
+    }
+  }
+  // ふきだし
+  for (const b of layerBubbles.querySelectorAll('.bubble')) {
+    const u = unit(b), fs = (parseFloat(getComputedStyle(b).fontSize) || 15) / k;
+    ctx.save(); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#b9d1db'; ctx.lineWidth = 1.6; roundPath(ctx, u.x, u.y, u.w, u.h, 9); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(u.x + u.w / 2 - 6, u.y + u.h - .5); ctx.lineTo(u.x + u.w / 2, u.y + u.h + 8); ctx.lineTo(u.x + u.w / 2 + 6, u.y + u.h - .5); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.fillRect(u.x + u.w / 2 - 5, u.y + u.h - 2.4, 10, 3.4);
+    ctx.fillStyle = '#244653'; ctx.font = `800 ${fs.toFixed(1)}px system-ui,"Yu Gothic UI",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const words = b.textContent.split(' '); let line = '', lines = []; const maxW = u.w - 14;
+    for (const wd of words) { const t = line ? line + ' ' + wd : wd; if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = wd; } else line = t; }
+    lines.push(line); const lh = fs * 1.45, y0 = u.y + u.h / 2 - (lines.length - 1) * lh / 2; lines.forEach((ln, i) => ctx.fillText(ln, u.x + u.w / 2, y0 + i * lh)); ctx.restore();
+  }
+  // あめ
+  if (rainy) { const r = mulberry(31); ctx.save(); ctx.strokeStyle = '#ffffff99'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let i = 0; i < 120; i++) { const x = r() * (W + 30), y = r() * H; ctx.moveTo(x, y); ctx.lineTo(x - 8, y + 24); } ctx.stroke(); ctx.restore(); }
+  ctx.restore();
+  // したの おび：きょうの ともだち（あった こは いろつき）と ひづけ
+  ctx.save(); ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillStyle = '#244653'; ctx.font = '800 38px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif';
+  ctx.fillText('きょうの ともだち', OW / 2, PY + H * S + 46);
+  const n = friends.length, size = 104, gap = 20, rowW = n * size + (n - 1) * gap; let ix = (OW - rowW) / 2; const iy = PY + H * S + 78;
+  for (const f of friends) {
+    const met = !!own.metToday[f.id], im = f.img; ctx.save(); ctx.globalAlpha = met ? 1 : .35; if (hasFilter && !met) ctx.filter = 'grayscale(1)';
+    const sc = Math.min(size / im.naturalWidth, size / im.naturalHeight); ctx.drawImage(im, ix + (size - im.naturalWidth * sc) / 2, iy + (size - im.naturalHeight * sc), im.naturalWidth * sc, im.naturalHeight * sc); ctx.restore(); ix += size + gap;
+  }
+  const d = new Date(); ctx.fillStyle = '#506874'; ctx.font = '700 30px system-ui,"Yu Gothic UI",sans-serif'; ctx.textAlign = 'right'; ctx.fillText(d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(), OW - 40, OH - 34);
+  ctx.restore();
+  return new Promise((res, rej) => cvs.toBlob(b => b ? res(b) : rej(Error('png')), 'image/png'));
+}
+const photoDlg = $('photo'); let photoURL = '', photoFile = null;
+async function openPhoto() {
+  const status = $('photo-status'); status.textContent = 'しゃしんを つくって いるよ…';
+  try {
+    const blob = await makePhoto(); if (photoURL) URL.revokeObjectURL(photoURL);
+    photoFile = new File([blob], 'marufuwa-hiroba.png', { type: 'image/png' }); photoURL = URL.createObjectURL(blob);
+    $('photo-img').src = photoURL; $('photo-img').alt = 'きょうの ひろばの しゃしん。まるふわと ともだちが いるよ。'; $('photo-save').href = photoURL; $('photo-save').download = photoFile.name;
+    const canShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [photoFile] })); $('photo-share').hidden = !canShare;
+    $('photo-share').onclick = async () => { try { await navigator.share({ files: [photoFile], text: 'まるふわの ひろばで あそんだよ　#まるふわつりびより' }); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (e) { status.textContent = e.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
+    status.textContent = 'かってに とうこうは しません。「ほぞんする」で のこせるよ。';
+    if (!photoDlg.open) photoDlg.showModal(); sfx.tap();
+  } catch { narrate('しゃしんを つくれなかったよ。もういちど ためしてね。'); status.textContent = 'つくれなかったよ。もういちど ためしてね。'; }
+}
+$('snap').addEventListener('click', () => { lastInput = T; openPhoto(); });
+$('close-photo').addEventListener('click', () => photoDlg.close());
+
 // ─── はじまり ───
 buildProps(); applyTime(); drawSound(); drawMotion(); renderPalRow();
 new ResizeObserver(() => { measure(); render(); }).observe(scene); measure();
@@ -991,7 +1100,7 @@ const api = window.Hiroba = {
   version: 1, paused: false, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
-  goDest, secretTap, tapMascot, greet, talkTo, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
+  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   say: () => statusEl.textContent
 };
 })();
