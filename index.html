@@ -1184,8 +1184,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.font = 'bold 64px system-ui,sans-serif'; ctx.fillText('おさかな シールちょう', 600, 110);
     ctx.font = 'bold 44px system-ui,sans-serif'; ctx.fillStyle = full ? '#a5481c' : '#17658a'; ctx.fillText(full ? 'ぜんぶ あつめた！　' + seen + ' / ' + BASE : seen + ' / ' + BASE + ' しゅるい', 600, 178);
     const cols = 6, cell = 184, left = (1200 - cols * cell) / 2, top = 230;
+    const tall = list.length > cols * 5, rowH = tall ? 164 : 176, dy = tall ? 64 : 70, nameDy = tall ? 92 : 96;   // まぼろしで 31しゅ以上 → 6だん。下の「つれた かず」に かさならない よう つめる
     list.forEach((f, i) => {
-      const got = save.fish[f.id], cx = left + (i % cols) * cell + cell / 2, cy = top + Math.floor(i / cols) * 176 + 70;
+      const got = save.fish[f.id], cx = left + (i % cols) * cell + cell / 2, cy = top + Math.floor(i / cols) * rowH + dy;
       ctx.save(); ctx.translate(cx, cy); if (got) ctx.rotate((i % 3 - 1) * .1);
       if (got) {
         ctx.shadowColor = '#24465340'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 6;
@@ -1200,7 +1201,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
         ctx.fillStyle = '#9fb3bd'; ctx.font = 'bold 54px system-ui,sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText('？', 0, 4);
       }
       ctx.restore();
-      ctx.fillStyle = got ? '#244653' : '#9fb3bd'; ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 21px system-ui,sans-serif'; ctx.fillText(got ? f.name : '', cx, cy + 96, cell - 10);
+      ctx.fillStyle = got ? '#244653' : '#9fb3bd'; ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 21px system-ui,sans-serif'; ctx.fillText(got ? f.name : '', cx, cy + nameDy, cell - 10);
     });
     ctx.fillStyle = '#244653'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText('まるふわ つりびより　つれた かず ' + save.total, 600, 1262);
     ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillStyle = '#3a5a68'; ctx.fillText('#まるふわつりびより', 600, 1310);
