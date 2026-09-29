@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>まるふわ つりびより</title>
+<meta name="description" content="まるふわと なかまと、のんびり釣り。いそがなくて大丈夫。にがしても、へらない。">
+<meta name="theme-color" content="#b9edf5">
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0}
+button{font:inherit;font-weight:800;cursor:pointer;color:#244653;border:2px solid #b9d1db;background:#fff;border-radius:18px;min-height:52px;padding:8px 18px}
+button:disabled{opacity:.55;cursor:default}
+button:focus-visible{outline:3px solid #286b88;outline-offset:3px}
+main{max-width:640px;margin:auto;padding:16px}
+h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
+.lead{text-align:center;margin:0 0 12px;font-size:.9rem}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:.95rem}
+.hud strong{font-size:1.3rem;font-variant-numeric:tabular-nums}
+
+/* じかんごとの いろ */
+#scene[data-time=asa]{--sky1:#ffd9b8;--sky2:#fff3e2;--orb:#ffb45e;--hill:#b9d8a8;--tree:#7fbf7a;--ground:#e9dcc0;--edge:#c9b58d;--water1:#8fd3ee;--water2:#4aa3cf;--star:0}
+#scene[data-time=hiru]{--sky1:#a9defa;--sky2:#eaf8ff;--orb:#fff2a8;--hill:#a9d89a;--tree:#6fbf6a;--ground:#efe3c6;--edge:#cdb98f;--water1:#7fd0f2;--water2:#3b9bd0;--star:0}
+#scene[data-time=yuu]{--sky1:#ff9e6e;--sky2:#ffd9a8;--orb:#ff7a3d;--hill:#c9a27a;--tree:#7f9f5a;--ground:#e6cfa8;--edge:#bf9f72;--water1:#7aa9d6;--water2:#44779f;--star:0}
+#scene[data-time=yoru]{--sky1:#1f2f5c;--sky2:#4a5d92;--orb:#fff6cf;--hill:#34507a;--tree:#2f6a5a;--ground:#8f8a86;--edge:#6f6a66;--water1:#3f6fa6;--water2:#1d365f;--star:1}
+
+/* つりばごとの じめんの いろ と、みせる けしき */
+#scene[data-area=H]{--ground:#c4c6c4;--edge:#9a9c9a}
+#scene[data-area=B]{--ground:#d2a56c;--edge:#fbfbfb;--hill:transparent}
+#scene[data-area=R]{--ground:#b89a74;--edge:#8f7350}
+#scene[data-time=yoru][data-area] svg g[data-for],#scene[data-time=yoru] svg polygon[style*=ground]{filter:brightness(.62)}
+#scene:not([data-area=L]) [data-for=L],#scene:not([data-area=R]) [data-for=R],#scene:not([data-area=H]) [data-for=H],#scene:not([data-area=B]) [data-for=B]{display:none}
+.areas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.areas button{min-height:48px;padding:4px 2px;font-size:.82rem;line-height:1.25;border-radius:14px}
+.areas button[aria-pressed=true]{color:#fff;background:#17658a;border-color:#0e4a66}
+.areas small{display:block;font-weight:600;font-size:.7rem}
+.times{grid-template-columns:1.5fr repeat(4,1fr)}
+.times button{min-height:44px;font-size:.78rem}
+#keeper{position:absolute;z-index:2;left:60%;top:49%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
+#keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
+#keeper span{position:absolute;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;font-size:.7rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
+#equip{position:absolute;z-index:4;left:2.5%;bottom:3%;font-size:.72rem;font-weight:800;line-height:1.5;background:#ffffffd9;border:2px solid #b9d1db;border-radius:12px;padding:3px 9px;pointer-events:none}
+#shop-list{display:grid;gap:8px;margin:0 0 12px}
+#shop-list h3{margin:6px 0 0;font-size:1rem}
+#shop-list button{display:block;width:100%;text-align:left;min-height:56px;line-height:1.4}
+#shop-list button small{display:block;font-weight:600}
+#shop-list button[aria-pressed=true]{background:#fff3ce;border-color:#a56c19;color:#593700}
+#shop-hello{text-align:center;margin:0 0 8px;font-weight:800}
+#take-photo{min-height:64px;padding:4px 14px;font-size:.95rem;color:#593700;background:#fff3ce;border-color:#a56c19}
+#take-photo[hidden]{display:none}
+#card-word:empty{display:none}
+#card h2{display:inline}
+#photo-img{display:block;width:100%;height:auto;border-radius:14px;border:2px solid #d5e6ed;margin-bottom:10px}
+.photo-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;border-radius:18px;border:2px solid #0e4a66;background:#17658a;color:#fff;font-weight:800;font-size:.95rem;text-decoration:none}
+.pill[hidden]{display:none}
+#bucket-list{display:grid;gap:6px}
+#bucket-list div{display:grid;grid-template-columns:2.4rem 1fr;align-items:center;gap:8px;border:2px solid #d5e6ed;border-radius:14px;padding:6px 10px;line-height:1.45;font-size:.9rem;background:#fff}
+#bucket-list b{font-size:1.8rem;text-align:center}
+#bucket-list small{display:block;color:#506874}
+.stars{color:#e0a61c;letter-spacing:.1em;font-size:1.05rem}
+#scene{position:relative;width:100%;aspect-ratio:4/3;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;touch-action:manipulation;background:var(--sky2)}
+#scene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+#overlay{pointer-events:none}
+.who{position:absolute;width:17%;height:auto;aspect-ratio:3/4;object-fit:contain;transform:translate(-50%,-100%);transform-origin:50% 100%;pointer-events:none;transition:left .7s ease,top .7s ease}
+#marufuwa{z-index:3}
+.friend{z-index:2;width:14%;aspect-ratio:1/1}
+.bubble{position:absolute;z-index:4;transform:translate(-50%,-100%);background:#fff;border:2px solid #b9d1db;border-radius:14px;padding:2px 10px;font-size:.8rem;font-weight:800;white-space:nowrap;pointer-events:none}
+.bubble[hidden]{display:none}
+.spot{position:absolute;z-index:1;width:13%;min-height:0;aspect-ratio:1/1;padding:0;transform:translate(-50%,-50%);border:3px dashed #ffffffd9;border-radius:50%;background:#ffffff3d}
+.spot::after{content:"";position:absolute;left:50%;top:50%;width:34%;height:34%;transform:translate(-50%,-50%);border-radius:18% 18% 40% 40%;background:#ffd34d;border:2px solid #a9801a}
+.spot[aria-pressed=true]{border-color:transparent;background:transparent}
+.spot[aria-pressed=true]::after{display:none}
+.spot:disabled{opacity:1}
+.float{position:absolute;z-index:3;width:3.4%;aspect-ratio:3/4;transform:translate(-50%,-50%);border-radius:50% 50% 46% 46%;background:linear-gradient(#ff6b5e 0 50%,#fff 50%);border:2px solid #7a2d25;pointer-events:none}
+/* みずの なかの かげ。つる まえから、どんな こが きたか みえる */
+.shadow{position:absolute;z-index:2;width:var(--w,12%);aspect-ratio:5/2;transform:translate(-50%,-50%);border-radius:50%;background:#0b2a4a70;pointer-events:none}
+.shadow::after{content:"";position:absolute;right:-24%;top:8%;width:36%;height:84%;background:inherit;clip-path:polygon(0 50%,100% 0,100% 100%)}
+.shadow[data-rare="3"]{background:#ffffffb8}
+.shadow[data-rare="4"]{background:#ffd34de0;filter:drop-shadow(0 0 6px #ffe9a0)}
+#shadow{visibility:hidden;transition:left var(--swim,3s) ease-in-out,top var(--swim,3s) ease-in-out}
+#scene[data-phase=waiting] #shadow,#scene[data-phase=bite] #shadow,#scene[data-phase=reel] #shadow{visibility:visible}
+#scene[data-phase=reel] #shadow{animation:wander 1400ms linear infinite alternate}
+@keyframes wander{from{translate:-120% -14%}to{translate:120% 14%}}
+.puff{position:absolute;z-index:6;width:16px;height:16px;border-radius:50%;background:#fff;pointer-events:none}
+.hop{position:absolute;z-index:4;font-size:1.3rem;pointer-events:none;transform:translate(-50%,-50%)}
+.drift{opacity:.55;animation:drift var(--lap,38s) linear infinite}
+@keyframes drift{from{left:112%}to{left:-14%}}
+@keyframes tug{50%{translate:6px 3px}}
+.friend-float{animation:bob 2.6s ease-in-out infinite}
+#float{visibility:hidden}
+#scene[data-phase=waiting] #float,#scene[data-phase=bite] #float,#scene[data-phase=reel] #float{visibility:visible}
+#scene[data-phase=waiting] #float{animation:bob 2.2s ease-in-out infinite}
+#scene[data-phase=bite] #float,#scene[data-phase=reel] #float{animation:dip .45s ease-in-out infinite}
+#bang{position:absolute;z-index:5;transform:translate(-50%,-50%);font-size:1.8rem;font-weight:900;color:#fff;background:#e8543f;border-radius:50%;width:46px;height:46px;display:none;align-items:center;justify-content:center;border:3px solid #fff}
+#scene[data-phase=bite] #bang{display:flex}
+@keyframes bob{50%{translate:0 4px}}
+@keyframes dip{50%{translate:0 9px}}
+
+#reel{position:absolute;z-index:5;width:36%;aspect-ratio:1/1;transform:translate(-50%,-50%);display:none;pointer-events:none}
+#scene[data-phase=reel] #reel{display:block}
+#reel .back{position:absolute;inset:0;border-radius:50%;background:#17323d59}
+#reel .target{position:absolute;left:50%;top:50%;width:28%;height:28%;transform:translate(-50%,-50%);border-radius:50%;background:#fff6c9;border:4px solid #e0a61c}
+#reel .ring{position:absolute;inset:0;border-radius:50%;border:6px solid #fff;box-shadow:0 0 0 2px #286b88,inset 0 0 0 2px #286b88;animation:shrink var(--period,1600ms) linear infinite}
+@keyframes shrink{from{transform:scale(1)}to{transform:scale(0)}}
+#hp{position:absolute;left:50%;top:76%;width:62%;height:9%;transform:translateX(-50%);border-radius:10px;background:#ffffffc9;border:2px solid #286b88;overflow:hidden}
+#hp i{display:block;height:100%;width:100%;background:#5bc0a0;transition:width .2s}
+#judge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;font-weight:900;font-size:clamp(1.1rem,5.5vw,1.7rem);color:#fff;-webkit-text-stroke:1px #7a4a00;text-shadow:0 2px 0 #7a4a00,0 0 10px #000a}
+#judge[data-power="3"]{color:#ffe14d;font-size:clamp(1.3rem,6.5vw,2rem)}
+#combo{position:absolute;left:50%;top:18%;transform:translateX(-50%);white-space:nowrap;font-weight:900;font-size:.9rem;color:#fff;text-shadow:0 1px 4px #000b}
+.spark{position:absolute;z-index:6;width:12px;height:12px;background:#fff6a8;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);pointer-events:none}
+
+/* つれた しらせは うえに ちいさく。けしきと、さかなを かかげる まるふわが みえる ように */
+#card{display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;border:2px solid #bfdce8;border-radius:20px;padding:8px 12px;margin-top:10px}
+#card[hidden]{display:none}
+#card .fish{display:none}
+#card #guide{display:flex;align-items:center;gap:6px;margin:0 0 2px;width:100%}
+#guide img{width:34px;height:34px;object-fit:contain;flex:none}
+#guide span{flex:1;background:#17323d;color:#fff;font-weight:800;border-radius:12px;padding:2px 10px;text-align:left;font-size:.85rem}
+.shadow[data-nushi=true]{background:#06183299}
+.shadow[data-nushi=true][data-rare="4"]{background:#ffd34de0}
+#card h2{margin:2px 0;font-size:1.25rem}
+#card p{margin:1px 0;line-height:1.5;font-size:.9rem}
+.held{position:absolute;z-index:3;font-size:clamp(1.7rem,9vw,2.8rem);line-height:1;transform:translate(-50%,-100%) rotate(-90deg);pointer-events:none}
+.held[data-rare="3"]{filter:drop-shadow(0 0 5px #fff)}
+.held[data-rare="4"]{filter:sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 7px #ffd34d)}
+.held[hidden]{display:none}
+#card .tag{display:inline-block;margin:2px 4px;padding:2px 10px;border-radius:12px;background:#fff3ce;border:2px solid #a56c19;color:#593700;font-weight:800;font-size:.9rem}
+
+.actions{display:flex;gap:10px;margin-top:12px}
+#main-button{flex:1;min-height:64px;font-size:1.3rem;color:#fff;background:#17658a;border-color:#0e4a66}
+#main-button[data-hot=true]{background:#e8543f;border-color:#a8321f}
+#status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
+.note{text-align:center;font-size:.8rem;color:#506874;line-height:1.8;margin-top:18px}
+
+dialog{border:2px solid #bfdce8;border-radius:24px;padding:16px;max-width:min(560px,94vw);width:100%;color:#244653}
+dialog::backdrop{background:#17323d66}
+dialog h2{margin:0 0 4px;text-align:center}
+dialog .count{text-align:center;margin:0 0 12px}
+#book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:12px}
+#book-grid div{border:2px solid #d5e6ed;border-radius:14px;padding:8px 4px;text-align:center;font-size:.78rem;line-height:1.5;background:#fff}
+#book-grid div[data-seen=false]{background:#eef4f7;color:#7d939d}
+#book-grid b{display:block;font-size:1.9rem;line-height:1.2}
+#book-grid div[data-rare="4"][data-seen=true]{border-color:#e0a61c;background:#fffaf0}
+dialog .close{display:block;margin:auto;min-width:160px}
+
+@media(prefers-reduced-motion:reduce){
+  .who,#shadow{transition:none}
+  #scene .float,#reel .ring,#scene #shadow{animation:none}
+  .drift{display:none}
+  #reel .ring{display:none}
+  #hp i{transition:none}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>まるふわ つりびより</h1>
+  <p class="lead">いそがなくて、だいじょうぶ。にがしても、へらないよ。</p>
+  <div class="hud">
+    <span>つれた かず <strong id="total">0</strong></span>
+    <span>ずかん <strong id="seen">0</strong> / <span id="all">30</span></span>
+  </div>
+  <div class="hud">
+    <button id="open-bucket" type="button" style="flex:1">バケツ</button>
+    <button id="open-book" type="button" style="flex:1">ずかん</button>
+  </div>
+
+  <div class="areas" id="areas" role="group" aria-label="つりばを えらぶ"></div>
+  <div class="areas times" id="times" role="group" aria-label="じかんを えらぶ"></div>
+
+  <div id="scene" data-phase="idle" data-time="hiru" data-area="L">
+    <!-- かりの はいけい（いろと かたちだけ）。えが とどいたら さしかえる -->
+    <svg viewBox="0 0 600 450" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/></linearGradient>
+        <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--water1)"/><stop offset="1" style="stop-color:var(--water2)"/></linearGradient>
+      </defs>
+      <rect width="600" height="450" fill="url(#sky)"/>
+      <g fill="#fff" style="opacity:var(--star)"><circle cx="60" cy="40" r="2"/><circle cx="150" cy="80" r="1.6"/><circle cx="250" cy="30" r="2"/><circle cx="340" cy="70" r="1.6"/><circle cx="520" cy="50" r="2"/><circle cx="570" cy="110" r="1.6"/><circle cx="420" cy="24" r="1.4"/></g>
+      <circle cx="470" cy="92" r="40" style="fill:var(--orb)"/>
+      <path d="M0 190 Q90 110 190 180 T390 170 T600 150 V300 H0Z" style="fill:var(--hill)"/>
+      <!-- つりばごとの うしろの けしき -->
+      <g data-for="L" style="fill:var(--tree)"><circle cx="40" cy="196" r="34"/><circle cx="92" cy="182" r="40"/><circle cx="150" cy="200" r="32"/><circle cx="540" cy="176" r="38"/><circle cx="590" cy="196" r="34"/><circle cx="492" cy="198" r="28"/></g>
+      <g data-for="R" style="fill:var(--tree)"><circle cx="30" cy="170" r="46"/><circle cx="100" cy="150" r="52"/><circle cx="180" cy="176" r="44"/><circle cx="260" cy="160" r="48"/><circle cx="350" cy="172" r="46"/><circle cx="430" cy="152" r="52"/><circle cx="510" cy="170" r="46"/><circle cx="585" cy="156" r="50"/></g>
+      <g data-for="H"><polygon points="0,120 120,110 120,210 0,214" fill="#f4efe6"/><polygon points="0,120 120,110 140,122 18,134" fill="#5d5f6b"/><polygon points="130,140 250,130 250,206 130,210" fill="#ead9bd"/><polygon points="130,140 250,130 268,144 146,154" fill="#8a4a3a"/><rect x="150" y="166" width="34" height="40" fill="#7a5a3a"/><rect x="200" y="160" width="36" height="22" fill="#bfe3f5"/></g>
+      <g data-for="B"><rect x="0" y="150" width="600" height="130" style="fill:var(--water1)"/><rect x="0" y="150" width="600" height="6" fill="#ffffff55"/></g>
+      <polygon points="0,200 600,186 600,333 0,261" style="fill:var(--ground)"/>
+      <!-- つりばごとの まえの けしき -->
+      <g data-for="L"><polygon points="250,150 330,138 380,160 300,174" fill="#8a6a4a"/><polygon points="258,166 300,174 300,226 258,216" fill="#fff6e6"/><polygon points="300,174 372,160 372,210 300,226" fill="#f3e2c4"/><polygon points="322,188 346,184 346,214 322,220" fill="#9a7450"/></g>
+      <g data-for="R"><polygon points="250,226 300,150 350,222" fill="#ef8a4c"/><polygon points="300,150 350,222 372,214" fill="#c9652b"/><polygon points="288,226 300,196 312,224" fill="#5a3a22"/><ellipse cx="470" cy="236" rx="30" ry="16" fill="#8d8d93"/><ellipse cx="505" cy="246" rx="20" ry="11" fill="#77777d"/></g>
+      <g data-for="H"><rect x="470" y="70" width="64" height="170" rx="8" fill="#fbfbfb"/><rect x="470" y="70" width="64" height="16" fill="#e8543f"/><rect x="480" y="46" width="44" height="26" rx="6" fill="#fff6c9" stroke="#8a8a8a" stroke-width="3"/><path d="M492 240 v-34 a10 10 0 0 1 20 0 v34z" fill="#8fb4c9"/><rect x="300" y="196" width="60" height="30" rx="4" fill="#fff"/><rect x="346" y="204" width="34" height="22" rx="3" fill="#dfe9ee"/><circle cx="314" cy="230" r="7" fill="#444"/><circle cx="366" cy="230" r="7" fill="#444"/></g>
+      <g data-for="B"><g stroke="#a87b49" stroke-width="2"><line x1="0" y1="215" x2="600" y2="204"/><line x1="0" y1="232" x2="600" y2="226"/><line x1="0" y1="248" x2="600" y2="252"/><line x1="0" y1="258" x2="600" y2="290"/></g><polygon points="230,110 420,104 420,210 230,216" fill="#fbfbfb"/><rect x="230" y="104" width="190" height="12" fill="#3a6ea5"/><circle cx="280" cy="160" r="16" fill="#bfe3f5" stroke="#c9a23a" stroke-width="5"/><circle cx="370" cy="164" r="17" fill="none" stroke="#e8543f" stroke-width="9"/><circle cx="370" cy="164" r="17" fill="none" stroke="#fff" stroke-width="9" stroke-dasharray="13 14"/></g>
+      <!-- みずぎわ と みず -->
+      <polygon points="0,261 600,333 600,347 0,275" style="fill:var(--edge)"/>
+      <polygon points="0,275 600,347 600,450 0,450" fill="url(#water)"/>
+      <g stroke="#ffffff66" stroke-width="3" stroke-linecap="round" fill="none"><path d="M60 350 q14 -6 28 0"/><path d="M220 400 q14 -6 28 0"/><path d="M410 410 q14 -6 28 0"/><path d="M520 380 q14 -6 28 0"/></g>
+    </svg>
+
+    <button class="spot" type="button" data-spot="0" aria-label="ひだりの ばしょで つる"></button>
+    <button class="spot" type="button" data-spot="1" aria-label="まんなかの ばしょで つる"></button>
+    <button class="spot" type="button" data-spot="2" aria-label="みぎの ばしょで つる"></button>
+
+    <svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <line id="line-a" stroke="#fff" stroke-opacity=".8" stroke-width="2" vector-effect="non-scaling-stroke"/>
+      <line id="line-b" stroke="#fff" stroke-opacity=".8" stroke-width="2" vector-effect="non-scaling-stroke"/>
+      <line id="line-me" stroke="#fff" stroke-opacity=".95" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    </svg>
+
+    <button id="keeper" type="button" aria-label="おみせの きつねに はなしかける"><span aria-hidden="true">おみせ</span><img src="img/friend-kogitsune-s.webp" width="180" height="180" alt=""></button>
+    <div id="equip" aria-hidden="true"></div>
+    <img class="who friend" id="friend-a" src="img/friend-neko-s.webp" width="180" height="180" alt="となりで つりを する ねこ" draggable="false">
+    <img class="who friend" id="friend-b" src="img/friend-usagi-s.webp" width="180" height="180" alt="となりで つりを する うさぎ" draggable="false">
+    <div class="float friend-float" id="float-a" aria-hidden="true"></div>
+    <div class="float friend-float" id="float-b" aria-hidden="true"></div>
+    <img class="who" id="marufuwa" src="img/game-blue.webp" width="240" height="320" alt="つりを する まるふわ" draggable="false">
+    <div class="bubble" id="bubble" aria-hidden="true" hidden></div>
+    <span class="held" id="held" aria-hidden="true" hidden></span>
+    <span class="held" id="held-friend" aria-hidden="true" hidden></span>
+
+    <div class="shadow drift" style="top:90%;--w:9%;--lap:41s" aria-hidden="true"></div>
+    <div class="shadow drift" style="top:96%;--w:30%;--lap:67s;animation-delay:-30s" aria-hidden="true"></div>
+    <div class="shadow" id="shadow" aria-hidden="true"></div>
+    <div class="float" id="float" aria-hidden="true"></div>
+    <div id="bang" aria-hidden="true">！</div>
+    <div id="reel" aria-hidden="true">
+      <div class="back"></div><div class="ring"></div><div class="target"></div>
+      <div id="hp"><i></i></div><div id="combo"></div><div id="judge"></div>
+    </div>
+
+    <div id="card">
+      <div class="fish" id="card-fish" aria-hidden="true"></div>
+      <p id="guide"><img src="img/friend-penguin-s.webp" width="180" height="180" alt="あんないの ペンギン"><span id="guide-word"></span></p>
+      <h2 id="card-name"></h2>
+      <p id="card-size"></p>
+      <p id="card-tags"></p>
+      <p id="card-word"></p>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="main-button" type="button">なげる</button>
+    <button id="take-photo" type="button" hidden>しゃしんを とる</button>
+  </div>
+  <p id="status" role="status" aria-live="polite">きいろい バケツを おすと、ばしょを かえられるよ。</p>
+
+  <p class="note">じかんで つれる さかなが かわるよ（あさ・ひる・ゆうがた・よる）。<br>
+  きろくは この たんまつの なかだけに のこります。ログインも インストールも いりません。<br>
+  はいけいと さかなの えは、いまは かりの ものです。</p>
+
+  <dialog id="book" aria-labelledby="book-title">
+    <h2 id="book-title">おさかな ずかん</h2>
+    <p class="count"><span id="book-seen">0</span> / 30 しゅるい</p>
+    <div id="book-grid"></div>
+    <button class="close" type="button" id="close-book">とじる</button>
+  </dialog>
+
+  <dialog id="bucket" aria-labelledby="bucket-title">
+    <h2 id="bucket-title">バケツ</h2>
+    <p class="count">さいきん つった 10ぴき。つりばを かえても、きえないよ。</p>
+    <div id="bucket-list"></div>
+    <h3 style="margin:10px 0 4px;font-size:1rem">ひろった かざり</h3>
+    <p id="decor-list" style="margin:0 0 12px;line-height:1.8"></p>
+    <button class="close" type="button" id="close-bucket">とじる</button>
+  </dialog>
+
+  <dialog id="photo" aria-labelledby="photo-title">
+    <h2 id="photo-title">しゃしん</h2>
+    <img id="photo-img" width="1200" height="675" alt="">
+    <div class="photo-actions">
+      <a id="photo-save" class="pill" download="marufuwa-tsuri.png">ほぞんする</a>
+      <button id="photo-share" type="button" class="pill">みせる（きょうゆう）</button>
+      <a id="photo-x" class="pill" target="_blank" rel="noopener noreferrer">Xに かく</a>
+    </div>
+    <p class="count" id="photo-status" role="status">かってに とうこうは しません。</p>
+    <button class="close" type="button" id="close-photo">とじる</button>
+  </dialog>
+
+  <dialog id="shop" aria-labelledby="shop-title">
+    <h2 id="shop-title">きつねの おみせ</h2>
+    <p id="shop-hello"></p>
+    <p class="count">おかねは いらないよ。あそぶと、どうぐが ふえるよ。</p>
+    <div id="shop-list"></div>
+    <button class="close" type="button" id="close-shop">とじる</button>
+  </dialog>
+</main>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const scene = $('scene'), button = $('main-button'), status = $('status'), marufuwa = $('marufuwa');
+  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // rare: 1 ふつう / 2 ちょっと めずらしい / 3 めずらしい / 4 ぬし
+  // time: a あさ(5-10) h ひる(10-16) y ゆうがた(16-19) n よる(19-5)。'' は いつでも
+  // さいごの もじは つりば。L みずうみ / R かわ / H みなとまち / B ふねの うえ
+  // ならびじゅん（ばんごう）は かえない。ほぞんした きろくと すいそうが、この ばんごうを つかう
+  const FISH = [
+    ['まるあじ','🐟',10,25,1,'','H'],['ふわふぐ','🐡',8,20,1,'','H'],['もちだい','🐠',15,40,1,'','L'],
+    ['ころいわし','🐟',5,15,1,'ah','R'],['ぽてかれい','🐟',20,45,1,'yn','R'],['しらたまえび','🦐',3,12,1,'','L'],
+    ['ぷかくらげ','🪼',5,30,1,'h','H'],['こつぶがに','🦀',3,10,1,'a','L'],['わたあめきんぎょ','🐠',5,18,2,'','L'],
+    ['まんまるいか','🦑',10,35,2,'','B'],['ふくふくたこ','🐙',15,50,2,'yn','H'],['にじいろべら','🐠',10,30,2,'h','R'],
+    ['あさやけだい','🐠',25,60,2,'a','H'],['ゆうやけさば','🐟',20,45,2,'y','H'],['ほしぞらあなご','🐟',30,80,2,'yn','B'],
+    ['おもちひらめ','🐟',25,70,2,'','R'],['さくらます','🐟',30,60,2,'a','R'],['ぽんぽんはりせんぼん','🐡',10,35,2,'y','H'],
+    ['ころころかめ','🐢',15,40,3,'h','L'],['ねむりいるか','🐬',100,180,3,'a','B'],['つきみまんぼう','🐟',80,200,3,'hn','B'],
+    ['ひだまりえい','🐟',40,120,3,'h','R'],['みかづきたちうお','🐟',60,130,3,'n','B'],['しゃぼんだまうお','🐠',5,15,3,'','L'],
+    ['みずいろのこ','🐟',12,30,3,'a','L'],['みんとのこ','🐟',12,30,3,'h','R'],['あぷりこっとのこ','🐟',12,30,3,'y','H'],
+    ['らべんだーのこ','🐟',12,30,3,'n','B'],['きんのまるごい','🐟',40,90,4,'','L'],['まるくじら','🐳',200,400,4,'n','B']
+  ].map(([name, icon, min, max, rare, time, area], id) => ({id, name, icon, min, max, rare, time, area}));
+  // つりば。need は「ぜんぶで なんびき つったら いけるか」
+  const AREAS = [
+    {id: 'L', name: 'みずうみ', need: 0}, {id: 'R', name: 'かわ', need: 5},
+    {id: 'H', name: 'みなとまち', need: 15}, {id: 'B', name: 'ふねの うえ', need: 30}
+  ];
+  // どうぐ。おかねは つかわない。あそぶと ふえる
+  const RODS = [
+    {name: 'きのえだの さお', note: 'さいしょの さお', open: () => true, how: ''},
+    {name: 'たけの さお', note: 'すこし あわせやすい', open: s => s.total >= 10, how: '10ぴき つると もらえる'},
+    {name: 'ほしの さお', note: 'とても あわせやすい', open: s => Object.keys(s.fish).length >= 15, how: 'ずかんが 15しゅるいで もらえる'}
+  ];
+  const BAITS = [
+    {name: 'ふつうの えさ', note: 'いつもの えさ', open: () => true, how: ''},
+    {name: 'きらきら えさ', note: 'めずらしい こが きやすい', open: s => Object.keys(s.fish).length >= 5, how: 'ずかんが 5しゅるいで もらえる'},
+    {name: 'おおきい えさ', note: 'おおきい こが きやすい', open: s => s.total >= 20, how: '20ぴき つると もらえる'}
+  ];
+  // でやすさ。ジョブズ1の しさんで みなおした（まえは 3=10・4=2 で、ずかんが うまるまで とおすぎた）
+  const WEIGHT = {1: 60, 2: 28, 3: 26, 4: 8};
+  // 4 は スペシャル（とくべつな しゅるい）。ぬしは しゅるいでは なく、どの さかなにも いる とくだいの 1ぴき
+  const RARE_LABEL = {2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル'};
+  const starCount = (f, nushi) => Math.min(5, f.rare + (nushi ? 1 : 0));
+  const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
+  const cm = value => Number(value).toFixed(2);
+  const DECOR = ['かいがら', 'きれいな いし', 'ながれぎ', 'みずくさ', 'ちいさな びん', 'ほしの かけら'];
+  const TIME_LABEL = {a: 'あさ', h: 'ひる', y: 'ゆうがた', n: 'よる'};
+  const TIME_NAME = {a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru'};
+
+  const HOME = 'https://aohozomi.github.io/marufuwa-tsuri/';   // あそべる ばしょ。しゃしんと きょうゆうの ぶんに いれる
+  const KEY = 'marufuwa-tsuri-v1';
+  let save = {fish: {}, total: 0};
+  try { const data = JSON.parse(localStorage.getItem(KEY)); if (data && typeof data.fish === 'object' && Number.isInteger(data.total)) save = data; } catch {}
+  if (!RODS[save.rod] || !RODS[save.rod].open(save)) save.rod = 0;
+  if (!BAITS[save.bait] || !BAITS[save.bait].open(save)) save.bait = 0;
+  if (!AREAS.some(a => a.id === save.area && save.total >= a.need)) save.area = 'L';
+  function store() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch {} }
+
+  const query = new URLSearchParams(location.search);
+  function timeOfDay() {
+    const forced = query.get('time'); if (forced && TIME_LABEL[forced]) return forced;
+    if (TIME_LABEL[save.time]) return save.time;   // じぶんで えらんだ じかん。よるしか あそべない ひとも、ぜんぶの こに あえる
+    const hour = new Date().getHours();
+    return hour >= 5 && hour < 10 ? 'a' : hour >= 10 && hour < 16 ? 'h' : hour >= 16 && hour < 19 ? 'y' : 'n';
+  }
+  function pickFish() {
+    const now = timeOfDay(), pool = FISH.filter(f => f.area === save.area && (!f.time || f.time.includes(now)));
+    const wanted = Number(query.get('rare')); if (wanted) { const only = pool.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
+    const weight = f => WEIGHT[f.rare] * (save.bait === 1 && f.rare >= 3 ? 2.5 : 1);
+    let roll = Math.random() * pool.reduce((sum, f) => sum + weight(f), 0);
+    for (const f of pool) { roll -= weight(f); if (roll <= 0) return f; }
+    return pool[0];
+  }
+
+  // ばしょ。すうじは がめんの なかの わりあい（%）。みずぎわは ひだりから みぎへ さがる
+  const SPOT_X = [18, 46, 76];
+  const shore = x => 58 + .16 * x;
+  const feet = i => ({x: SPOT_X[i], y: shore(SPOT_X[i]) - 1});
+  const floatAt = i => ({x: SPOT_X[i] + 7, y: shore(SPOT_X[i] + 7) + 13});
+  const place = (node, p) => { node.style.left = p.x + '%'; node.style.top = p.y + '%'; };
+  const spots = [...document.querySelectorAll('.spot')];
+  let mine = 1, friends = [0, 2];       // friends[0]=ねこ, friends[1]=うさぎ の いる ばしょ
+  function rod(line, i, tall) {
+    const f = feet(i), w = floatAt(i);
+    line.setAttribute('x1', f.x + 4); line.setAttribute('y1', f.y - tall);
+    line.setAttribute('x2', w.x); line.setAttribute('y2', w.y);
+  }
+  function layout() {
+    place(marufuwa, feet(mine)); place($('friend-a'), feet(friends[0])); place($('friend-b'), feet(friends[1]));
+    place($('float-a'), floatAt(friends[0])); place($('float-b'), floatAt(friends[1]));
+    rod($('line-a'), friends[0], 9); rod($('line-b'), friends[1], 9);
+    const w = floatAt(mine); place($('float'), w); place($('bang'), {x: w.x, y: w.y - 12});
+    place($('reel'), {x: Math.min(80, Math.max(20, w.x + 9)), y: 75});   // まるふわの かおに かぶらない いち
+    const casting = phase === 'waiting' || phase === 'bite' || phase === 'reel';
+    if (casting) rod($('line-me'), mine, 12);
+    $('line-me').style.display = casting ? '' : 'none';
+    spots.forEach((spot, i) => { spot.setAttribute('aria-pressed', String(i === mine)); place(spot, {x: SPOT_X[i] + 7, y: shore(SPOT_X[i] + 7) + 3}); });
+  }
+  function moveTo(i) {
+    if (i === mine || !(phase === 'idle' || phase === 'caught')) return;
+    const there = friends.indexOf(i); if (there >= 0) friends[there] = mine;   // なかまと ばしょを こうかん
+    mine = i; $('held').hidden = $('held-friend').hidden = true; setPhase('idle'); face('blue');
+    button.textContent = 'なげる'; button.dataset.hot = 'false';
+    say('ここに しよう。「なげる」を おしてね。');
+  }
+  spots.forEach((spot, i) => spot.addEventListener('click', () => moveTo(i)));
+
+  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0;
+  function setPhase(next) { phase = next; scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function say(text) { status.textContent = text; }
+  function face(name) { marufuwa.src = 'img/game-' + name + '.webp'; }
+  function hud() {
+    $('total').textContent = String(save.total);
+    $('seen').textContent = $('book-seen').textContent = String(Object.keys(save.fish).length);
+  }
+
+  function cast() {
+    scene.dataset.time = TIME_NAME[timeOfDay()];
+    fish = pickFish(); face('blue'); $('held').hidden = true; setPhase('waiting');
+    button.textContent = 'まってる…'; button.disabled = true; button.dataset.hot = 'false';
+    say('ぽちゃん。のんびり まとう。');
+    const wait = Number(query.get('wait')) || (2200 + Math.random() * 3300);
+    // かげが みぎから およいで くる。おおきさは さかなの おおきさ、いろは めずらしさ
+    const shadow = $('shadow'), w = floatAt(mine);
+    nushi = Math.random() < (Number(query.get('nushi')) || .04 * (save.bait === 2 ? 2 : 1));
+    shadow.dataset.rare = String(fish.rare); shadow.dataset.nushi = String(nushi);
+    shadow.style.setProperty('--w', Math.min(44, Math.max(8, 7 + fish.max / 12) * (nushi ? 1.7 : 1)) + '%');
+    shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
+    shadow.style.setProperty('--swim', wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});
+    setTimeout(bite, wait);
+  }
+  function bite() {
+    setPhase('bite');
+    button.textContent = 'ひく！'; button.disabled = false; button.dataset.hot = 'true';
+    say((nushi ? 'とても おおきな かげ…！ ぬしかも。' : fish.rare === 4 ? 'きんいろの かげ…！ スペシャルな こかも。' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
+    button.focus();
+  }
+  function startReel() {
+    hpMax = hp = 3 + fish.rare * 2 + (nushi ? 5 : 0); period = 1850 - fish.rare * 250;
+    $('reel').style.setProperty('--period', period + 'ms');
+    const ring = document.querySelector('#reel .ring'); ring.style.animation = 'none'; void ring.offsetWidth; ring.style.animation = '';
+    ringStart = performance.now();
+    $('hp').firstElementChild.style.width = '100%'; $('judge').textContent = $('combo').textContent = ''; combo = 0;
+    setPhase('reel'); face('smile');
+    // わの なかに さかなの かげを いれる
+    const shadow = $('shadow'); shadow.style.setProperty('--swim', '.3s'); shadow.style.setProperty('--w', '15%');
+    shadow.style.left = $('reel').style.left; shadow.style.top = $('reel').style.top;
+    wanderStart = performance.now();
+    button.textContent = 'いまだ！';
+    say(reduce() ? 'ボタンを なんかいか おして、ひきあげよう。' : 'わが まんなかに かさなったら おしてね。さかなが まんなかに きた ときが ねらいめ。');
+  }
+  function pull() {
+    // わの おおきさは じかんから けいさんする（えがく しくみに たよらない）
+    const scale = 1 - ((performance.now() - ringStart) % period) / period, miss = Math.abs(scale - .3);
+    // さかなは わの なかを にげまわる。まんなかに きた ときほど、あわせやすい
+    const lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap), easy = .06 + .1 * (1 - away) + save.rod * .025;
+    const power = reduce() ? 2 : miss < easy ? 3 : miss < easy + .12 ? 2 : 1;
+    // つづけて うまく いくと、すこし つよく ひける。はずしても へらない（かぞえなおすだけ）
+    combo = power >= 2 ? combo + 1 : 0;
+    hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0));
+    $('hp').firstElementChild.style.width = (hp / hpMax * 100) + '%';
+    const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'おしい！';
+    const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
+    $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
+    if (!reduce()) {
+      marufuwa.animate([{scale: '1.08 .92'}, {scale: '1 1'}], {duration: 200, easing: 'ease-out'});
+      judge.animate([{scale: '.6'}, {scale: '1.25'}, {scale: '1'}], {duration: 260, easing: 'ease-out'});
+      if (power === 3) sparkle(); else if (power === 1) puff();
+    }
+    if (hp === 0) caught(); else say(word + ' あと すこし。');
+  }
+  function sparkle() {
+    const reel = $('reel');
+    for (let i = 0; i < 8; i++) {
+      const star = document.createElement('i'), angle = Math.PI * 2 * i / 8 + Math.random() * .5, far = 60 + Math.random() * 40;
+      star.className = 'spark'; star.style.left = reel.style.left; star.style.top = reel.style.top; scene.append(star);
+      star.animate([{translate: '-50% -50%', scale: '.4', opacity: 1}, {translate: (Math.cos(angle) * far - 6) + 'px ' + (Math.sin(angle) * far - 6) + 'px', scale: '1.3', opacity: 0}], {duration: 620, easing: 'ease-out'}).onfinish = () => star.remove();
+    }
+  }
+  function puff() {
+    const reel = $('reel');
+    for (let i = 0; i < 4; i++) {
+      const cloud = document.createElement('i'), angle = Math.PI * 2 * i / 4 + .6, far = 46;
+      cloud.className = 'puff'; cloud.style.left = reel.style.left; cloud.style.top = reel.style.top; scene.append(cloud);
+      cloud.animate([{translate: '-50% -50%', scale: '.5', opacity: .9}, {translate: (Math.cos(angle) * far - 8) + 'px ' + (Math.sin(angle) * far - 8) + 'px', scale: '1.6', opacity: 0}], {duration: 520, easing: 'ease-out'}).onfinish = () => cloud.remove();
+    }
+  }
+  function caught() {
+    const range = fish.max - fish.min;
+    const size = Math.round((nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + range * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8)) * 100) / 100;
+    const old = save.fish[fish.id], first = !old, record = !first && size > old.best, big = !nushi && size >= fish.min + range * .8, firstNushi = nushi && !(old && old.nushi);
+    const had = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))];
+    save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
+    save.total++;
+    save.bucket = [{id: fish.id, size, at: Date.now(), nushi}, ...(Array.isArray(save.bucket) ? save.bucket : [])].slice(0, 10);
+    // ときどき、さかなが かざりを もって いる。すいそうに おける
+    const found = Math.random() < (Number(query.get('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
+    if (found) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[found] = (save.decor[found] || 0) + 1; }
+    store(); hud(); drawEquip();
+    const gift = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))].filter(item => !had.includes(item)).map(item => item.name);
+    $('card-fish').textContent = fish.icon; $('card-name').textContent = fish.name;
+    const stars = document.createElement('span'); stars.className = 'stars'; stars.textContent = starsOf(fish, nushi); stars.setAttribute('aria-label', 'めずらしさ ' + starCount(fish, nushi) + ' / 5');
+    $('card-size').replaceChildren(cm(size) + ' センチ　', stars);
+    if (found) gift.push(found + '（さかなが もって いたよ）');
+    const tags = [];
+    if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]);
+    $('card-tags').replaceChildren(...tags.map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = text; return tag; }));
+    // あんないの ペンギンが、まいかい ひとこと
+    const left = FISH.length - Object.keys(save.fish).length;
+    $('guide-word').textContent = nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
+    $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
+    face(nushi || fish.rare === 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
+    last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date()};
+    setPhase('caught');
+    // つれた さかなを、まるふわが かかげる
+    const held = $('held'), f = feet(mine);
+    held.textContent = fish.icon; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.7' : ''; place(held, {x: f.x + (nushi ? 14 : 11), y: f.y - 3}); held.hidden = false;
+    if (!reduce()) held.animate([{translate: '0 30px', opacity: 0}, {translate: '0 -8px', opacity: 1}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
+    // れんだ しても、うれしい しゅんかんが きえない ように、すこしだけ まつ
+    button.textContent = 'もういちど なげる'; button.dataset.hot = 'false'; button.disabled = true; caughtAt = performance.now();
+    setTimeout(() => { if (phase === 'caught') button.disabled = false; }, 1000);
+    say(fish.name + 'が つれた。' + cm(size) + 'センチ。' + tags.join(' '));
+  }
+
+  function act() {
+    if (phase === 'caught' && performance.now() - caughtAt < 1000) return;
+    if (phase === 'idle' || phase === 'caught') cast();
+    else if (phase === 'bite') startReel();
+    else if (phase === 'reel') pull();
+  }
+  button.addEventListener('click', act);
+  // わや みずを じかに おしても、ひける
+  scene.addEventListener('click', event => { if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') ringStart = performance.now(); });
+
+  // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
+  const WORDS = ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
+  const bubble = $('bubble');
+  function chatter() {
+    if (!document.hidden && phase !== 'caught' && !book.open) {
+      const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
+      bubble.textContent = WORDS[Math.floor(Math.random() * WORDS.length)];
+      place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
+      if (bubble.textContent === 'つれた！') {   // なかまも、つれた さかなを かかげる
+        const theirs = $('held-friend');
+        theirs.textContent = ['🐟', '🐠', '🐡'][Math.floor(Math.random() * 3)]; place(theirs, {x: f.x + 9, y: f.y - 2}); theirs.hidden = false;
+        setTimeout(() => { theirs.hidden = true; }, 7000);
+      }
+      if (bubble.textContent === 'つれた！' && !reduce()) {   // さかなが、ぴょんと はねる
+        const hop = document.createElement('span'), w = floatAt(friends[who]);
+        hop.className = 'hop'; hop.textContent = '🐟'; hop.setAttribute('aria-hidden', 'true'); place(hop, w); scene.append(hop);
+        hop.animate([{translate: '0 0', opacity: 1}, {translate: '-10px -46px', opacity: 1, offset: .5}, {translate: '-22px -20px', opacity: 0}], {duration: 1100, easing: 'ease-out'}).onfinish = () => hop.remove();
+      }
+      setTimeout(() => { bubble.hidden = true; }, 2600);
+    }
+    setTimeout(chatter, Number(query.get('chat')) || (9000 + Math.random() * 8000));
+  }
+
+  // つりばを えらぶ
+  const areaName = id => AREAS.find(a => a.id === id).name;
+  function drawAreas() {
+    $('areas').replaceChildren(...AREAS.map(area => {
+      const tab = document.createElement('button'), open = save.total >= area.need;
+      tab.type = 'button'; tab.textContent = area.name; tab.disabled = !open || !(phase === 'idle' || phase === 'caught');
+      tab.setAttribute('aria-pressed', String(save.area === area.id));
+      if (!open) { const left = document.createElement('small'); left.textContent = 'あと ' + (area.need - save.total) + 'ひき'; tab.append(left); }
+      tab.addEventListener('click', () => {
+        if (save.area === area.id) return;
+        save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true;
+        setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false';
+        say(area.name + 'に ついたよ。どんな こが いるかな。');
+      });
+      return tab;
+    }));
+  }
+  // じかんを えらぶ。「いまの じかん」は とけいに あわせる
+  function drawTimes() {
+    $('times').replaceChildren(...[['', 'いまの じかん'], ['a', 'あさ'], ['h', 'ひる'], ['y', 'ゆうがた'], ['n', 'よる']].map(([id, name]) => {
+      const tab = document.createElement('button');
+      tab.type = 'button'; tab.textContent = name; tab.disabled = !(phase === 'idle' || phase === 'caught');
+      tab.setAttribute('aria-pressed', String((save.time || '') === id));
+      tab.addEventListener('click', () => {
+        save.time = id; store(); scene.dataset.time = TIME_NAME[timeOfDay()]; drawTimes();
+        say(TIME_LABEL[timeOfDay()] + 'に なったよ。' + (id ? '' : '（とけいに あわせて いるよ）'));
+      });
+      return tab;
+    }));
+  }
+  function drawEquip() { $('equip').textContent = 'さお：' + RODS[save.rod].name + '　えさ：' + BAITS[save.bait].name; }
+
+  // おみせ。うでまえを みて、こえを かけて くれる（くらべない。ほめるだけ）
+  const shop = $('shop');
+  const hello = () => save.total < 5 ? 'はじめてだね。ゆっくり どうぞ。' : save.total < 15 ? 'なれて きたね。' : save.total < 40 ? 'じょうずに なったね。' : 'もう めいじんだね。';
+  function drawShop() {
+    $('shop-hello').textContent = '「' + hello() + '」';
+    const rows = [];
+    for (const [title, list, key] of [['さお', RODS, 'rod'], ['えさ', BAITS, 'bait']]) {
+      const head = document.createElement('h3'); head.textContent = title; rows.push(head);
+      list.forEach((item, i) => {
+        const pick = document.createElement('button'), open = item.open(save), note = document.createElement('small');
+        pick.type = 'button'; pick.textContent = open ? item.name : '？？？'; pick.disabled = !open;
+        pick.setAttribute('aria-pressed', String(save[key] === i));
+        note.textContent = open ? item.note + (save[key] === i ? '（つかって いる）' : '') : item.how; pick.append(note);
+        pick.addEventListener('click', () => { save[key] = i; store(); drawEquip(); drawShop(); });
+        rows.push(pick);
+      });
+    }
+    $('shop-list').replaceChildren(...rows);
+  }
+  $('keeper').addEventListener('click', () => { drawShop(); shop.showModal(); });
+  $('close-shop').addEventListener('click', () => shop.close());
+
+  // しゃしん。つった こを かかげた 1まい。なまえは いれない（まるふわの せかいだけ）
+  const photo = $('photo');
+  let last = null, photoFile = null, photoURL = '';
+  function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  async function takePhoto() {
+    if (!last) return;
+    const status = $('photo-status'), color = name => getComputedStyle(scene).getPropertyValue(name).trim() || '#fff';
+    const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 675;
+    const ctx = canvas.getContext('2d');
+    const sky = ctx.createLinearGradient(0, 0, 0, 470); sky.addColorStop(0, color('--sky1')); sky.addColorStop(1, color('--sky2'));
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, 1200, 675);
+    ctx.fillStyle = color('--orb'); ctx.beginPath(); ctx.arc(1010, 130, 70, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = color('--ground'); ctx.beginPath(); ctx.moveTo(0, 400); ctx.lineTo(1200, 380); ctx.lineTo(1200, 520); ctx.lineTo(0, 480); ctx.fill();
+    const water = ctx.createLinearGradient(0, 480, 0, 675); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2'));
+    ctx.fillStyle = water; ctx.beginPath(); ctx.moveTo(0, 480); ctx.lineTo(1200, 520); ctx.lineTo(1200, 675); ctx.lineTo(0, 675); ctx.fill();
+    const me = new Image(); me.src = marufuwa.src; await me.decode();
+    const tall = 340, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, 210 - wide / 2, 478 - tall, wide, tall);
+    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '190px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+    if (last.fish.rare === 4 && 'filter' in ctx) ctx.filter = 'sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 16px #ffd34d)';
+    ctx.translate(500, 340); ctx.rotate(-Math.PI / 2); if (last.nushi) ctx.scale(1.45, 1.45); ctx.fillText(last.fish.icon, 0, 0); ctx.restore();
+    ctx.fillStyle = '#fffffff0'; roundRect(ctx, 690, 210, 460, 330, 34); ctx.fill(); ctx.strokeStyle = '#bfdce8'; ctx.lineWidth = 5; ctx.stroke();
+    ctx.fillStyle = '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.font = 'bold 54px system-ui,sans-serif'; ctx.fillText(last.fish.name, 920, 295, 420);
+    ctx.font = 'bold 50px system-ui,sans-serif'; ctx.fillText(cm(last.size) + ' センチ', 920, 370, 420);
+    ctx.fillStyle = '#e0a61c'; ctx.font = '50px system-ui,sans-serif'; ctx.fillText(starsOf(last.fish, last.nushi), 920, 440, 420);
+    ctx.fillStyle = '#593700'; ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(last.tags.join('・'), 920, 500, 420);
+    ctx.fillStyle = color('--star') === '1' ? '#fff' : '#244653'; ctx.textAlign = 'left';
+    ctx.font = 'bold 42px system-ui,sans-serif'; ctx.fillText('まるふわ つりびより', 46, 74);
+    ctx.font = '30px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + last.area, 48, 122);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText('#まるふわまるいろ　' + HOME.replace('https://', ''), 46, 640);
+    const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(Error('png')), 'image/png'));
+    if (photoURL) URL.revokeObjectURL(photoURL);
+    photoFile = new File([blob], 'marufuwa-tsuri-' + last.fish.id + '.png', {type: 'image/png'}); photoURL = URL.createObjectURL(blob);
+    $('photo-img').src = photoURL; $('photo-img').alt = last.fish.name + 'を かかげる まるふわの しゃしん';
+    $('photo-save').href = photoURL; $('photo-save').download = photoFile.name;
+    const words = 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + '\n#まるふわまるいろ #つりびより\n' + HOME;
+    $('photo-x').href = 'https://x.com/intent/tweet?' + new URLSearchParams({text: words});
+    $('photo-share').hidden = !(navigator.share && navigator.canShare && navigator.canShare({files: [photoFile]}));
+    $('photo-share').onclick = async () => { try { await navigator.share({files: [photoFile], text: words}); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (error) { status.textContent = error.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
+    status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。';
+  }
+  $('take-photo').addEventListener('click', async () => {
+    try { await takePhoto(); photo.showModal(); } catch { say('しゃしんを つくれなかったよ。もういちど ためしてね。'); }
+  });
+  $('close-photo').addEventListener('click', () => photo.close());
+
+  const bucket = $('bucket');
+  $('open-bucket').addEventListener('click', () => {
+    const list = Array.isArray(save.bucket) ? save.bucket.filter(item => FISH[item.id]) : [];
+    const clock = new Intl.DateTimeFormat('ja-JP', {month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+    $('bucket-list').replaceChildren(...(list.length ? list.map(item => {
+      const f = FISH[item.id], row = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), when = document.createElement('small');
+      icon.textContent = f.icon; icon.setAttribute('aria-hidden', 'true');
+      when.textContent = clock.format(new Date(item.at)) + '　' + starsOf(f, item.nushi) + (item.nushi ? '　ぬし' : '');
+      text.append(f.name + '　' + cm(item.size) + 'センチ', when); row.append(icon, text); return row;
+    }) : ['まだ からっぽ。のんびり いこう。']));
+    const decor = save.decor && typeof save.decor === 'object' ? Object.entries(save.decor) : [];
+    $('decor-list').textContent = decor.length ? decor.map(([name, count]) => name + ' ×' + count).join('　') : 'まだ ないよ。さかなが ときどき もって くるよ。';
+    bucket.showModal();
+  });
+  $('close-bucket').addEventListener('click', () => bucket.close());
+
+  const book = $('book');
+  $('open-book').addEventListener('click', () => {
+    $('book-grid').replaceChildren(...FISH.map(f => {
+      const got = save.fish[f.id], cell = document.createElement('div');
+      cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare);
+      const icon = document.createElement('b'); icon.textContent = got ? f.icon : '？'; icon.setAttribute('aria-hidden', 'true');
+      const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') : 'いつでも');
+      cell.append(icon, got ? f.name : 'まだ あってない', document.createElement('br'), got ? 'さいだい ' + cm(got.best) + 'cm（' + got.count + 'ひき）' + (got.nushi ? ' ぬし◎' : '') : when);
+      return cell;
+    }));
+    book.showModal();
+  });
+  $('close-book').addEventListener('click', () => book.close());
+
+  scene.dataset.time = TIME_NAME[timeOfDay()];
+  $('all').textContent = String(FISH.length);
+  scene.after($('card'));   // つれた しらせは けしきの したに。まるふわと さかなを かくさない
+  scene.dataset.area = save.area;
+  hud(); drawEquip(); setPhase('idle');
+  setTimeout(chatter, Number(query.get('chat')) || 5000);
+  window.Tsuri = {state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends]};
+})();
+</script>
+</body>
+</html>
