@@ -214,8 +214,11 @@ body.gazing #scene{box-shadow:0 18px 40px #24465340}
 #reel{position:absolute;z-index:5;width:36%;aspect-ratio:1/1;transform:translate(-50%,-50%);display:none;pointer-events:none}
 #scene[data-phase=reel] #reel{display:block}
 #reel .back{position:absolute;inset:0;border-radius:50%;background:#17323d59}
-#reel .target{position:absolute;left:50%;top:50%;width:28%;height:28%;transform:translate(-50%,-50%);border-radius:50%;background:#fff6c9;border:4px solid #e0a61c}
-#reel .ring{position:absolute;inset:0;border-radius:50%;border:6px solid #fff;box-shadow:0 0 0 2px #286b88,inset 0 0 0 2px #286b88;animation:shrink var(--period,1600ms) linear infinite}
+/* まと：わが ここに かさなったら「いまだ」。かさなって いる あいだ、きんいろに ひかる */
+#reel .target{position:absolute;left:50%;top:50%;width:30%;height:30%;transform:translate(-50%,-50%);border-radius:50%;background:#fff6c94d;border:4px solid #e0a61c;transition:background .08s,box-shadow .08s,scale .08s}
+#reel[data-hot=true] .target{background:#ffe14dd9;box-shadow:0 0 0 5px #fff6a8,0 0 22px 8px #ffd34d;scale:1.1}
+#reel .ring{position:absolute;inset:0;border-radius:50%;border:7px solid #fff;box-shadow:0 0 0 2px #286b88,inset 0 0 0 2px #286b88,0 0 14px #ffffffb0;will-change:transform}
+#reel[data-hot=true] .ring{border-color:#ffe14d;box-shadow:0 0 0 2px #a56c19,inset 0 0 0 2px #a56c19,0 0 18px #ffd34d}
 @keyframes shrink{from{transform:scale(1)}to{transform:scale(0)}}
 #hp{position:absolute;left:50%;top:76%;width:62%;height:9%;transform:translateX(-50%);border-radius:10px;background:#ffffffc9;border:2px solid #286b88;overflow:hidden}
 #hp i{display:block;height:100%;width:100%;background:#5bc0a0;transition:width .2s}
@@ -670,21 +673,46 @@ dialog .close{display:block;margin:auto;min-width:160px}
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else startAmbient(); });
   function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : 'おと：OFF'; $('sound').setAttribute('aria-pressed', String(on)); }
   $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { startAmbient(); chord([523, 784], .09, 'triangle'); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。'); } else say('おとを けしたよ。'); });
+  // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
+  const TARGET = .3;
+  const SWIMS = {
+    yuttari: {name: 'ゆったり', tip: 'まんなかで、ゆっくりに なるよ', f: p => p < .7 ? TARGET + .7 * Math.pow(1 - p / .7, 3) : TARGET * (1 - Math.pow((p - .7) / .3, 2))},
+    yurari: {name: 'ゆらり', tip: 'おなじ はやさで、ちぢむよ', f: p => 1 - p},
+    guigui: {name: 'ぐいぐい', tip: 'だんだん、はやく なるよ', f: p => 1 - p * p},
+    furafura: {name: 'ふらふら', tip: 'いったり きたり するよ', f: p => Math.max(0, 1 - p + .08 * Math.sin(p * Math.PI * 6))},
+    pitatto: {name: 'ぴたっと', tip: 'とちゅうで、いちど とまるよ', f: p => p < .34 ? 1 - p * 1.18 : p < .58 ? .6 : .6 * (1 - (p - .58) / .42)}
+  };
+  const swimOf = f => f.legend ? 'yuttari' : f.rare === 1 ? ['yuttari', 'yurari'][f.id % 2] : f.rare === 2 ? ['yurari', 'guigui', 'yuttari'][f.id % 3] : f.rare === 3 ? ['guigui', 'furafura', 'pitatto'][f.id % 3] : ['furafura', 'pitatto'][f.id % 2];
+  let swim = SWIMS.yurari, hitAt = 0, perfects = 0, spinning = 0;
+  const cycleTime = () => (performance.now() - ringStart) % period;
+  const ringSize = () => swim.f(cycleTime() / period);
+  // 「いまだ」までの じかんの ずれ（ミリびょう）。まえでも あとでも、ちかい ほうを かえす
+  function offBeat() { let gap = cycleTime() - hitAt; if (gap > period / 2) gap -= period; if (gap < -period / 2) gap += period; return gap; }
+  // まどの ひろさ（ミリびょう）。さかなが まんなかに きた とき・いい さお ほど ひろい。いちばん せまくても 0.12びょう
+  function windowMs() { const lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); return Math.max(120, (.06 + .1 * (1 - away) + save.rod * .025) * period); }
   function startGuide() {
     // うごきを へらす せっていでも、おとの あんないは とめない（めが みえなくて、うごきも へらしたい ひとの ため）
     stopGuide(); if (!save.sound) return;
-    // ピコンは、おして から とどくまでの おくれ（やく 0.2びょう）の ぶん、はやめに ならす。ジョブズ1の そくていで なおした
-    const pikon = .3 + 200 / period, marks = [1, 2, 3, 4].map(step => 1 - step * (1 - pikon) / 5), pitches = [392, 494, 587, 740];
-    let before = 1;
+    // ピコンは、おして から とどくまでの おくれ（やく 0.2びょう）の ぶん、はやめに ならす。ポ・ポ・ポ・ポは、おなじ まあいで
+    const pikon = (hitAt - 200 + period) % period, gap = pikon > 320 ? pikon / 5 : 0, pitches = [392, 494, 587, 740];
+    let before = cycleTime();
     guide = setInterval(() => {
       if (phase !== 'reel') return stopGuide();
-      const scale = 1 - ((performance.now() - ringStart) % period) / period;
-      marks.forEach((mark, i) => { if (before > mark && scale <= mark) tone(pitches[i], .05, 'triangle', 0, .05); });   // ポ、ポ、ポ、ポ（おなじ まあいで、だんだん たかく）
-      if (before > pikon && scale <= pikon) chord([988, 1319], .07);   // いまだ：ピコン
-      before = scale;
-    }, 25);
+      const now = cycleTime(), passed = mark => before <= now ? before < mark && mark <= now : mark > before || mark <= now;
+      if (gap) pitches.forEach((pitch, i) => { if (passed(pikon - gap * (4 - i))) tone(pitch, .05, 'triangle', 0, .05); });
+      if (passed(pikon)) chord([988, 1319], .07);   // いまだ：ピコン
+      before = now;
+    }, 15);
   }
   function stopGuide() { clearInterval(guide); guide = 0; }
+  // わを えがく。がめんの かきかえに あわせて、なめらかに
+  function spin() {
+    if (phase !== 'reel') { spinning = 0; return; }
+    const ring = document.querySelector('#reel .ring'), hot = Math.abs(offBeat()) <= windowMs();
+    ring.style.transform = 'scale(' + ringSize().toFixed(4) + ')';
+    $('reel').dataset.hot = String(hot);
+    spinning = requestAnimationFrame(spin);
+  }
 
   // あめ。ひに よって ふる（4にちに 1かい くらい）。あめの ひは、めずらしい こが でやすい
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
@@ -742,25 +770,25 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function startReel() {
     hpMax = hp = 3 + fish.rare * 2 + (nushi ? 5 : 0); period = 1850 - fish.rare * 250;
     if (fish.legend) { hpMax = hp = 7; period = 1500; }   // まぼろしは、でて きたら つれる。わは ゆっくり
-    $('reel').style.setProperty('--period', period + 'ms');
-    const ring = document.querySelector('#reel .ring'); ring.style.animation = 'none'; void ring.offsetWidth; ring.style.animation = '';
+    swim = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; perfects = 0;
+    // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
+    hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
     ringStart = performance.now();
     $('hp').firstElementChild.style.width = '100%'; $('judge').textContent = $('combo').textContent = ''; combo = 0;
     setPhase('reel'); face('smile');
     // わの なかに さかなの かげを いれる
     const shadow = $('shadow'); shadow.style.setProperty('--swim', '.3s'); shadow.style.setProperty('--w', '15%');
     shadow.style.left = $('reel').style.left; shadow.style.top = $('reel').style.top;
-    wanderStart = performance.now(); startGuide();
+    wanderStart = performance.now(); startGuide(); cancelAnimationFrame(spinning); spinning = requestAnimationFrame(spin);
     button.textContent = 'いまだ！';
-    say(reduce() && !save.sound ? 'ボタンを なんかいか おして、ひきあげよう。' : save.sound ? 'ポ、ポ、ポ、ポ、ピコン。「ピコン」で おしてね。' :'わが まんなかに かさなったら おしてね。さかなが まんなかに きた ときが ねらいめ。');
+    say(reduce() && !save.sound ? 'ボタンを なんかいか おして、ひきあげよう。' : 'この こは「' + swim.name + '」。' + swim.tip + '。' + (save.sound ? '「ピコン」で おしてね。' : 'わが きんいろに ひかったら おしてね。'));
   }
   function pull() {
-    // わの おおきさは じかんから けいさんする（えがく しくみに たよらない）
-    const scale = 1 - ((performance.now() - ringStart) % period) / period, miss = Math.abs(scale - .3);
-    // さかなは わの なかを にげまわる。まんなかに きた ときほど、あわせやすい
-    const lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap), easy = Math.max(.06 + .1 * (1 - away) + save.rod * .025, 120 / period);   // わが はやい さかなほど、まどを ひろく（はんのうの はやさが ちがっても あたる ように）
+    // 「いまだ」との じかんの ずれで きめる（えがく しくみに たよらない。わの うごきかたが ちがっても、おなじ ものさし）
+    const miss = Math.abs(offBeat()), easy = windowMs();
     const blind = reduce() && !save.sound;   // わも おとも ない ときだけ、タイミングを みない
-    const power = blind ? 2 : miss < easy ? 3 : miss < easy + .12 ? 2 : 1;
+    const power = blind ? 2 : miss <= easy ? 3 : miss <= easy + .12 * period ? 2 : 1;
+    if (power === 3) perfects++;
     // つづけて うまく いくと、すこし つよく ひける。はずしても へらない（かぞえなおすだけ）
     combo = power >= 2 ? combo + 1 : 0;
     hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0));
@@ -803,7 +831,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     else { chord([784, 988, 1175, 1568], .075); tone(1568, .22, 'square', .3, .045); tone(392, .3, 'triangle', .3, .05); }
     buzz(nushi ? [80, 60, 80, 60, 200] : 120);
     const range = fish.max - fish.min;
-    const size = Math.round((nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + range * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8)) * 100) / 100;
+    // ねらって「ぴったり」を だした ぶん、すこし おおきい こが つれる（1かいで 2.5%、さいだい 10%）。れんだ より、ねらう ほうが とく
+    const aimed = 1 + Math.min(.1, perfects * .025);
+    const size = Math.round((nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + range * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8)) * aimed * 100) / 100;
     const old = save.fish[fish.id], first = !old, record = !first && size > old.best, big = !nushi && size >= fish.min + range * .8, firstNushi = nushi && !(old && old.nushi);
     const had = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))];
     save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
@@ -1173,7 +1203,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   drawSound(); if (rainy) say('きょうは あめ。めずらしい こが でやすいよ。');
   hud(); drawEquip(); setPhase('idle');
   setTimeout(chatter, Number(query.get('chat')) || 5000);
-  window.Tsuri = {all: FISH, state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends]};
+  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends]};
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
