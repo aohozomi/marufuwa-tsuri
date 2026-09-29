@@ -114,7 +114,7 @@
   const HOTS = {
     toudai: { label: 'とうだい', box: [76, 8, 16, 30], when: s => s.area === 'H' && s.time === 'yoru' },
     marumado: { label: 'まるまど', box: [40, 27, 13, 18], when: s => s.area === 'B' && (s.time === 'yuu' || s.time === 'yoru') },
-    tsuki: { label: 'つき', box: [71, 5, 15.6, 21], when: s => s.time === 'yoru' && s.area !== 'H' }
+    tsuki: { label: 'つき', box: [71.5, 10, 14.5, 21], when: s => s.time === 'yoru' && s.area !== 'H' }
   };
   for (const [key, h] of Object.entries(HOTS)) {
     const b = make('button'); b.type = 'button'; b.className = 'hm-hot'; b.hidden = true; b.dataset.hm = key; b.setAttribute('aria-label', h.label);
