@@ -21,7 +21,7 @@ button:active:not(:disabled),.pill:active{transform:translateY(4px) scale(.98,.9
 button:disabled{opacity:.6;cursor:default;box-shadow:0 2px 0 var(--side),inset 0 -4px 6px #0000000f}
 @media(prefers-reduced-motion:reduce){button,.pill{transition:none}button:active:not(:disabled),.pill:active{transform:none}}
 button:focus-visible{outline:3px solid #286b88;outline-offset:3px}
-main{max-width:560px;margin:10px auto 24px;padding:12px 14px 18px;background:#f4fbfff5;border-radius:32px;box-shadow:0 12px 30px #2446531f;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px auto 24px;padding:12px 14px 18px;background:#f4fbfff5;border-radius:32px;box-shadow:0 12px 30px #2446531f;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 #backdrop{position:fixed;inset:0;width:100%;height:100%;z-index:-1}
 .bd-trees circle{transform-box:fill-box;transform-origin:50% 100%;animation:sway 6s ease-in-out infinite alternate}
 .bd-trees circle:nth-child(2n){animation-delay:-3s}
@@ -29,14 +29,14 @@ main{max-width:560px;margin:10px auto 24px;padding:12px 14px 18px;background:#f4
 [hidden]{display:none !important}
 
 /* うえの おび：だいめい と、おと・うごきの ボタン */
-.top{display:flex;align-items:center;justify-content:space-between;gap:6px 10px;flex-wrap:wrap;margin:0 0 10px}
-.logo{display:flex;align-items:flex-end;gap:1px;font-size:clamp(1.35rem,6.2vw,1.85rem);font-weight:900;margin:0;line-height:1.15}
+.top{display:flex;align-items:center;justify-content:space-between;gap:6px 8px;flex-wrap:wrap;margin:0 0 8px}
+.logo{display:flex;align-items:flex-end;gap:1px;font-size:clamp(1.2rem,5.4vw,1.75rem);font-weight:900;margin:0;line-height:1.15}
 .logo span{display:inline-block;color:#fff;-webkit-text-stroke:5px var(--k);paint-order:stroke fill;text-shadow:0 3px 0 var(--d),0 6px 7px #24465340;animation:bounce 2.6s ease-in-out infinite;animation-delay:calc(var(--n)*-.26s)}
 .logo i{display:inline-block;width:.45em}
 .logo span:nth-of-type(4n+1){--k:#4bb3e0;--d:#2a86b3}.logo span:nth-of-type(4n+2){--k:#46c79a;--d:#2a9a72}.logo span:nth-of-type(4n+3){--k:#ff9a6b;--d:#d96f40}.logo span:nth-of-type(4n){--k:#a98be8;--d:#7c5fc4}
 @keyframes bounce{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -4px;rotate:3deg}}
 .hud{display:flex;gap:8px}
-.hud button{min-height:48px;padding:6px 14px;font-size:.88rem;--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
+.hud button{min-height:46px;padding:4px 12px;font-size:.82rem;--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
 .hud button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36}
 .hud button[disabled]{opacity:1}
 
@@ -65,12 +65,14 @@ main{max-width:560px;margin:10px auto 24px;padding:12px 14px 18px;background:#f4
 .orb::before{content:"";position:absolute;inset:-14px}
 .cloud{position:absolute;z-index:1;left:0;width:28%;height:auto;aspect-ratio:100/40;opacity:calc(.92 - var(--star)*.6);cursor:pointer;animation:cloud 80s linear infinite}
 .cloud.c1{top:5%}
-.cloud.c2{top:15%;width:21%;animation-duration:110s;animation-delay:-55s}
-@keyframes cloud{from{transform:translateX(-130%)}to{transform:translateX(390%)}}
+.cloud.c2{top:15%;width:21%;--to:520%;animation-duration:110s;animation-delay:-55s}
+@keyframes cloud{from{transform:translateX(-130%)}to{transform:translateX(var(--to,390%))}}
 #props,#actors,#bubbles{position:absolute;inset:0;pointer-events:none}
 .prop{position:absolute;pointer-events:none;filter:var(--tone) var(--dim) var(--hlf);transition:filter .15s}
 .prop svg{display:block;width:100%;height:100%;overflow:visible;pointer-events:none}
 .prop[data-dest],.prop[data-secret]{pointer-events:auto;cursor:pointer}
+.prop[data-secret=tree]{pointer-events:none}
+.prop[data-secret=tree]::before{content:"";position:absolute;left:8%;right:8%;top:0;height:62%;pointer-events:auto;cursor:pointer}
 .prop.hl{--hlf:drop-shadow(0 0 7px #fff) drop-shadow(0 0 3px #fff)}
 .prop[data-id^=lamp]{filter:none}
 .canopy{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.6s ease-in-out infinite alternate}
@@ -83,6 +85,8 @@ main{max-width:560px;margin:10px auto 24px;padding:12px 14px 18px;background:#f4
 .mark{position:absolute;left:50%;top:-6%;transform:translateX(-50%);z-index:2;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;line-height:1;background:#ffffffe6;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 0 #9cc9e0,0 6px 8px #24465333;animation:markbob 2.2s ease-in-out infinite;pointer-events:none}
 .prop[data-id=pier] .mark{left:74%}
 .prop[data-id=stall] .mark{top:-4%}
+.prop[data-id=lot1] .mark{left:92%;top:2%}
+.prop[data-id=lot2] .mark{left:8%;top:2%}
 @keyframes markbob{50%{translate:0 -4px}}
 /* ひとの すがた。かげ・からだの ゆれは JS。じっと している ときは ゆっくり いきを する */
 .actor{position:absolute;left:0;top:0;transform-origin:50% 100%;pointer-events:none}
@@ -121,9 +125,9 @@ button[data-dest=onigiri]{--c1:#f0ffea;--c2:#a6e3ae;--side:#52b066;--ink:#123f1c
 #places-wait button b{font-size:1.4rem}
 /* ともだち */
 #friends h2{font-size:1rem;margin:4px 0 0;text-align:center}
-#pal-row{display:flex;gap:6px 10px;justify-content:center;flex-wrap:wrap;list-style:none;padding:0;margin:6px 0 10px}
-#pal-row li{display:flex;flex-direction:column;align-items:center;width:66px;font-size:.74rem;font-weight:800;line-height:1.35;text-align:center}
-#pal-row img{width:54px;height:54px;object-fit:contain}
+#pal-row{display:flex;gap:6px 6px;justify-content:center;flex-wrap:wrap;list-style:none;padding:0;margin:6px 0 10px}
+#pal-row li{display:flex;flex-direction:column;align-items:center;width:64px;font-size:.72rem;font-weight:800;line-height:1.35;text-align:center}
+#pal-row img{width:52px;height:52px;object-fit:contain}
 #pal-row li[data-met=false] img{filter:grayscale(1);opacity:.38}
 #pal-row li[data-met=true] img{filter:drop-shadow(0 2px 0 #ffd25e)}
 .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:6px 0}
@@ -229,7 +233,7 @@ body.calm .cloud.c2{left:56%}
   <nav id="places" aria-label="いきさき">
     <button type="button" data-dest="tsuri"><b aria-hidden="true">🎣</b>つりば<small>つりびより</small></button>
     <button type="button" data-dest="oheya"><b aria-hidden="true">🐠</b>まるふわの おへや<small>すいそう</small></button>
-    <button type="button" data-dest="onigiri"><b aria-hidden="true">🍙</b>おにぎりキャッチ<small>&nbsp;</small></button>
+    <button type="button" data-dest="onigiri"><b aria-hidden="true">🍙</b>おにぎり キャッチ<small>&nbsp;</small></button>
   </nav>
   <nav id="places-wait" aria-label="まだ できて いない ばしょ">
     <button type="button" data-dest="kouji1"><b aria-hidden="true">🚧</b>こうじちゅう<small>なにが できるかな？</small></button>
@@ -388,7 +392,7 @@ function startAmbient() {
 function stopAmbient() { if (amb) amb.nodes.forEach(n => { try { n.stop(); } catch {} }); amb = null; }
 function updateAmbient() {
   if (!amb || !ac) return;
-  const d = Math.hypot(player.x - 180, player.y - 400), near = clamp(1 - d / 260, 0, 1);
+  const d = Math.hypot(player.x - 180, player.y - 396), near = clamp(1 - d / 260, 0, 1);
   const vol = .004 + .05 * near * near, pan = clamp((180 - player.x) / 180, -1, 1) * .8;
   try { amb.gain.gain.setTargetAtTime(vol, ac.currentTime, .12); if (amb.pan) amb.pan.pan.setTargetAtTime(pan, ac.currentTime, .12); } catch {}
 }
@@ -396,24 +400,57 @@ function updateAmbient() {
 // ─── ともだち ───
 const HELLO = { a: 'おはよう', h: 'こんにちは', y: 'こんにちは', n: 'こんばんは' };
 const PALS = {
-  neko: { name: 'ねこ', size: .885, pitch: [880, 1175, 880], hello: 'にゃ。まるふわ、きたね',
+  neko: { name: 'ももの ねこ', size: .885, pitch: [880, 1175, 880], hello: 'にゃ。まるふわ、きたね',
     lines: ['ひなたぼっこ、きもちいい にゃ', 'ごろごろ… ねむく なって きた', 'しっぽが うずうず する にゃ', 'ここ、ぼくの おきにいり', 'まるふわ、きょうも ふわふわ だね', 'ふんすいの みず、ひやっと して たよ', 'なにも しなくても いいんだよ'],
     rain: ['あめの おと、ねむく なるね', 'ぬれないように ここに いよっと'], night: ['よるの さんぽは、しずかで すき', 'おつきさま、ながめて たんだ'], morning: ['ふあぁ… ねむいにゃ'], evening: ['ゆうやけ、おさかな いろ だね'] },
-  usagi: { name: 'うさぎ', size: .68, pitch: [1319, 1568, 1319], hello: 'ぴょん！ あえて うれしいな',
+  usagi: { name: 'ミントの うさぎ', size: .68, pitch: [1319, 1568, 1319], hello: 'ぴょん！ あえて うれしいな',
     lines: ['ぴょん ぴょん！ げんき？', 'みみを すませると、かぜの こえが するよ', 'ひろば、すき。みんな くるから', 'いっしょに ぴょんって して みる？', 'にんじん…は ないよね。えへへ', 'きょうも あえて うれしい'],
     rain: ['あめの ひは、みみが ぺたんと なるよ', 'ぽつぽつ、うたって いるみたい'], night: ['おほしさま、いっぱい だね', 'ねむいけど、もう ちょっと ここに いたいな'], morning: ['いい あさ だね！'], evening: ['そらが ももいろ だよ！'] },
-  panda: { name: 'パンダ', size: .81, pitch: [392, 330, 392], hello: 'もぐもぐ… ゆっくり していってね',
+  panda: { name: 'おひるね パンダ', size: .81, pitch: [392, 330, 392], hello: 'もぐもぐ… ゆっくり していってね',
     lines: ['ささ、たべる？ ないしょで はんぶんこ', 'のんびり するの、とくい だよ', 'ころんで あそぶと きもちいい よ', 'おなか いっぱい… ねむい', 'ゆっくりで いいんだよ', 'ここに すわると、ほっと するよ', 'きょうも きて くれて ありがとう'],
     rain: ['あめの おとを きくと、おちつくね', 'かさ、いっしょに はいる？'], night: ['ほしを ながめながら、ささを もぐもぐ', 'おやすみまえの ひろば、いいね'], morning: ['ふわぁ… まだ ねむい ね'], evening: ['ゆうやけ、おいしそう… ささ みたい'] },
-  kojika: { name: 'こじか', size: .76, pitch: [988, 1319, 1175], hello: 'もりの においが するよ',
+  kojika: { name: 'おほしさまの こじか', size: .76, pitch: [988, 1319, 1175], hello: 'もりの においが するよ',
     lines: ['ちいさな はなが さいて たよ', 'はしるのは すき。でも いまは ゆっくり', 'この かばんの ほし、おきにいり', 'あるくと、ぽっくり おとが するよ', 'きのう、ゆめで まるふわに あったよ', 'いい かぜが ふいて いるね'],
     rain: ['あめの もりは、いい におい だよ', 'しずくが きらきら して いるね'], night: ['もりの よるは、しずかで きれい', 'ほたる、いるかな'], morning: ['あさの くうき、すきとおって いるね'], evening: ['ゆうやけの もり、あったかい いろ'] },
-  kogitsune: { name: 'こぎつね', size: .935, pitch: [740, 988, 740], hello: 'おみせは つりばに あるよ',
+  kogitsune: { name: 'おみせの こぎつね', size: .935, pitch: [740, 988, 740], hello: 'おみせは つりばに あるよ',
     lines: ['おかねは いらないよ。あそぶと どうぐが ふえるよ', 'この ぼうし、おきにいり。にあう？', 'つりばに おいでよ。おおきい こが いるかも', 'おにぎり、おいしい よね', 'いつでも ゆっくり して いってね', 'ここは いい ところ だよね'],
     rain: ['あめの ひは、めずらしい こが でやすいんだって', 'おみせの のれん、ぬれない かな'], night: ['よるの つりばも すてきだよ', 'おつきさま、まんまるだね'], morning: ['きょうの おみせ、じゅんび できたよ'], evening: ['そろそろ おみせを しまう じかん'] },
-  penguin: { name: 'ペンギン', size: .745, pitch: [659, 880, 659], hello: 'ひろばへ ようこそ',
+  penguin: { name: 'あんないの ペンギン', size: .745, pitch: [659, 880, 659], hello: 'ひろばへ ようこそ',
     lines: ['つりば、おへや、おにぎり。すきな ところへ どうぞ', 'まだ こうじちゅうの ばしょも あるよ。たのしみに ね', 'スカーフ、あったかいよ', 'ふんすいを さんかい さわると… ないしょ！', 'いけを じっと みて いると、いい ことが あるよ', 'いそがなくて だいじょうぶ', 'ここに いて いいんだよ'],
-    rain: ['あめの ひは、みずたまりが たのしいね', 'ぼく、ぬれるの へいき'], night: ['よるは ほしが きれいに みえるよ', 'つきを さわると… どうなるかな'], morning: ['きょうも いい ひに なるよ'], evening: ['そらの いろが かわるよ。ゆうがた だね'] }
+    rain: ['あめの ひは、みずたまりが たのしいね', 'ぼく、ぬれるの へいき'], night: ['よるは ほしが きれいに みえるよ', 'つきを さわると… どうなるかな'], morning: ['きょうも いい ひに なるよ'], evening: ['そらの いろが かわるよ。ゆうがた だね'] },
+  alpaca: { name: 'わたあめの アルパカ', size: .633, pitch: [784, 1047, 988], hello: 'かぜが ふわふわ して いるね',
+    lines: ['もこもこ、さわって みる？', 'ふわふわは、こころにも あるんだよ', 'かぜに ふかれると、ねむく なるね', 'ゆっくり ゆっくり、いこうね', 'スカーフ、おそろいに する？', 'ここは あったかい ばしょ だね'],
+    rain: ['あめの ひの もこもこは、しっとり だよ', 'かさが ほしいな。もこもこが ぬれちゃう'], night: ['よるの かぜは、すこし ひんやり だね', 'ほしが わたあめに みえるよ'], morning: ['あさの ひかり、ふわっと して いる'], evening: ['ゆうやけ、わたあめの いろ'] },
+  azarashi: { name: 'さくらの あざらし', size: .65, pitch: [523, 659, 587], hello: 'いけの みずも きもちいいね',
+    lines: ['ごろん… ここで ひとやすみ', 'おなか、ぽかぽか するね', 'つるつるの いし、みつけたよ', 'およぐの、だいすき。でも いまは ごろごろ', 'さくらの はな、あたまに ついてる？', 'のんびり、のんびり'],
+    rain: ['あめは みずと おなじ。きもちいい', 'ぽつぽつ おと、うみみたい'], night: ['つきの ひかりで、みずが きらきら', 'ねむい ときは、ねて いいんだよ'], morning: ['おはよう。あさの みずは つめたいよ'], evening: ['ゆうひで、みずが オレンジに なるよ'] },
+  gantai: { name: 'がんたいの くま', size: .644, pitch: [440, 587, 523], hello: 'ほしが みえるよ。ひるでも ね',
+    lines: ['この がんたい、ちょっと かっこいい でしょ', 'かたほうの めでも、きれいな ものは みえるよ', 'ほしを かぞえると、ねむく なるよ', 'むりに げんきに ならなくて いいよ', 'すわって、ゆっくり ながめよう', 'まるふわと おそろいの ふく、うれしい'],
+    rain: ['あめの ひは、くもの うえの ほしを おもうんだ', 'ぽつぽつ… ほしの かけらみたい'], night: ['ほら、ほしが でて きたよ', 'ながれぼしを みつけたら、ねがいごと だよ'], morning: ['ひるまも、ほしは そこに いるんだよ'], evening: ['もうすぐ ほしが でるよ'] },
+  hamster: { name: 'いちごの ハムスター', size: .636, pitch: [1175, 1397, 1175], hello: 'ほっぺに おやつ いれとこ',
+    lines: ['ほっぺ、ぱんぱん だよ。さわる？', 'いちごの かおり、する？', 'ちいさい からだでも、だいじょうぶ', 'ちょこちょこ あるくの、たのしい', 'おやつ、はんぶんこ する？', 'ここ、ひなたで あったかい'],
+    rain: ['あめの ひは、おうちで ごろごろ したいな', 'かさ、ちっちゃいのが ほしいな'], night: ['よるは、ひまわりの たねを かじるよ', 'ねむい… ほっぺに ゆめを いれとこ'], morning: ['あさごはん、たべた？'], evening: ['ゆうごはんの じかん だね'] },
+  hiyoko: { name: 'レモンの ひよこ', size: .606, pitch: [1568, 1760, 1568], hello: 'ぴよ！ きょうも いい ひ',
+    lines: ['ぴよ ぴよ。いっしょに あるく？', 'ちいさくても、げんき いっぱい', 'レモンの かおり、するかな？', 'ころんでも、ぴよって おきれば いいんだ', 'おひさま、まぶしい ね', 'ぴよ。ここ、たのしい ね'],
+    rain: ['あめの ひは、みずたまりで ぴちゃぴちゃ', 'ぬれたら、ふるふる するよ'], night: ['ねむい ぴよ… おやすみの じかん', 'ほしが おおきな たまごみたい'], morning: ['ぴよ！ あさだよ、おきよう'], evening: ['そろそろ おうちへ かえろうかな'] },
+  hoho: { name: 'ほほきずの ねこ', size: .697, pitch: [587, 784, 659], hello: 'へっちゃら だよ。きに しないで',
+    lines: ['この ほっぺの きず、なかよしの しるし', 'きずが あっても、いまは たのしいよ', 'むりして わらわなくて いいからね', 'つらい ときは、ここで やすんで いきな', 'ぼくも、ころんだ ことが いっぱい あるよ', 'いっしょに ひなたぼっこ、しよう'],
+    rain: ['あめの ひは、きずが すこし うずくんだ。でも へっちゃら', 'あまやどり、いっしょに する？'], night: ['よるは しずかで いいね', 'ねむれない よるも あるよね。ここに いて いいよ'], morning: ['あさは、ゆっくりで いいんだよ'], evening: ['いちにち、おつかれさま'] },
+  kawauso: { name: 'ラテの かわうそ', size: .647, pitch: [698, 880, 784], hello: 'いい いし、みつけたよ',
+    lines: ['この いし、つるつる。あげよっか？', 'ラテ、のむ？ あったかいよ', 'みずの なかは、きもちいいよ', 'たからものは、ポケットに いれとくんだ', 'ぷかぷか うくの、とくいだよ', 'いっしょに ひとやすみ しよう'],
+    rain: ['あめの ひは、みずあそび びより', 'いしが つやつやに なるよ'], night: ['よるの みずは、つきが うつるよ', 'ラテで ほっと するよ'], morning: ['あさの ラテは おいしいよ'], evening: ['ゆうやけの いけ、きれいだよ'] },
+  koinu: { name: 'はちみつの こいぬ', size: .658, pitch: [1047, 1319, 1047], hello: 'わん！ あえて うれしい',
+    lines: ['わん！ おさんぽ、いく？', 'しっぽが ぶんぶん しちゃう', 'はちみつ、なめる？ あまいよ', 'ここで はしっても いいかな？', 'いっしょに いると、たのしい', 'ぼく、まるふわが だいすき'],
+    rain: ['あめの さんぽも たのしいよ わん', 'ぶるぶる ぶるっ！ ぬれちゃった'], night: ['おほしさまに ほえたら おこられるかな', 'ねむいけど、もう すこし あそびたい わん'], morning: ['おはよう わん！ さんぽの じかん'], evening: ['ゆうがたの さんぽ、すき'] },
+  ribbon: { name: 'リボンの うさぎ', size: .608, pitch: [1245, 1480, 1319], hello: 'リボン、にあう？',
+    lines: ['この リボン、おきにいり', 'まるふわの ふくも、かわいいね', 'おしゃれは、じぶんが うれしい ことが だいじ', 'リボンを むすぶと、きもちが しゃんと するよ', 'ぴょん って すると、ゆれるよ', 'きょうも いい ひ だね'],
+    rain: ['あめの ひの リボンは、しっとり', 'かさも リボンの がら なんだ'], night: ['よるの リボンは、ほしいろ', 'ねる まえに、リボンを ほどくんだ'], morning: ['あさの リボン、うまく むすべた'], evening: ['ゆうやけ いろの リボン、いいでしょ'] },
+  risu: { name: 'チョコの りす', size: .711, pitch: [932, 1109, 988], hello: 'どんぐり、たべる？',
+    lines: ['どんぐり、いっぱい あつめたよ', 'ベレーぼう、にあってる？', 'チョコの かおり、する でしょ', 'きの うえは、いい けしきだよ', 'ちょこちょこ うごくの、たのしい', 'ゆっくりで いいよ、ぼくも のんびり'],
+    rain: ['あめの ひは、きの うろで ひとやすみ', 'どんぐり、ぬれないように しまうよ'], night: ['よるの もりは、ほたるが とぶよ', 'おやすみの まえに、どんぐりを かぞえる'], morning: ['あさの きは、つゆが きらきら'], evening: ['ゆうやけの きの うえ、おすすめだよ'] },
+  tanuki: { name: 'クローバーの たぬき', size: .681, pitch: [494, 622, 554], hello: 'よつばの クローバー、さがそ',
+    lines: ['よつばを みつけると、いい ことが あるって', 'ぽんぽこ おなか、さわる？', 'ばけるのは にがて。でも ここに いるよ', 'のんびり さがそう。いそがなくて いい', 'みつからなくても、たのしいよ', 'いっしょに くさむら、みて みよう'],
+    rain: ['あめの ひは、クローバーが つやつや', 'ぽんぽこ、あまやどり'], night: ['よるの くさむらで、ほたるを みたよ', 'つきの ひかりで、よつばが ひかったよ'], morning: ['つゆの クローバー、きれいだよ'], evening: ['ゆうやけの くさむら、いい におい'] }
 };
 
 // ─── ばしょ（かんばん・たてもの・かざり）。すうじは 360×560 の せかいの なかの いち ───
@@ -432,11 +469,11 @@ const PROPS = [
   { id: 'pier', x: 78, y: 286, w: 104, h: 76, svg: SVG.pier, dest: 'tsuri', mark: '🎣' },
   { id: 'house', x: 180, y: 264, w: 122, h: 126, svg: SVG.house, dest: 'oheya', mark: '🐠' },
   { id: 'stall', x: 296, y: 270, w: 118, h: 134, svg: SVG.stall, dest: 'onigiri', mark: '🍙' },
-  { id: 'fountain', x: 180, y: 416, w: 120, h: 90, svg: SVG.fountain, secret: 'fountain', block: { ell: [180, 402, 56, 20] } },
+  { id: 'fountain', x: 180, y: 416, w: 120, h: 90, svg: SVG.fountain, secret: 'fountain', block: { ell: [180, 393, 58, 22] } },
   { id: 'lamp-l', x: 126, y: 350, w: 70, h: 90, svg: SVG.lamp },
   { id: 'lamp-r', x: 234, y: 350, w: 70, h: 90, svg: SVG.lamp },
-  { id: 'tree-l', x: 28, y: 366, w: 80, h: 116, svg: SVG.tree, secret: 'tree', block: { rect: [0, 340, 40, 370] } },
-  { id: 'tree-r', x: 334, y: 360, w: 80, h: 116, svg: SVG.tree, secret: 'tree', block: { rect: [320, 334, 360, 364] } },
+  { id: 'tree-l', x: 16, y: 384, w: 68, h: 112, svg: SVG.tree, secret: 'tree', block: { rect: [0, 358, 32, 388] } },
+  { id: 'tree-r', x: 344, y: 384, w: 68, h: 112, svg: SVG.tree, secret: 'tree', block: { rect: [328, 358, 360, 388] } },
   { id: 'bench-l', x: 64, y: 430, w: 70, h: 38, svg: SVG.bench, block: { rect: [30, 418, 98, 432] } },
   { id: 'bench-r', x: 296, y: 430, w: 70, h: 38, svg: SVG.bench, block: { rect: [262, 418, 330, 432] } },
   { id: 'lot1', x: 62, y: 526, w: 122, h: 80, svg: SVG.lot1, dest: 'kouji1', mark: '🚧', block: { rect: [0, 452, 126, 528] } },
@@ -448,7 +485,7 @@ const DEST = {
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
   onigiri: { name: 'おにぎりキャッチ', at: { x: 296, y: 292 }, kind: 'go', url: () => ONIGIRI_URL, pan: .8, motif: () => { tone(523, .07, 'square', 0, .04); tone(392, .1, 'square', .09, .04); } },
   kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 62, y: 540 }, kind: 'wait', line: 'ここは まだ こうじちゅう。なにが できるかな？', pan: -.8 },
-  kouji2: { name: 'こうじちゅうの ばしょ（カードの ひろば？）', at: { x: 298, y: 540 }, kind: 'wait', line: 'ここも こうじちゅう。カードの ひろば…かも？ たのしみに まっててね', pan: .8 }
+  kouji2: { name: 'こうじちゅう（カードの ひろば？）', at: { x: 298, y: 540 }, kind: 'wait', line: 'ここも こうじちゅう。カードの ひろば…かも？ たのしみに まっててね', pan: .8 }
 };
 
 // ─── あるける ところ（10×10 の ます）と、みちさがし ───
@@ -477,7 +514,7 @@ function nearestFree(x, y) {
   return best || { x: 180, y: 500 };
 }
 function los(a, b) {
-  const n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 3));
+  const n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 1.5));
   for (let i = 1; i < n; i++) { const t = i / n; if (!isFree(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)) return false; }
   return true;
 }
@@ -533,9 +570,9 @@ function chooseFriends() {
   if (force.length) return force.slice(0, 6);
   const rnd = mulberry((today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 + 3), ids = Object.keys(PALS);
   for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
-  return ids.slice(0, 4);
+  return ids.slice(0, 5);
 }
-const SLOTS = [{ x: 84, y: 368 }, { x: 276, y: 368 }, { x: 120, y: 440 }, { x: 240, y: 440 }, { x: 180, y: 336 }, { x: 180, y: 480 }];
+const SLOTS = [{ x: 84, y: 368 }, { x: 276, y: 368 }, { x: 120, y: 440 }, { x: 240, y: 440 }, { x: 180, y: 336 }, { x: 140, y: 316 }];
 const friends = chooseFriends().map((id, i) => {
   const a = makeActor(id, PALS[id].name, BASE + 'img/friend-' + id + '-s.webp', 68, PALS[id].size, 'friend');
   a.home = SLOTS[i]; a.x = a.home.x; a.y = a.home.y; a.speed = 30; a.state = 'idle'; a.timer = 1 + Math.random() * 4; a.cool = 0; a.talking = 0; a.bag = []; a.friend = true;
@@ -566,18 +603,32 @@ let T = 0, lastInput = 0;
 const bubbles = [];
 let box = { width: 360, height: 560 }, k = 1;
 function measure() { box = scene.getBoundingClientRect(); k = box.width / W; }
-function narrate(text) { statusEl.textContent = text; }
+let lastHard = -99;
+// soft：かってに おこる ことの しらせ。さっき だいじな しらせが あったら、うわがきしない
+function narrate(text, soft) { if (soft && T - lastHard < 10) return; if (!soft) lastHard = T; statusEl.textContent = text; }
 function removeBubble(b) { b.el.remove(); const i = bubbles.indexOf(b); if (i >= 0) bubbles.splice(i, 1); }
-function placeBubble(b) {
+function computeBubble(b) {
   const a = b.actor, s = scaleOf(a), px = a.x * k, py = (a.y - a.h * s) * k - 6;
-  const left = clamp(px - b.w / 2, 4, Math.max(4, box.width - b.w - 4)), top = Math.max(4, py - b.h - 8);
-  b.el.style.transform = `translate(${left.toFixed(1)}px,${top.toFixed(1)}px)`;
-  b.el.style.setProperty('--tx', clamp(px - left, 16, Math.max(16, b.w - 16)).toFixed(1) + 'px');
+  b.px = px; b.left = clamp(px - b.w / 2, 4, Math.max(4, box.width - b.w - 4)); b.top = Math.max(4, py - b.h - 8);
+}
+// ふきだしを ならべる。まえに いる ひとの ふきだしを そのまま、うしろの ひとの ふきだしが かさなったら うえへ ずらす
+function layoutBubbles() {
+  const placed = [];
+  bubbles.forEach(computeBubble);
+  bubbles.slice().sort((a, b) => b.actor.y - a.actor.y).forEach(b => {
+    for (let i = 0; i < 6; i++) {
+      const hit = placed.find(o => b.left < o.left + o.w + 4 && b.left + b.w + 4 > o.left && b.top < o.top + o.h + 4 && b.top + b.h + 4 > o.top);
+      if (!hit) break; b.top = Math.max(4, hit.top - b.h - 6);
+    }
+    placed.push(b);
+    b.el.style.transform = `translate(${b.left.toFixed(1)}px,${b.top.toFixed(1)}px)`;
+    b.el.style.setProperty('--tx', clamp(b.px - b.left, 16, Math.max(16, b.w - 16)).toFixed(1) + 'px');
+  });
 }
 function speak(actor, text, ms = 3200, quiet) {
   bubbles.filter(b => b.actor === actor).forEach(removeBubble);
   const el = document.createElement('div'); el.className = 'bubble'; el.textContent = text; layerBubbles.append(el);
-  const b = { actor, el, until: T + ms / 1000, w: el.offsetWidth, h: el.offsetHeight }; bubbles.push(b); placeBubble(b);
+  const b = { actor, el, until: T + ms / 1000, w: el.offsetWidth, h: el.offsetHeight }; bubbles.push(b); layoutBubbles();
   if (!quiet) narrate((actor === player ? '' : actor.name + '：') + '「' + text + '」');
   return b;
 }
@@ -643,7 +694,7 @@ function render() {
     a.el.style.left = (a.x / W * 100).toFixed(3) + '%'; a.el.style.top = (a.y / H * 100).toFixed(3) + '%';
     a.el.style.transform = `translate(-50%,-100%) scale(${s.toFixed(3)})`; a.el.style.zIndex = String(100 + Math.round(a.y) + (a === player ? 1 : 0));
   }
-  bubbles.forEach(placeBubble);
+  layoutBubbles();
 }
 
 // ─── ともだちの ひとこと ───
@@ -672,7 +723,7 @@ function talkTo(f) {
   lastInput = T;
   if (dist(player, f) < 52) { greet(f, true); return; }
   const dx = player.x - f.x, dy = player.y - f.y, d = Math.hypot(dx, dy) || 1, spot = nearestFree(f.x + dx / d * 40, f.y + dy / d * 40);
-  f.talking = 6; f.path = []; narrate(f.name + 'の ところへ いくよ');
+  f.talking = 6; f.state = 'talk'; f.path = []; narrate(f.name + 'の ところへ いくよ');
   walkTo(spot.x, spot.y, () => greet(f, true));
 }
 function nearestFriend(unmetFirst) {
@@ -686,6 +737,7 @@ function updateFriend(f, dt) {
   if (f.state === 'idle') {
     f.timer -= dt;
     if (f.timer <= 0) {
+      if (Math.random() < .3) { hop(f); f.timer = 2.5 + Math.random() * 3; return; }
       for (let tries = 0; tries < 6; tries++) {
         const tx = f.home.x + (Math.random() * 2 - 1) * 46, ty = f.home.y + (Math.random() * 2 - 1) * 34;
         if (isFree(tx, ty) && dist({ x: tx, y: ty }, player) > 40) { f.path = findPath(f, { x: tx, y: ty }); f.state = 'walk'; break; }
@@ -747,7 +799,7 @@ function shootingStar(byTap) {
   if (reduce()) { setTimeout(() => { m.remove(); meteorEl = null; }, 1600); } else { const an = m.animate([{ translate: '0 0', opacity: 0 }, { translate: `${dx * .15}px ${dy * .15}px`, opacity: 1, offset: .12 }, { translate: `${dx}px ${dy}px`, opacity: 0 }], { duration: 2400, easing: 'ease-in' }); an.onfinish = () => { m.remove(); meteorEl = null; }; }
   narrate('ながれぼしが とんだよ。さわると ねがいごとが できるよ'); seen('meteor');
 }
-function meteorTap() { if (!meteorEl) return; const r = meteorEl.getBoundingClientRect(); meteorEl.remove(); meteorEl = null; wish((r.left - box.left) / k, (r.top - box.top) / k); }
+function meteorTap() { if (!meteorEl) return; measure(); const r = meteorEl.getBoundingClientRect(); meteorEl.remove(); meteorEl = null; wish((r.left - box.left) / k, (r.top - box.top) / k); }
 
 // ─── いきさき ───
 let trip = null;
@@ -778,8 +830,9 @@ function leave(id) {
 function enterTank() {
   const house = propEl('house'); if (house) house.classList.add('open'); sfx.door();
   setTimeout(() => {
+    if (!trip || trip.id !== 'oheya') { if (house) house.classList.remove('open'); return; }   // とちゅうで やめた
     player.el.classList.add('gone'); narrate('まるふわの おへやに はいったよ');
-    if (window.TsuriTank && typeof window.TsuriTank.open === 'function') { window.TsuriTank.open(); }
+    if (window.TsuriTank && typeof window.TsuriTank.open === 'function' && (window.TsuriTank.version || 0) >= 3) { window.TsuriTank.open(); }
     else { own.last = 'oheya'; own.leftAt = Date.now(); saveOwn(); setTimeout(() => hooks.navigate(new URL('../', location.href).href), 400); }
   }, reduce() ? 100 : 380);
 }
@@ -807,7 +860,7 @@ function findFriend() {
 function renderPalRow() {
   $('pal-row').replaceChildren(...friends.map(f => {
     const li = document.createElement('li'), img = document.createElement('img'), met = !!own.metToday[f.id];
-    li.dataset.met = String(met); img.src = BASE + 'img/friend-' + f.id + '-s.webp'; img.alt = ''; img.width = img.height = 54;
+    li.dataset.met = String(met); img.src = BASE + 'img/friend-' + f.id + '-s.webp'; img.alt = ''; img.width = img.height = 52;
     li.append(img, f.name + (met ? '' : '（まだ）')); li.setAttribute('aria-label', f.name + (met ? '。きょう あったよ' : '。きょう まだ あって いないよ')); return li;
   }));
 }
@@ -863,7 +916,7 @@ function nearestThing() {
   let best = null, bd = Infinity;
   friends.forEach(f => { const d = dist(player, f); if (d < 64 && d < bd) { bd = d; best = { kind: 'friend', f, name: f.name }; } });
   Object.entries(DEST).forEach(([id, d]) => { const dd = dist(player, d.at); if (dd < 44 && dd < bd) { bd = dd; best = { kind: 'dest', id, name: d.name }; } });
-  if (dist(player, { x: 180, y: 402 }) < 78 && 78 < bd + 200 && !best) best = { kind: 'fountain', name: 'ふんすい' };
+  if (!best && dist(player, { x: 180, y: 396 }) < 78) best = { kind: 'fountain', name: 'ふんすい' };
   return best;
 }
 function interactNearest() {
@@ -873,7 +926,7 @@ function interactNearest() {
 }
 
 // ─── いちばん ながい ときの もの：ひとりで いる ときに、ともだちが あいに きて くれる ───
-let nearNote = '', nextNear = 0, nextVisit = 30, nextClock = 30, nextBird = 6, nextJump = 14, nextMeteor = 45;
+let nearNote = '', nextNear = 0, nextVisitAt = 30, nextClock = 30, nextBird = 6, nextJump = 14, nextMeteor = 45;
 function update(dt) {
   T += dt;
   const kb = keyMove(dt); if (!kb) stepActor(player, dt);
@@ -885,8 +938,8 @@ function update(dt) {
   if (T > nextNear) { nextNear = T + .35; const t = nearestThing(), note = t ? t.kind + (t.id || t.name) : ''; if (note !== nearNote) { nearNote = note; if (t && (kb || !player.moving) && !trip) narrate(t.kind === 'dest' ? t.name + 'の まえ。スペースキーで はいれるよ' : t.kind === 'friend' ? t.name + 'が ちかくに いるよ' : 'ふんすいの ちかく'); } updateAmbient(); }
   if (T > nextClock) { nextClock = T + 30; if (timeOfDay() !== curTime) { applyTime(); narrate(TIME_LABEL[curTime] + 'に なったよ'); } }
   // ひとりで ながく いると、ともだちが あいに くる
-  if (!reduce() && T - lastInput > nextVisit && !trip && !player.path.length) {
-    nextVisit = T - lastInput + 40; const f = nearestFriend(true);
+  if (!reduce() && T - lastInput > 30 && T > nextVisitAt && !trip && !player.path.length) {
+    nextVisitAt = T + 40; const f = nearestFriend(true);
     if (f && f.talking <= 0 && dist(f, player) > 70) { const dx = player.x - f.x, dy = player.y - f.y, d = Math.hypot(dx, dy) || 1, spot = nearestFree(player.x - dx / d * 36, player.y - dy / d * 36); f.talking = 0; f.state = 'walk'; f.path = findPath(f, spot); f.speed = 44; f.cool = 0; }
   }
   if (T > nextBird) {
@@ -895,12 +948,12 @@ function update(dt) {
   }
   if (T > nextJump) {
     nextJump = T + 16 + Math.random() * 20;
-    if (!reduce() && !document.hidden) { const jx = 40 + Math.random() * 40; fxAt(jx, 254, '🐟', [{ translate: '-50% 0', opacity: 0 }, { translate: `-50% ${-26 * k}px`, opacity: 1, offset: .4 }, { translate: `-50% 0`, opacity: 0 }], { duration: 900, easing: 'ease-out' }); sfx.splash(-.7); narrate('いけで さかなが ぴょん と はねたよ'); seen('pond'); }
+    if (!reduce() && !document.hidden) { const jx = 40 + Math.random() * 40; fxAt(jx, 254, '🐟', [{ translate: '-50% 0', opacity: 0 }, { translate: `-50% ${-26 * k}px`, opacity: 1, offset: .4 }, { translate: `-50% 0`, opacity: 0 }], { duration: 900, easing: 'ease-out' }); sfx.splash(-.7); narrate('いけで さかなが ぴょん と はねたよ', true); seen('pond'); }
   }
   if (curTime === 'n' && T > nextMeteor) { nextMeteor = T + 50 + Math.random() * 50; if (!reduce()) shootingStar(false); }
 }
 let last = 0;
-function frame(t) { requestAnimationFrame(frame); const dt = Math.min(.05, (t - last) / 1000 || 0); last = t; if (document.hidden || (window.TsuriTank && window.TsuriTank.isOpen && window.TsuriTank.isOpen())) return; update(dt); render(); }
+function frame(t) { requestAnimationFrame(frame); const dt = Math.min(.05, (t - last) / 1000 || 0); last = t; if (document.hidden || api.paused || (window.TsuriTank && window.TsuriTank.isOpen && window.TsuriTank.isOpen())) return; update(dt); render(); }
 
 // ─── はじまり ───
 buildProps(); applyTime(); drawSound(); drawMotion(); renderPalRow();
@@ -916,10 +969,10 @@ setTimeout(() => {
 requestAnimationFrame(frame);
 addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag) stopAmbient(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else { startAmbient(); lastInput = T; } });
-addEventListener('pageshow', e => { if (e.persisted) { curtain.style.display = 'none'; trip = null; player.el.classList.remove('gone'); measure(); narrate('ひろばに もどったよ'); } });
+addEventListener('pageshow', e => { if (e.persisted) { curtain.style.display = 'none'; trip = null; player.el.classList.remove('gone'); const house = propEl('house'); if (house) house.classList.remove('open'); measure(); narrate('ひろばに もどったよ'); } });
 
-window.Hiroba = {
-  version: 1, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
+const api = window.Hiroba = {
+  version: 1, paused: false, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
   goDest, secretTap, tapMascot, greet, talkTo, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
