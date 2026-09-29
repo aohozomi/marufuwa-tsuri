@@ -214,6 +214,11 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 #card #guide{display:flex;align-items:center;gap:6px;margin:0 0 2px;width:100%}
 #guide img{width:34px;height:34px;object-fit:contain;flex:none}
 #guide span{flex:1;background:#17323d;color:#fff;font-weight:800;border-radius:12px;padding:2px 10px;text-align:left;font-size:.85rem}
+.shadow[data-rare="5"]{mix-blend-mode:normal;background:linear-gradient(90deg,#ff8fa3,#ffd34d,#8fe3a8,#7fd0f2,#b79cf0);filter:drop-shadow(0 0 8px #fff);animation:rainbow 2.4s linear infinite}
+.held[data-rare="5"]{filter:drop-shadow(0 0 8px #fff) drop-shadow(0 0 14px #ffd34d);animation:rainbow 2.4s linear infinite}
+#book-grid div[data-rare="5"][data-seen=true]{border-color:#b79cf0;background:linear-gradient(135deg,#fff0f4,#fffbe6,#eefbf2,#eaf7ff,#f3edff)}
+#book-grid div[data-rare="5"][data-seen=true] b{background:linear-gradient(135deg,#ffd0da,#fff0b0,#c8f3d6,#c4e9fb,#dccdfa);animation:rainbow 3s linear infinite}
+@keyframes rainbow{to{filter:hue-rotate(360deg) drop-shadow(0 0 8px #fff)}}
 .shadow[data-nushi=true]{background:#06183299}
 .shadow[data-nushi=true][data-rare="4"]{background:#ffd34de0}
 #card h2{margin:2px 0;font-size:1.25rem}
@@ -460,6 +465,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
     'ころころ{亀|かめ}', '{眠|ねむ}り{海豚|いるか}', '{月見|つきみ}まんぼう', '{日|ひ}だまり{鱏|えい}', '{三日月|みかづき}{太刀魚|たちうお}', 'しゃぼん{玉|だま}{魚|うお}',
     '{水色|みずいろ}の{子|こ}', 'ミントの{子|こ}', 'アプリコットの{子|こ}', 'ラベンダーの{子|こ}', '{金|きん}の{丸鯉|まるごい}', '{丸|まる}{鯨|くじら}'
   ].forEach((kanji, id) => { FISH[id].kanji = kanji; });
+  // まぼろしの さかな。でて くる かくりつが、てんもんがくてきに ひくい（なげる 8000かいに 1かい）。でて きたら、つれる。
+  // ずかんの 30しゅるいには かぞえない。あうまで、いる ことも わからない。ばんごうは 30ばんから（うしろに たすだけ）
+  [['つきあかりのきんぎょ', '🐠', 20, 40, 'L', '{月明|つきあ}かりの{金魚|きんぎょ}'], ['ほしくずのこい', '🐟', 60, 120, 'R', '{星屑|ほしくず}の{鯉|こい}'],
+    ['しんじゅのたい', '🐠', 40, 90, 'H', '{真珠|しんじゅ}の{鯛|たい}'], ['にじいろくじら', '🐳', 300, 600, 'B', '{虹色|にじいろ}{鯨|くじら}']
+  ].forEach(([name, icon, min, max, area, kanji]) => FISH.push({id: FISH.length, name, icon, min, max, rare: 5, time: '', area, kanji, legend: true}));
+  const BASE = FISH.filter(f => !f.legend).length, LEGEND_ODDS = 1 / 8000;
+  const seenCount = () => Object.keys(save.fish).filter(id => FISH[id] && !FISH[id].legend).length;
   // {かんじ|よみ} を、ふりがなつきの もじに する
   function ruby(text) {
     const out = document.createDocumentFragment();
@@ -491,7 +503,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // でやすさ。ジョブズ1の しさんで みなおした（まえは 3=10・4=2 で、ずかんが うまるまで とおすぎた）
   const WEIGHT = {1: 60, 2: 28, 3: 26, 4: 8};
   // 4 は スペシャル（とくべつな しゅるい）。ぬしは しゅるいでは なく、どの さかなにも いる とくだいの 1ぴき
-  const RARE_LABEL = {2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル'};
+  const RARE_LABEL = {2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル', 5: 'まぼろし'};
   const starCount = (f, nushi) => Math.min(5, f.rare + (nushi ? 1 : 0));
   const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
   const cm = value => Number(value).toFixed(2);
@@ -518,7 +530,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function pickFish() {
     // じかんの ふだは「でる／でない」では なく「でやすい／でにくい（3ばい）」。ゲーム開発司令部の てんけんで、
     // じかんに よっては 2〜3しゅるいしか でない わくが 9つ あった ため
-    const now = timeOfDay(), here = FISH.filter(f => f.area === save.area);
+    const myth = FISH.find(f => f.legend && f.area === save.area);
+    if (myth && (query.get('legend') === '1' || Math.random() < LEGEND_ODDS)) { wish = false; return myth; }
+    const now = timeOfDay(), here = FISH.filter(f => f.area === save.area && !f.legend);
     const wanted = Number(query.get('rare')); if (wanted) { const only = here.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
     // やさしい ほしょう：しってる こが 5かい つづいたら、つぎは まだ あってない こ
     const unseen = here.filter(f => !save.fish[f.id]), wished = wish && here.some(f => f.rare >= 3);
@@ -663,7 +677,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function face(name) { marufuwa.src = 'img/game-' + name + '.webp'; }
   function hud() {
     $('total').textContent = String(save.total);
-    $('seen').textContent = $('book-seen').textContent = String(Object.keys(save.fish).length);
+    $('seen').textContent = $('book-seen').textContent = String(seenCount());
   }
 
   function cast() {
@@ -704,11 +718,12 @@ dialog .close{display:block;margin:auto;min-width:160px}
     flying = false; tone(1568, .06); tone(1568, .06, 'square', .1); tone(2093, .12, 'square', .2); buzz([120, 80, 120]);   // ピピッ、ピーン
     setPhase('bite');
     button.textContent = 'ひく！'; button.disabled = false; button.dataset.hot = 'true';
-    say((nushi ? 'とても おおきな かげ…！ ぬしかも。' : fish.rare === 4 ? 'きんいろの かげ…！ スペシャルな こかも。' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
+    say((fish.legend ? 'にじいろに ひかる かげ…！ なんだろう。' : nushi ? 'とても おおきな かげ…！ ぬしかも。' : fish.rare === 4 ? 'きんいろの かげ…！ スペシャルな こかも。' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
     button.focus();
   }
   function startReel() {
     hpMax = hp = 3 + fish.rare * 2 + (nushi ? 5 : 0); period = 1850 - fish.rare * 250;
+    if (fish.legend) { hpMax = hp = 7; period = 1500; }   // まぼろしは、でて きたら つれる。わは ゆっくり
     $('reel').style.setProperty('--period', period + 'ms');
     const ring = document.querySelector('#reel .ring'); ring.style.animation = 'none'; void ring.offsetWidth; ring.style.animation = '';
     ringStart = performance.now();
@@ -765,7 +780,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function caught() {
     stopGuide();
     // つれた：むかしの ゲームの「てに いれた！」ふう。ぬしと スペシャルは、ながい ファンファーレ
-    if (nushi || fish.rare === 4) { chord([523, 659, 784, 1047, 784, 1047, 1319, 1568], .085); tone(2093, .5, 'square', .7, .045); [262, 330, 392].forEach((low, i) => tone(low, .16, 'triangle', .7 + i * .16, .05)); }
+    if (fish.legend) { chord([523, 659, 784, 1047, 1319, 1568, 2093, 1568, 2093, 2637], .09); tone(3136, .8, 'square', .95, .04); [262, 330, 392, 523].forEach((low, i) => tone(low, .2, 'triangle', .2 + i * .2, .05)); }
+    else if (nushi || fish.rare === 4) { chord([523, 659, 784, 1047, 784, 1047, 1319, 1568], .085); tone(2093, .5, 'square', .7, .045); [262, 330, 392].forEach((low, i) => tone(low, .16, 'triangle', .7 + i * .16, .05)); }
     else { chord([784, 988, 1175, 1568], .075); tone(1568, .22, 'square', .3, .045); tone(392, .3, 'triangle', .3, .05); }
     buzz(nushi ? [80, 60, 80, 60, 200] : 120);
     const range = fish.max - fish.min;
@@ -788,10 +804,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]);
     $('card-tags').replaceChildren(...tags.map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = text; return tag; }));
     // あんないの ペンギンが、まいかい ひとこと
-    const left = FISH.length - Object.keys(save.fish).length;
-    $('guide-word').textContent = nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
+    const left = BASE - seenCount();
+    $('guide-word').textContent = fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
-    face(nushi || fish.rare === 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
+    face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
     last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date()};
     setPhase('caught');
     // つれた さかなを、まるふわが かかげる
@@ -800,7 +816,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (!reduce()) {
       held.animate([{translate: '0 30px', opacity: 0}, {translate: '0 -8px', opacity: 1}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
       // やったー：ぴょん、ぴょんと とびはねる。ぬしと スペシャルは 3かい
-      const hops = nushi || fish.rare === 4 ? 3 : 2, frames = [{translate: '0 0', scale: '1 1', rotate: '0deg'}];
+      const hops = fish.legend ? 5 : nushi || fish.rare === 4 ? 3 : 2, frames = [{translate: '0 0', scale: '1 1', rotate: '0deg'}];
       for (let i = 0; i < hops; i++) frames.push({translate: '0 -22px', scale: '.95 1.07', rotate: (i % 2 ? 6 : -6) + 'deg'}, {translate: '0 0', scale: '1.08 .92', rotate: '0deg'});
       frames.push({translate: '0 0', scale: '1 1', rotate: '0deg'});
       marufuwa.animate(frames, {duration: 330 * hops + 120, easing: 'ease-out'});
@@ -1078,7 +1094,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   const book = $('book');
   $('open-book').addEventListener('click', () => {
-    $('book-grid').replaceChildren(...FISH.map(f => {
+    $('book-grid').replaceChildren(...FISH.filter(f => !f.legend || save.fish[f.id]).map(f => {
       const got = save.fish[f.id], cell = document.createElement('div');
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
       const icon = document.createElement('b'); icon.textContent = got ? f.icon : '？'; icon.setAttribute('aria-hidden', 'true');
@@ -1091,7 +1107,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   $('close-book').addEventListener('click', () => book.close());
 
   scene.dataset.time = TIME_NAME[timeOfDay()];
-  $('all').textContent = String(FISH.length);
+  $('all').textContent = String(BASE);
   scene.after($('card'));   // つれた しらせは けしきの したに。まるふわと さかなを かくさない
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
