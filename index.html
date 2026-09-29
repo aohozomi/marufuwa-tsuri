@@ -159,10 +159,11 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .shadow{mix-blend-mode:multiply}
 .shadow[data-rare="3"],.shadow[data-rare="4"]{mix-blend-mode:normal}
 /* ながれぼし（よるだけ、ときどき）。おすと ねがいごと。ひみつの しかけ */
-#scene #star{position:absolute;z-index:5;left:78%;top:8%;width:15%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;box-shadow:none;color:#fff6a8;font-size:clamp(1.4rem,7vw,2.2rem);line-height:1;text-shadow:0 0 10px #fff6a8,0 0 22px #ffe27a;transform:translate(-50%,-50%);animation:shoot 6s ease-out forwards}
+#scene #star{position:absolute;z-index:5;left:78%;top:8%;width:15%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;box-shadow:none;color:#fff6a8;font-size:clamp(1.4rem,7vw,2.2rem);line-height:1;text-shadow:0 0 10px #fff6a8,0 0 22px #ffe27a;transform:translate(-50%,-50%);animation:shoot 1.6s ease-out forwards}
 #scene #star::before{display:block;left:70%;right:auto;top:30%;width:160%;height:3px;border-radius:3px;background:linear-gradient(90deg,#fff6a8,#fff6a800);rotate:-24deg;transform-origin:0 50%}
 #scene #star[hidden]{display:none}
-@keyframes shoot{0%{translate:40vw -10vh;opacity:0}12%{opacity:1}100%{translate:-46vw 12vh;opacity:1}}
+@keyframes shoot{0%{translate:30vw -8vh;opacity:0}30%{opacity:1}100%{translate:0 0;opacity:1}}
+@media(prefers-reduced-motion:reduce){#scene #star{animation:none}}
 #rain{position:absolute;inset:-20% 0 0 -20%;z-index:4;pointer-events:none;display:none;background-image:repeating-linear-gradient(105deg,#ffffff00 0 14px,#ffffff8c 14px 15.5px,#ffffff00 15.5px 34px);background-size:68px 120px;animation:rain .55s linear infinite}
 #scene[data-rain=true] #rain{display:block}
 #scene[data-rain=true] > svg:first-of-type{filter:brightness(.8) saturate(.75)}
@@ -1057,7 +1058,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (night && free && star.hidden && !wish) {
       star.hidden = false; star.style.animation = 'none'; void star.offsetWidth; star.style.animation = '';
       chord([1568, 2093, 2637], .06); say('あ、ながれぼし！ おすと、ねがいごとが できるよ。');
-      setTimeout(() => { star.hidden = true; }, 6000);
+      // じかんぎれは なし。おすまで、そらに のこる（ジョブズ1の けんぴん：きえる・うごく まとは、だれでも あそべるに はんする）
     }
     setTimeout(shootingStar, Number(query.get('star')) || (45000 + Math.random() * 60000));
   }
