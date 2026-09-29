@@ -10,8 +10,20 @@
 :root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light}
 *{box-sizing:border-box}
 body{margin:0}
-button{font:inherit;font-weight:800;cursor:pointer;color:#244653;border:2px solid #b9d1db;background:#fff;border-radius:18px;min-height:52px;padding:8px 18px}
-button:disabled{opacity:.55;cursor:default}
+/* ぷにぷにシールの ボタン。しろい ふち、つや、ぷっくり。おすと ぷにっと へこむ。いろは みみの 4しょく */
+button,.pill{--c1:#ffffff;--c2:#d9f0fb;--side:#a9cfe3;--ink:#244653;
+  font:inherit;font-weight:800;cursor:pointer;color:var(--ink);position:relative;min-height:52px;padding:8px 18px;
+  border:3px solid #fff;border-radius:999px;background:linear-gradient(180deg,var(--c1) 0%,var(--c2) 100%);
+  box-shadow:0 5px 0 var(--side),0 10px 14px #2446532b,inset 0 -7px 10px #00000014,inset 0 5px 7px #ffffffcc;
+  transition:transform .09s ease-out,box-shadow .09s ease-out}
+button::before,.pill::before{content:"";position:absolute;left:10%;right:10%;top:7%;height:36%;border-radius:999px;background:linear-gradient(#ffffffd9,#ffffff00);pointer-events:none}
+button:active:not(:disabled),.pill:active{transform:translateY(4px) scale(.98,.93);box-shadow:0 1px 0 var(--side),0 3px 6px #2446532b,inset 0 -3px 6px #00000014,inset 0 3px 5px #ffffffcc}
+button:disabled{opacity:.6;cursor:default;box-shadow:0 2px 0 var(--side),inset 0 -4px 6px #0000000f}
+.spot::before,#keeper::before{display:none}
+#scene .spot,#scene #keeper{box-shadow:none;transition:none}
+#scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
+#scene #keeper:active{transform:translate(-50%,-100%) scale(.94)}
+@media(prefers-reduced-motion:reduce){button,.pill{transition:none}button:active:not(:disabled),.pill:active{transform:none}}
 button:focus-visible{outline:3px solid #286b88;outline-offset:3px}
 main{max-width:640px;margin:auto;padding:16px}
 h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
@@ -32,8 +44,11 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 #scene[data-time=yoru][data-area] svg g[data-for],#scene[data-time=yoru] svg polygon[style*=ground]{filter:brightness(.62)}
 #scene:not([data-area=L]) [data-for=L],#scene:not([data-area=R]) [data-for=R],#scene:not([data-area=H]) [data-for=H],#scene:not([data-area=B]) [data-for=B]{display:none}
 .areas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
-.areas button{min-height:48px;padding:4px 2px;font-size:.82rem;line-height:1.25;border-radius:14px}
-.areas button[aria-pressed=true]{color:#fff;background:#17658a;border-color:#0e4a66}
+.areas{margin-bottom:14px}
+.areas button{min-height:48px;padding:4px 2px;font-size:.82rem;line-height:1.25;border-radius:22px}
+.areas button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36}
+.times button[aria-pressed=true]{--c1:#e6dcff;--c2:#b79cf0;--side:#8a6bd0;--ink:#33205f}
+.hud button{--c1:#ffffff;--c2:#cfeaf9;--side:#9cc6dc}
 .areas small{display:block;font-weight:600;font-size:.7rem}
 .time-box{margin-bottom:10px;font-size:.85rem}
 .time-box summary{cursor:pointer;padding:6px 4px;font-weight:800}
@@ -51,15 +66,17 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 #shop-list button{display:block;position:relative;width:100%;text-align:left;min-height:64px;line-height:1.4;padding-left:64px}
 #shop-list button b{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:#f3f9fc;border:2px solid #d5e6ed;border-radius:12px}
 #shop-list button small{display:block;font-weight:600}
-#shop-list button[aria-pressed=true]{background:#fff3ce;border-color:#a56c19;color:#593700}
+#shop-list button{border-radius:26px}
+#shop-list button::before{left:4%;right:4%;height:30%}
+#shop-list button[aria-pressed=true]{--c1:#fff6cf;--c2:#ffd98a;--side:#d39a1c;--ink:#593700}
 #shop-hello{text-align:center;margin:0 0 8px;font-weight:800}
-#take-photo{min-height:64px;padding:4px 14px;font-size:.95rem;color:#593700;background:#fff3ce;border-color:#a56c19}
+#take-photo{--c1:#fff6cf;--c2:#ffd25e;--side:#d39a1c;--ink:#593700;min-height:68px;padding:4px 14px;font-size:.95rem}
 #take-photo[hidden]{display:none}
 #card-word:empty{display:none}
 #card h2{display:inline}
 #photo-img{display:block;width:100%;height:auto;border-radius:14px;border:2px solid #d5e6ed;margin-bottom:10px}
 .photo-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
-.pill{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;border-radius:18px;border:2px solid #0e4a66;background:#17658a;color:#fff;font-weight:800;font-size:.95rem;text-decoration:none}
+.pill{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #0e4a66}
 .pill[hidden]{display:none}
 #bucket-list{display:grid;gap:6px}
 #bucket-list div{display:grid;grid-template-columns:2.4rem 1fr;align-items:center;gap:8px;border:2px solid #d5e6ed;border-radius:14px;padding:6px 10px;line-height:1.45;font-size:.9rem;background:#fff}
@@ -136,8 +153,9 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 #card .tag{display:inline-block;margin:2px 4px;padding:2px 10px;border-radius:12px;background:#fff3ce;border:2px solid #a56c19;color:#593700;font-weight:800;font-size:.9rem}
 
 .actions{display:flex;gap:10px;margin-top:12px}
-#main-button{flex:1;min-height:64px;font-size:1.3rem;color:#fff;background:#17658a;border-color:#0e4a66}
-#main-button[data-hot=true]{background:#e8543f;border-color:#a8321f}
+.actions{gap:12px;margin:16px 0 6px}
+#main-button{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;flex:1;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
+#main-button[data-hot=true]{--c1:#ffa98f;--c2:#ee5a3c;--side:#b23a20;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
 .note{text-align:center;font-size:.8rem;color:#506874;line-height:1.8;margin-top:18px}
 
