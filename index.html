@@ -11,7 +11,7 @@
 *{box-sizing:border-box}
 body{margin:0}
 /* ぷにぷにシールの ボタン。しろい ふち、つや、ぷっくり。おすと ぷにっと へこむ。いろは みみの 4しょく */
-button,.pill{--c1:#ffffff;--c2:#d9f0fb;--side:#a9cfe3;--ink:#244653;
+button,.pill{--c1:#ffffffd9;--c2:#bfe6f9b3;--side:#9cc9e0;--ink:#244653;-webkit-backdrop-filter:blur(5px) saturate(1.3);backdrop-filter:blur(5px) saturate(1.3);
   font:inherit;font-weight:800;cursor:pointer;color:var(--ink);position:relative;min-height:52px;padding:8px 18px;
   border:3px solid #fff;border-radius:999px;background:linear-gradient(180deg,var(--c1) 0%,var(--c2) 100%);
   box-shadow:0 5px 0 var(--side),0 10px 14px #2446532b,inset 0 -7px 10px #00000014,inset 0 5px 7px #ffffffcc;
@@ -27,6 +27,17 @@ button:disabled{opacity:.6;cursor:default;box-shadow:0 2px 0 var(--side),inset 0
 button:focus-visible{outline:3px solid #286b88;outline-offset:3px}
 main{max-width:640px;margin:auto;padding:16px}
 h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
+#backdrop{position:fixed;inset:0;width:100%;height:100%;z-index:-1}
+.bd-trees circle{transform-box:fill-box;transform-origin:50% 100%;animation:sway 6s ease-in-out infinite alternate}
+.bd-trees circle:nth-child(2n){animation-delay:-3s}
+main{background:#f4fbffd9;border-radius:32px;margin-top:10px;margin-bottom:24px;box-shadow:0 12px 30px #2446531f;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+/* だいめい：ぷっくりした もじ。1もじずつ、なみの ように ゆれる */
+.logo{display:flex;justify-content:center;align-items:flex-end;gap:1px;font-size:clamp(1.7rem,8.4vw,2.6rem);font-weight:900;margin:6px 0 2px;line-height:1.1}
+.logo span{display:inline-block;color:#fff;-webkit-text-stroke:6px var(--k);paint-order:stroke fill;text-shadow:0 4px 0 var(--d),0 7px 8px #24465340;animation:bounce 2.6s ease-in-out infinite;animation-delay:calc(var(--n)*-.26s)}
+.logo i{font-style:normal;font-size:.8em;margin:0 3px;animation:bounce 2.6s ease-in-out infinite;animation-delay:-1.1s}
+.logo span:nth-of-type(4n+1){--k:#4bb3e0;--d:#2a86b3}.logo span:nth-of-type(4n+2){--k:#46c79a;--d:#2a9a72}.logo span:nth-of-type(4n+3){--k:#ff9a6b;--d:#d96f40}.logo span:nth-of-type(4n){--k:#a98be8;--d:#7c5fc4}
+.logo span:nth-of-type(1){--n:0}.logo span:nth-of-type(2){--n:1}.logo span:nth-of-type(3){--n:2}.logo span:nth-of-type(4){--n:3}.logo span:nth-of-type(5){--n:4}.logo span:nth-of-type(6){--n:5}.logo span:nth-of-type(7){--n:6}.logo span:nth-of-type(8){--n:7}.logo span:nth-of-type(9){--n:8}
+@keyframes bounce{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -5px;rotate:3deg}}
 .lead{text-align:center;margin:0 0 12px;font-size:.9rem}
 .hud{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:.95rem}
 .hud strong{font-size:1.3rem;font-variant-numeric:tabular-nums}
@@ -48,7 +59,8 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 .areas button{min-height:48px;padding:4px 2px;font-size:.82rem;line-height:1.25;border-radius:22px}
 .areas button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36}
 .times button[aria-pressed=true]{--c1:#e6dcff;--c2:#b79cf0;--side:#8a6bd0;--ink:#33205f}
-.hud button{--c1:#ffffff;--c2:#cfeaf9;--side:#9cc6dc}
+.hud button{--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
+.hud button::after{content:"";position:absolute;right:14%;bottom:16%;width:9px;height:9px;border-radius:50%;background:#ffffffe6;pointer-events:none}
 .areas small{display:block;font-weight:600;font-size:.7rem}
 .time-box{margin-bottom:10px;font-size:.85rem}
 .time-box summary{cursor:pointer;padding:6px 4px;font-weight:800}
@@ -91,11 +103,36 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 .friend{z-index:2;width:14%;aspect-ratio:1/1}
 .bubble{position:absolute;z-index:4;transform:translate(-50%,-100%);background:#fff;border:2px solid #b9d1db;border-radius:14px;padding:2px 10px;font-size:.8rem;font-weight:800;white-space:nowrap;pointer-events:none}
 .bubble[hidden]{display:none}
-.spot{position:absolute;z-index:1;width:10%;min-height:0;aspect-ratio:1/1;padding:0;transform:translate(-50%,-50%);border:3px dashed #ffffffd9;border-radius:50%;background:#ffffff3d}
-.spot::after{content:"";position:absolute;left:50%;top:50%;width:34%;height:34%;transform:translate(-50%,-50%);border-radius:18% 18% 40% 40%;background:#ffd34d;border:2px solid #a9801a}
-.spot[aria-pressed=true]{border-color:transparent;background:transparent}
-.spot[aria-pressed=true]::after{display:none}
+/* バケツ：じめんに おいて ある、りったいの バケツ。かげが じめんに おちる */
+.spot{position:absolute;z-index:1;width:11%;min-height:0;aspect-ratio:1/1;padding:0;transform:translate(-50%,-78%);border:0;border-radius:50%;background:none}
+.spot svg{position:static;width:100%;height:100%;display:block;pointer-events:none;animation:nudge 2.4s ease-in-out infinite}
+.spot[aria-pressed=true] svg{animation:none;opacity:.55}
 .spot:disabled{opacity:1}
+@keyframes nudge{50%{translate:0 -3px}}
+/* かぜ：き・くさ・くも・みず・はたが、ゆっくり なびく */
+#scene svg g[style*="--tree"] circle,.grass path{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.6s ease-in-out infinite alternate}
+#scene svg g[style*="--tree"] circle:nth-child(2n){animation-duration:5.4s;animation-delay:-2s}
+.grass path:nth-child(2n){animation-duration:3.2s;animation-delay:-1.2s}
+.grass path{animation-duration:2.8s}
+.flag{transform-box:fill-box;transform-origin:0 50%;animation:flutter 1.6s ease-in-out infinite alternate}
+.cloud{animation:cloud 70s linear infinite}
+.cloud.c2{animation-duration:95s;animation-delay:-40s}
+.clouds{opacity:calc(.85 - var(--star)*.6)}
+.waves path{animation:wave 3.4s ease-in-out infinite alternate}
+.waves path:nth-child(2n){animation-delay:-1.7s}
+.who{animation:breathe 3.2s ease-in-out infinite}
+.friend{animation-duration:2.7s;animation-delay:-1s}
+@keyframes sway{from{rotate:-2.2deg}to{rotate:2.2deg}}
+@keyframes flutter{from{transform:skewY(-7deg) scaleX(1)}to{transform:skewY(8deg) scaleX(.9)}}
+@keyframes cloud{from{transform:translateX(-160px)}to{transform:translateX(640px)}}
+@keyframes wave{from{transform:translateX(-7px)}to{transform:translateX(7px)}}
+@keyframes breathe{50%{scale:1.025 .975}}
+/* あめ */
+#rain{position:absolute;inset:-20% 0 0 -20%;z-index:4;pointer-events:none;display:none;background-image:repeating-linear-gradient(105deg,#ffffff00 0 14px,#ffffff8c 14px 15.5px,#ffffff00 15.5px 34px);background-size:68px 120px;animation:rain .55s linear infinite}
+#scene[data-rain=true] #rain{display:block}
+#scene[data-rain=true] > svg:first-of-type{filter:brightness(.8) saturate(.75)}
+#scene[data-rain=true][data-dim=true] > svg:first-of-type{filter:brightness(.55) saturate(.7)}
+@keyframes rain{to{background-position:-32px 120px}}
 .float{position:absolute;z-index:3;width:3.4%;aspect-ratio:3/4;transform:translate(-50%,-50%);border-radius:50% 50% 46% 46%;background:linear-gradient(#ff6b5e 0 50%,#fff 50%);border:2px solid #7a2d25;pointer-events:none}
 /* みずの なかの かげ。つる まえから、どんな こが きたか みえる */
 .shadow{position:absolute;z-index:2;width:var(--w,12%);aspect-ratio:5/2;transform:translate(-50%,-50%);border-radius:50%;background:#0b2a4a70;pointer-events:none}
@@ -182,6 +219,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
 @media(prefers-reduced-motion:reduce){
   .who,#shadow{transition:none}
+  #scene svg *,.who,.spot svg,#rain,.logo span{animation:none !important}
   #scene .float,#reel .ring,#scene #shadow{animation:none}
   .drift{display:none}
   #reel .ring{display:none}
@@ -191,9 +229,21 @@ dialog .close{display:block;margin:auto;min-width:160px}
 </head>
 <body>
 <main>
-  <h1>まるふわ つりびより</h1>
+  <!-- うしろの けしき（かり）。パソコンの ひろい がめんで、さゆうが まっしろに ならない ように -->
+  <svg id="backdrop" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs><linearGradient id="bd-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfeefc"/><stop offset=".6" stop-color="#f3fbff"/></linearGradient><linearGradient id="bd-lake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9e0f7"/><stop offset="1" stop-color="#6cc3ea"/></linearGradient></defs>
+    <rect width="1600" height="900" fill="url(#bd-sky)"/>
+    <g fill="#fff" opacity=".9"><ellipse cx="220" cy="150" rx="110" ry="34"/><ellipse cx="300" cy="126" rx="70" ry="32"/><ellipse cx="1320" cy="210" rx="120" ry="36"/><ellipse cx="1400" cy="184" rx="70" ry="30"/></g>
+    <path d="M0 560 Q200 420 420 540 T860 520 T1300 500 T1600 540 V900 H0Z" fill="#bfe6b8"/>
+    <path d="M0 640 Q300 560 620 640 T1240 620 T1600 650 V900 H0Z" fill="url(#bd-lake)"/>
+    <g class="bd-trees" fill="#7cc77f"><circle cx="70" cy="600" r="90"/><circle cx="210" cy="640" r="70"/><circle cx="330" cy="610" r="60"/><circle cx="1290" cy="620" r="64"/><circle cx="1410" cy="600" r="84"/><circle cx="1540" cy="640" r="92"/></g>
+    <g fill="#8a5a2b"><rect x="60" y="660" width="20" height="120"/><rect x="202" y="690" width="16" height="100"/><rect x="1402" y="660" width="18" height="120"/><rect x="1532" y="700" width="20" height="110"/></g>
+    <path d="M0 780 Q400 730 800 790 T1600 770 V900 H0Z" fill="#a7dba0"/>
+  </svg>
+  <h1 class="logo" aria-label="まるふわ つりびより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">つ</span><span aria-hidden="true">り</span><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
   <p class="lead">いそがなくて、だいじょうぶ。にがしても、へらないよ。</p>
   <div class="hud">
+    <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
     <span>つれた かず <strong id="total">0</strong></span>
     <span>ずかん <strong id="seen">0</strong> / <span id="all">30</span></span>
   </div>
@@ -217,6 +267,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       <rect width="600" height="450" fill="url(#sky)"/>
       <g fill="#fff" style="opacity:var(--star)"><circle cx="60" cy="40" r="2"/><circle cx="150" cy="80" r="1.6"/><circle cx="250" cy="30" r="2"/><circle cx="340" cy="70" r="1.6"/><circle cx="520" cy="50" r="2"/><circle cx="570" cy="110" r="1.6"/><circle cx="420" cy="24" r="1.4"/></g>
       <circle cx="470" cy="92" r="40" style="fill:var(--orb)"/>
+      <g class="clouds" fill="#fff"><g class="cloud c1"><ellipse cx="90" cy="70" rx="46" ry="16"/><ellipse cx="120" cy="58" rx="30" ry="16"/><ellipse cx="66" cy="60" rx="24" ry="13"/></g><g class="cloud c2"><ellipse cx="330" cy="110" rx="38" ry="13"/><ellipse cx="354" cy="100" rx="24" ry="13"/></g></g>
       <path d="M0 190 Q90 110 190 180 T390 170 T600 150 V300 H0Z" style="fill:var(--hill)"/>
       <!-- つりばごとの うしろの けしき -->
       <g data-for="L" style="fill:var(--tree)"><circle cx="40" cy="196" r="34"/><circle cx="92" cy="182" r="40"/><circle cx="150" cy="200" r="32"/><circle cx="540" cy="176" r="38"/><circle cx="590" cy="196" r="34"/><circle cx="492" cy="198" r="28"/></g>
@@ -229,12 +280,19 @@ dialog .close{display:block;margin:auto;min-width:160px}
       <g data-for="R"><polygon points="250,226 300,150 350,222" fill="#ef8a4c"/><polygon points="300,150 350,222 372,214" fill="#c9652b"/><polygon points="288,226 300,196 312,224" fill="#5a3a22"/><ellipse cx="470" cy="236" rx="30" ry="16" fill="#8d8d93"/><ellipse cx="505" cy="246" rx="20" ry="11" fill="#77777d"/></g>
       <g data-for="H"><rect x="470" y="70" width="64" height="170" rx="8" fill="#fbfbfb"/><rect x="470" y="70" width="64" height="16" fill="#e8543f"/><rect x="480" y="46" width="44" height="26" rx="6" fill="#fff6c9" stroke="#8a8a8a" stroke-width="3"/><path d="M492 240 v-34 a10 10 0 0 1 20 0 v34z" fill="#8fb4c9"/><rect x="300" y="196" width="60" height="30" rx="4" fill="#fff"/><rect x="346" y="204" width="34" height="22" rx="3" fill="#dfe9ee"/><circle cx="314" cy="230" r="7" fill="#444"/><circle cx="366" cy="230" r="7" fill="#444"/></g>
       <g data-for="B"><g stroke="#a87b49" stroke-width="2"><line x1="0" y1="215" x2="600" y2="204"/><line x1="0" y1="232" x2="600" y2="226"/><line x1="0" y1="248" x2="600" y2="252"/><line x1="0" y1="258" x2="600" y2="290"/></g><polygon points="230,110 420,104 420,210 230,216" fill="#fbfbfb"/><rect x="230" y="104" width="190" height="12" fill="#3a6ea5"/><circle cx="280" cy="160" r="16" fill="#bfe3f5" stroke="#c9a23a" stroke-width="5"/><circle cx="370" cy="164" r="17" fill="none" stroke="#e8543f" stroke-width="9"/><circle cx="370" cy="164" r="17" fill="none" stroke="#fff" stroke-width="9" stroke-dasharray="13 14"/></g>
+      <!-- かぜに なびく くさ と、おみせの はた -->
+      <g class="grass" data-for="L" stroke="#5aa85a" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M200 262 q-4 -16 -10 -22"/><path d="M208 264 q2 -18 8 -26"/><path d="M440 292 q-4 -16 -10 -22"/><path d="M448 294 q2 -18 8 -26"/><path d="M560 300 q2 -18 8 -26"/></g>
+      <g class="grass" data-for="R" stroke="#4f9650" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M150 258 q-4 -16 -10 -22"/><path d="M158 260 q2 -18 8 -26"/><path d="M410 288 q-4 -16 -10 -22"/><path d="M418 290 q2 -18 8 -26"/><path d="M570 304 q2 -18 8 -26"/></g>
+      <line x1="414" y1="232" x2="414" y2="150" stroke="#8a5a2b" stroke-width="4" stroke-linecap="round"/>
+      <polygon class="flag" points="416,152 456,160 416,176" fill="#ff8f6b" stroke="#fff" stroke-width="2"/>
       <!-- みずぎわ と みず -->
       <polygon points="0,261 600,333 600,347 0,275" style="fill:var(--edge)"/>
       <polygon points="0,275 600,347 600,450 0,450" fill="url(#water)"/>
-      <g stroke="#ffffff66" stroke-width="3" stroke-linecap="round" fill="none"><path d="M60 350 q14 -6 28 0"/><path d="M220 400 q14 -6 28 0"/><path d="M410 410 q14 -6 28 0"/><path d="M520 380 q14 -6 28 0"/></g>
+      <g class="waves" stroke="#ffffff66" stroke-width="3" stroke-linecap="round" fill="none"><path d="M60 350 q14 -6 28 0"/><path d="M220 400 q14 -6 28 0"/><path d="M410 410 q14 -6 28 0"/><path d="M520 380 q14 -6 28 0"/><path d="M130 430 q14 -6 28 0"/><path d="M330 370 q14 -6 28 0"/></g>
     </svg>
 
+    <div id="rain" aria-hidden="true"></div>
+    <template id="bucket-art"><svg viewBox="0 0 60 60" aria-hidden="true"><ellipse cx="31" cy="53" rx="24" ry="6" fill="#00000030"/><path d="M12 22 L17 50 Q30 56 43 50 L48 22Z" fill="url(#pail)"/><path d="M12 22 L17 50 Q22 53 26 53 L22 22Z" fill="#ffffff55"/><ellipse cx="30" cy="22" rx="18" ry="6.5" fill="#ffe27a" stroke="#b9891c" stroke-width="2"/><ellipse cx="30" cy="23" rx="14" ry="4.4" fill="#7fd0f2"/><path d="M12 22 Q30 -6 48 22" fill="none" stroke="#9a7a3a" stroke-width="3" stroke-linecap="round"/><defs><linearGradient id="pail" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd34d"/><stop offset="1" stop-color="#e0a61c"/></linearGradient></defs></svg></template>
     <button class="spot" type="button" data-spot="0" aria-label="ひだりの ばしょで つる"></button>
     <button class="spot" type="button" data-spot="1" aria-label="まんなかの ばしょで つる"></button>
     <button class="spot" type="button" data-spot="2" aria-label="みぎの ばしょで つる"></button>
@@ -287,8 +345,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   <p class="note">じかんで でやすい さかなが かわるよ（あさ・ひる・ゆうがた・よる）。<br>
   きろくは この たんまつの なかだけに のこります。ログインも インストールも いりません。<br>
-  はいけいと さかなの えは、いまは かりの ものです。<br>
-  キャラクター画像はAIを使用して制作しています。</p>
+  はいけいと さかなの えは、いまは かりの ものです。</p>
 
   <dialog id="book" aria-labelledby="book-title">
     <h2 id="book-title">おさかな シールちょう</h2>
@@ -401,7 +458,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const wanted = Number(query.get('rare')); if (wanted) { const only = here.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
     // やさしい ほしょう：しってる こが 5かい つづいたら、つぎは まだ あってない こ
     const unseen = here.filter(f => !save.fish[f.id]), pool = (save.streak || 0) >= 5 && unseen.length ? unseen : here;
-    const weight = f => WEIGHT[f.rare] * (save.bait === 1 && f.rare >= 3 ? 2.5 : 1) * (!f.time || f.time.includes(now) ? 1 : 1 / 3);
+    const weight = f => WEIGHT[f.rare] * (save.bait === 1 && f.rare >= 3 ? 2.5 : 1) * (rainy && f.rare >= 3 ? 1.5 : 1) * (!f.time || f.time.includes(now) ? 1 : 1 / 3);
     let roll = Math.random() * pool.reduce((sum, f) => sum + weight(f), 0);
     for (const f of pool) { roll -= weight(f); if (roll <= 0) return f; }
     return pool[0];
@@ -443,6 +500,39 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
   spots.forEach((spot, i) => spot.addEventListener('click', () => moveTo(i)));
 
+  // おと。めが みえなくても、おとだけで あそべる ように。わが ちかづくと おとが たかく なり、いまだ の ところで「ピコン」
+  let audio = null, guide = 0;
+  function tone(freq, length = .12, type = 'sine', delay = 0, loud = .13) {
+    if (!save.sound) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      const at = audio.currentTime + delay, osc = audio.createOscillator(), vol = audio.createGain();
+      osc.type = type; osc.frequency.setValueAtTime(freq, at);
+      vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud, at + .012); vol.gain.exponentialRampToValueAtTime(.0001, at + length);
+      osc.connect(vol).connect(audio.destination); osc.start(at); osc.stop(at + length + .02);
+    } catch {}
+  }
+  const chord = (notes, gap = .09, type = 'triangle') => notes.forEach((note, i) => tone(note, .22, type, i * gap));
+  function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {} }
+  function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : 'おと：OFF'; $('sound').setAttribute('aria-pressed', String(on)); }
+  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (save.sound) { chord([660, 880]); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。'); } else say('おとを けしたよ。'); });
+  function startGuide() {
+    stopGuide(); if (!save.sound || reduce()) return;
+    let before = 1;
+    guide = setInterval(() => {
+      if (phase !== 'reel') return stopGuide();
+      const scale = 1 - ((performance.now() - ringStart) % period) / period;
+      for (const [mark, pitch] of [[.9, 392], [.75, 494], [.6, 587], [.45, 740]]) if (before > mark && scale <= mark) tone(pitch, .07, 'sine', 0, .08);
+      if (before > .36 && scale <= .36) chord([1319, 1760], .06);   // いまだ
+      before = scale;
+    }, 25);
+  }
+  function stopGuide() { clearInterval(guide); guide = 0; }
+
+  // あめ。ひに よって ふる（4にちに 1かい くらい）。あめの ひは、めずらしい こが でやすい
+  const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
+
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false;
   function setPhase(next) { phase = next; scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
@@ -456,6 +546,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     scene.dataset.time = TIME_NAME[timeOfDay()];
     fish = pickFish(); face('blue'); $('held').hidden = true;
     flying = !reduce(); setPhase('waiting'); if (flying) throwRod();
+    tone(700, .25, 'sine'); tone(420, .2, 'sine', .12); tone(180, .16, 'triangle', .85);   // ひゅっ…ぽちゃん
     button.textContent = 'まってる…'; button.disabled = true; button.dataset.hot = 'false';
     say('ぽちゃん。のんびり まとう。');
     const wait = Number(query.get('wait')) || (2200 + Math.random() * 3300);
@@ -486,7 +577,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     };
   }
   function bite() {
-    flying = false;
+    flying = false; chord([880, 880, 1175], .14, 'square'); buzz([120, 80, 120]);
     setPhase('bite');
     button.textContent = 'ひく！'; button.disabled = false; button.dataset.hot = 'true';
     say((nushi ? 'とても おおきな かげ…！ ぬしかも。' : fish.rare === 4 ? 'きんいろの かげ…！ スペシャルな こかも。' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
@@ -502,7 +593,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // わの なかに さかなの かげを いれる
     const shadow = $('shadow'); shadow.style.setProperty('--swim', '.3s'); shadow.style.setProperty('--w', '15%');
     shadow.style.left = $('reel').style.left; shadow.style.top = $('reel').style.top;
-    wanderStart = performance.now();
+    wanderStart = performance.now(); startGuide();
     button.textContent = 'いまだ！';
     say(reduce() ? 'ボタンを なんかいか おして、ひきあげよう。' : 'わが まんなかに かさなったら おしてね。さかなが まんなかに きた ときが ねらいめ。');
   }
@@ -518,6 +609,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('hp').firstElementChild.style.width = (hp / hpMax * 100) + '%';
     const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'おしい！';
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
+    if (power === 3) { chord([1047, 1319, 1568], .06); buzz(40); } else if (power === 2) tone(880, .14, 'triangle'); else tone(294, .16, 'sine');
     $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
     if (!reduce()) {
       marufuwa.animate([{scale: '1.08 .92'}, {scale: '1 1'}], {duration: 200, easing: 'ease-out'});
@@ -543,6 +635,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     }
   }
   function caught() {
+    stopGuide(); chord(nushi || fish.rare === 4 ? [523, 659, 784, 1047, 1319] : [523, 659, 784, 1047], .11); buzz(nushi ? [80, 60, 80, 60, 200] : 120);
     const range = fish.max - fish.min;
     const size = Math.round((nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + range * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8)) * 100) / 100;
     const old = save.fish[fish.id], first = !old, record = !first && size > old.best, big = !nushi && size >= fish.min + range * .8, firstNushi = nushi && !(old && old.nushi);
@@ -591,7 +684,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') ringStart = performance.now(); });
 
   // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
-  const WORDS = ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
+  const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
   const bubble = $('bubble');
   function chatter() {
     if (!document.hidden && phase !== 'caught' && !book.open) {
@@ -750,7 +843,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
   scene.dataset.time = TIME_NAME[timeOfDay()];
   $('all').textContent = String(FISH.length);
   scene.after($('card'));   // つれた しらせは けしきの したに。まるふわと さかなを かくさない
-  scene.dataset.area = save.area;
+  scene.dataset.area = save.area; scene.dataset.rain = String(rainy);
+  spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
+  drawSound(); if (rainy) say('きょうは あめ。めずらしい こが でやすいよ。');
   hud(); drawEquip(); setPhase('idle');
   setTimeout(chatter, Number(query.get('chat')) || 5000);
   window.Tsuri = {all: FISH, state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends]};
