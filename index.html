@@ -650,7 +650,48 @@ dialog .close{display:block;margin:auto;min-width:160px}
   if (!RODS[save.rod] || !RODS[save.rod].open(save)) save.rod = 0;
   if (!BAITS[save.bait] || !BAITS[save.bait].open(save)) save.bait = 0;
   if (!AREAS.some(a => a.id === save.area && save.total >= a.need)) save.area = 'L';
-  function store() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch {} }
+  // ほかの タブ・ページが きろくを かきかえて いたら、あわせてから かく（ずかんが きえない よう）
+  // かず（つった かず・さかなごとの かず）は「じぶんの ふえた ぶん」と「あいての ふえた ぶん」を どちらも たす。おおきさは おおきい ほう
+  let stored = '', base = null; try { stored = localStorage.getItem(KEY) || ''; base = JSON.parse(stored); } catch {}   // base＝さいごに あわせた ときの きろく
+  const was = (path) => { let x = base; for (const key of path) x = x && typeof x === 'object' ? x[key] : undefined; return Number.isInteger(x) ? x : 0; };
+  function mergeIn(other) {
+    if (!other || typeof other !== 'object' || !other.fish || typeof other.fish !== 'object' || !Number.isInteger(other.total)) return false;
+    let changed = false;
+    for (const [id, got] of Object.entries(other.fish)) {
+      if (!FISH[id] || !got || !Number.isFinite(got.best) || !Number.isInteger(got.count)) continue;
+      const mine = save.fish[id];
+      if (!mine) { save.fish[id] = {count: got.count, best: got.best, nushi: !!got.nushi}; changed = true; continue; }
+      const count = Math.max(mine.count, got.count, mine.count + got.count - was(['fish', id, 'count'])), best = Math.max(mine.best, got.best), nushi = !!(mine.nushi || got.nushi);
+      if (count !== mine.count || best !== mine.best || nushi !== !!mine.nushi) { save.fish[id] = {count, best, nushi}; changed = true; }
+    }
+    const total = Math.max(save.total, other.total, save.total + other.total - was(['total'])); if (total !== save.total) { save.total = total; changed = true; }
+    if (Array.isArray(other.bucket)) {   // バケツ：ならべて、あたらしい じゅんに 10こ
+      const have = new Set((Array.isArray(save.bucket) ? save.bucket : []).map(item => item.at + ':' + item.id));
+      const more = other.bucket.filter(item => item && FISH[item.id] && Number.isFinite(item.size) && Number.isFinite(item.at) && !have.has(item.at + ':' + item.id));
+      if (more.length) { save.bucket = [...(Array.isArray(save.bucket) ? save.bucket : []), ...more].sort((a, b) => b.at - a.at).slice(0, 10); changed = true; }
+    }
+    if (other.pals && typeof other.pals === 'object') for (const name of Object.keys(other.pals)) if (other.pals[name] === true && !(save.pals && save.pals[name])) { save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {}; save.pals[name] = true; changed = true; }
+    if (other.decor && typeof other.decor === 'object') for (const [name, n] of Object.entries(other.decor)) {
+      const mine = (save.decor && save.decor[name]) || 0, more = Number.isInteger(n) ? Math.max(mine, n, mine + n - was(['decor', name])) : mine;
+      if (more !== mine) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[name] = more; changed = true; }
+    }
+    if (Number.isInteger(other.wishes)) { const wishes = Math.max(save.wishes || 0, other.wishes, (save.wishes || 0) + other.wishes - was(['wishes'])); if (wishes !== (save.wishes || 0)) { save.wishes = wishes; changed = true; } }
+    return changed;
+  }
+  function store(replace) {
+    try {
+      if (!replace) { const now = localStorage.getItem(KEY); if (now && now !== stored) mergeIn(JSON.parse(now)); }
+      stored = JSON.stringify(save); localStorage.setItem(KEY, stored); base = JSON.parse(stored);
+    } catch {}
+  }
+  addEventListener('storage', event => {   // べつの タブで つった ぶんも、こちらの きろくに くわえる
+    if (event.key !== KEY || !event.newValue) return;
+    try {
+      const other = JSON.parse(event.newValue); let changed = mergeIn(other); stored = event.newValue; base = other;
+      if (other && other.sound === false && save.sound) { save.sound = false; stopAmbient(); drawSound(); changed = true; }   // ひろばで おとを けしたら、こちらも けす（つけるのは その タブで じぶんで）
+      if (changed) hud();
+    } catch {}
+  });
 
   const query = new URLSearchParams(location.search);
   // けんさようの あいず（legend・nushi・rare・decor）は、てもとで ひらいた ときだけ きく
@@ -1252,7 +1293,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const fishes = {}; for (const [id, got] of Object.entries(data.fish)) if (FISH[id] && got && Number.isFinite(got.best) && Number.isInteger(got.count)) fishes[id] = {count: got.count, best: got.best, nushi: !!got.nushi};
       if (data.total < save.total && $('keep-load').dataset.sure !== 'yes') { $('keep-load').dataset.sure = 'yes'; keepSay('いまの きろく（' + save.total + 'ひき）より すくない きろく（' + data.total + 'ひき）です。もどすなら、もういちど おしてね。'); return; }
       save = {...data, fish: fishes}; delete $('keep-load').dataset.sure;
-      store(); location.reload();
+      store(true); location.reload();
     } catch { keepSay('この もじは、よめなかったよ。「MF1.」から はじまる もじを、ぜんぶ はってね。'); }
   });
   $('close-keep').addEventListener('click', () => keep.close());
