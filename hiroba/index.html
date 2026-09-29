@@ -6,6 +6,16 @@
 <title>まるふわの ひろば</title>
 <meta name="description" content="まるふわと ともだちが あるく ひろば。つりばへ、おにぎりキャッチへ、まるふわの おへやへ。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#b9edf5">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23a8dc93'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%F0%9F%8C%B3%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="まるふわの ひろば">
+<meta property="og:description" content="まるふわと ともだちが あるく ひろば。つりばへ、おにぎりキャッチへ、まるふわの おへやへ。むりょう・インストールなし。">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ひろばで、まるふわと ともだちが あつまって いる">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light}
 *{box-sizing:border-box}
@@ -752,7 +762,13 @@ function updateFriend(f, dt) {
 
 // ─── ひみつ・さわると おこる こと ───
 const taps = { fountain: [], me: [] };
-const seen = key => { if (!own.secrets[key]) { own.secrets[key] = 1; saveOwn(); } };
+const HM_KEY = 'marufuwa-himitsu-v1';
+function hmMark(id) {   // ひみつノート（つりびよりの バケツの なか）に のこす。読んで・足して・すぐ 書く
+  const d = readJSON(HM_KEY) || {}; if (!d.found || typeof d.found !== 'object') d.found = {};
+  if (!d.found[id]) d.found[id] = { at: Date.now(), time: TIME_NAME[curTime] || '' }; d.v = 1;
+  try { localStorage.setItem(HM_KEY, JSON.stringify(d)); } catch {}
+}
+const seen = key => { if (!own.secrets[key]) { own.secrets[key] = 1; saveOwn(); } hmMark('hiroba-' + key); };
 function countTaps(kind, n, windowSec) {
   const list = taps[kind]; list.push(T); while (list.length && T - list[0] > windowSec) list.shift();
   if (list.length >= n) { list.length = 0; return true; } return false;
