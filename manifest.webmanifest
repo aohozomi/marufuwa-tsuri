@@ -1,0 +1,16 @@
+{
+  "name": "まるふわ つりびより",
+  "short_name": "つりびより",
+  "description": "急がなくて、大丈夫。逃がしても、減らないよ。まるふわと なかまと、のんびり つり。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#edf6fa",
+  "theme_color": "#b9edf5",
+  "icons": [
+    {"src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
