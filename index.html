@@ -84,6 +84,16 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 #shop-hello{text-align:center;margin:0 0 8px;font-weight:800}
 #take-photo{--c1:#fff6cf;--c2:#ffd25e;--side:#d39a1c;--ink:#593700;min-height:68px;padding:4px 14px;font-size:.95rem}
 #take-photo[hidden]{display:none}
+/* ながめる：ボタンを しまって、けしきだけ。なにも しなくて いい じかん */
+#gaze{--c1:#eee6ff;--c2:#b9a2ee;--side:#8a6bd0;--ink:#33205f;min-height:68px;padding:4px 14px;font-size:.95rem}
+body.gazing main > *:not(#scene):not(.actions):not(#status){display:none !important}
+body.gazing main{background:none;box-shadow:none;padding-top:4vh}
+body.gazing #main-button,body.gazing #take-photo{display:none}
+body.gazing .actions{justify-content:center;margin-top:14px}
+body.gazing #gaze{min-height:52px;opacity:.85}
+body.gazing #status{color:#244653;background:#ffffffc9;border-radius:14px;padding:4px 10px;display:inline-block}
+body.gazing .spot,body.gazing #equip,body.gazing #keeper span{display:none}
+body.gazing #scene{box-shadow:0 18px 40px #24465340}
 #card-word:empty{display:none}
 #card h2{display:inline}
 #photo-img{display:block;width:100%;height:auto;border-radius:14px;border:2px solid #d5e6ed;margin-bottom:10px}
@@ -185,6 +195,12 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .drift{opacity:.55;animation:drift var(--lap,38s) linear infinite}
 @keyframes drift{from{left:112%}to{left:-14%}}
 @keyframes tug{50%{translate:6px 3px}}
+/* ウキの まわりに、わが ひろがり つづける */
+.float::after,.float::before{content:"";position:absolute;left:50%;top:78%;width:260%;aspect-ratio:2.4/1;border:2px solid #ffffffb8;border-radius:50%;translate:-50% -50%;animation:ring 3.2s ease-out infinite;pointer-events:none}
+.float::before{animation-delay:-1.6s}
+@keyframes ring{from{scale:.25;opacity:.9}to{scale:1.5;opacity:0}}
+.leap{position:absolute;z-index:3;width:5.5%;aspect-ratio:5/2;border-radius:50%;background:#1d4a73cc;pointer-events:none;transform:translate(-50%,-50%)}
+.leap::after{content:"";position:absolute;right:-26%;top:6%;width:38%;height:88%;background:inherit;clip-path:polygon(0 50%,100% 0,100% 100%)}
 .friend-float{animation:bob 2.6s ease-in-out infinite}
 #float{visibility:hidden}
 #scene[data-phase=waiting] #float,#scene[data-phase=bite] #float,#scene[data-phase=reel] #float{visibility:visible}
@@ -390,6 +406,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   <div class="actions">
     <button id="main-button" type="button">なげる</button>
     <button id="take-photo" type="button" hidden>しゃしんを とる</button>
+    <button id="gaze" type="button" aria-pressed="false">ながめる</button>
   </div>
   <p id="status" role="status" aria-live="polite">きいろい バケツを おすと、ばしょを かえられるよ。</p>
 
@@ -977,7 +994,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function drawWater(now) {
     if (now - lastDraw < 42 && lastDraw) return; lastDraw = now;
     const key = scene.dataset.time + scene.dataset.area;
-    if (key !== tintKey) { const css = getComputedStyle(scene); tint = {near: rgb(css.getPropertyValue('--water2')), far: rgb(css.getPropertyValue('--water1')), sky: rgb(css.getPropertyValue('--sky2')), orb: rgb(css.getPropertyValue('--orb'))}; tintKey = key; }
+    if (key !== tintKey) { const css = getComputedStyle(scene); tint = {near: rgb(css.getPropertyValue('--water2')), far: rgb(css.getPropertyValue('--water1')), sky: rgb(css.getPropertyValue('--sky2')), orb: rgb(css.getPropertyValue('--orb')), sand: rgb(css.getPropertyValue('--ground')), leaf: rgb(css.getPropertyValue('--tree')), woods: scene.dataset.area === 'L' || scene.dataset.area === 'R' ? 1 : 0}; tintKey = key; }
     const W = pond.width, H = pond.height, px = sheet.data, t = now / 1000, calm = rainy ? .45 : 1, sun = rainy ? .15 : .75;
     for (let y = 0, i = 0; y < H; y++) {
       const d = y / (H - 1), spread = .32 + d * 1.05, mirror = (1 - d) * (1 - d) * .42;
@@ -989,7 +1006,19 @@ dialog .close{display:block;margin:auto;min-width:160px}
         const glint = Math.pow(Math.max(0, swell), 5) * (.5 + .5 * d) * calm, shade = Math.min(0, swell) * .1;
         const off = (x / W - .783) / beam, glow = Math.exp(-off * off / 2) * (.5 + .5 * Math.sin(d * 90 - t * 3 + u * 20)) * sun * (1 - d * .45);
         const drop = rainy && Math.random() < .004 ? .5 : 0;
-        for (let c = 0; c < 3; c++) { let v = hue[c] * (1 + shade); v += (255 - v) * Math.min(1, glint * .85 + drop); v += (tint.orb[c] - v) * glow; px[i + c] = v; }
+        // きしからの きょり（みずぎわは ななめ）。あさい ところは そこの すなが すけ、きしの きが うつり、しろい あわが よせて かえす
+        const reach = (y - x / W * H * .412) / H, wob = Math.sin(x * .33 + t * 1.4) * .012;
+        const shallow = Math.max(0, 1 - Math.max(0, reach) / .16), clear = shallow * shallow * .5;
+        const echo = tint.woods * Math.max(0, 1 - Math.max(0, reach + wob) / .3) * (.3 + .12 * Math.sin(x * .9 + t * 2 + reach * 60));
+        const lap = .035 + .022 * Math.sin(t * .9 + x * .05), foam = reach < lap + .02 ? Math.max(0, 1 - Math.abs(reach - lap) / .02) * (.55 + .45 * grain(x * .45 + t * .6, y * .8)) + (reach < lap ? .16 : 0) : 0;
+        for (let c = 0; c < 3; c++) {
+          let v = hue[c] * (1 + shade);
+          v += (tint.leaf[c] * .75 - v) * echo;
+          v += (tint.sand[c] - v) * clear;
+          v += (255 - v) * Math.min(1, glint * .85 + drop + foam * .8);
+          v += (tint.orb[c] - v) * glow * (1 - foam);
+          px[i + c] = v;
+        }
         px[i + 3] = 255;
       }
     }
@@ -1049,6 +1078,33 @@ dialog .close{display:block;margin:auto;min-width:160px}
     trowel.putImageData(tile, 0, 0);
   }
   function flow(now) { if (!document.hidden) { drawWater(now); drawSky(now); drawSoil(); } requestAnimationFrame(flow); }
+
+  // ながめる。つらなくて いい。みずと そらと なかまを、みて いるだけ
+  const GAZE_WORDS = ['なみの おとを、きいて いよう。', 'きょうも、おつかれさま。', 'なにも しなくて、いいよ。', 'ゆっくり、いきを しよう。', 'ここに いて、いいよ。'];
+  let gazeTimer = 0;
+  $('gaze').addEventListener('click', () => {
+    const on = !document.body.classList.contains('gazing');
+    if (on && !(phase === 'idle' || phase === 'caught')) { say('つりが おわってから、ながめよう。'); return; }
+    document.body.classList.toggle('gazing', on);
+    $('gaze').textContent = on ? 'もどる' : 'ながめる'; $('gaze').setAttribute('aria-pressed', String(on));
+    clearInterval(gazeTimer);
+    if (on) { startAmbient(); say(GAZE_WORDS[0]); let n = 0; gazeTimer = setInterval(() => say(GAZE_WORDS[++n % GAZE_WORDS.length]), 24000); scene.scrollIntoView({block: 'center'}); }
+    else say('おかえり。「なげる」で、また つりが できるよ。');
+  });
+
+  // さかなが はねる。ときどき、みなもから ぴょんと とんで、ぽちゃんと おちる
+  function leapingFish() {
+    if (!document.hidden && !reduce() && !document.querySelector('dialog[open]')) {
+      const x = 12 + Math.random() * 76, y = Math.min(95, shore(x) + 14 + Math.random() * 14), jump = document.createElement('i'), way = Math.random() < .5 ? 1 : -1;
+      jump.className = 'leap'; place(jump, {x, y}); jump.style.scale = way + ' 1'; scene.append(jump);
+      const box = scene.getBoundingClientRect(), far = box.width * .09 * way, high = box.height * .13;
+      jump.animate([{translate: '0 0', rotate: -35 * way + 'deg', opacity: 0}, {translate: far * .2 + 'px ' + -high * .6 + 'px', rotate: -25 * way + 'deg', opacity: 1, offset: .2}, {translate: far * .5 + 'px ' + -high + 'px', rotate: '0deg', offset: .5}, {translate: far * .8 + 'px ' + -high * .6 + 'px', rotate: 25 * way + 'deg', opacity: 1, offset: .8}, {translate: far + 'px 0', rotate: 40 * way + 'deg', opacity: 0}], {duration: 900, easing: 'ease-in-out'}).onfinish = () => jump.remove();
+      [[0, 0], [far, 820]].forEach(([dx, wait]) => { const ring = document.createElement('i'); ring.className = 'ripple'; place(ring, {x, y}); ring.style.translate = dx + 'px 0'; scene.append(ring); ring.animate([{scale: '.2', opacity: .9}, {scale: '1.8', opacity: 0}], {duration: 800, delay: wait, fill: 'backwards', easing: 'ease-out'}).onfinish = () => ring.remove(); });
+      zap(.08, .05, .03); tone(520, .06, 'triangle', .85, .03, 260); zap(.1, .86, .04);
+    }
+    setTimeout(leapingFish, Number(query.get('leap')) || (11000 + Math.random() * 16000));
+  }
+  setTimeout(leapingFish, Number(query.get('leap')) || 7000);
 
   // ながれぼし：よるに、ときどき ながれる。おすと ねがいごとが できて、つぎは めずらしい こが くる。
   // がめんには かかない（みつけた ひとが、ひとに いいたく なる しかけ）。めが みえない ひとには、おとと ことばで しらせる
