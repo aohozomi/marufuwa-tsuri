@@ -69,7 +69,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 #scene[data-dim=true] > svg:first-of-type{filter:brightness(.62) saturate(.85)}
 .times{grid-template-columns:1.5fr repeat(4,1fr)}
 .times button{min-height:44px;font-size:.78rem}
-#keeper{position:absolute;z-index:2;left:60%;top:49%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
+#keeper{position:absolute;z-index:2;left:87%;top:50%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
 #keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
 #keeper span{position:absolute;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;font-size:.7rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
 #equip{position:absolute;z-index:4;left:2.5%;bottom:3%;font-size:.72rem;font-weight:800;line-height:1.5;background:#ffffffd9;border:2px solid #b9d1db;border-radius:12px;padding:3px 9px;pointer-events:none}
@@ -114,7 +114,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 #scene svg g[style*="--tree"] circle:nth-child(2n){animation-duration:5.4s;animation-delay:-2s}
 .grass path:nth-child(2n){animation-duration:3.2s;animation-delay:-1.2s}
 .grass path{animation-duration:2.8s}
-.flag{transform-box:fill-box;transform-origin:0 50%;animation:flutter 1.6s ease-in-out infinite alternate}
+.flag{transform-box:fill-box;transform-origin:100% 50%;animation:flutter 1.6s ease-in-out infinite alternate}
 .cloud{animation:cloud 70s linear infinite}
 .cloud.c2{animation-duration:95s;animation-delay:-40s}
 .clouds{opacity:calc(.85 - var(--star)*.6)}
@@ -329,8 +329,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
       <!-- かぜに なびく くさ と、おみせの はた -->
       <g class="grass" data-for="L" stroke="#5aa85a" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M200 262 q-4 -16 -10 -22"/><path d="M208 264 q2 -18 8 -26"/><path d="M440 292 q-4 -16 -10 -22"/><path d="M448 294 q2 -18 8 -26"/><path d="M560 300 q2 -18 8 -26"/></g>
       <g class="grass" data-for="R" stroke="#4f9650" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M150 258 q-4 -16 -10 -22"/><path d="M158 260 q2 -18 8 -26"/><path d="M410 288 q-4 -16 -10 -22"/><path d="M418 290 q2 -18 8 -26"/><path d="M570 304 q2 -18 8 -26"/></g>
-      <line x1="414" y1="232" x2="414" y2="150" stroke="#8a5a2b" stroke-width="4" stroke-linecap="round"/>
-      <polygon class="flag" points="416,152 456,160 416,176" fill="#ff8f6b" stroke="#fff" stroke-width="2"/>
+      <line x1="566" y1="236" x2="566" y2="154" stroke="#8a5a2b" stroke-width="4" stroke-linecap="round"/>
+      <polygon class="flag" points="564,156 528,164 564,180" fill="#ff8f6b" stroke="#fff" stroke-width="2"/>
       <!-- みずぎわ と みず -->
       <polygon points="0,261 600,333 600,347 0,275" style="fill:var(--edge)"/>
       <polygon points="0,275 600,347 600,450 0,450" fill="url(#water)"/>
