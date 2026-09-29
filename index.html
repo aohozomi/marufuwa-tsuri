@@ -286,6 +286,23 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 .held[data-rare="3"]{filter:drop-shadow(0 0 5px #fff)}
 .held[data-rare="4"]{filter:sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 7px #ffd34d)}
 .held[hidden]{display:none}
+/* かりの え（tsuri-art.js）：魚・どうぐ・ウキ */
+img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}
+.held .art{width:clamp(2.6rem,14vw,4.2rem);height:auto;aspect-ratio:1/1;filter:drop-shadow(0 2px 2px #0000003a)}
+#held-friend .art{width:clamp(1.6rem,8vw,2.6rem)}
+.hop .art{width:1.8rem;height:1.8rem}
+.logo i img.art{width:auto;height:1.15em;aspect-ratio:3/5;margin:0 .1em}
+.held[data-art="1"][data-rare="4"]{filter:drop-shadow(0 0 7px #ffd34d)}
+.held[data-art="1"][data-rare="5"]{animation:none}
+#bucket-list b .art{width:2.6rem;height:2.6rem}
+#book-grid b .art{width:3rem;height:3rem;margin:0 auto}
+#book-grid div[data-rare="5"][data-seen=true] b[data-art="1"]{animation:none}
+#equip .art{display:inline-block;width:1.7em;height:1.7em;vertical-align:-.5em;margin:0 .1em}
+#shop-list button b .art{width:38px;height:38px}
+#shadow.art{aspect-ratio:var(--ar,2.4);border-radius:0;-webkit-mask:var(--m) center/100% 100% no-repeat;mask:var(--m) center/100% 100% no-repeat}
+#shadow.art::after{display:none}
+.float.art{background:var(--fimg) center/contain no-repeat;border:0;border-radius:0;aspect-ratio:3/5;width:4.4%}
+.float.art::before,.float.art::after{top:60%}
 #card .tag{display:inline-block;margin:1px 2px;padding:0 8px;border-radius:10px;background:#fff3ce;border:2px solid #a56c19;color:#593700;font-weight:800;font-size:.74rem}
 
 .actions{display:flex;gap:10px;margin-top:12px}
@@ -526,6 +543,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   </dialog>
 </main>
 
+<script src="tsuri-art.js"></script>
 <script>
 (() => {
   'use strict';
@@ -534,6 +552,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   // 「なげる」は、おせない あいだも disabled に しない（Firefox・Safari では、フォーカスが きえて、キーボード・よみあげの いる ばしょが なくなる）。ようすだけ うすくして、act() が むしする
   const lock = on => { if (on) button.setAttribute('aria-disabled', 'true'); else button.removeAttribute('aria-disabled'); };
+  // 魚・どうぐの え。かりの え（tsuri-art.js。ジョブズ1が コードで かいた）が あれば つかい、無ければ 絵文字
+  const ART = window.TsuriArt || null;
+  const artOf = f => ART && ART.fish && ART.fish[f.id] ? ART[f.id] : '';
+  const fishImg = f => { const url = artOf(f); if (!url) { const t = document.createElement('span'); t.textContent = f.icon; return t; } const im = new Image(); im.src = url; im.alt = ''; im.draggable = false; im.className = 'art'; return im; };
+  const gearImg = (kind, i, fallback) => { const svg = ART && ART[kind] && ART[kind][i]; if (!svg) { const t = document.createElement('span'); t.textContent = fallback; return t; } const im = new Image(); im.src = ART.uri(svg); im.alt = ''; im.draggable = false; im.className = 'art'; return im; };
+  if (ART && ART.float) { const li = document.querySelector('.logo i'); if (li) { const im = new Image(); im.src = ART.uri(ART.float); im.alt = ''; im.draggable = false; im.className = 'art'; li.replaceChildren(im); } }   // ロゴの 🎣 も、ウキの え
+  const loadImg = url => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = url; });
 
   // rare: 1 ふつう / 2 ちょっと めずらしい / 3 めずらしい / 4 ぬし
   // time: a あさ(5-10) h ひる(10-16) y ゆうがた(16-19) n よる(19-5)。'' は いつでも
@@ -823,6 +848,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const shadow = $('shadow'), w = floatAt(mine);
     nushi = Math.random() < (Number(probe('nushi')) || .04 * (save.bait === 2 ? 2 : 1));
     shadow.dataset.rare = String(fish.rare); shadow.dataset.nushi = String(nushi);
+    if (ART && ART.shadow && ART.shadow[fish.id]) { shadow.classList.add('art'); shadow.style.setProperty('--m', ART.shadowMask(fish.id)); shadow.style.setProperty('--ar', String(ART.meta.shadowAspect[fish.id])); } else shadow.classList.remove('art');   // さかなごとの かげの かたち
     shadow.style.setProperty('--w', Math.min(44, Math.max(8, 7 + fish.max / 12) * (nushi ? 1.7 : 1)) + '%');
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
     shadow.style.setProperty('--swim', wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});
@@ -973,7 +999,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     setPhase('caught');
     // つれた さかなを、まるふわが かかげる
     const held = $('held'), f = feet(mine);
-    held.textContent = fish.icon; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.45' : ''; place(held, {x: f.x + 5, y: f.y - (nushi ? 1 : 3)}); held.hidden = false;   // むねの まえで だっこ する（かおは かくさない。つれた しらせとも、バケツとも かさならない）
+    held.replaceChildren(fishImg(fish)); held.dataset.art = artOf(fish) ? '1' : ''; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.45' : ''; place(held, {x: f.x + 5, y: f.y - (nushi ? 1 : 3)}); held.hidden = false;   // むねの まえで だっこ する（かおは かくさない。つれた しらせとも、バケツとも かさならない）
     if (!reduce()) {
       held.animate([{translate: '0 30px', opacity: 0}, {translate: '0 -8px', opacity: 1}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
       // やったー：ぴょん、ぴょんと とびはねる。ぬしと スペシャルは 3かい
@@ -1018,15 +1044,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
       bubble.textContent = Math.random() < .25 ? pals[who].word : WORDS[Math.floor(Math.random() * WORDS.length)];
       place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
+      const theirFish = FISH[Math.floor(Math.random() * 3)];
       if (bubble.textContent === 'つれた！') {   // なかまも、つれた さかなを かかげる
         const theirs = $('held-friend');
-        theirs.textContent = ['🐟', '🐠', '🐡'][Math.floor(Math.random() * 3)]; place(theirs, {x: f.x + 4, y: f.y - 2}); theirs.style.fontSize = 'clamp(1.1rem,5.5vw,1.7rem)'; theirs.hidden = false;
+        theirs.replaceChildren(fishImg(theirFish)); place(theirs, {x: f.x + 4, y: f.y - 2}); theirs.style.fontSize = 'clamp(1.1rem,5.5vw,1.7rem)'; theirs.hidden = false;
         setTimeout(() => { theirs.hidden = true; }, 7000);
       }
       if (!reduce()) $(who ? 'friend-b' : 'friend-a').animate(bubble.textContent === 'つれた！' ? [{translate: '0 0', rotate: '0deg'}, {translate: '0 -14px', rotate: '-8deg'}, {translate: '0 0', rotate: '0deg'}, {translate: '0 -9px', rotate: '8deg'}, {translate: '0 0', rotate: '0deg'}] : [{rotate: '0deg'}, {rotate: '7deg'}, {rotate: '-5deg'}, {rotate: '0deg'}], {duration: 700, easing: 'ease-out'});   // しゃべる ときに、からだも うごく
       if (bubble.textContent === 'つれた！' && !reduce()) {   // さかなが、ぴょんと はねる
         const hop = document.createElement('span'), w = floatAt(friends[who]);
-        hop.className = 'hop'; hop.textContent = '🐟'; hop.setAttribute('aria-hidden', 'true'); place(hop, w); scene.append(hop);
+        hop.className = 'hop'; hop.replaceChildren(fishImg(theirFish)); hop.setAttribute('aria-hidden', 'true'); place(hop, w); scene.append(hop);
         hop.animate([{translate: '0 0', opacity: 1}, {translate: '-10px -46px', opacity: 1, offset: .5}, {translate: '-22px -20px', opacity: 0}], {duration: 1100, easing: 'ease-out'}).onfinish = () => hop.remove();
       }
       setTimeout(() => { bubble.hidden = true; }, 2600);
@@ -1072,7 +1099,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false'; lock(false);
     say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
   });
-  function drawEquip() { $('equip').textContent = RODS[save.rod].icon + ' ' + RODS[save.rod].name + '　' + BAITS[save.bait].icon + ' ' + BAITS[save.bait].name; }
+  function drawEquip() { $('equip').replaceChildren(gearImg('rod', save.rod, RODS[save.rod].icon), ' ' + RODS[save.rod].name + '　', gearImg('bait', save.bait, BAITS[save.bait].icon), ' ' + BAITS[save.bait].name); }
 
   // おみせ。うでまえを みて、こえを かけて くれる（くらべない。ほめるだけ）
   const shop = $('shop');
@@ -1084,7 +1111,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const head = document.createElement('h3'); head.textContent = title; rows.push(head);
       list.forEach((item, i) => {
         const pick = document.createElement('button'), open = item.open(save), note = document.createElement('small');
-        const icon = document.createElement('b'); icon.textContent = open ? item.icon : '？'; icon.setAttribute('aria-hidden', 'true');
+        const icon = document.createElement('b'); if (open) icon.append(gearImg(key, i, item.icon)); else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
         pick.type = 'button'; pick.dataset.k = key + i; pick.append(icon, open ? item.name : '？？？'); pick.disabled = !open;
         pick.setAttribute('aria-pressed', String(save[key] === i));
         note.textContent = open ? item.note + (save[key] === i ? '（つかって いる）' : '') : item.how; pick.append(note);
@@ -1117,9 +1144,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const me = new Image(); me.src = marufuwa.src; await me.decode();
     const tall = 330, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, 230 - wide / 2, 488 - tall, wide, tall);
     ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '170px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
-    if (last.fish.rare === 4 && 'filter' in ctx) ctx.filter = 'sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 16px #ffd34d)';
+    const fishArt = artOf(last.fish) ? await loadImg(artOf(last.fish)) : null;
+    if (last.fish.rare === 4 && 'filter' in ctx) ctx.filter = fishArt ? 'drop-shadow(0 0 16px #ffd34d)' : 'sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 16px #ffd34d)';
     if (last.fish.legend && 'filter' in ctx) ctx.filter = 'drop-shadow(0 0 18px #fff) drop-shadow(0 0 30px #ffd34d)';
-    ctx.translate(480, 300); if (last.nushi) ctx.scale(1.4, 1.4); ctx.fillText(last.fish.icon, 0, 0); ctx.restore();
+    ctx.translate(480, 300); if (last.nushi) ctx.scale(1.4, 1.4); if (fishArt) ctx.drawImage(fishArt, -130, -130, 260, 260); else ctx.fillText(last.fish.icon, 0, 0); ctx.restore();
     // ぬし・まぼろしの ときは、きねんの わくと おび
     const special = last.fish.legend ? 'まぼろしに あえました' : last.nushi ? 'ぬしを つりました' : '';
     if (special) {
@@ -1147,7 +1175,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // シールちょうの 1まい。あつめた シールが ならぶ。30しゅるい そろうと「ぜんぶ あつめた！」
   async function bookPhoto() {
     const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1350;
-    const ctx = canvas.getContext('2d'), seen = seenCount(), full = seen >= BASE, list = FISH.filter(f => !f.legend || save.fish[f.id]);
+    const ctx = canvas.getContext('2d'), seen = seenCount(), full = seen >= BASE, list = FISH.filter(f => !f.legend || save.fish[f.id]), arts = {};
+    await Promise.all(list.filter(f => save.fish[f.id] && artOf(f)).map(async f => { arts[f.id] = await loadImg(artOf(f)); }));
     const paper = ctx.createLinearGradient(0, 0, 0, 1350); paper.addColorStop(0, full ? '#fff6cf' : '#eaf6fd'); paper.addColorStop(1, full ? '#ffe9a8' : '#d3eefb');
     ctx.fillStyle = paper; ctx.fillRect(0, 0, 1200, 1350);
     if (full) { ctx.strokeStyle = '#d39a1c'; ctx.lineWidth = 24; ctx.strokeRect(12, 12, 1176, 1326); }
@@ -1164,7 +1193,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
         ctx.fillStyle = face; ctx.beginPath(); ctx.arc(0, 0, 60, 0, Math.PI * 2); ctx.fill();
         ctx.shadowColor = 'transparent'; ctx.lineWidth = 8; ctx.strokeStyle = '#fff'; ctx.stroke();
         if (got.nushi) { ctx.lineWidth = 5; ctx.strokeStyle = '#e8543f'; ctx.beginPath(); ctx.arc(0, 0, 70, 0, Math.PI * 2); ctx.stroke(); }
-        ctx.font = '70px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText(f.icon, 0, 4);
+        ctx.font = '70px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.textBaseline = 'middle'; if (arts[f.id]) ctx.drawImage(arts[f.id], -48, -48, 96, 96); else ctx.fillText(f.icon, 0, 4);
         ctx.fillStyle = '#ffffffcc'; ctx.beginPath(); ctx.ellipse(0, -34, 38, 14, 0, 0, Math.PI * 2); ctx.fill();
       } else {
         ctx.setLineDash([10, 10]); ctx.lineWidth = 4; ctx.strokeStyle = '#b9cbd4'; ctx.beginPath(); ctx.arc(0, 0, 58, 0, Math.PI * 2); ctx.stroke();
@@ -1377,7 +1406,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const clock = new Intl.DateTimeFormat('ja-JP', {month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'});
     $('bucket-list').replaceChildren(...(list.length ? list.map(item => {
       const f = FISH[item.id], row = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), when = document.createElement('small');
-      icon.textContent = f.icon; icon.setAttribute('aria-hidden', 'true');
+      icon.replaceChildren(fishImg(f)); icon.setAttribute('aria-hidden', 'true');
       when.textContent = clock.format(new Date(item.at)) + '　' + starsOf(f, item.nushi) + (item.nushi ? '　ぬし' : '');
       text.append(ruby(f.kanji), '　' + cm(item.size) + 'センチ', when); row.append(icon, text); return row;
     }) : ['まだ からっぽ。のんびり いこう。']));
@@ -1398,7 +1427,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('book-grid').replaceChildren(...FISH.filter(f => !f.legend || save.fish[f.id]).map(f => {
       const got = save.fish[f.id], cell = document.createElement('div');
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
-      const icon = document.createElement('b'); icon.textContent = got ? f.icon : '？'; icon.setAttribute('aria-hidden', 'true');
+      const icon = document.createElement('b'); if (got) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
       cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), got ? 'さいだい ' + cm(got.best) + 'cm（' + got.count + 'ひき）' + (got.nushi ? ' ぬし◎' : '') : when);
       return cell;
@@ -1425,6 +1454,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   drawEasy();
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
+  if (ART && ART.float) document.querySelectorAll('.float').forEach(el => { el.classList.add('art'); el.style.setProperty('--fimg', 'url("' + ART.uri(ART.float) + '")'); });   // ウキの え
   drawWater(performance.now()); drawSky(performance.now()); drawSoil();
   if (!reduce()) requestAnimationFrame(flow); else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
   drawSound();
