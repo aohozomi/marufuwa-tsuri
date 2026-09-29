@@ -134,7 +134,7 @@
     if (lit) { say('とうだいの あかりは ついて いるよ。'); return; }
     const beam = make('div', 'hm-beam'), glow = make('div', 'hm-glow'), jelly = make('div', 'hm-jelly', '🪼');
     beam.setAttribute('aria-hidden', 'true'); glow.setAttribute('aria-hidden', 'true'); jelly.setAttribute('aria-hidden', 'true');
-    scene.append(beam, glow, jelly); requestAnimationFrame(() => jelly.classList.add('on'));
+    scene.append(beam, glow, jelly); setTimeout(() => jelly.classList.add('on'), 30);
     lit = { beam, glow, jelly };
     tone(110, 1.1, 'triangle', 0, .07, 96); tone(880, .12, 'triangle', .9, .04); markFound('tsuri-toudai');
     say('とうだいに あかりが ついたよ。ひかりの おびが、ゆっくり うみを なでて いるよ。');
@@ -146,7 +146,7 @@
   function marumadoPass() {
     if (windowBusy) return; windowBusy = true;
     const win = make('div', 'hm-win', '<svg viewBox="0 0 120 50" aria-hidden="true"><path d="M4 30 Q10 8 50 10 Q88 12 100 28 Q108 20 118 12 Q116 26 112 34 Q116 40 120 46 Q106 42 100 38 Q80 46 46 44 Q14 44 4 30Z" fill="#12283f"/></svg>');
-    win.setAttribute('aria-hidden', 'true'); scene.append(win); requestAnimationFrame(() => win.classList.add('on'));
+    win.setAttribute('aria-hidden', 'true'); scene.append(win); setTimeout(() => win.classList.add('on'), 30);
     const whale = win.firstElementChild;
     if (!reduced()) whale.animate([{ transform: 'translateX(70%)' }, { transform: 'translateX(-95%)' }], { duration: dur(5500), easing: 'ease-in-out', fill: 'forwards' });
     else whale.style.transform = 'translateX(-10%)';
@@ -160,7 +160,7 @@
   function tsukiRabbit() {
     if (rabbitBusy) return; rabbitBusy = true;
     const g = make('div', 'hm-rabbit', '<svg viewBox="0 0 100 80" aria-hidden="true"><g fill="#4d5478"><ellipse cx="34" cy="20" rx="6" ry="17" transform="rotate(-8 34 20)"/><ellipse cx="48" cy="19" rx="6" ry="17" transform="rotate(10 48 19)"/><circle cx="42" cy="40" r="13"/><ellipse cx="44" cy="62" rx="17" ry="14"/><path d="M62 74 h30 l-5 -20 h-20z"/></g><g class="kine"><rect x="56" y="30" width="5" height="34" rx="2" fill="#4d5478" transform="rotate(24 58 64)"/><rect x="46" y="22" width="20" height="11" rx="5" fill="#4d5478" transform="rotate(24 58 64)"/></g></svg>');
-    g.setAttribute('aria-hidden', 'true'); scene.append(g); requestAnimationFrame(() => g.classList.add('on'));
+    g.setAttribute('aria-hidden', 'true'); scene.append(g); setTimeout(() => g.classList.add('on'), 30);
     if (!reduced()) g.querySelector('.kine').animate([{ transform: 'rotate(-28deg)' }, { transform: 'rotate(6deg)' }, { transform: 'rotate(-28deg)' }], { duration: dur(900), iterations: 8, easing: 'ease-in-out' });
     for (let i = 0; i < 8; i++) later(() => { tone(130, .1, 'triangle', 0, .06, 92); zap(.03, 0, .03); }, 450 + i * 900);
     markFound('tsuri-tsuki'); say('つきに、もちを つく うさぎの かげが みえたよ。');
@@ -176,7 +176,7 @@
     const fog = make('div', 'hm-fog'), deer = make('img', 'hm-deer'), x = 62, y = shore(x) - 1;
     fog.setAttribute('aria-hidden', 'true'); deer.setAttribute('aria-hidden', 'true'); deer.alt = ''; deer.src = 'img/friend-kojika-s.webp'; deer.draggable = false;
     deer.style.top = y + '%'; deer.style.left = (reduced() ? x : 112) + '%'; deer.style.transition = reduced() ? 'opacity .8s' : 'opacity .8s,left ' + dur(5000) + 'ms linear';
-    scene.append(fog, deer); requestAnimationFrame(() => { fog.classList.add('on'); });
+    scene.append(fog, deer); setTimeout(() => { fog.classList.add('on'); }, 30);
     if (reduced()) fog.style.transition = 'none', fog.style.opacity = '.6';
     say('きりが かかって きたよ。きりの むこうから、こじかが きたよ。');
     zap(.9, 0, .03, .3); zap(.9, .7, .022, -.3);
