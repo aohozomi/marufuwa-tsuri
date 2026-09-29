@@ -328,8 +328,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
 @media(prefers-reduced-motion:reduce){
   .who,#shadow{transition:none}
-  #scene svg *,.who,.spot svg,#rain,.logo span{animation:none !important}
-  #scene .float,#reel .ring,#scene #shadow{animation:none}
+  #scene svg *,.who,.spot svg,#rain,.logo span,.logo i,.bd-trees circle,.friend-float{animation:none !important}
+  /* うきの ゆれ・「ちょんちょん」・みずの わ・さかなの かげ・にじいろの ひかり も、うごきを へらす せっていでは とめる（ゆびの うごきに ついて くる 物だけ のこす） */
+  #scene .float,#scene #float,#float[data-nibble=true],.float::before,.float::after,#reel .ring,#scene #shadow,#scene[data-phase=reel] #shadow,.shadow[data-rare="5"],.held[data-rare="5"],#book-grid div[data-rare="5"][data-seen=true] b{animation:none !important}
+  #reel .back,#main-button,#reel .ring{transition:none !important}
   .drift{display:none}
   #reel .ring{display:none}
   #hp i{transition:none}
