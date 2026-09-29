@@ -10,7 +10,7 @@
 <link rel="canonical" href="https://aohozomi.github.io/marufuwa-tsuri/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="まるふわ つりびより">
-<meta property="og:description" content="急がなくて、大丈夫。逃がしても、減らないよ。まるふわと なかまと、のんびり つり。むりょう・インストールなし。">
+<meta property="og:description" content="いそがなくて、だいじょうぶ。にがしても、へらないよ。まるふわと なかまと、のんびり つり。むりょう・インストールなし。">
 <meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/">
 <meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og.png">
 <meta property="og:image:width" content="1200">
@@ -556,7 +556,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ['しんじゅのたい', '🐠', 40, 90, 'H', '{真珠|しんじゅ}の{鯛|たい}'], ['にじいろくじら', '🐳', 300, 600, 'B', '{虹色|にじいろ}{鯨|くじら}']
   ].forEach(([name, icon, min, max, area, kanji]) => FISH.push({id: FISH.length, name, icon, min, max, rare: 5, time: '', area, kanji, legend: true}));
   // まぼろしの ひ：つきに 1にち だけ、まぼろしが でやすい（60かいに 1かい）。ひづけで きまるので、みんな おなじ ひ
-  const calendar = new Date(), mythDay = new URLSearchParams(location.search).get('mythday') === '1' || calendar.getDate() === (calendar.getFullYear() * 12 + calendar.getMonth()) * 5 % 27 + 1;
+  const calendar = new Date(), mythDay = (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('mythday') === '1') || calendar.getDate() === (calendar.getFullYear() * 12 + calendar.getMonth()) * 5 % 27 + 1;
   const BASE = FISH.filter(f => !f.legend).length, LEGEND_ODDS = mythDay ? 1 / 60 : 1 / 8000;
   // きりの いい かずの おいわい。かずに よって、おこる ことが ちがう
   const MILES = {10: ['👏', '10ぴきめ！ なかまが はくしゅ して いるよ。'], 30: ['🌸', '30ぴきめ！ はなびらが まって きたよ。'], 50: ['🎈', '50ぴきめ！ ふうせんが あがったよ。'], 100: ['🎆', '100ぴきめ！ はなびが あがったよ。'], 300: ['🌈', '300ぴきめ！ にじいろの かみふぶき だよ。'], 500: ['⭐', '500ぴきめ！ ほしが ふって きたよ。'], 1000: ['👑', '1000びきめ！ もう、つりの めいじんだね。']};
@@ -612,6 +612,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function store() { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch {} }
 
   const query = new URLSearchParams(location.search);
+  // けんさようの あいず（legend・nushi・rare・decor）は、てもとで ひらいた ときだけ きく
+  const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:', probe = key => local ? query.get(key) : null;
   function timeOfDay() {
     const asked = query.get('time'), forced = {asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n'}[asked] || asked; if (forced && TIME_LABEL[forced]) return forced;
     if (TIME_LABEL[save.time]) return save.time;   // じぶんで えらんだ じかん。よるしか あそべない ひとも、ぜんぶの こに あえる
@@ -624,9 +626,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const myth = FISH.find(f => f.legend && f.area === save.area);
     // シールちょうを 30しゅるい そろえた ひとは、まぼろしに あいやすく なる（25かいに 1かい）。だれも あえない ままに しない
     const odds = seenCount() >= BASE ? Math.max(LEGEND_ODDS, 1 / 25) : LEGEND_ODDS;
-    if (myth && (query.get('legend') === '1' || Math.random() < odds)) { wish = false; return myth; }
+    if (myth && (probe('legend') === '1' || Math.random() < odds)) { wish = false; return myth; }
     const now = timeOfDay(), here = FISH.filter(f => f.area === save.area && !f.legend);
-    const wanted = Number(query.get('rare')); if (wanted) { const only = here.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
+    const wanted = Number(probe('rare')); if (wanted) { const only = here.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
     // やさしい ほしょう：しってる こが 5かい つづいたら、つぎは まだ あってない こ
     const unseen = here.filter(f => !save.fish[f.id]), wished = wish && here.some(f => f.rare >= 3);
     const pool = wished ? here.filter(f => f.rare >= 3) : (save.streak || 0) >= 5 && unseen.length ? unseen : here;
@@ -792,7 +794,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false;
-  function setPhase(next) { phase = next; scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { phase = next; if (next === 'idle') button.disabled = false; scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
   function face(name) { marufuwa.src = 'img/game-' + name + '.webp'; }
   function hud() {
@@ -811,7 +813,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const wait = Number(query.get('wait')) || (save.total === 0 ? 1300 : 2200 + Math.random() * 3300);
     // かげが みぎから およいで くる。おおきさは さかなの おおきさ、いろは めずらしさ
     const shadow = $('shadow'), w = floatAt(mine);
-    nushi = Math.random() < (Number(query.get('nushi')) || .04 * (save.bait === 2 ? 2 : 1));
+    nushi = Math.random() < (Number(probe('nushi')) || .04 * (save.bait === 2 ? 2 : 1));
     shadow.dataset.rare = String(fish.rare); shadow.dataset.nushi = String(nushi);
     shadow.style.setProperty('--w', Math.min(44, Math.max(8, 7 + fish.max / 12) * (nushi ? 1.7 : 1)) + '%');
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
@@ -936,7 +938,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     save.total++; save.streak = first ? 0 : (save.streak || 0) + 1;
     save.bucket = [{id: fish.id, size, at: Date.now(), nushi}, ...(Array.isArray(save.bucket) ? save.bucket : [])].slice(0, 10);
     // ときどき、さかなが かざりを もって いる。すいそうに おける
-    const found = Math.random() < (Number(query.get('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
+    const found = Math.random() < (Number(probe('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
     if (found) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[found] = (save.decor[found] || 0) + 1; }
     store(); hud(); drawEquip();
     const gift = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))].filter(item => !had.includes(item)).map(item => item.name);
@@ -1392,7 +1394,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('take-photo'), $('easy'), $('gaze')); document.querySelector('.actions').after(sub);
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
-    status.after(where, label('みる・いく'), rows[1], label('せってい'), rows[0], document.querySelector('main > .time-box:not(:has(#areas))'));
+    status.after(where, label('みる・いく'), rows[1], label('せってい'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
   }
   // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる
   function drawEasy() { const on = !!save.easy; $('easy').textContent = on ? 'らくちん：ON' : 'らくちん：OFF'; $('easy').setAttribute('aria-pressed', String(on)); scene.dataset.easy = String(on); }
