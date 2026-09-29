@@ -245,7 +245,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   </div>
   <p id="status" role="status" aria-live="polite">きいろい バケツを おすと、ばしょを かえられるよ。</p>
 
-  <p class="note">じかんで つれる さかなが かわるよ（あさ・ひる・ゆうがた・よる）。<br>
+  <p class="note">じかんで でやすい さかなが かわるよ（あさ・ひる・ゆうがた・よる）。<br>
   きろくは この たんまつの なかだけに のこります。ログインも インストールも いりません。<br>
   はいけいと さかなの えは、いまは かりの ものです。<br>
   キャラクター画像はAIを使用して制作しています。</p>
@@ -354,9 +354,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
     return hour >= 5 && hour < 10 ? 'a' : hour >= 10 && hour < 16 ? 'h' : hour >= 16 && hour < 19 ? 'y' : 'n';
   }
   function pickFish() {
-    const now = timeOfDay(), pool = FISH.filter(f => f.area === save.area && (!f.time || f.time.includes(now)));
-    const wanted = Number(query.get('rare')); if (wanted) { const only = pool.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
-    const weight = f => WEIGHT[f.rare] * (save.bait === 1 && f.rare >= 3 ? 2.5 : 1);
+    // じかんの ふだは「でる／でない」では なく「でやすい／でにくい（3ばい）」。ゲーム開発司令部の てんけんで、
+    // じかんに よっては 2〜3しゅるいしか でない わくが 9つ あった ため
+    const now = timeOfDay(), here = FISH.filter(f => f.area === save.area);
+    const wanted = Number(query.get('rare')); if (wanted) { const only = here.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
+    // やさしい ほしょう：しってる こが 5かい つづいたら、つぎは まだ あってない こ
+    const unseen = here.filter(f => !save.fish[f.id]), pool = (save.streak || 0) >= 5 && unseen.length ? unseen : here;
+    const weight = f => WEIGHT[f.rare] * (save.bait === 1 && f.rare >= 3 ? 2.5 : 1) * (!f.time || f.time.includes(now) ? 1 : 1 / 3);
     let roll = Math.random() * pool.reduce((sum, f) => sum + weight(f), 0);
     for (const f of pool) { roll -= weight(f); if (roll <= 0) return f; }
     return pool[0];
@@ -481,7 +485,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const old = save.fish[fish.id], first = !old, record = !first && size > old.best, big = !nushi && size >= fish.min + range * .8, firstNushi = nushi && !(old && old.nushi);
     const had = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))];
     save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
-    save.total++;
+    save.total++; save.streak = first ? 0 : (save.streak || 0) + 1;
     save.bucket = [{id: fish.id, size, at: Date.now(), nushi}, ...(Array.isArray(save.bucket) ? save.bucket : [])].slice(0, 10);
     // ときどき、さかなが かざりを もって いる。すいそうに おける
     const found = Math.random() < (Number(query.get('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
@@ -668,7 +672,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const got = save.fish[f.id], cell = document.createElement('div');
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare);
       const icon = document.createElement('b'); icon.textContent = got ? f.icon : '？'; icon.setAttribute('aria-hidden', 'true');
-      const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') : 'いつでも');
+      const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
       cell.append(icon, got ? f.name : 'まだ あってない', document.createElement('br'), got ? 'さいだい ' + cm(got.best) + 'cm（' + got.count + 'ひき）' + (got.nushi ? ' ぬし◎' : '') : when);
       return cell;
     }));
@@ -682,8 +686,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
   scene.dataset.area = save.area;
   hud(); drawEquip(); setPhase('idle');
   setTimeout(chatter, Number(query.get('chat')) || 5000);
-  window.Tsuri = {state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends]};
+  window.Tsuri = {all: FISH, state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends]};
 })();
 </script>
+<script defer src="tsuri-tank.js"></script>
 </body>
 </html>
