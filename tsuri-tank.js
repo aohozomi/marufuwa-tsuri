@@ -248,7 +248,8 @@
 .tk-photo a{display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#17658a;border:2px solid #0e4a66;border-radius:18px;padding:8px 18px;text-decoration:none}
 .tk-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
-.tk-fish[data-legend]{animation:tk-rainbow 7s linear infinite}
+.tk-fish[data-rainbow]{animation:tk-rainbow 7s linear infinite}
+.tk-fish[data-legend]:not([data-rainbow]){filter:drop-shadow(0 0 6px #fff6b8)}
 @keyframes tk-rainbow{from{filter:hue-rotate(0deg) drop-shadow(0 0 6px #fff6b8)}to{filter:hue-rotate(360deg) drop-shadow(0 0 6px #fff6b8)}}
 .tk-card .tk-tag.tk-myth{background:linear-gradient(90deg,#ff8fb1,#ffb84d,#5fc98f,#4cb6e6,#a98be8);text-shadow:0 1px 0 #0005}
 .tk-lampbtn,.tk-rice{position:absolute;z-index:6;padding:0;margin:0;border:0;background:none;box-shadow:none;min-height:0;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:none}
@@ -279,7 +280,7 @@
 .tk-night .tk-restfish{display:block}
 .tk-hb{opacity:0}
 @media(prefers-reduced-motion:reduce){
-  .tk-fish[data-legend],.tk-st,.tk-instar,.tk-restfish,.tk-room.tk-nap .tk-mascot{animation:none}
+  .tk-fish[data-rainbow],.tk-st,.tk-instar,.tk-restfish,.tk-room.tk-nap .tk-mascot{animation:none}
   .tk-st{opacity:.7}
   .tk-friend{transition:none}
   .tk-sway,.tk-float,.tk-twinkle,.tk-ray,.tk-mascot{animation:none}
@@ -407,7 +408,9 @@
   function makeFish(r, k, fresh, edge) {
     const f = r.fish, z = zoneOf(f), seedR = mulberry(f.id * 7919 + k * 104729 + 13);
     const el = document.createElement('span');
-    el.className = 'tk-fish'; el.dataset.fid = String(f.id); if (f.legend) el.dataset.legend = '1'; el.dataset.layer = String(r.nushi || f.rare >= 4 ? 2 : Math.floor(seedR() * 3)); // ぬしと スペシャルは いちばん まえを、ゆっくり
+    el.className = 'tk-fish'; el.dataset.fid = String(f.id); if (f.legend) { el.dataset.legend = '1'; const artMeta = window.TsuriArt && window.TsuriArt.meta; if (!(artMeta && artMeta.rainbowInTank === false)) el.dataset.rainbow = '1'; }
+    // 絵に すでに にじを ぬってある時（TsuriArt.meta.rainbowInTank=false）は、水槽の にじいろの 光を かけない
+    el.dataset.layer = String(r.nushi || f.rare >= 4 ? 2 : Math.floor(seedR() * 3)); // ぬしと スペシャルは いちばん まえを、ゆっくり
     const layerNo = Number(el.dataset.layer), art = window.TsuriArt && window.TsuriArt[f.id];
     const size = sizeOf(f, r.best, r.nushi) * (1 + (k ? (seedR() - .5) * .16 : 0)) * [.86, 1, 1.12][layerNo];
     el.style.width = el.style.height = Math.round(size) + 'px';
