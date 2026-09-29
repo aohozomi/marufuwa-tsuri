@@ -518,19 +518,32 @@ dialog .close{display:block;margin:auto;min-width:160px}
   spots.forEach((spot, i) => spot.addEventListener('click', () => moveTo(i)));
 
   // おと。めが みえなくても、おとだけで あそべる ように。わが ちかづくと おとが たかく なり、いまだ の ところで「ピコン」
-  let audio = null, guide = 0;
-  function tone(freq, length = .12, type = 'sine', delay = 0, loud = .13) {
+  // おとの つくりは、むかしの ゲームき ふう：かくばった なみ（square）・さんかくの なみ（triangle）・みじかい ざっ（noise）の 3つだけ。
+  // おとは ぷつっと はじまって、すぱっと きれる。たかさは だんだんに うごく（ピロリッ、ヒュ〜）
+  let audio = null, guide = 0, hiss = null;
+  function ready() { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); return audio; }
+  function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0) {
     if (!save.sound) return;
     try {
-      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-      if (audio.state === 'suspended') audio.resume();
-      const at = audio.currentTime + delay, osc = audio.createOscillator(), vol = audio.createGain();
-      osc.type = type; osc.frequency.setValueAtTime(freq, at);
-      vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud, at + .012); vol.gain.exponentialRampToValueAtTime(.0001, at + length);
-      osc.connect(vol).connect(audio.destination); osc.start(at); osc.stop(at + length + .02);
+      const ctx = ready(), at = ctx.currentTime + delay, osc = ctx.createOscillator(), vol = ctx.createGain();
+      osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
+      if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + length);
+      const level = osc.type === 'triangle' ? loud * 2.2 : loud;
+      vol.gain.setValueAtTime(level, at); vol.gain.setValueAtTime(level * .6, at + length * .5); vol.gain.setValueAtTime(0, at + length);
+      osc.connect(vol).connect(ctx.destination); osc.start(at); osc.stop(at + length + .02);
     } catch {}
   }
-  const chord = (notes, gap = .09, type = 'triangle') => notes.forEach((note, i) => tone(note, .22, type, i * gap));
+  function zap(length = .12, delay = 0, loud = .07) {   // みじかい ざっ（みずしぶき、けむり）
+    if (!save.sound) return;
+    try {
+      const ctx = ready(), at = ctx.currentTime + delay;
+      if (!hiss) { hiss = ctx.createBuffer(1, ctx.sampleRate * .5, ctx.sampleRate); const d = hiss.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
+      const src = ctx.createBufferSource(), vol = ctx.createGain(); src.buffer = hiss;
+      vol.gain.setValueAtTime(loud, at); vol.gain.linearRampToValueAtTime(0, at + length);
+      src.connect(vol).connect(ctx.destination); src.start(at); src.stop(at + length + .02);
+    } catch {}
+  }
+  const chord = (notes, gap = .07, type = 'square') => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap));
   function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {} }
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
   let ambient = null;
@@ -554,15 +567,15 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; }
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else startAmbient(); });
   function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : 'おと：OFF'; $('sound').setAttribute('aria-pressed', String(on)); }
-  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { startAmbient(); chord([660, 880]); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。'); } else say('おとを けしたよ。'); });
+  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { startAmbient(); chord([988, 1319], .08); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。'); } else say('おとを けしたよ。'); });
   function startGuide() {
     stopGuide(); if (!save.sound || reduce()) return;
     let before = 1;
     guide = setInterval(() => {
       if (phase !== 'reel') return stopGuide();
       const scale = 1 - ((performance.now() - ringStart) % period) / period;
-      for (const [mark, pitch] of [[.9, 392], [.75, 494], [.6, 587], [.45, 740]]) if (before > mark && scale <= mark) tone(pitch, .07, 'sine', 0, .08);
-      if (before > .36 && scale <= .36) chord([1319, 1760], .06);   // いまだ
+      for (const [mark, pitch] of [[.9, 392], [.75, 494], [.6, 587], [.45, 740]]) if (before > mark && scale <= mark) tone(pitch, .05, 'triangle', 0, .05);   // ポ、ポ、ポ、ポ（だんだん たかく）
+      if (before > .36 && scale <= .36) chord([988, 1319], .07);   // いまだ：ピコン
       before = scale;
     }, 25);
   }
@@ -584,7 +597,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     scene.dataset.time = TIME_NAME[timeOfDay()];
     fish = pickFish(); face('blue'); $('held').hidden = true;
     flying = !reduce(); setPhase('waiting'); if (flying) throwRod();
-    tone(700, .25, 'sine'); tone(420, .2, 'sine', .12); tone(180, .16, 'triangle', .85);   // ひゅっ…ぽちゃん
+    tone(220, .28, 'square', .2, .04, 880); tone(330, .1, 'triangle', .9, .06, 110); zap(.14, .9);   // ヒュ〜ッ…ポチャ
     button.textContent = 'まってる…'; button.disabled = true; button.dataset.hot = 'false';
     say('ぽちゃん。のんびり まとう。');
     const wait = Number(query.get('wait')) || (2200 + Math.random() * 3300);
@@ -615,7 +628,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     };
   }
   function bite() {
-    flying = false; chord([880, 880, 1175], .14, 'square'); buzz([120, 80, 120]);
+    flying = false; tone(1568, .06); tone(1568, .06, 'square', .1); tone(2093, .12, 'square', .2); buzz([120, 80, 120]);   // ピピッ、ピーン
     setPhase('bite');
     button.textContent = 'ひく！'; button.disabled = false; button.dataset.hot = 'true';
     say((nushi ? 'とても おおきな かげ…！ ぬしかも。' : fish.rare === 4 ? 'きんいろの かげ…！ スペシャルな こかも。' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
@@ -647,7 +660,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('hp').firstElementChild.style.width = (hp / hpMax * 100) + '%';
     const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'おしい！';
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
-    if (power === 3) { chord([1047, 1319, 1568], .06); buzz(40); } else if (power === 2) tone(880, .14, 'triangle'); else tone(294, .16, 'sine');
+    if (power === 3) { chord([1047, 1319, 1568, 2093], .045); buzz(40); }   // ピロリロッ
+    else if (power === 2) { tone(784, .05); tone(1047, .08, 'square', .05); }   // ピコッ
+    else { tone(196, .12, 'triangle', 0, .06, 131); zap(.08, 0, .04); }   // ポフッ
     $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
     if (!reduce()) {
       marufuwa.animate([{scale: '1.08 .92'}, {scale: '1 1'}], {duration: 200, easing: 'ease-out'});
@@ -673,7 +688,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
     }
   }
   function caught() {
-    stopGuide(); chord(nushi || fish.rare === 4 ? [523, 659, 784, 1047, 1319] : [523, 659, 784, 1047], .11); buzz(nushi ? [80, 60, 80, 60, 200] : 120);
+    stopGuide();
+    // つれた：むかしの ゲームの「てに いれた！」ふう。ぬしと スペシャルは、ながい ファンファーレ
+    if (nushi || fish.rare === 4) { chord([523, 659, 784, 1047, 784, 1047, 1319, 1568], .085); tone(2093, .5, 'square', .7, .045); [262, 330, 392].forEach((low, i) => tone(low, .16, 'triangle', .7 + i * .16, .05)); }
+    else { chord([784, 988, 1175, 1568], .075); tone(1568, .22, 'square', .3, .045); tone(392, .3, 'triangle', .3, .05); }
+    buzz(nushi ? [80, 60, 80, 60, 200] : 120);
     const range = fish.max - fish.min;
     const size = Math.round((nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + range * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8)) * 100) / 100;
     const old = save.fish[fish.id], first = !old, record = !first && size > old.best, big = !nushi && size >= fish.min + range * .8, firstNushi = nushi && !(old && old.nushi);
