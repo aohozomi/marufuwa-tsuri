@@ -515,8 +515,29 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
   const chord = (notes, gap = .09, type = 'triangle') => notes.forEach((note, i) => tone(note, .22, type, i * gap));
   function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {} }
+  // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
+  let ambient = null;
+  function startAmbient() {
+    if (!save.sound || ambient) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      const buffer = audio.createBuffer(1, audio.sampleRate * 3, audio.sampleRate), data = buffer.getChannelData(0);
+      let lastValue = 0; for (let i = 0; i < data.length; i++) { lastValue = lastValue * .96 + (Math.random() * 2 - 1) * .04; data[i] = lastValue * 6; }   // やわらかい ざーっ
+      const noise = audio.createBufferSource(); noise.buffer = buffer; noise.loop = true;
+      const soft = audio.createBiquadFilter(); soft.type = 'lowpass'; soft.frequency.value = 900;
+      const swell = audio.createGain(); swell.gain.value = .05;
+      const lfo = audio.createOscillator(), depth = audio.createGain(); lfo.frequency.value = .11; depth.gain.value = .04; lfo.connect(depth).connect(swell.gain);
+      noise.connect(soft).connect(swell).connect(audio.destination);
+      const nodes = [noise, lfo];
+      if (rainy) { const drops = audio.createBufferSource(), thin = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = buffer; drops.loop = true; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; quiet.gain.value = .035; drops.connect(thin).connect(quiet).connect(audio.destination); nodes.push(drops); }
+      nodes.forEach(node => node.start()); ambient = nodes;
+    } catch {}
+  }
+  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else startAmbient(); });
   function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : 'おと：OFF'; $('sound').setAttribute('aria-pressed', String(on)); }
-  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (save.sound) { chord([660, 880]); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。'); } else say('おとを けしたよ。'); });
+  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { startAmbient(); chord([660, 880]); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。'); } else say('おとを けしたよ。'); });
   function startGuide() {
     stopGuide(); if (!save.sound || reduce()) return;
     let before = 1;
@@ -673,6 +694,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
 
   function act() {
+    startAmbient();   // おとを ON に して いた ひとは、さいしょに おした ときから なみの おと
     if (phase === 'caught' && performance.now() - caughtAt < 1000) return;
     if (phase === 'idle' || phase === 'caught') cast();
     else if (phase === 'bite') startReel();
