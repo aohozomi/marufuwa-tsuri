@@ -361,6 +361,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <div id="bucket-list"></div>
     <h3 style="margin:10px 0 4px;font-size:1rem">ひろった かざり</h3>
     <p id="decor-list" style="margin:0 0 12px;line-height:1.8"></p>
+    <h3 style="margin:10px 0 4px;font-size:1rem">あった なかま</h3>
+    <p id="pal-list" style="margin:0 0 12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></p>
     <button class="close" type="button" id="close-bucket">とじる</button>
   </dialog>
 
@@ -472,7 +474,21 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const floatAt = i => ({x: SPOT_X[i] + 7, y: shore(SPOT_X[i] + 7) + 13});
   const place = (node, p) => { node.style.left = p.x + '%'; node.style.top = p.y + '%'; };
   const spots = [...document.querySelectorAll('.spot')];
-  let mine = 1, friends = [0, 2];       // friends[0]=ねこ, friends[1]=うさぎ の いる ばしょ
+  let mine = 1, friends = [0, 2];       // friends[0]・friends[1] の いる ばしょ
+  // となりに くる なかま。ひと、つりばに よって、くる こが かわる。「きょうは だれが いるかな」
+  const PALS = [
+    {id: 'neko', name: 'ねこ', word: 'にゃ、つれた', home: 'H'}, {id: 'usagi', name: 'うさぎ', word: 'ぴょん と つれた', home: 'L'},
+    {id: 'panda', name: 'パンダ', word: 'ささも つれないかな', home: 'R'}, {id: 'kojika', name: 'こじか', word: 'もりの においが する', home: 'R'}
+  ];
+  let pals = [PALS[0], PALS[1]];
+  function callPals() {
+    const now = new Date(), seed = now.getFullYear() * 372 + now.getMonth() * 31 + now.getDate() + AREAS.findIndex(a => a.id === save.area) * 5;
+    const first = PALS.find(p => p.home === save.area) || PALS[seed % PALS.length], rest = PALS.filter(p => p !== first);
+    pals = [first, rest[seed % rest.length]];
+    pals.forEach((pal, i) => { const img = $(i ? 'friend-b' : 'friend-a'); img.src = 'img/friend-' + pal.id + '-s.webp'; img.alt = 'となりで つりを する ' + pal.name; });
+    save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {};
+    pals.forEach(pal => { save.pals[pal.id] = true; }); store();
+  }
   // さおは てもとから ななめ うえへ。いとは さおの さきから ウキへ
   function rod(line, i, tall, stick) {
     const f = feet(i), w = floatAt(i), tip = {x: f.x + 9, y: f.y - tall - 6};
@@ -712,7 +728,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function chatter() {
     if (!document.hidden && phase !== 'caught' && !book.open) {
       const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
-      bubble.textContent = WORDS[Math.floor(Math.random() * WORDS.length)];
+      bubble.textContent = Math.random() < .25 ? pals[who].word : WORDS[Math.floor(Math.random() * WORDS.length)];
       place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
       if (bubble.textContent === 'つれた！') {   // なかまも、つれた さかなを かかげる
         const theirs = $('held-friend');
@@ -739,9 +755,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
       if (!open) { const left = document.createElement('small'); left.textContent = 'あと ' + (area.need - save.total) + 'ひき'; tab.append(left); }
       tab.addEventListener('click', () => {
         if (save.area === area.id) return;
-        save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true;
+        save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals();
         setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false';
-        say(area.name + 'に ついたよ。どんな こが いるかな。');
+        say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
       });
       return tab;
     }));
@@ -845,6 +861,12 @@ dialog .close{display:block;margin:auto;min-width:160px}
     }) : ['まだ からっぽ。のんびり いこう。']));
     const decor = save.decor && typeof save.decor === 'object' ? Object.entries(save.decor) : [];
     $('decor-list').textContent = decor.length ? decor.map(([name, count]) => name + ' ×' + count).join('　') : 'まだ ないよ。さかなが ときどき もって くるよ。';
+    $('pal-list').replaceChildren(...PALS.map(pal => {
+      const met = save.pals && save.pals[pal.id], tag = document.createElement('span'), img = document.createElement('img');
+      tag.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;font-size:.78rem;width:64px;' + (met ? '' : 'opacity:.35;filter:grayscale(1)');
+      img.src = 'img/friend-' + pal.id + '-s.webp'; img.width = img.height = 52; img.alt = ''; img.style.objectFit = 'contain';
+      tag.append(img, met ? pal.name : '？'); return tag;
+    }));
     bucket.showModal();
   });
   $('close-bucket').addEventListener('click', () => bucket.close());
@@ -866,7 +888,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   scene.dataset.time = TIME_NAME[timeOfDay()];
   $('all').textContent = String(FISH.length);
   scene.after($('card'));   // つれた しらせは けしきの したに。まるふわと さかなを かくさない
-  scene.dataset.area = save.area; scene.dataset.rain = String(rainy);
+  scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
   drawSound(); if (rainy) say('きょうは あめ。めずらしい こが でやすいよ。');
   hud(); drawEquip(); setPhase('idle');
