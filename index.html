@@ -26,7 +26,7 @@
 <meta property="og:image:alt" content="ゆうがたの みずうみで、まるふわが きんいろの さかなを かかげて いる">
 <meta name="twitter:card" content="summary_large_image">
 <style>
-:root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light}
+:root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light;touch-action:manipulation}   /* ダブルタップの ひろがりを ふせぐ（つまんで ひろげるのは できる） */
 *{box-sizing:border-box}
 body{margin:0}
 /* ぷにぷにシールの ボタン。しろい ふち、つや、ぷっくり。おすと ぷにっと へこむ。いろは みみの 4しょく */
@@ -782,6 +782,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // おとの つくりは、むかしの ゲームき ふう：かくばった なみ（square）・さんかくの なみ（triangle）・みじかい ざっ（noise）の 3つだけ。
   // おとは ぷつっと はじまって、すぱっと きれる。たかさは だんだんに うごく（ピロリッ、ヒュ〜）
   let audio = null, guide = 0, hiss = null;
+  const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // iPhone は マナー スイッチで おとが きえる（Web Audio は マナーに したがう）
   function ready() { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); return audio; }
   function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0) {
     if (!save.sound) return;
@@ -829,7 +830,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; }
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else startAmbient(); });
   function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : 'おと：OFF（おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
-  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { startAmbient(); chord([523, 784], .09, 'triangle'); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。'); } else say('おとを けしたよ。'); });
+  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { startAmbient(); chord([523, 784], .09, 'triangle'); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。' + (IOS ? ' きこえない ときは、よこの マナー スイッチを みてね。' : '')); } else say('おとを けしたよ。'); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
   const TARGET = .3;
   const SWIMS = {
@@ -1093,6 +1094,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
       bubble.textContent = Math.random() < .25 ? pals[who].word : WORDS[Math.floor(Math.random() * WORDS.length)];
       place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
+      const half = bubble.offsetWidth / scene.clientWidth * 50; place(bubble, {x: Math.min(98 - half, Math.max(2 + half, f.x)), y: f.y - 19});   // がめんの はしで きれない よう
       const theirFish = FISH[Math.floor(Math.random() * 3)];
       if (bubble.textContent === 'つれた！') {   // なかまも、つれた さかなを かかげる
         const theirs = $('held-friend');
