@@ -16,7 +16,7 @@
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const readJSON = key => { try { const d = JSON.parse(localStorage.getItem(key)); return d && typeof d === 'object' ? d : null; } catch { return null; } };
   const soundOn = () => (readJSON(MAIN_KEY) || {}).sound === true;
-  let speed = 1, skew = 0;                       // 検査用：時間を はやめる／すすめる
+  let speed = 1, skew = 0, muted = false;        // 検査用：時間を はやめる／すすめる／ひみつの 待ち時間を 止める（ほかの 検査が 仮想の 時計を 進める 間、こじか・ねこが 勝手に 出ないように）
   const dur = ms => ms / speed, later = (fn, ms) => setTimeout(fn, dur(ms)), clock = () => performance.now() + skew;
   const say = text => { if (status) status.textContent = text; };
   const make = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
@@ -231,7 +231,7 @@
   }
   function tick() {
     update(); napFollow();
-    if (!idleLike()) return;
+    if (muted || !idleLike()) return;
     const s = state(), waited = clock() - idleSince;
     if (!deerBusy && !deerDone && s.area === 'L' && s.time === 'asa' && waited >= 20000 && !pals().some(el => palOf(el) === 'kojika')) deerEvent();
     if (!nap && s.time === 'hiru' && waited >= 30000 && palEl('neko')) napStart();
@@ -319,6 +319,6 @@
 
   window.TsuriHimitsu = {
     version: 1, found: foundMap, replay, open: () => { if (!noteDlg) buildNote(); drawNote(); noteDlg.showModal(); },
-    _debug: { tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy }) }
+    _debug: { tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy }) }
   };
 })();
