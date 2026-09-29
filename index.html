@@ -34,6 +34,7 @@ button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-s
 .spot::before,#keeper::before{display:none}
 #scene .spot,#scene #keeper{box-shadow:none;transition:none}
 #scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
+.spot::after{content:"";position:absolute;inset:-6px;border-radius:50%}   /* みえない あたりはんてい。ちいさい こや ゆびが ふるえる ひとが おしやすい */
 #scene #keeper:active{transform:translate(-50%,-100%) scale(.94)}
 @media(prefers-reduced-motion:reduce){button,.pill{transition:none}button:active:not(:disabled),.pill:active{transform:none}}
 button:focus-visible{outline:3px solid #286b88;outline-offset:3px}
@@ -74,7 +75,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .hud button,.hud .pill{white-space:nowrap;padding:8px 6px;font-size:.88rem;min-width:0}
 .hud .plaza{--c1:#fff1dc;--c2:#ffc98f;--side:#d98a45;--ink:#5a2f0c;text-shadow:none;min-height:52px}
 .hud button{--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
-.hud button::after{content:"";position:absolute;right:14%;bottom:16%;width:9px;height:9px;border-radius:50%;background:#ffffffe6;pointer-events:none}
+.hud button::after{content:"";position:absolute;left:12%;top:18%;width:7px;height:7px;border-radius:50%;background:#ffffffe6;pointer-events:none}
 .areas small{display:block;font-weight:600;font-size:.7rem}
 .time-box{margin-bottom:10px;font-size:.85rem}
 .time-box summary{cursor:pointer;padding:6px 4px;font-weight:800}
@@ -85,7 +86,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .times button{min-height:44px;font-size:.78rem}
 #keeper{position:absolute;z-index:2;left:87%;top:50%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
 #keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
-#keeper span{position:absolute;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;font-size:.7rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
+#keeper span{position:absolute;z-index:2;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;font-size:.7rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
 #equip{position:absolute;z-index:4;left:2.5%;bottom:3%;font-size:.72rem;font-weight:800;line-height:1.5;background:#ffffffd9;border:2px solid #b9d1db;border-radius:12px;padding:3px 9px;pointer-events:none}
 #shop-list{display:grid;gap:8px;margin:0 0 12px}
 #shop-list h3{margin:6px 0 0;font-size:1rem}
@@ -288,8 +289,8 @@ body.gazing #scene{box-shadow:0 18px 40px #24465340}
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions{gap:12px;margin:16px 0 6px;flex-wrap:wrap}
 #take-photo,#gaze{flex:1 1 40%;min-height:54px}
-#main-button{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;flex:1 1 100%;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
-#main-button[data-hot=true]{--c1:#ffa98f;--c2:#ee5a3c;--side:#b23a20;text-shadow:0 2px 0 #9a2f18}
+#main-button{--c1:#2a8cc0;--c2:#0e5a82;--side:#0a4262;--ink:#fff;flex:1 1 100%;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
+#main-button[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
 .note{text-align:center;font-size:.85rem;color:#506874;line-height:2.3;margin-top:18px}
 rt{font-size:.62em;letter-spacing:.02em;font-weight:700}
