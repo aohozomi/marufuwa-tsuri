@@ -109,6 +109,8 @@ body.gazing #gaze{min-height:52px;opacity:.85}
 body.gazing #status{color:#244653;background:#ffffffc9;border-radius:14px;padding:4px 10px;display:inline-block}
 body.gazing .spot,body.gazing #equip,body.gazing #keeper span{display:none}
 body.gazing #scene{box-shadow:0 18px 40px #24465340}
+body.gazing #card,body.gazing #guide{display:none !important}   /* ながめている あいだは、さっきの けっかを かくす */
+body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding-top:0;padding-bottom:0}
 #card-word:empty{display:none}
 #card h2{display:inline}
 #photo-img{display:block;width:100%;height:auto;border-radius:14px;border:2px solid #d5e6ed;margin-bottom:10px}
@@ -1310,16 +1312,28 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function flow(now) { if (!document.hidden) { drawWater(now); drawSky(now); drawSoil(); } requestAnimationFrame(flow); }
 
   // ながめる。つらなくて いい。みずと そらと なかまを、みて いるだけ
-  const GAZE_WORDS = ['なみの おとを、きいて いよう。', 'きょうも、おつかれさま。', 'なにも しなくて、いいよ。', 'ゆっくり、いきを しよう。', 'ここに いて、いいよ。'];
-  let gazeTimer = 0;
+  const GAZE_WORDS = ['なみの おとを、きいて いよう。', 'きょうも、おつかれさま。', 'なにも しなくて、いいよ。', 'ゆっくり、いきを しよう。', 'ここに いて、いいよ。', 'ぼんやり するのも、だいじな じかん。', 'いま できる ことだけで、じゅうぶん。', 'みずが きらきら しているね。', 'くもが ゆっくり ながれて いくね。', 'しんこきゅう、ひとつ。', 'いそがなくて、だいじょうぶ。', 'ここは、ゆっくり して いい ばしょ。'];
+  const GAZE_NIGHT = ['よるの みずは、しずかだね。', 'ほしが ひとつ、みえるかな。', 'ねむれない よるも、ここに いて いいよ。', 'もう おそいね。むりしないでね。'];
+  const GAZE_RAIN = ['あめの おとって、おちつくね。', 'ここは ぬれないよ。ゆっくり しよう。'];
+  const GAZE_MORNING = ['あさの ひかりだね。', 'きょうは、きょうの ペースで いいよ。'];
+  let gazeTimer = 0, gazeLast = '', wake = null;
+  // ことばは、じかん・てんき・おとに あわせて えらぶ（おとが ないのに「おとを きいて」とは いわない）
+  const gazeLine = () => {
+    const pool = [...GAZE_WORDS, ...(timeOfDay() === 'n' ? GAZE_NIGHT : []), ...(timeOfDay() === 'a' ? GAZE_MORNING : []), ...(rainy ? GAZE_RAIN : [])].filter(x => x !== gazeLast && (save.sound || !x.includes('おと')));
+    return gazeLast = pool[Math.floor(Math.random() * pool.length)];
+  };
+  // がめんが きえない ように（つかえる ブラウザだけ。もどる・はなれる ときは はなす）
+  const wakeOn = async () => { try { if ('wakeLock' in navigator && !wake) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch { wake = null; } };
+  const wakeOff = () => { try { if (wake) wake.release(); } catch {} wake = null; };
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && document.body.classList.contains('gazing')) wakeOn(); });
   $('gaze').addEventListener('click', () => {
     const on = !document.body.classList.contains('gazing');
     if (on && !(phase === 'idle' || phase === 'caught')) { say('つりが おわってから、ながめよう。'); return; }
     document.body.classList.toggle('gazing', on);
     $('gaze').textContent = on ? 'もどる' : 'ながめる'; $('gaze').setAttribute('aria-pressed', String(on));
     clearInterval(gazeTimer);
-    if (on) { startAmbient(); say(GAZE_WORDS[0]); let n = 0; gazeTimer = setInterval(() => say(GAZE_WORDS[++n % GAZE_WORDS.length]), 24000); scene.scrollIntoView({block: 'center'}); }
-    else say('おかえり。「なげる」で、また つりが できるよ。');
+    if (on) { startAmbient(); say(save.sound ? gazeLine() : 'おとを つけると、なみの おとが きこえるよ。'); gazeTimer = setInterval(() => say(gazeLine()), 24000); scene.scrollIntoView({block: 'center'}); wakeOn(); }
+    else { say('おかえり。「なげる」で、また つりが できるよ。'); wakeOff(); }
   });
 
   // さかなが はねる。ときどき、みなもから ぴょんと とんで、ぽちゃんと おちる
