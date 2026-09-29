@@ -158,7 +158,23 @@ dialog h2{margin:0 0 8px;text-align:center}
 .photo-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
 dialog .count{text-align:center;margin:0 0 12px;font-size:.9rem;line-height:1.7}
 dialog .close{display:block;margin:auto;min-width:160px}
+/* ありがとうの いし と ほしぞら（きねんかん）*/
+#thanks{padding:14px}
+#sky-box{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(#1f2f5c,#4a5d92);aspect-ratio:1/1;margin:0 auto 10px;max-width:440px}
+#sky-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ty-star{cursor:pointer;transform-box:fill-box;transform-origin:center;animation:ty-tw 5.2s ease-in-out infinite}
+.ty-bg{animation:ty-tw 7s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes ty-tw{0%,100%{opacity:.6;transform:scale(.9)}50%{opacity:1;transform:scale(1.12)}}
+.ty-star.on{animation:none;opacity:1;transform:scale(1.9)}
+#sky-cap{position:absolute;left:8px;right:8px;bottom:8px;min-height:60px;display:flex;align-items:center;gap:10px;background:#ffffffee;border-radius:14px;padding:6px 12px;font-weight:800;color:#244653;line-height:1.5}
+#sky-cap img{width:46px;height:46px;object-fit:contain;flex:none}
+#sky-cap small{display:block;font-weight:700;color:#506874}
+#thanks-list{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:6px}
+#thanks-list button{min-height:46px;padding:4px 12px;font-size:.9rem}
+#thanks details{margin:6px 0 8px}
+#thanks summary{cursor:pointer;font-weight:800;padding:10px 4px;min-height:44px;display:list-item}
 @media(prefers-reduced-motion:reduce){
+  .ty-star,.ty-bg{animation:none !important}
   .logo span,.bd-trees circle,.waves path,.tuft,.cloud,.canopy,.jet,.arm,.mark,.actor img,#rain{animation:none !important}
   .prop,.door{transition:none}
   .cloud{left:8%}
@@ -167,6 +183,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 }
 /* つかう ひとが「うごき：すくない」を えらんだ とき（OSの せっていと おなじ あつかい） */
 body.calm .logo span,body.calm .bd-trees circle,body.calm .waves path,body.calm .tuft,body.calm .cloud,body.calm .canopy,body.calm .jet,body.calm .arm,body.calm .mark,body.calm .actor img,body.calm #rain{animation:none !important}
+body.calm .ty-star,body.calm .ty-bg{animation:none !important}
 body.calm .prop,body.calm .door{transition:none}
 body.calm .cloud{left:8%}
 body.calm .cloud.c2{left:56%}
@@ -272,6 +289,7 @@ body.calm .cloud.c2{left:56%}
         <button type="button" data-touch="cloud">くも</button>
         <button type="button" data-touch="tree">き</button>
         <button type="button" data-touch="me">まるふわ</button>
+        <button type="button" data-touch="thanks" id="touch-thanks" hidden>ありがとうの いし</button>
       </div>
     </details>
   </section>
@@ -282,6 +300,18 @@ body.calm .cloud.c2{left:56%}
   </details>
   <p class="note">おとの せっていは、つりびよりと おなじ ものを つかうよ。<br>きろくは この たんまつの なかだけに のこります。</p>
 </main>
+<dialog id="thanks" aria-labelledby="thanks-title">
+  <h2 id="thanks-title">ありがとうの ほしぞら</h2>
+  <p class="count">あそんで くれた ひとの ほしが、ならんで いるよ。</p>
+  <p class="count" id="thanks-sample" hidden><strong>これは さんぷる です。</strong>ほんとうの なまえでは ありません。</p>
+  <div id="sky-box" role="group" aria-label="ほしぞら。ほしを さわると、なまえが でるよ">
+    <svg id="sky-svg" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+    <div id="sky-cap" role="status" aria-live="polite"><span>ほしを さわって みてね。</span></div>
+  </div>
+  <details><summary>なまえの いちらん</summary><ul id="thanks-list"></ul></details>
+  <p class="count">この ばしょは、おとなの ひとが なまえを えらんで のせて います。</p>
+  <button class="close" type="button" id="close-thanks">とじる</button>
+</dialog>
 <dialog id="photo" aria-labelledby="photo-title">
   <h2 id="photo-title">しゃしん</h2>
   <img id="photo-img" alt="" width="540" height="960">
@@ -491,6 +521,7 @@ const SVG = {
   tree: `<svg viewBox="0 0 80 116" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="112" rx="26" ry="4.5" fill="#0b2a4a" opacity=".16"/><rect x="34" y="64" width="12" height="46" rx="4" fill="#b98a5a" stroke="#7a4b34" stroke-width="2"/><g class="canopy" style="fill:var(--tree)" stroke="#3f7a4a" stroke-opacity=".5" stroke-width="2"><circle cx="40" cy="40" r="32"/><circle cx="18" cy="56" r="20"/><circle cx="62" cy="56" r="20"/><circle cx="40" cy="20" r="20"/><g fill="#fff" opacity=".18" stroke="none"><circle cx="30" cy="30" r="11"/><circle cx="52" cy="46" r="7"/></g><g stroke="none"><circle cx="24" cy="46" r="3" fill="#ff9ab8"/><circle cx="52" cy="30" r="3" fill="#ff9ab8"/><circle cx="40" cy="56" r="3" fill="#ffd25e"/><circle cx="60" cy="58" r="2.6" fill="#ff9ab8"/></g></g></svg>`,
   bench: `<svg viewBox="0 0 70 38" xmlns="http://www.w3.org/2000/svg"><ellipse cx="35" cy="34" rx="30" ry="3.5" fill="#0b2a4a" opacity=".14"/><rect x="8" y="24" width="6" height="10" rx="2" fill="#a9794a" stroke="#7a4b34" stroke-width="1.6"/><rect x="56" y="24" width="6" height="10" rx="2" fill="#a9794a" stroke="#7a4b34" stroke-width="1.6"/><rect x="4" y="14" width="62" height="12" rx="5" fill="#e5bf8c" stroke="#7a4b34" stroke-width="2.2"/><rect x="6" y="2" width="58" height="10" rx="5" fill="#f0d29e" stroke="#7a4b34" stroke-width="2.2"/></svg>`,
   lot1: `<svg viewBox="0 0 122 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="61" cy="76" rx="56" ry="5" fill="#0b2a4a" opacity=".15"/><ellipse cx="60" cy="62" rx="54" ry="14" fill="#d9b98a" stroke="#7a4b34" stroke-width="2"/><path d="M18 60 Q34 34 54 58Z" fill="#c99a62" stroke="#7a4b34" stroke-width="2" stroke-linejoin="round"/><g><rect x="62" y="46" width="36" height="14" rx="4" fill="#ffd25e" stroke="#7a4b34" stroke-width="2"/><rect x="80" y="33" width="17" height="15" rx="3" fill="#ffe9a0" stroke="#7a4b34" stroke-width="2"/><rect x="83" y="36" width="11" height="8" rx="2" fill="#bfe3f5"/><circle cx="70" cy="62" r="5" fill="#5a5a66" stroke="#7a4b34" stroke-width="1.6"/><circle cx="90" cy="62" r="5" fill="#5a5a66" stroke="#7a4b34" stroke-width="1.6"/><g class="arm"><path d="M66 48 L48 30 L36 42" fill="none" stroke="#e0a61c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 42 l-7 6 l11 3z" fill="#e0a61c" stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"/></g></g><g stroke="#7a4b34" stroke-width="2"><rect x="4" y="44" width="5" height="26" rx="1.5" fill="#e5bf8c"/><rect x="113" y="44" width="5" height="26" rx="1.5" fill="#e5bf8c"/></g><line x1="6" y1="54" x2="116" y2="54" stroke="#ffd25e" stroke-width="5" stroke-linecap="round"/><line x1="6" y1="54" x2="116" y2="54" stroke="#3a3a3a" stroke-width="5" stroke-dasharray="6 6" opacity=".75"/><path d="M104 70 l5-16 l5 16z" fill="#ff8a3c" stroke="#7a4b34" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 72 l4-12 l4 12z" fill="#ff8a3c" stroke="#7a4b34" stroke-width="1.8" stroke-linejoin="round"/><rect x="30" y="24" width="4" height="26" fill="#8a6a52"/><rect x="88" y="24" width="4" height="26" fill="#8a6a52"/><rect x="24" y="2" width="74" height="24" rx="7" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.5"/><text x="61" y="18" text-anchor="middle" font-size="11" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">こうじちゅう</text></svg>`,
+  stone: `<svg viewBox="0 0 34 52" xmlns="http://www.w3.org/2000/svg"><ellipse cx="17" cy="49" rx="15" ry="3.4" fill="#0b2a4a" opacity=".16"/><path d="M5 48 L5 22 Q5 10 17 10 Q29 10 29 22 L29 48Z" fill="#e9e2d4" stroke="#7a4b34" stroke-width="2" stroke-linejoin="round"/><path d="M9 44 V23 Q9 15 15 14" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".8"/><path d="M17 1 l2.6 5.6 l6 .7 l-4.5 4 l1.3 6 l-5.4 -3.1 l-5.4 3.1 l1.3 -6 l-4.5 -4 l6 -.7z" fill="#ffe27a" stroke="#e0a61c" stroke-width="1.3" stroke-linejoin="round" transform="translate(0 -1)"/><rect x="9" y="28" width="16" height="10" rx="3" fill="#fff6cf" stroke="#c99a62" stroke-width="1.2"/><text x="17" y="35.6" text-anchor="middle" font-size="4.6" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">ありがとう</text></svg>`,
   lot2: `<svg viewBox="0 0 122 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="61" cy="76" rx="56" ry="5" fill="#0b2a4a" opacity=".15"/><ellipse cx="60" cy="62" rx="54" ry="14" fill="#d9b98a" stroke="#7a4b34" stroke-width="2"/><path d="M22 66 Q22 30 61 28 Q100 30 100 66Z" fill="#cfeaf9" stroke="#7a4b34" stroke-width="2.2" stroke-linejoin="round"/><path d="M40 62 Q42 38 61 33 M62 62 Q66 38 61 33 M84 62 Q80 40 61 33" fill="none" stroke="#ffffffb0" stroke-width="3" stroke-linecap="round"/><text x="61" y="58" text-anchor="middle" font-size="28" font-weight="900" fill="#fff" stroke="#7a4b34" stroke-width="2" paint-order="stroke" font-family="system-ui,sans-serif">？</text><g stroke="#7a4b34" stroke-width="2"><rect x="4" y="44" width="5" height="26" rx="1.5" fill="#e5bf8c"/><rect x="113" y="44" width="5" height="26" rx="1.5" fill="#e5bf8c"/></g><line x1="6" y1="54" x2="116" y2="54" stroke="#ffd25e" stroke-width="5" stroke-linecap="round"/><line x1="6" y1="54" x2="116" y2="54" stroke="#3a3a3a" stroke-width="5" stroke-dasharray="6 6" opacity=".75"/><path d="M104 70 l5-16 l5 16z" fill="#ff8a3c" stroke="#7a4b34" stroke-width="1.8" stroke-linejoin="round"/><rect x="30" y="24" width="4" height="8" fill="#8a6a52"/><rect x="88" y="24" width="4" height="8" fill="#8a6a52"/><rect x="24" y="2" width="74" height="24" rx="7" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.5"/><text x="61" y="18" text-anchor="middle" font-size="11" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">こうじちゅう</text></svg>`
 };
 const PROPS = [
@@ -504,6 +535,7 @@ const PROPS = [
   { id: 'tree-r', x: 344, y: 384, w: 68, h: 112, svg: SVG.tree, secret: 'tree', block: { rect: [328, 358, 360, 388] } },
   { id: 'bench-l', x: 64, y: 430, w: 70, h: 38, svg: SVG.bench, block: { rect: [30, 418, 98, 432] } },
   { id: 'bench-r', x: 296, y: 430, w: 70, h: 38, svg: SVG.bench, block: { rect: [262, 418, 330, 432] } },
+  { id: 'stone', x: 342, y: 446, w: 30, h: 46, svg: SVG.stone, dest: 'thanks', mark: '⭐', block: { rect: [326, 430, 360, 450] } },
   { id: 'lot1', x: 62, y: 526, w: 122, h: 80, svg: SVG.lot1, dest: 'kouji1', mark: '🚧', block: { rect: [0, 452, 126, 528] } },
   { id: 'lot2', x: 298, y: 526, w: 122, h: 80, svg: SVG.lot2, dest: 'kouji2', mark: '🚧', block: { rect: [234, 452, 360, 528] } }
 ];
@@ -512,6 +544,7 @@ const DEST = {
   tsuri: { name: 'つりば', at: { x: 90, y: 296 }, kind: 'go', url: () => new URL('../', location.href).href, pan: -.8, motif: () => { tone(660, .08, 'triangle', 0, .05, 990); zap(.06, .08, .04); } },
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
   onigiri: { name: 'おにぎりキャッチ', at: { x: 296, y: 292 }, kind: 'go', url: () => ONIGIRI_URL, pan: .8, motif: () => { tone(523, .07, 'square', 0, .04); tone(392, .1, 'square', .09, .04); } },
+  thanks: { name: 'ありがとうの いし', at: { x: 320, y: 444 }, kind: 'thanks', pan: .8 },
   kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 62, y: 540 }, kind: 'wait', line: 'ここは まだ こうじちゅう。なにが できるかな？', pan: -.8 },
   kouji2: { name: 'こうじちゅう（カードの ひろば？）', at: { x: 298, y: 540 }, kind: 'wait', line: 'ここも こうじちゅう。カードの ひろば…かも？ たのしみに まっててね', pan: .8 }
 };
@@ -813,6 +846,7 @@ function secretTap(kind) {
     sfx.leaf(); if (!reduce()) for (let i = 0; i < 6; i++) fxAt(70 + Math.random() * 220, 300 + Math.random() * 50, '🍃', [{ translate: '-50% -50%', opacity: 1, rotate: '0deg' }, { translate: `calc(-50% + ${(Math.random() * 2 - 1) * 40 * k}px) calc(-50% + ${90 * k}px)`, opacity: 0, rotate: (Math.random() * 2 - 1) * 200 + 'deg' }], { duration: 1500 + Math.random() * 600, delay: i * 90, easing: 'ease-in', fill: 'backwards' });
     narrate('はっぱが ひらひら おちて きたよ'); seen('tree');
   } else if (kind === 'me') { tapMascot(); }
+  else if (kind === 'thanks') { openThanks(); }
 }
 function tapMascot() {
   lastInput = T; sfx.boing(); hop(player);
@@ -847,6 +881,7 @@ function goDest(id) {
 }
 function arrive(id) {
   const d = DEST[id]; if (!trip || trip.id !== id) return;
+  if (d.kind === 'thanks') { trip = null; sfx.arrive(); openThanks(); return; }
   if (d.kind === 'wait') { trip = null; sfx.hammer(); setFace('apricot', 2600); hop(player, 2); speak(player, 'こうじちゅう だって', 2200, true); narrate(d.line); return; }
   sfx.arrive(); setFace('sparkle', 3000);
   if (d.kind === 'tank') { enterTank(); return; }
@@ -989,6 +1024,48 @@ function update(dt) {
 let last = 0;
 function frame(t) { requestAnimationFrame(frame); const dt = Math.min(.05, (t - last) / 1000 || 0); last = t; if (document.hidden || api.paused || (window.TsuriTank && window.TsuriTank.isOpen && window.TsuriTank.isOpen())) return; update(dt); render(); }
 
+// ─── きねんかん「ありがとうの ほしぞら」──あそんで くれた 人の ほしが ならぶ。なまえは thanks.json（ただの ファイル）から。サーバー なし ───
+//   ・ゲームの 中では「見る」だけ。なまえを うつ 所は ない。外への リンクも ない（リンクは おとなの ページに）。
+//   ・ひみつでは ないので 「thanks.json が 無い／空」の 時は いしを 出さない。`?sample=1` の 時だけ さんぷるの なまえを 出す（本番には 出ない）。
+const SAMPLE_NAMES = ['ミルク', 'ほしぞら', 'もも', 'ラムネ', 'ゆき', 'そら', 'はな', 'ことり', 'くるみ', 'あずき', 'みかん', 'ひなた', 'たんぽぽ', 'こむぎ', 'あめだま', 'すずらん', 'ハート', 'ふわり', 'ぽっぽ', 'マロン', 'ちょこ', 'ゆず', 'きなこ', 'ぱんだ', 'ほたる'];
+const thanks = { list: [], sample: false };
+const okEntry = e => e && typeof e.name === 'string' && e.name.length >= 1 && e.name.length <= 16 && typeof e.icon === 'string' && !!PALS[e.icon] && /^\d{4}-\d{2}$/.test(String(e.month || ''));
+async function loadThanks() {
+  try { const r = await fetch('thanks.json', { cache: 'no-store' }); if (r.ok) { const d = await r.json(); if (Array.isArray(d)) thanks.list = d.filter(okEntry).slice(0, 2000); } } catch {}
+  if (!thanks.list.length && q.has('sample')) { const ids = Object.keys(PALS); thanks.list = SAMPLE_NAMES.map((name, i) => ({ name, icon: ids[i % ids.length], month: '2026-' + String(9 + (i % 3)).padStart(2, '0') })); thanks.sample = true; }
+  const stone = propEl('stone'); if (stone) stone.hidden = !thanks.list.length; const tb = $('touch-thanks'); if (tb) tb.hidden = !thanks.list.length;
+}
+const STAR_TINT = ['#fff2a8', '#d5ecff', '#ffd6e6', '#d6ffe3'];
+const starShape = (cx, cy, r) => { let d = ''; for (let i = 0; i < 10; i++) { const rr = i % 2 ? r * .46 : r, a = -Math.PI / 2 + i * Math.PI / 5; d += (i ? 'L' : 'M') + (cx + Math.cos(a) * rr).toFixed(1) + ' ' + (cy + Math.sin(a) * rr).toFixed(1); } return d + 'Z'; };
+function drawSky() {
+  const svg = $('sky-svg'), n = thanks.list.length, rnd = mulberry(77), parts = [];
+  for (let i = 0; i < 46; i++) parts.push(`<circle class="ty-bg" cx="${(rnd() * 300).toFixed(1)}" cy="${(rnd() * 300).toFixed(1)}" r="${(.5 + rnd() * 1.1).toFixed(1)}" fill="#fff" style="animation-delay:${(-rnd() * 7).toFixed(2)}s"/>`);
+  const c = Math.min(23, 132 / Math.sqrt(Math.max(1, n))), r = clamp(c * .5, 3, 8.5);   // ほしは ひまわりの たねの ように ならぶ（すきまが うまる）
+  thanks.list.forEach((e, i) => {
+    const rad = c * Math.sqrt(i + .6), th = i * 2.39996, x = 150 + Math.cos(th) * rad, y = 126 + Math.sin(th) * rad * .78, m =Number(String(e.month).slice(5)) || 0;
+    parts.push(`<g class="ty-star" data-i="${i}" style="animation-delay:${(-(i * 1.7 % 5.2)).toFixed(2)}s"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${Math.max(14, r * 2.2).toFixed(1)}" fill="#fff" opacity="0"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r * 1.7).toFixed(1)}" fill="${STAR_TINT[m % 4]}" opacity=".18"/><path d="${starShape(x, y, r)}" fill="${STAR_TINT[m % 4]}" stroke="#fff" stroke-opacity=".6" stroke-width=".5"/></g>`);
+  });
+  svg.innerHTML = parts.join('');
+  $('thanks-list').replaceChildren(...thanks.list.map((e, i) => { const li = document.createElement('li'), b = document.createElement('button'), sm = document.createElement('small'); b.type = 'button'; b.dataset.i = String(i); b.textContent = e.name + ' さん'; sm.textContent = ' ' + Number(String(e.month).slice(5)) + 'がつ'; b.append(sm); li.append(b); return li; }));
+  $('thanks-sample').hidden = !thanks.sample;
+}
+function showStar(i) {
+  const e = thanks.list[i]; if (!e) return;
+  $('sky-svg').querySelectorAll('.ty-star.on').forEach(g => g.classList.remove('on')); const g = $('sky-svg').querySelector(`.ty-star[data-i="${i}"]`); if (g) g.classList.add('on');
+  const cap = $('sky-cap'), img = document.createElement('img'), box = document.createElement('div'), sm = document.createElement('small');
+  img.src = BASE + 'img/friend-' + e.icon + '-s.webp'; img.alt = ''; box.textContent = e.name + ' さん、ありがとう'; sm.textContent = Number(String(e.month).slice(5)) + 'がつに きて くれたよ'; box.append(sm); cap.replaceChildren(img, box);
+  tone(1047 + (i % 5) * 132, .12, 'triangle', 0, .05, 1568); tone(1568 + (i % 5) * 132, .16, 'triangle', .1, .04);
+}
+function openThanks() {
+  if (!thanks.list.length) { narrate('ありがとうの いしは、まだ じゅんびちゅう だよ。'); return; }
+  drawSky(); $('sky-cap').replaceChildren(Object.assign(document.createElement('span'), { textContent: 'ほしを さわって みてね。' }));
+  const dlg = $('thanks'); if (!dlg.open) dlg.showModal(); narrate('ありがとうの ほしぞらを ひらいたよ。あそんで くれた ひとの ほしが ならんで いるよ。'); hmMark('hiroba-thanks'); sfx.on();
+}
+$('sky-svg').addEventListener('click', e => { const g = e.target.closest('.ty-star'); if (g) showStar(Number(g.dataset.i)); });
+$('thanks-list').addEventListener('click', e => { const b = e.target.closest('button'); if (b) showStar(Number(b.dataset.i)); });
+$('close-thanks').addEventListener('click', () => $('thanks').close());
+document.addEventListener('close', e => { if (e.target && e.target.id === 'thanks') { trip = null; setFace('smile', 1800); narrate('ありがとうの ほしぞらを とじたよ。'); } }, true);
+
 // ─── しゃしん：きょうの ひろばを 1まいの えに（1080×1920）。なまえ・URLは えに いれない ───
 const svgImage = svg => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
 function svgText(svgEl, cs, w, h) {   // いろの へんすう（var(--x)）を その ばで 実際の いろに して、えに できる かたちに する
@@ -1081,7 +1158,7 @@ $('snap').addEventListener('click', () => { lastInput = T; openPhoto(); });
 $('close-photo').addEventListener('click', () => photoDlg.close());
 
 // ─── はじまり ───
-buildProps(); applyTime(); drawSound(); drawMotion(); renderPalRow();
+buildProps(); applyTime(); drawSound(); drawMotion(); renderPalRow(); loadThanks();
 new ResizeObserver(() => { measure(); render(); }).observe(scene); measure();
 own.visits = (own.visits || 0) + 1;
 // かえって きた とき：さいごに いった ばしょの まえに いる
@@ -1100,7 +1177,7 @@ const api = window.Hiroba = {
   version: 1, paused: false, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
-  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
+  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   say: () => statusEl.textContent
 };
 })();
