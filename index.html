@@ -35,6 +35,11 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 .areas button{min-height:48px;padding:4px 2px;font-size:.82rem;line-height:1.25;border-radius:14px}
 .areas button[aria-pressed=true]{color:#fff;background:#17658a;border-color:#0e4a66}
 .areas small{display:block;font-weight:600;font-size:.7rem}
+.time-box{margin-bottom:10px;font-size:.85rem}
+.time-box summary{cursor:pointer;padding:6px 4px;font-weight:800}
+.time-box .times{margin:6px 0 0}
+/* ほんとうは よるなのに あかるい じかんを えらんだ とき。まぶしく しない */
+#scene[data-dim=true] > svg:first-of-type{filter:brightness(.62) saturate(.85)}
 .times{grid-template-columns:1.5fr repeat(4,1fr)}
 .times button{min-height:44px;font-size:.78rem}
 #keeper{position:absolute;z-index:2;left:60%;top:49%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
@@ -43,7 +48,8 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 #equip{position:absolute;z-index:4;left:2.5%;bottom:3%;font-size:.72rem;font-weight:800;line-height:1.5;background:#ffffffd9;border:2px solid #b9d1db;border-radius:12px;padding:3px 9px;pointer-events:none}
 #shop-list{display:grid;gap:8px;margin:0 0 12px}
 #shop-list h3{margin:6px 0 0;font-size:1rem}
-#shop-list button{display:block;width:100%;text-align:left;min-height:56px;line-height:1.4}
+#shop-list button{display:block;position:relative;width:100%;text-align:left;min-height:64px;line-height:1.4;padding-left:64px}
+#shop-list button b{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:#f3f9fc;border:2px solid #d5e6ed;border-radius:12px}
 #shop-list button small{display:block;font-weight:600}
 #shop-list button[aria-pressed=true]{background:#fff3ce;border-color:#a56c19;color:#593700}
 #shop-hello{text-align:center;margin:0 0 8px;font-weight:800}
@@ -68,7 +74,7 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 .friend{z-index:2;width:14%;aspect-ratio:1/1}
 .bubble{position:absolute;z-index:4;transform:translate(-50%,-100%);background:#fff;border:2px solid #b9d1db;border-radius:14px;padding:2px 10px;font-size:.8rem;font-weight:800;white-space:nowrap;pointer-events:none}
 .bubble[hidden]{display:none}
-.spot{position:absolute;z-index:1;width:13%;min-height:0;aspect-ratio:1/1;padding:0;transform:translate(-50%,-50%);border:3px dashed #ffffffd9;border-radius:50%;background:#ffffff3d}
+.spot{position:absolute;z-index:1;width:10%;min-height:0;aspect-ratio:1/1;padding:0;transform:translate(-50%,-50%);border:3px dashed #ffffffd9;border-radius:50%;background:#ffffff3d}
 .spot::after{content:"";position:absolute;left:50%;top:50%;width:34%;height:34%;transform:translate(-50%,-50%);border-radius:18% 18% 40% 40%;background:#ffd34d;border:2px solid #a9801a}
 .spot[aria-pressed=true]{border-color:transparent;background:transparent}
 .spot[aria-pressed=true]::after{display:none}
@@ -84,6 +90,7 @@ h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 #scene[data-phase=reel] #shadow{animation:wander 1400ms linear infinite alternate}
 @keyframes wander{from{translate:-120% -14%}to{translate:120% 14%}}
 .puff{position:absolute;z-index:6;width:16px;height:16px;border-radius:50%;background:#fff;pointer-events:none}
+.ripple{position:absolute;z-index:2;width:9%;aspect-ratio:2/1;transform:translate(-50%,-50%);border:3px solid #ffffffd9;border-radius:50%;pointer-events:none}
 .hop{position:absolute;z-index:4;font-size:1.3rem;pointer-events:none;transform:translate(-50%,-50%)}
 .drift{opacity:.55;animation:drift var(--lap,38s) linear infinite}
 @keyframes drift{from{left:112%}to{left:-14%}}
@@ -168,7 +175,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
   </div>
 
   <div class="areas" id="areas" role="group" aria-label="つりばを えらぶ"></div>
-  <div class="areas times" id="times" role="group" aria-label="じかんを えらぶ"></div>
+  <details class="time-box"><summary>じかんを かえる（いま：<span id="time-now"></span>）</summary>
+    <div class="areas times" id="times" role="group" aria-label="じかんを えらぶ"></div>
+  </details>
 
   <div id="scene" data-phase="idle" data-time="hiru" data-area="L">
     <!-- かりの はいけい（いろと かたちだけ）。えが とどいたら さしかえる -->
@@ -203,6 +212,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <button class="spot" type="button" data-spot="2" aria-label="みぎの ばしょで つる"></button>
 
     <svg id="overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <line id="rod-a" stroke="#8a5a2b" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      <line id="rod-b" stroke="#8a5a2b" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      <line id="rod-me" stroke="#8a5a2b" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
       <line id="line-a" stroke="#fff" stroke-opacity=".8" stroke-width="2" vector-effect="non-scaling-stroke"/>
       <line id="line-b" stroke="#fff" stroke-opacity=".8" stroke-width="2" vector-effect="non-scaling-stroke"/>
       <line id="line-me" stroke="#fff" stroke-opacity=".95" stroke-width="2" vector-effect="non-scaling-stroke"/>
@@ -317,14 +329,15 @@ dialog .close{display:block;margin:auto;min-width:160px}
   ];
   // どうぐ。おかねは つかわない。あそぶと ふえる
   const RODS = [
-    {name: 'きのえだの さお', note: 'さいしょの さお', open: () => true, how: ''},
-    {name: 'たけの さお', note: 'すこし あわせやすい', open: s => s.total >= 10, how: '10ぴき つると もらえる'},
-    {name: 'ほしの さお', note: 'とても あわせやすい', open: s => Object.keys(s.fish).length >= 15, how: 'ずかんが 15しゅるいで もらえる'}
+    {icon: '🌿', name: 'きのえだの さお', note: 'さいしょの さお', open: () => true, how: ''},
+    {icon: '🎋', name: 'たけの さお', note: 'すこし あわせやすい', open: s => s.total >= 10, how: '10ぴき つると もらえる'},
+    {icon: '🌟', name: 'ほしの さお', note: 'とても あわせやすい', open: s => Object.keys(s.fish).length >= 15, how: 'ずかんが 15しゅるいで もらえる'}
   ];
+  // えさの えは かり（えもじ）。おおきい えさは、おにぎり
   const BAITS = [
-    {name: 'ふつうの えさ', note: 'いつもの えさ', open: () => true, how: ''},
-    {name: 'きらきら えさ', note: 'めずらしい こが きやすい', open: s => Object.keys(s.fish).length >= 5, how: 'ずかんが 5しゅるいで もらえる'},
-    {name: 'おおきい えさ', note: 'おおきい こが きやすい', open: s => s.total >= 20, how: '20ぴき つると もらえる'}
+    {icon: '🫘', name: 'ふつうの えさ', note: 'いつもの えさ', open: () => true, how: ''},
+    {icon: '✨', name: 'きらきら えさ', note: 'めずらしい こが きやすい', open: s => Object.keys(s.fish).length >= 5, how: 'ずかんが 5しゅるいで もらえる'},
+    {icon: '🍙', name: 'おおきい えさ', note: 'おおきい こが きやすい', open: s => s.total >= 20, how: '20ぴき つると もらえる'}
   ];
   // でやすさ。ジョブズ1の しさんで みなおした（まえは 3=10・4=2 で、ずかんが うまるまで とおすぎた）
   const WEIGHT = {1: 60, 2: 28, 3: 26, 4: 8};
@@ -374,21 +387,24 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const place = (node, p) => { node.style.left = p.x + '%'; node.style.top = p.y + '%'; };
   const spots = [...document.querySelectorAll('.spot')];
   let mine = 1, friends = [0, 2];       // friends[0]=ねこ, friends[1]=うさぎ の いる ばしょ
-  function rod(line, i, tall) {
-    const f = feet(i), w = floatAt(i);
-    line.setAttribute('x1', f.x + 4); line.setAttribute('y1', f.y - tall);
+  // さおは てもとから ななめ うえへ。いとは さおの さきから ウキへ
+  function rod(line, i, tall, stick) {
+    const f = feet(i), w = floatAt(i), tip = {x: f.x + 9, y: f.y - tall - 6};
+    stick.setAttribute('x1', f.x + 3); stick.setAttribute('y1', f.y - tall * .5);
+    stick.setAttribute('x2', tip.x); stick.setAttribute('y2', tip.y);
+    line.setAttribute('x1', tip.x); line.setAttribute('y1', tip.y);
     line.setAttribute('x2', w.x); line.setAttribute('y2', w.y);
   }
   function layout() {
     place(marufuwa, feet(mine)); place($('friend-a'), feet(friends[0])); place($('friend-b'), feet(friends[1]));
     place($('float-a'), floatAt(friends[0])); place($('float-b'), floatAt(friends[1]));
-    rod($('line-a'), friends[0], 9); rod($('line-b'), friends[1], 9);
+    rod($('line-a'), friends[0], 9, $('rod-a')); rod($('line-b'), friends[1], 9, $('rod-b'));
     const w = floatAt(mine); place($('float'), w); place($('bang'), {x: w.x, y: w.y - 12});
     place($('reel'), {x: Math.min(80, Math.max(20, w.x + 9)), y: 75});   // まるふわの かおに かぶらない いち
     const casting = phase === 'waiting' || phase === 'bite' || phase === 'reel';
-    if (casting) rod($('line-me'), mine, 12);
-    $('line-me').style.display = casting ? '' : 'none';
-    spots.forEach((spot, i) => { spot.setAttribute('aria-pressed', String(i === mine)); place(spot, {x: SPOT_X[i] + 7, y: shore(SPOT_X[i] + 7) + 3}); });
+    rod($('line-me'), mine, 12, $('rod-me'));
+    $('line-me').style.display = casting && !flying ? '' : 'none';
+    spots.forEach((spot, i) => { spot.setAttribute('aria-pressed', String(i === mine)); place(spot, {x: SPOT_X[i] + 10, y: shore(SPOT_X[i] + 10) - 6}); });   // バケツは りくの うえ（みずぎわより うえ）
   }
   function moveTo(i) {
     if (i === mine || !(phase === 'idle' || phase === 'caught')) return;
@@ -399,7 +415,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
   spots.forEach((spot, i) => spot.addEventListener('click', () => moveTo(i)));
 
-  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0;
+  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false;
   function setPhase(next) { phase = next; scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
   function face(name) { marufuwa.src = 'img/game-' + name + '.webp'; }
@@ -410,7 +426,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   function cast() {
     scene.dataset.time = TIME_NAME[timeOfDay()];
-    fish = pickFish(); face('blue'); $('held').hidden = true; setPhase('waiting');
+    fish = pickFish(); face('blue'); $('held').hidden = true;
+    flying = !reduce(); setPhase('waiting'); if (flying) throwRod();
     button.textContent = 'まってる…'; button.disabled = true; button.dataset.hot = 'false';
     say('ぽちゃん。のんびり まとう。');
     const wait = Number(query.get('wait')) || (2200 + Math.random() * 3300);
@@ -423,7 +440,25 @@ dialog .close{display:block;margin:auto;min-width:160px}
     shadow.style.setProperty('--swim', wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});
     setTimeout(bite, wait);
   }
+  // なげる うごき：うしろに そって、えいっと ふって、ウキが ゆみなりに とんで、ぽちゃん
+  function throwRod() {
+    const box = scene.getBoundingClientRect(), f = feet(mine), w = floatAt(mine);
+    const dx = (w.x - (f.x + 9)) / 100 * box.width, dy = (w.y - (f.y - 18)) / 100 * box.height;
+    marufuwa.animate([{rotate: '0deg', scale: '1 1'}, {rotate: '-16deg', scale: '.93 1.07', offset: .35}, {rotate: '13deg', scale: '1.07 .93', translate: '0 -8px', offset: .62}, {rotate: '0deg', scale: '1 1'}], {duration: 640, easing: 'ease-in-out'});
+    const shout = document.createElement('span'); shout.className = 'bubble'; shout.textContent = 'えいっ'; shout.setAttribute('aria-hidden', 'true'); place(shout, {x: f.x, y: f.y - 24}); scene.append(shout);
+    shout.animate([{opacity: 0, translate: '0 8px'}, {opacity: 1, translate: '0 0', offset: .3}, {opacity: 1, offset: .7}, {opacity: 0, translate: '0 -8px'}], {duration: 900}).onfinish = () => shout.remove();
+    $('float').animate([{translate: -dx + 'px ' + -dy + 'px', opacity: 0}, {translate: -dx + 'px ' + -dy + 'px', opacity: 1, offset: .4}, {translate: -dx * .45 + 'px ' + (-dy - 70) + 'px', offset: .7}, {translate: '0 0'}], {duration: 900, easing: 'ease-in'}).onfinish = () => {
+      flying = false; layout();
+      for (let i = 0; i < 2; i++) {
+        const ring = document.createElement('i'); ring.className = 'ripple'; place(ring, w); scene.append(ring);
+        ring.animate([{scale: '.3', opacity: .9}, {scale: '2.4', opacity: 0}], {duration: 700, delay: i * 180, easing: 'ease-out', fill: 'backwards'}).onfinish = () => ring.remove();
+      }
+      const plop = document.createElement('span'); plop.className = 'hop'; plop.style.fontSize = '.8rem'; plop.style.fontWeight = '900'; plop.style.color = '#fff'; plop.textContent = 'ぽちゃん'; plop.setAttribute('aria-hidden', 'true'); place(plop, {x: w.x, y: w.y - 7}); scene.append(plop);
+      plop.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -18px'}], {duration: 800}).onfinish = () => plop.remove();
+    };
+  }
   function bite() {
+    flying = false;
     setPhase('bite');
     button.textContent = 'ひく！'; button.disabled = false; button.dataset.hot = 'true';
     say((nushi ? 'とても おおきな かげ…！ ぬしかも。' : fish.rare === 4 ? 'きんいろの かげ…！ スペシャルな こかも。' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
@@ -569,6 +604,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
   // じかんを えらぶ。「いまの じかん」は とけいに あわせる
   function drawTimes() {
+    const hour = new Date().getHours(), night = hour >= 19 || hour < 5;
+    scene.dataset.dim = String(night && timeOfDay() !== 'n');
+    $('time-now').textContent = TIME_LABEL[timeOfDay()];
     $('times').replaceChildren(...[['', 'いまの じかん'], ['a', 'あさ'], ['h', 'ひる'], ['y', 'ゆうがた'], ['n', 'よる']].map(([id, name]) => {
       const tab = document.createElement('button');
       tab.type = 'button'; tab.textContent = name; tab.disabled = !(phase === 'idle' || phase === 'caught');
@@ -580,7 +618,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       return tab;
     }));
   }
-  function drawEquip() { $('equip').textContent = 'さお：' + RODS[save.rod].name + '　えさ：' + BAITS[save.bait].name; }
+  function drawEquip() { $('equip').textContent = RODS[save.rod].icon + ' ' + RODS[save.rod].name + '　' + BAITS[save.bait].icon + ' ' + BAITS[save.bait].name; }
 
   // おみせ。うでまえを みて、こえを かけて くれる（くらべない。ほめるだけ）
   const shop = $('shop');
@@ -592,7 +630,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const head = document.createElement('h3'); head.textContent = title; rows.push(head);
       list.forEach((item, i) => {
         const pick = document.createElement('button'), open = item.open(save), note = document.createElement('small');
-        pick.type = 'button'; pick.textContent = open ? item.name : '？？？'; pick.disabled = !open;
+        const icon = document.createElement('b'); icon.textContent = open ? item.icon : '？'; icon.setAttribute('aria-hidden', 'true');
+        pick.type = 'button'; pick.append(icon, open ? item.name : '？？？'); pick.disabled = !open;
         pick.setAttribute('aria-pressed', String(save[key] === i));
         note.textContent = open ? item.note + (save[key] === i ? '（つかって いる）' : '') : item.how; pick.append(note);
         pick.addEventListener('click', () => { save[key] = i; store(); drawEquip(); drawShop(); });
