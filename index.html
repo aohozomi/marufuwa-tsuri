@@ -127,6 +127,13 @@ main{background:#f4fbfff5;border-radius:32px;margin-top:10px;margin-bottom:24px;
 @keyframes cloud{from{transform:translateX(-160px)}to{transform:translateX(640px)}}
 @keyframes wave{from{transform:translateX(-7px)}to{transform:translateX(7px)}}
 @keyframes breathe{50%{scale:1.025 .975}}
+/* まって いる あいだ：ゆらゆら からだを ゆらす。かかった とき：びくっと する */
+#scene[data-phase=waiting] #marufuwa{animation:waiting 2.6s ease-in-out infinite}
+#scene[data-phase=bite] #marufuwa{animation:startle .5s ease-in-out infinite}
+#scene[data-phase=reel] #marufuwa{animation:tugging .42s ease-in-out infinite}
+@keyframes waiting{0%,100%{rotate:-2.5deg;scale:1 1}50%{rotate:2.5deg;scale:1.02 .98}}
+@keyframes startle{0%,100%{translate:0 0;scale:1 1}30%{translate:0 -7px;scale:.96 1.05}60%{translate:0 0;scale:1.04 .96}}
+@keyframes tugging{0%,100%{rotate:-7deg;translate:-2px 0}50%{rotate:-11deg;translate:-5px 0}}
 /* あめ */
 #rain{position:absolute;inset:-20% 0 0 -20%;z-index:4;pointer-events:none;display:none;background-image:repeating-linear-gradient(105deg,#ffffff00 0 14px,#ffffff8c 14px 15.5px,#ffffff00 15.5px 34px);background-size:68px 120px;animation:rain .55s linear infinite}
 #scene[data-rain=true] #rain{display:block}
@@ -686,7 +693,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     else { tone(196, .12, 'triangle', 0, .06, 131); zap(.08, 0, .04); }   // ポフッ
     $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
     if (!reduce()) {
-      marufuwa.animate([{scale: '1.08 .92'}, {scale: '1 1'}], {duration: 200, easing: 'ease-out'});
+      // ぐいっと ひく：うしろに のけぞって、もどる
+      marufuwa.animate([{rotate: '-7deg', scale: '1 1'}, {rotate: '-20deg', scale: '.94 1.06', translate: '-8px 0'}, {rotate: '-7deg', scale: '1 1'}], {duration: 260, easing: 'ease-out'});
       judge.animate([{scale: '.6'}, {scale: '1.25'}, {scale: '1'}], {duration: 260, easing: 'ease-out'});
       if (power === 3) sparkle(); else if (power === 1) puff();
     }
@@ -743,7 +751,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // つれた さかなを、まるふわが かかげる
     const held = $('held'), f = feet(mine);
     held.textContent = fish.icon; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.7' : ''; place(held, {x: f.x + (nushi ? 14 : 11), y: f.y - 3}); held.hidden = false;
-    if (!reduce()) held.animate([{translate: '0 30px', opacity: 0}, {translate: '0 -8px', opacity: 1}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
+    if (!reduce()) {
+      held.animate([{translate: '0 30px', opacity: 0}, {translate: '0 -8px', opacity: 1}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
+      // やったー：ぴょん、ぴょんと とびはねる。ぬしと スペシャルは 3かい
+      const hops = nushi || fish.rare === 4 ? 3 : 2, frames = [{translate: '0 0', scale: '1 1', rotate: '0deg'}];
+      for (let i = 0; i < hops; i++) frames.push({translate: '0 -22px', scale: '.95 1.07', rotate: (i % 2 ? 6 : -6) + 'deg'}, {translate: '0 0', scale: '1.08 .92', rotate: '0deg'});
+      frames.push({translate: '0 0', scale: '1 1', rotate: '0deg'});
+      marufuwa.animate(frames, {duration: 330 * hops + 120, easing: 'ease-out'});
+      // となりの なかまも、いっしょに よろこぶ
+      [$('friend-a'), $('friend-b')].forEach((pal, i) => pal.animate([{translate: '0 0'}, {translate: '0 -12px'}, {translate: '0 0'}, {translate: '0 -8px'}, {translate: '0 0'}], {duration: 620, delay: 180 + i * 140, easing: 'ease-out'}));
+    }
     // れんだ しても、うれしい しゅんかんが きえない ように、すこしだけ まつ
     button.textContent = 'もういちど なげる'; button.dataset.hot = 'false'; button.disabled = true; caughtAt = performance.now();
     setTimeout(() => { if (phase === 'caught') button.disabled = false; }, 1000);
@@ -775,6 +792,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
         theirs.textContent = ['🐟', '🐠', '🐡'][Math.floor(Math.random() * 3)]; place(theirs, {x: f.x + 9, y: f.y - 2}); theirs.hidden = false;
         setTimeout(() => { theirs.hidden = true; }, 7000);
       }
+      if (!reduce()) $(who ? 'friend-b' : 'friend-a').animate(bubble.textContent === 'つれた！' ? [{translate: '0 0', rotate: '0deg'}, {translate: '0 -14px', rotate: '-8deg'}, {translate: '0 0', rotate: '0deg'}, {translate: '0 -9px', rotate: '8deg'}, {translate: '0 0', rotate: '0deg'}] : [{rotate: '0deg'}, {rotate: '7deg'}, {rotate: '-5deg'}, {rotate: '0deg'}], {duration: 700, easing: 'ease-out'});   // しゃべる ときに、からだも うごく
       if (bubble.textContent === 'つれた！' && !reduce()) {   // さかなが、ぴょんと はねる
         const hop = document.createElement('span'), w = floatAt(friends[who]);
         hop.className = 'hop'; hop.textContent = '🐟'; hop.setAttribute('aria-hidden', 'true'); place(hop, w); scene.append(hop);
