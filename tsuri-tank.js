@@ -32,7 +32,7 @@
     ['みんとのこ','🐟',12,30,3],['あぷりこっとのこ','🐟',12,30,3],['らべんだーのこ','🐟',12,30,3],['きんのまるごい','🐟',40,90,4],['まるくじら','🐳',200,400,4]
   ].map(([name, icon, min, max, rare], id) => ({ id, name, icon, min, max, rare }));
   const fishList = () => { const t = window.Tsuri && window.Tsuri.all; const l = typeof t === 'function' ? t() : t; return Array.isArray(l) && l.length ? l : FISH_COPY; };
-  const STAR = { 1: 1, 2: 2, 3: 3, 4: 4 };   // めずらしさ（本体と おなじ：スペシャル＝★4。その子の「ぬし」を つった ことが あれば ＋1 で ★5）
+  const STAR = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 };   // めずらしさ（本体と おなじ：スペシャル＝★4。その子の「ぬし」を つった ことが あれば ＋1 で ★5）
   const starCount = (f, nushi) => Math.min(5, (STAR[f.rare] || 1) + (nushi ? 1 : 0));
   const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
 
@@ -110,7 +110,6 @@
       <rect y="418" width="360" height="222" fill="#ebcb9d"/><g stroke="#d9b07c" stroke-opacity=".55" stroke-width="2">${planks}</g>
       <ellipse cx="180" cy="536" rx="146" ry="47" fill="#ffcfc4"/><ellipse cx="180" cy="536" rx="122" ry="36" fill="#fff1ea"/>
       <ellipse cx="180" cy="536" rx="134" ry="42" fill="none" stroke="#ffb3a3" stroke-width="5" stroke-dasharray="1 11" stroke-linecap="round"/>
-      <g transform="translate(206 534)"><path d="M0 16 L12 -6 L24 16 Z" fill="#ffffff" stroke="#f0d9cf" stroke-width="2" stroke-linejoin="round"/><rect x="6" y="6" width="12" height="10" rx="2" fill="#4b6a5a"/></g>
       <rect x="8" y="242" width="344" height="12" rx="6" fill="#f6dcae"/><rect x="14" y="254" width="332" height="92" rx="8" fill="#e5bf8c"/>
       <rect x="22" y="264" width="152" height="72" rx="8" fill="none" stroke="#c99a62" stroke-width="3"/><rect x="186" y="264" width="152" height="72" rx="8" fill="none" stroke="#c99a62" stroke-width="3"/>
       <circle cx="164" cy="300" r="4" fill="#b9894f"/><circle cx="196" cy="300" r="4" fill="#b9894f"/>
@@ -119,9 +118,11 @@
       <g transform="translate(298 22)"><path d="M0 26 L14 -2 L28 26 Z" fill="#ffffff" stroke="#e8d6c2" stroke-width="2.4" stroke-linejoin="round"/><rect x="7" y="12" width="14" height="14" rx="3" fill="#4b6a5a"/></g>
     </svg>`;
   }
-  function lampSvg() { // ランプ（よるは ひかる）。部屋の暗さより上に置く
+  const RICE = { x: 204, y: 526, w: 30, h: 26 };   // ラグの上の おにぎり（3かい さわると はんぶんこ）
+  const riceSvg = () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 26" width="30" height="26"><g transform="translate(3 4)"><path d="M0 18 L12 -4 L24 18 Z" fill="#ffffff" stroke="#f0d9cf" stroke-width="2" stroke-linejoin="round"/><rect x="6" y="8" width="12" height="10" rx="2" fill="#4b6a5a"/></g></svg>`;
+  function lampSvg(off) { // ランプ（よるは ひかる）。部屋の暗さより上に置く
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640"><defs><radialGradient id="tk-halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3b8" stop-opacity=".95"/><stop offset="1" stop-color="#fff3b8" stop-opacity="0"/></radialGradient></defs>
-      <circle class="tk-halo" cx="180" cy="40" r="60" fill="url(#tk-halo)"/><line x1="180" y1="0" x2="180" y2="16" stroke="#b58c5e" stroke-width="3"/><path d="M156 40 Q156 20 180 18 Q204 20 204 40 Z" fill="#ffd76a" stroke="#e5b542" stroke-width="2"/><ellipse cx="180" cy="42" rx="17" ry="4" fill="#fff6c9"/></svg>`;
+      <circle class="tk-halo" cx="180" cy="40" r="60" fill="url(#tk-halo)"${off ? ' opacity="0"' : ''}/><line x1="180" y1="0" x2="180" y2="16" stroke="#b58c5e" stroke-width="3"/><path d="M156 40 Q156 20 180 18 Q204 20 204 40 Z" fill="#ffd76a" stroke="#e5b542" stroke-width="2"/><ellipse cx="180" cy="42" rx="17" ry="4" fill="#fff6c9"/></svg>`;
   }
   function frameSvg() {
     const t = ROOM.tank;
@@ -177,7 +178,7 @@
 .tk-halo{opacity:.25}
 .tk-room[data-time=yoru] .tk-halo{opacity:1}
 .tk-room[data-time=yuu] .tk-halo{opacity:.55}
-.tk-water{overflow:hidden;background:linear-gradient(var(--tk-a),var(--tk-b));touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:background .6s}
+.tk-water{overflow:hidden;background:linear-gradient(var(--tk-a),var(--tk-b));touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:background .6s,filter 1s}
 .tk-water::after{content:"";position:absolute;inset:0;background:linear-gradient(#ffffff59,#ffffff00 12%),linear-gradient(115deg,#ffffff1f 0,#ffffff00 22%);pointer-events:none;z-index:9}
 .tk-water.tk-decorating{cursor:crosshair;box-shadow:inset 0 0 0 3px #ffffffcc}
 .tk-rays,.tk-base,.tk-placed,.tk-layer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
@@ -246,7 +247,41 @@
 .tk-photo .tk-photorow{display:flex;gap:8px}.tk-photo .tk-photorow button,.tk-photo .tk-photorow a{min-height:48px}
 .tk-photo a{display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#17658a;border:2px solid #0e4a66;border-radius:18px;padding:8px 18px;text-decoration:none}
 .tk-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+.tk-fish[data-legend]{animation:tk-rainbow 7s linear infinite}
+@keyframes tk-rainbow{from{filter:hue-rotate(0deg) drop-shadow(0 0 6px #fff6b8)}to{filter:hue-rotate(360deg) drop-shadow(0 0 6px #fff6b8)}}
+.tk-card .tk-tag.tk-myth{background:linear-gradient(90deg,#ff8fb1,#ffb84d,#5fc98f,#4cb6e6,#a98be8);text-shadow:0 1px 0 #0005}
+.tk-lampbtn,.tk-rice{position:absolute;z-index:6;padding:0;margin:0;border:0;background:none;box-shadow:none;min-height:0;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:none}
+.tk-lampbtn::before,.tk-rice::before{display:none}
+.tk-lampbtn:active,.tk-rice:active{transform:none;box-shadow:none}
+.tk-lampbtn:focus-visible,.tk-rice:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a99}
+.tk-lampbtn{border-radius:14px}
+.tk-rice{display:flex;align-items:center;justify-content:center;border-radius:14px}
+.tk-rice svg{width:60%;height:auto;display:block;pointer-events:none}
+.tk-rice.tk-gone{visibility:hidden}
+.tk-starwall{position:absolute;pointer-events:none;opacity:0;transition:opacity 1.6s}
+.tk-room.tk-starry .tk-starwall{opacity:1}
+.tk-st{opacity:.3;transform-box:fill-box;transform-origin:center;animation:tk-tw 5s ease-in-out infinite}
+@keyframes tk-tw{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:1;transform:scale(1.12)}}
+.tk-room.tk-starry .tk-halo{opacity:0 !important}
+.tk-room.tk-starry .tk-dim{opacity:.6}
+.tk-room.tk-starry .tk-water{filter:brightness(1.12) saturate(1.1)}
+.tk-room.tk-starry .tk-twinkle{filter:drop-shadow(0 0 5px #fff6a8)}
+.tk-friend{transition:transform 1.4s ease}
+.tk-room.tk-nap .tk-mascot{animation:tk-nap 5.4s ease-in-out infinite}
+@keyframes tk-nap{0%,100%{transform:scale(1,1) rotate(-1.5deg)}50%{transform:scale(1.03,.985) rotate(-1.5deg)}}
+.tk-room.tk-nap .tk-friend[data-who=a]{transform:translateX(7px) rotate(3deg)}
+.tk-room.tk-nap .tk-friend[data-who=b]{transform:translateX(-7px) rotate(-3deg)}
+.tk-room.tk-nap[data-time=yoru] .tk-water{filter:brightness(.9)}
+.tk-instar{position:absolute;left:36%;top:30%;font-style:normal;font-size:13px;line-height:1;color:#fff2a8;text-shadow:0 0 6px #ffe27a,0 0 10px #fff;opacity:0;pointer-events:none;animation:tk-tw 4.2s ease-in-out infinite}
+.tk-night .tk-bottlestar .tk-instar{opacity:1}
+.tk-restfish{position:absolute;left:66%;top:22%;font-style:normal;font-size:13px;line-height:1;display:none;pointer-events:none;animation:tk-float 4.2s ease-in-out infinite alternate}
+.tk-night .tk-restfish{display:block}
+.tk-hb{opacity:0}
 @media(prefers-reduced-motion:reduce){
+  .tk-fish[data-legend],.tk-st,.tk-instar,.tk-restfish,.tk-room.tk-nap .tk-mascot{animation:none}
+  .tk-st{opacity:.7}
+  .tk-friend{transition:none}
   .tk-sway,.tk-float,.tk-twinkle,.tk-ray,.tk-mascot{animation:none}
   .tk-bub{display:none}
   #tk .tk-chrome,.tk-says,.tk-water,.tk-dim{transition:none}
@@ -263,10 +298,13 @@
     <div class="tk-stage"><div class="tk-room" data-time="hiru">
       <div class="tk-roomsvg" style="left:0;top:0;width:100%;height:100%"></div>
       <div class="tk-dim"></div>
+      <div class="tk-starwall" aria-hidden="true" style="left:0;top:0;width:100%;height:100%"></div>
       ${fa ? '<img class="tk-friend" data-who="a" src="' + fa + '" alt="" draggable="false">' : ''}
       <img class="tk-mascot" src="${BASE}img/game-blue.webp" width="240" height="320" alt="すいそうを ながめる まるふわ" draggable="false">
       ${fb ? '<img class="tk-friend" data-who="b" src="' + fb + '" alt="" draggable="false">' : ''}
       <div class="tk-lamp" style="left:0;top:0;width:100%;height:100%;pointer-events:none"></div>
+      <button type="button" class="tk-lampbtn" aria-pressed="false" aria-label="ランプ" style="left:41.7%;top:0;width:16.7%;height:8.8%"></button>
+      <button type="button" class="tk-rice" aria-label="おにぎり" style="left:53.1%;top:80.2%;width:15.6%;height:8.2%"></button>
       <div class="tk-water" data-tk="water">
         <svg class="tk-rays" viewBox="0 0 328 180" preserveAspectRatio="xMidYMin slice" aria-hidden="true"></svg>
         <div class="tk-base" aria-hidden="true"></div>
@@ -287,6 +325,7 @@
   const tip = $(dlg, '.tk-card'), empty = $(dlg, '.tk-empty'), mascot = $(dlg, '.tk-mascot'), says = $(dlg, '.tk-says'), sr = $(dlg, '#tk-sr'), list = $(dlg, '#tk-list');
   const tray = $(dlg, '.tk-tray'), items = $(dlg, '.tk-items'), placedList = $(dlg, '.tk-placedlist'), decoBtn = $(dlg, '.tk-deco-btn'), earBtn = $(dlg, '.tk-ear'), sndBtn = $(dlg, '.tk-snd'), photo = $(dlg, '.tk-photo');
   const friendsEls = [...dlg.querySelectorAll('.tk-friend')];
+  const starwall = $(dlg, '.tk-starwall'), lampBtn = $(dlg, '.tk-lampbtn'), rice = $(dlg, '.tk-rice');
   $(dlg, '.tk-roomsvg').innerHTML = roomSvg(); $(dlg, '.tk-lamp').innerHTML = lampSvg(); $(dlg, '.tk-frame').innerHTML = frameSvg();
   for (const child of [$(dlg, '.tk-roomsvg'), $(dlg, '.tk-lamp'), $(dlg, '.tk-frame')]) { const s = child.querySelector('svg'); if (s) { s.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;display:block'; } }
 
@@ -363,12 +402,12 @@
   const sizeOf = (f, best, nushi) => {
     const t = clamp((Math.log(f.max) - Math.log(3)) / (Math.log(400) - Math.log(3)), 0, 1);
     const mod = .92 + .2 * clamp((best - f.min) / Math.max(1, f.max - f.min), 0, 1); // 自分の最大サイズが、魚の大きさに出る
-    return (24 + 40 * Math.pow(t, .9)) * mod * unit * (nushi ? 1.32 : f.rare === 4 ? 1.1 : 1); // ぬしは ひとまわり おおきく（スペシャルも ほんの すこし）
+    return (24 + 40 * Math.pow(t, .9)) * mod * unit * (nushi ? 1.32 : f.rare === 5 ? 1.2 : f.rare === 4 ? 1.1 : 1); // ぬしは ひとまわり おおきく（スペシャルも ほんの すこし）
   };
   function makeFish(r, k, fresh, edge) {
     const f = r.fish, z = zoneOf(f), seedR = mulberry(f.id * 7919 + k * 104729 + 13);
     const el = document.createElement('span');
-    el.className = 'tk-fish'; el.dataset.fid = String(f.id); el.dataset.layer =String(r.nushi || f.rare === 4 ? 2 : Math.floor(seedR() * 3)); // ぬしと スペシャルは いちばん まえを、ゆっくり
+    el.className = 'tk-fish'; el.dataset.fid = String(f.id); if (f.legend) el.dataset.legend = '1'; el.dataset.layer = String(r.nushi || f.rare >= 4 ? 2 : Math.floor(seedR() * 3)); // ぬしと スペシャルは いちばん まえを、ゆっくり
     const layerNo = Number(el.dataset.layer), art = window.TsuriArt && window.TsuriArt[f.id];
     const size = sizeOf(f, r.best, r.nushi) * (1 + (k ? (seedR() - .5) * .16 : 0)) * [.86, 1, 1.12][layerNo];
     el.style.width = el.style.height = Math.round(size) + 'px';
@@ -376,7 +415,7 @@
     if (art) { const im = new Image(); im.src = art; im.alt = ''; im.draggable = false; el.append(im); } else el.textContent = f.icon;
     const o = { el, f, art: !!art, best: r.best, count: r.count, nushi: !!r.nushi, size, z, layer: layerNo, seed: seedR, at: performance.now(), leaving: false,
       x: 0, y: 0, vx: 0, tx: 0, ty: 0, dir: seedR() < .5 ? -1 : 1, face: 1, hold: 0, until: 0, pop: 0, nibble: 0,
-      speed: (14 + seedR() * 12) * unit * [.7, 1, 1.25][layerNo] * (z.kind === 'glide' ? .8 : z.kind === 'crawl' ? .55 : 1) * (r.nushi ? .7 : f.rare === 4 ? .85 : 1), fresh: !!fresh,
+      speed: (14 + seedR() * 12) * unit * [.7, 1, 1.25][layerNo] * (z.kind === 'glide' ? .8 : z.kind === 'crawl' ? .55 : 1) * (r.nushi ? .7 : f.rare >= 4 ? .85 : 1), fresh: !!fresh,
       bp: seedR() * 6.28, bw: .8 + seedR() * .8, ba: (2 + seedR() * 3) * unit, enter: 0 };
     const m = size * .6 + 6;
     o.x = m + seedR() * Math.max(1, W - 2 * m); o.y = (z.y0 + seedR() * (z.y1 - z.y0)) * floorY;
@@ -390,6 +429,10 @@
   }
   function retarget(o) {
     const m = o.size * .6 + 6;
+    if (o.gather && now < o.gather) {   // ごはんの おれい：ガラスの まんなかに あつまる
+      o.tx = clamp(W * .5 + (o.seed() - .5) * W * .34, m, W - m); o.ty = clamp(H * .34 + o.seed() * H * .28, o.size * .5 + 4, floorY);
+      o.dir = o.tx > o.x ? 1 : -1; o.until = now + 1600; return;
+    }
     let tx = m + o.seed() * Math.max(1, W - 2 * m);
     if (Math.abs(tx - o.x) < W * .16) tx = o.x + (o.x < W / 2 ? 1 : -1) * (W * .24 + o.seed() * W * .2);
     o.tx = clamp(tx, m, W - m);
@@ -504,13 +547,13 @@
   const PENTA = [0, 2, 4, 7, 9];
   const sizeNorm = f => clamp((Math.log(f.max) - Math.log(3)) / (Math.log(400) - Math.log(3)), 0, 1);
   function fishFreq(f) { const idx = Math.round((1 - sizeNorm(f)) * 13) + (f.id % 3); return 130.8 * 2 ** ((PENTA[idx % 5] + 12 * Math.floor(idx / 5)) / 12); }
-  const REG = { 1: 'ふつう', 2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル' };
+  const REG = { 1: 'ふつう', 2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル', 5: 'まぼろし' };
   const regOf = o => o.nushi ? 'ぬし' : REG[o.f.rare];
-  const sizeWord = (f, nushi) => nushi || f.rare === 4 ? 'とても おおきい' : sizeNorm(f) > .62 ? 'おおきい' : sizeNorm(f) > .3 ? 'ふつうの おおきさ' : 'ちいさい';
+  const sizeWord = (f, nushi) => nushi || f.rare >= 4 ? 'とても おおきい' : sizeNorm(f) > .62 ? 'おおきい' : sizeNorm(f) > .3 ? 'ふつうの おおきさ' : 'ちいさい';
   function fishVoice(f, pan, vol = .1, nushi = false) {   // 魚の「なまえの おと」（ぬしと スペシャルは、ながい ファンファーレふう）
     if (!sfx) return;
     const fr = fishFreq(f);
-    if (nushi || f.rare === 4) { tone(fr, .3, { type: 'triangle', vol: vol * 1.2, pan }); tone(fr * 1.5, .3, { type: 'triangle', vol: vol * .8, pan, at: .11 }); tone(fr * 2, .42, { type: 'square', vol: vol * .5, pan, at: .22 }); }
+    if (nushi || f.rare >= 4) { tone(fr, .3, { type: 'triangle', vol: vol * 1.2, pan }); tone(fr * 1.5, .3, { type: 'triangle', vol: vol * .8, pan, at: .11 }); tone(fr * 2, .42, { type: 'square', vol: vol * .5, pan, at: .22 }); if (f.rare === 5) tone(fr * 3, .34, { type: 'square', vol: vol * .35, pan, at: .5 }); }
     else if (f.rare === 3) { tone(fr, .18, { type: 'triangle', vol, pan }); tone(fr * 2, .12, { type: 'square', vol: vol * .5, pan, at: .09 }); tone(fr * 3, .1, { type: 'square', vol: vol * .35, pan, at: .17 }); }
     else if (f.rare === 2) { tone(fr, .14, { type: 'square', vol: vol * .8, pan }); tone(fr * 2, .1, { type: 'square', vol: vol * .4, pan, at: .09 }); }
     else tone(fr, .14, { type: 'triangle', vol, pan });
@@ -577,13 +620,14 @@
   function autoSay() {
     clearTimeout(sayTimer);
     if (!isOpen()) return;
+    if (napping) { sayTimer = setTimeout(autoSay, 9000); return; }
     const cur = fishes.filter(o => !o.leaving).map(o => o.f), time = scene.dataset.time || 'hiru', roll = Math.random();
     let text;
-    const left = fishList().length - residents().length;
+    const left = fishList().filter(f => !f.legend).length - residents().filter(r => !r.fish.legend).length;   // ずかんは まぼろしを かぞえない
     if (!cur.length) text = pick(SAY.empty);
     else if (roll < .16 && left > 0 && left <= 5) text ='ずかんまで あと ' + left + 'しゅるい。ゆっくり あいにいこうね。';
     else if (roll < .2 && left === 0) text = 'ずかん、ぜんぶ そろったね。ありがとう。';
-    else if (roll < .35) { const f = pick(cur); text = pick(SAY.touch(f.name)); if (f.rare >= 3) mood(f.rare === 4 ? 'sparkle' : 'apricot', 3200); }
+    else if (roll < .35) { const f = pick(cur); text = pick(SAY.touch(f.name)); if (f.rare >= 3) mood(f.rare >= 4 ? 'sparkle' : 'apricot', 3200); }
     else if (roll < .6 && SAY[time]) text = pick(SAY[time]);
     else text = pick(SAY.any);
     say(text);
@@ -607,14 +651,14 @@
     resetZen();
   }
   // さかなの データ（さわると出る）。ひとことは、まるふわから。くらべない：出るのは自分の記録だけ
-  const CARD_SAY = { 1: 'ゆったり およいでるね。', 2: 'ちょっと めずらしい こだよ。', 3: 'めずらしい こ！ あえて うれしいね。', 4: 'スペシャルな こだよ！ きらきら してるね。' };
+  const CARD_SAY = { 1: 'ゆったり およいでるね。', 2: 'ちょっと めずらしい こだよ。', 3: 'めずらしい こ！ あえて うれしいね。', 4: 'スペシャルな こだよ！ きらきら してるね。', 5: 'まぼろしの こ…！ ほんとうに いたんだ。' };
   const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
   function touchFish(o, viaKey) {
     o.pop = 1; o.hold = 4; o.vx *= .2;
-    const left = fishList().length - residents().length;
+    const left = fishList().filter(f => !f.legend).length - residents().filter(r => !r.fish.legend).length;
     const line = o.fresh ? (left > 0 && left <= 5 ? 'はじめまして！ ずかんまで あと ' + left + 'しゅるい。' : 'はじめまして！') : (o.nushi ? 'ぬしだよ！ すごいね。' : CARD_SAY[o.f.rare] || CARD_SAY[1]);   // 「あと○」は 5しゅるい以下の時だけ（遠い時は重荷になる）
     const name = mk('div', 'tk-cardname'); name.append(mk('span', '', o.f.name));
-    if (o.nushi) name.append(mk('span', 'tk-tag', 'ぬし')); else if (o.f.rare === 4) name.append(mk('span', 'tk-tag', 'スペシャル'));
+    if (o.nushi) name.append(mk('span', 'tk-tag', 'ぬし')); else if (o.f.rare === 5) name.append(mk('span', 'tk-tag tk-myth', 'まぼろし')); else if (o.f.rare === 4) name.append(mk('span', 'tk-tag', 'スペシャル'));
     if (o.fresh) name.append(mk('span', 'tk-newburst', 'NEW'));
     const dl = mk('dl'), big = mk('span', 'tk-big', o.best.toFixed(2) + 'cm'), stars = mk('span', 'tk-stars', starsOf(o.f, o.nushi)); stars.setAttribute('aria-label', 'めずらしさ ' + starCount(o.f, o.nushi) + ' / 5');
     const row = (k, v) => { const dt = mk('dt', '', k), dd = mk('dd'); dd.append(v); dl.append(dt, dd); };
@@ -626,9 +670,9 @@
     tip.replaceChildren(mk('div', 'tk-cardsay', line), body, close); tip.hidden = false; o.fresh = false;
     if (viaKey) close.focus();
     clearTimeout(touchFish.t); touchFish.t = setTimeout(() => { tip.hidden = true; }, 9000);
-    mood(o.nushi || o.f.rare === 4 ? 'sparkle' : o.f.rare === 3 ? 'apricot' : 'smile', 2600);
+    mood(o.nushi || o.f.rare >= 4 ? 'sparkle' : o.f.rare === 3 ? 'apricot' : 'smile', 2600);
     sr.textContent = o.f.name + '。' + regOf(o) + '。さいだい ' + o.best.toFixed(1) + 'センチ、あつめた ' + o.count + 'ひき。';
-    fishVoice(o.f, panOf(o.x), .11, o.nushi); buzz(o.nushi || o.f.rare === 4 ? [20, 40, 20, 40, 40] : 18);
+    fishVoice(o.f, panOf(o.x), .11, o.nushi); buzz(o.nushi || o.f.rare >= 4 ? [20, 40, 20, 40, 40] : 18);
     resetZen();
   }
   function resetZen() { dlg.classList.remove('tk-zen'); clearTimeout(zenTimer); zenTimer = setTimeout(() => dlg.classList.add('tk-zen'), 26000); }
@@ -661,6 +705,7 @@
     sr.textContent = 'いま ' + list.length + 'ひき およいでいます。ひだりから じゅんに、' + list.map(o => where(o) + 'の ' + o.f.name + '（' + sizeWord(o.f, o.nushi) + '）').join('、') + '。';
     say(list.length + 'ひき いるよ。みみを すませてね。', true);
     list.forEach((o, i) => setTimeout(() => { if (isOpen() && sfx) fishVoice(o.f, panOf(o.x), .11, o.nushi); }, 400 + i * 650));   // ひだり→みぎへ、なまえの おとを じゅんに
+    clearTimeout(utaTimer); if (sfx) utaTimer = setTimeout(sing, 400 + list.length * 650 + 5000);   // ひとまわり あと 5びょう なにも しないと、うたを うたう
   }
   function toggleSound(force) {
     const to = force === undefined ? !soundNow() : force;
@@ -715,6 +760,7 @@
       el.innerHTML = decorMarkup(p.n, size); el.dataset.i = String(i); el.title = p.n;
       placedBox.append(el);
     });
+    applyCombos(0);
   }
   function renderTray() {
     const have = Object.keys(DECOR).filter(n => (Number(owned()[n]) || 0) > 0);
@@ -740,7 +786,7 @@
   }
   function removeDecor(i) {
     const p = tank.placed[i]; if (!p) return;
-    tank.placed.splice(i, 1); saveTank(); renderPlaced(); renderTray();
+    tank.placed.splice(i, 1); saveTank(); renderPlaced(); applyCombos(1); renderTray();
     cuePon(p.x * W, true); sr.textContent = p.n + ' を もどしたよ。';
   }
   function placeDecor(name, x, y) {
@@ -750,7 +796,7 @@
     tank.placed.push({ n: name, x: +clamp(x, .05, .95).toFixed(3), y: +py.toFixed(3) }); saveTank(); renderPlaced();
     if (available(name) === 0) selected = '';
     renderTray(); say(pick(SAY.deco), true); mood('smile', 2200); heart(x * W, py * H - 14);
-    cuePon(x * W); sr.textContent = name + ' を おいたよ。';
+    cuePon(x * W); sr.textContent = name + ' を おいたよ。'; applyCombos(1);
   }
   function setDeco(on) {
     deco = on; selected = on ? selected : ''; tray.hidden = !on; decoBtn.setAttribute('aria-pressed', String(on)); decoBtn.textContent = on ? 'かざりを おわる' : 'かざる';
@@ -768,24 +814,30 @@
     const ctx = cvs.getContext('2d'); ctx.scale(K, K);
     const t = ROOM.tank, rp = palette();
     ctx.drawImage(await svgImage(roomSvg()), 0, 0, ROOM.w, ROOM.h);
-    if (rp.night || rp.dusk) { ctx.save(); ctx.globalAlpha = rp.night ? .5 : .12; ctx.fillStyle = rp.night ? '#0c2048' : '#ff8a3c'; ctx.fillRect(0, 0, ROOM.w, ROOM.h); ctx.restore(); }
+    if (rp.night || rp.dusk) { ctx.save(); ctx.globalAlpha = rp.night ? (starry ? .6 : .5) : .12; ctx.fillStyle = rp.night ? '#0c2048' : '#ff8a3c'; ctx.fillRect(0, 0, ROOM.w, ROOM.h); ctx.restore(); }
+    if (starry) { ctx.save(); STARS.forEach((st, i) => { ctx.globalAlpha = .55 + (i % 3) * .15; ctx.fillStyle = st.c; ctx.fill(new Path2D(starPath(st.x, st.y, st.s))); }); ctx.restore(); }
+    if (!riceGone) ctx.drawImage(await svgImage(riceSvg()), RICE.x, RICE.y, RICE.w, RICE.h);
     for (const el of [...friendsEls.filter(e => e.dataset.who === 'a'), mascot, ...friendsEls.filter(e => e.dataset.who === 'b')]) {
       const img = await imgReady(el); if (!img) continue;
       const fi = el.dataset.who === 'a' ? 0 : 1, isM = el === mascot, w = isM ? ROOM.mascot.w : ROOM.friend.w, h = isM ? ROOM.mascot.h : ROOM.friend.w, cx = isM ? ROOM.mascot.cx : ROOM.friendX[fi], foot = isM ? ROOM.mascot.foot : ROOM.friend.foot[fi];
       ctx.save(); if (rp.night && 'filter' in ctx) ctx.filter = 'brightness(.88) saturate(.95)';
       ctx.drawImage(img, cx - w / 2, foot - h, w, h); ctx.restore();
     }
-    ctx.drawImage(await svgImage(lampSvg()), 0, 0, ROOM.w, ROOM.h);
+    ctx.drawImage(await svgImage(lampSvg(starry)), 0, 0, ROOM.w, ROOM.h);
     // 水槽のなか（角を丸く切りぬく）
     ctx.save(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(t.x, t.y, t.w, t.h, 14) : ctx.rect(t.x, t.y, t.w, t.h); ctx.clip();
     const g = ctx.createLinearGradient(0, t.y, 0, t.y + t.h); g.addColorStop(0, rp.a); g.addColorStop(1, rp.b); ctx.fillStyle = g; ctx.fillRect(t.x, t.y, t.w, t.h);
     ctx.drawImage(await svgImage(tankBaseSvg(rp, false)), t.x, t.y, t.w, t.h);
     const kx = t.w / W, ky = t.h / H;
-    for (const p of tank.placed) { const size = 34 * unit * kx; ctx.drawImage(await svgImage(decorMarkup(p.n, 120)), t.x + p.x * t.w - size / 2, t.y + p.y * t.h - size / 2, size, size); }
+    for (const p of tank.placed) {
+      const size = 34 * unit * kx, dx = t.x + p.x * t.w - size / 2, dy = t.y + p.y * t.h - size / 2; ctx.drawImage(await svgImage(decorMarkup(p.n, 120)), dx, dy, size, size);
+      if (rp.night && p.n === 'ちいさな びん' && comboOn.bottle) { ctx.save(); ctx.font = `${Math.round(size * .34)}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff2a8'; ctx.shadowColor = '#ffe27a'; ctx.shadowBlur = 14; ctx.fillText('✦', dx + size * .42, dy + size * .42); ctx.restore(); }
+      if (rp.night && p.n === 'ながれぎ' && comboOn.forest) { ctx.save(); ctx.font = `${Math.round(size * .34)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🐟', dx + size * .78, dy + size * .3); ctx.restore(); }
+    }
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     for (const o of fishes.slice().sort((a, b) => a.layer - b.layer)) {
       const size = o.size * kx, cx = t.x + o.x * kx, cy = t.y + o.y * ky, flip = (o.art || LEFT_FACING.has(o.f.icon)) ? (o.face > 0 ? -1 : 1) : 1;
-      ctx.save(); ctx.translate(cx, cy); ctx.scale(flip, 1); ctx.globalAlpha = o.layer === 0 ? .82 : 1;
+      ctx.save(); ctx.translate(cx, cy); ctx.scale(flip, 1); ctx.globalAlpha = o.layer === 0 ? .82 : 1; if (o.f.legend) { ctx.shadowColor = '#fff2a8'; ctx.shadowBlur = 30; }
       const art = window.TsuriArt && window.TsuriArt[o.f.id];
       if (art) { const im = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = art; }); if (im) ctx.drawImage(im, -size / 2, -size / 2, size, size); }
       else { ctx.font = `${Math.round(size * .9)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif`; ctx.fillText(o.f.icon, 0, 0); }
@@ -796,7 +848,12 @@
     ctx.drawImage(await svgImage(frameSvg()), 0, 0, ROOM.w, ROOM.h);
     // ひづけ（名前は入れない）
     const d = new Date(), stamp = d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate();
-    ctx.font = '700 11px system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#7a6a55'; ctx.fillText('まるふわ つりびより  ' + stamp, ROOM.w - 10, ROOM.h - 10);
+    ctx.font = '700 11px system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#7a6a55'; ctx.fillText(stamp, ROOM.w - 10, ROOM.h - 10);
+    // 記念の ふだ：ゲームの なまえ・つれた かず・シールちょう（作者の なまえと URL は いれない）
+    const sv = readSave(), total = Number(sv.total) || 0, baseN = fishList().filter(f => !f.legend).length, gotN = residents().filter(r => !r.fish.legend).length;
+    ctx.save(); ctx.fillStyle = '#fffdf6ee'; ctx.strokeStyle = '#e3d3b0'; ctx.lineWidth = 2; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(10, ROOM.h - 68, 190, 56, 14); else ctx.rect(10, ROOM.h - 68, 190, 56); ctx.fill(); ctx.stroke();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#7a4b34'; ctx.font = '800 14px system-ui,sans-serif'; ctx.fillText('まるふわ つりびより', 22, ROOM.h - 47);
+    ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText('つれた かず ' + total + '　シールちょう ' + gotN + ' / ' + baseN, 22, ROOM.h - 27); ctx.restore();
     return new Promise(res => cvs.toBlob(b => res(b), 'image/png'));
   }
   async function takePhoto() {
@@ -815,12 +872,150 @@
   }
   $(photo, '.tk-photoclose').addEventListener('click', () => { photo.hidden = true; $(dlg, '.tk-cam').focus(); });
 
+  // ─── ひみつ（へやの なか）：ランプ・おにぎり・うとうと・かざりの くみあわせ・ごはんの おれい・すいそうの うた ───
+  //   ごほうびは 見た目・音・ことば だけ（釣れる 魚は かえない）。見つけても 見のがしても 何も へらない。
+  //   どれも「さわる」「まつ」だけで おこり、音（おと ON の時）と 読み上げ（sr）でも しらせる。見つけた ものは ひみつ専用の 鍵に 書く。
+  const HM_KEY = 'marufuwa-himitsu-v1';
+  function markFound(id, extra) {   // 読んで・足して・すぐ書く（ほかの ページが 書いた 物を 消さない）
+    let d = {};
+    try { d = JSON.parse(localStorage.getItem(HM_KEY)) || {}; } catch {}
+    if (!d || typeof d !== 'object') d = {};
+    if (!d.found || typeof d.found !== 'object') d.found = {};
+    if (!d.found[id]) d.found[id] = { at: Date.now(), time: scene.dataset.time || '', ...extra };
+    d.v = 1;
+    try { localStorage.setItem(HM_KEY, JSON.stringify(d)); } catch {}
+  }
+  let starry = false, riceTaps = 0, riceGone = false, napping = false, napTimer = 0, napBreath = 0, thanksTimer = 0, utaTimer = 0, comboOn = { bottle: false, forest: false };
+  const STARS = (() => { const r = mulberry(4242), out = []; for (let i = 0; i < 46; i++) out.push({ x: 6 + r() * 348, y: 4 + r() * 600, s: 2.2 + r() * 4.2, c: r() < .68 ? '#fff2a8' : '#d5ecff', d: -r() * 6, p: 3.4 + r() * 3.6 }); return out; })();
+  const starPath = (x, y, s) => `M${x} ${y - s} L${x + s * .28} ${y - s * .28} L${x + s} ${y} L${x + s * .28} ${y + s * .28} L${x} ${y + s} L${x - s * .28} ${y + s * .28} L${x - s} ${y} L${x - s * .28} ${y - s * .28}Z`;
+  starwall.innerHTML = `<svg viewBox="0 0 360 640" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:100%" aria-hidden="true">${STARS.map(st => `<path class="tk-st" d="${starPath(st.x, st.y, st.s)}" fill="${st.c}" style="animation-delay:${st.d.toFixed(2)}s;animation-duration:${st.p.toFixed(2)}s"/>`).join('')}</svg>`;
+  rice.innerHTML = riceSvg();
+  const cueClick = () => { noise(.03, { vol: .05 }); tone(1320, .04, { type: 'square', vol: .03 }); };
+  const cueLamp = on => {
+    noise(.03, { vol: .06 });
+    if (on) { tone(660, .08, { type: 'triangle', vol: .07 }); tone(880, .1, { type: 'triangle', vol: .07, at: .08 }); }
+    else { tone(880, .1, { type: 'triangle', vol: .06, glide: .5 }); [2093, 2637, 3136, 2637, 3136, 3951].forEach((f, i) => tone(f, .09, { type: 'square', vol: .018, at: .22 + i * .12 })); }
+  };
+  const cueHappy = () => { tone(784, .12, { type: 'triangle', vol: .07 }); tone(988, .18, { type: 'triangle', vol: .07, at: .12 }); };
+  const cueChime = () => [1568, 2093, 2637].forEach((f, i) => tone(f, .12, { type: 'triangle', vol: .05, at: i * .1 }));
+  const cueMunchMany = () => { for (let i = 0; i < 3; i++) noise(.06, { at: .25 + i * .18, vol: .05 }); cueHappy(); };
+  const cueBubbles = () => { [0, 1, 2].forEach(i => tone(560 + i * 110, .12, { type: 'triangle', vol: .06, at: i * .32, glide: 1.35 })); tone(1568, .2, { type: 'triangle', vol: .04, at: 1.1 }); };
+  function applyStarry() { room.classList.toggle('tk-starry', starry); lampBtn.setAttribute('aria-pressed', String(starry)); }
+  // へや1：ランプを けすと ほしぞら（よるだけ）
+  function toggleLamp() {
+    if (room.dataset.time !== 'yoru') { say('ひるまは ランプが なくても あかるいね。', true); sr.textContent = 'ひるまは ランプが なくても あかるいね。'; cueClick(); return; }
+    starry = !starry; applyStarry();
+    if (starry) { markFound('heya-lamp'); mood('sparkle', 3600); say('わあ… ほしぞらみたい。', true); sr.textContent = 'ランプを けしたよ。かべが ほしぞらに なったよ。'; cueLamp(false); }
+    else { say('ぽっと あかるく なったね。', true); sr.textContent = 'ランプを つけたよ。'; cueLamp(true); }
+  }
+  // へや3：ラグの おにぎりを 3かい さわると、なかまと はんぶんこ
+  function tapRice() {
+    if (riceGone) return;
+    riceTaps++;
+    if (riceTaps < 3) { say(riceTaps === 1 ? 'おにぎり、おいしそう。' : 'はんぶんこ、しよっか。', true); sr.textContent = 'おにぎりを さわったよ。'; cueMunch(RICE.x); return; }
+    riceTaps = 0; riceGone = true; rice.classList.add('tk-gone'); markFound('heya-onigiri');
+    sr.textContent = 'おにぎりを はんぶんこ したよ。'; mood('mint', 4200); say('はんぶんこ しよ', true);
+    setTimeout(() => { if (isOpen()) say('おいしいね', true); }, 1500);
+    cueMunchMany();
+    if (!reduced()) friendsEls.forEach((el, i) => { el.animate([{ translate: '0 0', scale: '1 1' }, { translate: '0 -10px', scale: '.96 1.06' }, { translate: '0 0', scale: '1.05 .95' }, { translate: '0 -6px', scale: '.98 1.03' }, { translate: '0 0', scale: '1 1' }], { duration: 1500, delay: 250 + i * 200, easing: 'ease-out' }); });
+    heart(RICE.x + 12, 0);
+  }
+  // へや4：3ぷん なにも しないと、まるふわが うとうと
+  function resetNap() { clearTimeout(napTimer); if (isOpen()) napTimer = setTimeout(nap, 180000); }
+  function nap() {
+    if (!isOpen()) return;
+    if (napping || deco || !tip.hidden || !photo.hidden) { resetNap(); return; }
+    napping = true; room.classList.add('tk-nap'); markFound('heya-utouto');
+    say('すや すや…', true); sr.textContent = 'まるふわが うとうと しはじめたよ。';
+    clearInterval(napBreath); napBreath = setInterval(() => { if (sfx && isOpen()) tone(150, .9, { type: 'triangle', vol: .018, glide: .8 }); }, 4200);
+  }
+  function wake() {
+    if (!napping) return;
+    napping = false; room.classList.remove('tk-nap'); clearInterval(napBreath); napBreath = 0;
+    say('…ねてないよ。', true); mood('smile', 2200);
+  }
+  // へや5：かざりの くみあわせ（ほしの びん／ちいさな もり）
+  const hasDecor = n => tank.placed.some(pl => pl.n === n);
+  const decorEl = n => [...placedBox.children].find(e => e.title === n);
+  function applyCombos(mode) {   // mode 0＝えが かわった だけ／1＝かざりを おいた・もどした／2＝ひらいた ところ
+    const cur = { bottle: hasDecor('ちいさな びん') && hasDecor('ほしの かけら'), forest: hasDecor('ながれぎ') && hasDecor('みずくさ') && hasDecor('きれいな いし') };
+    const night = room.dataset.time === 'yoru', bottle = decorEl('ちいさな びん'), log = decorEl('ながれぎ');
+    placedBox.classList.toggle('tk-night', night);
+    if (bottle) { bottle.classList.toggle('tk-bottlestar', cur.bottle); if (cur.bottle && !bottle.querySelector('.tk-instar')) { const st = document.createElement('i'); st.className = 'tk-instar'; st.textContent = '✦'; bottle.append(st); } }
+    if (log && cur.forest && !log.querySelector('.tk-restfish')) { const fi = document.createElement('i'); fi.className = 'tk-restfish'; fi.textContent = '🐟'; log.append(fi); }
+    const say2 = (text, id) => { sr.textContent = mode === 2 ? (sr.textContent ? sr.textContent + ' ' : '') + text : text; if (mode === 1) { say(text, true); mood('sparkle', 2600); cueChime(); } if (night) markFound(id); };
+    if (cur.bottle && (mode === 2 || !comboOn.bottle) && mode !== 0) say2(night ? 'ほしの びんが ひかって いるよ。' : 'ほしの びんが できたよ。よるに なると ひかるよ。', 'heya-bin');
+    if (cur.forest && (mode === 2 || !comboOn.forest) && mode !== 0) say2(night ? 'ちいさな もりで、さかなが やすんで いるよ。' : 'ちいさな もりが できたよ。よるに なると さかなが やすみに くるよ。', 'heya-mori');
+    if (mode !== 0) comboOn = cur;   // えが かわっただけの 時は、まえの じょうたいを のこす（おいた・もどした 時に くらべる）
+  }
+  // へや6：ごはんの あと 20びょう なにも しないと、さかなが おれいに あつまる
+  function armThanks() { clearTimeout(thanksTimer); thanksTimer = setTimeout(thanks, 20000); }
+  function thanks() {
+    if (!isOpen() || deco) return;
+    const list = fishes.filter(o => !o.leaving); if (!list.length) return;
+    for (const o of list) { o.gather = now + 7000; o.hold = 0; o.until = 0; }
+    markFound('heya-okaeshi'); mood('mint', 4200); say('ありがとう、って いってるみたい。', true); sr.textContent = 'さかなたちが、ありがとう って いってる みたい。';
+    cueBubbles();
+    if (reduced()) { heart(W * .5, H * .5); return; }
+    const cx = W * .5, cy = H * .48, sc = Math.min(W * .34, H * .5) / 34, n = 16;
+    for (let i = 0; i < n; i++) {
+      const t = i / n * Math.PI * 2, hx = 16 * Math.pow(Math.sin(t), 3), hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)), sz = 7 + (i % 3) * 2;
+      const b = document.createElement('span'); b.className = 'tk-bub tk-hb';
+      b.style.cssText = `left:${(cx + hx * sc).toFixed(1)}px;top:${(cy + hy * sc).toFixed(1)}px;width:${sz}px;height:${sz}px;animation:none`;
+      water.append(b);
+      b.animate([{ opacity: 0, transform: 'translateY(26px) scale(.4)' }, { opacity: .95, transform: 'translateY(0) scale(1)', offset: .25 }, { opacity: .95, transform: 'translateY(-6px) scale(1)', offset: .7 }, { opacity: 0, transform: 'translateY(-30px) scale(.9)' }], { duration: 3600, delay: i * 110, easing: 'ease-out', fill: 'backwards' }).onfinish = () => b.remove();
+      setTimeout(() => b.remove(), 3600 + i * 110 + 400);
+    }
+  }
+  // へや8：みみで ながめる → 魚の おとの ひとまわりの あと 5びょう まつと、まるふわが うたを うたう
+  function sing() {
+    if (!isOpen() || !sfx || !listen) return;
+    const list = fishes.filter(o => !o.leaving).slice().sort((a, b) => a.x - b.x).slice(0, 8);
+    if (!list.length) return;
+    const gap = .3;
+    list.forEach((o, i) => { let f = fishFreq(o.f); if (f < 300) f *= 2; tone(f, .26, { type: 'triangle', vol: .08, pan: panOf(o.x), at: i * gap }); });
+    const end = list.length * gap;
+    [523, 659, 784].forEach((f, i) => tone(f, .5, { type: 'triangle', vol: .06, at: end + i * .02 }));
+    mood('smile', end * 1000 + 1800); say('♪ ふん ふふん ♪', true); sr.textContent = 'まるふわが、すいそうの うたを うたったよ。'; markFound('heya-uta');
+  }
+  const interact = () => { clearTimeout(thanksTimer); clearTimeout(utaTimer); if (napping) wake(); resetNap(); };
+  dlg.addEventListener('pointerdown', interact, true); dlg.addEventListener('keydown', interact, true);
+  lampBtn.addEventListener('click', toggleLamp); rice.addEventListener('click', tapRice);
+  function resetSecrets() {
+    starry = false; applyStarry(); riceTaps = 0; riceGone = false; rice.classList.remove('tk-gone');
+    if (napping) { napping = false; room.classList.remove('tk-nap'); }
+    clearInterval(napBreath); napBreath = 0; clearTimeout(thanksTimer); clearTimeout(utaTimer); clearTimeout(napTimer);
+    comboOn = { bottle: false, forest: false };
+  }
+  // ひみつノート（つりびよりの ページ）から「もういちど きく」ための、おとと ことば
+  const REPLAY = {
+    'heya-lamp': { text: 'ランプを けしたよ。かべが ほしぞらに なったよ。', play: () => cueLamp(false) },
+    'heya-onigiri': { text: 'おにぎりを はんぶんこ したよ。', play: cueMunchMany },
+    'heya-utouto': { text: 'まるふわが うとうと しはじめたよ。', play: () => tone(150, .9, { type: 'triangle', vol: .04, glide: .8 }) },
+    'heya-bin': { text: 'ほしの びんが ひかって いるよ。', play: cueChime },
+    'heya-mori': { text: 'ちいさな もりで、さかなが やすんで いるよ。', play: cueChime },
+    'heya-okaeshi': { text: 'さかなたちが、ありがとう って いってる みたい。', play: cueBubbles },
+    'heya-uta': { text: 'まるふわが、すいそうの うたを うたったよ。', play: () => [523, 659, 784, 659, 523, 784].forEach((f, i) => tone(f, .24, { type: 'triangle', vol: .07, at: i * .3 })) }
+  };
+  function replay(id) { const r = REPLAY[id]; if (!r) return null; refreshSound(); r.play(); return r.text; }
+  function secret(id) {   // 検査・ノート用：ひみつを その場で おこす
+    if (!isOpen()) return false;
+    if (id === 'lamp') { toggleLamp(); return true; }
+    if (id === 'rice') { riceTaps = 2; tapRice(); return true; }
+    if (id === 'nap') { nap(); return napping; }
+    if (id === 'thanks') { thanks(); return true; }
+    if (id === 'uta') { sing(); return true; }
+    return false;
+  }
+
   // ─── 開く・閉じる ───
   function open() {
     if (dlg.open) return;
     tank = readTank();
     const arrivals = newArrivals();
-    dlg.showModal();
+    dlg.showModal(); resetSecrets();
+    // となりに いる なかまが かわって いたら、へやの なかまも かえる（つりばを かえた あと）
+    friendsEls.forEach(el => { const src2 = friendSrc(el.dataset.who === 'a' ? 'friend-a' : 'friend-b'); if (src2 && el.getAttribute('src') !== src2) el.setAttribute('src', src2); });
     layoutRoom(); paintWater(); layoutRoom();
     const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
     if (arrivals.length) {
@@ -833,15 +1028,16 @@
     setListen(false); refreshSound(); if (sfx) { cueOpen(); startAmbience(); }
     clearTimeout(sayTimer); sayTimer = setTimeout(autoSay, 8000);
     clearTimeout(rotateTimer); rotateTimer = setTimeout(rotate, 40000);
+    applyCombos(2); resetNap();
     start();
   }
   function close() { if (dlg.open) dlg.close(); }
-  dlg.addEventListener('close', () => { clearTimeout(sayTimer); clearTimeout(zenTimer); clearTimeout(moodTimer); clearTimeout(rotateTimer); clearTimeout(sayPending); cancelAnimationFrame(raf); raf = 0; tip.hidden = true; photo.hidden = true; setDeco(false); setListen(false); refreshBadge(); mascot.src = BASE + 'img/game-blue.webp'; stopAmbience(); if (sfx) cueClose(); });
+  dlg.addEventListener('close', () => { resetSecrets(); clearTimeout(sayTimer); clearTimeout(zenTimer); clearTimeout(moodTimer); clearTimeout(rotateTimer); clearTimeout(sayPending); cancelAnimationFrame(raf); raf = 0; tip.hidden = true; photo.hidden = true; setDeco(false); setListen(false); refreshBadge(); mascot.src = BASE + 'img/game-blue.webp'; stopAmbience(); if (sfx) cueClose(); });
   $(dlg, '.tk-close').addEventListener('click', close);
   $(empty, 'button').addEventListener('click', close);
   $(dlg, '.tk-cam').addEventListener('click', takePhoto);
   openBtn.addEventListener('click', () => open());
-  $(dlg, '.tk-feed').addEventListener('click', () => { if (deco) setDeco(false); drop(W * (.3 + Math.random() * .4), H * .1, 4); say(pick(SAY.feed), true); sr.textContent = 'ごはんを あげたよ。さかなが あつまって くるよ。'; });
+  $(dlg, '.tk-feed').addEventListener('click', () => { if (deco) setDeco(false); drop(W * (.3 + Math.random() * .4), H * .1, 4); say(pick(SAY.feed), true); sr.textContent = 'ごはんを あげたよ。さかなが あつまって くるよ。'; armThanks(); });
   decoBtn.addEventListener('click', () => setDeco(!deco));
   sndBtn.addEventListener('click', () => toggleSound());
   earBtn.addEventListener('click', () => {
@@ -872,5 +1068,5 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) { stopAmbience(); if (actx && actx.state === 'running') actx.suspend().catch(() => {}); } else if (isOpen() && sfx) { startAmbience(); } });
   refreshBadge(); refreshSound();
 
-  window.TsuriTank = { open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), sound: () => sfx, listening: () => listen, version: 3 };
+  window.TsuriTank = { open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), version: 4 };
 })();
