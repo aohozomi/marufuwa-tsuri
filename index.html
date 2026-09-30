@@ -351,8 +351,9 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 .drop{position:absolute;z-index:4;border-radius:50%;background:#fff;border:1px solid #8fd0f2;pointer-events:none}   /* みずしぶき */
 .ripple{position:absolute;z-index:2;width:9%;aspect-ratio:2/1;transform:translate(-50%,-50%);border:3px solid #ffffffd9;border-radius:50%;pointer-events:none}
 .hop{position:absolute;z-index:4;font-size:1.3rem;pointer-events:none;transform:translate(-50%,-50%)}
-.drift{opacity:.55;animation:drift var(--lap,38s) linear infinite}
-@keyframes drift{from{left:112%}to{left:-14%}}
+html.dlg-open :not(dialog[open]):not(dialog[open] *),html.dlg-open :not(dialog[open]):not(dialog[open] *)::before,html.dlg-open :not(dialog[open]):not(dialog[open] *)::after{animation-play-state:paused !important}   /* 窓が ひらいて いる あいだ、窓の そとの CSS の 動きを 一時停止（ひらいた 窓の 中は うごく。とじれば つづきから） */
+.drift{opacity:.55;left:0;animation:drift var(--lap,38s) linear infinite}
+@keyframes drift{from{translate:calc(112 / var(--wn,16) * 100%) 0}to{translate:calc(-14 / var(--wn,16) * 100%) 0}}   /* left ではなく translate で うごかす（left は 毎フレーム レイアウトを やりなおす＝電池・熱。translate の % は じぶんの はば＝--w の %：--wn は その すうじ） */
 @keyframes tug{50%{translate:6px 3px}}
 /* ウキの まわりに、わが ひろがり つづける */
 .float::after,.float::before{content:"";position:absolute;left:50%;top:78%;width:260%;aspect-ratio:2.4/1;border:2px solid #ffffffb8;border-radius:50%;translate:-50% -50%;animation:ring 3.2s ease-out infinite;pointer-events:none}
@@ -800,8 +801,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <span class="held" id="held" aria-hidden="true" hidden></span>
     <span class="held" id="held-friend" aria-hidden="true" hidden></span>
 
-    <div class="shadow drift ambient-fish" data-fish="3" style="top:80%;--w:16%;--lap:41s;animation-delay:-14s" aria-hidden="true"></div>
-    <div class="shadow drift ambient-fish" data-fish="12" style="top:89%;--w:18%;--lap:67s;animation-delay:-42s" aria-hidden="true"></div>
+    <div class="shadow drift ambient-fish" data-fish="3" style="top:80%;--w:16%;--wn:16;--lap:41s;animation-delay:-14s" aria-hidden="true"></div>
+    <div class="shadow drift ambient-fish" data-fish="12" style="top:89%;--w:18%;--wn:18;--lap:67s;animation-delay:-42s" aria-hidden="true"></div>
     <div class="shadow" id="shadow" aria-hidden="true"></div>
     <div class="float" id="float" aria-hidden="true"></div>
     <div id="bang" aria-hidden="true">！</div>
@@ -3119,10 +3120,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
   // そら。くもは ゆっくり ながれる。ゆうがたは くもが そまり、よるは ほしが またたく
   const heaven = $('sky'), brush = heaven.getContext('2d'), film = brush.createImageData(heaven.width, heaven.height);
-  let lastSky = 0;
+  let lastSky = 0, skyKey = '', skyTint = null;
   function drawSky(now) {
     if (now - lastSky < (document.body.classList.contains('quiet') ? 500 : document.body.classList.contains('gazing') ? 250 : 125) && lastSky) return; lastSky = now;
-    const css = getComputedStyle(scene), top = rgb(css.getPropertyValue('--sky1')), low = rgb(css.getPropertyValue('--sky2')), orb = rgb(css.getPropertyValue('--orb'));
+    const sk = scene.dataset.time + '|' + document.documentElement.dataset.time;   // そらの 色は 時間だけで きまる：まいかい getComputedStyle を よばない（スタイルの 強制 さいけいさんを へらす）
+    if (sk !== skyKey || !skyTint) { const css = getComputedStyle(scene); skyTint = {top: rgb(css.getPropertyValue('--sky1')), low: rgb(css.getPropertyValue('--sky2')), orb: rgb(css.getPropertyValue('--orb'))}; skyKey = sk; }
+    const top = skyTint.top, low = skyTint.low, orb = skyTint.orb;
     const night = scene.dataset.time === 'yoru', dusk = scene.dataset.time === 'yuu' || scene.dataset.time === 'asa';
     const W = heaven.width, H = heaven.height, px = film.data, t = now / 1000, cover = rainy ? .3 : .52;
     const cloud = night ? [120, 132, 178] : dusk ? [0, 1, 2].map(c => 255 * .45 + orb[c] * .55) : [255, 255, 255], belly = night ? [60, 70, 110] : dusk ? [0, 1, 2].map(c => orb[c] * .6 + 70) : rainy ? [150, 160, 170] : [214, 228, 240];
@@ -3164,7 +3167,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     trowel.putImageData(tile, 0, 0);
   }
-  function flow(now) { if (!document.hidden && !document.querySelector('dialog[open]')) { if (scene.dataset.tooku !== 'true') drawWater(now); drawSky(now); drawSoil(); } requestAnimationFrame(flow); }   // 窓が ひらいて いる 間と、とおく ON の 間の みずは、みえない ので かかない（CPU を へらす・総司令部の そくてい）
+  // ダイアログが ひらいて いる あいだの じょうたいを 1か所で もつ（まいフレーム DOM を さがさない）。html.dlg-open の あいだ、ひらいた 窓の そと（うしろの 画面）の CSS の 動きを 一時停止（見た目は かわらない・電池と 熱。ゲーム開発司令部２の おへやの そくてい：CPU 42→28%、本体の ずかんでも 28→6%）
+  let dlgOpen = false;
+  { const root = document.documentElement, sync = () => { const o = !!document.querySelector('dialog[open]'); if (o !== dlgOpen) { dlgOpen = o; root.classList.toggle('dlg-open', o); } };
+    new MutationObserver(sync).observe(document.body, {subtree: true, attributes: true, attributeFilter: ['open']}); sync(); }
+  function flow(now) { if (!document.hidden && !dlgOpen) { if (scene.dataset.tooku !== 'true') drawWater(now); drawSky(now); drawSoil(); } requestAnimationFrame(flow); }   // 窓が ひらいて いる 間と、とおく ON の 間の みずは、みえない ので かかない（CPU を へらす・総司令部の そくてい）
 
   // ながめる。つらなくて いい。みずと そらと なかまを、みて いるだけ
   const GAZE_WORDS = ['なみの おとを、きいて いよう。', 'きょうも、おつかれさま。', 'なにも しなくて、いいよ。', 'ゆっくり、いきを しよう。', 'ここに いて、いいよ。', 'ぼんやり するのも、だいじな じかん。', 'いま できる ことだけで、じゅうぶん。', 'みずが きらきら しているね。', 'くもが ゆっくり ながれて いくね。', 'しんこきゅう、ひとつ。', 'いそがなくて、だいじょうぶ。', 'ここは、ゆっくり して いい ばしょ。'];
