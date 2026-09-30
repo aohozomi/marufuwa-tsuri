@@ -21,7 +21,10 @@
 #tooku .far{position:absolute;left:-2%;right:-2%;top:36%;height:14%;background:var(--hill,#a9d89a);border-radius:50% 50% 0 0/100% 100% 0 0;filter:brightness(.9) saturate(.8);opacity:.9}
 #tooku .far2{position:absolute;left:30%;right:-10%;top:40%;height:12%;background:var(--tree,#6fbf6a);border-radius:60% 40% 0 0/100% 100% 0 0;opacity:.7}
 #tooku canvas.water{position:absolute;left:0;right:0;top:46%;width:100%;height:54%;display:block;image-rendering:auto}
-#tooku .shore{position:absolute;left:-4%;width:46%;top:84%;height:22%;background:var(--ground,#efe3c6);border-radius:50% 50% 0 0/100% 100% 0 0;box-shadow:inset 0 3px 0 var(--edge,#cdb98f)}
+#tooku .shore{position:absolute;left:-4%;width:46%;top:84%;height:22%;background:radial-gradient(ellipse at 40% 20%,#f6ecd4,var(--ground,#efe3c6) 60%);border-radius:50% 50% 0 0/100% 100% 0 0;box-shadow:inset 0 3px 0 var(--edge,#cdb98f)}
+#tooku .grass{position:absolute;width:.5cqw;height:2.2cqw;background:#5aa85a;border-radius:50% 50% 0 0;transform-origin:50% 100%;translate:-50% -100%;animation:sway 4.6s ease-in-out infinite alternate}
+#tooku .stone{position:absolute;width:1.4cqw;height:.9cqw;border-radius:50%;background:#bfb6a6;box-shadow:inset -2px -2px 0 #9a9284;translate:-50% -50%}
+#tooku .boat::after{content:'';position:absolute;left:8%;right:8%;bottom:-.6cqw;height:1cqw;border-radius:50%;background:#0b2a4a40;filter:blur(1px)}
 #tooku .dock{position:absolute;left:62%;width:20%;top:78%;height:2.2cqw;background:#b08a5a;border-radius:2px;box-shadow:0 2px 0 #7a5a38}
 #tooku .me{position:absolute;left:14%;top:83%;width:5.6cqw;translate:-50% -100%}
 #tooku .me img{scale:-1 1}
@@ -39,7 +42,7 @@
 #scene[data-phase=bite] #tooku .mine,#scene[data-phase=reel] #tooku .mine{animation:tooku-dip .45s ease-in-out infinite}
 #tooku .ring{position:absolute;width:4cqw;height:1.6cqw;translate:-50% -50%;border:1.5px solid #ffffffa0;border-radius:50%;opacity:0}
 #scene[data-phase=waiting] #tooku .ring,#scene[data-phase=bite] #tooku .ring,#scene[data-phase=reel] #tooku .ring{animation:tooku-ring 2.2s ease-out infinite}
-#tooku .fish{position:absolute;width:5cqw;height:2cqw;translate:-50% -50%;border-radius:50%;background:#0b2a4a55;opacity:0;animation:tooku-fish 5s ease-in-out infinite alternate;animation-delay:var(--d,0s)}
+#tooku .fish{position:absolute;width:5cqw;height:1.6cqw;translate:-50% -50%;border-radius:50%;background:#0b2a4a3a;filter:blur(1.2px);mix-blend-mode:multiply;opacity:0;animation:tooku-fish 5s ease-in-out infinite alternate;animation-delay:var(--d,0s)}
 #tooku .name{position:absolute;translate:-50% 0;font-size:.62rem;font-weight:800;color:#fff;text-shadow:0 1px 2px #0008;white-space:nowrap}
 #tooku-toggle{--c1:#e8f0ff;--c2:#9fb8ee;--side:#5d7fcc;--ink:#1f3a6e;flex:1 1 40%;min-height:54px;font-size:.95rem}
 #tooku-toggle[aria-pressed=true]{--c1:#cfe0ff;--c2:#6f95e6;--side:#3e63bd}
@@ -120,6 +123,8 @@
       const fx = flip ? x - 4 : x + 4, fy = y + (kind === 'dock' ? 6 : 5);
       line(flip ? x - 1.2 : x + 1.2, y - 3.6, fx, fy); html('bobber', {left: fx + '%', top: fy + '%', '--d': '-' + between(0, 2).toFixed(1) + 's'});
     });
+    for (let i = 0; i < 7; i++) html('grass', {left: between(2, 38) + '%', top: between(87, 96) + '%', rotate: between(-14, 14) + 'deg'});
+    for (let i = 0; i < 4; i++) html('stone', {left: between(3, 36) + '%', top: between(88, 97) + '%'});
     for (let i = 0; i < 4; i++) html('fish', {left: between(20, 80) + '%', top: between(56, 92) + '%', '--d': '-' + between(0, 5).toFixed(1) + 's'});
   }
 
