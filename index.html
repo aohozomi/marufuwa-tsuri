@@ -916,6 +916,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <div id="nakama-party"></div>
     <div id="nakama-card" hidden></div>
     <div id="nakama-grid"></div>
+    <div id="nakama-own" hidden></div>
     <button class="close" type="button" id="close-nakama"></button>
   </dialog>
 
@@ -1193,6 +1194,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const more = other.note.filter(n => n && Number.isFinite(n.at) && Number.isInteger(n.id) && FISH[n.id] && ['catch', 'release', 'gift'].includes(n.kind) && !have.has(n.at + ':' + n.id + ':' + n.kind)).map(n => ({at: n.at, id: n.id, size: Number.isFinite(n.size) ? n.size : 0, spot: typeof n.spot === 'string' ? n.spot.slice(0, 1) : 'L', time: typeof n.time === 'string' ? n.time.slice(0, 1) : 'h', nushi: !!n.nushi, party: Array.isArray(n.party) ? n.party.filter(x => typeof x === 'string').slice(0, 4) : [], avatar: typeof n.avatar === 'string' ? n.avatar : null, kind: n.kind}));
       if (more.length) { save.note = [...(Array.isArray(save.note) ? save.note : []), ...more].sort((a, b) => b.at - a.at).slice(0, 200); changed = true; }
     }
+    if (ownOk(other.own) && !ownOk(save.own)) { save.own = {c: other.own.c, a: other.own.a, ear: other.own.ear, item: other.own.item}; changed = true; }   // じぶんの こ（あれば のこす）
     if (typeof other.avatar === 'string' && !save.avatar && /^[a-z]{2,12}$/.test(other.avatar)) { save.avatar = other.avatar; changed = true; }   // じぶんの キャラ（あとで えらべば うわがき）
     if (other.modeTip === true && save.modeTip !== true) { save.modeTip = true; changed = true; }
     if (other.homeTip === true && save.homeTip !== true) { save.homeTip = true; changed = true; }
@@ -1811,7 +1813,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; if (!cardShownAt) { cardShownAt = performance.now(); if (phase === 'caught') lockFor(1000); } }   // カードが 出た 時刻（つれた 直後は 0）
   function cardWait(ms) { clearTimeout(cardTimer); cardShownAt = 0; $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
-  function face(name) { curFace = name; const av = avatarPal(); marufuwa.src = av ? 'img/friend-' + av.id + '-s.webp' : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
+  function face(name) { curFace = name; const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
   function drawToday() {
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
@@ -3337,6 +3339,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ['rel10', 2, 'そっと 10ぴき', 'Set ten free', 'やさしく にがそう', 'Be gentle', '💧', () => (save.released || 0) >= 10],
     ['fav', 1, '♡を つけた', 'A first heart', 'なかまを ♡に', 'Heart a friend', '♡', () => !!(save.fav && save.fav.length)],
     ['avatar', 1, 'じぶんの キャラ', 'Your own character', 'なかまを えらんで つろう', 'Fish as a friend', '🧑‍🎤', () => !!avatarPal()],
+    ['own', 1, 'じぶんの こを つくった', 'Made your own friend', 'なかまの がめんで つくれるよ', 'You can make one in Friends', '🧸', () => ownOk(save.own)],
     ['party1', 1, 'なかまと いっしょに つった', 'Fishing together', 'いっしょに いく なかまを', 'Take a friend along', '🤝', () => tf('party1')],
     ['party4', 2, 'なかま 4にんで つった', 'Four friends along', '4にんで いっしょに', 'Go with four friends', '👥', () => tf('party4')],
     ['pal5', 1, 'であった なかま 5にん', '5 friends met', 'いろんな なかまに あおう', 'Meet more friends', '🐾', () => nPal() >= 5],
@@ -3399,14 +3402,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // ---- なかま：であった こを えらぶ（108にんに ふえても おなじ しくみ）。じぶんの キャラ／いっしょに いく なかま（4にんまで）／♡。まるふわは しゅじんこう（いつでも もどせる）----
   function rosterById(id) { return ROSTER.find(p => p.id === id) || null; }
   function metPal(p) { return !!(save.pals && save.pals[p.id]); }
-  function avatarPal() { const p = typeof save.avatar === 'string' ? rosterById(save.avatar) : null; return p && metPal(p) ? p : null; }
+  function avatarPal() { if (save.avatar === 'own') return ownOk(save.own) ? window.TsuriOwn.pal(save.own) : null; const p = typeof save.avatar === 'string' ? rosterById(save.avatar) : null; return p && metPal(p) ? p : null; }   // 'own'＝じぶんの こ（tsuri-own.js）。つくって いない・こわれて いる ときは まるふわ
   function paintAvatar() {
     const av = avatarPal(); if (av) marufuwa.dataset.avatar = av.id; else delete marufuwa.dataset.avatar;
     face(curFace);
-    if (av || marufuwa.dataset.altSet) { marufuwa.dataset.altSet = av ? '1' : ''; marufuwa.alt = av ? L('つりを する ' + av.name, 'Fishing: ' + palName(av)) : L('つりを する まるふわ', 'Marufuwa fishing'); }
+    if (av || marufuwa.dataset.altSet) { marufuwa.dataset.altSet = av ? '1' : ''; marufuwa.alt = av ? (av.own ? L('つりを する ' + window.TsuriOwn.label(save.own), 'Fishing: ' + window.TsuriOwn.label(save.own)) : L('つりを する ' + av.name, 'Fishing: ' + palName(av))) : L('つりを する まるふわ', 'Marufuwa fishing'); }
   }
   const nakama = $('nakama'), nk = {pick: null};
-  const nkImg = (p, size) => { const im = document.createElement('img'); im.src = p ? 'img/friend-' + p.id + '-s.webp' : 'img/game-blue.webp'; im.width = im.height = size; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; return im; };
+  nakama.addEventListener('close', () => { nk.own = false; delete nakama.dataset.own; });   // とじたら つくる がめんも おわり
+  const nkImg = (p, size) => { const im = document.createElement('img'); im.src = p ? (p.own ? window.TsuriOwn.src(save.own, levelOf(save.xp || 0), u => { im.src = u; }) : 'img/friend-' + p.id + '-s.webp') : 'img/game-blue.webp'; im.width = im.height = size; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; return im; };
   const nkBtn = (text, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = text; b.addEventListener('click', fn); return b; };
   function nkText() { const o = $('open-nakama'); o.textContent = L('なかま', 'Friends'); o.setAttribute('aria-label', L('なかま。じぶんの キャラと、いっしょに いく なかまを えらぶ', 'Friends. Choose who you fish as and who comes along')); $('close-nakama').textContent = L('とじる', 'Close'); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', nkText); else nkText();
@@ -3430,12 +3434,36 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     say(save.fav.includes(p.id) ? L(p.name + 'を ♡に したよ。', 'Marked ' + palName(p) + ' as a favorite.') : L('♡を はずしたよ。', 'Removed the heart.'));
     afterNakamaChange('#nakama-card [data-act=fav]');
   }
+  // ---- じぶんの こ（tsuri-own.js）：自由入力なし・数字だけ（save.own＝{c,a,ear,item}）----
+  function ownOk(o) { return !!(window.TsuriOwn && window.TsuriOwn.valid(o)); }
+  function ownFaceSrc() { return window.TsuriOwn.src(save.own, levelOf(save.xp || 0), u => { const a = avatarPal(); if (a && a.own) marufuwa.src = u; }); }
+  function chooseOwn(o) {   // o＝あたらしく つくった こ／null＝つくって ある こで つる
+    if (o) save.own = {c: o.c, a: o.a, ear: o.ear, item: o.item};
+    if (!ownOk(save.own)) return;
+    save.avatar = 'own'; paintAvatar(); SFX.loved();
+    say(L('じぶんの こ、' + window.TsuriOwn.name(save.own) + 'で つるよ。', 'Fishing as your own friend, ' + window.TsuriOwn.en(save.own) + '.'));
+    afterNakamaChange('#nakama-me [data-act=own-make]');
+  }
+  function ownSection(me, av) {
+    const O = window.TsuriOwn, maker = $('nakama-own'); if (!O || !maker || !O.available()) return;
+    if (nk.own) {
+      nakama.dataset.own = 'true';
+      if (!maker.dataset.open) { maker.dataset.open = '1'; const m = O.openMaker(maker, {own: ownOk(save.own) ? save.own : null, level: levelOf(save.xp || 0), onDone: o => { nk.own = false; chooseOwn(o); }, onCancel: () => { nk.own = false; drawNakama(); const b = nakama.querySelector('#nakama-me [data-act=own-make]'); if (b) b.focus({preventScroll: true}); }}); setTimeout(() => m.focus(), 0); }
+      return;
+    }
+    delete nakama.dataset.own; maker.hidden = true; delete maker.dataset.open; maker.replaceChildren();
+    const row = document.createElement('div'), has = ownOk(save.own); row.className = 'nk-row';
+    const make = nkBtn(has ? L('じぶんの こを つくりなおす', 'Remake your own friend') : L('じぶんの こを つくる', 'Make your own friend'), () => { nk.own = true; drawNakama(); }); make.dataset.act = 'own-make'; row.append(make);
+    if (has && !(av && av.own)) { const use = nkBtn(L('じぶんの こで つる', 'Fish as your own friend'), () => chooseOwn(null)); use.dataset.act = 'own-use'; row.append(use); }
+    me.append(row);
+  }
   function drawNakama() {
     nkText(); const av = avatarPal(), all = ROSTER, metN = all.filter(metPal).length, pf = prefPals(), party = pf.party;
     $('nakama-title').textContent = L('なかま', 'Friends');
     $('nakama-lead').textContent = L('であった なかまと いっしょに つりが できるよ。いっしょに いくと、なかよく なって レベルが あがるよ。', 'Fish together with the friends you have met. The more you go together, the higher their level grows.') + ' ' + L('であった なかま ' + metN + ' / ' + all.length, 'Met ' + metN + ' / ' + all.length);
-    const me = $('nakama-me'), who = document.createElement('span'); who.textContent = L('じぶん：', 'You: ') + (av ? palName(av) : L('まるふわ', 'Marufuwa'));
+    const me = $('nakama-me'), who = document.createElement('span'); who.textContent = L('じぶん：', 'You: ') + (av ? palName(av) + (av.own ? L('（じぶんの こ）', ' (your own friend)') : '') : L('まるふわ', 'Marufuwa'));
     me.replaceChildren(nkImg(av, 56), who, ...(av ? [nkBtn(L('まるふわに もどす', 'Back to Marufuwa'), () => chooseAvatar(null))] : []));
+    ownSection(me, av);
     // いっしょに いく なかま（4にんまで）
     { const box = $('nakama-party'), h = document.createElement('h3'), slots = document.createElement('div'); h.textContent = L('いっしょに いく なかま（4にんまで）', 'Coming along (up to 4)'); slots.className = 'slots';
       for (let i = 0; i < 4; i++) {
@@ -3705,6 +3733,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-en.js"></script>
 <script defer src="tsuri-tegami.js"></script>
 <script defer src="tsuri-note.js"></script>
+<script defer src="tsuri-own.js"></script>
 <script defer src="tsuri-ruby-dict.js"></script>
 <script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
