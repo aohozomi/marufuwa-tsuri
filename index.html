@@ -1302,6 +1302,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0;
   function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  const showModal0 = HTMLDialogElement.prototype.showModal;
+  HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
+    if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
+    return showModal0.apply(this, arguments);
+  };
   function say(text, mute) { status.textContent = text; if (!mute) speak(text); }
   // つれた けっかの ながい ぶんは 目には 出さない（カードと ペンギンが みせる）。読み上げ（aria-live）にだけ のこす。あとから ほかの ことばが 書かれたら（外付けも）ふつうに 見える
   function sayQuiet(text) { const span = document.createElement('span'); span.className = 'sr-only'; span.textContent = text; status.replaceChildren(span); speak(text); }
@@ -1539,7 +1544,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
   const bubble = $('bubble');
   function chatter() {
-    if (!document.hidden && phase !== 'caught' && !book.open && !swapping) {
+    if (!document.hidden && (phase === 'idle' || phase === 'waiting') && !book.open && !swapping) {   // アタリ・ひいて いる・つれた あとは しゃべらない（わの タイミングに めが いく）
       const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
       bubble.textContent = Math.random() < .25 ? pals[who].word : WORDS[Math.floor(Math.random() * WORDS.length)];
       place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
