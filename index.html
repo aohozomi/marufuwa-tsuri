@@ -1193,12 +1193,30 @@ dialog .close{display:block;margin:auto;min-width:160px}
     { const b = document.createElement('button'); b.id = 'calm'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
     { const b = document.createElement('button'); b.id = 'large'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
     { const g = document.createElement('div'), h = document.createElement('h3'); g.className = 'assist-group'; g.setAttribute('role', 'group'); g.setAttribute('aria-labelledby', 'assist-snd-h'); h.id = 'assist-snd-h'; h.className = 'assist-label'; g.append(h);
-      SND_BTN.forEach(x => { const b = document.createElement('button'); b.id = x.id; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); g.append(b); }); body.append(g); }
+      SND_BTN.forEach(x => { const b = document.createElement('button'); b.id = x.id; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); g.append(b); });
+      { const y = document.createElement('button'); y.id = 'snd-yomi'; y.type = 'button'; y.hidden = true; y.setAttribute('aria-pressed', 'false'); g.append(y); }
+      body.append(g); }
     box.append(head, body);
     box.open = typeof save.assistOpen === 'boolean' ? save.assistOpen : !!save.easy;
     head.addEventListener('click', () => setTimeout(() => { save.assistOpen = box.open; store(); }, 0));   // ひらく／とじる を おぼえる
     return box;
   }
+  // よみあげ：がめんの ことばを こえで よむ。「おと」とは べつの せってい（おとが OFF でも つかえる）。
+  // この たんまつの なかだけで よむ「ローカルの こえ」（localService）に かぎる＝ことばは そとへ でない。にほんごの ローカルの こえが ない たんまつ・English の ときは ボタンを 出さない
+  const speech = 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function' ? window.speechSynthesis : null;
+  let yomiVoice = null;
+  const yomiAvail = () => !!yomiVoice && !EN();
+  function yomiPick() { try { yomiVoice = (speech ? speech.getVoices() : []).find(v => v.localService && /^ja([-_]|$)/i.test(v.lang)) || null; } catch { yomiVoice = null; } drawYomi(); }
+  function speak(text) {
+    if (save.yomi !== true || !yomiAvail() || !text || document.hidden || document.body.classList.contains('gazing')) return;   // ながめる 中は しずかに
+    try { speech.cancel(); const u = new SpeechSynthesisUtterance(String(text)); u.voice = yomiVoice; u.lang = yomiVoice.lang; u.rate = .95; u.volume = 1; speech.speak(u); } catch {}
+  }
+  function drawYomi() {
+    const b = $('snd-yomi'); if (!b) return; const ok = yomiAvail(); b.hidden = !ok; if (!ok) return;
+    const on = save.yomi === true; b.textContent = 'よみあげ：' + (on ? 'ON' : 'OFF'); b.setAttribute('aria-pressed', String(on));
+    b.setAttribute('aria-label', b.textContent + '。がめんの ことばを こえで よむよ。この たんまつの なかだけで よむよ。スクリーンリーダーを つかって いる ひとは、OFF の ままが おすすめ');
+  }
+  if (speech) { try { speech.addEventListener('voiceschanged', yomiPick); } catch {} }
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
   let ambient = null, ambientOut = null, ambientDuck = null, sleepMuted = false;
   function startAmbient() {
@@ -1284,9 +1302,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0;
   function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
-  function say(text) { status.textContent = text; }
+  function say(text, mute) { status.textContent = text; if (!mute) speak(text); }
   // つれた けっかの ながい ぶんは 目には 出さない（カードと ペンギンが みせる）。読み上げ（aria-live）にだけ のこす。あとから ほかの ことばが 書かれたら（外付けも）ふつうに 見える
-  function sayQuiet(text) { const span = document.createElement('span'); span.className = 'sr-only'; span.textContent = text; status.replaceChildren(span); }
+  function sayQuiet(text) { const span = document.createElement('span'); span.className = 'sr-only'; span.textContent = text; status.replaceChildren(span); speak(text); }
   function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; if (!cardShownAt) cardShownAt = performance.now(); }   // カードが 出た 時刻（つれた 直後は 0）
   function cardWait(ms) { clearTimeout(cardTimer); cardShownAt = 0; $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
@@ -1399,7 +1417,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       judge.animate([{scale: '.6'}, {scale: '1.25'}, {scale: '1'}], {duration: 260, easing: 'ease-out'});
       if (power === 3) sparkle(); else if (power === 1) puff();
     }
-    if (hp === 0) caught(); else say(word + ' あと すこし。');
+    if (hp === 0) caught(); else say(word + ' あと すこし。', true);
   }
   function sparkle() {
     const reel = $('reel');
@@ -2484,7 +2502,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function drawEasy() {
     const on = !!save.easy; $('easy').textContent = on ? 'らくちん：ON' : 'らくちん：OFF'; $('easy').setAttribute('aria-pressed', String(on)); scene.dataset.easy = String(on);
     const parts = []; if (on) parts.push('らくちん'); if (canBuzz && !buzzOn()) parts.push('ふるえ なし'); if (!natureOn()) parts.push('いきもの なし');
-    if (save.sndGuide === false) parts.push('あんないの おと なし'); if (save.sndFx === false) parts.push('こうかおん なし'); if (save.sndAmb === false) parts.push('なみと あめ なし'); if (save.slow) parts.push('ゆったり'); if (save.soft) parts.push('やさしい おと');
+    if (save.sndGuide === false) parts.push('あんないの おと なし'); if (save.sndFx === false) parts.push('こうかおん なし'); if (save.sndAmb === false) parts.push('なみと あめ なし'); if (save.slow) parts.push('ゆったり'); if (save.soft) parts.push('やさしい おと'); if (save.yomi === true && yomiAvail()) parts.push('よみあげ');
     if ($('assist-now')) $('assist-now').textContent = parts.length ? parts.join('・') : 'ふつう';
   }
   $('easy').addEventListener('click', () => { save.easy = !save.easy; store(); drawEasy(); say(save.easy ? 'らくちんに したよ。おすだけで つれるよ。' : 'らくちんを やめたよ。わが ひかったら おしてね。'); });
@@ -2514,7 +2532,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const msg = b.on ? L(...(on ? b.on : b.off)) : L(b.ja + 'を ' + (on ? 'つけたよ。' : 'けしたよ。'), b.en + (on ? ' turned on.' : ' turned off.'));
     say(msg + (save.sound ? '' : L(' 「おと」が OFF の あいだは ならないよ。', ' Nothing plays while Sound is off.')));
   }));
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawSndPrefs); else drawSndPrefs();
+  $('snd-yomi') && $('snd-yomi').addEventListener('click', () => {
+    save.yomi = save.yomi !== true; store(); drawYomi(); drawEasy();
+    if (save.yomi) say('よみあげを つけたよ。ここに でる ことばを こえで よむよ。'); else { try { speech.cancel(); } catch {} say('よみあげを けしたよ。'); }
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawSndPrefs(); yomiPick(); }); else { drawSndPrefs(); yomiPick(); }
   // うごきを へらす：スマホの せってい（OSの「うごきを へらす」）か、この ボタン。ボタンを おすと、せっていを ほぞんして よみこみ なおす（外付けの ぶひんも ぜんぶ おなじ せっていに なる）
   const osReduce = () => (window.__realMatchMedia || matchMedia.bind(window))('(prefers-reduced-motion: reduce)').matches;
   function drawCalm() {
