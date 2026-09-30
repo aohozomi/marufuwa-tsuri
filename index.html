@@ -85,7 +85,7 @@ button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-s
 .friend-hit{position:absolute;z-index:3;width:13%;height:24%;min-height:0;padding:0;transform:translate(-50%,-100%);background:none;border:0;border-radius:40%;box-shadow:none;cursor:pointer}   /* なかまの うえの みえない ボタン（おすと はなしかける） */
 .friend-hit::before,.friend-hit::after{display:none}
 #scene:not([data-phase=idle]):not([data-phase=waiting]) .friend-hit,#scene[data-tooku=true] .friend-hit,body.gazing .friend-hit{pointer-events:none}   /* まって いる とき・なにも して いない ときだけ おせる（ひく とき・カードが でて いる ときは けしきを おして「ひく」「カード」が できる） */
-.spot::after{content:"";position:absolute;inset:-6px;border-radius:50%}   /* みえない あたりはんてい。ちいさい こや ゆびが ふるえる ひとが おしやすい */
+.spot::after{content:"";position:absolute;inset:-7px;border-radius:50%}   /* みえない あたりはんてい。ちいさい こや ゆびが ふるえる ひとが おしやすい */
 #scene #keeper:active{transform:translate(-50%,-100%) scale(.94)}
 @media(prefers-reduced-motion:reduce){button,.pill{transition:none}button:active:not(:disabled),.pill:active{transform:none}}
 button:focus-visible,.pill:focus-visible,summary:focus-visible{outline:3px solid #0b4a6b;outline-offset:0;box-shadow:0 0 0 6px #fff}   /* 二重の わく：うちがわ こい・そとがわ しろ（どんな はいけいでも どちらかが みえる） */
@@ -1185,7 +1185,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (Array.isArray(other.party) && !(Array.isArray(save.party) && save.party.length)) { const ids = other.party.filter((id, i, a) => typeof id === 'string' && /^[a-z]{2,12}$/.test(id) && a.indexOf(id) === i).slice(0, 4); if (ids.length) { save.party = ids; changed = true; } }
     if (Array.isArray(other.fav)) { const have = new Set(Array.isArray(save.fav) ? save.fav : []), more = other.fav.filter(id => typeof id === 'string' && /^[a-z]{2,12}$/.test(id) && !have.has(id)); if (more.length) { save.fav = [...(Array.isArray(save.fav) ? save.fav : []), ...more]; changed = true; } }
     for (const key of ['palXp', 'palsAt', 'bond']) if (other[key] && typeof other[key] === 'object') for (const [id, v] of Object.entries(other[key])) if (/^[a-z]{2,12}$/.test(id) && Number.isFinite(v) && v > ((save[key] && save[key][id]) || 0)) { save[key] = save[key] && typeof save[key] === 'object' ? save[key] : {}; save[key][id] = v; changed = true; }   // けいけんち・あった じかん・なかよし：おおきい ほう
-    if (other.trophies && typeof other.trophies === 'object') for (const [id, at] of Object.entries(other.trophies)) if (/^[a-z0-9]{2,12}$/.test(id) && Number.isFinite(at) && !(save.trophies && save.trophies[id])) { save.trophies = save.trophies && typeof save.trophies === 'object' ? save.trophies : {}; save.trophies[id] = at; changed = true; }   // きねん：どちらかに あれば のこる
+    if (other.trophies && typeof other.trophies === 'object') for (const [id, at] of Object.entries(other.trophies)) if (/^[A-Za-z0-9]{2,12}$/.test(id) && Number.isFinite(at) && !(save.trophies && save.trophies[id])) { save.trophies = save.trophies && typeof save.trophies === 'object' ? save.trophies : {}; save.trophies[id] = at; changed = true; }   // きねん：どちらかに あれば のこる
     if (other.tflag && typeof other.tflag === 'object') for (const k of Object.keys(other.tflag)) if (other.tflag[k] === true && /^[a-z0-9]{2,12}$/.test(k) && !tf(k)) { save.tflag = save.tflag && typeof save.tflag === 'object' ? save.tflag : {}; save.tflag[k] = true; changed = true; }
     for (const k of ['gazeMin', 'photoN', 'dayN']) if (Number.isInteger(other[k]) && other[k] > (save[k] || 0)) { save[k] = other[k]; changed = true; }
     if (Array.isArray(other.note)) {   // つりびと ノート：あった ものは のこす（at・id・kind で いっしょに）
@@ -1650,7 +1650,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const swimOf = f => f.legend ? 'yuttari' : f.rare === 1 ? ['yuttari', 'yurari'][f.id % 2] : f.rare === 2 ? ['yurari', 'guigui', 'yuttari'][f.id % 3] : f.rare === 3 ? ['guigui', 'furafura', 'pitatto'][f.id % 3] : ['furafura', 'pitatto'][f.id % 2];
   // 魚ごとの くせ（おなじ 魚は まいかい おなじ＝おぼえると じょうずに なる）：せっかち＝はじめが はやい／のんびり＝はじめが ゆっくり／ためる＝まとの まえで ちょっと とまる。およぎの かたちだけ かえる（はんていの つくりは そのまま）。ずかんの カードに ひらがな 1ご
   const QUIRKS = {hasty: {ja: 'せっかち', en: 'Hasty', tip: ['はじめが はやい', 'quick at the start']}, calm: {ja: 'のんびり', en: 'Laid-back', tip: ['はじめが ゆっくり', 'slow at the start']}, hold: {ja: 'ためる', en: 'Holds', tip: ['まとの まえで ちょっと とまる', 'pauses just before the target']}};
-  const quirkOf = f => !f || f.legend ? '' : [null, 'hasty', 'calm', 'hold'][(f.id * 5 + 2) % 4] || '';
+  const quirkOf = f => { if (!f || f.legend) return ''; const q = [null, 'hasty', 'calm', 'hold'][(f.id * 5 + 2) % 4] || ''; return q === 'hold' && swimOf(f) === 'guigui' ? '' : q; };   // ぐいぐいは まとの まえに よゆうが なく「ためる」が かからない（ふだに うそを かかない）
   function withQuirk(base, q) {
     if (!q || !QUIRKS[q]) return base;
     let warp = p => p;
@@ -1682,7 +1682,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const swimTagText = () => EN() ? T(swimBase ? swimBase.name : swim.name) + (qk ? ' · ' + QUIRKS[qk].en : '') : (swimBase ? swimBase.name : swim.name) + (qk ? '・' + QUIRKS[qk].ja : '');
   function nushiRally() {   // ぬしが はんぶん より すくなく なったら「はりきる」：わが すこし はやく なり、くせが かわる／ふえる（はんてい・まどの つくりは そのまま。にげやすさは あそびかたの きまりの まま）
     period = Math.round(period * .86); qk = qk === 'hasty' ? 'hold' : 'hasty'; swim = withQuirk(swimBase, qk);
-    hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
+    qk = swim.quirk || ''; hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
     ringStart = performance.now(); ringSync(); startGuide(); $('swim-tag').textContent = save.easy ? 'らくちん' : swimTagText();
     say(L('ぬしが はりきってる！ ゆっくり あわせよう。', 'The Guardian is fired up! Take it steady.'));
     if (!reduce()) { const w = floatAt(mine), el = document.createElement('span'); el.className = 'hop plop'; el.setAttribute('aria-hidden', 'true'); el.style.fontWeight = '900'; el.style.color = '#fff'; el.textContent = L('はりきってる！', 'Fired up!'); place(el, {x: w.x + 2, y: w.y - 10}); scene.append(el); el.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -22px'}], {duration: 1400}).onfinish = () => el.remove(); }
@@ -1748,7 +1748,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // にげられた：ぷつん→「にげられた…また くるよ」。つれた かずに いれない・きろくは へらない・ずかんには「あえた」が のこる（まぼろしは のぞく）。せめない
   function escapeNow() {
     const f = fish; SFX.snap(); buzz(60);
-    if (f && !f.legend) { save.seenFish = save.seenFish && typeof save.seenFish === 'object' ? save.seenFish : {}; save.seenFish[f.id] = true; if (nushi) save.again = 'nushi'; else if (f.rare === 4) save.again = 'rare4'; if (save.again) save.againLeft = 8; store(); }   // にげた ぬし・スペシャルは「また くるよ」＝つぎの 8かいの あいだ でやすく（ほんとうに また くる）
+    if (f && !f.legend) { save.seenFish = save.seenFish && typeof save.seenFish === 'object' ? save.seenFish : {}; save.seenFish[f.id] = true; if (nushi) { save.again = 'nushi'; save.againLeft = 8; } else if (f.rare === 4) { save.again = 'rare4'; save.againLeft = 8; } store(); }   // にげた ぬし・スペシャルは「また くるよ」＝つぎの 8かいの あいだ でやすく（ほんとうに また くる）
     if (!reduce()) { const w = floatAt(mine), el = document.createElement('span'); el.className = 'hop plop'; el.setAttribute('aria-hidden', 'true'); el.style.fontWeight = '900'; el.style.color = '#fff'; el.textContent = L('ぷつん…', 'Snap…'); place(el, {x: w.x + 2, y: w.y - 8}); scene.append(el); el.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -22px'}], {duration: 1100}).onfinish = () => el.remove(); marufuwa.animate([{rotate: '0deg'}, {rotate: '9deg'}, {rotate: '-4deg'}, {rotate: '0deg'}], {duration: 520, easing: 'ease-out'}); }
     endFishing(L('にげられた… また くるよ。', 'It got away… it will come back.'));
     escapeRun++;
@@ -1903,7 +1903,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     plannedBase = nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + (fish.max - fish.min) * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8);   // おおきさは さきに きめる（おおきい ほど わが すこし はやい・±10%）
     if (save.total > 0 && !fish.legend && !query.get('swim')) { const sn = nushi ? 1 : Math.min(1, Math.max(0, (plannedBase - fish.min) / ((fish.max - fish.min) || 1))); period = Math.round(period * (1 - .1 * (2 * sn - 1))); }
     swimBase = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; qk = query.has('quirk') ? (QUIRKS[query.get('quirk')] ? query.get('quirk') : '') : (query.get('swim') || save.total === 0 ? '' : quirkOf(fish)); nushiPhase2 = false;   // ?swim=・さいしょの 1ぴきは くせなし
-    swim = withQuirk(swimBase, qk); perfects = 0; perfectStreak = 0; slips = 0; misses = 0; restUntil = 0;
+    swim = withQuirk(swimBase, qk); qk = swim.quirk || ''; perfects = 0; perfectStreak = 0; slips = 0; misses = 0; restUntil = 0;
     // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
     hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
     ringStart = reelStartAt = performance.now(); ringSync(); tension = 0; tensionAt = performance.now(); closeStreak = 0; tStage = 0; $('reel').dataset.tens = tensionOn() ? 'on' : 'off'; paintTension();
@@ -2261,7 +2261,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   async function swapPal() {
     if (swapping) return;
     swapping = true; swapFast = false; swapAnims = [];
-    const pf0 = prefPals(), kept = pf0.party.concat(pf0.fav).slice(0, 2), heldNow = k => kept.includes(pals[k]);   // いっしょに いく こ・♡の こは せきに のこる（じぶんで はずす まで かえらない）
+    const pf0 = prefPals(), kept = pf0.party.concat(pf0.fav), heldNow = k => kept.includes(pals[k]);   // いっしょに いく こ・♡の こは せきに のこる（じぶんで はずす まで かえらない）
     let slot = slotFlip; if (heldNow(slot)) slot = 1 - slot;
     const epoch = swapEpoch, img = $(slot ? 'friend-b' : 'friend-a'), old = pals[slot], next = heldNow(slot) ? null : pickPal(slot ? 'any' : 'home', pals); slotFlip = 1 - slotFlip;
     const still = () => epoch === swapEpoch;
@@ -2285,7 +2285,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (!reduce()) { await walk(img, off, 0, 'backwards'); if (!still()) return; }
       palRig(slot, true);   // ついて から、さおと ウキを だす
       const guest = next.home !== save.area;
-      palSay(slot, guest ? 'あそびに きたよ' : 'こんにちは'); if (nextFirst) { nextFirst = false; setTimeout(() => say(L('あたらしい なかまが きたよ！', 'A new friend has arrived!')), 2600); }   // はじめて あう こ：1かいだけ say(next.town ? L(next.name + (guest ? 'が あそびに きたよ。' : 'が きたよ。'), palName(next) + (guest ? ' came to visit.' : ' has arrived.')) : next.name + (guest ? 'が あそびに きたよ。' : 'が きたよ。'));
+      palSay(slot, guest ? 'あそびに きたよ' : 'こんにちは'); if (nextFirst) { nextFirst = false; setTimeout(() => say(L('あたらしい なかまが きたよ！', 'A new friend has arrived!')), 2600); } /* はじめて あう こ：1かいだけ */ say(next.town ? L(next.name + (guest ? 'が あそびに きたよ。' : 'が きたよ。'), palName(next) + (guest ? ' came to visit.' : ' has arrived.')) : next.name + (guest ? 'が あそびに きたよ。' : 'が きたよ。'));
     } finally {
       img.style.visibility = ''; palRig(slot, true); swapAnims.forEach(a => { try { a.cancel(); } catch {} }); swapAnims = [];   // どんな おわりかたでも、すがたが のこらない ように
       swapping = false; nextSwap = Date.now() + swapGap();
@@ -3317,8 +3317,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ['b5', 1, 'ずかん 5しゅるい', '5 in the book', 'いろんな こに あおう', 'Meet different fish', '📖', () => seenCount() >= 5],
     ['b15', 2, 'ずかん 15しゅるい', '15 in the book', 'ずかんを うめよう', 'Fill the book', '📖', () => seenCount() >= 15],
     ['bAll', 3, 'ずかん ぜんぶ', 'Book complete', 'ぜんぶ あつめよう', 'Collect them all', '📚', () => seenCount() >= BASE],
-    ['a2', 1, '2つの つりばで つった', 'Two fishing spots', 'べつの つりばへ いこう', 'Visit another spot', '🗺️', () => new Set(caughtFish().map(f => f.area)).size >= 2],
-    ['a4', 2, '4つの つりばで つった', 'All four spots', 'ぜんぶの つりばへ', 'Visit every spot', '🗺️', () => new Set(caughtFish().filter(f => !f.legend).map(f => f.area)).size >= 4],
+    ['a2', 1, '2つの つりばで つった', 'Two fishing spots', 'べつの つりばへ いこう', 'Visit another spot', '🗺️', () => new Set(caughtFish().filter(f => f.area !== '*').map(f => f.area)).size >= 2],
+    ['a4', 2, '4つの つりばで つった', 'All four spots', 'ぜんぶの つりばへ', 'Visit every spot', '🗺️', () => new Set(caughtFish().filter(f => !f.legend && f.area !== '*').map(f => f.area)).size >= 4],
     ['t4', 2, '4つの じかんで つった', 'Morning to night', 'あさ・ひる・ゆうがた・よる', 'Morning, noon, evening, night', '🌗', () => ['tasa', 'thiru', 'tyuu', 'tyoru'].every(tf)],
     ['tn', 1, 'よるに つった', 'A night catch', 'よるの つりばへ', 'Fish at night', '🌙', () => tf('tyoru')],
     ['rain', 1, 'あめの ひに つった', 'A rainy day', 'あめの ひに つりを', 'Fish on a rainy day', '☔', () => tf('rain')],
@@ -3669,7 +3669,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // おかえり：6じかん いじょう あいたら、となりの なかまが「おかえり！」。ときどき ちいさな おみやげ（かいがら など・かぞえない・ばつなし・「ひさしぶり」でも せめない）
   if (away >= 6 * 3600000 && save.total > 0) setTimeout(() => {
     const pal = pals[Math.random() < .5 ? 0 : 1], far = away >= 3 * 86400000; if (!pal) return;
-    palBubble(pal, far ? L('ひさしぶり！', 'Long time no see!') : L('おかえり！', 'Welcome back!'));
+    palBubble(pal, far ? L('ひさしぶり！', 'Long time no see!') : L('おかえり！', 'Welcome back!')); if (!welcome) say(L(pal.name + 'が「' + (far ? 'ひさしぶり！' : 'おかえり！') + '」って むかえて くれたよ。', palName(pal) + ' greets you: ' + (far ? 'Long time no see!' : 'Welcome back!')));
     if (Math.random() < .6) { const item = DECOR[Math.floor(Math.random() * DECOR.length)]; save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[item] = (save.decor[item] || 0) + 1; store(); setTimeout(() => say(L(pal.name + 'が「' + item + '」を おみやげに くれたよ。', palName(pal) + ' brought you a souvenir: ' + T(item) + '.')), 1600); }
   }, 2200);
   if (save.total === 0) say('「なげる」を おしてね。');
