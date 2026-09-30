@@ -330,8 +330,9 @@ body.gazing #sound{flex:0 1 auto}
 .assist{flex:1 1 100%;margin-bottom:0}
 .assist-body{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
 .assist-body button{flex:1 1 40%;min-height:54px;font-size:.95rem}
-#sound[aria-pressed=true],#buzz[aria-pressed=true]{--c1:#e3f3ff;--c2:#8fd0f5;--side:#4b9cc9;--ink:#0d3a55}   /* ON の ときは、ほんのり あおく（もじでも ON と かいて ある） */
+#sound[aria-pressed=true],#buzz[aria-pressed=true],#nature[aria-pressed=true]{--c1:#e3f3ff;--c2:#8fd0f5;--side:#4b9cc9;--ink:#0d3a55}   /* ON の ときは、ほんのり あおく（もじでも ON と かいて ある） */
 body.gazing .assist{display:none}
+#scene[data-ikimono=off] #ikimono{display:none}   /* けしきの いきものを しまう（うごく ものが きに なる 人の ために） */
 #main-button{--c1:#2a8cc0;--c2:#0e5a82;--side:#0a4262;--ink:#fff;flex:1 1 100%;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
 #main-button[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
@@ -858,12 +859,15 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const canBuzz = typeof navigator.vibrate === 'function';
   const buzzOn = () => typeof save.buzz === 'boolean' ? save.buzz : !reduce();
   function buzz(pattern) { try { if (canBuzz && buzzOn()) navigator.vibrate(pattern); } catch {} }
+  const natureOn = () => save.ikimono !== false;   // けしきの いきもの（tsuri-ikimono.js）。はじめは でている
+  function drawNature() { const b = $('nature'); if (b) { const on = natureOn(); b.textContent = on ? 'けしきの いきもの：ON' : 'けしきの いきもの：OFF'; b.setAttribute('aria-pressed', String(on)); } scene.dataset.ikimono = natureOn() ? 'on' : 'off'; }
   function drawBuzz() { const b = $('buzz'); if (!b) return; const on = buzzOn(); b.textContent = on ? 'ふるえ：ON' : 'ふるえ：OFF'; b.setAttribute('aria-pressed', String(on)); }
   function assistBox() {   // 「つかいやすく する」。ひらいた／とじた は おぼえる。まえから らくちんの 人は ひらいた ままで はじめる
     const box = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span'), body = document.createElement('div');
     box.className = 'time-box assist'; box.id = 'assist'; now.id = 'assist-now'; head.append('つかいやすく する（いま：', now, '）'); body.className = 'assist-body';
     body.append($('easy'));
     if (canBuzz) { const b = document.createElement('button'); b.id = 'buzz'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
+    { const b = document.createElement('button'); b.id = 'nature'; b.type = 'button'; b.setAttribute('aria-pressed', 'true'); body.append(b); }
     box.append(head, body);
     box.open = typeof save.assistOpen === 'boolean' ? save.assistOpen : !!save.easy;
     head.addEventListener('click', () => setTimeout(() => { save.assistOpen = box.open; store(); }, 0));   // ひらく／とじる を おぼえる
@@ -1572,7 +1576,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる。えらんだ ことは おぼえて おく
   function drawEasy() {
     const on = !!save.easy; $('easy').textContent = on ? 'らくちん：ON' : 'らくちん：OFF'; $('easy').setAttribute('aria-pressed', String(on)); scene.dataset.easy = String(on);
-    const parts = []; if (on) parts.push('らくちん'); if (canBuzz && !buzzOn()) parts.push('ふるえ なし');
+    const parts = []; if (on) parts.push('らくちん'); if (canBuzz && !buzzOn()) parts.push('ふるえ なし'); if (!natureOn()) parts.push('いきもの なし');
     if ($('assist-now')) $('assist-now').textContent = parts.length ? parts.join('・') : 'ふつう';
   }
   $('easy').addEventListener('click', () => { save.easy = !save.easy; store(); drawEasy(); say(save.easy ? 'らくちんに したよ。おすだけで つれるよ。' : 'らくちんを やめたよ。わが ひかったら おしてね。'); });
@@ -1581,7 +1585,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (save.buzz) buzz(80);   // どんな ふるえか、すぐ わかる ように
     say(save.buzz ? 'ふるえを つけたよ。' : 'ふるえを けしたよ。');
   });
-  drawBuzz(); drawEasy();
+  $('nature') && $('nature').addEventListener('click', () => {
+    save.ikimono = !natureOn(); store(); drawNature(); drawEasy();
+    say(save.ikimono ? 'けしきの いきものを だしたよ。' : 'けしきの いきものを しまったよ。');
+  });
+  drawBuzz(); drawNature(); drawEasy();
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
   if (ART && ART.shadow && ART.shadowMask) document.querySelectorAll('.ambient-fish[data-fish]').forEach(el => {
@@ -1604,5 +1612,6 @@ dialog .close{display:block;margin:auto;min-width:160px}
 </script>
 <script defer src="tsuri-tank.js"></script>
 <script defer src="tsuri-himitsu.js"></script>
+<script defer src="tsuri-ikimono.js"></script>
 </body>
 </html>
