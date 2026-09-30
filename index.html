@@ -2030,7 +2030,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       if (!save.hintX) {
         const hint = document.createElement('p'), text = document.createElement('span'), close = document.createElement('button');
         hint.className = 'inapp-hint'; hint.id = 'inapp-hint'; hint.setAttribute('role', 'note');
-        text.textContent = 'ぜんがめんで あそぶには、⋮ から ブラウザ（Safariなど）で ひらいてね。';
+        text.textContent = 'ぜんがめんで あそぶには、⋮ から ブラウザ（Safariなど）で ひらいてね。きろくは ブラウザごとに べつだよ。うつす ときは「きろくを のこす」から。';
         close.type = 'button'; close.textContent = '×'; close.setAttribute('aria-label', 'とじる（もう だしません）');
         close.addEventListener('click', () => { save.hintX = true; store(); hint.remove(); button.focus(); });
         hint.append(text, close); document.querySelector('.actions').after(hint);   // 「なげる」の すぐ した（けしきの した に おくと「なげる」が おびに かくれる）
