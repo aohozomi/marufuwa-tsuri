@@ -1358,7 +1358,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.font = '28px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + last.area, 920, 160, 440);
     ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6;
     ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText('つれた かず ' + save.total + '　シールちょう ' + seenCount() + ' / ' + BASE, 46, 596);
-    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText('#まるふわつりびより', 46, 642);   // えの なかには さくしゃの なまえも URLも いれない
+    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText('#まるふわつりびより', 46, 642);   // えの なかには さくしゃの なまえは いれない
+    ctx.textAlign = 'right'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, ''), 1160, 644);   // すみに ちいさく、あそべる ばしょ（この 1まいだけの れいがい・マスター 許可）
     ctx.shadowBlur = 0;
     const words = 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + '\n#まるふわつりびより\n' + HOME;
     await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', last.fish.name + 'を かかげる まるふわの しゃしん', words);
