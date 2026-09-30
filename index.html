@@ -1460,6 +1460,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
       cloud.animate([{translate: '-50% -50%', scale: '.5', opacity: .9}, {translate: (Math.cos(angle) * far - 8) + 'px ' + (Math.sin(angle) * far - 8) + 'px', scale: '1.6', opacity: 0}], {duration: 520, easing: 'ease-out'}).onfinish = () => cloud.remove();
     }
   }
+  // あんないの ペンギンの ふつうの ひとこと（くらべない・ほめすぎない・「いい こ」だけに かたよらない）。つづけて おなじ ものは でない
+  const PLAIN_WORDS = [['いい こが つれたね。', 'A nice one!'], ['ゆっくり つれたね。', 'Nice and easy.'], ['いい かんじ！', 'That felt nice!'], ['また あえたね。', 'We met again!'], ['のんびり いこうね。', 'Let' + String.fromCharCode(39) + 's take it easy.'], ['つぎは どんな こかな。', 'I wonder who is next.'], ['きょうも たのしいね。', 'Fun again today.'], ['ぷかぷか、いい きもち。', 'Floating along, feels nice.']];
+  let plainLast = -1;
+  function plainWord() { let i; do { i = Math.floor(Math.random() * PLAIN_WORDS.length); } while (i === plainLast && PLAIN_WORDS.length > 1); plainLast = i; return L(...PLAIN_WORDS[i]); }
   function caught() {
     stopGuide();
     // つれた：むかしの ゲームの「てに いれた！」ふう。ぬしと スペシャルは、ながい ファンファーレ
@@ -1500,7 +1504,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // あんないの ペンギンが、まいかい ひとこと
     const left = BASE - seenCount();
     if (mile) party(mile[0]); else if (leveled && lvNow % 5 === 0) party('🎉');   // 5レベルごとの ふしめ だけ おいわい
-    const guideWord = mile ? mile[1] : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : fish.season ? L('この つきの さかな だよ！ また らいねんも あえるよ。', 'This month' + String.fromCharCode(39) + 's fish! You can meet it again next year.') : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
+    const guideWord = mile ? mile[1] : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : fish.season ? L('この つきの さかな だよ！ また らいねんも あえるよ。', 'This month' + String.fromCharCode(39) + 's fish! You can meet it again next year.') : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : plainWord();   // ふつうの ときは、やさしい ひとことを こうたいで（つづけて おなじに ならない）
     $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
@@ -1522,7 +1526,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // れんだ しても、うれしい しゅんかんが きえない ように、すこしだけ まつ
     button.textContent = 'もういちど なげる'; button.dataset.hot = 'false'; lock(true); caughtAt = performance.now();
     setTimeout(() => { if (phase === 'caught') lock(false); }, 1000);
-    sayQuiet(fish.name + 'が つれた。' + cm(size) + 'センチ。' + (levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (guideWord === 'いい こが つれたね。' ? '' : '　ペンギン：' + guideWord));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
+    sayQuiet(fish.name + 'が つれた。' + cm(size) + 'センチ。' + (levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (PLAIN_WORDS.some(w => guideWord === w[0] || guideWord === w[1]) ? '' : '　ペンギン：' + guideWord));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
   }
 
   function act() {
