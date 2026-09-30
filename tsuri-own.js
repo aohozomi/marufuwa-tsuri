@@ -33,11 +33,14 @@
   ];
   const EARS = [['ピンク', 'Pink', null, '#ffb8c8'], ['ラベンダー', 'Lavender', [270, .3], '#c9b8e8'], ['ミント', 'Mint', [158, .32], '#a8dcc8']];
   const ITEMS = [['なし', 'None'], ['リボン', 'Ribbon'], ['ぼうし', 'Hat'], ['かばん', 'Bag']];
+  // しろい いろ（わたあめ・ゆき・しお）× モモンガ は ださない：「白い ふわふわ＋うすい 水色＋大きな 目」は 有名な モモンガに にて しまう（2026-09-25 白い子の 件）。きまりは ここ 1か所（valid と つくる がめんが これを みる）
+  const WHITE_NAMES = ['わたあめ', 'ゆき', 'しお'], KINAKO = COLORS.findIndex(c => c[0] === 'きなこ');
+  const banned = (c, a) => !!(COLORS[c] && ANIMALS[a] && ANIMALS[a][0] === 'momonga' && WHITE_NAMES.includes(COLORS[c][0]));
   const ITEM_LV = [0, 3, 6, 10];   // レベルが あがると 1つずつ ふえる（さがらない）
   const api = { PROVISIONAL: true, COLORS, ANIMALS, EARS, ITEMS, ITEM_LV };
 
   const isInt = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
-  const valid = o => !!o && typeof o === 'object' && isInt(o.c, 0, COLORS.length - 1) && isInt(o.a, 0, ANIMALS.length - 1) && isInt(o.ear, 0, 2) && isInt(o.item, 0, 3) && !!ANIMALS[o.a][3];
+  const valid = o => !!o && typeof o === 'object' && isInt(o.c, 0, COLORS.length - 1) && isInt(o.a, 0, ANIMALS.length - 1) && isInt(o.ear, 0, 2) && isInt(o.item, 0, 3) && !!ANIMALS[o.a][3] && !banned(o.c, o.a);
   const name = o => COLORS[o.c][0] + 'の ' + ANIMALS[o.a][1];
   const en = o => COLORS[o.c][1] + ' ' + ANIMALS[o.a][2];
   const hasEars = a => !!(ANIMALS[a] && ANIMALS[a][4]);
@@ -47,7 +50,7 @@
   const pals = new Map();
   const pal = o => { if (!valid(o)) return null; const k = [o.c, o.a].join('.'); let p = pals.get(k); if (!p) { p = {id: 'own', name: name(o), en: en(o), own: true, home: 'L', word: ''}; pals.set(k, p); } return p; };
   Object.assign(api, {
-    valid, hasEars, itemOpen, pal,
+    valid, hasEars, itemOpen, pal, allowed: (c, a) => !banned(c, a),
     name: o => valid(o) ? name(o) : '', en: o => valid(o) ? en(o) : '',
     label: o => valid(o) ? T('じぶんの こ、' + name(o), 'Your own friend, ' + en(o)) : '',
     available: () => ANIMALS.some(x => x[3]),
@@ -157,7 +160,7 @@
     const option = (k, v, build) => { const b = el('button', 'own-opt'); b.type = 'button'; b.dataset.k = k; b.dataset.v = String(v); build(b); b.addEventListener('click', () => pick(k, v, b)); groups[k].grid.append(b); opts.push(b); return b; };
     root.append(title, lead, prev, group('c'), group('a'), group('ear'), group('item'));
     groups.c.hOf = () => T('いろ・あじ', 'Color · flavor'); groups.a.hOf = () => T('いきもの', 'Animal'); groups.ear.hOf = () => T('みみの なか', 'Inside the ears'); groups.item.hOf = () => T('こもの', 'Accessory');
-    COLORS.forEach((c, i) => option('c', i, b => { const sw = el('i', 'own-sw'); sw.style.background = c[5]; sw.setAttribute('aria-hidden', 'true'); b.append(sw, el('span')); b._t = () => T(c[0], c[1]); }));
+    COLORS.forEach((c, i) => option('c', i, b => { const sw = el('i', 'own-sw'); sw.style.background = c[5]; sw.setAttribute('aria-hidden', 'true'); b.append(sw, el('span'), el('small')); b._t = () => T(c[0], c[1]); }));
     ANIMALS.forEach((a, i) => { if (!a[3]) return; option('a', i, b => { const im = el('img'); im.alt = ''; im.loading = 'lazy'; im.src = BASE + 'img/friend-' + a[3] + '-s.webp'; im.setAttribute('aria-hidden', 'true'); b.append(im, el('span')); b._t = () => T(a[1], a[2]); }); });
     EARS.forEach((e, i) => option('ear', i, b => { const sw = el('i', 'own-sw'); sw.style.background = e[3]; sw.setAttribute('aria-hidden', 'true'); b.append(sw, el('span')); b._t = () => T(e[0], e[1]); }));
     ITEMS.forEach((it, i) => option('item', i, b => { b.append(el('span'), el('small')); b._t = () => T(it[0], it[1]); b._lock = () => ITEM_LV[i] > lv ? T('レベル ' + ITEM_LV[i] + ' で ひらくよ', 'Unlocks at level ' + ITEM_LV[i]) : ''; }));
@@ -172,6 +175,7 @@
         const k = b.dataset.k, v = +b.dataset.v, sp = b.querySelector('span'); sp.textContent = b._t();
         const on = d[k] === v; b.setAttribute('aria-pressed', String(on));
         if (k === 'item') { const lock = b._lock(); b.querySelector('small').textContent = lock; if (lock) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled'); b.setAttribute('aria-label', b._t() + (lock ? '。' + lock : '')); }
+        else if (k === 'c') { const no = banned(v, d.a), sm = T('モモンガには ないよ', 'Not for this one'); b.querySelector('small').textContent = no ? sm : ''; if (no) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled'); b.setAttribute('aria-label', b._t() + (no ? '。' + sm : '')); }
         else b.setAttribute('aria-label', b._t());
       }
       const nm = T(name(d), en(d)); pname.firstChild.textContent = nm; pimg.alt = '';
@@ -181,8 +185,10 @@
     }
     function pick(k, v, b) {
       if (k === 'item' && ITEM_LV[v] > lv) { speak(T('こもの「' + ITEMS[v][0] + '」は レベル ' + ITEM_LV[v] + ' で ひらくよ。', 'The accessory “' + ITEMS[v][1] + '” unlocks at level ' + ITEM_LV[v] + '.')); return; }
+      if (k === 'c' && banned(v, d.a)) { speak(T('モモンガには「' + COLORS[v][0] + '」の いろは ないよ。ほかの いろを えらんでね。', 'There is no “' + COLORS[v][1] + '” flying squirrel. Please pick another color.')); return; }
+      const swapped = k === 'a' && banned(d.c, v); if (swapped) d.c = KINAKO;   // モモンガを えらんだ とき、しろい いろは きなこに かわる（かわった ことを よみあげる）
       d[k] = v; if (k === 'a' && !hasEars(v)) d.ear = 0; paint();
-      speak(T('いろは ' + COLORS[d.c][0] + '。いきものは ' + ANIMALS[d.a][1] + '。' + name(d), 'Color: ' + COLORS[d.c][1] + '. Animal: ' + ANIMALS[d.a][2] + '. ' + en(d) + '.') + (k === 'item' ? T('　こもの：' + ITEMS[d.item][0], ' Accessory: ' + ITEMS[d.item][1]) : ''));
+      speak((swapped ? T('モモンガには しろい いろが ないので、きなこに したよ。', 'There is no white flying squirrel, so we chose Kinako. ') : '') + T('いろは ' + COLORS[d.c][0] + '。いきものは ' + ANIMALS[d.a][1] + '。' + name(d), 'Color: ' + COLORS[d.c][1] + '. Animal: ' + ANIMALS[d.a][2] + '. ' + en(d) + '.') + (k === 'item' ? T('　こもの：' + ITEMS[d.item][0], ' Accessory: ' + ITEMS[d.item][1]) : ''));
     }
     go.addEventListener('click', () => { const o = {c: d.c, a: d.a, ear: hasEars(d.a) ? d.ear : 0, item: d.item}; if (valid(o) && typeof opt.onDone === 'function') opt.onDone(o); });
     cancel.addEventListener('click', () => { if (typeof opt.onCancel === 'function') opt.onCancel(); });
