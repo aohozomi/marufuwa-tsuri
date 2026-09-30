@@ -1561,13 +1561,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const blind = save.easy || (reduce() && !sndOn('guide'));   // らくちん、または、わも あんないの おとも ない とき：タイミングを みない
     const power = blind ? 2 : miss <= easy ? 3 : miss <= easy + .12 * period ? 2 : 1;
     if (power === 3) { perfects++; misses = 0; hp = Math.max(0, hp - 1); } else if (power === 1) misses++;   // 「ぴったり」は 1つ おおく ひける
-    const rest = blind ? 320 : Math.max(320, period * .45);   // やすみは、どの ひきかたでも おなじ ながさ
+    const rest = blind ? 320 : Math.min(1000, Math.max(320, period * .8));   // やすみは、どの ひきかたでも おなじ ながさ。わの 1しゅうの 8わり（さいだい 1びょう）＝れんだの はやさが、1しゅうに 1かい ねらう ひとと おなじ くらいに
     restUntil = performance.now() + rest; $('reel').dataset.rest = 'true'; button.dataset.rest = 'true';
     setTimeout(() => { delete $('reel').dataset.rest; delete button.dataset.rest; }, rest);
     // つづけて うまく いくと、すこし つよく ひける。はずしても へらない（かぞえなおすだけ）
     combo = power >= 2 ? combo + 1 : 0;
     // 「ちかい」は 2つ ひける。ちかいが 3かい つづくと 3つ（さいだい +2）。ずれる ひとの まちが みじかく なる（ものさし _kenpin_tmp/sim_reel.mjs：★3で おおきく ずれる ひと 9.1→4.0びょう・さいだい 17→8びょう。ぴったり ねらう ひと 3.3びょう・れんだ 2.1びょう）。「ぴったり」は 4つ・れんぞくは さらに +1
     hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0) - (power === 1 ? Math.min(2, (misses + 1) >> 1) : 0));
+    if (power === 3 && hp === 1) hp = 0;   // 「ぴったり」で のこりが 1 なら、そのまま つれる（1かいぶんの ために もう 1しゅう またせない）
     $('hp').firstElementChild.style.width = (Math.ceil(hp / 2) / Math.ceil(hpMax / 2) * 100) + '%';   // めもりに そろえる（1めもり＝あと 1かい）
     const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
