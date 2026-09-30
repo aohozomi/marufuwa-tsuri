@@ -65,7 +65,7 @@
   const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
 
   // ─── 記録の読み書き ───
-  const KEY = 'marufuwa-tsuri-v1', TANK_KEY = 'marufuwa-tsuri-tank-v1';
+  const KEY = 'marufuwa-tsuri-v1', TANK_KEY = 'marufuwa-tsuri-tank-v1', HIMITSU_KEY = 'marufuwa-himitsu-v1';
   const readSave = () => { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d.fish === 'object' && d.fish) return d; } catch {} return { fish: {}, total: 0 }; };
   const okPlaced = p => p && typeof p.n === 'string' && Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1;
   // sound / soundMain：すいそうの中で「おと」を切りかえた時の選択と、その時の本体の「おと」の値（本体が あとから かわったら、本体に合わせる）
@@ -80,7 +80,11 @@
     if (!Object.keys(tank.seen).length && res.length >= 4) { tank.seen = Object.fromEntries(res.map(r => [r.fish.id, r.count])); saveTank(); return []; }
     const out = []; for (const r of res) { const n = r.count - (tank.seen[r.fish.id] || 0); if (n > 0) out.push({ ...r, n }); } return out;
   };
-  const owned = () => { const s = readSave(); return s.decor && typeof s.decor === 'object' ? s.decor : {}; };
+  // ひみつで もらえる かざり（ひろばの きせつの おとしもの・つりの ひみつの おくりもの）：ひみつの 鍵の gifts＝{英字の 名前: 個数}（さいだい 3こ）を、本体の save.decor に 足して 数える。
+  // 本体の 記録は かきかえない。本体の save.decor に 同じ 名前が あっても ひみつの ぶんが 足される
+  const GIFT_DECOR = { sakura: 'さくらの はなびら', aoba: 'あおい は', donguri: 'どんぐり', yuki: 'ゆきの けっしょう', sasabune: 'ささぶね', yadokari: 'やどかり' };
+  const giftCounts = () => { try { const d = JSON.parse(localStorage.getItem(HIMITSU_KEY)), g = d && typeof d === 'object' && d.gifts && typeof d.gifts === 'object' ? d.gifts : {}, out = {}; for (const [id, name] of Object.entries(GIFT_DECOR)) { const n = Math.floor(Number(g[id])); if (n > 0) out[name] = Math.min(3, n); } return out; } catch { return {}; } };
+  const owned = () => { const s = readSave(), base = s.decor && typeof s.decor === 'object' ? s.decor : {}, extra = giftCounts(), out = { ...base }; for (const [n, c] of Object.entries(extra)) out[n] = (Number(out[n]) || 0) + c; return out; };
   const available = name => Math.max(0, (Number(owned()[name]) || 0) - tank.placed.filter(p => p.n === name).length);
 
   // ─── 小道具 ───
@@ -122,7 +126,14 @@
     'ながれぎ': { kind: 'sand', svg: () => `<path d="M4 32 Q12 14 24 20 Q30 22 36 10" fill="none" stroke="#b58c5e" stroke-width="7" stroke-linecap="round"/><path d="M22 20 Q26 28 32 30" fill="none" stroke="#b58c5e" stroke-width="4.5" stroke-linecap="round"/><circle cx="12" cy="24" r="1.8" fill="#8f6a42"/>` },
     'みずくさ': { kind: 'sand', sway: true, svg: () => `<g fill="none" stroke-linecap="round" stroke-width="5"><path d="M20 36 Q10 24 16 6" stroke="#6cc796"/><path d="M20 36 Q22 20 28 8" stroke="#7fd6a4"/><path d="M20 36 Q30 26 34 16" stroke="#59b98a"/></g>` },
     'ちいさな びん': { kind: 'sand', svg: () => `<g transform="rotate(-24 20 22)"><rect x="9" y="14" width="22" height="16" rx="7" fill="#cfeff1cc" stroke="#8cc9cf" stroke-width="2"/><rect x="29" y="18" width="7" height="8" rx="2" fill="#cfeff1cc" stroke="#8cc9cf" stroke-width="2"/><rect x="35" y="19" width="4" height="6" rx="1.5" fill="#c99a62"/><path d="M14 20 h10 M14 24 h7" stroke="#e9c98a" stroke-width="2.4" stroke-linecap="round"/></g>` },
-    'ほしの かけら': { kind: 'float', twinkle: true, svg: () => `<circle cx="20" cy="20" r="15" fill="#ffe27a33"/><path d="M20 4 l4.4 10.6 l11.6 1 l-8.8 7.6 l2.8 11.2 l-10 -6.2 l-10 6.2 l2.8 -11.2 l-8.8 -7.6 l11.6 -1z" fill="#ffe27a" stroke="#f5b93a" stroke-width="1.6" stroke-linejoin="round"/>` }
+    'ほしの かけら': { kind: 'float', twinkle: true, svg: () => `<circle cx="20" cy="20" r="15" fill="#ffe27a33"/><path d="M20 4 l4.4 10.6 l11.6 1 l-8.8 7.6 l2.8 11.2 l-10 -6.2 l-10 6.2 l2.8 -11.2 l-8.8 -7.6 l11.6 -1z" fill="#ffe27a" stroke="#f5b93a" stroke-width="1.6" stroke-linejoin="round"/>` },
+    // ここから ひみつで もらえる かざり（GIFT_DECOR）：ひろばの きせつの おとしもの（さくら・あおい は・どんぐり・ゆき）／つりの ひみつの おくりもの（ささぶね・やどかり）。kind: surface＝みずの おもてに ういて いる／bob＝ゆらゆら／crawl＝ゆっくり あるく
+    'さくらの はなびら': { kind: 'float', bob: true, svg: () => `<g transform="translate(20 20)"><g fill="#ffd0e0" stroke="#f08bb0" stroke-width="1.5" stroke-linejoin="round">${[0, 72, 144, 216, 288].map(a => `<path transform="rotate(${a})" d="M0 -2 C-6 -6 -6 -15 -2.4 -16 L0 -13.4 L2.4 -16 C6 -15 6 -6 0 -2Z"/>`).join('')}</g><circle r="2.8" fill="#ffe27a" stroke="#f5b93a" stroke-width="1"/><g stroke="#f08bb0" stroke-width=".8" stroke-linecap="round">${[36, 108, 180, 252, 324].map(a => `<path transform="rotate(${a})" d="M0 -3.6 V-6.6"/>`).join('')}</g></g>` },
+    'あおい は': { kind: 'float', bob: true, svg: () => `<path d="M6 31 C4 13 19 5 35 7 C37 23 27 35 6 31Z" fill="#8fe0a8" stroke="#4fae7c" stroke-width="2" stroke-linejoin="round"/><path d="M7 30 C16 22 24 16 33 9" fill="none" stroke="#4fae7c" stroke-width="1.8" stroke-linecap="round"/><path d="M15 23 l-1 -6 M21 18 l0 -6 M25 21 l5 1 M19 25 l-1 5" stroke="#6cc796" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M6 31 l-3 4" stroke="#4fae7c" stroke-width="2" stroke-linecap="round"/>` },
+    'どんぐり': { kind: 'sand', svg: () => `<path d="M20 35 C11 33 9 22 11 18 L29 18 C31 22 29 33 20 35Z" fill="#d79a52" stroke="#8a5a2b" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 19 C8 11 14 7 20 7 C26 7 32 11 31.5 19 Q20 22 8.5 19Z" fill="#9a6a3a" stroke="#6a4420" stroke-width="2" stroke-linejoin="round"/><path d="M20 7 V3.5" stroke="#6a4420" stroke-width="2.4" stroke-linecap="round"/><path d="M12 14 l4 4 M17 10.5 l4.5 7 M24 11 l4 6" stroke="#b98a55" stroke-width="1.1" stroke-linecap="round"/><ellipse cx="15.5" cy="27" rx="2.2" ry="4.2" fill="#ffffff55" transform="rotate(14 15.5 27)"/>` },
+    'ゆきの けっしょう': { kind: 'float', twinkle: true, svg: () => { const arm = '<path d="M0 0 V-15 M0 -9 l-4 -4 M0 -9 l4 -4 M0 -4.5 l-2.6 -2.6 M0 -4.5 l2.6 -2.6"/>', arms = [0, 60, 120, 180, 240, 300].map(a => `<g transform="rotate(${a})">${arm}</g>`).join(''); return `<g transform="translate(20 20)"><g fill="none" stroke="#6aa7c9" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round">${arms}</g><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${arms}</g><circle r="3" fill="#fff" stroke="#6aa7c9" stroke-width="1"/></g>`; } },
+    'ささぶね': { kind: 'surface', bob: true, svg: () => `<path d="M20 27 V7" stroke="#4fae7c" stroke-width="2" stroke-linecap="round"/><path d="M22.5 8.5 Q35 13 32 24 L22.5 24Z" fill="#c6f0d2" stroke="#4fae7c" stroke-width="1.8" stroke-linejoin="round"/><path d="M2 22 C8 22 10 34 20 34 C30 34 32 22 38 22 C33 30 28 31 20 31 C12 31 7 30 2 22Z" fill="#8fe0a8" stroke="#4fae7c" stroke-width="2" stroke-linejoin="round"/><path d="M9 27 Q20 32 31 27" fill="none" stroke="#e9ffe9" stroke-width="1.4" stroke-linecap="round"/>` },
+    'やどかり': { kind: 'sand', crawl: true, svg: () => `<g stroke-linecap="round" stroke-linejoin="round"><path d="M8 33 l-3 4 M13 35 l-2 4 M29 35 l2 4 M34 32 l3 3" stroke="#d96f40" stroke-width="2" fill="none"/><path d="M6 31 Q8 26 13 27 L14 33 Q8 35 6 31Z" fill="#ff9a7a" stroke="#d96f40" stroke-width="1.6"/><path d="M14 33 Q24 38 33 33 L32 28 L14 28Z" fill="#ff9a7a" stroke="#d96f40" stroke-width="1.6"/><path d="M33 32 Q40 8 22 7 Q10 8 13 26 Q15 31 33 32Z" fill="#ffe3c4" stroke="#d98a5a" stroke-width="2"/><path d="M17 25 Q18 14 25 14 Q30 17 26 22 Q23 24 21 21" fill="none" stroke="#d98a5a" stroke-width="1.6"/><circle cx="8" cy="24" r="2.1" fill="#fff" stroke="#d96f40" stroke-width="1.2"/><circle cx="8" cy="24" r=".9" fill="#3a2a2a"/><path d="M8 26 v2" stroke="#d96f40" stroke-width="1.6"/></g>` }
   };
   const decorMarkup = (name, size, c) => { const d = DECOR[name] || DECOR['きれいな いし']; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">${d.svg(c)}</svg>`; };
 
@@ -228,6 +239,8 @@
 .tk-sway{transform-origin:50% 100%;transform-box:fill-box;animation:tk-sway 4.6s ease-in-out infinite alternate}
 .tk-float{animation:tk-float 4.2s ease-in-out infinite alternate}
 .tk-twinkle{animation:tk-twinkle 2.6s ease-in-out infinite}
+.tk-crawl{animation:tk-crawl 16s linear infinite}
+@keyframes tk-crawl{0%{transform:translateX(-14px) scaleX(1)}46%{transform:translateX(14px) scaleX(1)}50%{transform:translateX(14px) scaleX(-1)}96%{transform:translateX(-14px) scaleX(-1)}100%{transform:translateX(-14px) scaleX(1)}}
 @keyframes tk-sway{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
 @keyframes tk-float{from{transform:translateY(-4px)}to{transform:translateY(5px)}}
 @keyframes tk-twinkle{0%,100%{opacity:1}50%{opacity:.55}}
@@ -337,7 +350,7 @@
   .tk-fish[data-rainbow],.tk-st,.tk-instar,.tk-restfish,.tk-room.tk-nap .tk-mascot{animation:none}
   .tk-st{opacity:.7}
   .tk-friend{transition:none}
-  .tk-sway,.tk-float,.tk-twinkle,.tk-ray,.tk-mascot{animation:none}
+  .tk-sway,.tk-float,.tk-twinkle,.tk-crawl,.tk-ray,.tk-mascot{animation:none}
   .tk-bub{display:none}
   #tk .tk-chrome,.tk-says,.tk-water,.tk-dim{transition:none}
 }`;
@@ -906,7 +919,7 @@
     placedBox.replaceChildren();
     tank.placed.forEach((p, i) => {
       const d = DECOR[p.n] || DECOR['きれいな いし'], size = 34 * unit, el = document.createElement('div');
-      el.className = 'tk-deco' + (d.sway ? ' tk-sway' : '') + (d.twinkle ? ' tk-twinkle tk-float' : '');
+      el.className = 'tk-deco' + (d.sway ? ' tk-sway' : '') + (d.twinkle ? ' tk-twinkle tk-float' : d.bob ? ' tk-float' : '') + (d.crawl ? ' tk-crawl' : '');
       el.style.cssText = `left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;width:${size}px;height:${size}px;margin:${(-size / 2).toFixed(1)}px 0 0 ${(-size / 2).toFixed(1)}px`;
       el.innerHTML = decorMarkup(p.n, size); el.dataset.i = String(i); el.title = p.n;
       placedBox.append(el);
@@ -921,7 +934,7 @@
       b.type = 'button'; b.disabled = left === 0 && selected !== n; b.setAttribute('aria-pressed', String(selected === n));
       b.innerHTML = decorMarkup(n, 30) + '<span></span>'; $(b, 'span').textContent = n + ' ×' + left;
       b.addEventListener('click', e => {
-        if (e.detail === 0) { if (left > 0) placeDecor(n, .18 + Math.random() * .64, (DECOR[n].kind === 'float' ? .25 + Math.random() * .4 : .86 + Math.random() * .06)); return; } // キーボードは、その場にぽんと置く
+        if (e.detail === 0) { if (left > 0) placeDecor(n, .18 + Math.random() * .64, (DECOR[n].kind === 'float' ? .25 + Math.random() * .4 : DECOR[n].kind === 'surface' ? .1 : .86 + Math.random() * .06)); return; } // キーボードは、その場にぽんと置く
         selected = selected === n ? '' : n; renderTray();
       });
       return b;
@@ -943,7 +956,7 @@
   function placeDecor(name, x, y) {
     if (available(name) <= 0) return;
     const d = DECOR[name];
-    const py = d.kind === 'float' ? clamp(y, .12, .8) : clamp(Math.max(y, .8), .8, .94);   // 砂の上のものは、砂の高さに落ち着く
+    const py = d.kind === 'surface' ? clamp(Math.min(y, .13), .07, .13) : d.kind === 'float' ? clamp(y, .12, .8) : clamp(Math.max(y, .8), .8, .94);   // 砂の上のものは、砂の高さに落ち着く／みずの おもての ものは、おもてに うかぶ
     tank.placed.push({ n: name, x: +clamp(x, .05, .95).toFixed(3), y: +py.toFixed(3) }); saveTank(); renderPlaced();
     if (available(name) === 0) selected = '';
     renderTray(); say(pick(SAY.deco), true); mood('smile', 2200); heart(x * W, py * H - 14);
@@ -1069,7 +1082,7 @@
   // ─── ひみつ（へやの なか）：ランプ・おにぎり・うとうと・かざりの くみあわせ・ごはんの おれい・すいそうの うた ───
   //   ごほうびは 見た目・音・ことば だけ（釣れる 魚は かえない）。見つけても 見のがしても 何も へらない。
   //   どれも「さわる」「まつ」だけで おこり、音（おと ON の時）と 読み上げ（sr）でも しらせる。見つけた ものは ひみつ専用の 鍵に 書く。
-  const HM_KEY = 'marufuwa-himitsu-v1';
+  const HM_KEY = HIMITSU_KEY;
   function markFound(id, extra) {   // 読んで・足して・すぐ書く（ほかの ページが 書いた 物を 消さない）
     let d = {};
     try { d = JSON.parse(localStorage.getItem(HM_KEY)) || {}; } catch {}
@@ -1266,7 +1279,12 @@
 
   // ─── English mode（tsuri-en.js が あって 英語の 時だけ）：おくりもの だなの 文と、総司令部の 表に まだ ない 文を 足す ───
   {
-    const EN = { ex: { 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
+    const GIFT_EN = { 'さくらのはなびら': 'Cherry blossom petal', 'あおいは': 'Fresh green leaf', 'どんぐり': 'Acorn', 'ゆきのけっしょう': 'Snow crystal', 'ささぶね': 'Bamboo-leaf boat', 'やどかり': 'Hermit crab' };   // ひみつで もらえる かざりの なまえ（訳表の かけら 表には 入らないので、ここで 訳す）
+    const EN = { ex: { 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
+      [/^(.+?)×(\d+)$/, (_, n, k) => GIFT_EN[n] ? GIFT_EN[n] + ' ×' + k : null],   // かざりの ふだ（ひみつで もらえる かざり）
+      [/^(.+?)をもどす$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] : null],
+      [/^(.+?)をもどしたよ。$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] + '.' : null],
+      [/^(.+?)をおいたよ。$/, (_, n) => GIFT_EN[n] ? 'Placed ' + GIFT_EN[n] + '.' : null],
       [/^おくりものだな。もらったさかなが(\d+)ひき。おすと、ひらくよ。$/, (_, n) => 'Gift Shelf. ' + n + ' fish received. Press to open.'],
       [/^おくりものだなをひらいたよ。もらったさかなが(\d+)ひきいるよ。$/, (_, n) => 'Opened the Gift Shelf. There ' + (n === '1' ? 'is 1 fish' : 'are ' + n + ' fish') + ' you received.']
     ] };
@@ -1274,5 +1292,5 @@
     addEventListener('load', regEn);
   }
 
-  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), version: 5 };
+  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, version: 6 };
 })();

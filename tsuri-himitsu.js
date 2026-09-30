@@ -2,7 +2,8 @@
 //   つりの がめんの ひみつ：あさぎりの こじか／みなとまちの とうだい／ふねの まるまど／ねこの ひるね／つきの うさぎ。＋ ひみつノート。
 //   ・本体（index.html）は書き換えない。本体の さいごに 1行：<script defer src="tsuri-himitsu.js"></script>（外すには その1行を消す）。
 //   ・読むだけ：#scene の data-phase・data-time・data-area、#friend-a・#friend-b の 絵、localStorage['marufuwa-tsuri-v1'] の sound。
-//   ・書く：ひみつ専用の 鍵 localStorage['marufuwa-himitsu-v1'] = {v:1, found:{名前:{at,time}}, gifts:{}} だけ（読んで・足して・すぐ書く。ほかの ページが 書いた物を 消さない）。
+//   ・書く：ひみつ専用の 鍵 localStorage['marufuwa-himitsu-v1'] = {v:1, found:{名前:{at,time}}, gifts:{sakura|aoba|donguri|yuki|sasabune|yadokari: 個数(1〜3)}} だけ（読んで・足して・すぐ書く。ほかの ページが 書いた物を 消さない）。
+//       gifts＝ひみつで もらえる おへやの かざり（ひろばの きせつの おとしもの・つりの ひみつの おくりもの）。おへや（tsuri-tank.js の GIFT_DECOR）が 読んで 本体の save.decor に 足して 数える。
 //   ・ごほうびは 見た目・音・ことば だけ。釣れる 魚は かえない。見つけなくても、見のがしても、何も へらない。
 //   ・ぜんぶ「さわる（本当の ボタン。Tab で えらべる）」か「まつ」で おこり、音（おと ON の時）と 読み上げ（#status）でも しらせる。
 //   ・つりの 最中（かかった・ひいて いる 間）は、ひみつの ボタンを とめる（本体は ボタンの 上を おしても ひけない ため）。
@@ -298,6 +299,7 @@
     'hiroba-wishstar': ['🌟', 'ねがいの ほし', 'つりばで ねがった ぶんだけ、よるの ひろばの そらに ほしが ふえるよ。'],
     'hiroba-group': ['📷', 'みんなで しゃしん', 'なかまが ぜんいん あつまって きたよ。'],
     'hiroba-kouji': ['🚧', 'かんばんの うら', 'こうじちゅうの かんばんの うらに、なにか かいて あったよ。'],
+    'hiroba-drop': ['🍂', 'きせつの おとしもの', 'きを ゆらしたら、きせつの ものが おちて きたよ。おへやに かざれるよ。'],
     'hiroba-thanks': ['🌟', 'ありがとうの ほしぞら', 'ありがとうの いしを ひらいて、あそんで くれた ひとの ほしを みたよ。'],
     'kotoba-hajimari': ['✨', 'はじめの ことば', 'ひみつの ことばを みつけたよ。ことばは、これから ふえるかも しれないよ。']
   };
@@ -456,7 +458,8 @@
       'ベンチで ひとやすみ': 'A Rest on the Bench', 'ベンチで ゆっくり すわって いたら、なかまが となりに きて くれたよ。': 'While you rested quietly on the bench, a friend came and sat next to you.',
       'ねがいの ほし': 'Wishing Star', 'つりばで ねがった ぶんだけ、よるの ひろばの そらに ほしが ふえるよ。': 'The more wishes you make at the fishing spot, the more stars appear in the plaza sky at night.',
       'みんなで しゃしん': 'Group Photo', 'なかまが ぜんいん あつまって きたよ。': 'All the friends gathered around.',
-      'かんばんの うら': 'Back of the Sign', 'こうじちゅうの かんばんの うらに、なにか かいて あったよ。': 'There was something written on the back of the construction sign.'
+      'かんばんの うら': 'Back of the Sign', 'こうじちゅうの かんばんの うらに、なにか かいて あったよ。': 'There was something written on the back of the construction sign.',
+      'きせつの おとしもの': 'Seasonal Find', 'きを ゆらしたら、きせつの ものが おちて きたよ。おへやに かざれるよ。': 'When you shook the tree, something from the season fell down. You can decorate the room with it.'
     }, rules: [
       [/^(ひみつのことばがみつかったよ！|このことばはもうみつけているよ。いつでもどうぞ。)(.+)$/, (_, a, b) => { const E = window.TsuriEn, x = E && E.tr ? E.tr(a) : null, y = E && E.tr ? E.tr(b) : null; return x == null || y == null ? null : x + ' ' + y; }],
       [/^✨(.+)✨$/, (_, a) => { const E = window.TsuriEn, x = E && E.tr ? E.tr(a) : null; return x == null ? null : '✨ ' + x + ' ✨'; }],
