@@ -152,6 +152,8 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 .chips button{min-height:48px;padding:4px 8px;font-size:.82rem;line-height:1.3}
 .chips button[aria-checked=true]{--c1:#ffe6ef;--c2:#ff9fbd;--side:#d9628a;--ink:#5a1230}
 #gift-word{font-weight:800}
+#today{margin:2px 0 10px;text-align:center;font-size:.85rem;line-height:1.7;font-weight:700}
+#today[hidden]{display:none}
 /* てがみ（tsuri-tegami.js）：ひさしぶりに もどった ときと よなかに、景色の すみに ✉。おさなくても いい・その日 いちどだけ・ごほうびは なし */
 #scene #tegami{position:absolute;z-index:5;left:3%;top:5%;width:max(14%,46px);min-height:46px;aspect-ratio:1/1;padding:0;font-size:clamp(1.4rem,7vw,2.1rem);line-height:1;animation:tegami-bob 2.8s ease-in-out infinite}
 #scene #tegami[hidden]{display:none}
@@ -622,6 +624,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <button id="gaze" type="button" aria-pressed="false">ながめる</button>
   </div>
   <p id="status" role="status" aria-live="polite">「なげる」を おしてね。</p>
+  <p id="today" class="note today" hidden></p>
 
   <p class="note"><ruby>時間<rt>じかん</rt></ruby>で <ruby>出<rt>で</rt></ruby>やすい <ruby>魚<rt>さかな</rt></ruby>が <ruby>変<rt>か</rt></ruby>わるよ（<ruby>朝<rt>あさ</rt></ruby>・<ruby>昼<rt>ひる</rt></ruby>・<ruby>夕方<rt>ゆうがた</rt></ruby>・<ruby>夜<rt>よる</rt></ruby>）。<br>
   <ruby>記録<rt>きろく</rt></ruby>は この <ruby>端末<rt>たんまつ</rt></ruby>の <ruby>中<rt>なか</rt></ruby>だけに <ruby>残<rt>のこ</rt></ruby>ります。ログインも インストールも いりません。<br>
@@ -1132,8 +1135,18 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function say(text) { status.textContent = text; }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
   function face(name) { curFace = name; marufuwa.src = wearUrl(name) || 'img/game-' + name + '.webp'; }
+  // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
+  function drawToday() {
+    const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
+    const boss = save.total >= AREAS.find(a => a.id === BOSS.area).need;
+    box.hidden = false;
+    box.textContent = EN()
+      ? 'Everyone has the same lucky fish today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (boss ? ' Today' + String.fromCharCode(39) + 's Giant tends to show up at ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ') — same for everyone.' : '')
+      : 'きょうは みんな おなじ さかなが ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (boss ? 'ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ（これも みんな おなじ）。' : '');
+  }
   function hud() {
     $('total').textContent = String(save.total);
+    drawToday();
     $('seen').textContent = $('book-seen').textContent = String(seenCount());
     const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
     $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%';
@@ -1302,7 +1315,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
-    last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date()};
+    last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY};
     setPhase('caught');
     // つれた さかなを、まるふわが かかげる
     const held = $('held'), f = feet(mine);
@@ -1678,8 +1691,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.textAlign = 'right'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, ''), 1160, 644);   // すみに ちいさく、あそべる ばしょ（この 1まいだけの れいがい・マスター 許可）
     ctx.shadowBlur = 0;
     const words = EN()
-      ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + '\n' + TAG() + '\n' + HOME_SHARE()
-      : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + '\n#まるふわつりびより\n' + HOME;
+      ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + (last.lucky ? '\nEveryone has the same lucky fish today!' : '') + '\n' + TAG() + '\n' + HOME_SHARE()
+      : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + (last.lucky ? '\nきょうの ラッキーさかな、みんな おなじ！' : '') + '\n#まるふわつりびより\n' + HOME;
     await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of Marufuwa holding up ' + last.fish.name : last.fish.name + 'を かかげる まるふわの しゃしん', words, night);
   }
   // シールちょうの 1まい。あつめた シールが ならぶ。30しゅるい そろうと「ぜんぶ あつめた！」
@@ -2139,7 +2152,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), ...(window.TsuriBgm ? [TsuriBgm.button({sound: () => !!save.sound, enableSound: () => $('sound').click()})] : []), $('take-photo'), $('release'), $('send-gift'), $('gaze'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
-    status.after(where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
+    status.after($('today'), where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
   }
   // つかいやすく する（ふだんは とじて いる 折りたたみ）：らくちん・ふるえ。名前で 年れいを わけない（おとなも えらべる）
   // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる。えらんだ ことは おぼえて おく
@@ -2173,6 +2186,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   drawSound();
   // おかえり／ふかい よる：かぞえない・せめない・アドバイスしない。ひさしぶりに きた ひとには、きろくは そのままだと つたえる。よなかに ひらいた ひとには、ゆっくり ながめよう と だけ
   const away = save.last ? Date.now() - save.last : 0, hourNow = new Date().getHours();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawToday);   // 英語の ときは tsuri-en.js が よみこまれて から 書きなおす
   // てがみ：tsuri-tegami.js は defer なので、ぜんぶ よみこまれて から（DOMContentLoaded）。あいた ひにちは かぞえない・出さない
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => tegamiInit(away)); else tegamiInit(away);
   const welcome = (away >= 3 * 86400000 ? 'おかえり。ずかんも きろくも、そのままだよ。' : '') + (hourNow >= 1 && hourNow < 5 ? 'ねむれない？ ゆっくり ながめよう。' : '');
