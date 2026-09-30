@@ -421,6 +421,10 @@ body:not(.gazing) .sub-actions[data-audio=set] #sound,body:not(.gazing) .sub-act
 .assist{flex:1 1 100%;margin-bottom:0}
 .assist-body{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
 .assist-body button{flex:1 1 40%;min-height:54px;font-size:.95rem}
+.assist-group{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:12px}
+.assist-label{flex:1 1 100%;margin:6px 0 -2px;font-size:.85rem;font-weight:800;color:#3a5a68}
+:root[data-night=true] .assist-label{color:#a9bfd2}
+.assist-group button[aria-pressed=true]{--c1:#e3f3ff;--c2:#8fd0f5;--side:#4b9cc9;--ink:#0d3a55}
 #sound[aria-pressed=true],#buzz[aria-pressed=true],#nature[aria-pressed=true],#calm[aria-pressed=true],#large[aria-pressed=true],.bgm-btn[aria-pressed=true]{--c1:#e3f3ff;--c2:#8fd0f5;--side:#4b9cc9;--ink:#0d3a55}   /* ON の ときは、ほんのり あおく（もじでも ON と かいて ある） */
 body.gazing .assist{display:none}
 #scene[data-ikimono=off] #ikimono{display:none}
@@ -1121,8 +1125,12 @@ dialog .close{display:block;margin:auto;min-width:160px}
   let audio = null, guide = 0, hiss = null;
   const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // iPhone は マナー スイッチで おとが きえる（Web Audio は マナーに したがう）
   function ready() { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); return audio; }
-  function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0) {
-    if (!save.sound) return;
+  // おとは 3つに わけて けせる（きこえかたに びんかんな ひと・おとが いらない ひと の ため）。「おと」ボタンが ぜんぶの もと
+  // guide＝あんない（わ・ピコン・ちょんちょん・ピピッ・はんてい）／fx＝こうかおん（なげる・おいわい・おくりもの など）／amb＝なみと あめ／ui＝おとを つけた ときの かくにん（いつも ならす）
+  const SND_KEY = {guide: 'sndGuide', fx: 'sndFx', amb: 'sndAmb'};
+  const sndOn = kind => save.sound === true && (kind === 'ui' || save[SND_KEY[kind]] !== false);
+  function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, kind = 'fx') {
+    if (!sndOn(kind)) return;
     try {
       const ctx = ready(), at = ctx.currentTime + delay, osc = ctx.createOscillator(), vol = ctx.createGain();
       osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
@@ -1132,8 +1140,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
       osc.connect(vol).connect(ctx.destination); osc.start(at); osc.stop(at + length + .02);
     } catch {}
   }
-  function zap(length = .12, delay = 0, loud = .07) {   // みじかい ざっ（みずしぶき、けむり）
-    if (!save.sound) return;
+  function zap(length = .12, delay = 0, loud = .07, kind = 'fx') {   // みじかい ざっ（みずしぶき、けむり）
+    if (!sndOn(kind)) return;
     try {
       const ctx = ready(), at = ctx.currentTime + delay;
       if (!hiss) { hiss = ctx.createBuffer(1, ctx.sampleRate * .5, ctx.sampleRate); const d = hiss.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
@@ -1142,7 +1150,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
       src.connect(vol).connect(ctx.destination); src.start(at); src.stop(at + length + .02);
     } catch {}
   }
-  const chord = (notes, gap = .07, type = 'square', loud = .05) => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud));
+  const chord = (notes, gap = .07, type = 'square', loud = .05, kind = 'fx') => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, kind));
+  const guideTone = (freq, length, type, delay, loud, slideTo) => tone(freq, length, type, delay, loud, slideTo, 'guide'), guideChord = (notes, gap, type, loud) => chord(notes, gap, type, loud, 'guide'), guideZap = (length, delay, loud) => zap(length, delay, loud, 'guide');
+  const SND_BTN = [   // つかいやすく する の なかの「おとの せってい」。dflt＝はじめから ON。sample＝ONに した とき ちょっと ならす
+    {id: 'snd-guide', key: 'sndGuide', ja: 'あんないの おと', en: 'Guide sounds', dflt: true, sample: () => { guideTone(587, .05, 'triangle', 0, .0825); setTimeout(() => guideChord([988, 1319], .07, 'square', .075), 260); }},
+    {id: 'snd-fx', key: 'sndFx', ja: 'こうかおん', en: 'Sound effects', dflt: true, sample: () => { tone(784, .06, 'triangle', 0, .05); tone(1047, .08, 'triangle', .07, .05); }},
+    {id: 'snd-amb', key: 'sndAmb', ja: 'なみと あめの おと', en: 'Waves and rain', dflt: true, sample: () => {}}
+  ];
   const FANFARE = .032;   // おいわいの おとは ひかえめに（あんないの おとが きこえる ように。ジョブズ1の そくてい）
   // ふるえ：かかった ときと つれた とき。さわりに びんかんな こも いるので、いれきり できる。「うごきを へらす」の 人は はじめから なし
   const canBuzz = typeof navigator.vibrate === 'function';
@@ -1159,6 +1173,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     { const b = document.createElement('button'); b.id = 'nature'; b.type = 'button'; b.setAttribute('aria-pressed', 'true'); body.append(b); }
     { const b = document.createElement('button'); b.id = 'calm'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
     { const b = document.createElement('button'); b.id = 'large'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
+    { const g = document.createElement('div'), h = document.createElement('h3'); g.className = 'assist-group'; g.setAttribute('role', 'group'); g.setAttribute('aria-labelledby', 'assist-snd-h'); h.id = 'assist-snd-h'; h.className = 'assist-label'; g.append(h);
+      SND_BTN.forEach(x => { const b = document.createElement('button'); b.id = x.id; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); g.append(b); }); body.append(g); }
     box.append(head, body);
     box.open = typeof save.assistOpen === 'boolean' ? save.assistOpen : !!save.easy;
     head.addEventListener('click', () => setTimeout(() => { save.assistOpen = box.open; store(); }, 0));   // ひらく／とじる を おぼえる
@@ -1167,7 +1183,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
   let ambient = null, ambientOut = null, sleepMuted = false;
   function startAmbient() {
-    if (!save.sound || ambient || sleepMuted) return;
+    if (!sndOn('amb') || ambient || sleepMuted) return;
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       if (audio.state === 'suspended') audio.resume();
@@ -1195,7 +1211,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function audioChosen() { if (save.audioSet !== true) { save.audioSet = true; store(); } }
   function drawAudioSize() { const row = document.querySelector('.sub-actions'); if (row) row.dataset.audio = audioDecided() ? 'set' : ''; drawSound(); }   // ちいさく するのは ひらき なおした とき／つれた とき（おした ゆびの したで ボタンが うごかない ように）
   function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
-  $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([523, 784], .09, 'triangle'); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。' + (IOS ? ' きこえない ときは、よこの マナー スイッチを みてね。' : '')); } else say('おとを けしたよ。'); });
+  $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([523, 784], .09, 'triangle', .05, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
   const TARGET = .3;
   const SWIMS = {
@@ -1216,15 +1232,15 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function windowMs() { const lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); return (Math.max(120, (.06 + .1 * (1 - away) + save.rod * .025) * period) + Math.min(240, misses * 30)) * (save.total === 0 ? 2 : 1); }   // はじめての 1ぴきだけ、「いまだ」の まどを 2ばい（ばつは ない・さいしょの 1ぴきは かならず つれる）
   function startGuide() {
     // うごきを へらす せっていでも、おとの あんないは とめない（めが みえなくて、うごきも へらしたい ひとの ため）
-    stopGuide(); if (!save.sound || save.easy) return;
+    stopGuide(); if (!sndOn('guide') || save.easy) return;
     // ピコンは、おして から とどくまでの おくれ（やく 0.2びょう）の ぶん、はやめに ならす。ポ・ポ・ポ・ポは、おなじ まあいで
     const pikon = (hitAt - 200 + period) % period, gap = pikon > 320 ? pikon / 5 : 0, pitches = [392, 494, 587, 740];
     let before = cycleTime();
     guide = setInterval(() => {
       if (phase !== 'reel') return stopGuide();
       const now = cycleTime(), passed = mark => before <= now ? before < mark && mark <= now : mark > before || mark <= now;
-      if (gap) pitches.forEach((pitch, i) => { if (passed(pikon - gap * (4 - i))) tone(pitch, .05, 'triangle', 0, [.11, .0925, .0825, .0725][i]); });   // ひくい おとほど、おおきく（きこえかたを そろえる）
-      if (passed(pikon)) chord([988, 1319], .07, 'square', .075);   // いまだ：ピコン
+      if (gap) pitches.forEach((pitch, i) => { if (passed(pikon - gap * (4 - i))) guideTone(pitch, .05, 'triangle', 0, [.11, .0925, .0825, .0725][i]); });   // ひくい おとほど、おおきく（きこえかたを そろえる）
+      if (passed(pikon)) guideChord([988, 1319], .07, 'square', .075);   // いまだ：ピコン
       before = now;
     }, 15);
   }
@@ -1285,7 +1301,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
     shadow.style.setProperty('--swim', wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});
     // かかる まえの「ちょんちょん」。ウキが ちいさく ゆれて、もうすぐ くると わかる
-    setTimeout(() => { if (phase === 'waiting') { $('float').dataset.nibble = 'true'; tone(660, .04, 'triangle', 0, .04); tone(660, .04, 'triangle', .22, .04); say('ちょん、ちょん…。なにか きたかも。'); } }, Math.max(0, wait - 750));
+    setTimeout(() => { if (phase === 'waiting') { $('float').dataset.nibble = 'true'; guideTone(660, .04, 'triangle', 0, .04); guideTone(660, .04, 'triangle', .22, .04); say('ちょん、ちょん…。なにか きたかも。'); } }, Math.max(0, wait - 750));
     setTimeout(() => { delete $('float').dataset.nibble; bite(); }, wait);
   }
   // なげる うごき：うしろに そって、えいっと ふって、ウキが ゆみなりに とんで、ぽちゃん
@@ -1306,7 +1322,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     };
   }
   function bite() {
-    flying = false; tone(1568, .06); tone(1568, .06, 'square', .1); tone(2093, .12, 'square', .2); buzz([120, 80, 120]);   // ピピッ、ピーン
+    flying = false; guideTone(1568, .06); guideTone(1568, .06, 'square', .1); guideTone(2093, .12, 'square', .2); buzz([120, 80, 120]);   // ピピッ、ピーン
     setPhase('bite');
     button.textContent = 'ひく！'; lock(false); button.dataset.hot = 'true';
     say((fish.legend ? 'にじいろに ひかる かげ…！ なんだろう。' : nushi ? 'とても おおきな かげ…！ ぬしかも。' : fish.rare === 4 ? 'きんいろの かげ…！ スペシャルな こかも。' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
@@ -1329,14 +1345,14 @@ dialog .close{display:block;margin:auto;min-width:160px}
     button.textContent = 'いまだ！';
     $('swim-tag').textContent = save.easy ? 'らくちん' : swim.name;
     // みじかく。ちいさい こでも ひとめで わかる ように
-    say(save.easy || (reduce() && !save.sound) ? 'おすだけで、つれるよ。' : save.sound ? '「ピコン」で、おしてね。' : 'ひかったら、おしてね。');
+    say(save.easy || (reduce() && !sndOn('guide')) ? 'おすだけで、つれるよ。' : sndOn('guide') ? '「ピコン」で、おしてね。' : 'ひかったら、おしてね。');
   }
   function pull() {
     // 「いまだ」との じかんの ずれで きめる（えがく しくみに たよらない。わの うごきかたが ちがっても、おなじ ものさし）
     // ひいた あとは、みじかい「ぷにっ」やすみ。れんだ しても はやく ならない（ねらう ひとと、おなじ くらいの はやさ）。やすみの あいだの タップは、なにも おきない だけ
     if (performance.now() < restUntil) return;
     const miss = Math.abs(offBeat()), easy = windowMs();
-    const blind = save.easy || (reduce() && !save.sound);   // らくちん、または、わも おとも ない とき：タイミングを みない
+    const blind = save.easy || (reduce() && !sndOn('guide'));   // らくちん、または、わも あんないの おとも ない とき：タイミングを みない
     const power = blind ? 2 : miss <= easy ? 3 : miss <= easy + .12 * period ? 2 : 1;
     if (power === 3) { perfects++; misses = 0; hp = Math.max(0, hp - 1); } else if (power === 1) misses++;   // 「ぴったり」は 1つ おおく ひける
     const rest = blind ? 320 : Math.max(320, period * .45);   // やすみは、どの ひきかたでも おなじ ながさ
@@ -1348,9 +1364,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('hp').firstElementChild.style.width = (hp / hpMax * 100) + '%';
     const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'おしい！';
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
-    if (power === 3) { chord([1047, 1319, 1568, 2093], .045); buzz(40); }   // ピロリロッ
-    else if (power === 2) { tone(784, .05); tone(1047, .08, 'square', .05); }   // ピコッ
-    else { tone(196, .12, 'triangle', 0, .06, 131); zap(.08, 0, .04); }   // ポフッ
+    if (power === 3) { guideChord([1047, 1319, 1568, 2093], .045); buzz(40); }   // ピロリロッ
+    else if (power === 2) { guideTone(784, .05); guideTone(1047, .08, 'square', .05); }   // ピコッ
+    else { guideTone(196, .12, 'triangle', 0, .06, 131); guideZap(.08, 0, .04); }   // ポフッ
     $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
     if (!reduce()) {
       // ぐいっと ひく：うしろに のけぞって、もどる
@@ -2237,7 +2253,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   let gazeTimer = 0, gazeLast = '', wake = null;
   // ことばは、じかん・てんき・おとに あわせて えらぶ（おとが ないのに「おとを きいて」とは いわない）
   const gazeLine = () => {
-    const pool = [...GAZE_WORDS, ...(timeOfDay() === 'n' ? GAZE_NIGHT : []), ...(timeOfDay() === 'a' ? GAZE_MORNING : []), ...(rainy ? GAZE_RAIN : [])].filter(x => x !== gazeLast && (save.sound || !x.includes('おと')));
+    const pool = [...GAZE_WORDS, ...(timeOfDay() === 'n' ? GAZE_NIGHT : []), ...(timeOfDay() === 'a' ? GAZE_MORNING : []), ...(rainy ? GAZE_RAIN : [])].filter(x => x !== gazeLast && (sndOn('amb') || !x.includes('おと')));
     return gazeLast = pool[Math.floor(Math.random() * pool.length)];
   };
   // がめんが きえない ように（つかえる ブラウザだけ。もどる・はなれる ときは はなす）
@@ -2443,6 +2459,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function drawEasy() {
     const on = !!save.easy; $('easy').textContent = on ? 'らくちん：ON' : 'らくちん：OFF'; $('easy').setAttribute('aria-pressed', String(on)); scene.dataset.easy = String(on);
     const parts = []; if (on) parts.push('らくちん'); if (canBuzz && !buzzOn()) parts.push('ふるえ なし'); if (!natureOn()) parts.push('いきもの なし');
+    if (save.sndGuide === false) parts.push('あんないの おと なし'); if (save.sndFx === false) parts.push('こうかおん なし'); if (save.sndAmb === false) parts.push('なみと あめ なし');
     if ($('assist-now')) $('assist-now').textContent = parts.length ? parts.join('・') : 'ふつう';
   }
   $('easy').addEventListener('click', () => { save.easy = !save.easy; store(); drawEasy(); say(save.easy ? 'らくちんに したよ。おすだけで つれるよ。' : 'らくちんを やめたよ。わが ひかったら おしてね。'); });
@@ -2455,6 +2472,21 @@ dialog .close{display:block;margin:auto;min-width:160px}
     save.ikimono = !natureOn(); store(); drawNature(); drawEasy();
     say(save.ikimono ? 'けしきの いきものを だしたよ。' : 'けしきの いきものを しまったよ。');
   });
+  // おとの せってい：おとが ONの あいだだけ ならす。あんない・こうかおん・なみと あめ を 1つずつ けせる
+  const sndPrefOn = b => b.dflt ? save[b.key] !== false : save[b.key] === true;
+  function drawSndPrefs() {
+    const h = $('assist-snd-h'); if (h) h.textContent = L('おとの せってい', 'Sound settings');
+    SND_BTN.forEach(b => { const el = $(b.id); if (!el) return; const on = sndPrefOn(b); el.textContent = L(b.ja + '：' + (on ? 'ON' : 'OFF'), b.en + ': ' + (on ? 'ON' : 'OFF')); el.setAttribute('aria-pressed', String(on)); });
+  }
+  SND_BTN.forEach(b => $(b.id) && $(b.id).addEventListener('click', () => {
+    save[b.key] = !sndPrefOn(b); store(); drawSndPrefs(); drawEasy();
+    const on = sndPrefOn(b);
+    if (b.key === 'sndAmb') { if (on) startAmbient(); else stopAmbient(); }
+    if (b.key === 'sndGuide' && phase === 'reel') { if (on) startGuide(); else stopGuide(); }
+    if (on && save.sound) b.sample();
+    say(L(b.ja + 'を ' + (on ? 'つけたよ。' : 'けしたよ。'), b.en + (on ? ' turned on.' : ' turned off.')) + (save.sound ? '' : L(' 「おと」が OFF の あいだは ならないよ。', ' Nothing plays while Sound is off.')));
+  }));
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawSndPrefs); else drawSndPrefs();
   // うごきを へらす：スマホの せってい（OSの「うごきを へらす」）か、この ボタン。ボタンを おすと、せっていを ほぞんして よみこみ なおす（外付けの ぶひんも ぜんぶ おなじ せっていに なる）
   const osReduce = () => (window.__realMatchMedia || matchMedia.bind(window))('(prefers-reduced-motion: reduce)').matches;
   function drawCalm() {
