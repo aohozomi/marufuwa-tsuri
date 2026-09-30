@@ -1346,6 +1346,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   const watchers = [0, 1].map(i => { const im = document.createElement('img'); im.className = 'who friend watcher'; im.width = im.height = 180; im.alt = ''; im.draggable = false; im.setAttribute('aria-hidden', 'true'); im.hidden = true; scene.insertBefore(im, $('friend-a')); return im; });
   const WATCH_X = [33, 60];
+  function buddyPal() { const pf = prefPals(); return pf.party[0] || pf.fav[0] || null; }   // しゃしんに うつる なかま（1にん）
   function paintWatchers() {   // 3にんめ・4にんめは きしの うしろで ちいさく みまもる
     const extra = prefPals().party.slice(2, 4);
     watchers.forEach((im, i) => { const p = extra[i]; im.hidden = !p; if (p) { const src = 'img/friend-' + p.id + '-s.webp'; if (im.getAttribute('src') !== src) im.src = src; place(im, {x: WATCH_X[i], y: shore(WATCH_X[i]) - 9}); } });
@@ -2558,6 +2559,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 920, 112, 440);   // ゲームの なまえ。みた ひとが、さがして これる ように
     ctx.font = '28px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + T(last.area), 920, 160, 440);
     if (save.nameOnCard === true && bucketName()) { ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText(L('バケツ：', 'Bucket: ') + bucketName(), 920, 198, 440); }   // 本人が えらんだ ときだけ（はじめは OFF）。なまえは この 画像の なかだけ。URL・ひとことの もじには いれない
+    { const bd = buddyPal(); if (bd && !night) { const im = await loadImg('img/friend-' + bd.id + '-s.webp'); if (im) { const tall = 130, wide = tall * im.naturalWidth / im.naturalHeight; ctx.drawImage(im, 625 - wide / 2, 505 - tall, wide, tall); } } }   // いっしょに いく なかま（1にんまで）も うつる
     {   // けっかの ふだ（3つまで・ふだの じゅんは TAG_FIRST）を しゃしんの したの おびに。なまえ・かずの じゅんいは いれない（じぶんの きろく・おおもの・ぴったり ×2 など）
       const shown = tagsShown(last.tags).map(T).filter(Boolean);
       if (shown.length) {
@@ -2569,7 +2571,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     if (night) {
       nushiSeal(ctx, 1136, 226, T('ぬし'));
-      const pal = pals[0] || PALS[0], friend = await loadImg('img/friend-' + pal.id + '-s.webp');   // となりの こも「わっ！」と びっくり（ぴょんと はねて、ふきだしに ！？）
+      const pal = buddyPal() || pals[0] || PALS[0], friend = await loadImg('img/friend-' + pal.id + '-s.webp');   // となりの こも「わっ！」と びっくり（いっしょに いく こ・♡の こが いれば その こ）（ぴょんと はねて、ふきだしに ！？）
       if (friend) { const tall = 178, wide = tall * friend.naturalWidth / friend.naturalHeight; ctx.save(); ctx.translate(648, 490 - tall / 2 - 26); ctx.rotate(.1); ctx.drawImage(friend, -wide / 2, -tall / 2, wide, tall); ctx.restore(); }
       ctx.save(); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ff5a3c'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(622, 262, 36, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(636, 292); ctx.lineTo(654, 318); ctx.lineTo(612, 296); ctx.closePath(); ctx.fill(); ctx.stroke();
