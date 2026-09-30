@@ -1817,7 +1817,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       } else { img.style.visibility = 'hidden'; palRig(slot, false); }
       if (!still()) return;
       await hold(reduce() ? 1200 : 2200); if (!still()) return;
-      pals[slot] = next; img.src = 'img/friend-' + next.id + '-s.webp'; img.alt = 'となりで つりを する ' + next.name;
+      pals[slot] = next; img.src = 'img/friend-' + next.id + '-s.webp'; img.alt = 'となりで つりを する ' + next.name; paintFriendLabels();   // いれかわった なかまの なまえで「はなしかける」の ラベルも かきなおす
       const mt = metToday(); if (!mt.ids.includes(next.id)) mt.ids.push(next.id);
       save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {}; save.pals[next.id] = true; store();
       img.style.visibility = '';
