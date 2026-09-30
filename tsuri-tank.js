@@ -862,7 +862,7 @@
       });
       $(dlg, '.tk-actions').append(bgmBtn);
     }
-    B.enter('tank', { ctx: audio, sound: soundNow, starry: () => starry, mute: () => listen });
+    B.enter('tank', { ctx: audio, sound: soundNow, starry: () => starry, mute: () => listen, time: () => room.dataset.time });   // おへやの じかん（asa・hiru・yuu・yoru）で 曲が かわる
   }
   const bgmOpen = () => { if (visit) return; if (window.TsuriBgm) bgmEnter(); else loadBgm().then(B => { if (B && isOpen()) bgmEnter(); }); };
   const bgmLeave = () => { if (window.TsuriBgm) window.TsuriBgm.leave('tank'); };
