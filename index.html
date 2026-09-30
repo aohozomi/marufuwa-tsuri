@@ -489,6 +489,8 @@ dialog .count{text-align:center;margin:0 0 12px}
 #book-grid div[data-seen=false] b{width:62px;height:62px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:3px dashed #b9cbd4;color:#9fb3bd}
 #book-grid div[data-rare="4"][data-seen=true]{border-color:#e0a61c;background:#fffaf0}
 dialog .close{display:block;margin:auto;min-width:160px}
+dialog .close-top{position:sticky;top:0;z-index:3;display:block;margin:0 0 6px auto;min-height:44px;min-width:96px;padding:4px 14px;font-size:.85rem}   /* ながい まどの うえの「とじる」（したまで いかなくても とじられる） */
+dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカスを あてる（わくは いらない） */
 /* じぶんの どうぐ */
 .hud.menu{flex-wrap:wrap}
 .hud.menu > *{flex:1 1 30% !important;min-width:88px}
@@ -1316,8 +1318,21 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
-    return showModal0.apply(this, arguments);
+    const opener = document.activeElement, result = showModal0.apply(this, arguments);
+    try { dialogIntro(this, opener); } catch {}
+    return result;
   };
+  // まどが ひらいたら：みだしへ フォーカス（よみあげが なまえから はじまる）／ながい まどは みだしの したに「とじる」を もう1つ（うごかない・Tab の ひとつ めで とどく）／とじたら ひらいた ボタンへ もどる
+  function dialogIntro(dlg, opener) {
+    const h = document.getElementById((dlg.getAttribute('aria-labelledby') || '').split(' ')[0]);
+    if (h) { h.tabIndex = -1; h.focus({preventScroll: true}); }
+    if (!dlg.querySelector('.close-top') && dlg.scrollHeight > dlg.clientHeight + 8) {
+      const bottom = dlg.querySelector('button.close');
+      if (bottom) { const top = document.createElement('button'); top.type = 'button'; top.className = 'close-top'; top.textContent = bottom.textContent; top.addEventListener('click', () => dlg.close()); if (h && h.parentElement === dlg) h.after(top); else dlg.prepend(top); }
+    }
+    dlg._opener = opener;
+    if (!dlg._openerBound) { dlg._openerBound = true; dlg.addEventListener('close', () => { const o = dlg._opener; dlg._opener = null; try { if (o && o.isConnected && o !== document.body && !o.disabled) o.focus({preventScroll: true}); } catch {} }); }
+  }
   function say(text, mute) { status.textContent = text; if (!mute) speak(text); }
   // つれた けっかの ながい ぶんは 目には 出さない（カードと ペンギンが みせる）。読み上げ（aria-live）にだけ のこす。あとから ほかの ことばが 書かれたら（外付けも）ふつうに 見える
   function sayQuiet(text) { const span = document.createElement('span'); span.className = 'sr-only'; span.textContent = text; status.replaceChildren(span); speak(text); }
