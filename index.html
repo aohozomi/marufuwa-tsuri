@@ -482,7 +482,7 @@ rt{font-size:.62em;font-size:max(.62em,10px);letter-spacing:.02em;font-weight:70
 ruby{ruby-align:center}   /* 「無 料」「大 丈 夫」のように、ふりがなが ながい とき 漢字の あいだが ひらかない */
 #status,.lead,.note{text-wrap:balance;word-break:auto-phrase}   /* 「よ。」だけの 行を つくらない（あたらしい ブラウザ。ふるい ものは いつも どおり） */   /* ふりがなを よむ ひとが いちばん こまるので、10px より ちいさく しない */
 .lead{font-size:1rem}
-.nb{white-space:nowrap}   /* ひと まとまりの ことばは 行の なかで きらない（320px でも「よ。」だけの 行を つくらない。text-wrap の ない ブラウザでも きく） */
+.lead{word-break:keep-all;overflow-wrap:anywhere}   /* 一まとまりの ことばの まんなかで 行を きらない（320px で「よ。」だけの 行を つくらない。auto-phrase・balance の ない ふるい ブラウザでも きく。ながい ことばは はみださない よう anywhere） */
 #float[data-nibble=true]{animation:nibble .22s ease-in-out 3 !important}
 @keyframes nibble{50%{translate:0 6px}}
 /* 「なげる」は、がめんの したに とめる。スクロール しても、つれた あとも、おなじ ばしょに ある */
@@ -600,7 +600,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <path d="M0 780 Q400 730 800 790 T1600 770 V900 H0Z" fill="#a7dba0"/>
   </svg>
   <h1 class="logo" aria-label="まるふわ つりびより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">つ</span><span aria-hidden="true">り</span><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
-  <p class="lead"><ruby>急<rt>いそ</rt></ruby>がなくて、<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>。<span class="nb"><ruby>逃<rt>に</rt></ruby>がしても、<ruby>減<rt>へ</rt></ruby>らないよ。</span><br><small><span class="nb">1ぴき 10〜20<ruby>秒<rt>びょう</rt></ruby>くらい。</span> <span class="nb"><ruby>無料<rt>むりょう</rt></ruby>で あそべるよ。</span></small></p>
+  <p class="lead"><ruby>急<rt>いそ</rt></ruby>がなくて、<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>。<ruby>逃<rt>に</rt></ruby>がしても、<ruby>減<rt>へ</rt></ruby>らないよ。<br><small>1ぴき 10〜20<ruby>秒<rt>びょう</rt></ruby>くらい。<ruby>無料<rt>むりょう</rt></ruby>で あそべるよ。</small></p>
   <div class="hud record">
     <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
     <span>つれた かず <strong id="total">0</strong></span>
