@@ -1068,7 +1068,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     {id: 'neko', name: 'ももの ねこ', word: 'にゃ、つれた', home: 'H'}, {id: 'koinu', name: 'はちみつの こいぬ', word: 'わん！ たのしい', home: 'H'},
     {id: 'hamster', name: 'いちごの ハムスター', word: 'ほっぺに いれとこ', home: 'H'}, {id: 'hoho', name: 'ほほきずの ねこ', word: 'いっしょに いようね', home: 'H'},
     {id: 'azarashi', name: 'さくらの あざらし', word: 'うみ、きもちいい', home: 'B'}, {id: 'alpaca', name: 'わたあめの アルパカ', word: 'かぜが ふわふわ', home: 'B'},
-    {id: 'gantai', name: 'がんたいの くま', word: 'ほしが みえるよ', dayWord: 'ほしが みえるよ。ひるでも ね', home: 'B'}
+    {id: 'gantai', name: 'がんたいの くま', word: 'ほしが みえるよ', home: 'B'}
   ];
   let pals = [PALS[0], PALS[1]];
   // おくりもの（14_…の しよう）。URL に のせるのは すうじだけ：?gift=魚.大きさ×10.なかま.ひとこと.あいじるし（れい 12.194.8.3.48217）。
@@ -1548,7 +1548,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
   const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
   const bubble = $('bubble');
-  const palWord = p => p.dayWord && timeOfDay() !== 'n' ? p.dayWord : p.word;   // なかまの ひとことは じかんに あわせる（がんたいの くま：ひるは「ひるでも ね」）
+  const PAL_DAYWORD = {gantai: 'ほしが みえるよ。ひるでも ね'};   // ひると ゆうがた だけの ひとこと（PALS の かたちは かえない：水槽の けんさが よむ）
+  const palWord = p => PAL_DAYWORD[p.id] && timeOfDay() !== 'n' ? PAL_DAYWORD[p.id] : p.word;   // なかまの ひとことは じかんに あわせる（がんたいの くま：ひるは「ひるでも ね」）
   function chatter() {
     if (!document.hidden && (phase === 'idle' || phase === 'waiting') && !book.open && !swapping) {   // アタリ・ひいて いる・つれた あとは しゃべらない（わの タイミングに めが いく）
       const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
