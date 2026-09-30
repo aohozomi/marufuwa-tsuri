@@ -3458,7 +3458,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('close-bucket').addEventListener('click', () => bucket.close());
 
   // ---- きねん（トロフィー）：あそぶほど もらえる（銅・銀・金の 3だん・40こ）。とりにがしなし・くらべない・ばつなし・きげんつき なし。いままでの きろくからも あとから つく ----
-  const TIER = {1: ['🥉', '銅', 'Bronze'], 2: ['🥈', '銀', 'Silver'], 3: ['🥇', '金', 'Gold']}, TIER_HIRA = {1: 'どう', 2: 'ぎん', 3: 'きん'}, tierJa = k => save.hira === true ? TIER_HIRA[k] : TIER[k][1];   // ひらがなだけの ときは「どう・ぎん・きん」
+  const TIER = {1: ['🥉', '銅', 'Bronze'], 2: ['🥈', '銀', 'Silver'], 3: ['🥇', '金', 'Gold']}, TIER_HIRA = {1: 'どう', 2: 'ぎん', 3: 'きん'}, tierJa = k => TIER_HIRA[k];   // 「どう・ぎん・きん」（ひらがな。漢字＋ふりがなに したい ときは 辞書が かえる。#status・よみあげ・ラベルは いつも もとの ひらがな）
   const tf = k => !!(save.tflag && save.tflag[k]);
   const caughtFish = () => Object.keys(save.fish).map(id => FISH[id]).filter(Boolean);
   const nPal = () => ROSTER.filter(metPal).length;
