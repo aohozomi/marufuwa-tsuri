@@ -589,7 +589,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 #nakama-card button[aria-disabled=true]{opacity:.6}
 #nakama-party{margin:0 0 10px;text-align:center}
 #nakama-party h3{margin:0 0 6px;font-size:.95rem}
-#nakama-party .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#nakama-party .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 #nakama-party .slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:78px;padding:4px 2px;font-size:.7rem;line-height:1.2;border:3px dashed #b9cbd4;border-radius:14px;background:transparent;color:#566d79;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;word-break:keep-all;text-wrap:balance}
 #nakama-party button.slot{border:3px solid #ffb3c8;background:#fff;color:#244653}
 #nakama-party .slot::before{display:none}
@@ -607,7 +607,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 #nakama-grid .nk-none{color:#566d79;background:#eef4f7}
 #nakama-grid .nk-none img{opacity:.35;filter:grayscale(1)}
 #marufuwa[data-avatar]{width:17%;aspect-ratio:1/1}
-.watcher{width:10%;aspect-ratio:1/1;z-index:1;animation-delay:-2s}   /* 3にんめ・4にんめの なかま：きしの うしろで ちいさく */
+.watcher{width:10%;aspect-ratio:1/1;z-index:1;animation-delay:-2s}   /* 3にんめの なかま：きしの うしろで ちいさく */
 .watcher[hidden]{display:none}   /* まるふわ いがいの こを えらんだ とき（なかまと おなじ しかくい え） */
 dialog .close-top{position:sticky;top:0;z-index:3;display:block;margin:0 0 6px auto;min-height:44px;min-width:96px;padding:4px 14px;font-size:.85rem}   /* ながい まどの うえの「とじる」（したまで いかなくても とじられる） */
 dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカスを あてる（わくは いらない） */
@@ -1183,7 +1183,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (other.audioSet === true && save.audioSet !== true) { save.audioSet = true; changed = true; }
     if ((other.mode === 'easy' || other.mode === 'normal' || other.mode === 'hard') && !save.mode) { save.mode = other.mode; save.easy = other.mode === 'easy'; changed = true; }   // あそびかた（あとで えらべば うわがき）
     if (other.seenFish && typeof other.seenFish === 'object') for (const id of Object.keys(other.seenFish)) if (other.seenFish[id] === true && FISH[id] && !(save.seenFish && save.seenFish[id])) { save.seenFish = save.seenFish && typeof save.seenFish === 'object' ? save.seenFish : {}; save.seenFish[id] = true; changed = true; }
-    if (Array.isArray(other.party) && !(Array.isArray(save.party) && save.party.length)) { const ids = other.party.filter((id, i, a) => typeof id === 'string' && /^[a-z]{2,12}$/.test(id) && a.indexOf(id) === i).slice(0, 4); if (ids.length) { save.party = ids; changed = true; } }
+    if (Array.isArray(other.party) && !(Array.isArray(save.party) && save.party.length)) { const ids = other.party.filter((id, i, a) => typeof id === 'string' && /^[a-z]{2,12}$/.test(id) && a.indexOf(id) === i).slice(0, 3); if (ids.length) { save.party = ids; changed = true; } }
     if (Array.isArray(other.fav)) { const have = new Set(Array.isArray(save.fav) ? save.fav : []), more = other.fav.filter(id => typeof id === 'string' && /^[a-z]{2,12}$/.test(id) && !have.has(id)); if (more.length) { save.fav = [...(Array.isArray(save.fav) ? save.fav : []), ...more]; changed = true; } }
     for (const key of ['palXp', 'palsAt', 'bond']) if (other[key] && typeof other[key] === 'object') for (const [id, v] of Object.entries(other[key])) if (/^[a-z]{2,12}$/.test(id) && Number.isFinite(v) && v > ((save[key] && save[key][id]) || 0)) { save[key] = save[key] && typeof save[key] === 'object' ? save[key] : {}; save[key][id] = v; changed = true; }   // けいけんち・あった じかん・なかよし：おおきい ほう
     if (other.trophies && typeof other.trophies === 'object') for (const [id, at] of Object.entries(other.trophies)) if (/^[A-Za-z0-9]{2,12}$/.test(id) && Number.isFinite(at) && !(save.trophies && save.trophies[id])) { save.trophies = save.trophies && typeof save.trophies === 'object' ? save.trophies : {}; save.trophies[id] = at; changed = true; }   // きねん：どちらかに あれば のこる
@@ -1191,7 +1191,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     for (const k of ['gazeMin', 'photoN', 'dayN']) if (Number.isInteger(other[k]) && other[k] > (save[k] || 0)) { save[k] = other[k]; changed = true; }
     if (Array.isArray(other.note)) {   // つりびと ノート：あった ものは のこす（at・id・kind で いっしょに）
       const have = new Set((Array.isArray(save.note) ? save.note : []).map(n => n.at + ':' + n.id + ':' + n.kind));
-      const more = other.note.filter(n => n && Number.isFinite(n.at) && Number.isInteger(n.id) && FISH[n.id] && ['catch', 'release', 'gift'].includes(n.kind) && !have.has(n.at + ':' + n.id + ':' + n.kind)).map(n => ({at: n.at, id: n.id, size: Number.isFinite(n.size) ? n.size : 0, spot: typeof n.spot === 'string' ? n.spot.slice(0, 1) : 'L', time: typeof n.time === 'string' ? n.time.slice(0, 1) : 'h', nushi: !!n.nushi, party: Array.isArray(n.party) ? n.party.filter(x => typeof x === 'string').slice(0, 4) : [], avatar: typeof n.avatar === 'string' ? n.avatar : null, kind: n.kind}));
+      const more = other.note.filter(n => n && Number.isFinite(n.at) && Number.isInteger(n.id) && FISH[n.id] && ['catch', 'release', 'gift'].includes(n.kind) && !have.has(n.at + ':' + n.id + ':' + n.kind)).map(n => ({at: n.at, id: n.id, size: Number.isFinite(n.size) ? n.size : 0, spot: typeof n.spot === 'string' ? n.spot.slice(0, 1) : 'L', time: typeof n.time === 'string' ? n.time.slice(0, 1) : 'h', nushi: !!n.nushi, party: Array.isArray(n.party) ? n.party.filter(x => typeof x === 'string').slice(0, 3) : [], avatar: typeof n.avatar === 'string' ? n.avatar : null, kind: n.kind}));
       if (more.length) { save.note = [...(Array.isArray(save.note) ? save.note : []), ...more].sort((a, b) => b.at - a.at).slice(0, 200); changed = true; }
     }
     if (ownOk(other.own) && !ownOk(save.own)) { save.own = {c: other.own.c, a: other.own.a, ear: other.own.ear, item: other.own.item}; changed = true; }   // じぶんの こ（あれば のこす）
@@ -1328,7 +1328,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     swapEpoch++;   // いれかわりの とちゅうで つりばを かえたら、そのまま やめる
     paintWatchers();
   }
-  // ---- いっしょに いく なかま（4にんまで）と ♡・レベル・とくい ----
+  // ---- いっしょに いく なかま（3にんまで）と ♡・レベル・とくい ----
   const TOKU_IDS = ['me', 'chikara', 'un', 'ochi'];
   const SKILLS = {me: ['めがいい', 'Sharp eyes', 'ぴったりの はばが すこし ひろがる', 'A slightly wider perfect window'], chikara: ['ちからもち', 'Strong', 'いとが ぴんと はりにくい', 'The line is slower to tighten'], un: ['うんがいい', 'Lucky', 'めずらしい さかなに あいやすい', 'A bit more likely to meet rare fish'], ochi: ['おちつき', 'Calm', 'ぐいっと ひっぱられても たいりょくが もどらない', 'A tugging fish does not regain power']};
   function tokuOf(p) { const k = (window.TsuriToku && window.TsuriToku[p.id]) || p.toku; if (TOKU_IDS.includes(k)) return k; let h = 0; for (const c of p.id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return TOKU_IDS[h % 4]; }   // きまって いない こは ばんごうから 1つ（ずっと おなじ）
@@ -1337,7 +1337,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const palXpNeed = lv => 12 * (lv * lv - 1);
   function prefPals() {   // いっしょに いく こ（party）→ ♡の こ（さいきん あって いない じゅん）。じぶんの キャラ・まだ あって ない こは のぞく
     const av = avatarPal(), ok = p => p && metPal(p) && p !== av;
-    const party = (Array.isArray(save.party) ? save.party : []).map(rosterById).filter((p, i, a) => ok(p) && a.indexOf(p) === i).slice(0, 4), inParty = new Set(party);
+    const party = (Array.isArray(save.party) ? save.party : []).map(rosterById).filter((p, i, a) => ok(p) && a.indexOf(p) === i).slice(0, 3), inParty = new Set(party);
     const fav = (Array.isArray(save.fav) ? save.fav : []).map(rosterById).filter((p, i, a) => ok(p) && a.indexOf(p) === i && !inParty.has(p)).sort((a, b) => (palAtOf(a.id) - palAtOf(b.id)));
     return {party, fav};
   }
@@ -1356,12 +1356,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const watchers = [0, 1].map(i => { const im = document.createElement('img'); im.className = 'who friend watcher'; im.width = im.height = 180; im.alt = ''; im.draggable = false; im.setAttribute('aria-hidden', 'true'); im.hidden = true; scene.insertBefore(im, $('friend-a')); return im; });
   const WATCH_X = [33, 60];
   function buddyPal() { const pf = prefPals(); return pf.party[0] || pf.fav[0] || null; }   // しゃしんに うつる なかま（1にん）
-  function paintWatchers() {   // 3にんめ・4にんめは きしの うしろで ちいさく みまもる
-    const extra = prefPals().party.slice(2, 4);
+  function paintWatchers() {   // 3にんめは きしの うしろで ちいさく みまもる
+    const extra = prefPals().party.slice(2, 3);
     watchers.forEach((im, i) => { const p = extra[i]; im.hidden = !p; if (p) { const src = 'img/friend-' + p.id + '-s.webp'; if (im.getAttribute('src') !== src) im.src = src; place(im, {x: WATCH_X[i], y: shore(WATCH_X[i]) - 9}); } });
   }
   function palBubble(p, text) {   // ふきだし（なかまの うえ）
-    const seat = pals.indexOf(p), wi = prefPals().party.slice(2, 4).indexOf(p), pos = seat >= 0 ? (() => { const f = feet(friends[seat]); return {x: f.x, y: f.y - 19}; })() : wi >= 0 ? {x: WATCH_X[wi], y: shore(WATCH_X[wi]) - 9 - 15} : null; if (!pos) return;
+    const seat = pals.indexOf(p), wi = prefPals().party.slice(2, 3).indexOf(p), pos = seat >= 0 ? (() => { const f = feet(friends[seat]); return {x: f.x, y: f.y - 19}; })() : wi >= 0 ? {x: WATCH_X[wi], y: shore(WATCH_X[wi]) - 9 - 15} : null; if (!pos) return;
     const b = document.createElement('span'); b.className = 'bubble'; b.setAttribute('aria-hidden', 'true'); b.textContent = text; place(b, pos); scene.append(b);
     const half = b.offsetWidth / scene.clientWidth * 50; place(b, {x: Math.min(98 - half, Math.max(2 + half, pos.x)), y: pos.y}); setTimeout(() => b.remove(), 2400);
   }
@@ -2023,7 +2023,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const found = Math.random() < (Number(probe('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
     if (found) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[found] = (save.decor[found] || 0) + 1; }
     const palUps = partyGain(perfects);   // いっしょに いく こに けいけんち
-    { const fl = save.tflag = save.tflag && typeof save.tflag === 'object' ? save.tflag : {}; fl['t' + TIME_NAME[timeOfDay()]] = true; if (rainy) fl.rain = true; if (big) fl.big = true; if (perfects >= 3) fl.perfect3 = true; if (perfects >= 5) fl.perfect5 = true; if (curMode() === 'hard' && fish.rare >= 3) fl.hard = true; const pn = prefPals().party.length; if (pn >= 1) fl.party1 = true; if (pn >= 4) fl.party4 = true; }   // きねんの しるし
+    { const fl = save.tflag = save.tflag && typeof save.tflag === 'object' ? save.tflag : {}; fl['t' + TIME_NAME[timeOfDay()]] = true; if (rainy) fl.rain = true; if (big) fl.big = true; if (perfects >= 3) fl.perfect3 = true; if (perfects >= 5) fl.perfect5 = true; if (curMode() === 'hard' && fish.rare >= 3) fl.hard = true; const pn = prefPals().party.length; if (pn >= 1) fl.party1 = true; if (pn >= 3) fl.party3 = true; }   // きねんの しるし
     store(); hud(); drawEquip();
     const gift = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))].filter(item => !had.includes(item)).map(item => item.name);
     $('card-fish').textContent = fish.icon; $('card-name').replaceChildren(...(nushi && !fish.legend ? [L('ぬしの ', 'Guardian '), ruby(fish.kanji)] : [ruby(fish.kanji)])); $('card').dataset.nushi = String(!!nushi && !fish.legend);   // ぬし専用カード
@@ -3341,7 +3341,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ['avatar', 1, 'じぶんの キャラ', 'Your own character', 'なかまを えらんで つろう', 'Fish as a friend', '🧑‍🎤', () => !!avatarPal()],
     ['own', 1, 'じぶんの こを つくった', 'Made your own friend', 'なかまの がめんで つくれるよ', 'You can make one in Friends', '🧸', () => ownOk(save.own)],
     ['party1', 1, 'なかまと いっしょに つった', 'Fishing together', 'いっしょに いく なかまを', 'Take a friend along', '🤝', () => tf('party1')],
-    ['party4', 2, 'なかま 4にんで つった', 'Four friends along', '4にんで いっしょに', 'Go with four friends', '👥', () => tf('party4')],
+    ['party3', 2, 'なかま 3にんで つった', 'Three friends along', '3にんで いっしょに', 'Go with three friends', '👥', () => tf('party3')],
     ['pal5', 1, 'であった なかま 5にん', '5 friends met', 'いろんな なかまに あおう', 'Meet more friends', '🐾', () => nPal() >= 5],
     ['pal10', 2, 'であった なかま 10にん', '10 friends met', 'もっと たくさん', 'Even more friends', '🐾', () => nPal() >= 10],
     ['palAll', 3, 'であった なかま ぜんいん', 'Everyone met', 'みんなと あおう', 'Meet everyone', '🐾', () => nPal() >= ROSTER.length && ROSTER.length > 0],
@@ -3399,7 +3399,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   setInterval(() => { if (!document.hidden && document.body.classList.contains('gazing')) { save.gazeMin = (save.gazeMin || 0) + 1; store(); checkTrophies(false); } }, 60000);   // ながめて いた じかん（ひらいて いる あいだだけ）
   { const dk = dayKey(); if (save.dayLast !== dk) { save.dayN = (save.dayN || 0) + 1; save.dayLast = dk; store(); } }   // あそんだ ひ
   checkTrophies(true);   // いままでの きろくから あとづけ（しずかに）
-  // ---- なかま：であった こを えらぶ（108にんに ふえても おなじ しくみ）。じぶんの キャラ／いっしょに いく なかま（4にんまで）／♡。まるふわは しゅじんこう（いつでも もどせる）----
+  // ---- なかま：であった こを えらぶ（108にんに ふえても おなじ しくみ）。じぶんの キャラ／いっしょに いく なかま（3にんまで）／♡。まるふわは しゅじんこう（いつでも もどせる）----
   function rosterById(id) { return ROSTER.find(p => p.id === id) || null; }
   function metPal(p) { return !!(save.pals && save.pals[p.id]); }
   function avatarPal() { if (save.avatar === 'own') return ownOk(save.own) ? window.TsuriOwn.pal(save.own) : null; const p = typeof save.avatar === 'string' ? rosterById(save.avatar) : null; return p && metPal(p) ? p : null; }   // 'own'＝じぶんの こ（tsuri-own.js）。つくって いない・こわれて いる ときは まるふわ
@@ -3424,7 +3424,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function toggleParty(p) {
     const list = (Array.isArray(save.party) ? save.party : []).filter(id => rosterById(id));
     if (list.includes(p.id)) { save.party = list.filter(id => id !== p.id); say(L(p.name + 'は おるすばん。', palName(p) + ' will stay behind.')); }
-    else if (list.length >= 4) { say(L('いっしょに いけるのは 4にんまで。だれかを はずしてね。', 'Up to 4 friends can come along. Take someone off first.')); return; }
+    else if (list.length >= 3) { say(L('いっしょに いけるのは 3にんまで。だれかを はずしてね。', 'Up to 3 friends can come along. Take someone off first.')); return; }
     else { save.party = [...list, p.id]; SFX.loved(); say(L(p.name + 'と いっしょに いくよ。', 'Going along with ' + palName(p) + '.')); }
     afterNakamaChange('#nakama-card [data-act=party]');
   }
@@ -3464,9 +3464,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const me = $('nakama-me'), who = document.createElement('span'); who.textContent = L('じぶん：', 'You: ') + (av ? palName(av) + (av.own ? L('（じぶんの こ）', ' (your own friend)') : '') : L('まるふわ', 'Marufuwa'));
     me.replaceChildren(nkImg(av, 56), who, ...(av ? [nkBtn(L('まるふわに もどす', 'Back to Marufuwa'), () => chooseAvatar(null))] : []));
     ownSection(me, av);
-    // いっしょに いく なかま（4にんまで）
-    { const box = $('nakama-party'), h = document.createElement('h3'), slots = document.createElement('div'); h.textContent = L('いっしょに いく なかま（4にんまで）', 'Coming along (up to 4)'); slots.className = 'slots';
-      for (let i = 0; i < 4; i++) {
+    // いっしょに いく なかま（3にんまで）
+    { const box = $('nakama-party'), h = document.createElement('h3'), slots = document.createElement('div'); h.textContent = L('いっしょに いく なかま（3にんまで）', 'Coming along (up to 3)'); slots.className = 'slots';
+      for (let i = 0; i < 3; i++) {
         const p = party[i];
         if (!p) { const d = document.createElement('div'); d.className = 'slot'; d.textContent = L('あき', 'Empty'); slots.append(d); continue; }
         const b = document.createElement('button'); b.type = 'button'; b.className = 'slot'; b.append(nkImg(p, 44), palName(p), L(' Lv ' + palLv(p.id), ' Lv ' + palLv(p.id))); b.setAttribute('aria-label', palName(p) + '。' + L('レベル ' + palLv(p.id), 'Level ' + palLv(p.id))); b.addEventListener('click', () => { nk.pick = p.id; drawNakama(); const c = nakama.querySelector('#nakama-card'); if (c) c.scrollIntoView({block: 'nearest'}); }); slots.append(b);
@@ -3475,7 +3475,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const card = $('nakama-card'), sel = nk.pick ? rosterById(nk.pick) : null;
     card.hidden = !sel;
     if (sel) {
-      const inParty = party.includes(sel), isFav = Array.isArray(save.fav) && save.fav.includes(sel.id), full = !inParty && party.length >= 4, lv = palLv(sel.id), toNext = palXpNeed(lv + 1) - palXpOf(sel.id), tk = SKILLS[tokuOf(sel)];
+      const inParty = party.includes(sel), isFav = Array.isArray(save.fav) && save.fav.includes(sel.id), full = !inParty && party.length >= 3, lv = palLv(sel.id), toNext = palXpNeed(lv + 1) - palXpOf(sel.id), tk = SKILLS[tokuOf(sel)];
       const name = document.createElement('b'), info = document.createElement('span'), sk = document.createElement('span'), row = document.createElement('div'); name.textContent = palName(sel); row.className = 'nk-row';
       info.textContent = L('レベル ' + lv, 'Level ' + lv);   // けいけんちの すうじは 出さない（契約08）
       sk.textContent = L('とくい：' + tk[0] + '（' + tk[2] + '）', 'Talent: ' + tk[1] + ' (' + tk[3] + ')');
