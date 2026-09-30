@@ -1187,6 +1187,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (other.trophies && typeof other.trophies === 'object') for (const [id, at] of Object.entries(other.trophies)) if (/^[a-z0-9]{2,12}$/.test(id) && Number.isFinite(at) && !(save.trophies && save.trophies[id])) { save.trophies = save.trophies && typeof save.trophies === 'object' ? save.trophies : {}; save.trophies[id] = at; changed = true; }   // きねん：どちらかに あれば のこる
     if (other.tflag && typeof other.tflag === 'object') for (const k of Object.keys(other.tflag)) if (other.tflag[k] === true && /^[a-z0-9]{2,12}$/.test(k) && !tf(k)) { save.tflag = save.tflag && typeof save.tflag === 'object' ? save.tflag : {}; save.tflag[k] = true; changed = true; }
     for (const k of ['gazeMin', 'photoN', 'dayN']) if (Number.isInteger(other[k]) && other[k] > (save[k] || 0)) { save[k] = other[k]; changed = true; }
+    if (Array.isArray(other.note)) {   // つりびと ノート：あった ものは のこす（at・id・kind で いっしょに）
+      const have = new Set((Array.isArray(save.note) ? save.note : []).map(n => n.at + ':' + n.id + ':' + n.kind));
+      const more = other.note.filter(n => n && Number.isFinite(n.at) && Number.isInteger(n.id) && FISH[n.id] && ['catch', 'release', 'gift'].includes(n.kind) && !have.has(n.at + ':' + n.id + ':' + n.kind)).map(n => ({at: n.at, id: n.id, size: Number.isFinite(n.size) ? n.size : 0, spot: typeof n.spot === 'string' ? n.spot.slice(0, 1) : 'L', time: typeof n.time === 'string' ? n.time.slice(0, 1) : 'h', nushi: !!n.nushi, party: Array.isArray(n.party) ? n.party.filter(x => typeof x === 'string').slice(0, 4) : [], avatar: typeof n.avatar === 'string' ? n.avatar : null, kind: n.kind}));
+      if (more.length) { save.note = [...(Array.isArray(save.note) ? save.note : []), ...more].sort((a, b) => b.at - a.at).slice(0, 200); changed = true; }
+    }
     if (typeof other.avatar === 'string' && !save.avatar && /^[a-z]{2,12}$/.test(other.avatar)) { save.avatar = other.avatar; changed = true; }   // じぶんの キャラ（あとで えらべば うわがき）
     if (other.modeTip === true && save.modeTip !== true) { save.modeTip = true; changed = true; }
     if (other.homeTip === true && save.homeTip !== true) { save.homeTip = true; changed = true; }
@@ -1443,7 +1448,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     save.plopHint = true; store(); plopHintDue = true;
     try { const url = URL.createObjectURL(plopWav()), a = new Audio(url); a.volume = .9; a.onended = a.onerror = () => URL.revokeObjectURL(url); const p = a.play(); if (p && p.catch) p.catch(() => URL.revokeObjectURL(url)); } catch {}
   }
-  function softenBus() { if (bus && bus.low) bus.low.frequency.value = save.soft ? 1600 : 2500; }   // 「やさしい おと」を きりかえた とき（つくって ある でぐちの ローパスを かえる）
+  function softenBus() { if (bus && bus.low) bus.low.frequency.value = save.soft ? 1200 : 1400; }   // 「やさしい おと」を きりかえた とき（つくって ある でぐちの ローパスを かえる）
   function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, kind = 'fx') {
     if (!sndOn(kind)) return;
     try {
@@ -1816,6 +1821,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const box = $('plaza-note'); if (!box || document.readyState === 'loading') return;
     box.hidden = save.total < 3; box.textContent = L('ひろばでは、まるふわの おへやで あそべるよ。', 'In the plaza, you can visit Marufuwa' + String.fromCharCode(39) + 's room.');
   }
+  // つりびと ノート（外付け tsuri-note.js が よむ）：save.note＝あたらしい ものが さき・200こまで。{at,id,size,spot,time,nushi,party[],avatar,kind:'catch'|'release'|'gift'}。じぶんの キャラは party に いれない
+  function noteAdd(kind, f, size, nushiFlag) {
+    if (!f || !Number.isInteger(f.id)) return;
+    const av = avatarPal(); save.note = [{at: Date.now(), id: f.id, size: Number.isFinite(size) ? size : 0, spot: save.area, time: timeOfDay(), nushi: !!nushiFlag, party: prefPals().party.map(p => p.id), avatar: av ? av.id : null, kind}, ...(Array.isArray(save.note) ? save.note : [])].slice(0, 200);
+  }
   function hud() {
     $('total').textContent = String(save.total); drawPlazaNote(); document.body.dataset.early = String(save.total < 3);   // 3びき つる まで「きねん」「なかま」は かくす（さいしょの がめんを しずかに）
     drawToday(); drawBadge(); drawSeatHint();
@@ -1994,7 +2004,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
     const lvBefore = levelOf(save.xp || 0); save.xp = (save.xp || 0) + xpFor(fish, {nushi, first, record, big, perfects}); const lvNow = levelOf(save.xp), leveled = lvNow > lvBefore;
     save.total++; save.streak = first ? 0 : (save.streak || 0) + 1; bumpWeek(fish, size);
-    save.bucket = [{id: fish.id, size, at: Date.now(), nushi}, ...(Array.isArray(save.bucket) ? save.bucket : [])].slice(0, 10);
+    save.bucket = [{id: fish.id, size, at: Date.now(), nushi}, ...(Array.isArray(save.bucket) ? save.bucket : [])].slice(0, 10); noteAdd('catch', fish, size, nushi);
     // ときどき、さかなが かざりを もって いる。すいそうに おける
     const found = Math.random() < (Number(probe('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
     if (found) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[found] = (save.decor[found] || 0) + 1; }
@@ -2115,11 +2125,16 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const KOE = window.TsuriKoe && typeof window.TsuriKoe === 'object' ? window.TsuriKoe : {}, koeRecent = [];
   let waitedFrom = 0;   // なげて から まって いる じかんの はじまり
   // いっしょに いく なかまの「なかよし」の ひとこと（しつもん・めいれい・せかす ことばは 0。よりそう ことばだけ）
-  const PARTY_LINES = [['いっしょに いると おちつくな', 'It feels calm being with you'], ['きょうも いっしょ、うれしいな', 'Happy to be together again today'], ['また つれて きて くれて ありがとう', 'Thanks for bringing me along again'], ['ここ、すきだな', 'I like it here'], ['ゆっくり しようね', 'Let' + String.fromCharCode(39) + 's take it easy'], ['あなたと いると たのしい', 'It is fun with you'], ['のんびり いっしょに いよう', 'Let' + String.fromCharCode(39) + 's hang out together'], ['いい ひだね', 'It is a nice day'], ['なみの おと、すきだな', 'I like the sound of the waves'], ['そばに いるよ', 'I am right here']];
+  const PARTY_LINES = {   // いっしょに いく なかまの「なかよし」の ひとこと（なかよしの だんかいで かわる：はじめまして→また きたね→きょうも いっしょだね）
+    1: [['よろしくね', 'Nice to meet you'], ['いっしょに いけて うれしいな', 'I am glad to come along'], ['ここが つりば なんだね', 'So this is the fishing spot'], ['ゆっくり おしえてね', 'Show me at your own pace'], ['いい ひだね', 'It is a nice day']],
+    2: [['また きたね', 'You came again'], ['きょうも あえて うれしいな', 'Happy to see you again'], ['ここ、すきに なって きたよ', 'I am starting to like it here'], ['なみの おと、いいね', 'The waves sound nice'], ['のんびり しようね', 'Let us take it easy']],
+    3: [['きょうも いっしょだね', 'Together again today'], ['あなたと いると おちつくよ', 'I feel calm with you'], ['ずっと そばに いるよ', 'I will stay by your side'], ['いっしょに いられて しあわせ', 'I am happy to be with you'], ['なにも しなくても いいんだよ', 'You do not have to do anything'], ['ここに いて くれて ありがとう', 'Thank you for being here']]
+  };
+  const partyLinesOf = pal => { const b = Math.min(3, Math.max(1, (save.bond && save.bond[pal.id]) || 1)); return b === 1 ? PARTY_LINES[1] : PARTY_LINES[b].concat(PARTY_LINES[b - 1]); };
   function koeLine(pal, extra) {   // [にほんご, English] か null
     const inParty = prefPals().party.includes(pal), set = KOE[pal.id] || (inParty ? {} : null); if (!set) return null;   // いっしょに いく なかまは、ぜんいん「なかよし」の ひとことも（108にんでも おなじ）
     const all = []; ['n', TIME_NAME[timeOfDay()], rainy ? 'rain' : '', extra || ''].filter(Boolean).forEach(c => (Array.isArray(set[c]) ? set[c] : []).forEach((pair, i) => { if (Array.isArray(pair) && pair[0] && pair[1]) all.push({key: pal.id + ':' + c + ':' + i, pair, hot: c === extra}); }));
-    if (inParty) PARTY_LINES.forEach((pair, i) => all.push({key: 'party:' + i, pair, hot: false}));
+    if (inParty) partyLinesOf(pal).forEach(pair => all.push({key: 'party:' + pair[0], pair, hot: false}));
     if (!all.length) return null;
     const fresh = all.filter(x => !koeRecent.includes(x.key)), hot = fresh.filter(x => x.hot);
     const pool = hot.length && Math.random() < .7 ? hot : fresh.length ? fresh : [all.slice().sort((a, b) => koeRecent.indexOf(a.key) - koeRecent.indexOf(b.key))[0]];   // ぜんぶ でた あとは いちばん ふるい もの から（1かい ずつ ぐるっと まわる）
@@ -2806,7 +2821,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // そっと にがす：つった さかなを みずに かえす。ずかんや きろくは そのまま（へらない）。「にがした こ」の かずを、やさしく のこす
   $('release').addEventListener('click', () => {
     if (phase !== 'caught' || !last || last.released) return;
-    last.released = true; save.released = (save.released || 0) + 1; save.xp = (save.xp || 0) + 5;   // やさしい ことにも、ちょっとだけ けいけんち
+    last.released = true; save.released = (save.released || 0) + 1; save.xp = (save.xp || 0) + 5; noteAdd('release', last.fish, last.size, last.nushi);   // やさしい ことにも、ちょっとだけ けいけんち
     if (Array.isArray(save.bucket) && save.bucket[0] && save.bucket[0].id === last.fish.id) save.bucket[0].released = true;
     store(); hud(); $('release').hidden = $('send-gift').hidden = true;
     const held = $('held'); tone(660, .07, 'triangle', 0, .06, 990); zap(.1, .08, .04);
@@ -3020,7 +3035,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const giftClose = giftBtn('とじる', () => giftBox.close()), giftShelf = () => giftBtn('バケツを みる', () => { giftBox.close(); $('open-bucket').click(); });
   function giftTake(g) {
     save.gifts = [{id: g.id, size: g.size, pal: g.pal, word: g.word, at: Date.now(), code: g.code}, ...(Array.isArray(save.gifts) ? save.gifts : [])];
-    save.gotGifts = [g.code, ...(Array.isArray(save.gotGifts) ? save.gotGifts : [])];
+    save.gotGifts = [g.code, ...(Array.isArray(save.gotGifts) ? save.gotGifts : [])]; noteAdd('gift', FISH[g.id], g.size, false);
     tidyGifts(save); store(); dropGiftParam();
     SFX.gift(); buzz(60);
     const actions = [giftBtn('きろくを のこす', () => { giftBox.close(); $('open-keep').click(); })], back = giftOwn();
@@ -3422,7 +3437,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (sel) {
       const inParty = party.includes(sel), isFav = Array.isArray(save.fav) && save.fav.includes(sel.id), full = !inParty && party.length >= 4, lv = palLv(sel.id), toNext = palXpNeed(lv + 1) - palXpOf(sel.id), tk = SKILLS[tokuOf(sel)];
       const name = document.createElement('b'), info = document.createElement('span'), sk = document.createElement('span'), row = document.createElement('div'); name.textContent = palName(sel); row.className = 'nk-row';
-      info.textContent = L('レベル ' + lv + '　つぎの レベルまで あと ' + Math.max(0, toNext), 'Level ' + lv + ' - ' + Math.max(0, toNext) + ' more to the next level');
+      info.textContent = L('レベル ' + lv, 'Level ' + lv);   // けいけんちの すうじは 出さない（契約08）
       sk.textContent = L('とくい：' + tk[0] + '（' + tk[2] + '）', 'Talent: ' + tk[1] + ' (' + tk[3] + ')');
       if (av !== sel) {
         const b1 = nkBtn(inParty ? L('おるすばんに する', 'Stay behind') : L('いっしょに いく', 'Take along'), () => toggleParty(sel)); b1.dataset.act = 'party'; b1.setAttribute('aria-pressed', String(inParty)); if (full) b1.setAttribute('aria-disabled', 'true');
@@ -3660,7 +3675,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       html.dataset.ready = 'fresh'; delete html.dataset.time; setTimeout(() => { html.dataset.ready = 'true'; }, 500);   // 早い script の <html data-time> は やくめが おわり（けしきの data-time が うけつぐ）
     });
   }
-  window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
+  window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
@@ -3672,6 +3687,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-tooku.js"></script>
 <script defer src="tsuri-en.js"></script>
 <script defer src="tsuri-tegami.js"></script>
+<script defer src="tsuri-note.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
 </body>
 </html>
