@@ -45,6 +45,7 @@ try {
   if (early.calm === true) {
     document.documentElement.dataset.calm = 'true';
     var realMM = window.matchMedia.bind(window); window.__realMatchMedia = realMM;
+    var skipVT = function (e) { if (e.viewTransition) e.viewTransition.skipTransition(); }; addEventListener('pageswap', skipVT); addEventListener('pagereveal', skipVT);   // 「うごきを へらす」の ゲーム内スイッチ：ページの うつりも ふわっと させない
     window.matchMedia = function (q) { var m = realMM(q); return /prefers-reduced-motion[ ]*:[ ]*reduce/.test(String(q)) ? new Proxy(m, {get: function (t, k) { if (k === 'matches') return true; var v = t[k]; return typeof v === 'function' ? v.bind(t) : v; }}) : m; };
     document.addEventListener('DOMContentLoaded', function () {
       Array.prototype.forEach.call(document.styleSheets, function (sheet) {
@@ -351,6 +352,10 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 .drop{position:absolute;z-index:4;border-radius:50%;background:#fff;border:1px solid #8fd0f2;pointer-events:none}   /* みずしぶき */
 .ripple{position:absolute;z-index:2;width:9%;aspect-ratio:2/1;transform:translate(-50%,-50%);border:3px solid #ffffffd9;border-radius:50%;pointer-events:none}
 .hop{position:absolute;z-index:4;font-size:1.3rem;pointer-events:none;transform:translate(-50%,-50%)}
+/* ページを うつる とき：ふわっと 重なる（.32びょう・ひろばと おなじ 書き方）。「うごきを へらす」では 出さない（スマホの せってい・ゲームの スイッチ）。対応していない ブラウザは いままで どおり */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
 html.dlg-open :not(dialog[open]):not(dialog[open] *),html.dlg-open :not(dialog[open]):not(dialog[open] *)::before,html.dlg-open :not(dialog[open]):not(dialog[open] *)::after{animation-play-state:paused !important}   /* 窓が ひらいて いる あいだ、窓の そとの CSS の 動きを 一時停止（ひらいた 窓の 中は うごく。とじれば つづきから） */
 .drift{opacity:.55;left:0;animation:drift var(--lap,38s) linear infinite}
 @keyframes drift{from{translate:calc(112 / var(--wn,16) * 100%) 0}to{translate:calc(-14 / var(--wn,16) * 100%) 0}}   /* left ではなく translate で うごかす（left は 毎フレーム レイアウトを やりなおす＝電池・熱。translate の % は じぶんの はば＝--w の %：--wn は その すうじ） */
