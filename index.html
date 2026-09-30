@@ -1661,8 +1661,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
     last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY, album: !!(first && left === 0), badge: (first && left === 0 ? L('ずかん かんせい！', 'Sticker book complete!') : mile ? L(save.total + 'ひきめ！', 'Catch #' + save.total + '!') : '') , firstNushi};   // 節目：ずかん かんせい／10・30・50…ひきめ／はじめての ぬし
-    resultSpecial = !!(leveled || first || nushi || record || fish.rare >= 4 || mile || fish.legend); resultAck = save.total === 1; ackAt = 0;   // けっかを みた「1かい」で わける（さいしょの 1ぴきだけは そのまま なげる）
     $('more-summary').textContent = L('ほかの こと', 'More'); $('more-catch').open = false;   // つれた あとの ボタンは 主役 2つだけ。ほかは たたむ
+    resultSpecial = !!(leveled || first || nushi || record || fish.rare >= 4 || mile || fish.legend); resultAck = save.total === 1; ackAt = 0;   // けっかを みた「1かい」で わける（さいしょの 1ぴきだけは そのまま なげる）
     $('take-photo').textContent = resultSpecial ? L('しゃしんで おしえる', 'Photo to share') : 'しゃしんを とる';   // レベルアップ・はじめて・ぬし・きろくの すぐ あとが いちばん おしえたい：しゃしんの まどに「ともだちに おしえる」が ある
     drawAudioSize(); setPhase('caught'); cardWait(1500);   // 1.5びょうは カードを 出さず、まるふわと さかなと えんしゅつが しゅやく
     // つれた さかなを、まるふわが かかげる
