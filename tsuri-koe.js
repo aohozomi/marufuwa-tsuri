@@ -123,6 +123,14 @@ window.TsuriKoe = {
     get: [["いい ひかり してる", "Nice glow."], ["しずかに うれしい", "Quietly happy."]],
     wait: [["ぼんやり そらを みてる", "Gazing vaguely at the sky."], ["まつのは きらいじゃない", "I do not mind waiting."]]
   },
+  shirotama: {
+    n: [["じっと たって いるのが すき", "I like standing perfectly still."], ["くちばしが すこし おもい", "My bill is a little heavy."], ["ゆっくり まばたき する", "Blinking slowly."], ["みずの おもてを ながめる", "Gazing at the water surface."], ["あしが みずに つかってる", "My feet are in the water."]],
+    rain: [["あめの なかでも しずか", "Quiet even in the rain."], ["はねが しっとり する", "My feathers are getting damp."]],
+    asa: [["あさもやの なかに たつ", "Standing in the morning mist."]], hiru: [["ひなたで じっと して いる", "Staying still in the sun."]], yuu: [["ゆうやけが みずに うつる", "The sunset reflects on the water."]],
+    yoru: [["よるも じっと たって いる", "Standing still at night too."], ["つきの ひかりが くちばしに", "Moonlight on my bill."]],
+    get: [["ほう…、いいね", "Hoo… nice."], ["しずかに かんしん して いる", "Quietly impressed."]],
+    wait: [["いつまでも たって いられる", "I can stand here forever."], ["うごかず ぼーっと", "Staying put, spacing out."]]
+  },
   natsume: {
     n: [["なつめの みが あまい", "Dates are sweet."], ["ゆっくり あるくのが すき", "I like walking slowly."], ["すなの おと、さらさら", "The sand whispers."], ["こぶの うえは あったかい", "It is warm up on my hump."], ["みずは ゆっくり のむよ", "I drink water slowly."]],
     rain: [["あめの おと、ふしぎ", "Rain sounds so strange."], ["すなが しっとり する", "The sand is damp."]],

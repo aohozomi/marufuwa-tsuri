@@ -1850,7 +1850,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const palWord = p => PAL_DAYWORD[p.id] && timeOfDay() !== 'n' ? PAL_DAYWORD[p.id] : p.word;   // なかまの ひとことは じかんに あわせる（がんたいの くま：ひるは「ひるでも ね」）
   // なかまを おすと はなしかける：なまえ＋ひとこと＋ぴょん（つる ときの わの じゃまに ならない ように、まって いる 間・なにも して いない 間だけ）
   let talkAt = 0;
-  function paintFriendLabels() { pals.forEach((pal, i) => { const b = $(i ? 'talk-b' : 'talk-a'); if (b) b.setAttribute('aria-label', L(pal.name + 'に はなしかける', 'Talk to ' + palName(pal))); }); }
+  function paintFriendLabels() { pals.forEach((pal, i) => { const b = $(i ? 'talk-b' : 'talk-a'); if (b) b.setAttribute('aria-label', L(pal.name + 'に はなしかける', 'Talk to ' + palName(pal))); if (pal.town) { const img = $(i ? 'friend-b' : 'friend-a'); if (img) img.alt = palAlt(pal); } }); }   // 街人は 英語の ひょうに ないので、English が そろって から alt も かきなおす
   function talkTo(i) {
     if (!(phase === 'idle' || phase === 'waiting') || swapping || performance.now() - talkAt < 800) return; talkAt = performance.now();
     const pal = pals[i], f = feet(friends[i]), koe = koeLine(pal), word = koe ? L(koe[0], koe[1]) : palWord(pal), img = $(i ? 'friend-b' : 'friend-a');
