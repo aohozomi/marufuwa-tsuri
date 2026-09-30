@@ -190,6 +190,13 @@ body.calm .ty-star,body.calm .ty-bg{animation:none !important}
 body.calm .prop,body.calm .door{transition:none}
 body.calm .cloud{left:8%}
 body.calm .cloud.c2{left:56%}
+/* パソコン（ひろい 画面）：ひろばを 左に 大きく（画面の たかさに あわせる）、あそぶ ボタンなどは 右に。スマホ・せまい 画面は 今まで通り */
+.stage{display:block}
+@media (min-width:900px) and (min-height:560px){
+  main{max-width:min(1180px,calc(100vw - 32px));padding:14px 28px 22px}
+  .stage{display:grid;grid-template-columns:min(calc((100vh - 150px)*.6429),640px) minmax(340px,470px);grid-template-columns:min(calc((100dvh - 150px)*.6429),640px) minmax(340px,470px);column-gap:30px;justify-content:center;align-items:start}
+  .stage #scene{width:100%;min-width:0;position:sticky;top:12px;margin:0}
+}
 </style>
 </head>
 <body>
@@ -215,6 +222,7 @@ body.calm .cloud.c2{left:56%}
   </div>
   <p id="keys-help" class="sr">やじるしキーで まるふわが あるくよ。スペースキーで ちかくの ともだちに はなしかけたり、ばしょに はいったり できるよ。エスケープキーで やめるよ。したの ボタンでも おなじ ことが できるよ。</p>
 
+  <div class="stage">
   <div id="scene" data-time="hiru" data-rain="false" data-dim="false" tabindex="0" role="group" aria-label="ひろば。まるふわが あるく ばしょ" aria-describedby="keys-help">
     <svg id="bg" viewBox="0 0 360 560" preserveAspectRatio="none" aria-hidden="true">
       <defs>
@@ -265,6 +273,7 @@ body.calm .cloud.c2{left:56%}
     <div id="bubbles" aria-hidden="true"></div>
     <div id="rain" aria-hidden="true"></div>
   </div>
+  <div class="side">
   <p id="status" role="status" aria-live="polite"></p>
 
   <nav id="places" aria-label="いきさき">
@@ -303,6 +312,8 @@ body.calm .cloud.c2{left:56%}
   </details>
   <p class="note">おとの せっていは、つりびよりと おなじ ものを つかうよ。<br>きろくは この たんまつの なかだけに のこります。</p>
   <p class="note"><a href="../anshin/">おうちの かたへ</a></p>
+  </div>
+  </div>
 </main>
 <dialog id="thanks" aria-labelledby="thanks-title">
   <h2 id="thanks-title">ありがとうの ほしぞら</h2>
