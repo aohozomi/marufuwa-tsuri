@@ -880,6 +880,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script src="tsuri-art-season.js"></script>
 <script src="tsuri-art-real.js"></script>
 <script src="tsuri-town.js"></script>
+<script src="tsuri-koe.js"></script>
 <script src="tsuri-bgm.js"></script>
 <script>
 (() => {
@@ -1501,7 +1502,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     scene.dataset.time = TIME_NAME[timeOfDay()];
     fish = pickFish(); face('blue'); $('held').hidden = true;
     clearTimeout(biteTimer); clearTimeout(nibbleTimer);   // まえの なげるの タイマーが のこって いても、かさならない
-    flying = !reduce(); setPhase('waiting'); const flight = flying ? 900 : 0; if (flying) throwRod();   // flight＝ウキが みずに つく まで（ミリびょう）
+    flying = !reduce(); setPhase('waiting'); waitedFrom = performance.now(); const flight = flying ? 900 : 0; if (flying) throwRod();   // flight＝ウキが みずに つく まで（ミリびょう）
     tone(220, .28, 'square', .2, .04, 880); tone(330, .1, 'triangle', .9, .06, 110); zap(.14, .9);   // ヒュ〜ッ…ポチャ
     button.textContent = 'まってる…'; lock(true); button.dataset.hot = 'false';
     // 「ぽちゃん」は ウキが みずに ついた しゅんかんに（とんで いる 間は まだ 言わない。うごきを へらす ときは すぐ）
@@ -1678,7 +1679,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('more-summary').textContent = L('ほかの こと', 'More'); $('more-catch').open = false;   // つれた あとの ボタンは 主役 2つだけ。ほかは たたむ
     resultSpecial = !!(leveled || first || nushi || record || fish.rare >= 4 || mile || fish.legend); resultAck = save.total === 1; ackAt = 0;   // けっかを みた「1かい」で わける（さいしょの 1ぴきだけは そのまま なげる）
     $('take-photo').textContent = resultSpecial ? L('しゃしんで おしえる', 'Photo to share') : 'しゃしんを とる';   // レベルアップ・はじめて・ぬし・きろくの すぐ あとが いちばん おしえたい：しゃしんの まどに「ともだちに おしえる」が ある
-    drawAudioSize(); setPhase('caught'); cardWait(1500);   // 1.5びょうは カードを 出さず、まるふわと さかなと えんしゅつが しゅやく
+    drawAudioSize(); setPhase('caught'); cardWait(1500); koeGet();   // 1.5びょうは カードを 出さず、まるふわと さかなと えんしゅつが しゅやく
     // つれた さかなを、まるふわが かかげる
     const held = $('held'), f = feet(mine);
     held.replaceChildren(fishImg(fish)); held.dataset.art = artOf(fish) ? '1' : ''; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.25' : ''; place(held, {x: f.x + 5, y: f.y + (nushi ? 3.5 : -3)}); held.hidden = false;   // むねの まえで だっこ する（かおは かくさない。つれた しらせとも、バケツとも かさならない）。ぬしは ひとまわり おおきく、そのぶん おなかの ほうへ さげて かおに かからない ように（1.45ばいだと かおを かくして いた）
@@ -1741,6 +1742,29 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
   const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
   const bubble = $('bubble');
+  // なかまの ひとこと（かぶらない）：tsuri-koe.js（1にん 16ほん・ばめんべつ）。ぜんいんで「さいきん でた」を 20ぽん おぼえて、その ぶんは さける（ぜんぶ でて しまう ときだけ いちばん ふるい もの）。
+  // ぼーっと おちつく ことば だけ（しつもん・めいれい・せかす ことばは 0）。よみあげは しない（ふきだしだけ）。ばめん：n＝ふだん／asa・hiru・yuu・yoru／rain／get＝つれた あと／wait＝ながく まって いる
+  const KOE = window.TsuriKoe && typeof window.TsuriKoe === 'object' ? window.TsuriKoe : {}, koeRecent = [];
+  let waitedFrom = 0;   // なげて から まって いる じかんの はじまり
+  function koeLine(pal, extra) {   // [にほんご, English] か null
+    const set = KOE[pal.id]; if (!set) return null;
+    const all = []; ['n', TIME_NAME[timeOfDay()], rainy ? 'rain' : '', extra || ''].filter(Boolean).forEach(c => (Array.isArray(set[c]) ? set[c] : []).forEach((pair, i) => { if (Array.isArray(pair) && pair[0] && pair[1]) all.push({key: pal.id + ':' + c + ':' + i, pair, hot: c === extra}); }));
+    if (!all.length) return null;
+    const fresh = all.filter(x => !koeRecent.includes(x.key)), hot = fresh.filter(x => x.hot);
+    const pool = hot.length && Math.random() < .7 ? hot : fresh.length ? fresh : [all.slice().sort((a, b) => koeRecent.indexOf(a.key) - koeRecent.indexOf(b.key))[0]];   // ぜんぶ でた あとは いちばん ふるい もの から（1かい ずつ ぐるっと まわる）
+    const pick = pool[Math.floor(Math.random() * pool.length)], at = koeRecent.indexOf(pick.key); if (at >= 0) koeRecent.splice(at, 1); koeRecent.push(pick.key); while (koeRecent.length > 20) koeRecent.shift();   // おなじ ものは 1つだけ（いちばん あたらしい ところに）
+    return pick.pair;
+  }
+  function koeGet() {   // つれた あと、ときどき なかまが ぽつりと（よみあげは しない・まって いる 間の おしゃべりとは かさならない）
+    if (Math.random() >= .4) return; const slot = Math.random() < .5 ? 0 : 1;
+    setTimeout(() => {
+      if (phase !== 'caught' || swapping || !bubble.hidden) return;
+      const koe = koeLine(pals[slot], 'get'); if (!koe) return; const f = feet(friends[slot]);
+      bubble.textContent = L(koe[0], koe[1]); place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
+      const half = bubble.offsetWidth / scene.clientWidth * 50; place(bubble, {x: Math.min(98 - half, Math.max(2 + half, f.x)), y: f.y - 19});
+      setTimeout(() => { bubble.hidden = true; }, 2600);
+    }, 3000);
+  }
   // すきな さかな（なかまごと・さかなの ばんごう）。みせて あげて あたると ♡。はずれても「わあ、すてき！」（せめない・へらない・くらべない）
   const PAL_FAV = {usagi: 23, kawauso: 7, hiyoko: 8, ribbon: 2, panda: 21, kojika: 11, tanuki: 4, risu: 15, neko: 13, koinu: 1, hamster: 10, hoho: 12, azarashi: 19, alpaca: 9, gantai: 20};   // ぜんぶ、そのこの すんで いる つりばで つれる さかな（みせて あげられる）
   const PAL_PRAISE = [['わあ、すてき！', 'Wow, lovely!'], ['かっこいい！', 'So cool!'], ['いいなあ！', 'Nice one!'], ['すごい！', 'Amazing!']], praise = () => L(...PAL_PRAISE[Math.floor(Math.random() * PAL_PRAISE.length)]);
@@ -1771,36 +1795,38 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function paintFriendLabels() { pals.forEach((pal, i) => { const b = $(i ? 'talk-b' : 'talk-a'); if (b) b.setAttribute('aria-label', L(pal.name + 'に はなしかける', 'Talk to ' + palName(pal))); }); }
   function talkTo(i) {
     if (!(phase === 'idle' || phase === 'waiting') || swapping || performance.now() - talkAt < 800) return; talkAt = performance.now();
-    const pal = pals[i], f = feet(friends[i]), word = palWord(pal), img = $(i ? 'friend-b' : 'friend-a');
+    const pal = pals[i], f = feet(friends[i]), koe = koeLine(pal), word = koe ? L(koe[0], koe[1]) : palWord(pal), img = $(i ? 'friend-b' : 'friend-a');
     bubble.textContent = word; place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
     const half = bubble.offsetWidth / scene.clientWidth * 50; place(bubble, {x: Math.min(98 - half, Math.max(2 + half, f.x)), y: f.y - 19});
     if (!reduce()) img.animate([{translate: '0 0'}, {translate: '0 -14px'}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
     setTimeout(() => { bubble.hidden = true; }, 2600);
-    say(L(pal.name + '：「' + word + '」', palName(pal) + ': “' + T(word) + '”'));
+    say(koe ? L(pal.name + '：「' + koe[0] + '」', palName(pal) + ': “' + koe[1] + '”') : L(pal.name + '：「' + word + '」', palName(pal) + ': “' + T(word) + '”'));
   }
   ['talk-a', 'talk-b'].forEach((id, i) => $(id).addEventListener('click', () => talkTo(i)));
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintFriendLabels);
   function chatter() {
     if (!document.hidden && (phase === 'idle' || phase === 'waiting') && !book.open && !swapping) {   // アタリ・ひいて いる・つれた あとは しゃべらない（わの タイミングに めが いく）
-      const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
-      bubble.textContent = Math.random() < .25 ? palWord(pals[who]) : WORDS[Math.floor(Math.random() * WORDS.length)];
+      const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]), catchOne = Math.random() < .1;   // ときどき なかま じしんが つる（かぞえない）
+      const koe = catchOne ? null : koeLine(pals[who], phase === 'waiting' && performance.now() - waitedFrom > 9000 && Math.random() < .5 ? 'wait' : '');
+      bubble.textContent = catchOne ? L('つれた！', 'Got one!') : koe ? L(koe[0], koe[1]) : Math.random() < .25 ? palWord(pals[who]) : WORDS[Math.floor(Math.random() * WORDS.length)];
+      const isCatch = catchOne || bubble.textContent === 'つれた！';
       place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
       const half = bubble.offsetWidth / scene.clientWidth * 50; place(bubble, {x: Math.min(98 - half, Math.max(2 + half, f.x)), y: f.y - 19});   // がめんの はしで きれない よう
       const theirFish = FISH[Math.floor(Math.random() * 3)];
-      if (bubble.textContent === 'つれた！') {   // なかまも、つれた さかなを かかげる
+      if (isCatch) {   // なかまも、つれた さかなを かかげる
         const theirs = $('held-friend');
         theirs.replaceChildren(fishImg(theirFish)); place(theirs, {x: f.x + 4, y: f.y - 2}); theirs.style.fontSize = 'clamp(1.1rem,5.5vw,1.7rem)'; theirs.hidden = false;
         setTimeout(() => { theirs.hidden = true; }, 7000);
       }
-      if (!reduce()) $(who ? 'friend-b' : 'friend-a').animate(bubble.textContent === 'つれた！' ? [{translate: '0 0', rotate: '0deg'}, {translate: '0 -14px', rotate: '-8deg'}, {translate: '0 0', rotate: '0deg'}, {translate: '0 -9px', rotate: '8deg'}, {translate: '0 0', rotate: '0deg'}] : [{rotate: '0deg'}, {rotate: '7deg'}, {rotate: '-5deg'}, {rotate: '0deg'}], {duration: 700, easing: 'ease-out'});   // しゃべる ときに、からだも うごく
-      if (bubble.textContent === 'つれた！' && !reduce()) {   // さかなが、ぴょんと はねる
+      if (!reduce()) $(who ? 'friend-b' : 'friend-a').animate(isCatch ? [{translate: '0 0', rotate: '0deg'}, {translate: '0 -14px', rotate: '-8deg'}, {translate: '0 0', rotate: '0deg'}, {translate: '0 -9px', rotate: '8deg'}, {translate: '0 0', rotate: '0deg'}] : [{rotate: '0deg'}, {rotate: '7deg'}, {rotate: '-5deg'}, {rotate: '0deg'}], {duration: 700, easing: 'ease-out'});   // しゃべる ときに、からだも うごく
+      if (isCatch && !reduce()) {   // さかなが、ぴょんと はねる
         const hop = document.createElement('span'), w = floatAt(friends[who]);
         hop.className = 'hop'; hop.replaceChildren(fishImg(theirFish)); hop.setAttribute('aria-hidden', 'true'); place(hop, w); scene.append(hop);
         hop.animate([{translate: '0 0', opacity: 1}, {translate: '-10px -46px', opacity: 1, offset: .5}, {translate: '-22px -20px', opacity: 0}], {duration: 1100, easing: 'ease-out'}).onfinish = () => hop.remove();
       }
       setTimeout(() => { bubble.hidden = true; }, 2600);
     }
-    setTimeout(chatter, Number(query.get('chat')) || (9000 + Math.random() * 8000));
+    setTimeout(chatter, Number(query.get('chat')) || (14000 + Math.random() * 14000));   // ゆっくり（せかせか させない）
   }
 
   // なかまの いれかわり：だいたい 15ふん（10〜20ぷん）に 1にん。「またね」と てを ふって あるいて いき、すこし あいて、べつの こが あるいて きて「こんにちは」
