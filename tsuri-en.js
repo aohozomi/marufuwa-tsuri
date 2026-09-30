@@ -500,7 +500,8 @@
   function isPure(el) {
     // 文字の 飾りだけの 要素（ふりがな・太字 など）を 1つの 文として 訳す。ID の ある もの・かくれた もの（hidden・aria-hidden＝バッジ など ゲームが 中身を かえる 部品）・タグの ならび（chips）を ふくむ 時は さわらない（部品を こわさない）
     if (chips(el)) return false;
-    for (const d of el.querySelectorAll('*')) { if (!PURE.has(d.tagName) || d.id || d.hidden || d.getAttribute('aria-hidden') === 'true' || chips(d)) return false; }
+    // <rt aria-hidden="true">（ふりがなを よみあげに 読ませない しるし）は 飾りの ままなので ゆるす（ジョブズ1・8e2777e の あとの English 未訳）
+    for (const d of el.querySelectorAll('*')) { if (!PURE.has(d.tagName) || d.id || d.hidden || (d.getAttribute('aria-hidden') === 'true' && d.tagName !== 'RT') || chips(d)) return false; }
     return true;
   }
   function translateAttrs(el) {
