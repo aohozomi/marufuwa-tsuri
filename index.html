@@ -714,7 +714,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <path d="M0 780 Q400 730 800 790 T1600 770 V900 H0Z" fill="#a7dba0"/>
   </svg>
   <h1 class="logo" aria-label="まるふわ つりびより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">つ</span><span aria-hidden="true">り</span><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
-  <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <ruby>急<rt>いそ</rt></ruby>がなくて <ruby>大丈夫<rt>だいじょうぶ</rt></ruby>・<ruby>逃<rt>に</rt></ruby>がしても <ruby>減<rt>へ</rt></ruby>らない<br><small><span class="ic" aria-hidden="true">⏱</span> 1ぴき 10〜20<ruby>秒<rt>びょう</rt></ruby>・<ruby>無料<rt>むりょう</rt></ruby></small></p>
+  <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <ruby>急<rt aria-hidden="true">いそ</rt></ruby>がなくて <ruby>大丈夫<rt aria-hidden="true">だいじょうぶ</rt></ruby>・<ruby>逃<rt aria-hidden="true">に</rt></ruby>がしても <ruby>減<rt aria-hidden="true">へ</rt></ruby>らない<br><small><span class="ic" aria-hidden="true">⏱</span> 1ぴき 10〜20<ruby>秒<rt aria-hidden="true">びょう</rt></ruby>・<ruby>無料<rt aria-hidden="true">むりょう</rt></ruby></small></p>
   <div class="hud record">
     <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
     <span>つれた かず <strong id="total">0</strong></span>
@@ -847,9 +847,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   <p id="today" class="note today" hidden></p>
   <p id="nosave" class="note" role="status" style="font-weight:800" hidden></p>
 
-  <p class="note" id="about-note"><span class="ic" aria-hidden="true">🕐</span> <ruby>時間<rt>じかん</rt></ruby>で <ruby>出<rt>で</rt></ruby>る <ruby>魚<rt>さかな</rt></ruby>が <ruby>変<rt>か</rt></ruby>わる（<ruby>朝<rt>あさ</rt></ruby>・<ruby>昼<rt>ひる</rt></ruby>・<ruby>夕<rt>ゆう</rt></ruby>・<ruby>夜<rt>よる</rt></ruby>）<br>
-  <span class="ic" aria-hidden="true">💾</span> <ruby>記録<rt>きろく</rt></ruby>は この <ruby>端末<rt>たんまつ</rt></ruby>だけ・ログイン <ruby>不要<rt>ふよう</rt></ruby><br>
-  <span class="ic" aria-hidden="true">🎨</span> <ruby>絵<rt>え</rt></ruby>は <ruby>今<rt>いま</rt></ruby>は <ruby>仮<rt>かり</rt></ruby></p>
+  <p class="note" id="about-note"><span class="ic" aria-hidden="true">🕐</span> <ruby>時間<rt aria-hidden="true">じかん</rt></ruby>で <ruby>出<rt aria-hidden="true">で</rt></ruby>る <ruby>魚<rt aria-hidden="true">さかな</rt></ruby>が <ruby>変<rt aria-hidden="true">か</rt></ruby>わる（<ruby>朝<rt aria-hidden="true">あさ</rt></ruby>・<ruby>昼<rt aria-hidden="true">ひる</rt></ruby>・<ruby>夕<rt aria-hidden="true">ゆう</rt></ruby>・<ruby>夜<rt aria-hidden="true">よる</rt></ruby>）<br>
+  <span class="ic" aria-hidden="true">💾</span> <ruby>記録<rt aria-hidden="true">きろく</rt></ruby>は この <ruby>端末<rt aria-hidden="true">たんまつ</rt></ruby>だけ・ログイン <ruby>不要<rt aria-hidden="true">ふよう</rt></ruby><br>
+  <span class="ic" aria-hidden="true">🎨</span> <ruby>絵<rt aria-hidden="true">え</rt></ruby>は <ruby>今<rt aria-hidden="true">いま</rt></ruby>は <ruby>仮<rt aria-hidden="true">かり</rt></ruby></p>
   <div class="hud keep">
     <button id="open-keep" type="button" style="flex:1">きろくを のこす・もどす</button>
     <a class="pill quiet" href="anshin/" style="flex:1">おうちの かたへ</a>
@@ -858,7 +858,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
   <dialog id="keep" aria-labelledby="keep-title">
     <h2 id="keep-title">きろくを のこす・もどす</h2>
-    <p class="count"><ruby>記録<rt>きろく</rt></ruby>は この <ruby>端末<rt>たんまつ</rt></ruby>の <ruby>中<rt>なか</rt></ruby>だけに あるよ。<br>したの <ruby>文字<rt>もじ</rt></ruby>を どこかに <ruby>保存<rt>ほぞん</rt></ruby>して おくと、<ruby>消<rt>き</rt></ruby>えても <ruby>戻<rt>もど</rt></ruby>せるよ。</p>
+    <p class="count"><ruby>記録<rt aria-hidden="true">きろく</rt></ruby>は この <ruby>端末<rt aria-hidden="true">たんまつ</rt></ruby>の <ruby>中<rt aria-hidden="true">なか</rt></ruby>だけに あるよ。<br>したの <ruby>文字<rt aria-hidden="true">もじ</rt></ruby>を どこかに <ruby>保存<rt aria-hidden="true">ほぞん</rt></ruby>して おくと、<ruby>消<rt aria-hidden="true">き</rt></ruby>えても <ruby>戻<rt aria-hidden="true">もど</rt></ruby>せるよ。</p>
     <label for="keep-code" style="font-weight:800;font-size:.9rem">きろくの もじ</label>
     <textarea id="keep-code" rows="5" spellcheck="false" autocomplete="off" style="width:100%;font:inherit;font-size:.8rem;border:2px solid #b9d1db;border-radius:14px;padding:8px;margin:4px 0 10px;word-break:break-all"></textarea>
     <div class="photo-actions">

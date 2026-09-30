@@ -2,7 +2,7 @@
    にほんごの とき だけ、画面の ひらがなの ことばを「漢字＋ふりがな」に かえる。English の ときは なにも しない。
    もとの ひらがなの 文は そのまま（English の ひょうの キー・よみあげ・きろくは かわらない）。かえるのは 画面に 出た 文字だけ。
    ・じしょ：tsuri-ruby-dict.js（window.TsuriRubyDict＝1ぎょうに 1つ「ひらがな=漢字《よみ》ひらがな」）。ないことばは ひらがなの まま
-   ・かえない ところ：script・style・入力らん・ruby・[data-noruby]・#status・.bubble（よみあげ・ほかの 検査と ぶつかる ところ。あとで ひらく）
+   ・かえない ところ：script・style・入力らん・ruby・[data-noruby]・#status・.bubble・ライブ領域（aria-live／role=status／role=alert＝よみあげが 2回 入らない ように）（よみあげ・ほかの 検査と ぶつかる ところ。あとで ひらく）
    ・けす：?noruby=1（検査用）。ひらがなだけ＝ほんたいの きろく save.hira（つかいやすくする →「もじ」）
    ・よみあげ：<rt aria-hidden="true">（かんじだけ よむ）。ことばを こえで よむ しくみは もとの ひらがなの 文を つかう */
 (function (root) {
@@ -78,7 +78,7 @@
   const HIRA_MODE = !enabled && q.get('noruby') !== '1';
   const isEn = () => !!(root.TsuriEn && root.TsuriEn.lang === 'en');
   let D = null, observer = null, busy = false, scheduled = 0; const pending = new Set(), made = new WeakSet();
-  const SKIP = 'svg,canvas,script,style,textarea,input,select,option,ruby,rt,rp,[data-noruby],#status,.bubble,#bubble,.sr-only,#hm-live,.hm-note,[class*="hm-"],[id^="hm-"],[id^="tk-"],[class*="tk-"],#tank,#himitsu,title,head';
+  const SKIP = 'svg,canvas,script,style,textarea,input,select,option,ruby,rt,rp,[data-noruby],#status,.bubble,#bubble,.sr-only,#hm-live,.hm-note,[class*="hm-"],[id^="hm-"],[id^="tk-"],[class*="tk-"],#tank,#himitsu,title,head,[aria-live],[role=status],[role=alert]';
   function ensureDict() {
     if (D) return D; if (typeof root.TsuriRubyDict !== 'string') return null;
     D = parse(root.TsuriRubyDict);
