@@ -344,7 +344,7 @@ body.gazing .assist{display:none}
 #main-button[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
 .note{text-align:center;font-size:.85rem;color:#506874;line-height:2.3;margin-top:18px}
-rt{font-size:.62em;letter-spacing:.02em;font-weight:700}
+rt{font-size:.62em;font-size:max(.62em,10px);letter-spacing:.02em;font-weight:700}   /* ふりがなを よむ ひとが いちばん こまるので、10px より ちいさく しない */
 .lead{font-size:1rem}
 #float[data-nibble=true]{animation:nibble .22s ease-in-out 3 !important}
 @keyframes nibble{50%{translate:0 6px}}
@@ -693,6 +693,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const RARE_LABEL = {2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル', 5: 'まぼろし'};
   const starCount = (f, nushi) => Math.min(5, f.rare + (nushi ? 1 : 0));
   const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
+  const starEl = (f, nushi) => { const el = document.createElement('span'); el.className = 'stars'; el.textContent = starsOf(f, nushi); el.setAttribute('role', 'img'); el.setAttribute('aria-label', 'めずらしさ ' + starCount(f, nushi) + ' / 5'); return el; };   // 読み上げは「めずらしさ 3 / 5」
   const cm = value => { const n = Number(value); return n >= 100 ? String(Math.round(n)) : n.toFixed(1).replace(/\.0$/, ''); };   // 「18.83」より「18.8」。100センチを こえたら 整数
   const DECOR = ['かいがら', 'きれいな いし', 'ながれぎ', 'みずくさ', 'ちいさな びん', 'ほしの かけら'];
   const TIME_LABEL = {a: 'あさ', h: 'ひる', y: 'ゆうがた', n: 'よる'};
@@ -901,7 +902,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
   function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; }
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else startAmbient(); });
-  function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : 'おと：OFF（おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
+  function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
   $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { startAmbient(); chord([523, 784], .09, 'triangle'); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。' + (IOS ? ' きこえない ときは、よこの マナー スイッチを みてね。' : '')); } else say('おとを けしたよ。'); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
   const TARGET = .3;
@@ -1099,8 +1100,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     store(); hud(); drawEquip();
     const gift = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))].filter(item => !had.includes(item)).map(item => item.name);
     $('card-fish').textContent = fish.icon; $('card-name').replaceChildren(ruby(fish.kanji));
-    const stars = document.createElement('span'); stars.className = 'stars'; stars.textContent = starsOf(fish, nushi); stars.setAttribute('aria-label', 'めずらしさ ' + starCount(fish, nushi) + ' / 5');
-    $('card-size').replaceChildren(cm(size) + ' センチ　', stars);
+    $('card-size').replaceChildren(cm(size) + ' センチ　', starEl(fish, nushi));
     if (found) gift.push(found + '（さかなが もって いたよ）');
     const tags = [];
     if (fish === LUCKY) tags.push('きょうの ラッキー'); if (save.fish[fish.id].count === 10) tags.push('10ぴきめ！ なかよし');
@@ -1114,7 +1114,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // あんないの ペンギンが、まいかい ひとこと
     const left = BASE - seenCount();
     const mile = MILES[save.total]; if (mile) party(mile[0]);
-    $('guide-word').textContent = mile ? mile[1] : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
+    const guideWord = mile ? mile[1] : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
+    $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
     last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date()};
@@ -1135,7 +1136,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // れんだ しても、うれしい しゅんかんが きえない ように、すこしだけ まつ
     button.textContent = 'もういちど なげる'; button.dataset.hot = 'false'; lock(true); caughtAt = performance.now();
     setTimeout(() => { if (phase === 'caught') lock(false); }, 1000);
-    say(fish.name + 'が つれた。' + cm(size) + 'センチ。' + tags.join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : ''));
+    say(fish.name + 'が つれた。' + cm(size) + 'センチ。' + tags.join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (guideWord === 'いい こが つれたね。' ? '' : '　ペンギン：' + guideWord));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
   }
 
   function act() {
@@ -1531,7 +1532,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('bucket-list').replaceChildren(...(list.length ? list.map(item => {
       const f = FISH[item.id], row = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), when = document.createElement('small');
       icon.replaceChildren(fishImg(f)); icon.setAttribute('aria-hidden', 'true');
-      when.textContent = clock.format(new Date(item.at)) + '　' + starsOf(f, item.nushi) + (item.nushi ? '　ぬし' : '');
+      when.append(clock.format(new Date(item.at)) + '　', starEl(f, item.nushi), item.nushi ? '　ぬし' : '');
       text.append(ruby(f.kanji), '　' + cm(item.size) + 'センチ', when); row.append(icon, text); return row;
     }) : ['まだ からっぽ。のんびり いこう。']));
     const decor = save.decor && typeof save.decor === 'object' ? Object.entries(save.decor) : [];
@@ -1553,7 +1554,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
       const icon = document.createElement('b'); if (got) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
-      cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), got ? 'さいだい ' + cm(got.best) + 'cm（' + got.count + 'ひき）' + (got.nushi ? ' ぬし◎' : '') : when);
+      cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when);
       return cell;
     }));
     book.showModal();
