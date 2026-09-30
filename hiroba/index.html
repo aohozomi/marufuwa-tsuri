@@ -606,17 +606,31 @@ function renderSeason() {
 // ─── おと（むかしの ゲームき ふう：かくばった なみ・さんかくの なみ・みじかい ざっ だけ）───
 let ac = null, noiseBuf = null, amb = null;
 function ready() { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
-function route(c, node, pan) { if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); node.connect(p); p.connect(c.destination); } else node.connect(c.destination); }
+// やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
+//   ・基音は 1200Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみ（square）は さんかくに／
+//     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 2500Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
+const GENTLE = { top: 1200, attack: .015, lp: 2500, noiseLp: 1500, cap: .25, noiseGain: 2.4 };
+function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
+  if (c._gentle) return c._gentle;
+  let head = c.destination;
+  try { if (c.createWaveShaper) { const sh = c.createWaveShaper(), n = 2048, curve = new Float32Array(n); for (let i = 0; i < n; i++) curve[i] = GENTLE.cap * Math.tanh((i / (n - 1) * 2 - 1) * 4); sh.curve = curve; sh.oversample = '2x'; sh.connect(head); head = sh; } } catch {}
+  try { if (c.createBiquadFilter) { const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = GENTLE.lp; if (lp.Q) lp.Q.value = .5; lp.connect(head); head = lp; } } catch {}
+  return (c._gentle = head);
+}
+const lowerTo = (freq, slideTo) => { const hi = Math.max(freq, slideTo || 0); if (!(hi > GENTLE.top)) return [freq, slideTo || 0]; const k = 2 ** Math.ceil(Math.log2(hi / GENTLE.top)); return [freq / k, slideTo ? slideTo / k : 0]; };
+function route(c, node, pan) { const bus = gentleBus(c); if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); node.connect(p); p.connect(bus); } else node.connect(bus); }
 function tone(freq, len = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, pan = 0) {
   if (!sndOk()) return;
   try {
     const c = ready(), at = c.currentTime + delay, osc = c.createOscillator(), vol = c.createGain();
-    let rounded = false; if (soft()) { if (type === 'square') { type = 'triangle'; rounded = true; } if (freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; } }
+    let rounded = false; if (type === 'square' || type === 'sawtooth') { type = 'triangle'; rounded = true; }
+    if (soft() && freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; }   // 「やさしい おと」の せってい（むかしから ある）
+    [freq, slideTo] = lowerTo(freq, slideTo);
     osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
     if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + len);
-    const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud;
-    vol.gain.setValueAtTime(level, at); vol.gain.setValueAtTime(level * .6, at + len * .5); vol.gain.setValueAtTime(0, at + len);
-    osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + len + .02);
+    const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud, A = GENTLE.attack, mid = Math.max(A + .002, len * .5), end = Math.max(mid + .002, len);
+    vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(level, at + A); vol.gain.linearRampToValueAtTime(level * .6, at + mid); vol.gain.linearRampToValueAtTime(0, at + end);
+    osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + end + .02);
   } catch {}
 }
 function zap(len = .1, delay = 0, loud = .06, pan = 0) {
@@ -624,9 +638,10 @@ function zap(len = .1, delay = 0, loud = .06, pan = 0) {
   try {
     const c = ready(), at = c.currentTime + delay;
     if (!noiseBuf) { noiseBuf = c.createBuffer(1, c.sampleRate * .5, c.sampleRate); const d = noiseBuf.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
-    const src = c.createBufferSource(), vol = c.createGain(); src.buffer = noiseBuf;
-    vol.gain.setValueAtTime(loud, at); vol.gain.linearRampToValueAtTime(0, at + len);
-    src.connect(vol); route(c, vol, pan); src.start(at); src.stop(at + len + .02);
+    const src = c.createBufferSource(), lp = c.createBiquadFilter(), vol = c.createGain(); src.buffer = noiseBuf; lp.type = 'lowpass'; lp.frequency.value = GENTLE.noiseLp; if (lp.Q) lp.Q.value = .5;
+    const A = GENTLE.attack, end = Math.max(A + .005, len);
+    vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud * GENTLE.noiseGain, at + A); vol.gain.linearRampToValueAtTime(0, at + end);
+    src.connect(lp); lp.connect(vol); route(c, vol, pan); src.start(at); src.stop(at + end + .02);
   } catch {}
 }
 const chord = (notes, gap = .07, type = 'square', pan = 0, loud = .05) => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, pan));
@@ -665,13 +680,13 @@ function startAmbient() {
     const c = ready(), len = c.sampleRate * 3, buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
     let v = 0; for (let i = 0; i < len; i++) { v = v * .9 + (Math.random() * 2 - 1) * .1; d[i] = v * 3.2; }
     const src = c.createBufferSource(); src.buffer = buf; src.loop = true;
-    const band = c.createBiquadFilter(); band.type = 'bandpass'; band.frequency.value = 2400; band.Q.value = .6;
+    const band = c.createBiquadFilter(); band.type = 'lowpass'; band.frequency.value = GENTLE.noiseLp; band.Q.value = .5;   // ざわざわ（ざつおん）は ローパス 1500Hz
     const gain = c.createGain(); gain.gain.value = 0;
     const pan = c.createStereoPanner ? c.createStereoPanner() : null;
-    src.connect(band); band.connect(gain); if (pan) { gain.connect(pan); pan.connect(c.destination); } else gain.connect(c.destination);
+    src.connect(band); band.connect(gain); if (pan) { gain.connect(pan); pan.connect(gentleBus(c)); } else gain.connect(gentleBus(c));
     src.start();
     const nodes = [src]; let rainGain = null;
-    if (rainy) { const drops = c.createBufferSource(), thin = c.createBiquadFilter(); rainGain = c.createGain(); drops.buffer = buf; drops.loop = true; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; rainGain.gain.value = .03; drops.connect(thin); thin.connect(rainGain); rainGain.connect(c.destination); drops.start(); nodes.push(drops); }
+    if (rainy) { const drops = c.createBufferSource(), thin = c.createBiquadFilter(); rainGain = c.createGain(); drops.buffer = buf; drops.loop = true; drops.playbackRate.value = 2.2; thin.type = 'lowpass'; thin.frequency.value = GENTLE.noiseLp; rainGain.gain.value = .03; drops.connect(thin); thin.connect(rainGain); rainGain.connect(gentleBus(c)); drops.start(); nodes.push(drops); }
     amb = { nodes, gain, pan };
     updateAmbient();
   } catch {}
@@ -1793,7 +1808,7 @@ const api = window.Hiroba = {
   goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   season: () => SEASON, seasonOf, special: () => SPECIAL, specialOf, renderSeason, SEASON_LINES, SPECIAL_LINES, DROPS, pickDrop: () => dropEl && pickDrop(dropEl), drop: () => dropEl && ({ id: DROPS[SEASON].id, name: DROPS[SEASON].name, x: Number(dropEl.dataset.x), y: Number(dropEl.dataset.y) }),
   plush: () => plushEls.map(e => ({ id: Number(e.dataset.id), x: Number(e.dataset.x), y: Number(e.dataset.y) })), renderPlush, nushiIds, plushTap: el => plushTap(el), openZukan, drawZukan, showZukanPal,
-  sfx, startAmbient, stopAmbient, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,
+  sfx, startAmbient, stopAmbient, audio: { tone, zap, chord }, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,
   say: () => statusEl.textContent
 };
 // ─── English mode（tsuri-en.js と 総司令部の 表 tsuri-en-hiroba.js が ある 英語の 時だけ）：ひろばの 題・ロゴと、表に ない 文を 足す ───

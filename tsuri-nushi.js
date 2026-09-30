@@ -56,14 +56,26 @@
   shadow.after(fx); scene.append(dim, flash);
 
   // ひくい おと：じぶんの おとの くち（ゲームの おとが ON の ときだけ ならす）
+  // やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
+  //   ・基音は 1200Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみ（square）は さんかくに／
+  //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 2500Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
+  const GENTLE = { top: 1200, attack: .015, lp: 2500, noiseLp: 1500, cap: .25, noiseGain: 2.4 };
+  function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
+    if (c._gentle) return c._gentle;
+    let head = c.destination;
+    try { if (c.createWaveShaper) { const sh = c.createWaveShaper(), n = 2048, curve = new Float32Array(n); for (let i = 0; i < n; i++) curve[i] = GENTLE.cap * Math.tanh((i / (n - 1) * 2 - 1) * 4); sh.curve = curve; sh.oversample = '2x'; sh.connect(head); head = sh; } } catch {}
+    try { if (c.createBiquadFilter) { const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = GENTLE.lp; if (lp.Q) lp.Q.value = .5; lp.connect(head); head = lp; } } catch {}
+    return (c._gentle = head);
+  }
+  const lowerTo = (freq, slideTo) => { const hi = Math.max(freq, slideTo || 0); if (!(hi > GENTLE.top)) return [freq, slideTo || 0]; const k = 2 ** Math.ceil(Math.log2(hi / GENTLE.top)); return [freq / k, slideTo ? slideTo / k : 0]; };
   let ctx = null, drum = 0;
   const thump = (gain, hz) => {
     if (!soundOn()) return;
     try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); } catch (e) { return; }
     const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime;
     o.type = 'triangle'; o.frequency.setValueAtTime(hz, t); o.frequency.exponentialRampToValueAtTime(hz * .6, t + .25);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + .28);
-    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + .3);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + GENTLE.attack + .005); g.gain.exponentialRampToValueAtTime(.0001, t + .28);
+    o.connect(g).connect(gentleBus(ctx)); o.start(t); o.stop(t + .3);
   };
   const stopDrum = () => { clearTimeout(drum); drum = 0; };
 
@@ -138,5 +150,5 @@
     else clear();
   }).observe(scene, {attributes: true, attributeFilter: ['data-phase']});
 
-  window.TsuriNushi = {active: () => active, count: () => fx.children.length};
+  window.TsuriNushi = {active: () => active, count: () => fx.children.length, _debug: {thump}};
 })();

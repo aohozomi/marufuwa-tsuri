@@ -617,11 +617,23 @@
   const mainSound = () => readSave().sound === true;
   function soundNow() { const main = mainSound(); return tank.sound !== undefined && tank.soundMain === main ? tank.sound : main; }
   function refreshSound() { sfx = soundNow(); if (!sfx) stopAmbience(); else if (isOpen()) startAmbience(); syncSoundButton(); bgmRefresh(); return sfx; }
+  // やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
+  //   ・基音は 1200Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみ（square）は さんかくに／
+  //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 2500Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
+  const GENTLE = { top: 1200, attack: .015, lp: 2500, noiseLp: 1500, cap: .25, noiseGain: 2.4 };
+  function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
+    if (c._gentle) return c._gentle;
+    let head = c.destination;
+    try { if (c.createWaveShaper) { const sh = c.createWaveShaper(), n = 2048, curve = new Float32Array(n); for (let i = 0; i < n; i++) curve[i] = GENTLE.cap * Math.tanh((i / (n - 1) * 2 - 1) * 4); sh.curve = curve; sh.oversample = '2x'; sh.connect(head); head = sh; } } catch {}
+    try { if (c.createBiquadFilter) { const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = GENTLE.lp; if (lp.Q) lp.Q.value = .5; lp.connect(head); head = lp; } } catch {}
+    return (c._gentle = head);
+  }
+  const lowerTo = (freq, slideTo) => { const hi = Math.max(freq, slideTo || 0); if (!(hi > GENTLE.top)) return [freq, slideTo || 0]; const k = 2 ** Math.ceil(Math.log2(hi / GENTLE.top)); return [freq / k, slideTo ? slideTo / k : 0]; };
   function audio() {
     const AC = window.AudioContext || window.webkitAudioContext;   // つかう時に探す（おとが OFF の間は、作らない）
     if (!sfx || !AC) return null;
     try {
-      if (!actx) { actx = new AC(); master = actx.createGain(); master.gain.value = .55; master.connect(actx.destination); }
+      if (!actx) { actx = new AC(); master = actx.createGain(); master.gain.value = .55; master.connect(gentleBus(actx)); }
       if (actx.state === 'suspended') actx.resume();
       return actx;
     } catch { return null; }
@@ -633,21 +645,24 @@
     if (!sfx || !kindOk()) return;
     const c = audio(); if (!c) return;
     const t = c.currentTime + (o.at || 0), osc = c.createOscillator(), g = c.createGain(), vol = o.vol === undefined ? .1 : o.vol;
-    let type = o.type === 'square' ? 'square' : 'triangle', rounded = false;
-    if (readSave().soft === true) { if (type === 'square') { type = 'triangle'; rounded = true; } if (freq >= 1800) freq /= 2; }
+    let type = 'triangle', rounded = o.type === 'square';   // かくばった なみは まるい なみに（さんかくの なみだけ）
+    if (readSave().soft === true && freq >= 1800) freq /= 2;
+    let end0 = o.glide ? Math.max(30, freq * o.glide) : 0;
+    [freq, end0] = lowerTo(freq, end0);
     osc.type = type; osc.frequency.setValueAtTime(freq, t);
-    if (o.glide) osc.frequency.linearRampToValueAtTime(Math.max(30, freq * o.glide), t + len);
-    const level = osc.type === 'triangle' ? vol * (rounded ? 1.2 : 1.5) : vol * .7;   // さんかくの なみは ちいさく きこえるので すこし たす
-    g.gain.setValueAtTime(level, t); g.gain.setValueAtTime(level * .6, t + len * .5); g.gain.setValueAtTime(0, t + len);
-    osc.connect(g); g.connect(panner(c, o.pan)); osc.start(t); osc.stop(t + len + .02);
+    if (end0) osc.frequency.linearRampToValueAtTime(end0, t + len);
+    const level = vol * (rounded ? 1.2 : 1.5), A = GENTLE.attack, mid = Math.max(A + .002, len * .5), end = Math.max(mid + .002, len);   // さんかくの なみは ちいさく きこえるので すこし たす
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level, t + A); g.gain.linearRampToValueAtTime(level * .6, t + mid); g.gain.linearRampToValueAtTime(0, t + end);
+    osc.connect(g); g.connect(panner(c, o.pan)); osc.start(t); osc.stop(t + end + .02);
   }
-  function noise(len, o = {}) {   // みじかい ざっ（ざらざらした ざつおん。むかしの ゲームきの ドラムの おと）
+  function noise(len, o = {}) {   // みじかい ざっ（ぽちゃん・ぱくぱくの ざつおん）。ローパス 1500Hz で まるく
     if (!sfx || !kindOk()) return;
     const c = audio(); if (!c) return;
     if (!hissBuf) { hissBuf = c.createBuffer(1, c.sampleRate, c.sampleRate); const d = hissBuf.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
-    const t = c.currentTime + (o.at || 0), src = c.createBufferSource(), g = c.createGain();
-    src.buffer = hissBuf; g.gain.setValueAtTime(Math.max(.0002, o.vol || .05), t); g.gain.linearRampToValueAtTime(0, t + len);
-    src.connect(g); g.connect(panner(c, o.pan)); src.start(t, Math.random() * .4); src.stop(t + len + .02);
+    const t = c.currentTime + (o.at || 0), src = c.createBufferSource(), lp = c.createBiquadFilter(), g = c.createGain(), A = GENTLE.attack, end = Math.max(A + .005, len);
+    src.buffer = hissBuf; lp.type = 'lowpass'; lp.frequency.value = GENTLE.noiseLp; if (lp.Q) lp.Q.value = .5;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(Math.max(.0002, o.vol || .05) * GENTLE.noiseGain, t + A); g.gain.linearRampToValueAtTime(0, t + end);
+    src.connect(lp); lp.connect(g); g.connect(panner(c, o.pan)); src.start(t, Math.random() * .4); src.stop(t + end + .02);
   }
   const PENTA = [0, 2, 4, 7, 9];
   const sizeNorm = f => clamp((Math.log(f.max) - Math.log(3)) / (Math.log(400) - Math.log(3)), 0, 1);
@@ -1418,5 +1433,7 @@
     addEventListener('load', regEn);
   }
 
-  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open: () => open(), close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, parade: !!parade && !parade.still, paradeStill: !!parade && parade.still, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, heya: { encode: encodeRoom, decode: decodeRoom, link: roomLink, open: code => { const v = decodeRoom(code); if (!v || dlg.open) return false; open(v); return true; }, visiting: () => !!visit, back: backHome, max: { ...HEYA_MAX }, decorIds: [...DECOR_IDS] }, version: 7 };
+  // 検査用（音の 出口を 測る）：音の なまえ → よびだし。ふだんの ゲームでは つかわない
+  const CUES = { sprinkle: () => cueSprinkle(180), munch: () => cueMunch(180), gather: () => { lastGather = -1e9; cueGather(); }, plop: () => cuePlop(180), pon: () => cuePon(180, false), ponOff: () => cuePon(180, true), shutter: cueShutter, open: cueOpen, close: cueClose, click: cueClick, lampOn: () => cueLamp(true), lampOff: () => cueLamp(false), happy: cueHappy, chime: cueChime, munchMany: cueMunchMany, bubbles: cueBubbles, parade: cueParade, blip: () => asKind('amb', () => tone(640, .1, { vol: .022, glide: 1.9 })), napBreath: () => tone(150, .9, { type: 'triangle', vol: .018, glide: .8 }), utouto: () => tone(150, .9, { type: 'triangle', vol: .04, glide: .8 }), tourNote: () => tone(fishFreq(kinds()[0]), .26, { type: 'triangle', vol: .08 }), tourEnd: () => [523, 659, 784].forEach((f, i) => tone(f, .5, { type: 'triangle', vol: .06, at: i * .02 })) };
+  window.TsuriTank = { cues: { ...CUES, voice: (id, nushi) => { const f = kinds().find(k => k.id === id); if (f) fishVoice(f, 0, .09, !!nushi); }, ids: () => Object.keys(CUES) }, audio: { tone, noise }, frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open: () => open(), close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, parade: !!parade && !parade.still, paradeStill: !!parade && parade.still, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, heya: { encode: encodeRoom, decode: decodeRoom, link: roomLink, open: code => { const v = decodeRoom(code); if (!v || dlg.open) return false; open(v); return true; }, visiting: () => !!visit, back: backHome, max: { ...HEYA_MAX }, decorIds: [...DECOR_IDS] }, version: 7 };
 })();

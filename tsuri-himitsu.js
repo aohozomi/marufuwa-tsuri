@@ -37,17 +37,31 @@
   // ─── おと ───
   let ac = null, hiss = null;
   const ready = () => { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; };
-  const route = (c, node, pan) => { if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); node.connect(p); p.connect(c.destination); } else node.connect(c.destination); };
+  // やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
+  //   ・基音は 1200Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみ（square）は さんかくに／
+  //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 2500Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
+  const GENTLE = { top: 1200, attack: .015, lp: 2500, noiseLp: 1500, cap: .25, noiseGain: 2.4 };
+  function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
+    if (c._gentle) return c._gentle;
+    let head = c.destination;
+    try { if (c.createWaveShaper) { const sh = c.createWaveShaper(), n = 2048, curve = new Float32Array(n); for (let i = 0; i < n; i++) curve[i] = GENTLE.cap * Math.tanh((i / (n - 1) * 2 - 1) * 4); sh.curve = curve; sh.oversample = '2x'; sh.connect(head); head = sh; } } catch {}
+    try { if (c.createBiquadFilter) { const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = GENTLE.lp; if (lp.Q) lp.Q.value = .5; lp.connect(head); head = lp; } } catch {}
+    return (c._gentle = head);
+  }
+  const lowerTo = (freq, slideTo) => { const hi = Math.max(freq, slideTo || 0); if (!(hi > GENTLE.top)) return [freq, slideTo || 0]; const k = 2 ** Math.ceil(Math.log2(hi / GENTLE.top)); return [freq / k, slideTo ? slideTo / k : 0]; };
+  const route = (c, node, pan) => { const bus = gentleBus(c); if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); node.connect(p); p.connect(bus); } else node.connect(bus); };
   function tone(freq, len = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, pan = 0) {
     if (!kindOn()) return;
     try {
       const c = ready(), at = c.currentTime + delay, osc = c.createOscillator(), vol = c.createGain();
-      let rounded = false; if (sndSet().soft === true) { if (type === 'square') { type = 'triangle'; rounded = true; } if (freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; } }
+      let rounded = false; if (type === 'square' || type === 'sawtooth') { type = 'triangle'; rounded = true; }
+      if (sndSet().soft === true && freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; }
+      [freq, slideTo] = lowerTo(freq, slideTo);
       osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
       if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + len);
-      const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud;
-      vol.gain.setValueAtTime(level, at); vol.gain.setValueAtTime(level * .6, at + len * .5); vol.gain.setValueAtTime(0, at + len);
-      osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + len + .02);
+      const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud, A = GENTLE.attack, mid = Math.max(A + .002, len * .5), end = Math.max(mid + .002, len);
+      vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(level, at + A); vol.gain.linearRampToValueAtTime(level * .6, at + mid); vol.gain.linearRampToValueAtTime(0, at + end);
+      osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + end + .02);
     } catch {}
   }
   function zap(len = .1, delay = 0, loud = .06, pan = 0) {
@@ -55,9 +69,10 @@
     try {
       const c = ready(), at = c.currentTime + delay;
       if (!hiss) { hiss = c.createBuffer(1, c.sampleRate * .5, c.sampleRate); const d = hiss.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
-      const src = c.createBufferSource(), vol = c.createGain(); src.buffer = hiss;
-      vol.gain.setValueAtTime(loud, at); vol.gain.linearRampToValueAtTime(0, at + len);
-      src.connect(vol); route(c, vol, pan); src.start(at); src.stop(at + len + .02);
+      const src = c.createBufferSource(), lp = c.createBiquadFilter(), vol = c.createGain(); src.buffer = hiss; lp.type = 'lowpass'; lp.frequency.value = GENTLE.noiseLp; if (lp.Q) lp.Q.value = .5;
+      const A = GENTLE.attack, end = Math.max(A + .005, len);
+      vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud * GENTLE.noiseGain, at + A); vol.gain.linearRampToValueAtTime(0, at + end);
+      src.connect(lp); lp.connect(vol); route(c, vol, pan); src.start(at); src.stop(at + end + .02);
     } catch {}
   }
   const chord = (notes, gap = .08, type = 'square', loud = .04) => notes.forEach((n, i) => tone(n, gap * 1.05, type, i * gap, loud));
@@ -592,6 +607,6 @@
   window.TsuriHimitsu = {
     version: 1, found: foundMap, replay, open: () => { if (!noteDlg) buildNote(); drawNote(); noteDlg.showModal(); },
     kotoba: { version: 1, try: tryWord, open: openWord, list: () => WORDS.map(w => ({ id: w.id, title: titleOf(w.id), found: !!foundMap()[w.id] })) },
-    _debug: { kotoba: { sha256hex, norm, hashOf, words: () => WORDS.map(w => ({ id: w.id, keys: Object.keys(w), hashes: w.h.length, hex: w.h.every(x => /^[0-9a-f]{64}$/.test(x)) })), fromUrl, T }, tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy, boat: !!boat, boatDone, rainbow: !!rainbow, crab: !!crabBox, bucketOpens }), gifts: () => { const d = readJSON(HM_KEY); return d && d.gifts && typeof d.gifts === 'object' && !Array.isArray(d.gifts) ? { ...d.gifts } : {}; }, resetTotal: () => { total0 = totalNow(); rainbowLoud = false; }, resetOpens: () => { bucketOpens = 0; } }
+    _debug: { audio: { tone, zap, chord, fanfare, ids: () => Object.keys(REPLAY) }, kotoba: { sha256hex, norm, hashOf, words: () => WORDS.map(w => ({ id: w.id, keys: Object.keys(w), hashes: w.h.length, hex: w.h.every(x => /^[0-9a-f]{64}$/.test(x)) })), fromUrl, T }, tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy, boat: !!boat, boatDone, rainbow: !!rainbow, crab: !!crabBox, bucketOpens }), gifts: () => { const d = readJSON(HM_KEY); return d && d.gifts && typeof d.gifts === 'object' && !Array.isArray(d.gifts) ? { ...d.gifts } : {}; }, resetTotal: () => { total0 = totalNow(); rainbowLoud = false; }, resetOpens: () => { bucketOpens = 0; } }
   };
 })();
