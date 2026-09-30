@@ -24,6 +24,7 @@
   // 大きさ：3曲とも「K重みの LUFS」で −35 に そろえた（なおす 前は −32。本体の「なみ」は おなじ 測りかたで −28 なので、BGM は なみより 7 デシベル 小さい）。
   //   測りかた＝_qa の bgm_probe.js（OfflineAudioContext で 書き出し・K重みの 近似）。耳で 見る 時だけ ?bgmvol=0.5〜2 で 動かせる。
   //   曲ごとの 大きさ PART_TRIM は 書き出して 測って きめる（_qa の bgm_probe.js）。TRIM＝じかんたいの さいしょの 曲の 大きさ（ノードに かける）・2つめの 曲は 音符の gain に PART_TRIM／TRIM を かける。
+  const PLAY_MELODY = false;   // 10/1 マスター「おれ これ きらい」：じかんの 曲では 旋律を ならさない（和音の ながれだけ）。「くみたてる」で えらんだ 時だけ 旋律が ならせる
   const VOLUME = .65, PART_TRIM = { a1: .291, a2: .288, h1: .274, h2: .285, y1: .285, y2: .298, n1: .296, n2: .322 };
   const TRIM = { a: PART_TRIM.a1, h: PART_TRIM.h1, y: PART_TRIM.y1, n: PART_TRIM.n1 };
   const boost = (() => { try { const v = Number(new URLSearchParams(location.search).get('bgmvol')); return v > 0 ? Math.min(2, v) : 1; } catch { return 1; } })();
@@ -122,7 +123,7 @@
     let off = 0; const ev = [], marks = [];
     for (const n of KEYS[key]) {
       const p = PARTS[n](), k = PART_TRIM[n] / TRIM[key]; marks.push(off);
-      p.ev.forEach(([t, d, m, o]) => { if (o && o.role === 'mel') return; ev.push([t + off, d, m, k === 1 ? o : { ...o, gain: o.gain * k }]); });   // 10/1 マスター「おれ これ きらい」：旋律を やめ、ひくい 和音の ゆっくりした ながれ だけに（正弦波・900Hz以下）
+      p.ev.forEach(([t, d, m, o]) => { if (!PLAY_MELODY && o && o.role === 'mel') return; ev.push([t + off, d, m, k === 1 ? o : { ...o, gain: o.gain * k }]); });   // 10/1 マスター「おれ これ きらい」：旋律を やめ、ひくい 和音の ゆっくりした ながれ だけに（正弦波・900Hz以下）
       off += p.len;
     }
     ev.sort((x, y) => x[0] - y[0]); return { len: off, ev, marks, parts: KEYS[key].slice() };
@@ -199,12 +200,12 @@
   //   1. ひくい おと＝8曲の 和音の うち 1つ（1〜8）／2. うた＝8曲の 旋律の うち 1つ（0＝なし）／3. こだま＝うたを 1オクターブ ひくく 4.6びょう おくらせて かさねる（0/1）。
   //   3つは べつべつに くりかえす（ながさが ちがう ので 少しずつ ずれて、あきない）。ドレミソラ と 白い 鍵ばんだけ なので どれを くみあわせても ぶつからない。高い おとは ない（旋律 G3〜G4・こだま G2〜G3）。
   //   番号は p-m-e（例 3-5-1）。曲の 順番＝1 あさ1・2 あさ2・3 ひる1・4 ひる2・5 ゆうがた1・6 ゆうがた2・7 よる1・8 よる2（PART_KEYS の じゅん。ふやす ときは うしろへ）
-  const MIX_TRIM = .29, ECHO_DELAY = 4.6, ECHO_GAIN = .4;
+  const MIX_TRIM = .29, MIX_LEVEL = .55, ECHO_DELAY = 4.6, ECHO_GAIN = .4;   // MIX_LEVEL＝うたが 入る ときの 音量（10/1 から 音色が 正弦波に なって 大きく きこえる ように なった ので −35 LUFS に そろえる）
   function mixLayers(m) {
     const [p, mm, e] = m, pn = PART_KEYS[p - 1], pp = PARTS[pn](), sc = (ev, k) => ev.map(([tt, d, mi, o]) => [tt, d, mi, { ...o, gain: o.gain * k }]), byT = (x, y) => x[0] - y[0], out = [];
-    out.push({ name: 'pad', ev: sc(pp.ev.filter(x => x[3].role === 'pad'), PART_TRIM[pn] / MIX_TRIM * (mm > 0 ? 1 : 1.5)).sort(byT), len: pp.len, delay: 0 });   // うたなしの ときは 和音だけ なので 少し 大きく（−38 LUFS）
+    out.push({ name: 'pad', ev: sc(pp.ev.filter(x => x[3].role === 'pad'), PART_TRIM[pn] / MIX_TRIM * (mm > 0 ? MIX_LEVEL : 1)).sort(byT), len: pp.len, delay: 0 });   
     if (mm > 0) {
-      const mn = PART_KEYS[mm - 1], mp = PARTS[mn](), km = PART_TRIM[mn] / MIX_TRIM * (e ? .93 : 1), mel = mp.ev.filter(x => x[3].role === 'mel');
+      const mn = PART_KEYS[mm - 1], mp = PARTS[mn](), km = PART_TRIM[mn] / MIX_TRIM * MIX_LEVEL * (e ? .93 : 1), mel = mp.ev.filter(x => x[3].role === 'mel');
       out.push({ name: 'mel', ev: sc(mel, km).sort(byT), len: mp.len, delay: 0 });
       if (e) out.push({ name: 'echo', ev: mel.map(([tt, d, mi, o]) => [tt, d, mi - 12, { ...o, gain: o.gain * km * ECHO_GAIN, a: Math.max(o.a || 0, .5), r: (o.r || 0) + .4 }]).sort(byT), len: mp.len, delay: ECHO_DELAY });
     }
@@ -346,7 +347,7 @@
       subs.add(paint); paint(); b._unsub = () => subs.delete(paint); return b;
     },
     state: () => ({ on, key: cur ? cur.key : '', playing: !!cur, stack: stack.map(s => s.name), ownCtx: !!ownCtx, volume: VOLUME * boost, trim: { ...TRIM, mix: MIX_TRIM }, part: cur ? cur.startPart : 0, mix: mix ? mix.slice() : null }),
-    _debug: { mixLayers, MIX_TRIM, ECHO_DELAY, partName, track, part: n => PARTS[n](), PARTS, KEYS, PART_TRIM, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, TOP_MIDI, MIN_ATTACK, LP, AIR_LP, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get ticker() { return ticker; } }
+    _debug: { played: n => { const p = PARTS[n](); return { len: p.len, ev: p.ev.filter(e => PLAY_MELODY || !(e[3] && e[3].role === 'mel')) }; }, PLAY_MELODY, mixLayers, MIX_TRIM, ECHO_DELAY, partName, track, part: n => PARTS[n](), PARTS, KEYS, PART_TRIM, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, TOP_MIDI, MIN_ATTACK, LP, AIR_LP, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get ticker() { return ticker; } }
   };
   window.TsuriBgm = api;
   // ゆびで さわった あとで はじめて 音の 部品を 作る／画面が かくれたら 止める／ほかの タブで「おと」「BGM」が かわったら 取りこむ
