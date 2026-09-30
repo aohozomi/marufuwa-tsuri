@@ -2029,6 +2029,20 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ctx.fillStyle = '#fffffff0'; ctx.font = 'bold 44px system-ui,sans-serif'; ctx.shadowColor = '#0008'; ctx.shadowBlur = 8; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 540, 2250, 900); ctx.shadowBlur = 0;
     return canvas;
   }
+  // しゃしんの けしき：うしろの くも・とおくの やま（ひると よるで いろが かわる）／まえの き・みずの きらめき。かたちは いつも おなじ（さかなごとに ずれない）
+  function photoBack(ctx, color) {
+    const dark = color('--star') === '1';
+    if (dark) { ctx.fillStyle = 'rgba(255,255,255,.75)'; [[90, 60], [210, 130], [330, 40], [470, 90], [620, 30], [780, 70], [910, 40], [1040, 110], [1120, 60]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill(); }); }
+    else { ctx.fillStyle = 'rgba(255,255,255,.85)'; [[170, 120, 74, 26], [250, 104, 50, 22], [880, 96, 84, 28], [968, 118, 56, 22], [430, 158, 60, 20]].forEach(([x, y, rx, ry]) => { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }); }
+    ctx.fillStyle = dark ? 'rgba(24,58,84,.7)' : 'rgba(126,190,160,.55)'; ctx.beginPath(); ctx.moveTo(0, 400); ctx.quadraticCurveTo(200, 300, 420, 372); ctx.quadraticCurveTo(620, 320, 820, 380); ctx.quadraticCurveTo(1020, 330, 1200, 384); ctx.lineTo(1200, 430); ctx.lineTo(0, 430); ctx.fill();
+    ctx.fillStyle = dark ? 'rgba(18,44,68,.8)' : 'rgba(92,160,128,.6)'; ctx.beginPath(); ctx.moveTo(0, 420); ctx.quadraticCurveTo(260, 350, 520, 402); ctx.quadraticCurveTo(800, 352, 1200, 408); ctx.lineTo(1200, 450); ctx.lineTo(0, 450); ctx.fill();
+  }
+  function photoFront(ctx, color) {
+    const dark = color('--star') === '1';
+    [[70, 0.9], [150, 0.65], [1090, 0.8]].forEach(([x, k]) => { ctx.fillStyle = dark ? '#1b3b34' : '#69b57a'; ctx.beginPath(); ctx.arc(x, 396 - 46 * k, 46 * k, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = dark ? '#142d28' : '#8a6a44'; ctx.fillRect(x - 5 * k, 396 - 10, 10 * k, 46 * k); });
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    [[120, 560, 60], [330, 610, 80], [520, 580, 50], [760, 630, 90], [980, 575, 66], [640, 656, 70], [210, 650, 56]].forEach(([x, y, w]) => { ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + w / 2, y - 7, x + w, y); ctx.stroke(); });
+  }
   async function takePhoto() {
     if (!last) return;
     const night = !!last.nushi && !last.fish.legend;   // ぬし専用の しゃしん（まぼろしは まえの ままの にじいろの わく）
@@ -2038,9 +2052,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const sky = ctx.createLinearGradient(0, 0, 0, 470); sky.addColorStop(0, color('--sky1')); sky.addColorStop(1, color('--sky2'));
     ctx.fillStyle = sky; ctx.fillRect(0, 0, 1200, 675);
     ctx.fillStyle = color('--orb'); ctx.beginPath(); ctx.arc(590, 120, 62, 0, Math.PI * 2); ctx.fill();
+    photoBack(ctx, color);
     ctx.fillStyle = color('--ground'); ctx.beginPath(); ctx.moveTo(0, 400); ctx.lineTo(1200, 380); ctx.lineTo(1200, 520); ctx.lineTo(0, 480); ctx.fill();
     const water = ctx.createLinearGradient(0, 480, 0, 675); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2'));
     ctx.fillStyle = water; ctx.beginPath(); ctx.moveTo(0, 480); ctx.lineTo(1200, 520); ctx.lineTo(1200, 675); ctx.lineTo(0, 675); ctx.fill();
+    photoFront(ctx, color);
     bottomScrim(ctx, 530);
     if (night) nushiBackdrop(ctx, last.fish.id * 97 + 7);
     const me = await loadImg(marufuwa.src);   // decode() は 見えない タブだと おわらない ことが ある。load で まつ（よめなくても しゃしんは つくる）
