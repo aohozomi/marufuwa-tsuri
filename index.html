@@ -152,6 +152,14 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 .chips button{min-height:48px;padding:4px 8px;font-size:.82rem;line-height:1.3}
 .chips button[aria-checked=true]{--c1:#ffe6ef;--c2:#ff9fbd;--side:#d9628a;--ink:#5a1230}
 #gift-word{font-weight:800}
+/* ながめる を もっと ゆったり：おやすみタイマー・ぜんがめん は ながめる 中だけ。なにも しないと ボタンが きえて、景色だけに（さわると もどる）。おやすみで 景色が ゆっくり くらく */
+#sleep,#fullscreen{display:none;flex:0 1 auto;min-height:52px}
+body.gazing #sleep,body.gazing #fullscreen{display:block}
+#fullscreen[hidden]{display:none !important}
+body.gazing .sub-actions,body.gazing #status{transition:opacity 1.6s ease}
+body.gazing.quiet .sub-actions,body.gazing.quiet #status{opacity:0;pointer-events:none}
+body.sleepy #scene{filter:brightness(.5);transition:filter 8s ease-in}
+@media(prefers-reduced-motion:reduce){body.gazing .sub-actions,body.gazing #status,body.sleepy #scene{transition:none}}
 #today{margin:2px 0 10px;text-align:center;font-size:.85rem;line-height:1.7;font-weight:700}
 #today[hidden]{display:none}
 /* てがみ（tsuri-tegami.js）：ひさしぶりに もどった ときと よなかに、景色の すみに ✉。おさなくても いい・その日 いちどだけ・ごほうびは なし */
@@ -622,6 +630,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <button id="send-gift" class="give" type="button" hidden>さかなを おくる</button>
     <button id="easy" type="button" aria-pressed="false">らくちん：OFF</button>
     <button id="gaze" type="button" aria-pressed="false">ながめる</button>
+    <button id="sleep" type="button">おやすみタイマー：なし</button>
+    <button id="fullscreen" type="button">ぜんがめん</button>
   </div>
   <p id="status" role="status" aria-live="polite">「なげる」を おしてね。</p>
   <p id="today" class="note today" hidden></p>
@@ -1063,9 +1073,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     return box;
   }
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
-  let ambient = null;
+  let ambient = null, ambientOut = null, sleepMuted = false;
   function startAmbient() {
-    if (!save.sound || ambient) return;
+    if (!save.sound || ambient || sleepMuted) return;
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       if (audio.state === 'suspended') audio.resume();
@@ -1073,18 +1083,23 @@ dialog .close{display:block;margin:auto;min-width:160px}
       let lastValue = 0; for (let i = 0; i < data.length; i++) { lastValue = lastValue * .96 + (Math.random() * 2 - 1) * .04; data[i] = lastValue * 6; }   // やわらかい ざーっ
       const noise = audio.createBufferSource(); noise.buffer = buffer; noise.loop = true;
       const soft = audio.createBiquadFilter(); soft.type = 'lowpass'; soft.frequency.value = 900;
-      const swell = audio.createGain(); swell.gain.value = .05;
+      const swell = audio.createGain(); swell.gain.value = .05; const out = audio.createGain(); out.gain.value = 1; out.connect(audio.destination); ambientOut = out;   // まとめの おんりょう（おやすみで ふわっと きえる）
       const lfo = audio.createOscillator(), depth = audio.createGain(); lfo.frequency.value = .11; depth.gain.value = .04; lfo.connect(depth).connect(swell.gain);
-      noise.connect(soft).connect(swell).connect(audio.destination);
+      noise.connect(soft).connect(swell).connect(out);
       const nodes = [noise, lfo];
-      if (rainy) { const drops = audio.createBufferSource(), thin = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = buffer; drops.loop = true; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; quiet.gain.value = .035; drops.connect(thin).connect(quiet).connect(audio.destination); nodes.push(drops); }
+      if (rainy) { const drops = audio.createBufferSource(), thin = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = buffer; drops.loop = true; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; quiet.gain.value = .035; drops.connect(thin).connect(quiet).connect(out); nodes.push(drops); }
       nodes.forEach(node => node.start()); ambient = nodes;
     } catch {}
   }
-  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; }
+  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; ambientOut = null; }
+  function fadeAmbient(sec) {   // ふわっと きえる（おやすみタイマー）
+    if (!ambient || !ambientOut || !audio) { stopAmbient(); return; }
+    try { const t = audio.currentTime; ambientOut.gain.cancelScheduledValues(t); ambientOut.gain.setValueAtTime(ambientOut.gain.value, t); ambientOut.gain.linearRampToValueAtTime(0, t + sec); } catch {}
+    setTimeout(stopAmbient, sec * 1000 + 300);
+  }
   document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else startAmbient(); });
   function drawSound() { const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
-  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { startAmbient(); chord([523, 784], .09, 'triangle'); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。' + (IOS ? ' きこえない ときは、よこの マナー スイッチを みてね。' : '')); } else say('おとを けしたよ。'); });
+  $('sound').addEventListener('click', () => { save.sound = !save.sound; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([523, 784], .09, 'triangle'); say('おとを つけたよ。わが ちかづくと おとが たかく なって、「ピコン」で おしてね。' + (IOS ? ' きこえない ときは、よこの マナー スイッチを みてね。' : '')); } else say('おとを けしたよ。'); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
   const TARGET = .3;
   const SWIMS = {
@@ -1920,7 +1935,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   let tint = null, tintKey = '', lastDraw = 0;
   function rgb(text) { const hex = text.trim().replace('#', ''); const full = hex.length === 3 ? [...hex].map(c => c + c).join('') : hex; return [0, 2, 4].map(i => parseInt(full.slice(i, i + 2), 16) || 0); }
   function drawWater(now) {
-    if (now - lastDraw < 42 && lastDraw) return; lastDraw = now;
+    if (now - lastDraw < (document.body.classList.contains('quiet') ? 170 : document.body.classList.contains('gazing') ? 84 : 42) && lastDraw) return; lastDraw = now;   // ながめる 中は 12こま/びょう・なにも しない と 6こま/びょう（でんちを へらす）
     const key = scene.dataset.time + scene.dataset.area;
     if (key !== tintKey) { const css = getComputedStyle(scene); tint = {near: rgb(css.getPropertyValue('--water2')), far: rgb(css.getPropertyValue('--water1')), sky: rgb(css.getPropertyValue('--sky2')), orb: rgb(css.getPropertyValue('--orb')), sand: rgb(css.getPropertyValue('--ground')), leaf: rgb(css.getPropertyValue('--tree')), woods: scene.dataset.area === 'L' || scene.dataset.area === 'R' ? 1 : 0}; tintKey = key; }
     const W = pond.width, H = pond.height, px = sheet.data, t = now / 1000, calm = rainy ? .45 : 1, sun = rainy ? .15 : .75;
@@ -1962,7 +1977,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const heaven = $('sky'), brush = heaven.getContext('2d'), film = brush.createImageData(heaven.width, heaven.height);
   let lastSky = 0;
   function drawSky(now) {
-    if (now - lastSky < 125 && lastSky) return; lastSky = now;
+    if (now - lastSky < (document.body.classList.contains('quiet') ? 500 : document.body.classList.contains('gazing') ? 250 : 125) && lastSky) return; lastSky = now;
     const css = getComputedStyle(scene), top = rgb(css.getPropertyValue('--sky1')), low = rgb(css.getPropertyValue('--sky2')), orb = rgb(css.getPropertyValue('--orb'));
     const night = scene.dataset.time === 'yoru', dusk = scene.dataset.time === 'yuu' || scene.dataset.time === 'asa';
     const W = heaven.width, H = heaven.height, px = film.data, t = now / 1000, cover = rainy ? .3 : .52;
@@ -2022,14 +2037,61 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const wakeOn = async () => { try { if ('wakeLock' in navigator && !wake) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch { wake = null; } };
   const wakeOff = () => { try { if (wake) wake.release(); } catch {} wake = null; };
   document.addEventListener('visibilitychange', () => { if (!document.hidden && document.body.classList.contains('gazing')) wakeOn(); });
+  // ながめる を もっと ゆったり（総司令部 第4弾【5】）：①時計に あわせて 景色が かわる ②おやすみタイマー（おとが ふわっと きえて、景色が くらく なって、がめんを 消して いい ように なる）
+  // ③なにも しないと ボタンが きえて 景色だけに（さわる／キーで もどる）④ぜんがめん（つかえる ブラウザだけ）⑤でんち：ながめる 中は 絵の こうしんを へらす
+  const gazing = () => document.body.classList.contains('gazing');
+  const L = (ja, en) => EN() ? en : ja;
+  const SLEEP_STEPS = [0, 15, 30, 60];
+  let sleepMin = 0, sleepAt = 0, sleepTick = 0, quietTimer = 0;
+  function drawSleep() {
+    const b = $('sleep'); if (!b) return;
+    if (!sleepMin) { b.textContent = L('おやすみタイマー：なし', 'Sleep timer: off'); b.setAttribute('aria-label', L('おやすみタイマー。いまは なし', 'Sleep timer. Currently off')); return; }
+    const left = Math.max(1, Math.ceil((sleepAt - Date.now()) / 60000));
+    b.textContent = L('おやすみタイマー：あと ' + left + 'ふん', 'Sleep timer: ' + left + ' min left'); b.setAttribute('aria-label', L('おやすみタイマー。' + sleepMin + 'ふんで おとを とめるよ', 'Sleep timer. The sound stops after ' + sleepMin + ' minutes'));
+  }
+  function sleepNow() {   // おと・BGMを ふわっと きえる／がめんを ゆっくり くらく／がめんを けして いい ように（wake lock を はなす）
+    sleepMin = 0; clearInterval(sleepTick); sleepTick = 0; sleepMuted = true; drawSleep();
+    fadeAmbient(12); if (window.TsuriBgm) TsuriBgm.leave('gaze'); wakeOff();
+    document.body.classList.add('sleepy'); say(L('おやすみなさい。おとを とめたよ。', 'Good night. The sound has stopped.'));
+  }
+  function gazeReset() {
+    sleepMin = 0; clearInterval(sleepTick); sleepTick = 0; sleepMuted = false; drawSleep(); clearTimeout(quietTimer);
+    document.body.classList.remove('quiet', 'sleepy'); try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
+  }
+  function quietBump() {   // さわった／キーを おした ら もどす。9びょう なにも しないと ボタンを けす（キーボードの ひとが ボタンに いる ときは のこす）
+    if (!gazing()) return;
+    document.body.classList.remove('quiet'); clearTimeout(quietTimer);
+    quietTimer = setTimeout(() => { const ae = document.activeElement; if (gazing() && !(ae && ae.closest && ae.closest('.sub-actions') && ae.matches(':focus-visible'))) document.body.classList.add('quiet'); }, 9000);
+  }
+  ['pointerdown', 'pointermove', 'keydown', 'touchstart', 'wheel'].forEach(name => addEventListener(name, () => { if (gazing()) { document.body.classList.remove('sleepy'); quietBump(); } }, {passive: true}));
+  $('sleep').addEventListener('click', () => {
+    sleepMin = SLEEP_STEPS[(SLEEP_STEPS.indexOf(sleepMin) + 1) % SLEEP_STEPS.length]; clearInterval(sleepTick); sleepTick = 0;
+    if (sleepMin) { sleepAt = Date.now() + sleepMin * 60000; sleepTick = setInterval(() => { if (Date.now() >= sleepAt) sleepNow(); else drawSleep(); }, 15000); say(L('おやすみタイマーを ' + sleepMin + 'ふんに したよ。', 'Sleep timer set to ' + sleepMin + ' minutes.')); }
+    else say(L('おやすみタイマーを けしたよ。', 'Sleep timer is off.'));
+    drawSleep();
+  });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && sleepMin && Date.now() >= sleepAt) sleepNow(); });
+  $('fullscreen').hidden = !document.fullscreenEnabled;   // iPhone の ブラウザには ない
+  $('fullscreen').addEventListener('click', () => { try { const r = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); if (r && r.catch) r.catch(() => {}); } catch {} });
+  document.addEventListener('fullscreenchange', () => { $('fullscreen').textContent = document.fullscreenElement ? L('ぜんがめんを やめる', 'Exit full screen') : L('ぜんがめん', 'Full screen'); });
+  function syncClock() {   // ながめて いる うちに ゆうがた・よるに なる。じぶんで えらんだ じかんは そのまま（timeOfDay が きめる）
+    if (document.hidden || !(phase === 'idle' || phase === 'caught')) return;
+    const want = TIME_NAME[timeOfDay()]; if (scene.dataset.time === want) return;
+    const change = () => { scene.dataset.time = TIME_NAME[timeOfDay()]; drawTimes(); };
+    if (gazing() && !reduce() && scene.animate) { scene.animate([{filter: 'brightness(1)'}, {filter: 'brightness(.55)', offset: .5}, {filter: 'brightness(1)'}], {duration: 3200, easing: 'ease-in-out'}); setTimeout(change, 1600); } else change();
+    if (gazing()) say(L('いつのまにか、' + TIME_LABEL[timeOfDay()] + 'に なったよ。', 'Before you know it, it is ' + T(TIME_LABEL[timeOfDay()]).toLowerCase() + '.'));
+  }
+  setInterval(syncClock, 30000);
+  const paintGazeButtons = () => { drawSleep(); $('fullscreen').textContent = document.fullscreenElement ? L('ぜんがめんを やめる', 'Exit full screen') : L('ぜんがめん', 'Full screen'); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintGazeButtons); else paintGazeButtons();   // 英語の ときは tsuri-en.js が よみこまれて から 書く
   $('gaze').addEventListener('click', () => {
     const on = !document.body.classList.contains('gazing');
     if (on && !(phase === 'idle' || phase === 'caught')) { say('つりが おわってから、ながめよう。'); return; }
     document.body.classList.toggle('gazing', on);
     $('gaze').textContent = on ? 'もどる' : 'ながめる'; $('gaze').setAttribute('aria-pressed', String(on));
     clearInterval(gazeTimer);
-    if (on) { startAmbient(); say(save.sound ? gazeLine() : 'おとを つけると、なみの おとが きこえるよ。'); gazeTimer = setInterval(() => say(gazeLine()), 24000); scene.scrollIntoView({block: 'center'}); wakeOn(); if (window.TsuriBgm) TsuriBgm.enter('gaze', {ctx: () => save.sound ? ready() : null, sound: () => !!save.sound, time: () => timeOfDay()}); }
-    else { say('おかえり。「なげる」で、また つりが できるよ。'); wakeOff(); if (window.TsuriBgm) TsuriBgm.leave('gaze'); }
+    if (on) { startAmbient(); say(save.sound ? gazeLine() : 'おとを つけると、なみの おとが きこえるよ。'); gazeTimer = setInterval(() => say(gazeLine()), 24000); scene.scrollIntoView({block: 'center'}); wakeOn(); gazeReset(); quietBump(); if (window.TsuriBgm) TsuriBgm.enter('gaze', {ctx: () => save.sound ? ready() : null, sound: () => !!save.sound, time: () => timeOfDay()}); }
+    else { say('おかえり。「なげる」で、また つりが できるよ。'); wakeOff(); gazeReset(); if (window.TsuriBgm) TsuriBgm.leave('gaze'); }
   });
 
   // さかなが はねる。ときどき、みなもから ぴょんと とんで、ぽちゃんと おちる
@@ -2149,7 +2211,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const rows = document.querySelectorAll('main > .hud'), label = text => { const h = document.createElement('h2'); h.className = 'menu-label'; h.textContent = text; return h; };
     // ばしょは、ふだんは しまって おく。おすと、4つ ぜんぶ でる
     // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）
-    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), ...(window.TsuriBgm ? [TsuriBgm.button({sound: () => !!save.sound, enableSound: () => $('sound').click()})] : []), $('take-photo'), $('release'), $('send-gift'), $('gaze'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
+    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), ...(window.TsuriBgm ? [TsuriBgm.button({sound: () => !!save.sound, enableSound: () => $('sound').click()})] : []), $('take-photo'), $('release'), $('send-gift'), $('gaze'), $('sleep'), $('fullscreen'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
     status.after($('today'), where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
