@@ -70,7 +70,7 @@ button:active:not(:disabled),.pill:active{transform:translateY(4px) scale(.98,.9
 button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-shadow:0 2px 0 var(--side),inset 0 -4px 6px #0000000f}
 #main-button[aria-disabled=true]:active{transform:none}
 .spot::before,#keeper::before{display:none}
-#scene .spot,#scene #keeper{box-shadow:none;transition:none}
+#scene .spot,#scene #keeper,#scene .friend-hit{box-shadow:none;transition:none;-webkit-backdrop-filter:none;backdrop-filter:none}   /* せきの ボタンは 絵の うえに のる だけ。ガラスの ぼかしを かけると うしろの なかまが しみのように ぼやける */
 #scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
 .skip{position:absolute;left:8px;top:-80px;z-index:200;padding:12px 16px;border-radius:14px;background:#fff;color:#0b4a6b;font-weight:800;text-decoration:none;border:3px solid #0b4a6b}
 .skip:focus{top:8px}   /* Tab の ひとつ めで「なげる」へ とべる（おおくの ボタンを とばせる） */
