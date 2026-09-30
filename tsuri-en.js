@@ -75,7 +75,7 @@
     'おみせ': 'Shop', 'なげる': 'Cast', 'もういちどなげる': 'Cast again', 'まってる…': 'Waiting…', 'ひく！': 'Reel in!', 'いまだ！': 'Now!',
     'おと：OFF（つけるのがおすすめ）': 'Sound: OFF (better with sound)', 'おと：ON': 'Sound: ON', 'おと：OFF': 'Sound: OFF', 'おと': 'Sound',
     'しゃしんをとる': 'Take a photo', 'そっとにがす': 'Release gently', 'とおく：ON': 'Far view: ON', 'とおく：OFF': 'Far view: OFF', 'ながめる': 'Just watch', 'もどる': 'Back',
-    'ふつう': 'Normal', 'らくちん': 'Easy mode', 'らくちん：ON': 'Easy mode: ON', 'らくちん：OFF': 'Easy mode: OFF', 'ふるえ：ON': 'Vibration: ON', 'ふるえ：OFF': 'Vibration: OFF',
+    'ふつう': 'Normal', 'らくちん': 'Easy mode', 'よみあげ：ON': 'Read aloud: ON', 'よみあげ：OFF': 'Read aloud: OFF', 'よみあげ：ON。': 'Read aloud: ON.', 'よみあげ：OFF。': 'Read aloud: OFF.', 'がめんのことばをこえでよむよ': 'It reads the words on the screen aloud', 'がめんのことばをこえでよむよ。': 'It reads the words on the screen aloud.', 'このたんまつのなかだけでよむよ': 'It reads only inside this device', 'このたんまつのなかだけでよむよ。': 'It reads only inside this device.', 'スクリーンリーダーをつかっているひとは、OFFのままがおすすめ': 'If you use a screen reader, we recommend leaving it OFF', 'らくちん：ON': 'Easy mode: ON', 'らくちん：OFF': 'Easy mode: OFF', 'ふるえ：ON': 'Vibration: ON', 'ふるえ：OFF': 'Vibration: OFF',
     'けしきのいきもの：ON': 'Wildlife: ON', 'けしきのいきもの：OFF': 'Wildlife: OFF',
     'みる・いく': 'Look & Visit', 'バケツ': 'Bucket', 'ずかん': 'Fish Book', 'どうぐ': 'Gear', 'ひろば': 'Plaza', 'きろく': 'Records',
     'いまのじかん': 'Current time', 'あさ': 'Morning', 'ひる': 'Day', 'ゆうがた': 'Evening', 'よる': 'Night',
@@ -287,6 +287,9 @@
   const OFTEN = s => s.split('・').map(t => nmTime(t, true)).join(', ');
 
   // ---- 2) ルール（すうじ・なまえが はいる 文）----
+  // 「つかいやすくする（いま：…）」の 見出しに ならぶ 部品（本体が「・」で つなぐ。空白は norm で 消える）
+  const COMFORT_EN = { 'らくちん': 'Easy mode', 'ふるえなし': 'No vibration', 'いきものなし': 'No wildlife', 'あんないのおとなし': 'No guide sounds', 'こうかおんなし': 'No sound effects', 'なみとあめなし': 'No waves or rain', 'ゆったり': 'Extra time', 'やさしいおと': 'Soft sounds', 'よみあげ': 'Read aloud' };
+  const COMFORT_KEYS = Object.keys(COMFORT_EN).join('|');
   const REG_EN = { 'ふつう': 'Common', 'ちょっとめずらしい': 'A bit rare', 'めずらしい': 'Rare', 'スペシャル': 'Special', 'まぼろし': 'Mythical', 'ぬし': 'Guardian' };
   const SIZE_EN = { 'とてもおおきい': 'very large', 'おおきい': 'large', 'ふつうのおおきさ': 'medium-sized', 'ちいさい': 'small' };
   const SIDE_EN = { 'ひだり': 'left', 'みぎ': 'right', 'まんなか': 'middle' };
@@ -348,7 +351,8 @@
     [/^(\d+)\/(\d+)しゅるい$/, (_, a, b) => `${a}/${b} kinds`],
     [/^(🐠)?すいそう(\d+)$/, (_, e, n) => `${e || ''} Aquarium ${n}`.trim()],
     [/^すいそうをみる。あたらしいなかまが(\d+)ひき$/, (_, n) => `View the aquarium. ${n} new friends`],
-    [/^つかいやすくする（いま：(.+)）$/, (_, x) => `Comfort options (now: ${x === 'ふつう' ? 'Normal' : x.replace('らくちん', 'Easy mode').replace('ふるえなし', 'No vibration').replace('いきものなし', 'No wildlife').replace(/・/g, ', ')})`],
+    [new RegExp('^(?:' + COMFORT_KEYS + ')(?:・(?:' + COMFORT_KEYS + '))*$'), x => x.split('・').map(w => COMFORT_EN[w] || w).join(', ')],   // 見出しの「いま：」の 中（span）だけが 単独で とどく 時
+    [/^つかいやすくする（いま：(.+)）$/, (_, x) => `Comfort options (now: ${x === 'ふつう' ? 'Normal' : x.split('・').map(w => COMFORT_EN[w] || w).join(', ')})`],
     [/^ばしょをかえる（いま：(.+)）$/, (_, a) => `Change spot (now: ${nmArea(a)})`],
     [/^じかんをかえる（いま：(.+)）$/, (_, a) => `Change time (now: ${nmTime(a)})`],
     [/^(.+?)についたよ。きょうは(.+?)と(.+?)がいるよ。$/, (_, a, p1, p2) => `Arrived at ${nmArea(a, true)}. Today, ${nmPal(p1)} and ${nmPal(p2)} are here.`],
