@@ -1352,10 +1352,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function throwRod() {
     const box = scene.getBoundingClientRect(), f = feet(mine), w = floatAt(mine);
     const dx = (w.x - (f.x + 9)) / 100 * box.width, dy = (w.y - (f.y - 18)) / 100 * box.height;
-    marufuwa.animate([{rotate: '0deg', scale: '1 1'}, {rotate: '-16deg', scale: '.93 1.07', offset: .35}, {rotate: '13deg', scale: '1.07 .93', translate: '0 -8px', offset: .62}, {rotate: '0deg', scale: '1 1'}], {duration: 640, easing: 'ease-in-out'});
+    const back = 13 + Math.random() * 6, fore = 10 + Math.random() * 6, lift = 55 + Math.random() * 45, reach = .38 + Math.random() * .17;   // まいかい すこし ちがう ゆみなり（ちゃくすいの 0.9びょうは かえない）
+    marufuwa.animate([{rotate: '0deg', scale: '1 1'}, {rotate: -back + 'deg', scale: '.93 1.07', offset: .35}, {rotate: fore + 'deg', scale: '1.07 .93', translate: '0 -8px', offset: .62}, {rotate: '0deg', scale: '1 1'}], {duration: 640, easing: 'ease-in-out'});
     const shout = document.createElement('span'); shout.className = 'bubble'; shout.textContent = 'えいっ'; shout.setAttribute('aria-hidden', 'true'); place(shout, {x: f.x, y: f.y - 24}); scene.append(shout);
     shout.animate([{opacity: 0, translate: '0 8px'}, {opacity: 1, translate: '0 0', offset: .3}, {opacity: 1, offset: .7}, {opacity: 0, translate: '0 -8px'}], {duration: 900}).onfinish = () => shout.remove();
-    $('float').animate([{translate: -dx + 'px ' + -dy + 'px', opacity: 0}, {translate: -dx + 'px ' + -dy + 'px', opacity: 1, offset: .4}, {translate: -dx * .45 + 'px ' + (-dy - 70) + 'px', offset: .7}, {translate: '0 0'}], {duration: 900, easing: 'ease-in'}).onfinish = () => {
+    $('float').animate([{translate: -dx + 'px ' + -dy + 'px', opacity: 0}, {translate: -dx + 'px ' + -dy + 'px', opacity: 1, offset: .4}, {translate: -dx * reach + 'px ' + (-dy - lift) + 'px', offset: .7}, {translate: '0 0'}], {duration: 900, easing: 'ease-in'}).onfinish = () => {
       flying = false; layout();
       for (let i = 0; i < 2; i++) {
         const ring = document.createElement('i'); ring.className = 'ripple'; place(ring, w); scene.append(ring);
