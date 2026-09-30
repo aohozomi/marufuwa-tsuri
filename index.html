@@ -2030,6 +2030,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ctx.fillStyle = last.fish.legend ? '#6a4bc4' : night ? '#f0b429' : seasonal ? '#e0679a' : (!last.nushi && last.badge) ? '#1f7a66' : '#a5481c'; roundRect(ctx, 40, 34, 420, 70, 35); ctx.fill();
       ctx.fillStyle = night ? '#4a2a00' : '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 38px system-ui,sans-serif'; ctx.fillText(special, 250, 71, 390);
     }
+    if (last.tags.includes('はじめて！') && !night) { ctx.save(); ctx.translate(560, 236); ctx.rotate(-.12); ctx.fillStyle = '#e0679a'; roundRect(ctx, -104, -30, 208, 60, 30); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(T('はじめて！'), 0, 2, 190); ctx.restore(); }   // はじめて つった さかな：ピンクの リボン
     ctx.fillStyle = night ? '#0f2447f2' : '#fffffff0'; roundRect(ctx, 690, 210, 460, 330, 34); ctx.fill(); ctx.strokeStyle = night ? '#ffd34d' : '#bfdce8'; ctx.lineWidth = night ? 6 : 5; ctx.stroke();
     ctx.fillStyle = night ? '#fff4c9' : '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = 'bold 54px system-ui,sans-serif'; ctx.fillText(last.fish.name, 920, 295, 420);
