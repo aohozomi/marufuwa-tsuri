@@ -1539,7 +1539,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     setTimeout(() => { delete $('reel').dataset.rest; delete button.dataset.rest; }, rest);
     // つづけて うまく いくと、すこし つよく ひける。はずしても へらない（かぞえなおすだけ）
     combo = power >= 2 ? combo + 1 : 0;
-    hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0));
+    // 「ちかい」は 2つ ひける。ちかいが 3かい つづくと 3つ（さいだい +2）。ずれる ひとの まちが みじかく なる（ものさし _kenpin_tmp/sim_reel.mjs：★3で おおきく ずれる ひと 9.1→4.0びょう・さいだい 17→8びょう。ぴったり ねらう ひと 3.3びょう・れんだ 2.1びょう）。「ぴったり」は 4つ・れんぞくは さらに +1
+    hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0) - (power === 1 ? Math.min(2, (misses + 1) >> 1) : 0));
     $('hp').firstElementChild.style.width = (hp / hpMax * 100) + '%';
     const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
