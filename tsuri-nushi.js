@@ -40,6 +40,11 @@
 @keyframes nushi-bang{0%{opacity:0;transform:scale(.4) translateY(10%)}30%{opacity:1;transform:scale(1.25)}100%{opacity:1;transform:scale(1)}}
 @keyframes nushi-word{0%{opacity:0;transform:translateY(6px)}12%,80%{opacity:1;transform:translateY(0)}100%{opacity:0}}
 @keyframes nushi-jump{0%,100%{translate:0 0;rotate:0deg}30%{translate:0 -16%;rotate:-8deg}60%{translate:0 0}80%{translate:0 -8%;rotate:6deg}}
+/* ぬしの あいだは しずかに：なかまの ひとこと・なかまの つりあげ・けしきの いきもの・あめ を とめる（きんちょうが とぎれない ように）。data-boss は approach〜つりあげの あと 4びょうまで */
+#scene #ikimono,#scene #ame{transition:opacity .9s ease}
+#scene[data-boss=true] #bubble,#scene[data-boss=true] #held-friend,#scene[data-boss=true] .hop{display:none!important}
+#scene[data-boss=true] #ikimono{opacity:0}
+#scene[data-boss=true] #ame{opacity:.2}
 @media(prefers-reduced-motion:reduce){#scene .who[data-nushi-jump=true]{animation:none}}
 @media(prefers-reduced-motion:reduce){#nushi-fx .ring,#nushi-fx .splash,#scene[data-nushi-shake=true]{animation:none!important}#nushi-fx .halo{animation:none;opacity:.6}#nushi-fx .ray{animation-duration:2.4s}}
 `;
@@ -69,11 +74,12 @@
   const setPos = () => { const p = at(); dim.style.setProperty('--x', p.x); dim.style.setProperty('--y', p.y); };
 
   let active = false, lastPhase = '';
-  function clear() { active = false; stopDrum(); fx.textContent = ''; dim.dataset.on = 'false'; delete scene.dataset.nushiShake; }
+  let bossTimer = 0;
+  function clear() { active = false; stopDrum(); fx.textContent = ''; dim.dataset.on = 'false'; delete scene.dataset.nushiShake; clearTimeout(bossTimer); delete scene.dataset.boss; }
 
   function approach() {
     // まつ あいだ：かげが ちかづく じかん（--swim）に あわせて、そらが くらくなり、みずが ゆれ、おとが はやくなる
-    active = true;
+    active = true; scene.dataset.boss = 'true';
     const swim = parseInt(shadow.style.getPropertyValue('--swim')) || 3000;
     setPos(); dim.style.setProperty('--t', Math.max(1.2, swim / 1000 * .9) + 's'); dim.dataset.on = 'true';
     const p = at();
@@ -118,6 +124,7 @@
     for (let i = 0; i < 12; i++) el('ray', {x, y, r: (i * 30 + 15) + 'deg', d: (i % 3) * .08 + 's'});
     friendsReact();
     setTimeout(() => { if (scene.dataset.phase === 'caught') fx.textContent = ''; }, 4200);
+    clearTimeout(bossTimer); bossTimer = setTimeout(() => { delete scene.dataset.boss; }, 4200);   // 見せ場（！・わあ！）が おわる まで ひとこと・いきものは もどさない
     active = false;
   }
 
