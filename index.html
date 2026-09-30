@@ -1197,6 +1197,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (ownOk(other.own) && !ownOk(save.own)) { save.own = {c: other.own.c, a: other.own.a, ear: other.own.ear, item: other.own.item}; changed = true; }   // じぶんの こ（あれば のこす）
     if (typeof other.avatar === 'string' && !save.avatar && /^[a-z]{2,12}$/.test(other.avatar)) { save.avatar = other.avatar; changed = true; }   // じぶんの キャラ（あとで えらべば うわがき）
     if (other.modeTip === true && save.modeTip !== true) { save.modeTip = true; changed = true; }
+    if (other.hira === true && save.hira !== true && save.hira === undefined) { save.hira = true; changed = true; }   // ひらがなだけ（あとで えらべば うわがき）
     if (other.homeTip === true && save.homeTip !== true) { save.homeTip = true; changed = true; }
     if (other.plopHint === true && save.plopHint !== true) { save.plopHint = true; changed = true; }   // さいしょの「ぽちゃん」は 1かい きり
     if (Number.isInteger(other.bookSeen) && other.bookSeen > (Number.isInteger(save.bookSeen) ? save.bookSeen : 0)) { save.bookSeen = other.bookSeen; changed = true; }
@@ -3306,7 +3307,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('close-bucket').addEventListener('click', () => bucket.close());
 
   // ---- きねん（トロフィー）：あそぶほど もらえる（銅・銀・金の 3だん・40こ）。とりにがしなし・くらべない・ばつなし・きげんつき なし。いままでの きろくからも あとから つく ----
-  const TIER = {1: ['🥉', '銅', 'Bronze'], 2: ['🥈', '銀', 'Silver'], 3: ['🥇', '金', 'Gold']};
+  const TIER = {1: ['🥉', '銅', 'Bronze'], 2: ['🥈', '銀', 'Silver'], 3: ['🥇', '金', 'Gold']}, TIER_HIRA = {1: 'どう', 2: 'ぎん', 3: 'きん'}, tierJa = k => save.hira === true ? TIER_HIRA[k] : TIER[k][1];   // ひらがなだけの ときは「どう・ぎん・きん」
   const tf = k => !!(save.tflag && save.tflag[k]);
   const caughtFish = () => Object.keys(save.fish).map(id => FISH[id]).filter(Boolean);
   const nPal = () => ROSTER.filter(metPal).length;
@@ -3369,7 +3370,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (trophyShowing || !trophyQueue.length) return;
     if (!(phase === 'idle' || (phase === 'caught' && !$('card').dataset.wait))) { setTimeout(runTrophyQueue, 1500); return; }
     const t = trophyQueue.shift(), el = $('trophy-toast'); trophyShowing = true;
-    el.textContent = L('きねん：' + t[2], 'Trophy: ' + t[3]); el.hidden = false; SFX.trophy(); say(L('きねん：' + t[2] + '（' + TIER[t[1]][1] + '）', 'Trophy: ' + t[3] + ' (' + TIER[t[1]][2] + ')'), true);
+    el.textContent = L('きねん：' + t[2], 'Trophy: ' + t[3]); el.hidden = false; SFX.trophy(); say(L('きねん：' + t[2] + '（' + tierJa(t[1]) + '）', 'Trophy: ' + t[3] + ' (' + TIER[t[1]][2] + ')'), true);
     setTimeout(() => { el.hidden = true; trophyShowing = false; setTimeout(runTrophyQueue, 900); }, 3400);
   }
   function drawTrophyBadge() {
@@ -3388,8 +3389,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const has = !!(save.trophies && save.trophies[t[0]]), d = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), sm = document.createElement('small');
       d.dataset.got = String(has); d.dataset.tier = String(t[1]); d.setAttribute('role', 'listitem');
       icon.textContent = has ? t[6] : '？'; icon.setAttribute('aria-hidden', 'true');
-      text.append(has ? L(t[2], t[3]) : L(t[4], t[5])); sm.textContent = TIER[t[1]][0] + ' ' + L(TIER[t[1]][1], TIER[t[1]][2]); text.append(sm);   // まだの ものは ヒントを だす
-      d.setAttribute('aria-label', has ? L('もらった：' + t[2] + '（' + TIER[t[1]][1] + '）', 'Earned: ' + t[3] + ' (' + TIER[t[1]][2] + ')') : L('まだ：' + t[4], 'Not yet: ' + t[5]));
+      text.append(has ? L(t[2], t[3]) : L(t[4], t[5])); sm.textContent = TIER[t[1]][0] + ' ' + L(tierJa(t[1]), TIER[t[1]][2]); text.append(sm);   // まだの ものは ヒントを だす
+      d.setAttribute('aria-label', has ? L('もらった：' + t[2] + '（' + tierJa(t[1]) + '）', 'Earned: ' + t[3] + ' (' + TIER[t[1]][2] + ')') : L('まだ：' + t[4], 'Not yet: ' + t[5]));
       d.append(icon, text); return d;
     }));
   }
@@ -3669,10 +3670,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   $('large') && $('large').addEventListener('click', () => { save.large = !save.large; store(); drawLarge(); say(L(save.large ? 'もじを おおきく したよ。' : 'もじを もとの おおきさに したよ。', save.large ? 'Text is larger now.' : 'Text is back to normal size.')); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawLarge); else drawLarge();
-  // ふりがな：にほんごの もじに 漢字＋ふりがなを つける（tsuri-ruby.js）。なしに すると ひらがなの まま（よみこみ なおす）
-  const rubyOff = () => { try { return localStorage.getItem('marufuwa-ruby-off') === '1'; } catch { return false; } };
-  function drawRuby() { const b = $('ruby'); if (!b) return; b.hidden = EN(); const on = !rubyOff(); b.textContent = L('ふりがな：' + (on ? 'あり' : 'なし'), 'Furigana: ' + (on ? 'On' : 'Off')); b.setAttribute('aria-pressed', String(on)); }
-  $('ruby') && $('ruby').addEventListener('click', () => { try { if (rubyOff()) localStorage.removeItem('marufuwa-ruby-off'); else localStorage.setItem('marufuwa-ruby-off', '1'); } catch {} drawRuby(); say(L('ふりがなを かえるよ。よみこみ なおすね。', 'Changing furigana. Reloading.')); setTimeout(() => location.reload(), 900); });
+  // もじ：「かんじ＋ふりがな」（はじめから）／「ひらがなだけ」（幼児・低学年向け・漢字を 一切 出さない＝もとの ひらがな）。save.hira（tsuri-ruby.js が よむ）。かえたら よみこみなおす
+  function drawRuby() { const b = $('ruby'); if (!b) return; b.hidden = EN(); const hira = save.hira === true; b.textContent = L('もじ：' + (hira ? 'ひらがなだけ' : 'かんじ＋ふりがな'), 'Text: ' + (hira ? 'Hiragana only' : 'Kanji + furigana')); b.setAttribute('aria-pressed', String(hira)); }
+  $('ruby') && $('ruby').addEventListener('click', () => { save.hira = !(save.hira === true); store(); drawRuby(); say(L('もじを かえるよ。よみこみ なおすね。', 'Changing the text style. Reloading.')); setTimeout(() => location.reload(), 900); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawRuby); else drawRuby();
   drawBuzz(); drawNature(); drawEasy();
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();

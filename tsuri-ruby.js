@@ -3,7 +3,7 @@
    もとの ひらがなの 文は そのまま（English の ひょうの キー・よみあげ・きろくは かわらない）。かえるのは 画面に 出た 文字だけ。
    ・じしょ：tsuri-ruby-dict.js（window.TsuriRubyDict＝1ぎょうに 1つ「ひらがな=漢字《よみ》ひらがな」）。ないことばは ひらがなの まま
    ・かえない ところ：script・style・入力らん・ruby・[data-noruby]・#status・.bubble（よみあげ・ほかの 検査と ぶつかる ところ。あとで ひらく）
-   ・けす：?noruby=1 か localStorage marufuwa-ruby-off=1。TsuriRuby.off()／on()
+   ・けす：?noruby=1（検査用）。ひらがなだけ＝ほんたいの きろく save.hira（つかいやすくする →「もじ」）
    ・よみあげ：<rt aria-hidden="true">（かんじだけ よむ）。ことばを こえで よむ しくみは もとの ひらがなの 文を つかう */
 (function (root) {
   'use strict';
@@ -67,7 +67,10 @@
 
   // ---- ブラウザ：画面の もじを かえる ----
   const q = new URLSearchParams(location.search);
-  let enabled = !(q.get('noruby') === '1' || (() => { try { return localStorage.getItem('marufuwa-ruby-off') === '1'; } catch { return false; } })());
+  // もじの しゅるい：「かんじ＋ふりがな」（はじめから）／「ひらがなだけ」（幼児・低学年向け。漢字を 一切 出さない）。ほんたいの きろく（save.hira）を よむ
+  const hiraOnly = () => { try { const d = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1') || '{}'); return !!(d && d.hira === true); } catch { return false; } };
+  let enabled = !(q.get('noruby') === '1' || hiraOnly());
+  const HIRA_MODE = !enabled && q.get('noruby') !== '1';
   const isEn = () => !!(root.TsuriEn && root.TsuriEn.lang === 'en');
   let D = null, observer = null, busy = false, scheduled = 0; const pending = new Set(), made = new WeakSet();
   const SKIP = 'svg,canvas,script,style,textarea,input,select,option,ruby,rt,rp,[data-noruby],#status,.bubble,#bubble,.sr-only,#hm-live,.hm-note,[class*="hm-"],[id^="hm-"],[id^="tk-"],[class*="tk-"],#tank,#himitsu,title,head';
@@ -104,7 +107,19 @@
     busy = true; try { const items = [...pending]; pending.clear(); items.forEach(node => { if (node.isConnected) walk(node); }); } finally { busy = false; if (observer) observer.takeRecords(); }
   }
   function schedule(node) { if (!node) return; pending.add(node); if (!scheduled) scheduled = requestAnimationFrame ? requestAnimationFrame(flush) : setTimeout(flush, 16); }
+  // ひらがなだけ：もとから ある ふりがな（トップの せつめい・さかなの なまえ など）も よみ（rt）に もどして、漢字を 出さない
+  function deruby(rootNode) {
+    if (!rootNode || rootNode.nodeType !== 1 && rootNode.nodeType !== 9) return;
+    const list = rootNode.nodeType === 1 && rootNode.tagName === 'RUBY' ? [rootNode] : [...rootNode.querySelectorAll('ruby')];
+    list.forEach(r => { if (r.closest('svg,[data-noruby]')) return; const rt = r.querySelector('rt'); r.replaceWith(document.createTextNode(rt ? rt.textContent : r.textContent)); });
+  }
+  function startHira() {
+    if (isEn()) return;
+    deruby(document.body);
+    new MutationObserver(records => { for (const r of records) r.addedNodes.forEach(n => { if (n.nodeType === 1) deruby(n); }); }).observe(document.body, {childList: true, subtree: true});
+  }
   function start() {
+    if (HIRA_MODE) { startHira(); return; }
     if (!enabled || isEn() || !ensureDict()) return;
     const st = document.createElement('style'); st.textContent = 'ruby{ruby-position:over}rt{font-size:.52em;font-weight:700;line-height:1;letter-spacing:0}'; document.head.append(st);
     schedule(document.body);
@@ -124,8 +139,7 @@
   try { const proto = root.CanvasRenderingContext2D && root.CanvasRenderingContext2D.prototype; if (proto && !proto.__rubyPatched) { const ft = proto.fillText; proto.fillText = function (t, ...rest) { return ft.call(this, typeof t === 'string' ? kanji(t) : t, ...rest); }; proto.__rubyPatched = true; } } catch {}
   root.TsuriRuby = Object.assign({}, api, {
     kanji,
-    on() { enabled = true; try { localStorage.removeItem('marufuwa-ruby-off'); } catch {} if (!observer) start(); else schedule(document.body); },
-    off() { enabled = false; try { localStorage.setItem('marufuwa-ruby-off', '1'); } catch {} },
+    hira: () => HIRA_MODE,
     active: () => enabled && !isEn() && !!ensureDict() && !!observer
   });
   // English の ことばが きまって から（TsuriEn.lang）はじめる
