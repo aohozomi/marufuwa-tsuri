@@ -278,6 +278,7 @@
     'ぜんがめんで あそぶには、⋮ から ブラウザ（Safariなど）で ひらいてね。きろくは ブラウザごとに べつだよ。うつす ときは「きろくを のこす」から。': 'To play full screen, open this in a browser (such as Safari) from the ⋮ menu. Your records are separate in each browser. To move them, use “Save your records”.',
     'とじる（もう だしません）': 'Close (won’t show again)',
     'ホームがめんに おく': 'Add to home screen', 'いま ホームがめんに おく': 'Add it now',
+    '🐠 すいそう': '🐠 Aquarium',   // すいそうの ボタン（バッジの span は ゲームが かえる ので のこす）
     'まるふわ つりびより': 'Marufuwa Fishing Days',   // おへやの しゃしん（canvas）の ふだ
   }).forEach(([k, v]) => EX.set(k, v));
   for (const [k, v] of [...EX]) { const nk = norm(k); if (nk !== k) { EX.delete(k); EX.set(nk, v); } }   // かぎの すきまを そろえる
@@ -463,7 +464,8 @@
     return s;
   }
   function isPure(el) {
-    for (const d of el.querySelectorAll('*')) { if (!PURE.has(d.tagName) || d.id) return false; }
+    // 文字の 飾りだけの 要素（ふりがな・太字 など）を 1つの 文として 訳す。ID の ある もの・かくれた もの（hidden・aria-hidden＝バッジ など ゲームが 中身を かえる 部品）を ふくむ 時は さわらない（部品を こわさない）
+    for (const d of el.querySelectorAll('*')) { if (!PURE.has(d.tagName) || d.id || d.hidden || d.getAttribute('aria-hidden') === 'true') return false; }
     return true;
   }
   function translateAttrs(el) {
@@ -521,6 +523,10 @@
   }
 
   document.documentElement.lang = 'en';
+  // 英語は 日本語より 文字が ながい：せまい 画面（320〜360px）で ボタンの もじが はみ出さない ように、英語の ときだけ 少し ちいさく・折り返す（本体の CSS は さわらない）
+  { const css = document.createElement('style'); css.id = 'tsuri-en-css';
+    css.textContent = '@media (max-width:380px){html[lang=en] .hud>button,html[lang=en] .hud>a{font-size:.8rem;padding-left:4px;padding-right:4px;white-space:normal;line-height:1.15}html[lang=en] #tk-open{white-space:nowrap}html[lang=en] #tk-title{font-size:.8rem}}';
+    (document.head || document.documentElement).append(css); }
   // ページの 題と 説明：ふだんは 釣りの もの。ひろば など べつの ページは <html data-en-page> で この 既定を とばして、TsuriEn.page({title, description}) で 自分の 題・説明を きめる
   const meta = document.querySelector('meta[name=description]');
   window.TsuriEn.page = ({ title, description } = {}) => { if (title) document.title = title; if (description && meta) meta.content = description; };
