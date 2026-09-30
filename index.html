@@ -1856,8 +1856,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function applyMy() {   // どうぐの いろを がめんに あわせる
     if (ART && ART.float) $('float').style.setProperty('--fimg', 'url("' + ART.uri(floatSvg()) + '")');
     face(curFace); drawEquip();
-    $('bucket-title').textContent = bucketName() || 'バケツ'; $('open-bucket').setAttribute('aria-label', bucketName() ? 'バケツ（' + bucketName() + '）' : 'バケツ');
+    $('bucket-title').textContent = bucketName() || 'バケツ'; paintBucketLabel();
   }
+  function paintBucketLabel() { $('open-bucket').setAttribute('aria-label', bucketName() ? L('バケツ（' + bucketName() + '）', 'Bucket (' + bucketName() + ')') : L('バケツ', 'Bucket')); }   // English の ひょうが そろって から もういちど
   function unlockNames(before, now) { const out = []; for (const g of Object.values(GEAR)) for (const o of g.list) if (o.lv > before && o.lv <= now) out.push(g.title.split('（')[0] + '：' + o.n); return out; }
   function drawGear() {
     const my = save.my || {}, lv = myLv(), on = document.activeElement && $('gear-body').contains(document.activeElement) ? document.activeElement.dataset.k : '';
@@ -2628,7 +2629,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('bucket-list').replaceChildren(...(list.length ? list.map(item => {
       const f = FISH[item.id], row = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), when = document.createElement('small');
       icon.replaceChildren(fishImg(f)); icon.setAttribute('aria-hidden', 'true');
-      when.append(clock.format(new Date(item.at)) + '　', starEl(f, item.nushi), item.nushi ? '　ぬし' : '', item.released ? '　にがした' : '');
+      when.append(clock.format(new Date(item.at)) + '　', starEl(f, item.nushi), item.nushi ? '　ぬし' : '', item.released ? '　' + L('にがした', 'Released') : '');
       text.append(ruby(f.kanji), '　' + cm(item.size) + 'センチ', when); row.append(icon, text);
       if (giftable(f, item.nushi) && !item.released) {   // おくる：ぬし・まぼろし・にがした こ には ださない
         const send = document.createElement('button'); send.type = 'button'; send.className = 'give'; send.textContent = 'おくる'; send.setAttribute('aria-label', f.name + 'を おくる');
@@ -2661,7 +2662,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const book = $('book');
   $('open-book').addEventListener('click', () => {
     save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); drawBadge();   // ひらいた → みた ことに なる
-    { const myth = FISH.filter(f => f.legend), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? '★5の まぼろしの こ：ぜんいんに あえたよ！' : '★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'); }
+    { const myth = FISH.filter(f => f.legend), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? L('★5の まぼろしの こ：ぜんいんに あえたよ！', '★5 mythical fish: you have met them all!') : L('★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'), '★5 mythical fish: ' + myth.length + ' exist (met: ' + got + ').' + (seenCount() >= BASE ? '' : ' Collect all ' + BASE + ' kinds and you are more likely to meet them.')); }
     $('book-fact').hidden = true; $('book-fact').textContent = '';
     $('book-grid').replaceChildren(...FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])).map(f => {
       const got = save.fish[f.id], cell = document.createElement('div');
@@ -2817,7 +2818,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   drawSound();
   // おかえり／ふかい よる：かぞえない・せめない・アドバイスしない。ひさしぶりに きた ひとには、きろくは そのままだと つたえる。よなかに ひらいた ひとには、ゆっくり ながめよう と だけ
   const away = save.last ? Date.now() - save.last : 0, hourNow = new Date().getHours();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawToday(); drawPlazaNote(); });   // 英語の ときは tsuri-en.js が よみこまれて から 書きなおす
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawToday(); drawPlazaNote(); drawBadge(); paintBucketLabel(); });   // 英語の ときは tsuri-en.js が よみこまれて から 書きなおす
   // てがみ：tsuri-tegami.js は defer なので、ぜんぶ よみこまれて から（DOMContentLoaded）。あいた ひにちは かぞえない・出さない
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => tegamiInit(away)); else tegamiInit(away);
   const welcome = (away >= 3 * 86400000 ? 'おかえり。ずかんも きろくも、そのままだよ。' : '') + (hourNow >= 1 && hourNow < 5 ? 'ねむれない？ ゆっくり ながめよう。' : '');
