@@ -296,6 +296,7 @@
     'まるふわ つりびより': 'Marufuwa Fishing Days',   // おへやの しゃしん（canvas）の ふだ
   }).forEach(([k, v]) => EX.set(k, v));
   for (const [k, v] of [...EX]) { const nk = norm(k); if (nk !== k) { EX.delete(k); EX.set(nk, v); } }   // かぎの すきまを そろえる
+  try { ((window.TsuriTown && window.TsuriTown.list) || []).forEach(t => { if (t && t.name && t.en) { const nk = norm(t.name); if (!EX.has(nk)) EX.set(nk, t.en); if (!PAL_MAP.has(nk)) PAL_MAP.set(nk, t.en); } }); } catch {}   // 街人（tsuri-town.js・天の なかま）の 名前は 一覧から 自動で（108人に なっても 表を 足さない）
   const COLOR = { 'あか': 'Red', 'あお': 'Blue', 'きいろ': 'Yellow', 'もも': 'Pink', 'みどり': 'Green', 'むらさき': 'Purple', 'きん': 'Gold', 'にじ': 'Rainbow', 'ぎん': 'Silver', 'よぞら': 'Night sky', 'しろ': 'White', 'くろ': 'Black', 'オレンジ': 'Orange', 'そのまま': 'As is' };
   const OFTEN = s => s.split('・').map(t => nmTime(t, true)).join(', ');
 
