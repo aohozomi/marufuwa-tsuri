@@ -2252,7 +2252,50 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + (last.lucky ? '\nEveryone has the same lucky fish today!' : '') + '\n' + TAG() + '\n' + HOME_SHARE()
       : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + (last.lucky ? '\nきょうの ラッキーさかな、みんな おなじ！' : '') + '\n#まるふわつりびより\n' + HOME;
     const snap = last;   // ぬし・まぼろし・ずかん かんせい の しゃしんだけ「かべがみ」が つくれる
-    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of Marufuwa holding up ' + last.fish.name : last.fish.name + 'を かかげる まるふわの しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null, () => takePhoto());
+    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of Marufuwa holding up ' + last.fish.name : last.fish.name + 'を かかげる まるふわの しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null, () => takePhoto(), (snap.nushi || snap.fish.legend || snap.fish.rare >= 4) ? () => makeVideo(snap) : null);
+  }
+  // どうが（3びょう）：ぬし・★5・まぼろしを かかげる しゅんかん。canvas を MediaRecorder で ろく画（この たんまつの なかだけ・外へは おくらない）。
+  // もじは ゲームの なまえと URL だけ（さかなの なまえ・おおきさ・さくしゃの なまえは いれない）。ちかちかは しない（うす暗い ところから ゆっくり あかるく・さいごに ゆっくり くらく・ほしは ゆっくり ちる）
+  const VIDEO_TYPES = ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+  async function makeVideo(l) {
+    const W = 960, H = 540, k = .8, night = !!l.nushi && !l.fish.legend, color = name => getComputedStyle(scene).getPropertyValue(name).trim() || '#fff';
+    const bg = document.createElement('canvas'); bg.width = 1200; bg.height = 675; const b = bg.getContext('2d');
+    const sky = b.createLinearGradient(0, 0, 0, 470); sky.addColorStop(0, color('--sky1')); sky.addColorStop(1, color('--sky2')); b.fillStyle = sky; b.fillRect(0, 0, 1200, 675);
+    b.fillStyle = color('--orb'); b.beginPath(); b.arc(590, 120, 62, 0, Math.PI * 2); b.fill();
+    photoBack(b, color); b.fillStyle = color('--ground'); b.beginPath(); b.moveTo(0, 400); b.lineTo(1200, 380); b.lineTo(1200, 520); b.lineTo(0, 480); b.fill();
+    const water = b.createLinearGradient(0, 480, 0, 675); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2')); b.fillStyle = water; b.beginPath(); b.moveTo(0, 480); b.lineTo(1200, 520); b.lineTo(1200, 675); b.lineTo(0, 675); b.fill();
+    photoFront(b, color); bottomScrim(b, 530); if (night) nushiBackdrop(b, l.fish.id * 97 + 7);
+    const [me, art] = await Promise.all([loadImg(marufuwa.src), artOf(l.fish) ? loadImg(artOf(l.fish)) : Promise.resolve(null)]);
+    const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H; const ctx = canvas.getContext('2d');
+    const type = VIDEO_TYPES.find(t => MediaRecorder.isTypeSupported(t)), stream = canvas.captureStream(30), rec = new MediaRecorder(stream, type ? {mimeType: type, videoBitsPerSecond: 2500000} : {}), chunks = [];
+    rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    const stopped = new Promise(res => { rec.onstop = res; });
+    const fx = night ? 455 : 480, fy = 300, sc = night ? 1.45 : l.nushi ? 1.4 : 1, hx = night ? 200 : 230, name = EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより';
+    const stars = Array.from({length: 14}, (_, i) => ({a: i * Math.PI * 2 / 14 + .3, d: 190 + (i % 3) * 50, r: 7 + (i % 4) * 2}));
+    const frame = t => {
+      ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalAlpha = 1; ctx.drawImage(bg, 0, 0);
+      const rise = Math.min(1, Math.max(0, (t - .5) / .9)), e = 1 - Math.pow(1 - rise, 3), up = (1 - e) * 220;
+      if (me) { const tall = 330, wide = tall * me.naturalWidth / me.naturalHeight, hop = t > 1.2 && t < 2.4 ? -Math.abs(Math.sin((t - 1.2) * 5.2)) * 14 : 0; ctx.drawImage(me, hx - wide / 2, 488 - tall + hop, wide, tall); }
+      if (rise > 0) {
+        const r = 190 * (.85 + .15 * Math.sin(t * 5)), g = ctx.createRadialGradient(fx, fy + up, 10, fx, fy + up, r); g.addColorStop(0, 'rgba(255,226,120,' + (.55 * e).toFixed(2) + ')'); g.addColorStop(1, 'rgba(255,226,120,0)'); ctx.fillStyle = g; ctx.fillRect(fx - r, fy + up - r, r * 2, r * 2);
+        ctx.save(); ctx.translate(fx, fy + up); const s = sc * (.55 + .45 * e); ctx.scale(s, s); ctx.rotate(Math.sin(t * 4) * .05 * e);
+        if (art) ctx.drawImage(art, -130, -130, 260, 260); else { ctx.font = '170px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText(l.fish.icon, 0, 0); }
+        ctx.restore();
+      }
+      if (t > 1.35) {   // ほしが ゆっくり ちる
+        const u = Math.min(1, (t - 1.35) / 1.1), ee = 1 - Math.pow(1 - u, 2); ctx.fillStyle = '#fff6b0';
+        stars.forEach(st => { const x = fx + Math.cos(st.a) * st.d * ee, y = fy + Math.sin(st.a) * st.d * .7 * ee, r = st.r * (1 - u * .4); ctx.globalAlpha = 1 - u; ctx.beginPath(); ctx.moveTo(x, y - r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r); ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r); ctx.fill(); });
+        ctx.globalAlpha = 1;
+      }
+      if (t > 1.7) { ctx.globalAlpha = Math.min(1, (t - 1.7) / .5); ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0008'; ctx.shadowBlur = 8; ctx.font = 'bold 54px system-ui,sans-serif'; ctx.fillText(name, 600, 604, 1000); ctx.font = 'bold 30px system-ui,sans-serif'; ctx.fillText(HOME_HOST, 600, 646, 1000); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+      const fade = t < .4 ? 1 - t / .4 : t > 2.7 ? Math.min(1, (t - 2.7) / .3) : 0; if (fade > 0) { ctx.fillStyle = 'rgba(8,20,36,' + fade.toFixed(2) + ')'; ctx.fillRect(0, 0, 1200, 675); }
+    };
+    frame(0); rec.start(250); const t0 = performance.now();
+    await new Promise(resolve => { const timer = setInterval(() => { const t = (performance.now() - t0) / 1000; frame(Math.min(3, t)); if (t >= 3.05) { clearInterval(timer); resolve(); } }, 33); });
+    rec.stop(); await stopped; stream.getTracks().forEach(tr => tr.stop());
+    const mime = String(rec.mimeType || type || 'video/webm').split(';')[0], blob = new Blob(chunks, {type: mime});
+    if (!blob.size) throw Error('empty');
+    return {blob, type: mime, ext: mime.includes('mp4') ? 'mp4' : 'webm'};
   }
   // こんしゅうの きろく：つった かずと しゅるいを ならべる だけ。れんぞくの ひにちは かぞえない・ほかの ひとや せんしゅうと くらべない。おやすみの しゅうは「おやすみでも いいよ」
   const weekKey = t => { const x = new Date(t.getFullYear(), t.getMonth(), t.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x.getFullYear() * 10000 + (x.getMonth() + 1) * 100 + x.getDate(); };   // げつようびの ひづけ（20260928 など）
@@ -2349,7 +2392,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       : (full ? 'シールちょう、ぜんぶ あつめた！ ' : 'シールちょう ' + seen + ' / ' + BASE + '。') + '\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
     await showPhoto(canvas, 'marufuwa-tsuri-seal-' + seen + '.png', EN() ? 'A photo of the sticker album with ' + seen + (seen === 1 ? ' kind' : ' kinds') + ' of stickers.' : 'あつめた シールが ならんだ シールちょうの しゃしん。' + seen + 'しゅるい', words);
   }
-  let wallMaker = null, photoRegen = null, paintPhotoName = () => {};   // しゃしんの まど（かべがみ・なまえ）の じょうたい
+  let wallMaker = null, photoRegen = null, paintPhotoName = () => {}, videoMaker = null, videoUrl = '', resetClip = () => {}, videoOk = () => false;   // しゃしんの まど（かべがみ・なまえ）の じょうたい
   {   // しゃしんの まどの ボタン：がぞうを コピー／ともだちに おしえる（どちらも 自分で おした ときだけ・かってに おくらない）
     const row = $('photo-x').parentElement, copy = document.createElement('button'), invite = document.createElement('button');
     const nameBtn = document.createElement('button'); nameBtn.id = 'photo-name'; nameBtn.type = 'button'; nameBtn.className = 'pill'; nameBtn.hidden = true; nameBtn.setAttribute('aria-pressed', 'false');
@@ -2370,7 +2413,27 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         st.textContent = L('かべがみを ほぞん したよ。しゃしんアプリから かべがみに してね。', 'Saved the wallpaper. Set it as your wallpaper from your photo app.');
       } catch { st.textContent = L('かべがみを つくれなかったよ。', 'Could not make the wallpaper.'); }
     });
-    const paint = () => { paintName(); wall.textContent = L('かべがみに する', 'Make a wallpaper'); copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
+    const vid = document.createElement('button'), clip = document.createElement('video'), vsave = document.createElement('a'), vshare = document.createElement('button');
+    vid.id = 'photo-video'; vid.type = 'button'; vid.className = 'pill'; vid.hidden = true;
+    clip.id = 'photo-clip'; clip.hidden = true; clip.controls = true; clip.loop = true; clip.muted = true; clip.setAttribute('playsinline', ''); clip.style.cssText = 'display:block;width:100%;height:auto;border-radius:14px;margin:0 auto'; $('photo-img').after(clip);
+    vsave.id = 'photo-clip-save'; vsave.className = 'pill'; vsave.hidden = true; vshare.id = 'photo-clip-share'; vshare.type = 'button'; vshare.className = 'pill'; vshare.hidden = true; row.append(vid, vsave, vshare);
+    videoOk = () => typeof MediaRecorder === 'function' && !!HTMLCanvasElement.prototype.captureStream && !reduce();   // 対応ブラウザだけ・「うごきを へらす」では 出さない
+    resetClip = () => { clip.hidden = true; try { clip.pause(); } catch {} clip.removeAttribute('src'); if (videoUrl) { URL.revokeObjectURL(videoUrl); videoUrl = ''; } $('photo-img').hidden = false; vsave.hidden = vshare.hidden = true; vid.disabled = false; };
+    const paintVideo = () => { clip.setAttribute('aria-label', L('どうが', 'Video')); vid.textContent = L('どうがで おしえる', 'Share as a video'); vid.setAttribute('aria-label', L('どうがで おしえる。3びょうの どうがを この たんまつの なかで つくるよ', 'Share as a video. A 3-second video is made on this device')); vsave.textContent = L('どうがを ほぞんする', 'Save the video'); vshare.textContent = L('どうがを みせる（きょうゆう）', 'Share the video'); };
+    vid.addEventListener('click', async () => {
+      const st = $('photo-status'); if (!videoMaker || vid.disabled) return; vid.disabled = true;
+      st.textContent = L('どうがを つくって いるよ。3びょう まってね。', 'Making the video. It takes about 3 seconds.');
+      try {
+        const r = await videoMaker(), file = new File([r.blob], (photoFile ? photoFile.name.replace(/[.]png$/, '') : 'marufuwa-tsuri') + '.' + r.ext, {type: r.type});
+        if (videoUrl) URL.revokeObjectURL(videoUrl); videoUrl = URL.createObjectURL(r.blob);
+        clip.src = videoUrl; clip.hidden = false; $('photo-img').hidden = true; try { const pl = clip.play(); if (pl && pl.catch) pl.catch(() => {}); } catch {}
+        vsave.href = videoUrl; vsave.download = file.name; vsave.hidden = false; vid.hidden = true;
+        vshare.hidden = !(navigator.share && navigator.canShare && navigator.canShare({files: [file]}));
+        vshare.onclick = async () => { try { await navigator.share({files: [file], title: L('まるふわ つりびより', 'Marufuwa Fishing Days')}); st.textContent = L('きょうゆうの がめんを とじました。', 'Closed the share screen.'); } catch (error) { st.textContent = error && error.name === 'AbortError' ? L('やめました。', 'Cancelled.') : L('「どうがを ほぞんする」を つかってね。', 'Please use Save the video.'); } };
+        st.textContent = L('どうがが できたよ。この たんまつの なかだけで つくったよ。かってに とうこうは しません。', 'Your video is ready. It was made on this device only. Nothing is posted automatically.');
+      } catch { vid.disabled = false; st.textContent = L('どうがを つくれなかったよ。', 'Could not make the video.'); }
+    });
+    const paint = () => { paintVideo(); paintName(); wall.textContent = L('かべがみに する', 'Make a wallpaper'); copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint); else paint();
     copy.addEventListener('click', async () => {
       const st = $('photo-status');
@@ -2386,6 +2449,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   async function showPhoto(canvas, fileName, alt, words, nushiCard, wall, regen) {
     const status = $('photo-status'); $('photo').dataset.nushi = String(!!nushiCard); wallMaker = wall || null; $('photo-wall').hidden = !wallMaker;
+    videoMaker = video || null; resetClip(); $('photo-video').hidden = !(videoMaker && videoOk());   // どうがで おしえる：ぬし・★5・まぼろしの しゃしんの ときだけ
     photoRegen = regen || null; $('photo-name').hidden = !(photoRegen && bucketName()); paintPhotoName();   // なまえを のせる ボタンは つれた しゃしんで、バケツに なまえが ある ときだけ
     const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(Error('png')), 'image/png'));
     if (photoURL) URL.revokeObjectURL(photoURL);
