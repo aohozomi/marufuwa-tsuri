@@ -452,6 +452,7 @@ body.gazing .assist{display:none}
 :root[data-night=true] #nushi-flash{background:#ffe2a0;filter:opacity(.6)}
 @media(prefers-reduced-motion:reduce){#nushi-flash{display:none}}   /* けしきの いきものを しまう（うごく ものが きに なる 人の ために） */
 #main-button{--c1:#2a8cc0;--c2:#0e5a82;--side:#0a4262;--ink:#fff;flex:1 1 100%;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
+#main-button::after{content:"";position:absolute;left:16px;top:50%;width:34px;height:34px;transform:translateY(-50%);background:var(--rodimg) center/contain no-repeat;pointer-events:none;opacity:.95}   /* ボタンの ひだりに ちいさな さおの え（もじには かぶらない・かざり） */
 #main-button[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
 .note{text-align:center;font-size:.85rem;color:#506874;line-height:2.3;margin-top:18px}
@@ -1837,7 +1838,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   });
   $('open-gear').addEventListener('click', () => { $('gear-note').textContent = ''; drawGear(); $('gear').showModal(); });
   $('close-gear').addEventListener('click', () => $('gear').close());
-  function drawEquip() { const rodImg = ART && ART.rod && ART.rod[save.rod] ? svgImg(rodSvg(save.rod), 'art') : gearImg('rod', save.rod, RODS[save.rod].icon), baitImg = save.bait === 1 && ART && ART.bait ? svgImg(lureSvg(), 'art') : gearImg('bait', save.bait, BAITS[save.bait].icon); $('equip').replaceChildren(rodImg, ' ' + RODS[save.rod].name + '　', baitImg, ' ' + BAITS[save.bait].name); }
+  function drawEquip() { if (ART && ART.rod && ART.rod[save.rod]) $('main-button').style.setProperty('--rodimg', 'url("' + ART.uri(rodSvg(save.rod)) + '")'); const rodImg = ART && ART.rod && ART.rod[save.rod] ? svgImg(rodSvg(save.rod), 'art') : gearImg('rod', save.rod, RODS[save.rod].icon), baitImg = save.bait === 1 && ART && ART.bait ? svgImg(lureSvg(), 'art') : gearImg('bait', save.bait, BAITS[save.bait].icon); $('equip').replaceChildren(rodImg, ' ' + RODS[save.rod].name + '　', baitImg, ' ' + BAITS[save.bait].name); }
 
   // おみせ。うでまえを みて、こえを かけて くれる（くらべない。ほめるだけ）
   const shop = $('shop');
