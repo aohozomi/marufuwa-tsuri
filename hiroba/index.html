@@ -1220,6 +1220,8 @@ setTimeout(() => {
   const weather = rainy ? 'あめ' : 'はれ';
   narrate(own.visits <= 1 ? 'ひろばへ ようこそ。ゆびで さわると、まるふわが あるくよ。したの ボタンで、いきたい ところへ いけるよ。' : 'ひろばに ついたよ。いまは ' + TIME_LABEL[curTime] + '。きょうは ' + weather + '。ともだちが ' + friends.length + 'にん いるよ。');
 }, 500);
+// はじめて きた 日：4びょう たっても だれも さわらない 時だけ、まるふわが 1かい「さわって みてね」（字が よめない 子にも 目で わかる）
+setTimeout(() => { if (own.visits <= 1 && lastInput === 0 && !trip && !document.hidden) speak(player, 'さわって みてね', 3800, true); }, 4200);
 requestAnimationFrame(frame);
 addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag) stopAmbient(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else { startAmbient(); lastInput = T; } });
