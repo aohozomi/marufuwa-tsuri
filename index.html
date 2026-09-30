@@ -26,9 +26,15 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="ゆうがたの みずうみで、まるふわが きんいろの さかなを かかげて いる">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preload" as="image" href="img/game-blue.webp" fetchpriority="high">
+<link rel="preload" as="script" href="tsuri-wear.js"><link rel="preload" as="script" href="tsuri-daily.js"><link rel="preload" as="script" href="tsuri-mame.js"><link rel="preload" as="script" href="tsuri-art.js"><link rel="preload" as="script" href="tsuri-art-season.js"><link rel="preload" as="script" href="tsuri-art-real.js"><link rel="preload" as="script" href="tsuri-town.js"><link rel="preload" as="script" href="tsuri-koe.js"><link rel="preload" as="script" href="tsuri-bgm.js">   <!-- ほんたいの まえに ならぶ script は じゅんばんに よむと おそい。さきに ならんで よむ -->
 <script>
 // よるは ページも くらく（まぶしく ない ように）。さいしょの 1コマから。あとで 本体が がめんの じかんに あわせて なおす
-try { var h = new Date().getHours(), t = (JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}).time; if (matchMedia('(prefers-color-scheme: dark)').matches || t === 'n' || h >= 19 || h < 5) { document.documentElement.dataset.night = 'true'; document.querySelector('meta[name=theme-color]').content = '#0f1c33'; } } catch (e) {}
+// けしきの じかん（あさ・ひる・ゆうがた・よる）も ここで きめる（本体の timeOfDay と おなじ きまり）。よみこみの 一瞬に ひるの そらが みえない ように <html data-time> を 先に つける
+try { var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, mp = {asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n', a: 'a', h: 'h', y: 'y', n: 'n'}, q = new URLSearchParams(location.search).get('time');
+  var tt = mp[q] || (typeof sv.time === 'string' && sv.time.length === 1 && mp[sv.time]) || (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n');
+  document.documentElement.dataset.time = {a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru'}[tt];
+  if (matchMedia('(prefers-color-scheme: dark)').matches || tt === 'n') { document.documentElement.dataset.night = 'true'; document.querySelector('meta[name=theme-color]').content = '#0f1c33'; } } catch (e) {}
 </script>
 <script>
 // うごきを へらす（ゲームの 中の スイッチ）：スマホの せっていに くわえて、ここでも えらべる（せっていを しらない おうちの ひとや こどもの ために）。
@@ -107,10 +113,18 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 :root[data-night=true] .level-bar{background:#2d4d70}
 
 /* じかんごとの いろ */
-#scene[data-time=asa]{--sky1:#ffd9b8;--sky2:#fff3e2;--orb:#ffb45e;--hill:#b9d8a8;--tree:#7fbf7a;--ground:#e9dcc0;--edge:#c9b58d;--water1:#8fd3ee;--water2:#4aa3cf;--star:0}
-#scene[data-time=hiru]{--sky1:#a9defa;--sky2:#eaf8ff;--orb:#fff2a8;--hill:#a9d89a;--tree:#6fbf6a;--ground:#efe3c6;--edge:#cdb98f;--water1:#7fd0f2;--water2:#3b9bd0;--star:0}
-#scene[data-time=yuu]{--sky1:#ff9e6e;--sky2:#ffd9a8;--orb:#ff7a3d;--hill:#c9a27a;--tree:#7f9f5a;--ground:#e6cfa8;--edge:#bf9f72;--water1:#7aa9d6;--water2:#44779f;--star:0}
-#scene[data-time=yoru]{--sky1:#1f2f5c;--sky2:#4a5d92;--orb:#fff6cf;--hill:#34507a;--tree:#2f6a5a;--ground:#8f8a86;--edge:#6f6a66;--water1:#3f6fa6;--water2:#1d365f;--star:1}
+/* よみこみの 一瞬：本体が くる まえは けしきの なかみ（なかま・おみせ・せき）と「つれた かず」の 行を かくす（じゅんびが できたら html[data-ready]）。3びょう たっても できなければ かってに みせる（ほけん） */
+html:not([data-ready]) #scene > *,html:not([data-ready]) .hud.record{visibility:hidden;animation:revealLate 0s 6s forwards}
+html:not([data-ready]) #scene{background:linear-gradient(var(--sky1),var(--sky2))}   /* じゅんびが できる まで：けしきの なかみは ぜんぶ かくして、じかんに あった そらの いろだけ（ひるの やまや だれもいない きしを みせない） */
+@keyframes revealLate{to{visibility:visible}}
+html[data-ready=fresh] #scene > *{animation:sceneIn .4s ease-out}
+@keyframes sceneIn{from{opacity:0}}
+:root[data-calm] #scene > *,:root[data-calm][data-ready=fresh] #scene > *{animation:none !important}
+@media(prefers-reduced-motion:reduce){html[data-ready=fresh] #scene > *{animation:none !important}}
+#scene[data-time=asa],html[data-time=asa] #scene{--sky1:#ffd9b8;--sky2:#fff3e2;--orb:#ffb45e;--hill:#b9d8a8;--tree:#7fbf7a;--ground:#e9dcc0;--edge:#c9b58d;--water1:#8fd3ee;--water2:#4aa3cf;--star:0}
+#scene[data-time=hiru],html[data-time=hiru] #scene{--sky1:#a9defa;--sky2:#eaf8ff;--orb:#fff2a8;--hill:#a9d89a;--tree:#6fbf6a;--ground:#efe3c6;--edge:#cdb98f;--water1:#7fd0f2;--water2:#3b9bd0;--star:0}
+#scene[data-time=yuu],html[data-time=yuu] #scene{--sky1:#ff9e6e;--sky2:#ffd9a8;--orb:#ff7a3d;--hill:#c9a27a;--tree:#7f9f5a;--ground:#e6cfa8;--edge:#bf9f72;--water1:#7aa9d6;--water2:#44779f;--star:0}
+#scene[data-time=yoru],html[data-time=yoru] #scene{--sky1:#1f2f5c;--sky2:#4a5d92;--orb:#fff6cf;--hill:#34507a;--tree:#2f6a5a;--ground:#8f8a86;--edge:#6f6a66;--water1:#3f6fa6;--water2:#1d365f;--star:1}
 
 /* つりばごとの じめんの いろ と、みせる けしき */
 #scene[data-area=H]{--ground:#c4c6c4;--edge:#9a9c9a}
@@ -289,10 +303,10 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 #soil{position:absolute;left:0;top:41.3%;width:100%;height:35.8%;z-index:0;pointer-events:none;mix-blend-mode:multiply;opacity:.6;clip-path:polygon(0 8.7%,100% 0,100% 91.3%,0 46.6%)}
 /* ひかり：たいようや つきの ほうから、やわらかく さす */
 #light{position:absolute;inset:0;z-index:4;pointer-events:none;mix-blend-mode:soft-light;background:radial-gradient(ellipse 90% 80% at 78% 18%,var(--glow,#fff6c9) 0%,#ffffff00 60%),linear-gradient(200deg,#ffffff00 40%,var(--dusk,#24465322) 100%)}
-#scene[data-time=asa]{--glow:#ffe3b8;--dusk:#7a5a8a33}
-#scene[data-time=hiru]{--glow:#fffbe0;--dusk:#24465318}
-#scene[data-time=yuu]{--glow:#ffb070;--dusk:#5a2a6a55}
-#scene[data-time=yoru]{--glow:#b8c8ff;--dusk:#05103a88}
+#scene[data-time=asa],html[data-time=asa] #scene{--glow:#ffe3b8;--dusk:#7a5a8a33}
+#scene[data-time=hiru],html[data-time=hiru] #scene{--glow:#fffbe0;--dusk:#24465318}
+#scene[data-time=yuu],html[data-time=yuu] #scene{--glow:#ffb070;--dusk:#5a2a6a55}
+#scene[data-time=yoru],html[data-time=yoru] #scene{--glow:#b8c8ff;--dusk:#05103a88}
 /* あしもとの かげ。じめんに たって いる かんじ */
 .who,#keeper img{filter:drop-shadow(0 5px 3px #0000003d)}
 .spot svg{filter:drop-shadow(0 2px 2px #00000030)}
@@ -697,12 +711,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
     <button id="keeper" type="button" aria-label="おみせの きつねに はなしかける"><span aria-hidden="true">おみせ</span><img src="img/friend-kogitsune-s.webp" width="180" height="180" alt=""></button>
     <div id="equip" aria-hidden="true"></div>
-    <img class="who friend" id="friend-a" src="img/friend-neko-s.webp" width="180" height="180" alt="となりで つりを する ねこ" draggable="false">
-    <img class="who friend" id="friend-b" src="img/friend-usagi-s.webp" width="180" height="180" alt="となりで つりを する うさぎ" draggable="false">
+    <img class="who friend" id="friend-a" src="img/friend-neko-s.webp" fetchpriority="high" width="180" height="180" alt="となりで つりを する ねこ" draggable="false">
+    <img class="who friend" id="friend-b" src="img/friend-usagi-s.webp" fetchpriority="high" width="180" height="180" alt="となりで つりを する うさぎ" draggable="false">
     <button class="friend-hit" id="talk-a" type="button"></button><button class="friend-hit" id="talk-b" type="button"></button>
     <div class="float friend-float" id="float-a" aria-hidden="true"></div>
     <div class="float friend-float" id="float-b" aria-hidden="true"></div>
-    <img class="who" id="marufuwa" src="img/game-blue.webp" width="240" height="320" alt="つりを する まるふわ" draggable="false">
+    <img class="who" id="marufuwa" src="img/game-blue.webp" fetchpriority="high" width="240" height="320" alt="つりを する まるふわ" draggable="false">
     <div class="bubble" id="bubble" aria-hidden="true" hidden></div>
     <span class="held" id="held" aria-hidden="true" hidden></span>
     <span class="held" id="held-friend" aria-hidden="true" hidden></span>
@@ -3170,6 +3184,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (location.hash === '#restored') { say('きろくを もどしたよ。つづきから あそべるよ。'); try { history.replaceState(null, '', location.pathname + location.search); } catch {} }
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
   setTimeout(chatter, Number(query.get('chat')) || 5000);
+  {   // よみこみの 一瞬に ひるの そら・だれもいない きしを みせない：まるふわ・なかまの え が そろう（さいだい 1.5びょう）まで けしきの なかみを かくして おく。そろったら ふわっと
+    const html = document.documentElement, wait = im => (!im || im.complete) ? Promise.resolve() : new Promise(r => { im.addEventListener('load', r, {once: true}); im.addEventListener('error', r, {once: true}); });
+    Promise.race([Promise.all([marufuwa, $('friend-a'), $('friend-b')].map(wait)), new Promise(r => setTimeout(r, 1500))]).then(() => {
+      html.dataset.ready = 'fresh'; delete html.dataset.time; setTimeout(() => { html.dataset.ready = 'true'; }, 500);   // 早い script の <html data-time> は やくめが おわり（けしきの data-time が うけつぐ）
+    });
+  }
   window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
