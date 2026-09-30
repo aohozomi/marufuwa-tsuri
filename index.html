@@ -160,7 +160,7 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 #card h2{display:inline}
 #photo-img{display:block;width:100%;height:auto;border-radius:14px;border:2px solid #d5e6ed;margin-bottom:10px}
 .photo-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
-.pill{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #0e4a66}
+.pill{--c1:#3495c5;--c2:#10587e;--side:#0b425f;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #083a55}   /* 白い 字の コントラスト 4.5対1 いじょう（まえは 2.7対1） */
 .pill[hidden]{display:none}
 .pill.quiet{--c1:#ffffffd9;--c2:#bfe6f9b3;--side:#9cc9e0;--ink:#244653;text-shadow:none}   /* ひかえめな リンク（おうちの かたへ）。ふつうの ボタンと おなじ 色 */
 #bucket-list,#gift-list{display:grid;gap:6px}
@@ -214,7 +214,7 @@ body.gazing #tegami{display:none}
 #scene #card[data-nushi=true] .stars{color:#ffd34d}
 #photo[data-nushi=true] #photo-share{--c1:#fff1b8;--c2:#ffd25e;--side:#d39a1c;--ink:#593700;order:-1;min-height:60px;font-size:1.05rem;text-shadow:none}
 .photo-actions .give{min-width:140px}
-.stars{color:#e0a61c;letter-spacing:.1em;font-size:1.05rem}
+.stars{color:#b07a00;letter-spacing:.1em;font-size:1.05rem}   /* 白い カードの 上で 3対1 いじょう（まえは 2.2対1）。よるは 下の きまりで あかるい 金 */
 #scene{position:relative;width:100%;aspect-ratio:4/3;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;touch-action:manipulation;background:var(--sky2)}
 #scene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 #overlay{pointer-events:none}
@@ -512,18 +512,18 @@ dialog .close{display:block;margin:auto;min-width:160px}
 :root[data-night=true]{color:#e8f1f8;background:#0d1a2e}
 :root[data-night=true] #backdrop{filter:brightness(.3) saturate(1.1)}
 :root[data-night=true] main{background:#13253d;box-shadow:0 12px 30px #0007}
-:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen){color-scheme:dark}
+:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore){color-scheme:dark}
 :root[data-night=true] .actions{background:linear-gradient(#13253d00,#13253d 28%)}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen)::backdrop{background:#000000b3}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore)::backdrop{background:#000000b3}
 /* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) button:focus-visible{outline-color:#a9dcff}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) button:focus-visible{outline-color:#a9dcff}
 :root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small,:root[data-night=true] #gift-list small{color:#a9bfd2}
 :root[data-night=true] #bucket-list div,:root[data-night=true] #gift-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
 :root[data-night=true] #book-grid div[data-seen=false]{background:#16283f;color:#9db3c6}
@@ -1794,7 +1794,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.fillStyle = night ? '#fff4c9' : '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = 'bold 54px system-ui,sans-serif'; ctx.fillText(last.fish.name, 920, 295, 420);
     ctx.fillStyle = night ? '#fff' : '#244653'; ctx.font = 'bold 50px system-ui,sans-serif'; ctx.fillText(EN() ? cm(last.size) + ' cm' : cm(last.size) + ' センチ', 920, 370, 420);
-    ctx.fillStyle = night ? '#ffd34d' : '#e0a61c'; ctx.font = '50px system-ui,sans-serif'; ctx.fillText(starsOf(last.fish, last.nushi), 920, 440, 420);
+    ctx.fillStyle = night ? '#ffd34d' : '#b07a00'; ctx.font = '50px system-ui,sans-serif'; ctx.fillText(starsOf(last.fish, last.nushi), 920, 440, 420);
     ctx.fillStyle = night ? '#ffe9a0' : '#593700'; ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(last.tags.map(T).join(EN() ? ' · ' : '・'), 920, 500, 420);
     ctx.fillStyle = night ? '#cfe0ff' : color('--star') === '1' ? '#fff' : '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 920, 112, 440);   // ゲームの なまえ。みた ひとが、さがして これる ように
