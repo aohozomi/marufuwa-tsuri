@@ -169,7 +169,7 @@ button.zk.on{--c1:#fff4c2;--c2:#ffe27a99}
 #scene{position:relative;width:min(100%,calc((100vh - 232px)*.6429));width:min(100%,calc((100dvh - 232px)*.6429));min-width:min(100%,300px);margin:0 auto;aspect-ratio:360/560;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:var(--sky2);isolation:isolate}
 #scene:focus-visible{outline:3px solid #286b88;outline-offset:3px}
 #bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;filter:var(--dim)}
-#scene[data-rain=true] #bg{filter:var(--dim) brightness(.85) saturate(.8)}
+#scene[data-rain=true] #bg{filter:var(--dim) brightness(.93) saturate(.9)}   /* 雨の 日も くらく しすぎない（10/1）*/
 .waves path{animation:wave 3.4s ease-in-out infinite alternate}
 .waves path:nth-child(2n){animation-delay:-1.7s}
 .tuft{transform-box:fill-box;transform-origin:50% 100%;animation:sway 3.6s ease-in-out infinite alternate}
@@ -236,9 +236,9 @@ button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ff
 .meteor{position:absolute;z-index:2;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;cursor:pointer;pointer-events:auto}
 .meteor::before{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:#fffbe0;box-shadow:0 0 10px 4px #fff6a8,-30px -14px 14px 2px #fff6a866,-16px -7px 8px 2px #fff6a8aa}
 /* あめ */
-#rain{position:absolute;inset:-20% 0 0 -20%;z-index:900;pointer-events:none;display:none;background-image:repeating-linear-gradient(105deg,#ffffff00 0 14px,#ffffff8c 14px 15.5px,#ffffff00 15.5px 34px);background-size:68px 120px;animation:rain .55s linear infinite}
+#rain{position:absolute;inset:-20% 0 0 -20%;z-index:900;pointer-events:none;display:none;background-image:repeating-linear-gradient(105deg,#ffffff00 0 34px,#ffffff52 34px 35.2px,#ffffff00 35.2px 66px);background-size:104px 180px;animation:rain 3.6s linear infinite}   /* 10/1 あめの 見た目を おだやかに（マスター直「雨が 気持ち悪い」）：すじを まばらに・うすく（55%→32%）・ゆっくり（0.55びょう→3.6びょうで 1しゅう）。はやい ちらつきに ならない */
 #scene[data-rain=true] #rain{display:block}
-@keyframes rain{to{background-position:-32px 120px}}
+@keyframes rain{to{background-position:-48px 180px}}
 .tapring{position:absolute;z-index:120;width:38px;height:16px;margin:-8px 0 0 -19px;border:3px solid #ffffffe0;border-radius:50%;pointer-events:none}
 
 #status{min-height:3.4em;margin:10px 4px 6px;text-align:center;font-size:.98rem;line-height:1.6;font-weight:700}
@@ -624,8 +624,8 @@ function renderSeason() {
 let ac = null, noiseBuf = null, amb = null;
 function ready() { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
 // やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
-//   ・基音は 1200Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみ（square）は さんかくに／
-//     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 2500Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
+//   ・基音は 900Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみは 使わない（まるい さんかく波に）／
+//     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 1300Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
 const GENTLE = { top: 900, attack: .015, lp: 1300, noiseLp: 1500, cap: .25, noiseGain: 2.4 };   // 10/1 lp 2500→1400（三角波の 3倍音の「キン」を 出口で 切る・マスター直）
 function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
   if (c._gentle) return c._gentle;
@@ -636,11 +636,11 @@ function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が �
 }
 const lowerTo = (freq, slideTo) => { const hi = Math.max(freq, slideTo || 0); if (!(hi > GENTLE.top)) return [freq, slideTo || 0]; const k = 2 ** Math.ceil(Math.log2(hi / GENTLE.top)); return [freq / k, slideTo ? slideTo / k : 0]; };
 function route(c, node, pan) { const bus = gentleBus(c); if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); node.connect(p); p.connect(bus); } else node.connect(bus); }
-function tone(freq, len = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, pan = 0) {
+function tone(freq, len = .09, type = 'round', delay = 0, loud = .05, slideTo = 0, pan = 0) {
   if (!sndOk()) return;
   try {
     const c = ready(), at = c.currentTime + delay, osc = c.createOscillator(), vol = c.createGain();
-    let rounded = false; if (type === 'square' || type === 'sawtooth') { type = 'triangle'; rounded = true; }
+    let rounded = false; if (type !== 'triangle' && type !== 'sine') { type = 'triangle'; rounded = true; }   // 'round'＝まるい さんかく波（かくばった なみは 使わない）
     if (soft() && freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; }   // 「やさしい おと」の せってい（むかしから ある）
     [freq, slideTo] = lowerTo(freq, slideTo);
     osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
@@ -661,34 +661,34 @@ function zap(len = .1, delay = 0, loud = .06, pan = 0) {
     src.connect(lp); lp.connect(vol); route(c, vol, pan); src.start(at); src.stop(at + end + .02);
   } catch {}
 }
-const chord = (notes, gap = .07, type = 'square', pan = 0, loud = .05) => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, pan));
+const chord = (notes, gap = .07, type = 'round', pan = 0, loud = .05) => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, pan));
 const panRel = x => clamp((x - player.x) / 150, -1, 1) * .85;
 const sfx = {
-  ui: () => tone(1175, .04, 'square', 0, .035),
+  ui: () => tone(1175, .04, 'round', 0, .035),
   on: () => chord([988, 1319], .08),
   step: a => tone(a.stepFlip ? 196 : 165, .035, 'triangle', 0, .014),
   tap: () => tone(880, .04, 'triangle', 0, .04, 1175),
   arrive: () => chord([784, 988], .07),
   enter: () => chord([523, 659, 784, 1047, 1319], .06),
-  door: () => { tone(220, .12, 'triangle', 0, .05, 330); tone(660, .06, 'square', .1, .03); },
-  greet: f => chord(PALS[f.id].pitch, .08, 'square', panRel(f.x), .04),
-  kouji: () => { zap(.05, 0, .05); tone(150, .07, 'triangle', 0, .05, 90); tone(392, .07, 'square', .2, .04); tone(523, .07, 'square', .3, .04); tone(784, .14, 'triangle', .4, .05); },
-  group: () => { chord([659, 784, 988, 1319], .08); zap(.06, .5, .05); tone(1568, .05, 'square', .52, .03); },
+  door: () => { tone(220, .12, 'triangle', 0, .05, 330); tone(660, .06, 'round', .1, .03); },
+  greet: f => chord(PALS[f.id].pitch, .08, 'round', panRel(f.x), .04),
+  kouji: () => { zap(.05, 0, .05); tone(150, .07, 'triangle', 0, .05, 90); tone(392, .07, 'round', .2, .04); tone(523, .07, 'round', .3, .04); tone(784, .14, 'triangle', .4, .05); },
+  group: () => { chord([659, 784, 988, 1319], .08); zap(.06, .5, .05); tone(1568, .05, 'round', .52, .03); },
   sit: () => chord([392, 523], .09, 'triangle'),
   drop: () => { tone(1568, .05, 'triangle', 0, .03, 1319); tone(1319, .06, 'triangle', .13, .03, 1047); },
   pick: () => chord([1047, 1319, 1568], .06, 'triangle'),
   plush: () => tone(294, .09, 'triangle', 0, .05, 247),
   hammer: () => { for (let i = 0; i < 3; i++) { zap(.05, i * .22, .05); tone(150, .07, 'triangle', i * .22, .05, 90); } },
-  wish: () => { chord([1047, 1319, 1568, 2093, 2637], .07); tone(3136, .3, 'square', .4, .02); },
-  meteor: () => tone(2800, .55, 'square', 0, .025, 500),
+  wish: () => { chord([1047, 1319, 1568, 2093, 2637], .07); tone(3136, .3, 'round', .4, .02); },
+  meteor: () => tone(2800, .55, 'round', 0, .025, 500),
   boing: () => tone(300, .14, 'triangle', 0, .05, 620),
-  leaf: () => { tone(1568, .05, 'square', 0, .025); tone(1319, .05, 'square', .07, .02); tone(1047, .06, 'square', .14, .02); },
-  splash: pan => { zap(.09, 0, .05, pan); tone(880, .05, 'square', .02, .03, 1320, pan); },
+  leaf: () => { tone(1568, .05, 'round', 0, .025); tone(1319, .05, 'round', .07, .02); tone(1047, .06, 'round', .14, .02); },
+  splash: pan => { zap(.09, 0, .05, pan); tone(880, .05, 'round', .02, .03, 1320, pan); },
   spin: () => chord([523, 659, 784, 1047, 784, 1047, 1319], .05),
   water: pan => tone(1568, .04, 'triangle', 0, .04, 2093, pan),
   well: pan => { tone(392, .1, 'triangle', 0, .04, 294, pan); tone(587, .07, 'triangle', .13, .03, 440, pan); },
-  bird: pan => asKind('amb', () => { tone(2400, .045, 'square', 0, .012, 3000, pan); tone(3000, .045, 'square', .07, .012, 2500, pan); }),
-  cricket: pan => asKind('amb', () => { for (let i = 0; i < 3; i++) tone(4200, .02, 'square', i * .05, .006, 0, pan); })
+  bird: pan => asKind('amb', () => { tone(2400, .045, 'round', 0, .012, 3000, pan); tone(3000, .045, 'round', .07, .012, 2500, pan); }),
+  cricket: pan => asKind('amb', () => { for (let i = 0; i < 3; i++) tone(4200, .02, 'round', i * .05, .006, 0, pan); })
 };
 // おとの ずっと ながれる ぶぶん：ふんすいの みず（ちかづくと おおきく）、あめの ひは あめの おと
 function startAmbient() {
@@ -1865,7 +1865,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   ctx.save(); ctx.fillStyle = '#fff'; roundPath(ctx, PX - 8, PY - 8, W * S + 16, H * S + 16, 46); ctx.fill();
   roundPath(ctx, PX, PY, W * S, H * S, 38); ctx.clip(); ctx.translate(PX, PY); ctx.scale(S, S);
   const rainy = scene.dataset.rain === 'true', dimF = css.getPropertyValue('--dim').trim() || 'brightness(1)';
-  if (hasFilter) ctx.filter = dimF + (rainy ? ' brightness(.85) saturate(.8)' : '');
+  if (hasFilter) ctx.filter = dimF + (rainy ? ' brightness(.93) saturate(.9)' : '');
   ctx.drawImage(await svgImg(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H);
   ctx.filter = 'none';
   // おひさま・おつきさま・くも
@@ -1927,7 +1927,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
     }
   }
   // あめ
-  if (rainy) { const r = mulberry(31); ctx.save(); ctx.strokeStyle = '#ffffff99'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let i = 0; i < 120; i++) { const x = r() * (W + 30), y = r() * H; ctx.moveTo(x, y); ctx.lineTo(x - 8, y + 24); } ctx.stroke(); ctx.restore(); }
+  if (rainy) { const r = mulberry(31); ctx.save(); ctx.strokeStyle = '#ffffff5c'; ctx.lineWidth = 1; ctx.beginPath(); for (let i = 0; i < 40; i++) { const x = r() * (W + 30), y = r() * H; ctx.moveTo(x, y); ctx.lineTo(x - 8, y + 24); } ctx.stroke(); ctx.restore(); }
   ctx.restore();
   if (o.video) {
     ctx.save(); ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
@@ -1999,7 +1999,7 @@ function showZukanPal(id) {
   const s = document.createElement('span'), sm = document.createElement('small'); s.textContent = p.name; sm.textContent = p.hello;
   const extra = bookLines(id).map(l => { const e = document.createElement('small'); e.textContent = l; return e; });   // はじめて あった 日・あった ばしょ・とくい（かいすうは 出さない）
   $('zukan-cap').replaceChildren(s, sm, ...extra); paintZukanFav(id);
-  asKind('fx', () => chord(p.pitch, .08, 'square', 0, .04));
+  asKind('fx', () => chord(p.pitch, .08, 'round', 0, .04));
 }
 function openZukan() {
   lastInput = T; const any = drawZukan(); drawZukanMarks(); if ($('zukan-fav')) $('zukan-fav').replaceChildren();

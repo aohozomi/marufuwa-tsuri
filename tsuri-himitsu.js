@@ -38,9 +38,9 @@
   let ac = null, hiss = null;
   const ready = () => { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; };
   // やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
-  //   ・基音は 1200Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみ（square）は さんかくに／
-  //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 2500Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
-  const GENTLE = { top: 1200, attack: .015, lp: 2500, noiseLp: 1500, cap: .25, noiseGain: 2.4 };
+  //   ・基音は 900Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみは 使わない（まるい さんかく波に）／
+  //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 1300Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
+  const GENTLE = { top: 900, attack: .015, lp: 1300, noiseLp: 1500, cap: .25, noiseGain: 2.4 };   // 10/1 top 1200→900・lp 2500→1300（三角波の 3倍音の「キン」を 出口で 切る・ひろば・おへや・ひみつ・ぬし ぜんぶ そろえた）
   function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
     if (c._gentle) return c._gentle;
     let head = c.destination;
@@ -50,11 +50,11 @@
   }
   const lowerTo = (freq, slideTo) => { const hi = Math.max(freq, slideTo || 0); if (!(hi > GENTLE.top)) return [freq, slideTo || 0]; const k = 2 ** Math.ceil(Math.log2(hi / GENTLE.top)); return [freq / k, slideTo ? slideTo / k : 0]; };
   const route = (c, node, pan) => { const bus = gentleBus(c); if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); node.connect(p); p.connect(bus); } else node.connect(bus); };
-  function tone(freq, len = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, pan = 0) {
+  function tone(freq, len = .09, type = 'round', delay = 0, loud = .05, slideTo = 0, pan = 0) {
     if (!kindOn()) return;
     try {
       const c = ready(), at = c.currentTime + delay, osc = c.createOscillator(), vol = c.createGain();
-      let rounded = false; if (type === 'square' || type === 'sawtooth') { type = 'triangle'; rounded = true; }
+      let rounded = false; if (type !== 'triangle' && type !== 'sine') { type = 'triangle'; rounded = true; }   // 'round'＝まるい さんかく波
       if (sndSet().soft === true && freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; }
       [freq, slideTo] = lowerTo(freq, slideTo);
       osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
@@ -75,7 +75,7 @@
       src.connect(lp); lp.connect(vol); route(c, vol, pan); src.start(at); src.stop(at + end + .02);
     } catch {}
   }
-  const chord = (notes, gap = .08, type = 'square', loud = .04) => notes.forEach((n, i) => tone(n, gap * 1.05, type, i * gap, loud));
+  const chord = (notes, gap = .08, type = 'round', loud = .04) => notes.forEach((n, i) => tone(n, gap * 1.05, type, i * gap, loud));
 
   // ─── ひみつの 記録（ひみつ専用の 鍵）───
   function markFound(id, extra) {
@@ -188,7 +188,7 @@
   }
   const tapHot = key => {
     const h = HOTS[key]; h.taps++;
-    tone(196, .07, 'square', 0, .04); if (h.taps < 3) { say(h.label + 'を さわったよ。'); return; }
+    tone(196, .07, 'round', 0, .04); if (h.taps < 3) { say(h.label + 'を さわったよ。'); return; }
     h.taps = 0; ({ toudai: toudaiLight, marumado: marumadoPass, tsuki: tsukiRabbit })[key]();
   };
 
@@ -278,7 +278,7 @@
     const { pal, b, anim, breath } = nap; nap = null; clearInterval(breath); if (anim) anim.cancel();
     if (byCast) {
       b.textContent = 'にゃっ！ …ねてないよ'; const p = at(pal); b.style.left = p.x + '%'; b.style.top = (p.y - 24) + '%';
-      tone(1047, .06, 'square', 0, .03); tone(1319, .08, 'square', .07, .03); say('ねこが「にゃっ！ …ねてないよ」って いったよ。'); later(() => b.remove(), 2600);
+      tone(1047, .06, 'round', 0, .03); tone(1319, .08, 'round', .07, .03); say('ねこが「にゃっ！ …ねてないよ」って いったよ。'); later(() => b.remove(), 2600);
     } else b.remove();
   }
 
@@ -515,7 +515,7 @@
   };
   const wordOf = text => { const n = norm(text); if (!n || n.length > 40) return null; const h = sha256hex(SALT + n); return WORDS.find(w => w.h.includes(h)) || null; };
   const titleOf = id => (NOTE[id] || [])[1] || '';
-  const fanfare = () => { chord([988, 1319, 1568, 2093], .07, 'square', .04); tone(2637, .3, 'triangle', .35, .03); };
+  const fanfare = () => { chord([988, 1319, 1568, 2093], .07, 'round', .04); tone(2637, .3, 'triangle', .35, .03); };
   function tryWord(text) {
     if (!norm(text)) return { ok: false, reason: 'empty' };
     const w = wordOf(text); if (!w) return { ok: false, reason: 'none' };

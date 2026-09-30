@@ -6,7 +6,7 @@
 //   ・記録は自分の最大サイズだけ（魚の大きさに出る）。他の人とは比べない。
 //   ・魚の絵は今は仮の絵文字。絵が来たら window.TsuriArt = {魚の番号: 'img/fish-3.webp', ...}（発注書どおり、頭は左向き）を先に置くと差し替わる。右へ泳ぐ時は こちらで反転する。
 //   ・自分の記録は localStorage['marufuwa-tsuri-tank-v1'] = {seen, placed, sound?, soundMain?} に別に持つ（本体の記録は書き換えない）。
-//   ・おと：本体の save.sound を読む。むかしの ゲームき ふう（square・triangle・みじかい ざつおん だけ）。OFFの間は AudioContext も作らない。
+//   ・おと：本体の save.sound を読む。むかしの ゲームき ふう（まるい さんかく波・みじかい ざつおん だけ）。OFFの間は AudioContext も作らない。
 //   ・めずらしさ・ぬし：本体と おなじ いみ。★は しゅるいの めずらしさ（スペシャル＝★4）、その子の ぬしを つった ことが あれば（save.fish[番号].nushi）＋1 で ★5。
 //   ・ほかの ページ（ひろば など）から ひらく時：window.TsuriTank.open()。このファイルより先に window.TsuriTankConfig = {base:'../', noButton:true} を置く
 //     （base：img/ の場所の まえに つける／noButton：「すいそう」ボタンを ページに 足さない）。#scene（data-time・色）と #friend-a・#friend-b の絵が ページに あること。
@@ -652,9 +652,9 @@
   function soundNow() { const main = mainSound(); return tank.sound !== undefined && tank.soundMain === main ? tank.sound : main; }
   function refreshSound() { sfx = soundNow(); if (!sfx) stopAmbience(); else if (isOpen()) startAmbience(); syncSoundButton(); bgmRefresh(); return sfx; }
   // やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
-  //   ・基音は 1200Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみ（square）は さんかくに／
-  //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 2500Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
-  const GENTLE = { top: 1200, attack: .015, lp: 2500, noiseLp: 1500, cap: .25, noiseGain: 2.4 };
+  //   ・基音は 900Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみは 使わない（まるい さんかく波に）／
+  //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 1300Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
+  const GENTLE = { top: 900, attack: .015, lp: 1300, noiseLp: 1500, cap: .25, noiseGain: 2.4 };   // 10/1 top 1200→900・lp 2500→1300（三角波の 3倍音の「キン」を 出口で 切る・ひろば・おへや・ひみつ・ぬし ぜんぶ そろえた）
   function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
     if (c._gentle) return c._gentle;
     let head = c.destination;
@@ -673,13 +673,13 @@
     } catch { return null; }
   }
   const panner = (c, pan) => { if (!c.createStereoPanner) return master; const p = c.createStereoPanner(); p.pan.value = clamp(pan || 0, -1, 1); p.connect(master); return p; };
-  // むかしの ゲームき ふう（つりびよりと おなじ）：かくばった なみ（square）と、さんかくの なみ（triangle）と、みじかい ざつおん だけ。
+  // むかしの ゲームき ふう（つりびよりと おなじ）：かくばった なみは 使わず、まるい さんかくの なみと、みじかい ざつおん だけ。
   // ぷつっと はじまって、すぱっと きれる。たかさは だんだんに うごく（ピロリッ、ヒュ〜）
   function tone(freq, len, o = {}) {
     if (!sfx || !kindOk()) return;
     const c = audio(); if (!c) return;
     const t = c.currentTime + (o.at || 0), osc = c.createOscillator(), g = c.createGain(), vol = o.vol === undefined ? .1 : o.vol;
-    let type = 'triangle', rounded = o.type === 'square';   // かくばった なみは まるい なみに（さんかくの なみだけ）
+    let type = 'triangle', rounded = !!o.type && o.type !== 'triangle' && o.type !== 'sine';   // かくばった なみは まるい なみに（さんかくの なみだけ）
     if (readSave().soft === true && freq >= 1800) freq /= 2;
     let end0 = o.glide ? Math.max(30, freq * o.glide) : 0;
     [freq, end0] = lowerTo(freq, end0);
@@ -708,9 +708,9 @@
   function fishVoiceRaw(f, pan, vol, nushi) {   // （ぬしと スペシャルは、ながい ファンファーレふう）
     if (!sfx) return;
     const fr = fishFreq(f);
-    if (nushi || f.rare >= 4) { tone(fr, .3, { type: 'triangle', vol: vol * 1.2, pan }); tone(fr * 1.5, .3, { type: 'triangle', vol: vol * .8, pan, at: .11 }); tone(fr * 2, .42, { type: 'square', vol: vol * .5, pan, at: .22 }); if (f.rare === 5) tone(fr * 3, .34, { type: 'square', vol: vol * .35, pan, at: .5 }); }
-    else if (f.rare === 3) { tone(fr, .18, { type: 'triangle', vol, pan }); tone(fr * 2, .12, { type: 'square', vol: vol * .5, pan, at: .09 }); tone(fr * 3, .1, { type: 'square', vol: vol * .35, pan, at: .17 }); }
-    else if (f.rare === 2) { tone(fr, .14, { type: 'square', vol: vol * .8, pan }); tone(fr * 2, .1, { type: 'square', vol: vol * .4, pan, at: .09 }); }
+    if (nushi || f.rare >= 4) { tone(fr, .3, { type: 'triangle', vol: vol * 1.2, pan }); tone(fr * 1.5, .3, { type: 'triangle', vol: vol * .8, pan, at: .11 }); tone(fr * 2, .42, { type: 'round', vol: vol * .5, pan, at: .22 }); if (f.rare === 5) tone(fr * 3, .34, { type: 'round', vol: vol * .35, pan, at: .5 }); }
+    else if (f.rare === 3) { tone(fr, .18, { type: 'triangle', vol, pan }); tone(fr * 2, .12, { type: 'round', vol: vol * .5, pan, at: .09 }); tone(fr * 3, .1, { type: 'round', vol: vol * .35, pan, at: .17 }); }
+    else if (f.rare === 2) { tone(fr, .14, { type: 'round', vol: vol * .8, pan }); tone(fr * 2, .1, { type: 'round', vol: vol * .4, pan, at: .09 }); }
     else tone(fr, .14, { type: 'triangle', vol, pan });
   }
   const panOf = x => clamp((x / W - .5) * 1.8, -.9, .9);
@@ -745,7 +745,7 @@
   const cueGather = () => { const t = performance.now(); if (t - lastGather < 2500) return; lastGather = t; tone(659, .1, { vol: .05 }); tone(784, .14, { vol: .05, at: .09 }); };
   const cuePlop = x => { tone(720, .16, { vol: .09, glide: .32, pan: panOf(x) }); noise(.1, { vol: .035, at: .04, pan: panOf(x) }); };
   const cuePon = (x, off) => { tone(off ? 659 : 523, .1, { type: 'triangle', vol: .09, glide: off ? .6 : 1.26, pan: panOf(x) }); buzz(10); };
-  const cueShutter = () => { noise(.05, { vol: .09 }); noise(.06, { at: .09, vol: .08 }); tone(1046, .07, { type: 'square', vol: .04, at: .02 }); buzz([15, 40, 15]); };
+  const cueShutter = () => { noise(.05, { vol: .09 }); noise(.06, { at: .09, vol: .08 }); tone(1046, .07, { type: 'round', vol: .04, at: .02 }); buzz([15, 40, 15]); };
   const cueOpen = () => { [523, 659, 784].forEach((f, i) => tone(f, .22, { type: 'triangle', vol: .06, at: i * .08 })); };
   const cueClose = () => { [784, 659, 523].forEach((f, i) => tone(f, .18, { type: 'triangle', vol: .05, at: i * .07 })); };
 
@@ -878,7 +878,7 @@
   // ─── BGM（外付け tsuri-bgm.js。はじめは OFF。「おと」が ON の 時だけ ながれる。おへやを ひらいて いる 間だけ）───
   //   曲：ひるは b（ぽこぽこ）、ランプを けした 星空の へやは c（ほしぞら）。「みみで ながめる」の 間は おやすみ（魚の なまえの おとを じゃましない）。
   //   「BGM」ボタンは 下の ならびに 足す。おとが OFF の まま おしたら、おとも つける。ながす 音の 部品（AudioContext）は、おへやの ものを かりる。
-  let bgmBtn = null, bgmLoading = null, soundWasOff = false;
+  let bgmBtn = null, bgmMixBtn = null, bgmLoading = null, soundWasOff = false;
   const loadBgm = () => window.TsuriBgm ? Promise.resolve(window.TsuriBgm) : (bgmLoading || (bgmLoading = new Promise(res => { const s = document.createElement('script'); s.src = BASE + 'tsuri-bgm.js'; s.onload = () => res(window.TsuriBgm || null); s.onerror = () => res(null); document.head.append(s); })));
   function bgmEnter() {
     const B = window.TsuriBgm; if (!B) return;
@@ -889,6 +889,8 @@
         onToggle: next => { const msg = next ? (soundWasOff ? 'おとと BGMを つけたよ。' : 'BGMを つけたよ。') + ' しずかな きょくが ながれるよ。' : 'BGMを けしたよ。'; soundWasOff = false; say(msg, true); sr.textContent = msg; }
       });
       $(dlg, '.tk-actions').append(bgmBtn);
+      if (B.mixButton) bgmMixBtn = B.mixButton({ className: 'tk-bgm tk-bgmmix', sound: soundNow, enableSound: () => { soundWasOff = true; toggleSound(true); }, onToggle: next => { const msg = next ? (soundWasOff ? 'おとと BGMを つけたよ。' : 'BGMを つけたよ。') + ' しずかな きょくが ながれるよ。' : 'BGMを けしたよ。'; soundWasOff = false; say(msg, true); sr.textContent = msg; } });
+      if (bgmMixBtn) $(dlg, '.tk-actions').append(bgmMixBtn);
     }
     B.enter('tank', { ctx: audio, sound: soundNow, starry: () => starry, mute: () => listen, time: () => room.dataset.time });   // おへやの じかん（asa・hiru・yuu・yoru）で 曲が かわる
   }
@@ -1170,11 +1172,11 @@
   const starPath = (x, y, s) => `M${x} ${y - s} L${x + s * .28} ${y - s * .28} L${x + s} ${y} L${x + s * .28} ${y + s * .28} L${x} ${y + s} L${x - s * .28} ${y + s * .28} L${x - s} ${y} L${x - s * .28} ${y - s * .28}Z`;
   starwall.innerHTML = `<svg viewBox="0 0 360 640" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:100%" aria-hidden="true">${STARS.map(st => `<path class="tk-st" d="${starPath(st.x, st.y, st.s)}" fill="${st.c}" style="animation-delay:${st.d.toFixed(2)}s;animation-duration:${st.p.toFixed(2)}s"/>`).join('')}</svg>`;
   rice.innerHTML = riceSvg();
-  const cueClick = () => { noise(.03, { vol: .05 }); tone(1320, .04, { type: 'square', vol: .03 }); };
+  const cueClick = () => { noise(.03, { vol: .05 }); tone(1320, .04, { type: 'round', vol: .03 }); };
   const cueLamp = on => {
     noise(.03, { vol: .06 });
     if (on) { tone(660, .08, { type: 'triangle', vol: .07 }); tone(880, .1, { type: 'triangle', vol: .07, at: .08 }); }
-    else { tone(880, .1, { type: 'triangle', vol: .06, glide: .5 }); [2093, 2637, 3136, 2637, 3136, 3951].forEach((f, i) => tone(f, .09, { type: 'square', vol: .018, at: .22 + i * .12 })); }
+    else { tone(880, .1, { type: 'triangle', vol: .06, glide: .5 }); [2093, 2637, 3136, 2637, 3136, 3951].forEach((f, i) => tone(f, .09, { type: 'round', vol: .018, at: .22 + i * .12 })); }
   };
   const cueHappy = () => { tone(784, .12, { type: 'triangle', vol: .07 }); tone(988, .18, { type: 'triangle', vol: .07, at: .12 }); };
   const cueChime = () => [1568, 2093, 2637].forEach((f, i) => tone(f, .12, { type: 'triangle', vol: .05, at: i * .1 }));
@@ -1489,5 +1491,5 @@
 
   // 検査用（音の 出口を 測る）：音の なまえ → よびだし。ふだんの ゲームでは つかわない
   const CUES = { sprinkle: () => cueSprinkle(180), munch: () => cueMunch(180), gather: () => { lastGather = -1e9; cueGather(); }, plop: () => cuePlop(180), pon: () => cuePon(180, false), ponOff: () => cuePon(180, true), shutter: cueShutter, open: cueOpen, close: cueClose, click: cueClick, lampOn: () => cueLamp(true), lampOff: () => cueLamp(false), happy: cueHappy, chime: cueChime, munchMany: cueMunchMany, bubbles: cueBubbles, parade: cueParade, blip: () => asKind('amb', () => tone(640, .1, { vol: .022, glide: 1.9 })), napBreath: () => tone(150, .9, { type: 'triangle', vol: .018, glide: .8 }), utouto: () => tone(150, .9, { type: 'triangle', vol: .04, glide: .8 }), tourNote: () => tone(fishFreq(kinds()[0]), .26, { type: 'triangle', vol: .08 }), tourEnd: () => [523, 659, 784].forEach((f, i) => tone(f, .5, { type: 'triangle', vol: .06, at: i * .02 })) };
-  window.TsuriTank = { grow: { stageOf, check: growCheck, mul: GROW_MUL.slice(), dayIdx, rec: id => { const g = growRec(id); return g ? { ...g } : null; }, reload: () => { tank = readTank(); } }, cues: { ...CUES, voice: (id, nushi) => { const f = kinds().find(k => k.id === id); if (f) fishVoice(f, 0, .09, !!nushi); }, ids: () => Object.keys(CUES) }, audio: { tone, noise }, frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open: () => open(), close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, parade: !!parade && !parade.still, paradeStill: !!parade && parade.still, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, guest: () => guestId, heya: { encode: encodeRoom, decode: decodeRoom, link: roomLink, open: code => { const v = decodeRoom(code); if (!v || dlg.open) return false; open(v); return true; }, visiting: () => !!visit, back: backHome, max: { ...HEYA_MAX }, decorIds: [...DECOR_IDS] }, version: 7 };
+  window.TsuriTank = { grow: { sizes: () => fishes.map(o => ({ id: o.f.id, size: o.size, base: o.base, stage: o.stage })), stageOf, check: growCheck, mul: GROW_MUL.slice(), dayIdx, rec: id => { const g = growRec(id); return g ? { ...g } : null; }, reload: () => { tank = readTank(); } }, cues: { ...CUES, voice: (id, nushi) => { const f = kinds().find(k => k.id === id); if (f) fishVoice(f, 0, .09, !!nushi); }, ids: () => Object.keys(CUES) }, audio: { tone, noise }, frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open: () => open(), close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, parade: !!parade && !parade.still, paradeStill: !!parade && parade.still, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, guest: () => guestId, heya: { encode: encodeRoom, decode: decodeRoom, link: roomLink, open: code => { const v = decodeRoom(code); if (!v || dlg.open) return false; open(v); return true; }, visiting: () => !!visit, back: backHome, max: { ...HEYA_MAX }, decorIds: [...DECOR_IDS] }, version: 7 };
 })();

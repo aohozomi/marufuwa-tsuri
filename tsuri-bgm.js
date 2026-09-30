@@ -148,16 +148,19 @@
   }
 
   // ── 状態 ──
+  const readMix = () => { const v = (readJSON(KEY) || {}).mix; if (Array.isArray(v) && v.length === 3 && v.every(x => typeof x === 'number' && Number.isInteger(x))) { const [p, m, e] = v; if (p >= 1 && p <= 8 && m >= 0 && m <= 8 && (e === 0 || e === 1)) return [p, m, e]; } return null; };   // じぶんで くんだ BGM の ばんごう [ひくい おと 1〜8, うた 0〜8（0＝なし）, こだま 0/1]。なければ null（じかんで かわる）
+  let mix = readMix();
   let on = (readJSON(KEY) || {}).on === true, cur = null, air = null, ownCtx = null, wantGesture = false, ticker = 0;
   const stack = [], subs = new Set();
   const notify = () => subs.forEach(f => { try { f(); } catch {} });
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 1, on })); } catch {} };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(mix ? { v: 1, on, mix } : { v: 1, on })); } catch {} };
   const mainSound = () => { const m = readJSON(MAIN); return !!(m && m.sound === true); };
   const soundOk = fn => { try { return typeof fn === 'function' ? !!fn() : mainSound(); } catch { return false; } };
   const norm = t => ({ asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n' }[t] || t);
   function pickKey(name, o) {   // 曲は「いまの じかん」できまる（a あさ・h ひる・y ゆうがた・n よる）。じかんが わからなければ ひる
     o = o || {};
     if (name !== 'hiroba' && name !== 'tank' && name !== 'gaze') return null;   // 釣りの 画面など：鳴らさない
+    if (mix) return 'mix';   // じぶんで くんだ BGM（ばしょ・じかんに かかわらず）
     if (name === 'tank' && val(o.starry)) return 'n';   // ランプを けして 星空に した へやは よるの 曲
     const t = norm(val(o.time)); return Object.prototype.hasOwnProperty.call(KEYS, t) ? t : 'h';
   }
@@ -180,7 +183,7 @@
   function startPlayer(c, key, startPart) {   // startPart＝はじめに ながす 曲（0＝1つめ／1＝2つめ）。おへやは 2つめから はじめて、ひろばと ちがう 曲に する
     const t = track(key), g = c.createGain(), now = c.currentTime, off = startPart > 0 && t.marks[startPart] > 0 ? t.marks[startPart] : 0;
     g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(TRIM[key], now + 3); g.connect(airFor(c));
-    const p = { key, ctx: c, gain: g, loopStart: now + .15 - off, idx: off ? Math.max(0, t.ev.findIndex(e => e[0] >= off - 1e-6)) : 0, startPart: off ? startPart : 0, ended: false, made: 0 };
+    const p = { key, sig: key, ctx: c, gain: g, loopStart: now + .15 - off, idx: off ? Math.max(0, t.ev.findIndex(e => e[0] >= off - 1e-6)) : 0, startPart: off ? startPart : 0, ended: false, made: 0 };
     p.pump = () => {
       if (p.ended || c.state === 'closed') return;
       const t0 = c.currentTime, horizon = t0 + 4;
@@ -188,6 +191,37 @@
         const e = t.ev[p.idx], at = p.loopStart + e[0]; if (at > horizon) break;
         if (at >= t0 - .05) { try { voice(c, g, at, e[1], e[2], e[3]); p.made++; } catch {} }   // 間に あわなかった 音は とばす（まとめて 鳴らさない）
         p.idx++; if (p.idx >= t.ev.length) { p.idx = 0; p.loopStart += t.len; }
+      }
+    };
+    p.pump(); return p;
+  }
+  // ─── じぶんで くみたてる BGM（層3つ）───
+  //   1. ひくい おと＝8曲の 和音の うち 1つ（1〜8）／2. うた＝8曲の 旋律の うち 1つ（0＝なし）／3. こだま＝うたを 1オクターブ ひくく 4.6びょう おくらせて かさねる（0/1）。
+  //   3つは べつべつに くりかえす（ながさが ちがう ので 少しずつ ずれて、あきない）。ドレミソラ と 白い 鍵ばんだけ なので どれを くみあわせても ぶつからない。高い おとは ない（旋律 G3〜G4・こだま G2〜G3）。
+  //   番号は p-m-e（例 3-5-1）。曲の 順番＝1 あさ1・2 あさ2・3 ひる1・4 ひる2・5 ゆうがた1・6 ゆうがた2・7 よる1・8 よる2（PART_KEYS の じゅん。ふやす ときは うしろへ）
+  const MIX_TRIM = .29, ECHO_DELAY = 4.6, ECHO_GAIN = .4;
+  function mixLayers(m) {
+    const [p, mm, e] = m, pn = PART_KEYS[p - 1], pp = PARTS[pn](), sc = (ev, k) => ev.map(([tt, d, mi, o]) => [tt, d, mi, { ...o, gain: o.gain * k }]), byT = (x, y) => x[0] - y[0], out = [];
+    out.push({ name: 'pad', ev: sc(pp.ev.filter(x => x[3].role === 'pad'), PART_TRIM[pn] / MIX_TRIM * (mm > 0 ? 1 : 1.5)).sort(byT), len: pp.len, delay: 0 });   // うたなしの ときは 和音だけ なので 少し 大きく（−38 LUFS）
+    if (mm > 0) {
+      const mn = PART_KEYS[mm - 1], mp = PARTS[mn](), km = PART_TRIM[mn] / MIX_TRIM * (e ? .93 : 1), mel = mp.ev.filter(x => x[3].role === 'mel');
+      out.push({ name: 'mel', ev: sc(mel, km).sort(byT), len: mp.len, delay: 0 });
+      if (e) out.push({ name: 'echo', ev: mel.map(([tt, d, mi, o]) => [tt, d, mi - 12, { ...o, gain: o.gain * km * ECHO_GAIN, a: Math.max(o.a || 0, .5), r: (o.r || 0) + .4 }]).sort(byT), len: mp.len, delay: ECHO_DELAY });
+    }
+    return out;
+  }
+  function startMixPlayer(c, m) {
+    const g = c.createGain(), now = c.currentTime;
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(MIX_TRIM, now + 3); g.connect(airFor(c));
+    const layers = mixLayers(m).map(L => ({ ...L, loopStart: now + .15 + L.delay, idx: 0 }));
+    const p = { key: 'mix', sig: 'mix:' + m.join('-'), ctx: c, gain: g, layers, startPart: 0, ended: false, made: 0, code: m.join('-') };
+    p.pump = () => {
+      if (p.ended || c.state === 'closed') return;
+      const t0 = c.currentTime, horizon = t0 + 4;
+      for (const L of layers) for (let guard = 0; guard < 600; guard++) {
+        const e = L.ev[L.idx], at = L.loopStart + e[0]; if (at > horizon) break;
+        if (at >= t0 - .05) { try { voice(c, g, at, e[1], e[2], e[3]); p.made++; } catch {} }
+        L.idx++; if (L.idx >= L.ev.length) { L.idx = 0; L.loopStart += L.len; }
       }
     };
     p.pump(); return p;
@@ -208,15 +242,91 @@
       if (!key) { if (cur) { stopPlayer(cur, 1.6); cur = null; } return; }
       const top = stack[stack.length - 1], c = getCtx(top); if (!c) return;
       if (c.state === 'suspended') c.resume().catch(() => {});
-      if (cur && cur.key === key && cur.ctx === c) return;
+      const sig = key === 'mix' ? 'mix:' + mix.join('-') : key;
+      if (cur && (cur.sig || cur.key) === sig && cur.ctx === c) return;
       if (cur) stopPlayer(cur, 3);   // ふわっと つなぐ（前の 曲は 3びょうで きえる）
-      cur = startPlayer(c, key, top.name === 'tank' ? 1 : 0);
+      cur = key === 'mix' ? startMixPlayer(c, mix) : startPlayer(c, key, top.name === 'tank' ? 1 : 0);
     } catch { /* 音が 出せなくても ゲームは 止めない */ } finally { ensureTimer(); }
+  }
+  // ─── くみたてる まど（かな だけ・ボタンと えらぶ ところだけ。もじを うつ 場所は ない）───
+  const TIMEW = { ja: ['あさ', 'ひる', 'ゆうがた', 'よる'], en: ['Morning', 'Noon', 'Evening', 'Night'] };
+  const partName = (i, en) => en ? TIMEW.en[i >> 1] + ' ' + ((i & 1) + 1) : TIMEW.ja[i >> 1] + 'の ' + ((i & 1) + 1);   // i＝0〜7（PART_KEYS の じゅん）
+  const MX = {
+    ja: { open: 'くみたてる', openLabel: 'BGMを くみたてる', title: 'BGMを くみたてる', lead: '3つの そうを えらぶと、じぶんだけの BGMに なるよ。ばんごうを ともだちに おしえてね。', l1: '1. ひくい おと', l2: '2. うた', l3: '3. こだま', none: 'おやすみ（うたなし）', no: 'なし', yes: 'あり', auto: 'じかんで かわる ように もどす', codeAuto: 'いまは、じかんで かわる BGMだよ。', code: 'ばんごう：', off: 'BGMを ONに すると きけるよ。', close: 'とじる', changed: 'かえたよ。' },
+    en: { open: 'Build', openLabel: 'Build your BGM', title: 'Build your BGM', lead: 'Pick three layers to make your own BGM. Share the code with a friend!', l1: '1. Low sound', l2: '2. Melody', l3: '3. Echo', none: 'Rest (no melody)', no: 'Off', yes: 'On', auto: 'Back to the time of day', codeAuto: 'Now the music changes with the time of day.', code: 'Code: ', off: 'Turn BGM ON to listen.', close: 'Close', changed: 'Changed.' }
+  };
+  let mixDlg = null, mixOpener = null;
+  const mxL = () => MX[isEn() ? 'en' : 'ja'];
+  function ensureMixStyle() {
+    if (document.getElementById('bgm-mix-style')) return;
+    const s = document.createElement('style'); s.id = 'bgm-mix-style';
+    s.textContent = 'dialog.bgm-mix{border:2px solid #4b9cc9;border-radius:18px;padding:16px;width:min(92vw,420px);max-height:88vh;overflow:auto;background:#fff;color:#0d3a55;font:600 16px/1.6 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}' +
+      'dialog.bgm-mix::backdrop{background:rgba(6,36,58,.6)}dialog.bgm-mix h2{font-size:1.15rem;margin:0 0 6px;color:#0d3a55}dialog.bgm-mix p{margin:0 0 8px;font-size:.92rem}' +
+      'dialog.bgm-mix label{display:block;margin:10px 0 2px;font-weight:800}dialog.bgm-mix select{width:100%;min-height:48px;font:inherit;padding:6px 10px;border:2px solid #2f7fae;border-radius:12px;background:#fff;color:#0d3a55}' +
+      'dialog.bgm-mix button{min-height:48px;min-width:48px;padding:6px 14px;font:inherit;font-weight:800;border:2px solid #2f7fae;border-radius:14px;background:#e3f3ff;color:#0d3a55;cursor:pointer}dialog.bgm-mix button[aria-pressed=true]{background:#8fd0f5}dialog.bgm-mix button:disabled{opacity:.6;cursor:default}' +
+      'dialog.bgm-mix :focus-visible{outline:3px solid #0a4a72;outline-offset:2px}' +
+      '.bm-code{margin:12px 0 4px;padding:8px 10px;text-align:center;font-size:1.05rem;font-weight:800;background:#eaf6ff;border-radius:12px}.bm-hint{margin:4px 0 0;font-size:.85rem;color:#3b5a6c}.bm-hint[hidden]{display:none}' +
+      '.bm-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.bm-btns button{flex:1 1 40%}';
+    document.head.append(s);
+  }
+  function buildMixDialog() {
+    ensureMixStyle();
+    const d = document.createElement('dialog'); d.className = 'bgm-mix'; d.setAttribute('aria-labelledby', 'bm-title');
+    d.innerHTML = '<h2 id="bm-title"></h2><p class="bm-lead"></p>' +
+      '<label for="bm-p" class="bm-l1"></label><select id="bm-p"></select>' +
+      '<label for="bm-m" class="bm-l2"></label><select id="bm-m"></select>' +
+      '<label for="bm-e" class="bm-l3"></label><select id="bm-e"></select>' +
+      '<p class="bm-code" role="status" aria-live="polite"></p><p class="bm-hint" role="status" aria-live="polite" hidden></p>' +
+      '<div class="bm-btns"><span class="bm-onoff" style="display:contents"></span><button type="button" class="bm-auto"></button><button type="button" class="bm-close"></button></div>';
+    document.body.append(d);
+    const q = s => d.querySelector(s);
+    const onCh = () => { const p = Number(q('#bm-p').value), m = Number(q('#bm-m').value), e = Number(q('#bm-e').value); api.setMix([p, m, e]); paintMix(); };
+    ['#bm-p', '#bm-m', '#bm-e'].forEach(s => q(s).addEventListener('change', onCh));
+    q('.bm-auto').addEventListener('click', () => { api.setMix(null); paintMix(); });
+    const giveBack = () => { if (mixOpener && mixOpener.isConnected) { try { mixOpener.focus(); } catch {} } };   // とじたら もとの ボタンへ フォーカスを もどす（Esc で とじた ときは close の しらせ）
+    q('.bm-close').addEventListener('click', () => { d.close(); giveBack(); });
+    d.addEventListener('close', giveBack);
+    subs.add(() => { if (mixDlg && mixDlg.open) paintMix(); });
+    return d;
+  }
+  function paintMix() {   // ことばと えらぶ ものを いまの きろくに あわせる（ひらく たびに・かえる たびに）
+    const d = mixDlg, L = mxL(), en = isEn(), q = s => d.querySelector(s);
+    q('#bm-title').textContent = L.title; q('.bm-lead').textContent = L.lead; q('.bm-l1').textContent = L.l1; q('.bm-l2').textContent = L.l2; q('.bm-l3').textContent = L.l3; q('.bm-auto').textContent = L.auto; q('.bm-close').textContent = L.close;
+    const fill = (sel, opts, value) => { const keep = sel.value; if (sel.options.length !== opts.length) sel.replaceChildren(...opts.map(([v, txt]) => { const o = document.createElement('option'); o.value = String(v); o.textContent = txt; return o; })); else opts.forEach(([v, txt], i) => { sel.options[i].textContent = txt; }); sel.value = String(value); void keep; };
+    const parts = Array.from({ length: 8 }, (_, i) => [i + 1, (i + 1) + (en ? ': ' : '：') + partName(i, en)]);
+    const m0 = mix || defaultMix();
+    fill(q('#bm-p'), parts, m0[0]); fill(q('#bm-m'), [[0, '0' + (en ? ': ' : '：') + L.none], ...parts], m0[1]); fill(q('#bm-e'), [[0, '0' + (en ? ': ' : '：') + L.no], [1, '1' + (en ? ': ' : '：') + L.yes]], m0[2]);
+    q('.bm-code').textContent = mix ? L.code + mix.join('-') : L.codeAuto; q('.bm-auto').disabled = !mix; q('.bm-auto').setAttribute('aria-disabled', String(!mix));
+    const hint = q('.bm-hint'); hint.textContent = L.off; hint.hidden = on;
+  }
+  function defaultMix() {   // いま じかんで ながれて いる 曲を 出発点に（えらぶ 前の 見せかた）
+    const k = cur && cur.key && KEYS[cur.key] ? cur.key : 'h', i = PART_KEYS.indexOf(KEYS[k][0]);
+    return [i + 1, PART_KEYS.indexOf(KEYS[k][1]) + 1, 0];
   }
   const api = {
     version: 1, keys: ['a', 'h', 'y', 'n'], parts: PART_KEYS,
     on: () => on,
     set(v) { on = !!v; save(); refresh(); notify(); return on; },
+    // じぶんで くんだ BGM：[ひくい おと 1〜8, うた 0〜8, こだま 0/1]。null で「じかんで かわる」に もどる
+    mix: () => mix ? mix.slice() : null,
+    setMix(v) {
+      let nv = null; if (Array.isArray(v) && v.length === 3 && v.every(x => Number.isInteger(x))) { const [p, m, e] = v; if (p >= 1 && p <= 8 && m >= 0 && m <= 8 && (e === 0 || e === 1)) nv = [p, m, e]; }
+      if (v !== null && nv === null) return mix ? mix.slice() : null;   // へんな ばんごうは むし
+      mix = nv; save(); refresh(); notify(); return mix ? mix.slice() : null;
+    },
+    mixCode: () => mix ? mix.join('-') : '',
+    openMixer(opener, host) {
+      mixOpener = opener || null; if (!mixDlg) mixDlg = buildMixDialog();
+      const oo = mixDlg.querySelector('.bm-onoff'), h = host || {}; if (oo.firstChild && oo.firstChild._unsub) oo.firstChild._unsub();   // まどの 中の「BGM：ON/OFF」は、ひらいた ばしょの おと（enableSound）に つなぐ
+      oo.replaceChildren(api.button({ className: 'bm-btn', sound: h.sound, enableSound: h.enableSound, onToggle: h.onToggle }));
+      paintMix(); if (!mixDlg.open) { try { mixDlg.showModal(); } catch { mixDlg.setAttribute('open', ''); } } const s = mixDlg.querySelector('#bm-p'); if (s) s.focus(); },
+    // 「くみたてる」ボタン（ひろば・おへや に おく。ボタンを おすと まどが ひらく）
+    mixButton(o) {
+      o = o || {};
+      const b = document.createElement('button'); b.type = 'button'; b.className = o.className || 'bgm-btn'; if (o.id) b.id = o.id;
+      const paint = () => { const L = mxL(); b.textContent = L.open; b.setAttribute('aria-label', L.openLabel); b.title = L.openLabel; };
+      b.addEventListener('click', () => api.openMixer(b, { sound: o.sound, enableSound: o.enableSound, onToggle: o.onToggle })); subs.add(paint); paint(); b._unsub = () => subs.delete(paint); return b;
+    },
     enter(name, o) { const i = stack.findIndex(s => s.name === name); if (i >= 0) stack.splice(i, 1); stack.push({ name, o: o || {} }); refresh(); },
     leave(name) { const i = stack.findIndex(s => s.name === name); if (i >= 0) stack.splice(i, 1); refresh(); },
     refresh,
@@ -233,10 +343,10 @@
         api.set(next);
         if (typeof o.onToggle === 'function') { try { o.onToggle(next, soundOk(o.sound)); } catch {} }
       });
-      subs.add(paint); paint(); return b;
+      subs.add(paint); paint(); b._unsub = () => subs.delete(paint); return b;
     },
-    state: () => ({ on, key: cur ? cur.key : '', playing: !!cur, stack: stack.map(s => s.name), ownCtx: !!ownCtx, volume: VOLUME * boost, trim: { ...TRIM }, part: cur ? cur.startPart : 0 }),
-    _debug: { track, part: n => PARTS[n](), PARTS, KEYS, PART_TRIM, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, TOP_MIDI, MIN_ATTACK, LP, AIR_LP, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get ticker() { return ticker; } }
+    state: () => ({ on, key: cur ? cur.key : '', playing: !!cur, stack: stack.map(s => s.name), ownCtx: !!ownCtx, volume: VOLUME * boost, trim: { ...TRIM, mix: MIX_TRIM }, part: cur ? cur.startPart : 0, mix: mix ? mix.slice() : null }),
+    _debug: { mixLayers, MIX_TRIM, ECHO_DELAY, partName, track, part: n => PARTS[n](), PARTS, KEYS, PART_TRIM, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, TOP_MIDI, MIN_ATTACK, LP, AIR_LP, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get ticker() { return ticker; } }
   };
   window.TsuriBgm = api;
   // ゆびで さわった あとで はじめて 音の 部品を 作る／画面が かくれたら 止める／ほかの タブで「おと」「BGM」が かわったら 取りこむ
@@ -257,5 +367,5 @@
   ] };
   const regEn = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !regEn.done) { regEn.done = true; E.add(EN); } notify(); };
   addEventListener('load', regEn);
-  addEventListener('storage', e => { if (e.key === KEY) { on = (readJSON(KEY) || {}).on === true; refresh(); notify(); } else if (e.key === MAIN) refresh(); });
+  addEventListener('storage', e => { if (e.key === KEY) { on = (readJSON(KEY) || {}).on === true; mix = readMix(); refresh(); notify(); } else if (e.key === MAIN) refresh(); });
 })();
