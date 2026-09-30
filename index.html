@@ -1256,7 +1256,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const boss = save.total >= AREAS.find(a => a.id === BOSS.area).need, sf = seasonFish();
     box.hidden = false; const sunday = new Date().getDay() === 0 && weekShown() && weekShown().now;
     box.textContent = (sunday ? L('きょうは にちようび。こんしゅうの きろくを、ずかんの まどから しゃしんに できるよ。', 'It is Sunday. You can make this week' + String.fromCharCode(39) + 's photo from the sticker book.') + ' ' : '') + (sf ? L('この つきの さかな：「' + sf.name + '」。', 'This month' + String.fromCharCode(39) + 's fish: ' + sf.name + '. ') : '') + (EN()
-      ? 'Everyone has the same lucky fish today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (boss ? ' Today' + String.fromCharCode(39) + 's Giant tends to show up at ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ') — same for everyone.' : '')
+      ? 'Everyone has the same lucky fish today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (boss ? ' Today' + String.fromCharCode(39) + 's Guardian tends to show up at ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ') — same for everyone.' : '')
       : 'きょうは みんな おなじ さかなが ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (boss ? 'ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ（これも みんな おなじ）。' : ''));
   }
   function hud() {
