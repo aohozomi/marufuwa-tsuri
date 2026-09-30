@@ -98,7 +98,16 @@
       "オフラインようのしくみ（service worker・⟦0⟧）：ネットがあるときは、いつもいちばんあたらしいものをとります。ネットがないときだけ、ほぞんしたコピーをだします。おなじサイトのGETだけをあつかい、そとへはなにもおくりません。⟦1⟧でひらくと、このしくみとほぞんをはずせます。": "The offline mechanism (service worker · ⟦0⟧): when there is a connection, it always fetches the newest version. Only when there is no connection does it serve the saved copy. It handles only GET requests to the same site and sends nothing outside. Opening with ⟦1⟧ removes this mechanism and its saved copies.",
       "ひみつのことばは、ことばをハッシュ（SHA-256）にしてしらべます。ことばのいちらんは、プログラムのなかにそのままのかたちでははいっていません。ただし、みじかいことばはハッシュからわかってしまうことがあるので、ごほうびは、とられてもこまらないものだけにします。": "Secret Words are checked by turning the word into a hash (SHA-256). The list of words is not stored in the program in plain form. However, short words can sometimes be worked out from the hash, so rewards are limited to things that would not matter even if someone else got them.",
       "ゲームにもどる": "Back to the game",
-      "ひろばへ": "To the Plaza"
+      "ひろばへ": "To the Plaza",
+      "こころが つらい ときは": "When you are having a hard time",
+      "この ゲームは、つらい きもちを なおす ものでは ありません。でも、ひとりで かかえこまなくて だいじょうぶ、と つたえたい です。おこさんでも、おとなの かたでも、つらい ときに はなせる ところが あります。": "This game is not a treatment for painful feelings. But we want you to know that you do not have to carry them alone. Whether you are a child or an adult, there are places you can talk to when things are hard.",
+      "いますぐ あぶない ときは、110（けいさつ）か 119（きゅうきゅう）へ。": "If you are in immediate danger, call 110 (police) or 119 (ambulance) in Japan.",
+      "よりそいホットライン … 0120-279-338（24じかん・つうわりょうは かかりません）": "Yorisoi Hotline … 0120-279-338 (24 hours; toll-free)",
+      "#いのちSOS … 0120-061-338（24じかん・つうわりょうは かかりません）": "#Inochi SOS … 0120-061-338 (24 hours; toll-free)",
+      "こころのけんこうそうだんとういつダイヤル … 0570-064-556（つうわりょうが かかります。うけつけじかんは、おすまいのちいきに よって ちがいます）": "Mental Health Consultation Unified Dial … 0570-064-556 (call charges apply; hours vary by the region you live in)",
+      "おこさんむけ：24じかんこどもSOSダイヤル … 0120-0-78310（24じかん・つうわりょうは かかりません）／チャイルドライン … 0120-99-7777（18さいまで・まいにち16じ〜21じ・12がつ29にち〜1がつ3にちは おやすみ・つうわりょうは かかりません）": "For children: 24-Hour Kids SOS Dial … 0120-0-78310 (24 hours; toll-free) / Childline … 0120-99-7777 (up to age 18; daily 16:00–21:00, closed December 29 to January 3; toll-free)",
+      "にほんのそとに いる ときは、その くにの きんきゅうばんごうや、そうだんまどぐちに れんらくして ください。": "If you are outside Japan, please contact your local emergency number or a local crisis line.",
+      "ばんごうと じかんは、こうせいろうどうしょうの「まもろうよ こころ」の でんわそうだんの ページに のって いる ものです（かくにんび：2026ねん10がつ1にち）。かわる ことが あるので、かけて つながらない ときは、その ページで たしかめて ください。この ページから そとへは つながりません（ばんごうを かいて あるだけです）。": "The numbers and hours come from the “Mamorou yo Kokoro” telephone consultation page of the Ministry of Health, Labour and Welfare (checked October 1, 2026). They may change, so if you cannot get through, please check that page. Nothing on this page connects to the outside; the numbers are only written here."
     },
     rules: [
       // たしかめた 日づけ（毎日 かわる ため ルールで）
