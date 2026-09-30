@@ -1567,7 +1567,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
-    last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY};
+    last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY, badge: (first && left === 0 ? L('ずかん かんせい！', 'Sticker book complete!') : mile ? L(save.total + 'ひきめ！', 'Catch #' + save.total + '!') : '') , firstNushi};   // 節目：ずかん かんせい／10・30・50…ひきめ／はじめての ぬし
     drawAudioSize(); setPhase('caught'); cardWait(1500);   // 1.5びょうは カードを 出さず、まるふわと さかなと えんしゅつが しゅやく
     // つれた さかなを、まるふわが かかげる
     const held = $('held'), f = feet(mine);
@@ -1928,11 +1928,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ctx.translate(night ? 455 : 480, 300); if (last.nushi) ctx.scale(night ? 1.45 : 1.4, night ? 1.45 : 1.4); if (fishArt) ctx.drawImage(fishArt, -130, -130, 260, 260); else ctx.fillText(last.fish.icon, 0, 0); ctx.restore();
     // ぬし・まぼろしの ときは、きねんの わくと おび
     const seasonal = !!last.fish.season && !last.fish.legend && !last.nushi;
-    const special = seasonal ? L('この つきの さかなを つりました', 'Caught this month' + String.fromCharCode(39) + 's fish!') : T(last.fish.legend ? 'まぼろしに あえました' : last.nushi ? 'ぬしを つりました' : '');
+    const special = seasonal ? L('この つきの さかなを つりました', 'Caught this month' + String.fromCharCode(39) + 's fish!') : T(last.fish.legend ? 'まぼろしに あえました' : last.nushi ? (last.firstNushi ? L('はじめての ぬしを つりました', 'Caught my first Guardian!') : 'ぬしを つりました') : '') || last.badge;   // きねんの おび（ぬし・まぼろし・きせつが なければ 節目の おび）
     if (special) {
-      const edge = ctx.createLinearGradient(0, 0, 1200, 675); (last.fish.legend ? ['#ff8fa3', '#ffd34d', '#8fe3a8', '#7fd0f2', '#b79cf0'] : seasonal ? ['#ffb3c8', '#ffe27a', '#b9f0d0', '#a9d8ff', '#e3c6ff'] : ['#ffe27a', '#d39a1c', '#fff1b8', '#d39a1c', '#ffe27a']).forEach((tone, i) => edge.addColorStop(i / 4, tone));
+      const edge = ctx.createLinearGradient(0, 0, 1200, 675); (last.fish.legend ? ['#ff8fa3', '#ffd34d', '#8fe3a8', '#7fd0f2', '#b79cf0'] : (!last.nushi && !seasonal && last.badge) ? ['#b9f0d0', '#8fe3a8', '#fff6c9', '#8fe3a8', '#b9f0d0'] : seasonal ? ['#ffb3c8', '#ffe27a', '#b9f0d0', '#a9d8ff', '#e3c6ff'] : ['#ffe27a', '#d39a1c', '#fff1b8', '#d39a1c', '#ffe27a']).forEach((tone, i) => edge.addColorStop(i / 4, tone));
       ctx.strokeStyle = edge; ctx.lineWidth = 22; ctx.strokeRect(11, 11, 1178, 653);
-      ctx.fillStyle = last.fish.legend ? '#6a4bc4' : night ? '#f0b429' : seasonal ? '#e0679a' : '#a5481c'; roundRect(ctx, 40, 34, 420, 70, 35); ctx.fill();
+      ctx.fillStyle = last.fish.legend ? '#6a4bc4' : night ? '#f0b429' : seasonal ? '#e0679a' : (!last.nushi && last.badge) ? '#1f7a66' : '#a5481c'; roundRect(ctx, 40, 34, 420, 70, 35); ctx.fill();
       ctx.fillStyle = night ? '#4a2a00' : '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 38px system-ui,sans-serif'; ctx.fillText(special, 250, 71, 390);
     }
     ctx.fillStyle = night ? '#0f2447f2' : '#fffffff0'; roundRect(ctx, 690, 210, 460, 330, 34); ctx.fill(); ctx.strokeStyle = night ? '#ffd34d' : '#bfdce8'; ctx.lineWidth = night ? 6 : 5; ctx.stroke();
