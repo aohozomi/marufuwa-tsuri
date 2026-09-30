@@ -347,7 +347,9 @@ body.gazing .assist{display:none}
 #main-button[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
 .note{text-align:center;font-size:.85rem;color:#506874;line-height:2.3;margin-top:18px}
-rt{font-size:.62em;font-size:max(.62em,10px);letter-spacing:.02em;font-weight:700}   /* ふりがなを よむ ひとが いちばん こまるので、10px より ちいさく しない */
+rt{font-size:.62em;font-size:max(.62em,10px);letter-spacing:.02em;font-weight:700}
+ruby{ruby-align:center}   /* 「無 料」「大 丈 夫」のように、ふりがなが ながい とき 漢字の あいだが ひらかない */
+#status,.lead,.note{text-wrap:balance;word-break:auto-phrase}   /* 「よ。」だけの 行を つくらない（あたらしい ブラウザ。ふるい ものは いつも どおり） */   /* ふりがなを よむ ひとが いちばん こまるので、10px より ちいさく しない */
 .lead{font-size:1rem}
 #float[data-nibble=true]{animation:nibble .22s ease-in-out 3 !important}
 @keyframes nibble{50%{translate:0 6px}}
