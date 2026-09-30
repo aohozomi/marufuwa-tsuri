@@ -25,7 +25,7 @@
   const NORM_RE = new RegExp('(?<=[' + JPX + '])[\\s\\u3000]+|[\\s\\u3000]+(?=[' + JPX + '])', 'g');
   const norm = s => String(s).replace(NORM_RE, '').trim();
   const missing = new Set();
-  window.TsuriEn = { lang: LANG, t: s => s, missing: () => [...missing], toggle: null };
+  window.TsuriEn = { lang: LANG, t: s => s, missing: () => [...missing], toggle: null, add: () => {} };   // add は 英語の ときだけ はたらく（ひろば など べつの ページの 訳を たす）
 
   // ---------- きりかえの ボタン（日本語でも 英語でも 出す）----------
   function addToggle() {
@@ -328,12 +328,29 @@
   }
   window.TsuriEn.t = s => (JP.test(String(s)) ? (tr(s) ?? s) : s);
   window.TsuriEn.tr = tr;
+  // さかなの なまえだけ（ひろばの いけ など）も 訳す
+  FISH_JA.forEach((j, i) => EX.set(norm(j), FISH_EN[i]));
+  // べつの ページ・べつの ファイルが 訳を たす くち：TsuriEn.add({ex:{'にほんご':'English'}, rules:[[/正規表現/, (m…)=>'English']]})
+  window.TsuriEn.h = { nmFish, nmPal, nmArea, nmTime, norm, tailEn, EX, PAL_MAP, FISH_MAP };
+  window.TsuriEn.add = ({ ex, rules, short } = {}) => {
+    if (ex) Object.entries(ex).forEach(([k, v]) => EX.set(norm(k), v));
+    if (short) Object.entries(short).forEach(([k, v]) => SHORT.set(norm(k), v));
+    if (rules) rules.forEach(r => RULES.push(r));
+    // すでに 訳した ものも、もとの 日本語から やりなおす（あとから ふえた 訳・みじかい 訳が きく）
+    for (const [node, rec] of [...ORIG]) {
+      if (!node.isConnected) { ORIG.delete(node); continue; }
+      if (node.nodeValue !== rec.en) continue;   // ゲームが その あとで かきかえた ものは さわらない
+      const e = (forSvg(node) && SHORT.get(norm(rec.ja))) || tr(rec.ja);
+      if (e != null) { node.nodeValue = e; rec.en = e; }
+    }
+    missing.clear(); if (document.body) walk(document.body);   // まだ 日本語の ものも 訳す
+  };
 
   // =====================================================================
   //  DOM の ほんやく
   // =====================================================================
   const PURE = new Set(['RUBY', 'RT', 'RP', 'BR', 'SMALL', 'B', 'I', 'EM', 'STRONG', 'SPAN']);
-  const SKIP = new Set(['SCRIPT', 'STYLE', 'SVG', 'CANVAS', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION', 'NOSCRIPT', 'IMG']);
+  const SKIP = new Set(['SCRIPT', 'STYLE', 'CANVAS', 'TEXTAREA', 'INPUT', 'SELECT', 'OPTION', 'NOSCRIPT', 'IMG']);   // SVG の <text>（かんばんの もじ）も 訳す
   function reading(el) {
     let s = '';
     const walk = n => {
@@ -356,12 +373,17 @@
       if (v && JP.test(v)) { const e = tr(v); if (e != null) el.setAttribute(a, e); else missing.add(norm(v)); }
     }
   }
+  const SHORT = new Map();   // かんばん（SVG の もじ）は 場所が せまい ので、みじかい 訳を つかう
+  const ORIG = new Map();    // 訳した ぶぶんの「もとの 日本語」（あとから 訳が ふえた とき、やりなおせる）
+  const forSvg = n => { const p = n.parentElement; return !!(p && p.namespaceURI === 'http://www.w3.org/2000/svg'); };
   function translateText(n) {
     const v = n.nodeValue;
     if (!v || !JP.test(v)) return;
-    const e = tr(v);
+    const e = (forSvg(n) && SHORT.get(norm(v))) || tr(v);
     if (e != null) {
-      const lead = /^\s*/.exec(v)[0], trail = /\s*$/.exec(v)[0]; n.nodeValue = (lead ? ' ' : '') + e + (trail ? ' ' : '');
+      if (ORIG.size > 4000) { for (const k of ORIG.keys()) { if (!k.isConnected) ORIG.delete(k); } }
+      ORIG.set(n, { ja: v, en: null });
+      const lead = /^\s*/.exec(v)[0], trail = /\s*$/.exec(v)[0]; n.nodeValue = (lead ? ' ' : '') + e + (trail ? ' ' : ''); ORIG.get(n).en = n.nodeValue;
       // 「（いま：」のように ひらいた かっこは、つぎの ぶぶんの「）」を「)」に そろえる
       if (e.includes('(') && !e.includes(')')) { let s = n.nextSibling; while (s) { const t = s.nodeType === 3 ? s : (s.firstChild && s.firstChild.nodeType === 3 ? null : null); if (s.nodeType === 3 && s.nodeValue.trim().startsWith('）')) { s.nodeValue = s.nodeValue.replace('）', ')'); break; } s = s.nextSibling; } }
     } else missing.add(norm(v));
@@ -376,7 +398,7 @@
     if (JP.test(reading(el)) || hasRuby) {
       if ((hasRuby || el.children.length) && isPure(el)) {
         const e = tr(reading(el));
-        if (e != null) { el.replaceChildren(document.createTextNode(e)); return; }
+        if (e != null) { const t = document.createTextNode(e); ORIG.set(t, { ja: reading(el), en: e }); el.replaceChildren(t); return; }
         if (hasRuby) { missing.add(norm(reading(el))); return; }
       }
     }
