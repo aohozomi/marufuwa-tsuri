@@ -1264,7 +1264,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     pitatto: {name: 'ぴたっと', tip: 'とちゅうで、いちど とまるよ', f: p => p < .34 ? 1 - p * 1.18 : p < .58 ? .6 : .6 * (1 - (p - .58) / .42)}
   };
   const swimOf = f => f.legend ? 'yuttari' : f.rare === 1 ? ['yuttari', 'yurari'][f.id % 2] : f.rare === 2 ? ['yurari', 'guigui', 'yuttari'][f.id % 3] : f.rare === 3 ? ['guigui', 'furafura', 'pitatto'][f.id % 3] : ['furafura', 'pitatto'][f.id % 2];
-  let swim = SWIMS.yurari, hitAt = 0, perfects = 0, spinning = 0, misses = 0, restUntil = 0;
+  let swim = SWIMS.yurari, hitAt = 0, perfects = 0, spinning = 0, misses = 0, restUntil = 0, restBlip = 0;
   const cycleTime = () => (performance.now() - ringStart) % period;
   const ringSize = () => swim.f(cycleTime() / period);
   // 「いまだ」までの じかんの ずれ（ミリびょう）。まえでも あとでも、ちかい ほうを かえす
@@ -1379,7 +1379,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     button.focus();
   }
   function startReel() {
-    hpMax = hp = 3 + fish.rare * 2 + (nushi ? 5 : 0); period = 1850 - fish.rare * 250;
+    hpMax = hp = Math.min(12, 3 + fish.rare * 2 + (nushi ? 5 : 0)); period = 1850 - fish.rare * 250;   // ぬしでも さいだい 12（16だと ながすぎて つかれる）
     if (save.total === 0) { hpMax = hp = 3; period = 1700; }   // さいしょの 1ぴきは、かならず すぐ つれる
     if (fish.legend) { hpMax = hp = 7; period = 1500; }   // まぼろしは、でて きたら つれる。わは ゆっくり
     swim = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; perfects = 0; misses = 0; restUntil = 0;
@@ -1400,7 +1400,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function pull() {
     // 「いまだ」との じかんの ずれで きめる（えがく しくみに たよらない。わの うごきかたが ちがっても、おなじ ものさし）
     // ひいた あとは、みじかい「ぷにっ」やすみ。れんだ しても はやく ならない（ねらう ひとと、おなじ くらいの はやさ）。やすみの あいだの タップは、なにも おきない だけ
-    if (performance.now() < restUntil) return;
+    if (performance.now() < restUntil) {   // やすみの 間の おしは なにも おきない だけ。「ぷ」と ちいさく ならして、おした ことは とどいて いると しらせる（つづけて おしても 0.25びょうに 1かい）
+      if (performance.now() - restBlip > 250) { restBlip = performance.now(); guideTone(180, .05, 'triangle', 0, .03, 150); }
+      return;
+    }
     const miss = Math.abs(offBeat()), easy = windowMs();
     const blind = save.easy || (reduce() && !sndOn('guide'));   // らくちん、または、わも あんないの おとも ない とき：タイミングを みない
     const power = blind ? 2 : miss <= easy ? 3 : miss <= easy + .12 * period ? 2 : 1;
