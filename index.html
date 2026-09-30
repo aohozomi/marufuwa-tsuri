@@ -126,6 +126,9 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .hud button::after{content:"";position:absolute;left:12%;top:18%;width:7px;height:7px;border-radius:50%;background:#ffffffe6;pointer-events:none}
 .areas small{display:block;font-weight:600;font-size:.75rem}
 #open-book{position:relative}
+.book-fact{position:sticky;bottom:0;margin:8px 0;padding:10px 12px;background:#fffbe6;border:2px solid #d9a520;border-radius:14px;color:#593700;font-size:.9rem;font-weight:700;line-height:1.7;text-align:center;box-shadow:0 -6px 12px #0000001a}   /* まめちしき（したに ついて くる） */
+.book-fact[hidden]{display:none}
+#book-grid div[data-fact="1"]{cursor:pointer}
 html[data-clean=true],html[data-clean=true] body,html[data-clean=true] main{background:transparent !important;box-shadow:none !important;border-color:transparent !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
 html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.actions){display:none !important}   /* ?clean=1：けしきと「なげる」だけ（OBS の ブラウザソース などで つかう）。ほかの ひとの ふつうの がめんには ふれない */
 .seen-ring{display:inline-block;width:18px;height:18px;margin-right:6px;border-radius:50%;vertical-align:-3px;background:conic-gradient(#e08a00 var(--p,0%),#c9dbe4 0);-webkit-mask:radial-gradient(farthest-side,transparent 58%,#000 62%);mask:radial-gradient(farthest-side,transparent 58%,#000 62%)}   /* ずかんの すすみぐあい（ぜんぶ あつまると ぐるっと いっしゅう） */
@@ -731,6 +734,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <p class="count"><span id="book-seen">0</span> / <span id="book-base">30</span> しゅるい</p>
     <p class="count" id="book-myth"></p>
     <div id="book-grid"></div>
+    <p id="book-fact" class="book-fact" role="status" hidden></p>
     <div class="photo-actions"><button id="book-photo" type="button">シールちょうを しゃしんに</button></div>
     <button class="close" type="button" id="close-book">とじる</button>
   </dialog>
@@ -959,6 +963,34 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const starCount = (f, nushi) => Math.min(5, f.rare + (nushi ? 1 : 0));
   const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
   const starEl = (f, nushi) => { const el = document.createElement('span'); el.className = 'stars'; el.textContent = starsOf(f, nushi); el.setAttribute('role', 'img'); el.setAttribute('aria-label', 'めずらしさ ' + starCount(f, nushi) + ' / 5'); return el; };   // 読み上げは「めずらしさ 3 / 5」
+  // ずかんの まめちしき：さかなの もとに なった ほんとうの いきものの こと（ぜんぶ ほんとうの ことだけ）。[ひらがな, English]。まぼろし・「こ」の なかまには つけない
+  const FACTS = {
+    0: ['あじの よこには、ぜいごという かたい とげの ある うろこが ならんで いるよ。', 'Horse mackerel have hard, pointy scales called scutes along their sides.'],
+    1: ['ふぐは、みずを のんで おなかを ふくらませて、てきを びっくりさせるよ。', 'Pufferfish gulp water to puff up and surprise their enemies.'],
+    2: ['にほんでは、たいは「めでたい」に ひびきが にて いて、おいわいに よく つかわれるよ。', 'In Japan, sea bream (tai) sounds like “medetai” (happy), so it is used at celebrations.'],
+    3: ['いわしは、たくさんで むれに なって およいで、てきから みを まもるよ。', 'Sardines swim together in big schools to stay safe.'],
+    4: ['かれいは、うまれた ときは めが りょうがわに あるけれど、おおきく なると ひとつの めが かたがわに うごくよ。', 'Flounders are born with an eye on each side, and one eye moves over as they grow.'],
+    5: ['えびは、しっぽを ぱたぱたと うごかして、うしろへ すばやく にげられるよ。', 'Shrimp can flick their tails to dart backward quickly.'],
+    6: ['くらげは、からだの ほとんどが みずで、ほねも のうも ないんだよ。', 'Jellyfish are mostly water. They have no bones and no brain.'],
+    7: ['かには、あしの まがりかたの せいで、よこに あるくのが とくいだよ。', 'Crabs walk sideways because of the way their legs bend.'],
+    8: ['きんぎょの ごせんぞさまは、ふなという さかなだよ。', 'Goldfish come from a fish called crucian carp.'],
+    9: ['いかには しんぞうが 3つ あって、ちの いろは あおいよ。', 'Squid have three hearts, and their blood is blue.'],
+    10: ['たこの あしは、さわった ものの あじが わかるんだよ。', 'Octopus arms can taste what they touch.'],
+    11: ['べらの なかまには、ほかの さかなの からだに ついた ごみを たべて きれいに して あげる こも いるよ。', 'Some wrasses clean other fish by eating tiny pests off them.'],
+    12: ['たいの なかまは、かたい かいがらも かめる つよい はを もって いるよ。', 'Sea breams have strong teeth that can crush shells.'],
+    13: ['さばは、ずっと およぎ つづけて いきを して いるよ。', 'Mackerel keep swimming all the time to breathe.'],
+    14: ['あなごは、すなや いわの あなに かくれて、よるに でて くるのが すきだよ。', 'Conger eels like to hide in holes and come out at night.'],
+    15: ['ひらめは、まわりの いろに あわせて、からだの いろを かえられるよ。', 'Flatfish can change their color to match the sea floor.'],
+    16: ['さくらますは、かわで うまれて うみへ いき、また かわに もどって くる ことが あるよ。', 'Cherry salmon are born in rivers, live in the sea, and can return to rivers.'],
+    17: ['はりせんぼんは、ふくらむと からだじゅうの とげが たつよ。', 'When a porcupinefish puffs up, all its spines stand out.'],
+    18: ['うみがめは、うまれた はまに もどって、たまごを うむ ことが あるよ。', 'Sea turtles often return to the beach where they were born to lay eggs.'],
+    19: ['いるかは ねる とき、のうを はんぶんずつ やすませて いるよ。', 'Dolphins rest half of their brain at a time when they sleep.'],
+    20: ['まんぼうは、よこに なって みずの おもてで ひなたぼっこを する ことが あるよ。', 'Sunfish sometimes lie on their sides at the surface to warm up.'],
+    21: ['えいの くちは、おなかがわに ついて いるよ。', 'A ray’s mouth is on its belly side.'],
+    22: ['たちうおは、あたまを うえに むけて、たった ように およぐ ことが あるよ。', 'Cutlassfish sometimes swim standing upright with their heads up.'],
+    28: ['こいは ながいきで、30ねん いじょう いきる ことも あるよ。', 'Koi can live for more than 30 years.'],
+    29: ['くじらは、あたまの うえの あなで いきを するから、ときどき みずの うえに でて くるよ。', 'Whales breathe through a hole on top of their heads, so they come up to the surface now and then.']
+  };
   const cm = value => { const n = Number(value); return n >= 100 ? String(Math.round(n)) : n.toFixed(1).replace(/\.0$/, ''); };   // 「18.83」より「18.8」。100センチを こえたら 整数
   const DECOR = ['かいがら', 'きれいな いし', 'ながれぎ', 'みずくさ', 'ちいさな びん', 'ほしの かけら'];
   const TIME_LABEL = {a: 'あさ', h: 'ひる', y: 'ゆうがた', n: 'よる'};
@@ -1551,7 +1583,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (found) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[found] = (save.decor[found] || 0) + 1; }
     store(); hud(); drawEquip();
     const gift = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))].filter(item => !had.includes(item)).map(item => item.name);
-    $('card-fish').textContent = fish.icon; $('card-name').replaceChildren(ruby(fish.kanji)); $('card').dataset.nushi = String(!!nushi && !fish.legend);   // ぬし専用カード
+    $('card-fish').textContent = fish.icon; $('card-name').replaceChildren(...(nushi && !fish.legend ? [L('ぬしの ', 'Guardian '), ruby(fish.kanji)] : [ruby(fish.kanji)])); $('card').dataset.nushi = String(!!nushi && !fish.legend);   // ぬし専用カード
     $('card-size').replaceChildren(cm(size) + ' センチ　', starEl(fish, nushi));
     if (found) gift.push(found + '（さかなが もって いたよ）');
     if (leveled) unlockNames(lvBefore, lvNow).forEach(name => gift.push(name));
@@ -2630,9 +2662,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('open-book').addEventListener('click', () => {
     save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); drawBadge();   // ひらいた → みた ことに なる
     { const myth = FISH.filter(f => f.legend), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? '★5の まぼろしの こ：ぜんいんに あえたよ！' : '★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'); }
+    $('book-fact').hidden = true; $('book-fact').textContent = '';
     $('book-grid').replaceChildren(...FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])).map(f => {
       const got = save.fish[f.id], cell = document.createElement('div');
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
+      if (got && FACTS[f.id]) { cell.tabIndex = 0; cell.setAttribute('role', 'button'); cell.dataset.fact = '1'; const showFact = () => { const box = $('book-fact'); box.hidden = false; box.replaceChildren(L(f.name + '：' + FACTS[f.id][0], T(f.name) + ': ' + FACTS[f.id][1])); box.dataset.for = String(f.id); }; cell.addEventListener('click', showFact); cell.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showFact(); } }); }   // おすと まめちしき
       const icon = document.createElement('b'); if (got) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
       cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
@@ -2650,6 +2684,20 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         cell.append(icon, got ? ruby(f.kanji) : L('まだ あってない', 'Not met yet'), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? L('さいだい ', 'Largest ') + cm(got.best) + L('センチ（', ' cm (') + got.count + L('ひき）', ')') + ' · ' + month : month);
         return cell;
       }));
+    }
+    {   // ぬしの こ：ぬしを つった さかな。「ぬしの ○○」と さいだいの おおきさ
+      const guard = FISH.filter(f => save.fish[f.id] && save.fish[f.id].nushi && !f.legend);
+      if (guard.length) {
+        const head = document.createElement('h3'), note = document.createElement('p');
+        head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L('ぬしの こ', 'Guardians');
+        note.style.cssText = 'grid-column:1/-1;margin:0;text-align:center;font-size:.82rem;line-height:1.7'; note.textContent = L('ぬしを つった さかなが ならぶよ。ぬしは ときどき、ふかい ところから でて くるよ。', 'The Guardians you have caught. They sometimes rise from the deep.');
+        $('book-grid').append(head, note, ...guard.map(f => {
+          const got = save.fish[f.id], cell = document.createElement('div'); cell.dataset.seen = 'true'; cell.dataset.rare = String(f.rare); cell.dataset.nushi = 'true';
+          const icon = document.createElement('b'); icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; icon.setAttribute('aria-hidden', 'true');
+          cell.append(icon, L('ぬしの ', 'Guardian '), ruby(f.kanji), document.createElement('br'), L('さいだい ', 'Largest ') + cm(got.best) + L('センチ', ' cm'));
+          return cell;
+        }));
+      }
     }
     book.showModal();
   });
