@@ -803,6 +803,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   </dialog>
 </main>
 
+<script src="tsuri-daily.js"></script>
 <script src="tsuri-art.js"></script>
 <script src="tsuri-art-season.js"></script>
 <script src="tsuri-bgm.js"></script>
@@ -860,7 +861,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ['もみじがれい', '🐟', 20, 50, 11, 'もみじ{鰈|がれい}', 'Maple Flounder'], ['ゆきだるまうお', '🐠', 15, 40, 12, '{雪|ゆき}だるま{魚|うお}', 'Snowman Fish']
   ].forEach(([name, icon, min, max, season, kanji, en]) => FISH.push({id: FISH.length, name, icon, min, max, rare: 3, time: '', area: '*', kanji, season, en}));
   // まぼろしの ひ：つきに 1にち だけ、まぼろしが でやすい（60かいに 1かい）。ひづけで きまるので、みんな おなじ ひ
-  const calendar = new Date(), mythDay = (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('mythday') === '1') || calendar.getDate() === (calendar.getFullYear() * 12 + calendar.getMonth()) * 5 % 27 + 1;
+  // きょうの ラッキー・ぬし・まぼろしの ひ は、ひづけだけで きまる。ひろばと おなじ ファイル（tsuri-daily.js）を つかう。DAILY_FALLBACK は、よみこめ なかった ときの 同じ しき（かえる ときは 2か所 おなじに）
+  const DAILY_FALLBACK = (() => { const valid = t => (t instanceof Date && !isNaN(t) ? t : new Date()), day = t => { t = valid(t); return t.getFullYear() * 372 + t.getMonth() * 31 + t.getDate(); };
+    return {lucky: (base, t) => (day(t) * 11) % (base > 0 ? base : 30), boss: t => { const h = Math.imul(day(t), 2654435761) >>> 0; return {area: 'LRHB'[h % 4], time: 'ahyn'[(h >>> 8) % 4]}; }, myth: t => { t = valid(t); return t.getDate() === (t.getFullYear() * 12 + t.getMonth()) * 5 % 27 + 1; }}; })();
+  const DAILY = window.TsuriDaily || DAILY_FALLBACK;
+  const calendar = new Date(), mythDay = (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('mythday') === '1') || DAILY.myth(calendar);
   const BASE = FISH.filter(f => !f.legend && !f.season).length, LEGEND_ODDS = mythDay ? 1 / 60 : 1 / 8000;   // ずかんの 30しゅるい（まぼろし・きせつは かぞえない）
   const SEASON_ODDS = .1, MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const monthNow = () => (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:') && Number(new URLSearchParams(location.search).get('month')) >= 1 ? Number(new URLSearchParams(location.search).get('month')) : new Date().getMonth() + 1;   // たんまつの ひづけが ずれて いても エラーには ならない
@@ -869,9 +874,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // きりの いい かずの おいわい。かずに よって、おこる ことが ちがう
   const MILES = {10: ['👏', '10ぴきめ！ なかまが はくしゅ して いるよ。'], 30: ['🌸', '30ぴきめ！ はなびらが まって きたよ。'], 50: ['🎈', '50ぴきめ！ ふうせんが あがったよ。'], 100: ['🎆', '100ぴきめ！ はなびが あがったよ。'], 300: ['🌈', '300ぴきめ！ にじいろの かみふぶき だよ。'], 500: ['⭐', '500ぴきめ！ ほしが ふって きたよ。'], 1000: ['👑', '1000びきめ！ もう、つりの めいじんだね。']};
   // きょうの ラッキーさかな：ひづけで きまる（みんな おなじ）。その こが 4ばい でやすい。「きょうは ○○の ひ」と、はなしの たねに なる
-  const LUCKY = FISH[(calendar.getFullYear() * 372 + calendar.getMonth() * 31 + calendar.getDate()) * 11 % BASE];
+  const LUCKY = FISH[DAILY.lucky(BASE, calendar)];
   // きょうの ぬし：日づけで、「この つりばの、この じかん」に ぬしが でやすい（みんな おなじ。ふえるのは 2.5ばい。さがしても さがさなくても ばつは ない）
-  const BOSS = (() => { const day = calendar.getFullYear() * 372 + calendar.getMonth() * 31 + calendar.getDate(), h = Math.imul(day, 2654435761) >>> 0; return {area: 'LRHB'[h % 4], time: 'ahyn'[(h >>> 8) % 4]}; })();
+  const BOSS = DAILY.boss(calendar);
   const onBossSpot = () => save.area === BOSS.area && timeOfDay() === BOSS.time;
   const seenCount = () => Object.keys(save.fish).filter(id => FISH[id] && !FISH[id].legend && !FISH[id].season).length;
   // {かんじ|よみ} を、ふりがなつきの もじに する
