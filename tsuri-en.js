@@ -469,9 +469,19 @@
     walk(el);
     return s;
   }
+  // <span class="…"> だけを ならべた 入れもの（タグ・はんこ など）は「1つずつの 部品」。まとめて 1文に 訳すと 枠が きえて くっつく（First time!Big oneRare）ので、まとめない（ジョブズ1の 指摘・9/30）
+  function chips(el) {
+    let n = 0;
+    for (const c of el.childNodes) {
+      if (c.nodeType === 3) { if (c.nodeValue.trim()) return false; }
+      else if (c.nodeType === 1) { if (c.tagName === 'SPAN' && c.classList.length) n++; else return false; }
+    }
+    return n > 0;
+  }
   function isPure(el) {
-    // 文字の 飾りだけの 要素（ふりがな・太字 など）を 1つの 文として 訳す。ID の ある もの・かくれた もの（hidden・aria-hidden＝バッジ など ゲームが 中身を かえる 部品）を ふくむ 時は さわらない（部品を こわさない）
-    for (const d of el.querySelectorAll('*')) { if (!PURE.has(d.tagName) || d.id || d.hidden || d.getAttribute('aria-hidden') === 'true') return false; }
+    // 文字の 飾りだけの 要素（ふりがな・太字 など）を 1つの 文として 訳す。ID の ある もの・かくれた もの（hidden・aria-hidden＝バッジ など ゲームが 中身を かえる 部品）・タグの ならび（chips）を ふくむ 時は さわらない（部品を こわさない）
+    if (chips(el)) return false;
+    for (const d of el.querySelectorAll('*')) { if (!PURE.has(d.tagName) || d.id || d.hidden || d.getAttribute('aria-hidden') === 'true' || chips(d)) return false; }
     return true;
   }
   function translateAttrs(el) {
