@@ -1533,6 +1533,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     { const b = document.createElement('button'); b.id = 'nature'; b.type = 'button'; b.setAttribute('aria-pressed', 'true'); body.append(b); }
     { const b = document.createElement('button'); b.id = 'calm'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
     { const b = document.createElement('button'); b.id = 'large'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
+    { const b = document.createElement('button'); b.id = 'ruby'; b.type = 'button'; b.setAttribute('aria-pressed', 'true'); body.append(b); }
     { const g = document.createElement('div'), h = document.createElement('h3'); g.className = 'assist-group'; g.setAttribute('role', 'group'); g.setAttribute('aria-labelledby', 'assist-snd-h'); h.id = 'assist-snd-h'; h.className = 'assist-label'; g.append(h);
       SND_BTN.forEach(x => { const b = document.createElement('button'); b.id = x.id; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); g.append(b); });
       { const y = document.createElement('button'); y.id = 'snd-yomi'; y.type = 'button'; y.hidden = true; y.setAttribute('aria-pressed', 'false'); g.append(y); }
@@ -1794,7 +1795,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (h) { h.tabIndex = -1; h.focus({preventScroll: true}); }
     if (!dlg.querySelector('.close-top') && dlg.scrollHeight > dlg.clientHeight + 8) {
       const bottom = dlg.querySelector('button.close');
-      if (bottom) { const top = document.createElement('button'); top.type = 'button'; top.className = 'close-top'; top.textContent = bottom.textContent; top.addEventListener('click', () => dlg.close()); if (h && h.parentElement === dlg) h.after(top); else dlg.prepend(top); }
+      if (bottom) { const top = document.createElement('button'); top.type = 'button'; top.className = 'close-top'; top.replaceChildren(...[...bottom.childNodes].map(n => n.cloneNode(true)));   // ふりがなが ついて いても そのまま うつす（textContent だと rt まで まざる）
+      top.addEventListener('click', () => dlg.close()); if (h && h.parentElement === dlg) h.after(top); else dlg.prepend(top); }
     }
     dlg._opener = opener;
     if (!dlg._openerBound) { dlg._openerBound = true; dlg.addEventListener('close', () => { const o = dlg._opener; dlg._opener = null; try { if (o && o.isConnected && o !== document.body && !o.disabled) o.focus({preventScroll: true}); } catch {} }); }
@@ -3301,7 +3303,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('close-bucket').addEventListener('click', () => bucket.close());
 
   // ---- きねん（トロフィー）：あそぶほど もらえる（銅・銀・金の 3だん・40こ）。とりにがしなし・くらべない・ばつなし・きげんつき なし。いままでの きろくからも あとから つく ----
-  const TIER = {1: ['🥉', 'どう', 'Bronze'], 2: ['🥈', 'ぎん', 'Silver'], 3: ['🥇', 'きん', 'Gold']};
+  const TIER = {1: ['🥉', '銅', 'Bronze'], 2: ['🥈', '銀', 'Silver'], 3: ['🥇', '金', 'Gold']};
   const tf = k => !!(save.tflag && save.tflag[k]);
   const caughtFish = () => Object.keys(save.fish).map(id => FISH[id]).filter(Boolean);
   const nPal = () => ROSTER.filter(metPal).length;
@@ -3638,6 +3640,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   $('large') && $('large').addEventListener('click', () => { save.large = !save.large; store(); drawLarge(); say(L(save.large ? 'もじを おおきく したよ。' : 'もじを もとの おおきさに したよ。', save.large ? 'Text is larger now.' : 'Text is back to normal size.')); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawLarge); else drawLarge();
+  // ふりがな：にほんごの もじに 漢字＋ふりがなを つける（tsuri-ruby.js）。なしに すると ひらがなの まま（よみこみ なおす）
+  const rubyOff = () => { try { return localStorage.getItem('marufuwa-ruby-off') === '1'; } catch { return false; } };
+  function drawRuby() { const b = $('ruby'); if (!b) return; b.hidden = EN(); const on = !rubyOff(); b.textContent = L('ふりがな：' + (on ? 'あり' : 'なし'), 'Furigana: ' + (on ? 'On' : 'Off')); b.setAttribute('aria-pressed', String(on)); }
+  $('ruby') && $('ruby').addEventListener('click', () => { try { if (rubyOff()) localStorage.removeItem('marufuwa-ruby-off'); else localStorage.setItem('marufuwa-ruby-off', '1'); } catch {} drawRuby(); say(L('ふりがなを かえるよ。よみこみ なおすね。', 'Changing furigana. Reloading.')); setTimeout(() => location.reload(), 900); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawRuby); else drawRuby();
   drawBuzz(); drawNature(); drawEasy();
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
@@ -3684,7 +3691,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       html.dataset.ready = 'fresh'; delete html.dataset.time; setTimeout(() => { html.dataset.ready = 'true'; }, 500);   // 早い script の <html data-time> は やくめが おわり（けしきの data-time が うけつぐ）
     });
   }
-  window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
+  window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), fishList: () => FISH.map(f => ({id: f.id, name: f.name, kanji: f.kanji})), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
@@ -3697,6 +3704,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-en.js"></script>
 <script defer src="tsuri-tegami.js"></script>
 <script defer src="tsuri-note.js"></script>
+<script defer src="tsuri-ruby-dict.js"></script>
+<script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
 </body>
 </html>
