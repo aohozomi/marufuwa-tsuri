@@ -121,7 +121,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .hud .plaza{--c1:#fff1dc;--c2:#ffc98f;--side:#d98a45;--ink:#5a2f0c;text-shadow:none;min-height:52px}
 .hud button{--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
 .hud button::after{content:"";position:absolute;left:12%;top:18%;width:7px;height:7px;border-radius:50%;background:#ffffffe6;pointer-events:none}
-.areas small{display:block;font-weight:600;font-size:.7rem}
+.areas small{display:block;font-weight:600;font-size:.75rem}
 .areas button[aria-disabled=true],#shop-list button[aria-disabled=true]{--c1:#f2f6f9;--c2:#dfe8ee;--side:#b7c6d0;--ink:#3b5463;cursor:default}   /* まだ いけない：うすく（opacity）せず、いろを おとなしく。もじは くっきり */
 .time-box{margin-bottom:10px;font-size:.85rem}
 .time-box summary{cursor:pointer;padding:13px 4px;font-weight:800}
@@ -133,8 +133,8 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .times button{min-height:44px;font-size:.78rem}
 #keeper{position:absolute;z-index:2;left:87%;top:50%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
 #keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
-#keeper span{position:absolute;z-index:2;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;font-size:.7rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
-#equip{position:absolute;z-index:4;left:2.5%;bottom:3%;font-size:.72rem;font-weight:800;line-height:1.5;background:#ffffffd9;border:2px solid #b9d1db;border-radius:12px;padding:3px 9px;pointer-events:none}
+#keeper span{position:absolute;z-index:2;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;font-size:.75rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
+#equip{position:absolute;z-index:4;left:2.5%;bottom:3%;font-size:.8rem;font-weight:800;line-height:1.5;background:#ffffffd9;border:2px solid #b9d1db;border-radius:12px;padding:3px 9px;pointer-events:none}
 #shop-list{display:grid;gap:8px;margin:0 0 12px}
 #shop-list h3{margin:6px 0 0;font-size:1rem}
 #shop-list button{display:block;position:relative;width:100%;text-align:left;min-height:64px;line-height:1.4;padding-left:64px}
@@ -364,7 +364,7 @@ body.gazing #tegami{display:none}
 #main-button[data-rest=true]{transform:translateY(4px) scale(.98,.93);filter:saturate(.6) brightness(1.08)}
 #go-area{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36;min-height:40px;padding:2px 14px;font-size:.85rem;margin-top:3px}
 #go-area[hidden]{display:none}
-#card .stamp{display:inline-block;margin:1px 2px;padding:0 8px;border-radius:10px;background:#ffe14d;border:2px solid #a56c19;color:#593700;font-weight:900;font-size:.74rem;rotate:-3deg}
+#card .stamp{display:inline-block;margin:1px 2px;padding:0 8px;border-radius:10px;background:#ffe14d;border:2px solid #a56c19;color:#593700;font-weight:900;font-size:.75rem;rotate:-3deg}
 @media(max-width:380px){#areas{grid-template-columns:repeat(2,1fr)}}
 #swim-tag{position:absolute;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;font-weight:900;font-size:.78rem;color:#fff;background:#17323dcc;border-radius:10px;padding:1px 9px}
 .menu-label{font-weight:800;font-size:.85rem;margin:14px 0 6px;color:#3a5a68}
@@ -406,7 +406,7 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 #shadow.art::after{display:none}
 .float.art{background:var(--fimg) center/contain no-repeat;border:0;border-radius:0;aspect-ratio:3/5;width:4.4%}
 .float.art::before,.float.art::after{top:60%}
-#card .tag{display:inline-block;margin:1px 2px;padding:0 8px;border-radius:10px;background:#fff3ce;border:2px solid #a56c19;color:#593700;font-weight:800;font-size:.74rem}
+#card .tag{display:inline-block;margin:1px 2px;padding:0 8px;border-radius:10px;background:#fff3ce;border:2px solid #a56c19;color:#593700;font-weight:800;font-size:.75rem}
 
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions{gap:12px;margin:16px 0 6px;flex-wrap:wrap}
@@ -495,7 +495,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 #gear-preview .pv-gear{height:56px}
 #gear-body h3{margin:12px 0 4px;font-size:1rem}
 .swatches{display:flex;flex-wrap:wrap;gap:8px}
-.swatches button{min-width:64px;min-height:64px;padding:4px 4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:18px;font-size:.72rem;line-height:1.2}
+.swatches button{min-width:64px;min-height:64px;padding:4px 4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:18px;font-size:.75rem;line-height:1.2}
 .swatches button i{display:block;width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #24465355}
 .swatches button[aria-pressed=true]{--c1:#fff6cf;--c2:#ffd98a;--side:#d39a1c;--ink:#593700}
 .swatches button[aria-disabled=true]{opacity:.55}
@@ -2448,7 +2448,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('decor-list').textContent = decor.length ? decor.map(([name, count]) => name + ' ×' + count).join('　') : 'まだ ないよ。さかなが ときどき もって くるよ。';
     $('pal-list').replaceChildren(...PALS.map(pal => {
       const met = save.pals && save.pals[pal.id], tag = document.createElement('span'), img = document.createElement('img');
-      tag.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;text-align:center;line-height:1.3;font-size:.7rem;width:76px;';
+      tag.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;text-align:center;line-height:1.3;font-size:.75rem;width:84px;word-break:keep-all;text-wrap:balance;';
       img.src = 'img/friend-' + pal.id + '-s.webp'; img.width = img.height = 52; img.alt = ''; img.style.objectFit = 'contain'; if (!met) { img.style.opacity = '.35'; img.style.filter = 'grayscale(1)'; }   // まだ あって ない 子は、絵だけ うすく（「？」の 字は はっきり）
       tag.append(img, met ? pal.name : '？'); return tag;
     }));
