@@ -339,7 +339,10 @@ body.gazing .assist{display:none}
 .inapp-hint button{flex:none;min-width:44px;min-height:44px;padding:0 10px;font-size:1.2rem;line-height:1}
 :root[data-inapp=x] .actions{bottom:170px}
 :root[data-inapp=x] main{padding-bottom:190px}
-:root[data-night=true] .inapp-hint{background:#3a3220;border-color:#b98a1a;color:#f6e7c1}   /* けしきの いきものを しまう（うごく ものが きに なる 人の ために） */
+:root[data-night=true] .inapp-hint{background:#3a3220;border-color:#b98a1a;color:#f6e7c1}
+/* ぬしの 「ぱっ」と ひかる 光（tsuri-nushi.js）：光に びんかんな 人・よるの 画面に やさしく。動きを へらす 人には 白い ひかりを 出さない */
+:root[data-night=true] #nushi-flash{background:#ffe2a0;filter:opacity(.6)}
+@media(prefers-reduced-motion:reduce){#nushi-flash{display:none}}   /* けしきの いきものを しまう（うごく ものが きに なる 人の ために） */
 #main-button{--c1:#2a8cc0;--c2:#0e5a82;--side:#0a4262;--ink:#fff;flex:1 1 100%;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
 #main-button[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
@@ -1708,5 +1711,6 @@ dialog .close{display:block;margin:auto;min-width:160px}
 <script defer src="tsuri-ikimono.js"></script>
 <script defer src="tsuri-oshaberi.js"></script>
 <script defer src="tsuri-ame.js"></script>
+<script defer src="tsuri-nushi.js"></script>
 </body>
 </html>
