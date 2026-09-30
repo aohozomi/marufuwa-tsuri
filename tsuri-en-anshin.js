@@ -1,0 +1,89 @@
+/* まるふわ つりびより：「おうちの かたへ」（anshin/）の English（外付け・総司令部）
+   ・tsuri-en.js が 英語の ときだけ 読みこむ（anshin/ の HTML には さわらない）。日本語では 何も 起きない
+   ・かぎは「ふりがなの よみで そろえた 日本語」。⟦0⟧⟦1⟧ は <code> の はめこみ（英語の 語順で 元の 要素を はめなおす）
+   ・ページの 文が かわったら：?lang=en で ひらき、TsuriEn.missing() に 出た 文を ここに 足す（英語対応\00_読んでください.md）
+   ・書いた ことは 測れる 事だけ（おうちの かたへ の 約束を 英語でも おなじに）。外へは 何も 送らない */
+(() => {
+  'use strict';
+  const E = window.TsuriEn; if (!E || E.lang !== 'en' || typeof E.add !== 'function') return;
+  const MONTH = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  E.add({
+    ex: {
+      "「まるふわつりびより」「まるふわのひろば」について": "About “Marufuwa Fishing Days” and “Marufuwa’s Plaza”",
+      "ひとこと": "In short",
+      "「まるふわつりびより」は、いそがなくてもだいじょうぶな、のんびりつりのゲームです。にがしても、なにもへりません。": "“Marufuwa Fishing Days” is a relaxed fishing game where there is no need to hurry. Even if you let a fish go, nothing is lost.",
+      "ちいさなおこさんもあんしんしてあそべるように、おかね・こうこく・ログイン・ほかのひととのやりとりを、さいしょからいれていません。": "So that even small children can play with peace of mind, we did not include money, ads, logins, or interaction with other people from the start.",
+      "このゲームに「ない」もの": "What this game does NOT have",
+      "おかね": "Money",
+      "むりょうです。かきんやこうにゅうのボタンはありません。": "It is free. There are no purchase buttons of any kind.",
+      "こうこく": "Ads",
+      "でません。こうこくのかいしゃのぶひんも、いっていません。": "None are shown. No parts from advertising companies are included, either.",
+      "ログイン・ほんとうのなまえ・メール": "Login, real names, email",
+      "ききません。メールをいれるばしょはありません。もじをかけるところは、したの「もじをかけるところ」にかいたものだけです。": "We do not ask for them. There is no place to enter an email address. The only places where text can be typed are the ones listed below under “Text can be typed in only 3 places.”",
+      "ほかのひととのやりとり": "Interaction with other people",
+      "ありません。チャット・コメント・ランキング・フレンドのしくみは、いっていません。（つったさかなをリンクでひとにおくる「おくりもの」はありますが、おくるのはほんにんが「おくる」をおしたときだけです。ゲームのなかでやりとりはできません。）": "There is none. We have not included chat, comments, rankings, or friend systems. (There is a “Gift” feature for sending a fish you caught to someone with a link, but it is sent only when the player themself presses “Send.” You cannot communicate inside the game.)",
+      "つうしん": "Communication",
+      "あそんだきろくやしゃしんを、インターネットへおくることはありません。つうしんは、ゲームのえやプログラムをよみこむときだけです。アクセスかいせきのしくみも、クッキー（Cookie）もつかっていません。": "Your play records and photos are never sent over the internet. The game communicates only when it loads its pictures and program. We use no analytics and no cookies.",
+      "（ゲームをおいているサービスのがわに、いっぱんてきなせつぞくのきろくがのこることはあります。）": "(On the side of the service that hosts the game, ordinary connection logs may remain.)",
+      "そとへひらくボタンは、つぎの4つだけ": "Only these 4 buttons open something outside the game",
+      "ひろばの「おにぎりキャッチ」のかんばん…まるふわのべつのゲーム「おにぎりキャッチ」のページがひらきます（べつのゲームには、このページのことはあてはまりません）。": "The “Onigiri Catch” sign in the Plaza… This opens the page of another Marufuwa game, “Onigiri Catch.” (What is written on this page does not apply to that other game.)",
+      "「しゃしん」のがめんの「Xにかく」… X（きゅうツイッター）のとうこうがめんがひらきます。ゲームがかってにとうこうすることはありません。おこさんがつかうときは、このボタンにごちゅういください。しゃしんのがめんにも「Xは、おうちのひと（おとな）といっしょにつかってね」とでます。": "“Post to X” on the Photo screen… This opens X’s (formerly Twitter) posting screen. The game never posts anything by itself. If a child is using the game, please be careful with this button. The Photo screen also says, “Please use X with a grown-up.”",
+      "「しゃしん」の「きょうゆう」…たんまつのきょうゆうメニューがひらきます（つかえるたんまつだけ）。おくりさきは、おつかいのかたがえらびます。": "“Share” on the Photo screen… This opens your device’s share menu (only on devices that support it). The person using the device chooses where to send it.",
+      "「おくりもの」の「おくる」…たんまつのきょうゆうメニューがひらきます（つかえないたんまつでは、リンクをコピーします）。リンクにのるのは、すうじだけです（さかな・おおきさ・なかま・ひとこと・あいじるし）。ゲームがじどうでおくることはありません。おくるときは、おとなのかたといっしょにおねがいします。": "“Send” in the Gift feature… This opens your device’s share menu (on devices that cannot, it copies the link instead). The link contains only numbers (fish, size, friend, message, and an identifier). The game never sends anything automatically. When sending, please do it together with a grown-up.",
+      "もじをかけるところは、3つだけ": "Text can be typed in only 3 places",
+      "「きろくをのこす・もどす」のもじばこ…あそんだきろくをもじにして、メモにのこすためのものです。": "The text box in “Save / Restore records”… It is for turning your play records into text so you can keep them in a note.",
+      "「じぶんのどうぐ」の「バケツのなまえ」…ひらがな・カタカナ・アルファベット・すうじで8もじまで。すきななまえをつけられます。ほんとうのなまえはかかないように、おこさんにつたえてください。": "“Bucket name” in “My Gear”… Up to 8 characters (hiragana, katakana, letters, or numbers). You can give it any name you like. Please tell your child not to write their real name.",
+      "「ひみつのことば」…バケツのなかの「ひみつのことば」に、しっていることばをいれると、ひみつがみつかることがあります（リンクでひらいたときもおなじです）。あっているかどうかは、このたんまつのなかでしらべるだけで、いれたもじはほぞんもそうしんもしません。": "“Secret Word”… If you type a word you know into “Secret Word” in the bucket, you may find a secret (the same happens when you open a link). Whether the word is right is checked only inside this device; the text you type is neither saved nor sent.",
+      "どれも、このたんまつのなかだけでつかいます。そとへおくることはありません。（バケツのなまえは、このたんまつのきろくのなかにのこります。）": "All of these are used only inside this device. Nothing is sent outside. (The bucket name stays inside this device’s records.)",
+      "おこさんにやさしいくふう": "Kid-friendly features",
+      "にがしても、へりません。ゲームオーバー・せいげんじかん・しっぱいのばつはありません。": "Letting a fish go loses nothing. There is no game over, no time limit, and no penalty for failing.",
+      "「らくちん」…おすだけでつれます。タイミングをあわせなくてもだいじょうぶです。": "“Easy mode”… Just press to catch a fish. You do not need to match the timing.",
+      "おとは、はじめはOFFです。ONにするまで、おとはなりません。": "Sound is OFF at first. Nothing plays until you turn it ON.",
+      "BGM（しずかなきょく）…ひろば・おへや・ながめるで、ながすことができます。はじめはOFFです。「おと」がONのときに「BGM」もONにしたときだけながれます。「おと」をけせば、BGMもきえます。つりのがめんではながれません。": "BGM (quiet music)… It can play in the Plaza, the Room, and Just watch. It is OFF at first. It plays only when you turn “BGM” ON while “Sound” is ON. If you turn “Sound” off, the BGM stops too. It does not play on the fishing screen.",
+      "しんどう（ふるえ）…さかながかかったときやつれたときに、みじかいしんどうがでることがあります（Androidなど、しんどうにたいおうしたたんまつだけ）。「つかいやすくする」のなかの「ふるえ」できれます。「うごきをへらす」せっていのひとは、はじめからきれています。": "Vibration… A short vibration may occur when a fish bites or is caught (only on devices that support vibration, such as Android). You can turn it off with “Vibration” inside “Comfort options.” For people who use the “Reduce motion” setting, it is off from the start.",
+      "うごきをへらす…たんまつの「うごきをへらす」せっていか、ゲームのなかの「つかいやすくする」の「うごきをへらす」にあわせて、うごきをすくなくします（ひろば・おへやもおなじです）。": "Reduce motion… The game shows less movement, following your device’s “Reduce motion” setting or the “Reduce motion” option in the game’s “Comfort options” (the Plaza and the Room do the same).",
+      "もじをおおきく…「つかいやすくする」のなかで、ぜんぶのもじを1.25ばいにできます（ひろばもおなじです）。": "Larger text… In “Comfort options,” you can make all text 1.25 times larger (the Plaza does the same).",
+      "「けしきのいきもの」…けしきに、ことり・ちょうちょ・とんぼ・ほたるなどがでます。さわれません。うごくものがきになるひとは、「つかいやすくする」のなかできれます（「うごきをへらす」せっていではうごかず、そっとおかれるだけです）。": "“Wildlife”… Little birds, butterflies, dragonflies, fireflies, and more appear in the scenery. They cannot be touched. If moving things bother you, you can turn them off in “Comfort options” (with “Reduce motion” they do not move and are simply placed quietly).",
+      "もじはひらがなちゅうしんで、かんじにはふりがながついています。": "Text is mostly in hiragana, and kanji have furigana (reading aids).",
+      "キーボードでもあそべます（つりばはスペースキー・エンターキー、ひろばはやじるしキーであるいてスペースキー）。": "You can also play with a keyboard (at the fishing spots, the Space and Enter keys; in the Plaza, walk with the arrow keys and press Space).",
+      "「ながめる」…なにもしなくていいがめんです。このあいだは、がめんがきえません（つかえるたんまつだけ）。なにもしないとボタンがきえてけしきだけになります（さわるともどります）。「おやすみタイマー」をえらぶと、じかんがたったときにおとがふわっときえて、がめんをけしていいようになります。でんちをへらすために、このあいだはえのこうしんをへらしています。「ぜんがめん」もつかえます（つかえるブラウザだけ）。": "“Just watch”… A screen where you do not have to do anything. The screen does not turn off during this time (only on supported devices). If you do nothing, the buttons fade away and only the scenery remains (touch to bring them back). If you choose a “Sleep timer,” the sound fades out gently when the time is up, so you can turn the screen off. To save battery, the picture updates less often during this time. “Full screen” is also available (only in browsers that support it).",
+      "まいにちひらかないとそんをするしくみはありません。": "There is nothing that makes you lose out if you do not open the game every day.",
+      "きろくはどこにある？": "Where are my records?",
+      "あそんだきろく（つれたさかな・かざり・おとのせっていなど）は、このたんまつの、このブラウザのなかだけにはいります。": "Your play records (fish caught, decorations, sound settings, and so on) are stored only inside this browser on this device.",
+      "ブラウザのえつらんデータをけすと、きろくもきえます。iPhoneのSafariでは、ながくひらかないときろくがきえることがあります（Appleのきまり）。": "If you clear the browser’s browsing data, your records disappear too. On iPhone Safari, records may disappear if you do not open the game for a long time (an Apple rule).",
+      "たいせつなきろくは、ゲームの「きろくをのこす・もどす」でもじにして、メモにのこせます。": "You can keep important records by turning them into text with “Save / Restore records” in the game and saving that text in a note.",
+      "ぜんぶけしたいときは、ブラウザのせっていで、このサイトのデータをけしてください（てじゅんはブラウザによってちがいます）。": "If you want to erase everything, clear this site’s data in your browser settings (the steps differ by browser).",
+      "オフラインでもあそべるように、ゲームのえやプログラムのコピーを、このブラウザにほぞんします（あそんだきろくとはべつです）。ブラウザのデータをけすときえます。httpsのページのときだけで、Xのアプリなどでははたらかないことがおおいです。": "So that the game can be played offline, copies of the game’s pictures and program are saved in this browser (separate from your play records). They disappear if you clear the browser’s data. This works only on https pages, and often does not work inside apps such as X.",
+      "ホームがめんにおく（すきなときに）": "Add to the home screen (whenever you like)",
+      "iPhone … Safariの「きょうゆう」→「ホームがめんについか」。": "iPhone … In Safari, “Share” → “Add to Home Screen.”",
+      "Android … Chromeの「メニュー」→「ホームがめんについか」（「アプリをインストール」とでることもあります）。": "Android … In Chrome, “Menu” → “Add to Home screen” (it may say “Install app”).",
+      "おくと、アイコンからすぐひらけます。iPhoneでは、アイコンからひらくと、Safariであそんだきろくとはべつのばしょになることがあります。いままでのきろくをうつしたいときは、さきにSafariで「きろくをのこす」でもじにして、アイコンからひらいたあとに「もどす」をつかってください。": "Once added, you can open the game straight from the icon. On iPhone, opening from the icon may use a different storage place than the records you made in Safari. To move your records over, first turn them into text with “Save records” in Safari, then use “Restore” after opening from the icon.",
+      "まだたしかめていないこと": "Things we have not checked yet",
+      "しょうじきにかきます。": "We are being honest about this.",
+      "いろいろなじっさいのたんまつ（iPhone・Android）でのつかいごこちと、たくさんのおこさんでのためしは、これからです。": "How it feels on many real devices (iPhone and Android), and trials with many children, are still to come.",
+      "おとのきこえかたやおおきさのこのみは、ひとによってちがいます。おとをONにするときは、ちいさなおとからためしてください。": "How sounds are heard and what volume people prefer differ from person to person. When you turn sound ON, please try a quiet volume first.",
+      "BGMのおおきさは、きかいではかってそろえましたが、ひとのみみでのたしかめは、これからです。": "We measured and matched the BGM volume with equipment, but checking it by human ears is still to come.",
+      "ホームがめんにおいたときのきろくのひきつぎは、じっさいのiPhoneではまだたしかめていません（Appleのきまりにそってかきました）。": "We have not yet checked, on a real iPhone, how records carry over when the game is added to the home screen (we wrote this following Apple’s rules).",
+      "「おくりもの」のリンクを、たくさんのたんまつ（iPhone・Android・Xのアプリのなか）でひらいたときのようすは、これからたしかめます。": "We will check how “Gift” links behave when opened on many devices (iPhone, Android, and inside the X app).",
+      "めやてのふじゆうなかたにつかってもらったかくにんは、まだできていません。": "We have not yet been able to have people who find it hard to use their eyes or hands try it.",
+      "とてもふるいたんまつ（iPhoneならiOS 15.4よりまえなど）では、うごかないところがあるかもしれません。": "On very old devices (for iPhone, before iOS 15.4, for example), some parts may not work.",
+      "ないようがかわったときは、このページもなおします。": "When the content changes, we will update this page too.",
+      "もっとくわしく（おとなのかたむけ・ぎじゅつのはなし）": "More details (for grown-ups: technical notes)",
+      "ゲームのよみこみは、おなじばしょのがぞうとプログラム（GET）だけです。そうしん（POST）やがいぶサービスのぶひんはありません。": "The game only loads pictures and programs from the same place (GET). There is no sending (POST) and no parts from outside services.",
+      "ほぞんはブラウザのlocalStorageです。つかうなまえは7つ：⟦0⟧（つり）・⟦1⟧（すいそう）・⟦2⟧（ひみつノート）・⟦3⟧（ひろば）・⟦4⟧（BGMのON／OFFだけ）・⟦5⟧（とおく。ONにしたときだけ）・⟦6⟧（ことば：にほんごかEnglishか。えらんだときだけ）。": "Data is saved in the browser’s localStorage. Seven names are used: ⟦0⟧ (fishing) · ⟦1⟧ (aquarium) · ⟦2⟧ (Secret Notebook) · ⟦3⟧ (Plaza) · ⟦4⟧ (BGM ON/OFF only) · ⟦5⟧ (Far view; only when turned ON) · ⟦6⟧ (language: Japanese or English; only when you choose).",
+      "おとをONにするまで（BGMをONにしても）、オーディオのぶひんはつくられません。BGMのきょくはファイルではなく、ブラウザのなかでつくります（ダウンロードはありません）。": "Until you turn Sound ON (even if you turn BGM ON), no audio components are created. The BGM tunes are not files; they are made inside the browser (nothing is downloaded).",
+      "クッキーはつかっていません。": "No cookies are used.",
+      "オフラインようのしくみ（service worker・⟦0⟧）：ネットがあるときは、いつもいちばんあたらしいものをとります。ネットがないときだけ、ほぞんしたコピーをだします。おなじサイトのGETだけをあつかい、そとへはなにもおくりません。⟦1⟧でひらくと、このしくみとほぞんをはずせます。": "The offline mechanism (service worker · ⟦0⟧): when there is a connection, it always fetches the newest version. Only when there is no connection does it serve the saved copy. It handles only GET requests to the same site and sends nothing outside. Opening with ⟦1⟧ removes this mechanism and its saved copies.",
+      "ひみつのことばは、ことばをハッシュ（SHA-256）にしてしらべます。ことばのいちらんは、プログラムのなかにそのままのかたちでははいっていません。ただし、みじかいことばはハッシュからわかってしまうことがあるので、ごほうびは、とられてもこまらないものだけにします。": "Secret Words are checked by turning the word into a hash (SHA-256). The list of words is not stored in the program in plain form. However, short words can sometimes be worked out from the hash, so rewards are limited to things that would not matter even if someone else got them.",
+      "ゲームにもどる": "Back to the game",
+      "ひろばへ": "To the Plaza"
+    },
+    rules: [
+      // たしかめた 日づけ（毎日 かわる ため ルールで）
+      [/^このページには、ほごしゃのかたがしりたいことを、じっさいにたしかめたはんいだけかきました。たしかめたひ：(\d+)ねん(\d+)がつ(\d+)にち$/, (_, y, m, d) => `This page describes only what parents and guardians want to know, limited to what we have actually checked. Date checked: ${MONTH[+m] || m} ${+d}, ${y}.`]
+    ]
+  });
+  // ページの 頭に ある 英語の 1文（ゲーム開発司令部）は「日本語で 書かれて います・英語版は 予定」と 言って いる。英語の 時は もう 英語なので、その 2つだけ 外す
+  const intro = document.querySelector('p[lang="en"]');
+  if (intro && /written in Japanese/.test(intro.textContent)) intro.textContent = 'This page is for grown-ups. In short: no ads, no purchases, no login, no chat, and nothing you do is sent over the internet.';
+})();

@@ -447,6 +447,10 @@
     }
     missing.clear(); if (document.body) walk(document.body);   // まだ 日本語の ものも 訳す
   };
+  // 「おうちの かたへ」（anshin/）の 訳表は 別ファイル（tsuri-en-anshin.js）。この ページの HTML には さわらず、英語の ときだけ 自分で 読みこむ
+  // （document.currentScript は この 最初の 実行中だけ つかえる ので、ここで 場所を おぼえる）
+  { const me = document.currentScript, src = me && me.src;
+    if (src && /\/anshin\/(index\.html)?$/.test(location.pathname)) { const s = document.createElement('script'); s.src = src.replace(/[^/]*$/, '') + 'tsuri-en-anshin.js'; s.defer = true; (document.head || document.documentElement).append(s); } }
 
   // =====================================================================
   //  DOM の ほんやく
@@ -491,10 +495,34 @@
       if (e.includes('(') && !e.includes(')')) { let s = n.nextSibling; while (s) { const t = s.nodeType === 3 ? s : (s.firstChild && s.firstChild.nodeType === 3 ? null : null); if (s.nodeType === 3 && s.nodeValue.trim().startsWith('）')) { s.nodeValue = s.nodeValue.replace('）', ')'); break; } s = s.nextSibling; } }
     } else missing.add(norm(v));
   }
+  // 文の 中に <code>／<kbd>（コードの 表記）が はさまって いる 時：それを ⟦0⟧⟦1⟧… の「はめこみ」に して 文ぜんたいを 訳し、英語の 語順で 元の 要素を はめなおす（英語は 主語の 位置が ちがう ため）。
+  // 表の かぎは「よみで そろえた 日本語（はめこみ つき）」、訳は 英語（同じ ⟦n⟧ を すべて 1回ずつ ふくむ こと）。訳せない／⟦n⟧ が 合わない 時は 日本語のまま missing に 出す
+  const SLOT = new Set(['CODE', 'KBD']);
+  function tryTemplate(el) {
+    if (![...el.children].some(c => SLOT.has(c.tagName))) return false;
+    const slots = []; let s = '';
+    for (const n of el.childNodes) {
+      if (n.nodeType === 3) s += n.nodeValue;
+      else if (n.nodeType === 1 && SLOT.has(n.tagName) && !JP.test(n.textContent)) { s += '⟦' + slots.length + '⟧'; slots.push(n); }
+      else if (n.nodeType === 1 && PURE.has(n.tagName) && isPure(n)) s += reading(n);
+      else return false;
+    }
+    if (!JP.test(s)) return false;
+    const e = tr(s);
+    if (e == null) { missing.add(norm(s)); return true; }
+    const parts = e.split(/⟦(\d+)⟧/), used = [];
+    for (let i = 1; i < parts.length; i += 2) used.push(+parts[i]);
+    if (used.length !== slots.length || slots.some((_, i) => used.filter(u => u === i).length !== 1)) { missing.add(norm(s)); return true; }
+    const frag = document.createDocumentFragment();
+    parts.forEach((p, i) => { if (i % 2) frag.append(slots[+p]); else if (p) frag.append(document.createTextNode(p)); });
+    el.replaceChildren(frag);
+    return true;
+  }
   function walk(el) {
     if (!el || el.nodeType !== 1 || SKIP.has(el.tagName.toUpperCase())) return;
     if (el.closest && el.closest('[data-en-skip],[data-en]')) return;   // data-en-skip／data-en：その ページが 自分で 英語に する ところ（さわらない）
     translateAttrs(el);
+    if (el.firstElementChild && tryTemplate(el)) return;
     const hasRuby = !!el.querySelector('ruby');
     const text = el.textContent;
     if (!JP.test(text) && !hasRuby) { el.querySelectorAll('[aria-label],[alt],[title]').forEach(translateAttrs); return; }
