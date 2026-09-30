@@ -7,6 +7,11 @@
 //   ・ぜんぶ「さわる（本当の ボタン。Tab で えらべる）」か「まつ」で おこり、音（おと ON の時）と 読み上げ（#status）でも しらせる。
 //   ・つりの 最中（かかった・ひいて いる 間）は、ひみつの ボタンを とめる（本体は ボタンの 上を おしても ひけない ため）。
 //   ・音は 本体と おなじ むかしの ゲームき ふう（かくばった なみ・さんかくの なみ・みじかい ざつおん）。おとが OFF の間は 何も 鳴らさない。
+//   ・ひみつの ことば（合言葉）：Xなどで おしえる ことばを いれると「ひみつの ことばが みつかったよ」。名前は「ひみつの ことば」（「あいことば」は 記録の 持ち運びの 名前）。
+//       ことばは ソースに 書かず SHA-256 の ハッシュだけ 持つ（読んでも 一覧は 読めない）。※「見つけにくい」だけで「守り」では ない（みじかい ことばは 総当たりで わかる）→ ごほうびは 取られても 困らない 物だけ。
+//       入れかた：バケツの「ひみつの ことば」ボタン／リンク ?kotoba=ことば（ひらいたら アドレスから 消す）。どちらも この 端末の 中で しらべるだけ（外へ 送らない・入れた 文字は 画面に 出さない）。
+//       何度でも（期限なし・取りのがしなし・数えない・まちがえても 何も おこらない）。ごほうびは いまは「みつかったよ」の えんしゅつと ひみつノートの 1まい だけ。
+//       本体・ほかの 外付けは window の 'tsuri-kotoba' イベント（detail:{id,fresh,title}）を きいて、ごほうび（いろ・かざり）を 出せる。ことばの 足しかた：TsuriHimitsu._debug.kotoba.hashOf('ことば') の 16進 64もじを WORDS に 足す。
 (() => {
   'use strict';
   const scene = document.getElementById('scene');
@@ -107,6 +112,24 @@
 .hm-card button{grid-column:1 / span 2;min-height:48px;font-size:.9rem}
 #hm-live{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 @media(prefers-reduced-motion:reduce){.hm-beam,.hm-glow,.hm-jelly{animation:none}.hm-fog,.hm-jelly,.hm-win,.hm-rabbit,.hm-deer{transition:none}}
+.hm-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+#hm-word{padding:16px}
+#hm-word .hm-sub{text-align:center;margin:0 0 10px;font-size:.9rem;line-height:1.7}
+.hm-wrow{display:flex;gap:8px;align-items:stretch;margin:0 0 8px}
+.hm-wrow input{flex:1;min-width:0;min-height:48px;font-size:1.05rem;padding:6px 12px;border:3px solid #bfdce8;border-radius:14px;color:#244653;background:#fff;font-family:inherit}
+.hm-wrow input:focus-visible{outline:3px solid #286b88;outline-offset:2px}
+.hm-wrow button{flex:none;min-height:48px;min-width:88px}
+#hm-word-msg{min-height:3.4em;margin:6px 0 12px;text-align:center;font-weight:800;line-height:1.7;color:#244653}
+#hm-word-msg.hit{color:#1f6a4a}
+#hm-word-msg.pop{animation:hm-pop .7s ease-out}
+@keyframes hm-pop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+#hm-toast{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:7000;width:min(420px,calc(100vw - 24px));padding:12px 14px;border:3px solid #f0c060;border-radius:18px;background:#fff9e0;color:#5a3a10;text-align:center;box-shadow:0 8px 24px #0003}
+#hm-toast p{margin:0;font-weight:900;line-height:1.6}
+#hm-toast small{display:block;margin:2px 0 8px;font-size:.9rem;color:#6a4a1a}
+#hm-toast .hm-trow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+#hm-toast button{min-height:48px;min-width:120px;font-size:.9rem}
+:root[data-inapp=x] #hm-note,:root[data-inapp=x] #hm-word{max-height:calc(100dvh - 64px);margin:8px auto auto;overflow:auto}
+@media(prefers-reduced-motion:reduce){#hm-word-msg.pop{animation:none}}
 `;
   document.head.append(css);
 
@@ -263,7 +286,8 @@
     'hiroba-spin': ['🌀', 'まるふわの くるくる', 'まるふわが くるくると まわったよ。'],
     'hiroba-meteor': ['🌠', 'ひろばの ながれぼし', 'ひろばの よぞらに、ながれぼしが とんだよ。'],
     'hiroba-pond': ['🐟', 'いけの さかな', 'いけで さかなが ぴょんと はねたよ。'],
-    'hiroba-thanks': ['🌟', 'ありがとうの ほしぞら', 'ありがとうの いしを ひらいて、あそんで くれた ひとの ほしを みたよ。']
+    'hiroba-thanks': ['🌟', 'ありがとうの ほしぞら', 'ありがとうの いしを ひらいて、あそんで くれた ひとの ほしを みたよ。'],
+    'kotoba-hajimari': ['✨', 'はじめの ことば', 'ひみつの ことばを みつけたよ。ことばは、これから ふえるかも しれないよ。']
   };
   const REPLAY = {
     'tsuri-kojika': () => { zap(.9, 0, .03, .3); [0, 1, 2, 3, 4].forEach(i => tone(i % 2 ? 196 : 165, .04, 'triangle', .5 + i * .38, .02, 0, .5 - i * .2)); [0, 1, 2].forEach(i => { zap(.06, 2.6 + i * .7, .03, .1); tone(700 + i * 40, .04, 'triangle', 2.6 + i * .7, .03, 820); }); },
@@ -317,8 +341,101 @@
   syncNoteButton();
   addEventListener('storage', e => { if (e.key === HM_KEY) syncNoteButton(); });
 
+  // ─── ひみつの ことば（合言葉）───
+  //   ことばは ここに 書かない。SHA-256 の ハッシュ（塩つき）だけ 持つ。しらべるのは この 端末の 中だけ。
+  const SALT = 'marufuwa-kotoba:';
+  const SHA_K = new Uint32Array([0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2]);
+  function sha256hex(str) {   // 純粋な JS（https でない ページでも 動く・同じ 場所で 同期）。検査で crypto.subtle と 突きあわせる
+    const msg = new TextEncoder().encode(String(str)), len = msg.length, total = (len + 9 + 63) & ~63, buf = new Uint8Array(total), dv = new DataView(buf.buffer);
+    buf.set(msg); buf[len] = 0x80; dv.setUint32(total - 8, Math.floor(len * 8 / 0x100000000)); dv.setUint32(total - 4, (len * 8) >>> 0);
+    const h = new Uint32Array([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]), w = new Uint32Array(64), rr = (x, n) => (x >>> n) | (x << (32 - n));
+    for (let o = 0; o < total; o += 64) {
+      for (let i = 0; i < 16; i++) w[i] = dv.getUint32(o + i * 4);
+      for (let i = 16; i < 64; i++) { const s0 = rr(w[i - 15], 7) ^ rr(w[i - 15], 18) ^ (w[i - 15] >>> 3), s1 = rr(w[i - 2], 17) ^ rr(w[i - 2], 19) ^ (w[i - 2] >>> 10); w[i] = w[i - 16] + s0 + w[i - 7] + s1; }
+      let a = h[0], b = h[1], c = h[2], d = h[3], e = h[4], f = h[5], g = h[6], hh = h[7];
+      for (let i = 0; i < 64; i++) {
+        const S1 = rr(e, 6) ^ rr(e, 11) ^ rr(e, 25), ch = (e & f) ^ (~e & g), t1 = (hh + S1 + ch + SHA_K[i] + w[i]) >>> 0, S0 = rr(a, 2) ^ rr(a, 13) ^ rr(a, 22), mj = (a & b) ^ (a & c) ^ (b & c), t2 = (S0 + mj) >>> 0;
+        hh = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+      }
+      h[0] += a; h[1] += b; h[2] += c; h[3] += d; h[4] += e; h[5] += f; h[6] += g; h[7] += hh;
+    }
+    return [...h].map(x => x.toString(16).padStart(8, '0')).join('');
+  }
+  // ゆるく そろえる：全角・半角／カタカナ・ひらがな／大文字・小文字／空白・かなの 記号 を 気にしない
+  const norm = s => String(s).normalize('NFKC').toLowerCase().replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60)).replace(/[\s・、。，．,.!！?？~〜「」『』()（）\-_"'“”‘’]/g, '');
+  const hashOf = word => sha256hex(SALT + norm(word));
+  const WORDS = [   // { id: ひみつの 名前（found の 鍵）, h: [ことばの ハッシュ…（同じ ごほうびに つながる 言い方を 何個でも）] }
+    { id: 'kotoba-hajimari', h: ['9c2a761530c68817a24a59230c50613e3479fce922d15b87500e1be69cacd02a', 'fcde406bfbf5b4d8bee6f784b2700a35ccd50fe698cd0c098ab3860ec5b4691c', '0dc033f9dd0da633b6606cc92fe5c39090814e1e5491bb9f112b7fc572b2d6ab', 'caf61c8c4a566376e8812b46d10ed1d4da2710161b314e10b7b78a3b0a5cdd4a'] }   // はじめの ことば：あいさつの ことば 4つ（だれでも 見つけられる。ひみつの しくみの ご案内）
+  ];
+  const T = {   // 画面に 出す ことば（ひらがな・翻訳表に 出せるように ここに まとめる）
+    title: 'ひみつの ことば', open: 'ひみつの ことば', go: 'ためす', close: 'とじる',
+    hint: 'ことばを しって いたら、ここに いれてね。まちがえても、なにも おこらないよ。',
+    hit: 'ひみつの ことばが みつかったよ！', again: 'この ことばは もう みつけて いるよ。いつでも どうぞ。',
+    none: 'みつからなかったよ。ことばが ちがうのかも。もういちど ためしてね。', empty: 'ことばを いれてね。',
+    openNote: 'ひみつノートを ひらく'
+  };
+  const wordOf = text => { const n = norm(text); if (!n || n.length > 40) return null; const h = sha256hex(SALT + n); return WORDS.find(w => w.h.includes(h)) || null; };
+  const titleOf = id => (NOTE[id] || [])[1] || '';
+  const fanfare = () => { chord([988, 1319, 1568, 2093], .07, 'square', .04); tone(2637, .3, 'triangle', .35, .03); };
+  function tryWord(text) {
+    if (!norm(text)) return { ok: false, reason: 'empty' };
+    const w = wordOf(text); if (!w) return { ok: false, reason: 'none' };
+    const fresh = markFound(w.id), title = titleOf(w.id);
+    try { window.dispatchEvent(new CustomEvent('tsuri-kotoba', { detail: { id: w.id, fresh, title } })); } catch {}
+    return { ok: true, id: w.id, fresh, title };
+  }
+  let wordBtn = null, wordDlg = null;
+  function buildWord() {
+    wordDlg = make('dialog', '', '<h2 id="hm-word-title"></h2><p class="hm-sub"></p><div class="hm-wrow"><label class="hm-sr" for="hm-word-in"></label><input id="hm-word-in" type="text" maxlength="24" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"><button id="hm-word-go" type="button"></button></div><p id="hm-word-msg" role="status" aria-live="polite"></p><button class="close" type="button"></button>');
+    wordDlg.id = 'hm-word'; wordDlg.setAttribute('aria-labelledby', 'hm-word-title');
+    wordDlg.querySelector('#hm-word-title').textContent = T.title; wordDlg.querySelector('.hm-sub').textContent = T.hint; wordDlg.querySelector('label').textContent = T.title;
+    wordDlg.querySelector('#hm-word-go').textContent = T.go; wordDlg.querySelector('.close').textContent = T.close;
+    const input = wordDlg.querySelector('#hm-word-in'), msg = wordDlg.querySelector('#hm-word-msg');
+    const go = () => {
+      const r = tryWord(input.value); msg.classList.remove('hit', 'pop'); void msg.offsetWidth;
+      if (r.ok) { msg.textContent = (r.fresh ? T.hit : T.again) + '　' + r.title; msg.classList.add('hit'); if (!reduced()) msg.classList.add('pop'); fanfare(); input.value = ''; }
+      else msg.textContent = r.reason === 'empty' ? T.empty : T.none;
+    };
+    wordDlg.querySelector('#hm-word-go').addEventListener('click', go);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+    wordDlg.querySelector('.close').addEventListener('click', () => wordDlg.close());
+    document.body.append(wordDlg);
+  }
+  function openWord() {
+    if (!wordDlg) buildWord();
+    const msg = wordDlg.querySelector('#hm-word-msg'); msg.textContent = ''; msg.classList.remove('hit', 'pop');
+    wordDlg.showModal(); wordDlg.querySelector('#hm-word-in').focus();
+  }
+  function syncWordButton() {
+    if (!bucket || wordBtn) return;
+    wordBtn = make('button'); wordBtn.type = 'button'; wordBtn.id = 'hm-word-open'; wordBtn.textContent = T.open; wordBtn.style.cssText = 'display:block;margin:0 auto 12px;min-width:200px';
+    wordBtn.addEventListener('click', openWord);
+    const close = bucket.querySelector('.close'); if (close) close.before(wordBtn); else bucket.append(wordBtn);
+  }
+  syncWordButton();
+  // リンク ?kotoba=ことば：ひらいたら しらべて、アドレスから 消す（もういちど 読みこんでも くりかえさない）。入れられた 文字は 画面に 出さない
+  function showToast(r) {
+    const old = $('hm-toast'); if (old) old.remove();
+    const t = make('div'); t.id = 'hm-toast'; t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite'); document.body.append(t);
+    setTimeout(() => {
+      const p = make('p'), row = make('div', 'hm-trow'), shut = make('button'); shut.type = 'button'; shut.textContent = T.close; shut.addEventListener('click', () => t.remove());
+      p.textContent = r.ok ? '✨ ' + (r.fresh ? T.hit : T.again) + ' ✨' : T.none; t.append(p);
+      if (r.ok) { const s = make('small'); s.textContent = r.title; t.append(s); const n = make('button'); n.type = 'button'; n.textContent = T.openNote; n.addEventListener('click', () => { t.remove(); window.TsuriHimitsu.open(); }); row.append(n); }
+      row.append(shut); t.append(row);
+    }, 60);
+  }
+  function fromUrl() {
+    let u, raw; try { u = new URL(location.href); raw = u.searchParams.get('kotoba'); } catch { return null; }
+    if (raw === null) return null;
+    try { u.searchParams.delete('kotoba'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch {}
+    if (!norm(raw)) return null;
+    const r = tryWord(raw); if (r.ok) fanfare(); showToast(r); return r;
+  }
+  setTimeout(fromUrl, 900);
+
   window.TsuriHimitsu = {
     version: 1, found: foundMap, replay, open: () => { if (!noteDlg) buildNote(); drawNote(); noteDlg.showModal(); },
-    _debug: { tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy }) }
+    kotoba: { version: 1, try: tryWord, open: openWord, list: () => WORDS.map(w => ({ id: w.id, title: titleOf(w.id), found: !!foundMap()[w.id] })) },
+    _debug: { kotoba: { sha256hex, norm, hashOf, words: () => WORDS.map(w => ({ id: w.id, keys: Object.keys(w), hashes: w.h.length, hex: w.h.every(x => /^[0-9a-f]{64}$/.test(x)) })), fromUrl, T }, tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy }) }
   };
 })();
