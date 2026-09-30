@@ -1,6 +1,7 @@
-/* まるふわ つりびより：BGM（しずかな 曲。外付け・ゲーム開発司令部）
-   ・曲は ファイルでは なく、ブラウザの 中で 音を つくる（角ばった 波・三角の 波。メロディは ドレミソラだけ／和音は ハ長調の 白い 鍵ばんだけ）。ダウンロードも 通信も ない。
-   ・3曲：a＝ひろば（あさの さんぽ）／b＝すいそう（ぽこぽこ）／c＝ほしぞら（よるの へや）。マスターが 耳で えらんだ 試作 3案と おなじ 音符。
+/* まるふわ つりびより：BGM（しずかな・おだやかな 曲。外付け・ゲーム開発司令部）
+   ・曲は ファイルでは なく、ブラウザの 中で 音を つくる（サイン波が 中心。メロディは ドレミソラだけ／和音は ハ長調の 白い 鍵ばんだけ）。ダウンロードも 通信も ない。
+   ・「キンキン」しない きまり（9/30 夜・マスター「もっと 穏やかな、静かな、流れるような メロディー」）：いちばん 高い 音は G5（ミディ79）まで・アタックは 0.03びょう以上（和音は 0.8びょう以上）・ピッチは しゃくらない・どの 声も ローパス 1800Hz・こだまの ローパスは 1600Hz。
+   ・3曲：a＝ひろば（あさの さんぽ・70）／b＝すいそう（ぽこぽこ）／c＝ほしぞら（よるの へや）。曲の 性格は 試作 3案の まま、音符は 穏やかに 作りなおした（9/30 夜）。
    ・鳴る 条件：その ばしょの「おと」が ON かつ「BGM」が ON（はじめは OFF）。釣りの 画面では 鳴らさない（ひろば・おへや・ながめる だけ）。
      「おと」の せっていは そのまま 親スイッチ（おとを けせば BGMも きえる）。「うごきを へらす」では 止めない（おとは 動きとは べつの せってい）。
      画面が かくれた 時は 止める。「みみで ながめる」の 間は 鳴らさない（魚の なまえの おとを じゃましない）。
@@ -17,9 +18,9 @@
   'use strict';
   if (window.TsuriBgm) return;
   const KEY = 'marufuwa-bgm-v1', MAIN = 'marufuwa-tsuri-v1';
-  // 大きさ：3曲とも「K重みの LUFS」で −32 に そろえた（デモの mp3 は −20。ゲームでは 12 デシベル 小さく 鳴らす）。
-  //   測った 生の 値（VOLUME・TRIM ともに 1 の とき）：a −29.7／b −28.5／c −27.3。ここから かけ算で 出した。耳で 見る 時だけ ?bgmvol=0.5〜2 で 動かせる。
-  const VOLUME = .65, TRIM = { a: 1.19, b: 1.03, c: .89 };
+  // 大きさ：3曲とも「K重みの LUFS」で −34.5 に そろえた（なおす 前は −32。本体の「なみ」は おなじ 測りかたで −28 なので、BGM は なみより 6 デシベル 小さい）。
+  //   測りかた＝_qa の bgm_probe.js（OfflineAudioContext で 書き出し・K重みの 近似）。耳で 見る 時だけ ?bgmvol=0.5〜2 で 動かせる。
+  const VOLUME = .65, TRIM = { a: .27, b: .53, c: .53 };   // TRIM は 書き出して 測って きめる（下で 直す）
   const boost = (() => { try { const v = Number(new URLSearchParams(location.search).get('bgmvol')); return v > 0 ? Math.min(2, v) : 1; } catch { return 1; } })();
   const readJSON = k => { try { const d = JSON.parse(localStorage.getItem(k)); return d && typeof d === 'object' ? d : null; } catch { return null; } };
   const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
@@ -27,68 +28,75 @@
   const pick = (r, arr) => arr[Math.floor(r() * arr.length)];
   const val = v => typeof v === 'function' ? v() : v;
   const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');   // English mode（tsuri-en.js）の 時は「BGM: ON」（半角の コロン）
-  const N = { A4: 69, C5: 72, D5: 74, E5: 76, G5: 79, A5: 81 };
+  // やさしさの きまり（ぜんぶの 曲・声に かかる。耳に 痛い「キンキン」を 作らない ための 土台）
+  //   ・いちばん 高い 音符は G5（ミディ 79）まで。アタックは 0.03びょう より みじかく しない（旋律 0.03〜／パッド・ドローン 0.8〜）。ピッチを しゃくる（bend）は しない。
+  //   ・どの 声も ローパス 1800Hz より うえは ぼかす。ゆるい こだま（空気）の ローパスは 1600Hz。
+  const TOP_MIDI = 79, MIN_ATTACK = .03, LP = 1800, AIR_LP = 1600;
 
   // ── 曲：1周ぶんの 音の 一覧 [はじまり(びょう), ながさ(びょう), 音（ミディ）, 音色] と、1周の ながさ ──
-  function trackA() {   // ひろば（あさの さんぽ）84。オルゴールの ような メロディ＋やさしい ベース＋さらさらの アルペジオ
-    const ev = [], beat = 60 / 84, bar = beat * 4, add = (t, d, m, o) => ev.push([t, d, m, o]);
+  //   音色の role は 検査が 見分ける ための しるし（mel＝旋律／pad＝和音／drone＝ひくい 持続／bass／arp＝さらさら／twinkle＝しずく・星／bubble＝あわ）
+  function trackA() {   // ひろば（あさの さんぽ）70。ゆっくり 流れる メロディ＋ひくい 和音の 波＋さらさらの アルペジオ
+    const ev = [], beat = 60 / 70, bar = beat * 4, add = (t, d, m, o) => ev.push([t, d, m, o]);
     const chords = ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'G', 'C', 'Am', 'G', 'C'];
     const tri = { C: [60, 64, 67], Am: [57, 60, 64], F: [60, 65, 69], G: [59, 62, 67] }, root = { C: 48, Am: 45, F: 41, G: 43 };
+    const pad = { C: [55, 60, 64, 67], Am: [57, 60, 64, 69], F: [53, 57, 60, 65], G: [55, 59, 62, 67] };
+    // 旋律：2小節ずつ ふくらんで しずむ なだらかな 上下。跳びは 4度まで（ドレミソラ だけ）。[小節, 拍, 音, 長さ（拍）]
     const mel = [
-      [0, 0, N.E5, 1], [0, 1, N.G5, 1], [0, 2, N.E5, 1], [0, 3, N.D5, 1], [1, 0, N.C5, 2], [1, 2, N.D5, 1], [1, 3, N.E5, 1],
-      [2, 0, N.G5, 1.5], [2, 1.5, N.E5, .5], [2, 2, N.D5, 1], [2, 3, N.C5, 1], [3, 0, N.D5, 2], [3, 2, N.E5, 1], [3, 3, N.D5, 1],
-      [4, 0, N.E5, 1], [4, 1, N.G5, 1], [4, 2, N.A5, 1], [4, 3, N.G5, 1], [5, 0, N.E5, 2], [5, 2, N.D5, 1], [5, 3, N.C5, 1],
-      [6, 0, N.A4, 1], [6, 1, N.C5, 1], [6, 2, N.D5, 1], [6, 3, N.E5, 1], [7, 0, N.D5, 3],
-      [8, 0, N.G5, 1], [8, 1, N.E5, 1], [8, 2, N.G5, 1], [8, 3, N.A5, 1], [9, 0, N.G5, 2], [9, 2, N.E5, 1], [9, 3, N.D5, 1],
-      [10, 0, N.C5, 1], [10, 1, N.D5, 1], [10, 2, N.E5, 1], [10, 3, N.G5, 1], [11, 0, N.E5, 2], [11, 2, N.D5, 2],
-      [12, 0, N.C5, 1], [12, 1, N.E5, 1], [12, 2, N.G5, 1], [12, 3, N.E5, 1], [13, 0, N.D5, 2], [13, 2, N.C5, 1], [13, 3, N.A4, 1],
-      [14, 0, N.C5, 1], [14, 1, N.D5, 1], [14, 2, N.E5, 2], [15, 0, N.C5, 4]];
+      [0, 0, 76, 2], [0, 2, 74, 1], [0, 3, 72, 1], [1, 0, 69, 2], [1, 2, 72, 1], [1, 3, 74, 1],
+      [2, 0, 76, 3], [2, 3, 74, 1], [3, 0, 74, 4],
+      [4, 0, 76, 1], [4, 1, 79, 3], [5, 0, 76, 2], [5, 2, 74, 1], [5, 3, 72, 1], [6, 0, 69, 2], [6, 2, 72, 2], [7, 0, 74, 3],
+      [8, 0, 69, 2], [8, 2, 72, 2], [9, 0, 76, 2], [9, 2, 72, 2], [10, 0, 69, 2], [10, 2, 72, 1], [10, 3, 74, 1], [11, 0, 76, 2], [11, 2, 74, 2],
+      [12, 0, 79, 2], [12, 2, 76, 2], [13, 0, 74, 2], [13, 2, 72, 2], [14, 0, 69, 2], [14, 2, 74, 2], [15, 0, 72, 4]];
     chords.forEach((c, b) => {
       const t0 = b * bar;
-      add(t0, beat * 1.7, root[c], { gain: .16, a: .01, r: .3, lp: 900 });
-      add(t0 + beat * 2, beat * 1.6, root[c] + 7, { gain: .1, a: .01, r: .3, lp: 900 });
-      [0, 1, 2, 1, 0, 1, 2, 1].forEach((k, i) => add(t0 + i * beat / 2, beat * .42, tri[c][k] + 12, { type: 'triangle', gain: .045, a: .004, r: .1, pan: i % 2 ? .28 : -.28 }));
+      pad[c].forEach((m, j) => add(t0, bar, m, { role: 'pad', type: 'sine', gain: .028, a: 1.1, r: 1.9, hold: true, lp: 1100, pan: (j - 1.5) * .22 }));
+      add(t0, bar * .94, root[c], { role: 'bass', type: 'triangle', gain: .05, a: .35, r: .9, hold: true, lp: 600 });
+      [0, 1, 2, 1, 0, 1, 2, 1].forEach((k, i) => add(t0 + i * beat / 2, beat * .34, tri[c][k], { role: 'arp', type: 'sine', gain: .11, a: .05, r: .7, lp: 1400, pan: i % 2 ? .3 : -.3 }));
     });
-    mel.forEach(([b, s, m, len]) => add(b * bar + s * beat, len * beat * .92, m, { type: 'triangle', gain: .13, a: .006, r: .35, partial: .22 }));
+    mel.forEach(([b, s, m, len]) => add(b * bar + s * beat, len * beat * .97, m, { role: 'mel', type: 'sine', gain: .12, a: .09, r: .75, hold: true }));
     return { len: bar * 16, ev };
   }
-  function trackB() {   // すいそう（ぽこぽこ）60。ゆっくりの 和音＋ガラスの ベル＋あわ
-    const ev = [], r = mulberry(1234), bar = 4, penta = [72, 74, 76, 79, 81, 84], add = (t, d, m, o) => ev.push([t, d, m, o]);
-    const pads = { C: [48, 55, 64, 67, 71], Am: [45, 52, 60, 64, 67], F: [41, 48, 57, 60, 65], G: [43, 50, 59, 62, 67] };
-    ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'C'].forEach((c, i) => pads[c].forEach((m, j) => add(i * 8, 7.2, m, { type: 'triangle', gain: .03, a: 2.2, r: 2.6, hold: true, pan: (j - 2) * .2 })));
-    for (let b = 0; b < 16; b++) [.6, 2.1, 3.2].forEach(off => { if (r() < .72) add(b * bar + off, 1.2, pick(r, penta), { type: 'sine', gain: .05, a: .004, r: 1.6, partial: .28, pan: (r() - .5) * 1.2 }); });
-    for (let t = 1.2; t < 61; t += 1.4 + r() * 2.2) { const m = 84 + Math.floor(r() * 9), pan = (r() - .5) * 1.5; add(t, .05, m, { type: 'sine', gain: .03, a: .004, r: .07, bend: 1.7, pan }); if (r() < .4) add(t + .17, .05, m + 2, { type: 'sine', gain: .022, a: .004, r: .07, bend: 1.6, pan }); }
+  function trackB() {   // すいそう（ぽこぽこ）。ゆっくりの 和音＋ゆっくり 流れる しずく＋ちいさな あわ
+    const ev = [], r = mulberry(1234), bar = 4, add = (t, d, m, o) => ev.push([t, d, m, o]);
+    const penta = [64, 67, 69, 72, 74, 76, 79], up = { 67: 69, 69: 72, 72: 74, 74: 76, 76: 79 }, bub = [67, 69, 72, 74, 76];
+    const pads = { C: [48, 55, 60, 64, 67], Am: [45, 52, 57, 60, 64], F: [41, 48, 53, 57, 60], G: [43, 50, 55, 59, 62] };
+    ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'C'].forEach((c, i) => pads[c].forEach((m, j) => add(i * 8, 7.2, m, { role: 'pad', type: 'sine', gain: .022, a: 2.2, r: 2.6, hold: true, lp: 1000, pan: (j - 2) * .2 })));
+    let idx = 3;   // しずくは 1つ ぶん ずつ そっと うごく（ふた つ ぶん まで）
+    for (let b = 0; b < 16; b++) [.6, 2.1, 3.2].forEach(off => { if (r() < .72) { idx = Math.max(0, Math.min(penta.length - 1, idx + pick(r, [-2, -1, -1, 1, 1, 2]))); add(b * bar + off, 1.2, penta[idx], { role: 'twinkle', type: 'sine', gain: .14, a: .06, r: 1.9, pan: (r() - .5) * 1.2 }); } });
+    for (let t = 1.2; t < 61; t += 1.4 + r() * 2.2) { const m = pick(r, bub), pan = (r() - .5) * 1.5; add(t, .06, m, { role: 'bubble', type: 'sine', gain: .12, a: .03, r: .45, pan }); if (r() < .4) add(t + .22, .06, up[m], { role: 'bubble', type: 'sine', gain: .09, a: .03, r: .45, pan }); }
     return { len: 64, ev };
   }
-  function trackC() {   // ほしぞら（よるの へや）54。ひくい ドローン＋きらきらの 星＋ときどき お月さまの ベル
-    const ev = [], r = mulberry(4242), stars = [84, 86, 88, 91, 93, 96], add = (t, d, m, o) => ev.push([t, d, m, o]);
-    add(0, 52, 36, { type: 'triangle', gain: .06, a: 5, r: 5, hold: true });
-    add(1, 51, 43, { type: 'triangle', gain: .04, a: 6, r: 5, hold: true });
-    add(2, 50, 52, { type: 'triangle', gain: .018, a: 7, r: 5, hold: true });
-    for (let t = .5; t < 58; t += .35 + r() * .85) add(t, .1, pick(r, stars), { type: 'sine', gain: .035, a: .004, r: 1.3, pan: (r() - .5) * 1.5 });
-    for (let t = 4; t < 56; t += 8) [76, 79].forEach((m, i) => add(t + i * .05, 2.2, m, { type: 'sine', gain: .04, a: .02, r: 2.6, partial: .3, pan: i ? .3 : -.3 }));
+  function trackC() {   // ほしぞら（よるの へや）。ひくい ドローン＋ゆっくり ふくらむ 和音＋ときどき ちいさく またたく 星と お月さまの ベル
+    const ev = [], r = mulberry(4242), stars = [67, 69, 72, 74, 76, 79], add = (t, d, m, o) => ev.push([t, d, m, o]);
+    add(0, 52, 36, { role: 'drone', type: 'triangle', gain: .03, a: 5, r: 5, hold: true, lp: 500 });
+    add(1, 51, 43, { role: 'drone', type: 'triangle', gain: .02, a: 6, r: 5, hold: true, lp: 600 });
+    add(2, 50, 52, { role: 'drone', type: 'sine', gain: .01, a: 7, r: 5, hold: true, lp: 800 });
+    const pads = [[55, 60, 64, 67], [57, 60, 64, 69], [53, 57, 60, 65], [55, 59, 62, 67]];
+    pads.forEach((ch, i) => ch.forEach((m, j) => add(i * 15, 15, m, { role: 'pad', type: 'sine', gain: .026, a: 4, r: 4, hold: true, lp: 900, pan: (j - 1.5) * .25 })));
+    let si = 2;   // 星も そっと うごく
+    for (let t = 1; t < 58; t += 1 + r() * 1.8) { si = Math.max(0, Math.min(stars.length - 1, si + pick(r, [-2, -1, -1, 1, 1, 2]))); add(t, .1, stars[si], { role: 'twinkle', type: 'sine', gain: .1, a: .06, r: 2.2, pan: (r() - .5) * 1.5 }); }
+    for (let t = 4; t < 56; t += 8) [76, 79].forEach((m, i) => add(t + i * .05, 2.2, m, { role: 'twinkle', type: 'sine', gain: .075, a: .08, r: 2.8, pan: i ? .3 : -.3 }));
     return { len: 60, ev };
   }
   const BUILD = { a: trackA, b: trackB, c: trackC };
   const TRACKS = {};
   const track = key => TRACKS[key] || (TRACKS[key] = (() => { const t = BUILD[key](); t.ev.sort((x, y) => x[0] - y[0]); return t; })());
 
-  // ── 1つの 音（かくばった／三角の 波。partial＝1オクターブ うえの サイン波を すこし）──
+  // ── 1つの 音（ふつうは サイン波。アタックは 0.03びょう より みじかく しない・ローパスは 1800Hz より うえに しない・ピッチは しゃくらない）──
   function voice(ctx, dest, t, dur, midi, o) {
-    const { type = 'triangle', gain = .1, a = .008, r = .25, pan = 0, partial = 0, lp = 0, hold = false, bend = 0 } = o || {};
-    const g = ctx.createGain(), f0 = mtof(midi); let node = g;
-    const mk = (mult, level, ty) => { const os = ctx.createOscillator(); os.type = ty; os.frequency.setValueAtTime(f0 * mult, t); if (bend) os.frequency.linearRampToValueAtTime(f0 * mult * bend, t + Math.min(dur, .12)); const og = ctx.createGain(); og.gain.value = level; os.connect(og); og.connect(g); os.start(t); os.stop(t + a + dur + r + .1); };
-    mk(1, 1, type); if (partial) mk(2, partial, 'sine');
+    const { type = 'sine', gain = .1, r = .6, pan = 0, lp = LP, hold = false } = o || {};
+    const a = Math.max((o && o.a) || .08, MIN_ATTACK);
+    const g = ctx.createGain(), os = ctx.createOscillator(); os.type = type; os.frequency.setValueAtTime(mtof(midi), t); os.connect(g); os.start(t); os.stop(t + a + dur + r + .1);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + a);
     if (hold) { g.gain.setValueAtTime(gain, t + Math.max(a, dur)); g.gain.linearRampToValueAtTime(.0001, t + dur + r); } else g.gain.exponentialRampToValueAtTime(.0001, t + a + dur + r);
-    if (lp) { const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = lp; g.connect(fl); node = fl; }
-    if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; node.connect(p); p.connect(dest); } else node.connect(dest);
+    const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = Math.min(lp || LP, LP); g.connect(fl);
+    if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; fl.connect(p); p.connect(dest); } else fl.connect(dest);
   }
-  // ゆるい こだま（空気）。曲の 音は ここへ あつめて、ぜんたいの 大きさを きめる
+  // ゆるい こだま（空気）。曲の 音は ここへ あつめて、ぜんたいの 大きさを きめる。こだまは 8ぶん音符（70BPM の ちょうど 半拍）で かえって くる
   function makeAir(ctx, volume) {
     const master = ctx.createGain(); master.gain.value = volume;
-    const dl = ctx.createDelay(1); dl.delayTime.value = .34; const fb = ctx.createGain(); fb.gain.value = .3; const wet = ctx.createGain(); wet.gain.value = .22;
-    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
+    const dl = ctx.createDelay(1); dl.delayTime.value = 60 / 70 / 2; const fb = ctx.createGain(); fb.gain.value = .3; const wet = ctx.createGain(); wet.gain.value = .22;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = AIR_LP;
     master.connect(ctx.destination); master.connect(dl); dl.connect(lp); lp.connect(fb); fb.connect(dl); lp.connect(wet); wet.connect(ctx.destination);
     return master;
   }
@@ -184,7 +192,7 @@
       subs.add(paint); paint(); return b;
     },
     state: () => ({ on, key: cur ? cur.key : '', playing: !!cur, stack: stack.map(s => s.name), ownCtx: !!ownCtx, volume: VOLUME * boost, trim: { ...TRIM } }),
-    _debug: { track, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get ticker() { return ticker; } }
+    _debug: { track, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, TOP_MIDI, MIN_ATTACK, LP, AIR_LP, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get ticker() { return ticker; } }
   };
   window.TsuriBgm = api;
   // ゆびで さわった あとで はじめて 音の 部品を 作る／画面が かくれたら 止める／ほかの タブで「おと」「BGM」が かわったら 取りこむ
