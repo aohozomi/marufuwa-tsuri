@@ -574,6 +574,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   <dialog id="book" aria-labelledby="book-title">
     <h2 id="book-title">おさかな シールちょう</h2>
     <p class="count"><span id="book-seen">0</span> / 30 しゅるい</p>
+    <p class="count" id="book-myth"></p>
     <div id="book-grid"></div>
     <div class="photo-actions"><button id="book-photo" type="button">シールちょうを しゃしんに</button></div>
     <button class="close" type="button" id="close-book">とじる</button>
@@ -1626,6 +1627,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   const book = $('book');
   $('open-book').addEventListener('click', () => {
+    { const myth = FISH.filter(f => f.legend), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? '★5の まぼろしの こ：ぜんいんに あえたよ！' : '★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'); }
     $('book-grid').replaceChildren(...FISH.filter(f => !f.legend || save.fish[f.id]).map(f => {
       const got = save.fish[f.id], cell = document.createElement('div');
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
