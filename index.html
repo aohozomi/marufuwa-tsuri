@@ -960,6 +960,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // English mode（外付け tsuri-en.js・総司令部）が よみこまれて いて 英語の とき だけ、えの なかの もじと 共有の ぶんを 英語に する。日本語の ときは ぜんぶ そのまま
   const EN = () => !!(window.TsuriEn && TsuriEn.lang === 'en');
   const T = text => window.TsuriEn && TsuriEn.t ? TsuriEn.t(text) : text;   // ひょうに ある ことばは 英語に、ない ものは そのまま
+  const L = (ja, en) => EN() ? en : ja;   // 日本語と 英語を その場で えらぶ（ここに おくと、どの 書きかたの 前でも つかえる）
   const TAG = () => EN() ? '#MarufuwaFishing' : '#まるふわつりびより';
   const HOME_SHARE = () => EN() ? HOME + 'en/' : HOME;   // 英語の リンクカードを もつ 入口
   const KEY = 'marufuwa-tsuri-v1';
@@ -2083,29 +2084,58 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
   // きろくを のこす・もどす。もじに して、じぶんで ほぞんして おける。そとへは おくらない
   const keep = $('keep'), keepCode = $('keep-code'), keepSay = text => { $('keep-status').textContent = text; };
-  const pack = () => 'MF1.' + btoa(unescape(encodeURIComponent(JSON.stringify(save))));
-  $('open-keep').addEventListener('click', () => { keepCode.value = pack(); keepSay('この もじを、メモなどに はって のこしてね。'); keep.showModal(); });
+  // あいことば：MF1＝ほんたいの きろくだけ（リンクに つかう・みじかい）／MF2＝ほんたい＋おへや・ひみつ・ひろばの きろく（もじ・ファイルに つかう）
+  const b64 = text => btoa(unescape(encodeURIComponent(text)));
+  const EXT_KEYS = {tank: 'marufuwa-tsuri-tank-v1', himitsu: 'marufuwa-himitsu-v1', hiroba: 'marufuwa-hiroba-v1'};   // それぞれの ぶひんの きろく（そのまま はこぶ だけ）
+  const okExt = raw => { try { const o = JSON.parse(raw); return typeof raw === 'string' && raw.length <= 200000 && !!o && typeof o === 'object'; } catch { return false; } };
+  function packExt() { const ext = {}; for (const [k, key] of Object.entries(EXT_KEYS)) { try { const raw = localStorage.getItem(key); if (raw && okExt(raw)) ext[k] = raw; } catch {} } return ext; }
+  const pack = full => { const ext = full ? packExt() : {}; return Object.keys(ext).length ? 'MF2.' + b64(JSON.stringify({main: save, ext})) : 'MF1.' + b64(JSON.stringify(save)); };
+  $('open-keep').addEventListener('click', () => { keepCode.value = pack(true); keepSay(L('この もじを、メモなどに はって のこしてね。ながい ときは「ファイルに ほぞん」が らくだよ。', 'Paste this text into a note to keep it. If it is long, “Save as a file” is easier.')); keep.showModal(); });
   $('keep-copy').addEventListener('click', async () => {
-    keepCode.value = pack(); keepCode.select();
+    keepCode.value = pack(true); keepCode.select();
     try { await navigator.clipboard.writeText(keepCode.value); keepSay('コピー したよ。メモなどに はって のこしてね。'); } catch { keepSay('もじを えらんだよ。ながおしして、コピー してね。'); }
   });
   // きろくの もじ（MF1.…）と、リンク（…#restore=MF1.…）の どちらでも よめる。#の あとは サーバーに おくられない。かたちが おかしければ なげる（よぶ ほうが やさしい ことばに する）
   function readKeep(raw) {
-    const at = String(raw).indexOf('MF1.'); if (at < 0) throw Error('form');
-    let body = String(raw).slice(at + 4).replace(/[^A-Za-z0-9+/=_-]/g, '').replace(/-/g, '+').replace(/_/g, '/'); while (body.length % 4) body += '=';
-    const data = JSON.parse(decodeURIComponent(escape(atob(body))));
+    const m = /MF([12])[.]/.exec(String(raw)); if (!m) throw Error('form');
+    let body = String(raw).slice(m.index + 4).replace(/[^A-Za-z0-9+/=_-]/g, '').replace(/-/g, '+').replace(/_/g, '/'); while (body.length % 4) body += '=';
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(body)))), data = m[1] === '2' ? parsed && parsed.main : parsed, ext = {};
     if (!data || typeof data.fish !== 'object' || data.fish === null || !Number.isInteger(data.total) || data.total < 0) throw Error('shape');
+    if (m[1] === '2' && parsed.ext && typeof parsed.ext === 'object') for (const k of Object.keys(EXT_KEYS)) if (okExt(parsed.ext[k])) ext[k] = parsed.ext[k];   // おへや・ひみつ・ひろばの きろく（かたちが おかしい ものは もどさない）
     const fishes = {}; for (const [id, got] of Object.entries(data.fish)) if (FISH[id] && got && Number.isFinite(got.best) && Number.isInteger(got.count)) fishes[id] = {count: got.count, best: got.best, nushi: !!got.nushi};
-    return {data, fishes};
+    return {data, fishes, ext};
   }
   function applyKeep(got) {   // もどす：いまの きろくを おきかえて、よみこみ なおす（もどった あと「もどしたよ」を 1かい いう ため #restored を つける）
     save = {...got.data, fish: got.fishes}; store(true);
+    for (const k of Object.keys(got.ext || {})) { try { localStorage.setItem(EXT_KEYS[k], got.ext[k]); } catch {} }   // おへや・ひみつ・ひろば
     try { history.replaceState(null, '', location.pathname + location.search + '#restored'); } catch {}
     location.reload();
   }
   async function copyText(text) {   // コピー：ふつうの ほうほう → ふるい ほうほう の じゅん
     try { await navigator.clipboard.writeText(text); return true; } catch {}
     try { const t = document.createElement('textarea'); t.value = text; t.readOnly = true; t.style.cssText = 'position:fixed;left:-9999px;top:0'; document.body.append(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return !!ok; } catch { return false; }
+  }
+  {   // ファイルに ほぞん／ファイルから もどす（ながい もじを メモに はらなくて よい）。ファイルは じぶんの たんまつの なかだけ・そとへは おくらない
+    const row = $('keep-copy').parentElement, fileSave = document.createElement('button'), fileOpen = document.createElement('button');
+    fileSave.id = 'keep-save'; fileOpen.id = 'keep-open'; fileSave.type = fileOpen.type = 'button'; row.append(fileSave, fileOpen);
+    const paint = () => { fileSave.textContent = L('ファイルに ほぞん', 'Save as a file'); fileOpen.textContent = L('ファイルから もどす', 'Restore from a file'); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint); else paint();
+    fileSave.addEventListener('click', () => {
+      try {
+        const d = new Date(), url = URL.createObjectURL(new Blob([pack(true)], {type: 'text/plain'})), a = document.createElement('a');
+        a.href = url; a.download = 'marufuwa-kiroku-' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '.txt'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+        keepSay(L('ファイルに ほぞん したよ。だいじに とっておいてね。', 'Saved as a file. Keep it somewhere safe.'));
+      } catch { keepSay(L('ファイルに できなかったよ。「コピーする」を つかってね。', 'Could not save a file. Please use Copy instead.')); }
+    });
+    fileOpen.addEventListener('click', () => {
+      const input = document.createElement('input'); input.type = 'file'; input.accept = '.txt,text/plain';   // がめんには おかない（えらぶ ときだけ ひらく）
+      input.addEventListener('change', async () => {
+        const f = input.files && input.files[0]; if (!f) return;
+        if (f.size > 1000000) { keepSay(L('ファイルが おおきすぎるよ。きろくの ファイルを えらんでね。', 'That file is too big. Please choose your progress file.')); return; }
+        try { keepCode.value = (await f.text()).trim(); keepSay(L('ファイルを よんだよ。「この もじで もどす」を おしてね。', 'File read. Press “Restore from this text”.')); } catch { keepSay(L('ファイルを よめなかったよ。', 'Could not read that file.')); }
+      });
+      input.click();
+    });
   }
   $('keep-load').addEventListener('click', () => {
     try {
@@ -2378,7 +2408,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // ながめる を もっと ゆったり（総司令部 第4弾【5】）：①時計に あわせて 景色が かわる ②おやすみタイマー（おとが ふわっと きえて、景色が くらく なって、がめんを 消して いい ように なる）
   // ③なにも しないと ボタンが きえて 景色だけに（さわる／キーで もどる）④ぜんがめん（つかえる ブラウザだけ）⑤でんち：ながめる 中は 絵の こうしんを へらす
   const gazing = () => document.body.classList.contains('gazing');
-  const L = (ja, en) => EN() ? en : ja;
   const SLEEP_STEPS = [0, 15, 30, 60];
   let sleepMin = 0, sleepAt = 0, sleepTick = 0, quietTimer = 0;
   function drawSleep() {
