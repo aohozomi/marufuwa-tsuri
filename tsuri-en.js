@@ -25,7 +25,7 @@
   const NORM_RE = new RegExp('(?<=[' + JPX + '])[\\s\\u3000]+|[\\s\\u3000]+(?=[' + JPX + '])', 'g');
   const norm = s => String(s).replace(NORM_RE, '').trim();
   const missing = new Set();
-  window.TsuriEn = { lang: LANG, t: s => s, missing: () => [...missing], toggle: null, add: () => {} };   // add は 英語の ときだけ はたらく（ひろば など べつの ページの 訳を たす）
+  window.TsuriEn = { lang: LANG, t: s => s, missing: () => [...missing], toggle: null, add: () => {}, page: () => {} };   // add・page は 英語の ときだけ はたらく（add：ひろば など べつの ページの 訳を たす／page：ページごとの 題と 説明を 直す）
 
   // ---------- きりかえの ボタン（日本語でも 英語でも 出す）----------
   function addToggle() {
@@ -487,7 +487,7 @@
   }
   function walk(el) {
     if (!el || el.nodeType !== 1 || SKIP.has(el.tagName.toUpperCase())) return;
-    if (el.closest && el.closest('[data-en-skip]')) return;
+    if (el.closest && el.closest('[data-en-skip],[data-en]')) return;   // data-en-skip／data-en：その ページが 自分で 英語に する ところ（さわらない）
     translateAttrs(el);
     const hasRuby = !!el.querySelector('ruby');
     const text = el.textContent;
@@ -519,8 +519,10 @@
   }
 
   document.documentElement.lang = 'en';
-  document.title = 'Marufuwa Fishing Days — a no-rush fishing game';
-  const meta = document.querySelector('meta[name=description]'); if (meta) meta.content = "No rush. Let one go, and nothing is lost. A cozy fishing game that runs in your browser — free, no login, no install.";
+  // ページの 題と 説明：ふだんは 釣りの もの。ひろば など べつの ページは <html data-en-page> で この 既定を とばして、TsuriEn.page({title, description}) で 自分の 題・説明を きめる
+  const meta = document.querySelector('meta[name=description]');
+  window.TsuriEn.page = ({ title, description } = {}) => { if (title) document.title = title; if (description && meta) meta.content = description; };
+  if (!document.documentElement.hasAttribute('data-en-page')) window.TsuriEn.page({ title: 'Marufuwa Fishing Days — a no-rush fishing game', description: "No rush. Let one go, and nothing is lost. A cozy fishing game that runs in your browser — free, no login, no install." });
   function start() {
     logo(); patchData(); walk(document.body);
     let queue = new Set(), scheduled = false;
