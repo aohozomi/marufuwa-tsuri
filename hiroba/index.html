@@ -186,7 +186,7 @@ button[data-dest=onigiri]{--c1:#f0ffea;--c2:#a6e3ae;--side:#52b066;--ink:#123f1c
 .note a:focus-visible{outline:3px solid #286b88;outline-offset:2px;border-radius:8px}
 #curtain{position:fixed;inset:0;z-index:5000;background:#b9edf5;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-weight:900;font-size:1.4rem;color:#1d5a78;text-align:center;padding:24px}
 #curtain b{font-size:3rem;line-height:1}
-.pill{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #0e4a66}
+.pill{--c1:#3495c5;--c2:#10587e;--side:#0b425f;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #083a55}   /* 白い もじが 2.7対1 だった → つりびより本体（5e37fd8）と おなじ こい 青（4.5対1 いじょう） */
 dialog{border:2px solid #bfdce8;border-radius:24px;padding:16px;color:#244653;max-width:min(560px,94vw);width:100%}
 /* Xの アプリ：みえる まどが みじかく、下 47px に おびが かぶさる。まどは おびの うえで おわらせる（ボタンが かくれない・中は スクロール） */
 :root[data-inapp=x] dialog{max-height:calc(100dvh - 64px);margin:8px auto auto;overflow:auto}
@@ -393,6 +393,7 @@ const scene = $('scene'), layerProps = $('props'), layerActors = $('actors'), la
 const q = new URLSearchParams(location.search);
 const W = 360, H = 560, BASE = '../';
 const TE = s => (window.TsuriEn ? window.TsuriEn.t(s) : s);   // English mode（tsuri-en.js）の 時だけ 訳す。日本語では そのまま かえす（canvas に かく もじ・共有の 文に 使う）
+const SHARE_URL = 'aohozomi.github.io/marufuwa-tsuri';   // しゃしんカードの すみに 小さく（マスター 許可の れいがい）。つりびよりの しゃしんカード・おへやの ふだと 完全に 同じ もじ（/hiroba は つけない・訳さない）
 // 魚の 絵（つりびよりと おなじ tsuri-art.js）。ひろばが ひらいて しばらくしてから、じゃまに ならない ように 読む。水槽（おへや）と いけの さかなが 使う。読めなくても 絵文字で 出る
 let artLoading = null;
 const loadScript = src => new Promise(res => { const s = document.createElement('script'); s.src = BASE + src; s.onload = () => res(true); s.onerror = () => res(false); document.head.append(s); });
@@ -1211,7 +1212,7 @@ function roundPath(ctx, x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx
 async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cache }。ふだんの しゃしんは 引数なし（PNG）。動画の 材料づくりでは JPEG・おびを 時間の 名前に・ぴょん／ながれぼしも 描く
   measure();
   const svgImg = o.cache ? svgImageCached : svgImage;
-  const OW = 1080, OH = 1920, S = 2.9, PX = (OW - W * S) / 2, PY = 104, K3 = 3;
+  const OW = 1080, OH = 1920, S = o.video ? 2.9 : 2.78, PX = (OW - W * S) / 2, PY = 104, K3 = 3;   // しゃしんは ひろばを 少し 小さく して、いちばん 下に ひづけと あそべる ばしょ（URL）の 1行の 場所を あける（動画の 材料は 今まで どおり）
   const cvs = document.createElement('canvas'); cvs.width = OW; cvs.height = OH;
   const ctx = cvs.getContext('2d'), css = getComputedStyle(scene), hasFilter = 'filter' in ctx;
   const grad = ctx.createLinearGradient(0, 0, 0, OH); grad.addColorStop(0, '#dff2fb'); grad.addColorStop(1, '#f4fbff'); ctx.fillStyle = grad; ctx.fillRect(0, 0, OW, OH);
@@ -1294,7 +1295,14 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
     const met = !!own.metToday[f.id], im = f.img; ctx.save(); ctx.globalAlpha = met ? 1 : .35; if (hasFilter && !met) ctx.filter = 'grayscale(1)';
     const sc = Math.min(size / im.naturalWidth, size / im.naturalHeight); ctx.drawImage(im, ix + (size - im.naturalWidth * sc) / 2, iy + (size - im.naturalHeight * sc), im.naturalWidth * sc, im.naturalHeight * sc); ctx.restore(); ix += size + gap;
   }
-  const d = new Date(); ctx.fillStyle = '#506874'; ctx.font = '700 30px system-ui,"Yu Gothic UI",sans-serif'; ctx.textAlign = 'right'; ctx.fillText(d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(), OW - 40, OH - 34);
+  // いちばん 下の 1行：ひづけ（ひだり）と あそべる ばしょ（みぎ・いちばん ちいさい もじ）。URL は「しゃしんカード」だけの れいがい（マスター 許可）：つりびよりの しゃしんカード・おへやの ふだと 同じ もじ。
+  // 作者の なまえは いれない・訳さない・Lv. は ひろばに ない ので なし。ひづけに かからない ように はばに あわせて 縮める。動画の 材料（o.video）には いれない
+  const d = new Date(), dateText = d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(), FY = OH - 30;
+  ctx.fillStyle = '#506874'; ctx.font = '700 30px system-ui,"Yu Gothic UI",sans-serif'; ctx.textAlign = 'left'; ctx.fillText(dateText, 40, FY);
+  const dateW = ctx.measureText(dateText).width, urlMax = OW - 40 - (40 + dateW + 32);
+  let ufs = 26; const uFont = n => '700 ' + n + 'px system-ui,"Yu Gothic UI",sans-serif'; ctx.font = uFont(ufs);
+  while (ufs > 16 && ctx.measureText(SHARE_URL).width > urlMax) { ufs -= 1; ctx.font = uFont(ufs); }
+  ctx.fillStyle = '#5a6a73'; ctx.textAlign = 'right'; ctx.fillText(SHARE_URL, OW - 40, FY, urlMax);
   ctx.restore();
   return new Promise((res, rej) => cvs.toBlob(b => b ? res(b) : rej(Error('png')), o.type || 'image/png', o.quality));
 }
