@@ -963,7 +963,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const HOME_SHARE = () => EN() ? HOME + 'en/' : HOME;   // 英語の リンクカードを もつ 入口
   const KEY = 'marufuwa-tsuri-v1';
   let save = {fish: {}, total: 0};
-  try { const data = JSON.parse(localStorage.getItem(KEY)); if (data && typeof data.fish === 'object' && Number.isInteger(data.total)) save = data; } catch {}
+  // きろくの よみこみ：こわれて いる ところは すてて、のこせる ぶんは のこす（fish が null・配列・こわれた 1ぎょう・total が ふせい でも あそべる。うっかり ぜんぶ きえない）
+  function sturdy(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
+    const fish = {}; let counted = 0;
+    if (data.fish && typeof data.fish === 'object' && !Array.isArray(data.fish)) for (const [id, g] of Object.entries(data.fish)) if (g && typeof g === 'object' && Number.isInteger(g.count) && g.count >= 0 && Number.isFinite(g.best)) { fish[id] = g; counted += g.count; }
+    data.fish = fish; if (!Number.isInteger(data.total) || data.total < 0) data.total = counted;
+    return data;
+  }
+  try { const data = sturdy(JSON.parse(localStorage.getItem(KEY))); if (data) save = data; } catch {}
   if (!RODS[save.rod] || !RODS[save.rod].open(save)) save.rod = 0;
   if (!BAITS[save.bait] || !BAITS[save.bait].open(save)) save.bait = 0;
   if (!AREAS.some(a => a.id === save.area && save.total >= a.need)) save.area = 'L';
