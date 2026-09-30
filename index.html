@@ -124,7 +124,8 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .areas small{display:block;font-weight:600;font-size:.7rem}
 .areas button[aria-disabled=true],#shop-list button[aria-disabled=true]{--c1:#f2f6f9;--c2:#dfe8ee;--side:#b7c6d0;--ink:#3b5463;cursor:default}   /* まだ いけない：うすく（opacity）せず、いろを おとなしく。もじは くっきり */
 .time-box{margin-bottom:10px;font-size:.85rem}
-.time-box summary{cursor:pointer;padding:13px 4px;font-weight:800}   /* ゆびで おす ところは 44px いじょう */
+.time-box summary{cursor:pointer;padding:13px 4px;font-weight:800}
+.time-box summary[data-emoji]::before{content:attr(data-emoji) / "";margin-right:.4em}   /* いまの じかんの え。「/ ""」＝よみあげには ださない */   /* ゆびで おす ところは 44px いじょう */
 .time-box .times{margin:6px 0 0}
 /* ほんとうは よるなのに あかるい じかんを えらんだ とき。まぶしく しない */
 #scene[data-dim=true] > svg:first-of-type{filter:brightness(.62) saturate(.85)}
@@ -581,7 +582,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   </div>
 
   <div class="areas" id="areas" role="group" aria-label="つりばを えらぶ"></div>
-  <details class="time-box"><summary><span id="time-emoji" aria-hidden="true"></span> じかんを かえる（いま：<span id="time-now"></span>）</summary>
+  <details class="time-box"><summary>じかんを かえる（いま：<span id="time-now"></span>）</summary>
     <div class="areas times" id="times" role="group" aria-label="じかんを えらぶ"></div>
   </details>
 
@@ -1673,7 +1674,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function drawTimes() {
     const hour = new Date().getHours(), night = hour >= 19 || hour < 5;
     scene.dataset.dim = String(night && timeOfDay() !== 'n');
-    $('time-now').textContent = TIME_LABEL[timeOfDay()]; $('time-emoji').textContent = {a: '🌅', h: '☀️', y: '🌇', n: '🌙'}[timeOfDay()] || '';   // いまの じかんの え（よみあげ しない）
+    $('time-now').textContent = TIME_LABEL[timeOfDay()]; $('time-now').closest('summary').dataset.emoji = {a: '🌅', h: '☀️', y: '🌇', n: '🌙'}[timeOfDay()] || '';   // いまの じかんの え（ことばの 外＝CSS の ::before。よみあげ・English の ひょうに かんけい しない）
     syncTabs($('times'), [['', 'いまの じかん'], ['a', 'あさ'], ['h', 'ひる'], ['y', 'ゆうがた'], ['n', 'よる']].map(([id, name]) => ({k: 't' + id, text: name, disabled: !(phase === 'idle' || phase === 'caught'), pressed: (save.time || '') === id, click: () => {
       save.time = id; store(); scene.dataset.time = TIME_NAME[timeOfDay()]; drawTimes();
       say(TIME_LABEL[timeOfDay()] + 'に なったよ。' + (id ? '' : '（とけいに あわせて いるよ）'));
@@ -2559,7 +2560,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     save.yomi = save.yomi !== true; store(); drawYomi(); drawEasy();
     if (save.yomi) say('よみあげを つけたよ。ここに でる ことばを こえで よむよ。'); else { try { speech.cancel(); } catch {} say('よみあげを けしたよ。'); }
   });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawSndPrefs(); yomiPick(); }); else { drawSndPrefs(); yomiPick(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawSndPrefs(); yomiPick(); drawAreas(); }); else { drawSndPrefs(); yomiPick(); }   // English の ときは ひょうが そろって から もういちど（つりばの よみあげ ラベル）
   // うごきを へらす：スマホの せってい（OSの「うごきを へらす」）か、この ボタン。ボタンを おすと、せっていを ほぞんして よみこみ なおす（外付けの ぶひんも ぜんぶ おなじ せっていに なる）
   const osReduce = () => (window.__realMatchMedia || matchMedia.bind(window))('(prefers-reduced-motion: reduce)').matches;
   function drawCalm() {
