@@ -122,6 +122,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .hud button{--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
 .hud button::after{content:"";position:absolute;left:12%;top:18%;width:7px;height:7px;border-radius:50%;background:#ffffffe6;pointer-events:none}
 .areas small{display:block;font-weight:600;font-size:.7rem}
+.areas button[aria-disabled=true],#shop-list button[aria-disabled=true]{--c1:#f2f6f9;--c2:#dfe8ee;--side:#b7c6d0;--ink:#3b5463;cursor:default}   /* まだ いけない：うすく（opacity）せず、いろを おとなしく。もじは くっきり */
 .time-box{margin-bottom:10px;font-size:.85rem}
 .time-box summary{cursor:pointer;padding:13px 4px;font-weight:800}   /* ゆびで おす ところは 44px いじょう */
 .time-box .times{margin:6px 0 0}
@@ -1643,13 +1644,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
       let tab = have.get(s.k);
       if (!tab) { tab = document.createElement('button'); tab.type = 'button'; tab.dataset.k = s.k; tab.addEventListener('click', s.click); box.append(tab); }
       tab.disabled = s.disabled; tab.setAttribute('aria-pressed', String(s.pressed));
+      if (s.locked) tab.setAttribute('aria-disabled', 'true'); else tab.removeAttribute('aria-disabled');   // まだ いけない：Tab で とどき、おすと ことばが 出る（disabled だと とどかない）
+      if (s.label) tab.setAttribute('aria-label', s.label); else tab.removeAttribute('aria-label');
       const sig = s.text + '|' + (s.small || '');
       if (tab.dataset.t !== sig) { tab.replaceChildren(s.text); if (s.small) { const left = document.createElement('small'); left.textContent = s.small; tab.append(left); } tab.dataset.t = sig; }
     });
   }
   function drawAreas() {
     if ($('area-now')) $('area-now').textContent = areaName(save.area);
-    syncTabs($('areas'), AREAS.map(area => ({k: area.id, text: area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: save.total < area.need || !(phase === 'idle' || phase === 'caught'), pressed: save.area === area.id, click: () => {
+    syncTabs($('areas'), AREAS.map(area => ({k: area.id, text: area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
+      if (save.total < area.need) { say(L('あと ' + (area.need - save.total) + 'ひきで いけるよ。', (area.need - save.total) + ' more catches to unlock this spot.')); return; }   // まだ いけない：ことばだけ
       if (save.area === area.id) return;
       save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals();
       setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false';
@@ -1785,16 +1789,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
       list.forEach((item, i) => {
         const pick = document.createElement('button'), open = item.open(save), note = document.createElement('small');
         const icon = document.createElement('b'); if (open) icon.append(gearImg(key, i, item.icon)); else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
-        pick.type = 'button'; pick.dataset.k = key + i; pick.append(icon, open ? item.name : '？？？'); pick.disabled = !open;
+        pick.type = 'button'; pick.dataset.k = key + i; pick.append(icon, open ? item.name : '？？？'); if (!open) pick.setAttribute('aria-disabled', 'true');   // まだの しなは Tab で とどく（おしても なにも おきない・せつめいが よまれる）
         pick.setAttribute('aria-pressed', String(save[key] === i));
         note.textContent = open ? item.note + (save[key] === i ? '（つかって いる）' : '') : item.how; pick.append(note);
-        pick.addEventListener('click', () => { save[key] = i; store(); drawEquip(); drawShop(); });
+        pick.addEventListener('click', () => { if (!open) return; save[key] = i; store(); drawEquip(); drawShop(); });
         rows.push(pick);
       });
     }
     const on = document.activeElement && $('shop-list').contains(document.activeElement) ? document.activeElement.dataset.k : '';   // つくりなおしても、いま いる ボタンに もどる
     $('shop-list').replaceChildren(...rows);
-    if (on) { const again = $('shop-list').querySelector('[data-k="' + on + '"]'); if (again && !again.disabled) again.focus({preventScroll: true}); }
+    if (on) { const again = $('shop-list').querySelector('[data-k="' + on + '"]'); if (again) again.focus({preventScroll: true}); }
   }
   $('keeper').addEventListener('click', () => { drawShop(); shop.showModal(); });
   $('close-shop').addEventListener('click', () => shop.close());
