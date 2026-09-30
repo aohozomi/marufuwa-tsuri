@@ -426,6 +426,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
 /* よるの かげは、くらい みずに しずむ ので、うすい あお（つきの ひかりを うけた かげ）。ぬしは もっと あかるく */
 #scene[data-time=yoru] .shadow:not([data-rare="3"]):not([data-rare="4"]):not([data-rare="5"]){mix-blend-mode:normal;background:#a9c8f5a6}
 #scene[data-time=yoru] .shadow[data-nushi=true]:not([data-rare="4"]):not([data-rare="5"]){background:#dbe8ffd0}
+/* よこ持ち（スマホを よこに した とき）：景色を 左に 大きく、ボタンなどを 右に。たかさが せまいと 景色が「なげる」の 下に かくれて 遊べない ため。たて・タブレット・パソコン（たかさ 560px より 大きい）は かわらない。ながめる中は 今まで どおり 1れつ（ゲーム開発司令部 検証） */
+@media (orientation:landscape) and (max-height:560px) and (min-width:560px){
+  main{max-width:min(1100px,calc(100vw - 16px));display:grid;grid-template-columns:min(calc((100vh - 32px)*1.3333),52vw) minmax(200px,1fr);grid-template-columns:min(calc((100dvh - 32px)*1.3333),52vw) minmax(200px,1fr);column-gap:16px;align-content:start;align-items:start}
+  main > #scene{grid-column:1;grid-row:1 / span 30;position:sticky;top:8px;align-self:start;width:100%}
+  main > :not(#scene):not(#backdrop){grid-column:2}
+  main > .logo{font-size:min(1.75rem,3.2vw)}
+}
 </style>
 </head>
 <body>
