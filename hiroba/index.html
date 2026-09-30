@@ -200,7 +200,7 @@ button.zk.on{--c1:#fff4c2;--c2:#ffe27a99}
 .prop.open .door{transform:scaleX(.25)}
 .mark{position:absolute;left:50%;top:-6%;transform:translateX(-50%);z-index:2;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;line-height:1;background:#ffffffe6;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 0 #9cc9e0,0 6px 8px #24465333;animation:markbob 2.2s ease-in-out infinite;pointer-events:none}
 .prop[data-id=pier] .mark{left:74%}
-.prop[data-id=lot1] .mark{left:92%;top:2%}
+.prop[data-id=lot1] .mark{left:2%;top:2%}
 .prop[data-id=well] .mark{left:86%;top:2%}
 @supports (width:1cqw){#scene{container-type:inline-size}.mark{width:clamp(22px,9.44cqw,34px);height:clamp(22px,9.44cqw,34px);font-size:clamp(.8rem,3.19cqw,1.15rem);border-width:clamp(2px,.83cqw,3px)}}   /* せまい がめんでは しるしを ちいさく（かんばんの もじに かぶらない）。しるしは かざり */
 @keyframes markbob{50%{translate:0 -4px}}
@@ -626,7 +626,7 @@ function ready() { ac = ac || new (window.AudioContext || window.webkitAudioCont
 // やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
 //   ・基音は 1200Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみ（square）は さんかくに／
 //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 2500Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
-const GENTLE = { top: 1200, attack: .015, lp: 2500, noiseLp: 1500, cap: .25, noiseGain: 2.4 };
+const GENTLE = { top: 900, attack: .015, lp: 1300, noiseLp: 1500, cap: .25, noiseGain: 2.4 };   // 10/1 lp 2500→1400（三角波の 3倍音の「キン」を 出口で 切る・マスター直）
 function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
   if (c._gentle) return c._gentle;
   let head = c.destination;
@@ -900,14 +900,14 @@ const PROPS = [
   { id: 'bench-l', x: 64, y: 430, w: 70, h: 38, svg: SVG.bench, secret: 'bench', block: { rect: [30, 418, 98, 432] } },
   { id: 'bench-r', x: 296, y: 430, w: 70, h: 38, svg: SVG.bench, secret: 'bench', block: { rect: [262, 418, 330, 432] } },
   { id: 'stone', x: 342, y: 446, w: 30, h: 46, svg: SVG.stone, dest: 'thanks', mark: '⭐', block: { rect: [326, 430, 360, 450] } },
-  { id: 'lot1', x: 62, y: 526, w: 122, h: 80, svg: SVG.lot1, dest: 'kouji1', mark: '🚧', block: { rect: [0, 452, 126, 528] } },
+  { id: 'lot1', x: 308, y: 338, w: 96, h: 64, svg: SVG.lot1, dest: 'kouji1', mark: '🚧', block: { rect: [262, 290, 356, 340] } },   // こうじちゅうは 右上（マスター直・総司令部）
   { id: 'well', x: 298, y: 526, w: 122, h: 80, svg: SVG.well, dest: 'ido', mark: '💧', block: { rect: [234, 452, 360, 528] } }
 ];
 const DEST = {
   tsuri: { name: 'つりば', at: { x: 90, y: 296 }, kind: 'go', url: () => new URL('../', location.href).href, pan: -.8, motif: () => { tone(660, .08, 'triangle', 0, .05, 990); zap(.06, .08, .04); } },
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
   thanks: { name: 'ありがとうの いし', at: { x: 320, y: 444 }, kind: 'thanks', pan: .8 },
-  kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 62, y: 540 }, kind: 'wait', line: 'ここは まだ こうじちゅう。ちかぢか あそべるよ。たのしみに まっててね', pan: -.8 },
+  kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 308, y: 356 }, kind: 'wait', line: 'ここは まだ こうじちゅう。ちかぢか あそべるよ。たのしみに まっててね', pan: .8 },
   ido: { name: 'いど', at: { x: 298, y: 540 }, kind: 'well', pan: .8 }
 };
 
@@ -1589,11 +1589,13 @@ $('sound').addEventListener('click', () => setSoundOn(!soundOn()));
 //   「BGM」ボタンは おとの となり。おとが OFF の まま おしたら、おとも つける。ながす 音の 部品（AudioContext）は、ひろばの ものを かりる
 if (window.TsuriBgm) {
   let soundWasOff = false;
-  $('sound').after(window.TsuriBgm.button({
-    id: 'bgm', sound: soundOn,
+  const bgmHost = {
+    sound: soundOn,
     enableSound: () => { soundWasOff = true; setSoundOn(true); },
     onToggle: next => { narrate(next ? (soundWasOff ? 'おとと BGMを つけたよ。しずかな きょくが ながれるよ。' : 'BGMを つけたよ。しずかな きょくが ながれるよ。') : 'BGMを けしたよ。'); soundWasOff = false; lastInput = T; }
-  }));
+  };
+  $('sound').after(window.TsuriBgm.button({ id: 'bgm', ...bgmHost }));
+  if (window.TsuriBgm.mixButton) $('bgm').after(window.TsuriBgm.mixButton({ id: 'bgm-mix', ...bgmHost }));   // 「くみたてる」（ひくい おと・うた・こだま を えらぶ）
   window.TsuriBgm.enter('hiroba', { ctx: ready, sound: soundOn, time: () => curTime });
 }
 $('calm').addEventListener('click', () => { own.motion = own.motion === 'less' ? 'auto' : 'less'; saveOwn(); drawMotion(); narrate(own.motion === 'less' ? 'うごきを すくなく したよ。ともだちは その ばに いるよ。' : 'うごきを ふつうに もどしたよ。'); });
