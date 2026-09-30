@@ -661,6 +661,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const MILES = {10: ['👏', '10ぴきめ！ なかまが はくしゅ して いるよ。'], 30: ['🌸', '30ぴきめ！ はなびらが まって きたよ。'], 50: ['🎈', '50ぴきめ！ ふうせんが あがったよ。'], 100: ['🎆', '100ぴきめ！ はなびが あがったよ。'], 300: ['🌈', '300ぴきめ！ にじいろの かみふぶき だよ。'], 500: ['⭐', '500ぴきめ！ ほしが ふって きたよ。'], 1000: ['👑', '1000びきめ！ もう、つりの めいじんだね。']};
   // きょうの ラッキーさかな：ひづけで きまる（みんな おなじ）。その こが 4ばい でやすい。「きょうは ○○の ひ」と、はなしの たねに なる
   const LUCKY = FISH[(calendar.getFullYear() * 372 + calendar.getMonth() * 31 + calendar.getDate()) * 11 % BASE];
+  // きょうの ぬし：日づけで、「この つりばの、この じかん」に ぬしが でやすい（みんな おなじ。ふえるのは 2.5ばい。さがしても さがさなくても ばつは ない）
+  const BOSS = (() => { const day = calendar.getFullYear() * 372 + calendar.getMonth() * 31 + calendar.getDate(), h = Math.imul(day, 2654435761) >>> 0; return {area: 'LRHB'[h % 4], time: 'ahyn'[(h >>> 8) % 4]}; })();
+  const onBossSpot = () => save.area === BOSS.area && timeOfDay() === BOSS.time;
   const seenCount = () => Object.keys(save.fish).filter(id => FISH[id] && !FISH[id].legend).length;
   // {かんじ|よみ} を、ふりがなつきの もじに する
   function ruby(text) {
@@ -974,7 +977,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const wait = Number(query.get('wait')) || (save.total === 0 ? 1300 : 2200 + Math.random() * 3300);
     // かげが みぎから およいで くる。おおきさは さかなの おおきさ、いろは めずらしさ
     const shadow = $('shadow'), w = floatAt(mine);
-    nushi = Math.random() < (Number(probe('nushi')) || .04 * (save.bait === 2 ? 2 : 1));
+    nushi = Math.random() < (Number(probe('nushi')) || .04 * (onBossSpot() ? 2.5 : 1) * (save.bait === 2 ? 2 : 1));
     shadow.dataset.rare = String(fish.rare); shadow.dataset.nushi = String(nushi);
     if (ART && ART.shadow && ART.shadow[fish.id]) { shadow.classList.add('art'); shadow.style.setProperty('--m', ART.shadowMask(fish.id)); shadow.style.setProperty('--ar', String(ART.meta.shadowAspect[fish.id])); } else shadow.classList.remove('art');   // さかなごとの かげの かたち
     shadow.style.setProperty('--w', Math.min(44, Math.max(8, 7 + fish.max / 12) * (nushi ? 1.7 : 1)) + '%');
@@ -1699,7 +1702,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   drawSound();
   if (save.total === 0) say('「なげる」を おしてね。');
   else if (mythDay) say('きょうは、なにかが いる きが する…。');
-  else say('きょうの ラッキーさかなは「' + LUCKY.name + '」。' + areaName(LUCKY.area) + 'に いるよ。' + (rainy ? 'きょうは あめ。' : ''));
+  else say('きょうの ラッキーさかなは「' + LUCKY.name + '」。' + areaName(LUCKY.area) + 'に いるよ。' + (rainy ? 'きょうは あめ。' : '') + (save.total >= AREAS.find(a => a.id === BOSS.area).need ? ' きょうの ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ。' : ''));
   hud(); drawEquip(); setPhase('idle');
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
   setTimeout(chatter, Number(query.get('chat')) || 5000);
