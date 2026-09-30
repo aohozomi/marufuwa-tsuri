@@ -70,6 +70,8 @@
   const css = `
 #note-open{min-height:44px;width:100%;margin:0 0 10px;border-radius:999px}
 #note{max-width:min(520px,94vw)}
+:root[data-night=true] #note{color:#e8f1f8;background:#13253d;border-color:#2d4d70}
+:root[data-night=true] #note::backdrop{background:#000000b3}
 #note .note-paper{background:#fffdf5;border:1.5px solid #e6dcc0;border-radius:16px;padding:12px 14px;margin:0 0 12px;line-height:1.75;font-size:.98rem;color:#3a3220;max-height:52vh;overflow:auto}
 :root[data-night=true] #note .note-paper{background:#1a2438;border-color:#3b4a66;color:#f0f4fa}
 #note .note-day{margin:8px 0 2px;font-weight:700;opacity:.8}
@@ -97,7 +99,7 @@
       $('note-title').textContent = T('つりびと ノート', 'Fishing Notebook');
       $('note-close').textContent = T('とじる', 'Close');
       $('note-photo').textContent = T('ノートを しゃしんに', 'Save the page as a picture');
-      const list = entries().filter(e => e && e.at).sort((a, b) => b.at - a.at).slice(0, 200), paper = $('note-paper'); paper.innerHTML = '';
+      const list = entries().filter(e => e && Number.isFinite(e.at)).sort((a, b) => b.at - a.at).slice(0, 200), paper = $('note-paper'); paper.innerHTML = '';
       if (!list.length) {
         $('note-lead').textContent = T('つった さかなが、1ぎょうずつ にっきに なるよ。', 'Each fish you catch becomes one line of a diary.');
         const p = document.createElement('p'); p.className = 'note-empty'; p.textContent = T('まだ なにも かいて いないよ。さかなを つると、ここに のこるよ。', 'Nothing written yet. Catch a fish and it will appear here.'); paper.append(p);
@@ -118,7 +120,7 @@
     open.addEventListener('click', () => { render(); try { dlg.showModal(); } catch { dlg.setAttribute('open', ''); } });
     $('note-close').addEventListener('click', () => dlg.close());
     dlg.addEventListener('click', ev => { if (ev.target === dlg) dlg.close(); });
-    $('note-photo').addEventListener('click', () => photo(entries().filter(e => e && e.at).sort((a, b) => b.at - a.at).slice(0, 8)));
+    $('note-photo').addEventListener('click', () => photo(entries().filter(e => e && Number.isFinite(e.at)).sort((a, b) => b.at - a.at).slice(0, 8)));
   }
 
   // ---------- ノートの 1ページを 絵に（この 端末の 中だけ・1080×1350）----------
