@@ -2599,7 +2599,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const welcome = (away >= 3 * 86400000 ? 'おかえり。ずかんも きろくも、そのままだよ。' : '') + (hourNow >= 1 && hourNow < 5 ? 'ねむれない？ ゆっくり ながめよう。' : '');
   save.last = Date.now(); store();
   if (save.total === 0) say('「なげる」を おしてね。');
-  else if (mythDay) say(welcome + 'きょうは、なにかが いる きが する…。');
+  else if (mythDay) say(welcome + 'きょうは、ふしぎな ひ。みずが きらきら して いるよ。');
   else say(welcome + 'きょうの ラッキーさかなは「' + LUCKY.name + '」。' + areaName(LUCKY.area) + 'に いるよ。' + (rainy ? 'きょうは あめ。' : '') + (save.total >= AREAS.find(a => a.id === BOSS.area).need ? ' きょうの ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ。' : ''));
   applyMy(); hud(); setPhase('idle');
   if (location.hash === '#restored') { say('きろくを もどしたよ。つづきから あそべるよ。'); try { history.replaceState(null, '', location.pathname + location.search); } catch {} }
