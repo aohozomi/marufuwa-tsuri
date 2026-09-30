@@ -427,7 +427,9 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions{gap:12px;margin:16px 0 6px;flex-wrap:wrap}
-#take-photo,#gaze,#release,#send-gift{flex:1 1 40%;min-height:54px}
+#take-photo,#gaze,#release,#send-gift,#show-pal{flex:1 1 40%;min-height:54px}
+#show-pal{--c1:#ffe6ef;--c2:#ff9fbd;--side:#d9628a;--ink:#5a1230}
+#show-pal[hidden]{display:none}
 #release{--c1:#e3fbef;--c2:#8fe0b4;--side:#3fa873;--ink:#0f4a36}
 #release[hidden],#send-gift[hidden]{display:none}
 #sound,.bgm-btn{flex:1 1 100%;min-height:54px}
@@ -702,6 +704,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="main-button" type="button">なげる</button>
     <button id="take-photo" type="button" hidden>しゃしんを とる</button>
     <button id="release" type="button" hidden>そっと にがす</button>
+    <button id="show-pal" type="button" hidden>となりの こに みせる</button>
     <button id="send-gift" class="give" type="button" hidden>さかなを おくる</button>
     <button id="easy" type="button" aria-pressed="false">らくちん：OFF</button>
     <button id="gaze" type="button" aria-pressed="false">ながめる</button>
@@ -1058,6 +1061,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (Number.isInteger(other.tegami) && other.tegami > (save.tegami || 0)) { save.tegami = other.tegami; changed = true; }
     if (other.audioSet === true && save.audioSet !== true) { save.audioSet = true; changed = true; }
     if (Number.isInteger(other.bookSeen) && other.bookSeen > (Number.isInteger(save.bookSeen) ? save.bookSeen : 0)) { save.bookSeen = other.bookSeen; changed = true; }
+    if (other.loved && typeof other.loved === 'object') for (const [pid, fid] of Object.entries(other.loved)) if (Number.isInteger(fid) && !(save.loved && save.loved[pid] !== undefined)) { save.loved = save.loved && typeof save.loved === 'object' ? save.loved : {}; save.loved[pid] = fid; changed = true; }   // ♡ の ついた なかま：すきな さかなの ばんごう
     if (other.week && Number.isInteger(other.week.k) && Number.isInteger(other.week.n) && Array.isArray(other.week.ids)) {   // こんしゅうの きろく：あたらしい しゅうを とり、おなじ しゅうは かずを あわせる
       const mine = save.week;
       if (!mine || other.week.k > mine.k) { if (mine && mine.n > 0) save.lastWeek = mine; save.week = {k: other.week.k, n: other.week.n, ids: other.week.ids.filter(id => Number.isInteger(id) && FISH[id]), top: other.week.top && FISH[other.week.top.id] ? other.week.top : null}; changed = true; }
@@ -1415,7 +1419,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0;
-  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
@@ -1698,6 +1702,29 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
   const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
   const bubble = $('bubble');
+  // すきな さかな（なかまごと・さかなの ばんごう）。みせて あげて あたると ♡。はずれても「わあ、すてき！」（せめない・へらない・くらべない）
+  const PAL_FAV = {usagi: 23, kawauso: 7, hiyoko: 8, ribbon: 2, panda: 21, kojika: 11, tanuki: 4, risu: 15, neko: 13, koinu: 1, hamster: 10, hoho: 12, azarashi: 19, alpaca: 9, gantai: 20};   // ぜんぶ、そのこの すんで いる つりばで つれる さかな（みせて あげられる）
+  const PAL_PRAISE = [['わあ、すてき！', 'Wow, lovely!'], ['かっこいい！', 'So cool!'], ['いいなあ！', 'Nice one!'], ['すごい！', 'Amazing!']], praise = () => L(...PAL_PRAISE[Math.floor(Math.random() * PAL_PRAISE.length)]);
+  let showAt = 0;
+  function showPal() {
+    if (phase !== 'caught' || !last || performance.now() - showAt < 1500) return; showAt = performance.now();
+    const lovers = [];
+    pals.forEach((pal, slot) => {
+      const fav = PAL_FAV[pal.id] === last.fish.id, f = feet(friends[slot]);
+      palSay(slot, fav ? L('わあ！ だいすきな さかな！', 'Wow! My favorite fish!') : last.nushi ? L('ぬし…！ すごい！', 'The Guardian…! Amazing!') : praise());
+      const img = $(slot ? 'friend-b' : 'friend-a'); if (!reduce()) img.animate([{translate: '0 0'}, {translate: '0 -16px'}, {translate: '0 0'}], {duration: 460, easing: 'ease-out'});
+      if (fav) {
+        lovers.push(pal);
+        save.loved = save.loved && typeof save.loved === 'object' ? save.loved : {}; save.loved[pal.id] = last.fish.id;
+        if (!reduce()) { const h = document.createElement('span'); h.className = 'hop'; h.textContent = '♡'; h.style.cssText = 'color:#e0679a;font-weight:900;font-size:1.8rem'; h.setAttribute('aria-hidden', 'true'); place(h, {x: f.x, y: f.y - 24}); scene.append(h); h.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -34px'}], {duration: 1300, easing: 'ease-out'}).onfinish = () => h.remove(); }
+      }
+    });
+    if (lovers.length) { store(); chord([1047, 1319, 1568], .07, 'triangle', .04); }
+    say(lovers.length ? L(lovers.map(p => p.name).join('と ') + 'は、だいすきな さかなで とても よろこんだよ ♡', lovers.map(p => T(p.name)).join(' and ') + ' loved it — it is a favorite ♡') : L('となりの こたちが よろこんで いるよ。', 'Your neighbors are happy to see it.'));
+  }
+  $('show-pal').addEventListener('click', showPal);
+  const paintShowPal = () => { $('show-pal').textContent = L('となりの こに みせる', 'Show my neighbors'); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintShowPal); else paintShowPal();
   const PAL_DAYWORD = {gantai: 'ほしが みえるよ。ひるでも ね'};   // ひると ゆうがた だけの ひとこと（PALS の かたちは かえない：水槽の けんさが よむ）
   const palWord = p => PAL_DAYWORD[p.id] && timeOfDay() !== 'n' ? PAL_DAYWORD[p.id] : p.word;   // なかまの ひとことは じかんに あわせる（がんたいの くま：ひるは「ひるでも ね」）
   // なかまを おすと はなしかける：なまえ＋ひとこと＋ぴょん（つる ときの わの じゃまに ならない ように、まって いる 間・なにも して いない 間だけ）
@@ -2719,7 +2746,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const met = save.pals && save.pals[pal.id], tag = document.createElement('span'), img = document.createElement('img');
       tag.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;text-align:center;line-height:1.3;font-size:.75rem;width:84px;word-break:keep-all;text-wrap:balance;';
       img.src = 'img/friend-' + pal.id + '-s.webp'; img.width = img.height = 52; img.alt = ''; img.style.objectFit = 'contain'; if (!met) { img.style.opacity = '.35'; img.style.filter = 'grayscale(1)'; }   // まだ あって ない 子は、絵だけ うすく（「？」の 字は はっきり）
-      tag.append(img, met ? pal.name : '？'); return tag;
+      tag.append(img, met ? pal.name : '？');
+      if (met && save.loved && Number.isInteger(save.loved[pal.id]) && FISH[save.loved[pal.id]]) { const heart = document.createElement('small'); heart.style.color = '#c94b7b'; heart.append('♡ ', FISH[save.loved[pal.id]].name); tag.append(heart); }   // みせて よろこんだ なかまには ♡ と「すきな さかな」
+      return tag;
     }));
     bucket.showModal();
   });
@@ -2813,7 +2842,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // ばしょは、ふだんは しまって おく。おすと、4つ ぜんぶ でる
     // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）。つれた あとだけ「しゃしん・にがす・おくる」が さき（つれる まえは それらが 出ないので、おとが いちばん さき）
     const audio = document.createElement('div'); audio.className = 'audio-row'; audio.append($('sound'), ...(window.TsuriBgm ? [TsuriBgm.button({sound: () => !!save.sound, enableSound: () => $('sound').click(), onToggle: audioChosen})] : []));   // おとと BGM は 1くみ（となりどうし）
-    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('take-photo'), $('release'), $('send-gift'), audio, $('gaze'), $('sleep'), $('fullscreen'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
+    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('take-photo'), $('release'), $('show-pal'), $('send-gift'), audio, $('gaze'), $('sleep'), $('fullscreen'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
     drawAudioSize();
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('つりばを かえる（いま：', now, '）'); where.append(head, $('areas'));
