@@ -72,6 +72,9 @@ button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-s
 .spot::before,#keeper::before{display:none}
 #scene .spot,#scene #keeper{box-shadow:none;transition:none}
 #scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
+.friend-hit{position:absolute;z-index:3;width:13%;height:24%;min-height:0;padding:0;transform:translate(-50%,-100%);background:none;border:0;border-radius:40%;box-shadow:none;cursor:pointer}   /* なかまの うえの みえない ボタン（おすと はなしかける） */
+.friend-hit::before,.friend-hit::after{display:none}
+#scene:not([data-phase=idle]):not([data-phase=waiting]) .friend-hit,#scene[data-tooku=true] .friend-hit,body.gazing .friend-hit{pointer-events:none}   /* まって いる とき・なにも して いない ときだけ おせる（ひく とき・カードが でて いる ときは けしきを おして「ひく」「カード」が できる） */
 .spot::after{content:"";position:absolute;inset:-6px;border-radius:50%}   /* みえない あたりはんてい。ちいさい こや ゆびが ふるえる ひとが おしやすい */
 #scene #keeper:active{transform:translate(-50%,-100%) scale(.94)}
 @media(prefers-reduced-motion:reduce){button,.pill{transition:none}button:active:not(:disabled),.pill:active{transform:none}}
@@ -657,6 +660,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <div id="equip" aria-hidden="true"></div>
     <img class="who friend" id="friend-a" src="img/friend-neko-s.webp" width="180" height="180" alt="となりで つりを する ねこ" draggable="false">
     <img class="who friend" id="friend-b" src="img/friend-usagi-s.webp" width="180" height="180" alt="となりで つりを する うさぎ" draggable="false">
+    <button class="friend-hit" id="talk-a" type="button"></button><button class="friend-hit" id="talk-b" type="button"></button>
     <div class="float friend-float" id="float-a" aria-hidden="true"></div>
     <div class="float friend-float" id="float-b" aria-hidden="true"></div>
     <img class="who" id="marufuwa" src="img/game-blue.webp" width="240" height="320" alt="つりを する まるふわ" draggable="false">
@@ -1123,6 +1127,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const locals = PALS.filter(p => p.home === save.area), first = locals[seed % locals.length], rest = locals.filter(p => p !== first && !(TWINS.includes(first.id) && TWINS.includes(p.id)));
     pals = [first, rest[Math.floor(seed / 7) % rest.length]];
     pals.forEach((pal, i) => { const img = $(i ? 'friend-b' : 'friend-a'); img.src = 'img/friend-' + pal.id + '-s.webp'; img.alt = 'となりで つりを する ' + pal.name; });
+    paintFriendLabels();
     save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {};
     pals.forEach(pal => { save.pals[pal.id] = true; const mt = metToday(); if (!mt.ids.includes(pal.id)) mt.ids.push(pal.id); }); store();
     swapEpoch++;   // いれかわりの とちゅうで つりばを かえたら、そのまま やめる
@@ -1137,6 +1142,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function layout() {
     place(marufuwa, feet(mine)); place($('friend-a'), feet(friends[0])); place($('friend-b'), feet(friends[1]));
+    place($('talk-a'), {x: feet(friends[0]).x, y: feet(friends[0]).y - 6}); place($('talk-b'), {x: feet(friends[1]).x, y: feet(friends[1]).y - 6});
     place($('float-a'), floatAt(friends[0])); place($('float-b'), floatAt(friends[1]));
     rod($('line-a'), friends[0], 9, $('rod-a')); rod($('line-b'), friends[1], 9, $('rod-b'));
     const w = floatAt(mine); place($('float'), w); place($('bang'), {x: w.x, y: w.y - 12});
@@ -1615,6 +1621,20 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const bubble = $('bubble');
   const PAL_DAYWORD = {gantai: 'ほしが みえるよ。ひるでも ね'};   // ひると ゆうがた だけの ひとこと（PALS の かたちは かえない：水槽の けんさが よむ）
   const palWord = p => PAL_DAYWORD[p.id] && timeOfDay() !== 'n' ? PAL_DAYWORD[p.id] : p.word;   // なかまの ひとことは じかんに あわせる（がんたいの くま：ひるは「ひるでも ね」）
+  // なかまを おすと はなしかける：なまえ＋ひとこと＋ぴょん（つる ときの わの じゃまに ならない ように、まって いる 間・なにも して いない 間だけ）
+  let talkAt = 0;
+  function paintFriendLabels() { pals.forEach((pal, i) => { const b = $(i ? 'talk-b' : 'talk-a'); if (b) b.setAttribute('aria-label', L(pal.name + 'に はなしかける', 'Talk to ' + T(pal.name))); }); }
+  function talkTo(i) {
+    if (!(phase === 'idle' || phase === 'waiting') || swapping || performance.now() - talkAt < 800) return; talkAt = performance.now();
+    const pal = pals[i], f = feet(friends[i]), word = palWord(pal), img = $(i ? 'friend-b' : 'friend-a');
+    bubble.textContent = word; place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
+    const half = bubble.offsetWidth / scene.clientWidth * 50; place(bubble, {x: Math.min(98 - half, Math.max(2 + half, f.x)), y: f.y - 19});
+    if (!reduce()) img.animate([{translate: '0 0'}, {translate: '0 -14px'}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
+    setTimeout(() => { bubble.hidden = true; }, 2600);
+    say(L(pal.name + '：「' + word + '」', T(pal.name) + ': “' + T(word) + '”'));
+  }
+  ['talk-a', 'talk-b'].forEach((id, i) => $(id).addEventListener('click', () => talkTo(i)));
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintFriendLabels);
   function chatter() {
     if (!document.hidden && (phase === 'idle' || phase === 'waiting') && !book.open && !swapping) {   // アタリ・ひいて いる・つれた あとは しゃべらない（わの タイミングに めが いく）
       const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
