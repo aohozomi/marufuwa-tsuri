@@ -776,6 +776,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 </main>
 
 <script src="tsuri-art.js"></script>
+<script src="tsuri-art-season.js"></script>
 <script src="tsuri-bgm.js"></script>
 <script>
 (() => {
@@ -821,9 +822,22 @@ dialog .close{display:block;margin:auto;min-width:160px}
   [['つきあかりのきんぎょ', '🐠', 20, 40, 'L', '{月明|つきあ}かりの{金魚|きんぎょ}'], ['ほしくずのこい', '🐟', 60, 120, 'R', '{星屑|ほしくず}の{鯉|こい}'],
     ['しんじゅのたい', '🐠', 40, 90, 'H', '{真珠|しんじゅ}の{鯛|たい}'], ['にじいろくじら', '🐳', 300, 600, 'B', '{虹色|にじいろ}{鯨|くじら}']
   ].forEach(([name, icon, min, max, area, kanji]) => FISH.push({id: FISH.length, name, icon, min, max, rare: 5, time: '', area, kanji, legend: true}));
+  // きせつの さかな：つきごとに 1しゅ。その 月だけ でる。ずかんの 30しゅるいには かぞえない（あえなくても、また らいねん あえる）。ばんごうは 34ばんから（うしろに たすだけ）
+  // [なまえ, えもじ, さいしょう, さいだい, 月, かんじ, English]。日本の 暦で きめる。えは かり（tsuri-art-season.js）
+  [['ふくだるまうお', '🎍', 20, 45, 1, '{福|ふく}だるま{魚|うお}', 'Lucky Daruma Fish'], ['まめまきふぐ', '🐡', 10, 25, 2, '{豆撒|まめま}き{河豚|ふぐ}', 'Bean-Toss Puffer'],
+    ['ひなあられうお', '🐠', 12, 30, 3, 'ひなあられ{魚|うお}', 'Hina Festival Fish'], ['さくらふぶきうお', '🐟', 15, 40, 4, '{桜吹雪|さくらふぶき}{魚|うお}', 'Cherry Blizzard Fish'],
+    ['こいのぼりごい', '🐟', 30, 70, 5, 'こいのぼり{鯉|ごい}', 'Carp Streamer Koi'], ['あじさいうお', '🐟', 10, 28, 6, 'あじさい{魚|うお}', 'Hydrangea Fish'],
+    ['たなばたほしうお', '🐟', 15, 40, 7, '{七夕星|たなばたぼし}{魚|うお}', 'Star Festival Fish'], ['かきごおりだこ', '🐙', 15, 45, 8, 'かきごおり{蛸|だこ}', 'Shaved Ice Octopus'],
+    ['おつきみうさぎうお', '🐟', 15, 40, 9, '{お月見|おつきみ}うさぎ{魚|うお}', 'Moon-Viewing Bunny Fish'], ['ハロウィンかぼちゃうお', '🐡', 15, 40, 10, 'ハロウィンかぼちゃ{魚|うお}', 'Pumpkin Lantern Fish'],
+    ['もみじがれい', '🐟', 20, 50, 11, 'もみじ{鰈|がれい}', 'Maple Flounder'], ['ゆきだるまうお', '🐠', 15, 40, 12, '{雪|ゆき}だるま{魚|うお}', 'Snowman Fish']
+  ].forEach(([name, icon, min, max, season, kanji, en]) => FISH.push({id: FISH.length, name, icon, min, max, rare: 3, time: '', area: '*', kanji, season, en}));
   // まぼろしの ひ：つきに 1にち だけ、まぼろしが でやすい（60かいに 1かい）。ひづけで きまるので、みんな おなじ ひ
   const calendar = new Date(), mythDay = (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('mythday') === '1') || calendar.getDate() === (calendar.getFullYear() * 12 + calendar.getMonth()) * 5 % 27 + 1;
-  const BASE = FISH.filter(f => !f.legend).length, LEGEND_ODDS = mythDay ? 1 / 60 : 1 / 8000;
+  const BASE = FISH.filter(f => !f.legend && !f.season).length, LEGEND_ODDS = mythDay ? 1 / 60 : 1 / 8000;   // ずかんの 30しゅるい（まぼろし・きせつは かぞえない）
+  const SEASON_ODDS = .1, MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthNow = () => (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:') && Number(new URLSearchParams(location.search).get('month')) >= 1 ? Number(new URLSearchParams(location.search).get('month')) : new Date().getMonth() + 1;   // たんまつの ひづけが ずれて いても エラーには ならない
+  const seasonFish = () => FISH.find(f => f.season === monthNow());
+  document.addEventListener('DOMContentLoaded', () => { if (window.TsuriEn && TsuriEn.lang === 'en') FISH.filter(f => f.season).forEach(f => { f.name = f.en; f.kanji = f.en; }); });   // ひょうの ない さかなは、ここで 英語に
   // きりの いい かずの おいわい。かずに よって、おこる ことが ちがう
   const MILES = {10: ['👏', '10ぴきめ！ なかまが はくしゅ して いるよ。'], 30: ['🌸', '30ぴきめ！ はなびらが まって きたよ。'], 50: ['🎈', '50ぴきめ！ ふうせんが あがったよ。'], 100: ['🎆', '100ぴきめ！ はなびが あがったよ。'], 300: ['🌈', '300ぴきめ！ にじいろの かみふぶき だよ。'], 500: ['⭐', '500ぴきめ！ ほしが ふって きたよ。'], 1000: ['👑', '1000びきめ！ もう、つりの めいじんだね。']};
   // きょうの ラッキーさかな：ひづけで きまる（みんな おなじ）。その こが 4ばい でやすい。「きょうは ○○の ひ」と、はなしの たねに なる
@@ -831,7 +845,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // きょうの ぬし：日づけで、「この つりばの、この じかん」に ぬしが でやすい（みんな おなじ。ふえるのは 2.5ばい。さがしても さがさなくても ばつは ない）
   const BOSS = (() => { const day = calendar.getFullYear() * 372 + calendar.getMonth() * 31 + calendar.getDate(), h = Math.imul(day, 2654435761) >>> 0; return {area: 'LRHB'[h % 4], time: 'ahyn'[(h >>> 8) % 4]}; })();
   const onBossSpot = () => save.area === BOSS.area && timeOfDay() === BOSS.time;
-  const seenCount = () => Object.keys(save.fish).filter(id => FISH[id] && !FISH[id].legend).length;
+  const seenCount = () => Object.keys(save.fish).filter(id => FISH[id] && !FISH[id].legend && !FISH[id].season).length;
   // {かんじ|よみ} を、ふりがなつきの もじに する
   function ruby(text) {
     const out = document.createDocumentFragment();
@@ -863,7 +877,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // つりびと レベル：けいけんちは 「つった さかな1ぴき ごと」に たまる。めずらしい・ぬし・はじめての しゅるい・ぴったり で すこし おおく。
   // へらない・ほかの ひとと くらべない・じょうげん なし。にがしても、はずしても へらない。レベル L に なる のに いる けいけんち＝20×(L×L−1)
   const XP_RARE = {1: 0, 2: 5, 3: 15, 4: 40, 5: 100};
-  const xpFor = (fish, o) => 10 + (XP_RARE[fish.rare] || 0) + (o.nushi ? 50 : 0) + (o.first ? 20 : 0) + (o.record ? 5 : 0) + (o.big ? 3 : 0) + Math.min(6, o.perfects || 0) * 2;
+  const xpFor = (fish, o) => 10 + (XP_RARE[fish.rare] || 0) + (fish.season ? 10 : 0) + (o.nushi ? 50 : 0) + (o.first ? 20 : 0) + (o.record ? 5 : 0) + (o.big ? 3 : 0) + Math.min(6, o.perfects || 0) * 2;
   const xpNeed = lv => 20 * (lv * lv - 1);
   const levelOf = xp => Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, xp) / 20)));
   function migrateXp(rec) {   // まえから あそんで いる ひとの けいけんちは、いまの きろくから みつもる（へらない ように、すくなめに）
@@ -963,7 +977,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // シールちょうを 30しゅるい そろえた ひとは、まぼろしに あいやすく なる（25かいに 1かい）。だれも あえない ままに しない
     const odds = seenCount() >= BASE ? Math.max(LEGEND_ODDS, 1 / 25) : LEGEND_ODDS;
     if (myth && (probe('legend') === '1' || Math.random() < odds)) { wish = false; return myth; }
-    const now = timeOfDay(), here = FISH.filter(f => f.area === save.area && !f.legend);
+    const season = seasonFish();   // この 月の さかな：どの つりばでも 10かいに 1かい くらい。ずかんの かずには はいらない ので、あえなくても こまらない
+    if (season && (probe('season') === '1' || Math.random() < SEASON_ODDS)) { wish = false; return season; }
+    const now = timeOfDay(), here = FISH.filter(f => f.area === save.area && !f.legend && !f.season);
     const wanted = Number(probe('rare')); if (wanted) { const only = here.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
     // やさしい ほしょう：しってる こが 5かい つづいたら、つぎは まだ あってない こ
     const unseen = here.filter(f => !save.fish[f.id]), wished = wish && here.some(f => f.rare >= 3);
@@ -1173,11 +1189,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
   function drawToday() {
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
-    const boss = save.total >= AREAS.find(a => a.id === BOSS.area).need;
+    const boss = save.total >= AREAS.find(a => a.id === BOSS.area).need, sf = seasonFish();
     box.hidden = false;
-    box.textContent = EN()
+    box.textContent = (sf ? L('この つきの さかな：「' + sf.name + '」。', 'This month' + String.fromCharCode(39) + 's fish: ' + sf.name + '. ') : '') + (EN()
       ? 'Everyone has the same lucky fish today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (boss ? ' Today' + String.fromCharCode(39) + 's Giant tends to show up at ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ') — same for everyone.' : '')
-      : 'きょうは みんな おなじ さかなが ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (boss ? 'ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ（これも みんな おなじ）。' : '');
+      : 'きょうは みんな おなじ さかなが ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (boss ? 'ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ（これも みんな おなじ）。' : ''));
   }
   function hud() {
     $('total').textContent = String(save.total);
@@ -1336,7 +1352,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const tags = [];
     if (leveled) tags.push('レベルアップ！');
     if (fish === LUCKY) tags.push('きょうの ラッキー'); if (save.fish[fish.id].count === 10) tags.push('10ぴきめ！ なかよし');
-    if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]);
+    if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]); if (fish.season) tags.push(L('この つきの さかな', 'This month' + String.fromCharCode(39) + 's fish'));
     $('card-tags').replaceChildren(...tags.map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = text; return tag; }));
     // 「ぴったり」の ごほうび：はんこが おされる
     if (perfects >= 2) { const stamp = document.createElement('span'); stamp.className = 'stamp'; stamp.textContent = 'ぴったり ×' + perfects; $('card-tags').append(stamp); tags.push('ぴったり ×' + perfects); }
@@ -1346,7 +1362,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // あんないの ペンギンが、まいかい ひとこと
     const left = BASE - seenCount();
     const mile = MILES[save.total]; if (mile) party(mile[0]); else if (leveled && lvNow % 5 === 0) party('🎉');   // 5レベルごとの ふしめ だけ おいわい
-    const guideWord = mile ? mile[1] : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
+    const guideWord = mile ? mile[1] : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : fish.season ? L('この つきの さかな だよ！ また らいねんも あえるよ。', 'This month' + String.fromCharCode(39) + 's fish! You can meet it again next year.') : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
     $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
@@ -1696,11 +1712,12 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (night && 'filter' in ctx) ctx.filter = 'drop-shadow(0 0 24px #ffd34d)';
     ctx.translate(night ? 455 : 480, 300); if (last.nushi) ctx.scale(night ? 1.45 : 1.4, night ? 1.45 : 1.4); if (fishArt) ctx.drawImage(fishArt, -130, -130, 260, 260); else ctx.fillText(last.fish.icon, 0, 0); ctx.restore();
     // ぬし・まぼろしの ときは、きねんの わくと おび
-    const special = T(last.fish.legend ? 'まぼろしに あえました' : last.nushi ? 'ぬしを つりました' : '');
+    const seasonal = !!last.fish.season && !last.fish.legend && !last.nushi;
+    const special = seasonal ? L('この つきの さかなを つりました', 'Caught this month' + String.fromCharCode(39) + 's fish!') : T(last.fish.legend ? 'まぼろしに あえました' : last.nushi ? 'ぬしを つりました' : '');
     if (special) {
-      const edge = ctx.createLinearGradient(0, 0, 1200, 675); (last.fish.legend ? ['#ff8fa3', '#ffd34d', '#8fe3a8', '#7fd0f2', '#b79cf0'] : ['#ffe27a', '#d39a1c', '#fff1b8', '#d39a1c', '#ffe27a']).forEach((tone, i) => edge.addColorStop(i / 4, tone));
+      const edge = ctx.createLinearGradient(0, 0, 1200, 675); (last.fish.legend ? ['#ff8fa3', '#ffd34d', '#8fe3a8', '#7fd0f2', '#b79cf0'] : seasonal ? ['#ffb3c8', '#ffe27a', '#b9f0d0', '#a9d8ff', '#e3c6ff'] : ['#ffe27a', '#d39a1c', '#fff1b8', '#d39a1c', '#ffe27a']).forEach((tone, i) => edge.addColorStop(i / 4, tone));
       ctx.strokeStyle = edge; ctx.lineWidth = 22; ctx.strokeRect(11, 11, 1178, 653);
-      ctx.fillStyle = last.fish.legend ? '#6a4bc4' : night ? '#f0b429' : '#a5481c'; roundRect(ctx, 40, 34, 420, 70, 35); ctx.fill();
+      ctx.fillStyle = last.fish.legend ? '#6a4bc4' : night ? '#f0b429' : seasonal ? '#e0679a' : '#a5481c'; roundRect(ctx, 40, 34, 420, 70, 35); ctx.fill();
       ctx.fillStyle = night ? '#4a2a00' : '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 38px system-ui,sans-serif'; ctx.fillText(special, 250, 71, 390);
     }
     ctx.fillStyle = night ? '#0f2447f2' : '#fffffff0'; roundRect(ctx, 690, 210, 460, 330, 34); ctx.fill(); ctx.strokeStyle = night ? '#ffd34d' : '#bfdce8'; ctx.lineWidth = night ? 6 : 5; ctx.stroke();
@@ -1733,7 +1750,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // シールちょうの 1まい。あつめた シールが ならぶ。30しゅるい そろうと「ぜんぶ あつめた！」
   async function bookPhoto() {
     const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1350;
-    const ctx = canvas.getContext('2d'), seen = seenCount(), full = seen >= BASE, list = FISH.filter(f => !f.legend || save.fish[f.id]), arts = {};
+    const ctx = canvas.getContext('2d'), seen = seenCount(), full = seen >= BASE, list = FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])), arts = {};
     await Promise.all(list.filter(f => save.fish[f.id] && artOf(f)).map(async f => { arts[f.id] = await loadImg(artOf(f)); }));
     const paper = ctx.createLinearGradient(0, 0, 0, 1350); paper.addColorStop(0, full ? '#fff6cf' : '#eaf6fd'); paper.addColorStop(1, full ? '#ffe9a8' : '#d3eefb');
     ctx.fillStyle = paper; ctx.fillRect(0, 0, 1200, 1350);
@@ -1847,7 +1864,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function restoreOpen() {
     const hit = /^#restore=(MF1[.].+)$/.exec(location.hash); if (!hit) return;
     let got; try { got = readKeep(hit[1]); } catch { dropRestoreHash(); return; }   // よめない：なにも おこさない
-    const {data, fishes} = got, seen = Object.keys(fishes).filter(id => !FISH[id].legend).length, level = levelOf(Number.isInteger(data.xp) ? data.xp : migrateXp({fish: fishes}));
+    const {data, fishes} = got, seen = Object.keys(fishes).filter(id => !FISH[id].legend && !FISH[id].season).length, level = levelOf(Number.isInteger(data.xp) ? data.xp : migrateXp({fish: fishes}));
     const empty = save.total === 0 && Object.keys(save.fish).length === 0, less = data.total < save.total;
     $('restore-what').textContent = 'もどす きろく：つれた かず ' + data.total + 'ひき・シールちょう ' + seen + ' / ' + BASE + '・レベル ' + level;
     $('restore-now').textContent = empty ? '' : 'いまの きろく：つれた かず ' + save.total + 'ひき';
@@ -2226,7 +2243,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const book = $('book');
   $('open-book').addEventListener('click', () => {
     { const myth = FISH.filter(f => f.legend), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? '★5の まぼろしの こ：ぜんいんに あえたよ！' : '★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'); }
-    $('book-grid').replaceChildren(...FISH.filter(f => !f.legend || save.fish[f.id]).map(f => {
+    $('book-grid').replaceChildren(...FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])).map(f => {
       const got = save.fish[f.id], cell = document.createElement('div');
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
       const icon = document.createElement('b'); if (got) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
@@ -2234,6 +2251,19 @@ dialog .close{display:block;margin:auto;min-width:160px}
       cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
       return cell;
     }));
+    {   // きせつの さかな（月ごと 1しゅ）。ずかんの 30しゅるいには かぞえない。「また らいねん あえるよ」だけ。せかさない・かずを くらべない
+      const now = monthNow(), head = document.createElement('h3'), note = document.createElement('p');
+      head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L('きせつの さかな', 'Seasonal fish');
+      note.style.cssText = 'grid-column:1/-1;margin:0;text-align:center;font-size:.82rem;line-height:1.7'; note.textContent = L('つき ごとに 1しゅ。ずかんの 30しゅるいには かぞえないよ。あえなくても、また らいねん あえるよ。（えは いまは かり）', 'One kind each month. They are not part of the 30 kinds. If you miss one, you can meet it again next year. (The pictures are temporary for now.)');
+      $('book-grid').append(head, note, ...FISH.filter(f => f.season).map(f => {
+        const got = save.fish[f.id], cell = document.createElement('div');
+        cell.dataset.seen = String(!!got); cell.dataset.rare = '3'; cell.dataset.nushi = String(!!(got && got.nushi));
+        const icon = document.createElement('b'); if (got) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
+        const month = L(f.season + 'がつ', MONTHS_EN[f.season - 1]) + (f.season === now ? L('（この つき）', ' (this month)') : '');
+        cell.append(icon, got ? ruby(f.kanji) : L('まだ あってない', 'Not met yet'), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? L('さいだい ', 'Largest ') + cm(got.best) + L('センチ（', ' cm (') + got.count + L('ひき）', ')') + ' · ' + month : month);
+        return cell;
+      }));
+    }
     book.showModal();
   });
   $('close-book').addEventListener('click', () => book.close());
@@ -2317,7 +2347,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   if (location.hash === '#restored') { say('きろくを もどしたよ。つづきから あそべるよ。'); try { history.replaceState(null, '', location.pathname + location.search); } catch {} }
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
   setTimeout(chatter, Number(query.get('chat')) || 5000);
-  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
+  window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
