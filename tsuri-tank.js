@@ -158,6 +158,7 @@
 #tk-open .tk-badge[hidden]{display:none}
 #tk{padding:0;border:2px solid #bfdce8;border-radius:24px;width:min(560px,calc(100vw - 12px));max-width:none;height:min(96dvh,900px);max-height:calc(100dvh - 12px);overflow:hidden;background:#f3fafd;color:#244653}
 #tk[open]{display:flex;flex-direction:column}
+:root[data-inapp=x] #tk{max-height:calc(100dvh - 64px);height:min(96dvh,900px,calc(100dvh - 64px));margin:8px auto auto}   /* Xの アプリ：下 47px の おびに ボタンが かくれない ように、おびの うえで おわる */
 #tk::backdrop{background:#0d2a3acc}
 #tk .tk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 6px}
 #tk .tk-head h2{margin:0;font-size:1.1rem;text-align:left;white-space:nowrap}
