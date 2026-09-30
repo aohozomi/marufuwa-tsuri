@@ -1329,10 +1329,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function cast() {
     scene.dataset.time = TIME_NAME[timeOfDay()];
     fish = pickFish(); face('blue'); $('held').hidden = true;
-    flying = !reduce(); setPhase('waiting'); if (flying) throwRod();
+    flying = !reduce(); setPhase('waiting'); const flight = flying ? 900 : 0; if (flying) throwRod();   // flight＝ウキが みずに つく まで（ミリびょう）
     tone(220, .28, 'square', .2, .04, 880); tone(330, .1, 'triangle', .9, .06, 110); zap(.14, .9);   // ヒュ〜ッ…ポチャ
     button.textContent = 'まってる…'; lock(true); button.dataset.hot = 'false';
-    say('ぽちゃん。のんびり まとう。');
+    // 「ぽちゃん」は ウキが みずに ついた しゅんかんに（とんで いる 間は まだ 言わない。うごきを へらす ときは すぐ）
+    if (flight) setTimeout(() => { if (phase === 'waiting') say('ぽちゃん。のんびり まとう。'); }, flight); else say('ぽちゃん。のんびり まとう。');
     // さいしょの 1ぴきは、すぐに くる（はじめての ひとを またせない）
     const wait = Number(query.get('wait')) || (save.total === 0 ? 1300 : 2200 + Math.random() * 3300);
     // かげが みぎから およいで くる。おおきさは さかなの おおきさ、いろは めずらしさ
@@ -1344,7 +1345,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
     shadow.style.setProperty('--swim', wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});
     // かかる まえの「ちょんちょん」。ウキが ちいさく ゆれて、もうすぐ くると わかる
-    setTimeout(() => { if (phase === 'waiting') { $('float').dataset.nibble = 'true'; guideTone(660, .04, 'triangle', 0, .04); guideTone(660, .04, 'triangle', .22, .04); say('ちょん、ちょん…。なにか きたかも。'); } }, Math.max(0, wait - 750));
+    setTimeout(() => { if (phase === 'waiting') { $('float').dataset.nibble = 'true'; guideTone(660, .04, 'triangle', 0, .04); guideTone(660, .04, 'triangle', .22, .04); say('ちょん、ちょん…。なにか きたかも。'); } }, Math.max(flight ? flight + 150 : 0, wait - 750));   // ちゃくすいの まえに ちょんちょん しない（さいしょの 1ぴきは まちが 1.3びょうと みじかい）
     setTimeout(() => { delete $('float').dataset.nibble; bite(); }, wait);
   }
   // なげる うごき：うしろに そって、えいっと ふって、ウキが ゆみなりに とんで、ぽちゃん
