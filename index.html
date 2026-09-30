@@ -804,7 +804,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     pals = [first, rest[Math.floor(seed / 7) % rest.length]];
     pals.forEach((pal, i) => { const img = $(i ? 'friend-b' : 'friend-a'); img.src = 'img/friend-' + pal.id + '-s.webp'; img.alt = 'となりで つりを する ' + pal.name; });
     save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {};
-    pals.forEach(pal => { save.pals[pal.id] = true; }); store();
+    pals.forEach(pal => { save.pals[pal.id] = true; const mt = metToday(); if (!mt.ids.includes(pal.id)) mt.ids.push(pal.id); }); store();
+    swapEpoch++;   // いれかわりの とちゅうで つりばを かえたら、そのまま やめる
   }
   // さおは てもとから ななめ うえへ。いとは さおの さきから ウキへ
   function rod(line, i, tall, stick) {
@@ -827,6 +828,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
   function moveTo(i) {
     if (i === mine || !(phase === 'idle' || phase === 'caught')) return;
+    if (swapping) finishSwap();
     const there = friends.indexOf(i); if (there >= 0) friends[there] = mine;   // なかまと ばしょを こうかん
     mine = i; $('held').hidden = $('held-friend').hidden = true; setPhase('idle'); face('blue');
     button.textContent = 'なげる'; button.dataset.hot = 'false';
@@ -1163,7 +1165,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
   const bubble = $('bubble');
   function chatter() {
-    if (!document.hidden && phase !== 'caught' && !book.open) {
+    if (!document.hidden && phase !== 'caught' && !book.open && !swapping) {
       const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
       bubble.textContent = Math.random() < .25 ? pals[who].word : WORDS[Math.floor(Math.random() * WORDS.length)];
       place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
@@ -1184,6 +1186,71 @@ dialog .close{display:block;margin:auto;min-width:160px}
     }
     setTimeout(chatter, Number(query.get('chat')) || (9000 + Math.random() * 8000));
   }
+
+  // なかまの いれかわり：だいたい 10ぷん（8〜14ぷん）に 1にん。「またね」と てを ふって あるいて いき、すこし あいて、べつの こが あるいて きて「こんにちは」
+  // つりの さいちゅう（まって いる・かかった・ひいて いる）は かわらない。「うごきを へらす」ときは、あるかずに いれかわる だけ。てもとの けんさは ?pals=びょう
+  const dayKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+  function metToday() { const m = save.metToday; if (!m || m.d !== dayKey() || !Array.isArray(m.ids)) save.metToday = {d: dayKey(), ids: []}; return save.metToday; }   // きょう あった こ
+  const swapGap = () => { const sec = Number(probe('pals')); return sec > 0 ? sec * 1000 : (8 + Math.random() * 6) * 60000; };
+  let nextSwap = Date.now() + swapGap(), swapping = false, swapFast = false, swapEpoch = 0, slotFlip = Math.random() < .5 ? 0 : 1, swapAnims = [];
+  const hold = ms => new Promise(done => setTimeout(done, swapFast ? 0 : ms));
+  function finishSwap() { swapFast = true; swapAnims.forEach(a => { try { a.finish(); } catch {} }); }
+  async function walk(img, from, to, fill) {   // ぴょこ ぴょこ あるく（まっすぐ よこに。あしもとの たかさは かえない）
+    if (swapFast) return {cancel() {}};   // ばしょを かえた など、いそぐ ときは あるかない
+    const steps = 9, frames = [];
+    for (let i = 0; i <= steps; i++) frames.push({translate: Math.round(from + (to - from) * i / steps) + 'px ' + (i % 2 ? -8 : 0) + 'px'});
+    const a = img.animate(frames, {duration: 3400, easing: 'linear', fill}); swapAnims.push(a);
+    try { await a.finished; } catch {}
+    swapAnims = swapAnims.filter(x => x !== a); return a;
+  }
+  function palSay(slot, text) {   // なかまの ふきだし（ふだんの ひとことの ふきだしとは べつ）
+    const b = document.createElement('span'), f = feet(friends[slot]); b.className = 'bubble'; b.setAttribute('aria-hidden', 'true'); b.textContent = text; place(b, {x: f.x, y: f.y - 19}); scene.append(b);
+    const half = b.offsetWidth / scene.clientWidth * 50; place(b, {x: Math.min(98 - half, Math.max(2 + half, f.x)), y: f.y - 19});
+    setTimeout(() => b.remove(), 2400);
+  }
+  function palRig(slot, on) { const k = slot ? 'b' : 'a'; ['float-', 'rod-', 'line-'].forEach(name => { const el = $(name + k); if (el) el.style.visibility = on ? '' : 'hidden'; }); }   // いない あいだは、さおと ウキも かくす
+  function pickNewcomer(here) {   // きょう まだ あって ない こを さきに。ぜんいん あったら はじめから。1わりは ほかの つりばの こが あそびに くる
+    const mt = metToday(), met = new Set(mt.ids), present = new Set(here.map(p => p.id)), visitor = Math.random() < .1;
+    const homes = PALS.filter(p => p.home === save.area && !present.has(p.id)), away = PALS.filter(p => p.home !== save.area && !present.has(p.id));
+    const list = visitor && away.length ? away : homes;
+    let pool = list.filter(p => !met.has(p.id));
+    if (!pool.length) { if (list === homes) mt.ids = mt.ids.filter(id => !PALS.some(p => p.id === id && p.home === save.area)); pool = list; }
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+  }
+  async function swapPal() {
+    if (swapping) return;
+    swapping = true; swapFast = false; swapAnims = [];
+    const epoch = swapEpoch, slot = slotFlip, img = $(slot ? 'friend-b' : 'friend-a'), old = pals[slot], next = pickNewcomer(pals); slotFlip = 1 - slotFlip;
+    const still = () => epoch === swapEpoch;
+    try {
+      if (!next) return;
+      const W = scene.clientWidth, seat = feet(friends[slot]).x, side = seat < 50 ? -1 : 1, off = side * ((side < 0 ? seat : 100 - seat) / 100 * W + W * .2);   // はしまで の きょり(px)
+      palSay(slot, 'またね'); say(old.name + 'が「またね」と かえって いったよ。');
+      if (!reduce() && !swapFast) {
+        const wave = img.animate([{rotate: '0deg'}, {rotate: '12deg'}, {rotate: '-10deg'}, {rotate: '12deg'}, {rotate: '0deg'}], {duration: 900}); swapAnims.push(wave);
+        try { await wave.finished; } catch {}
+        if (!still()) return;
+        palRig(slot, false);   // さおと ウキは、あるき だす ときに しまう
+        const gone = await walk(img, 0, off, 'forwards'); img.style.visibility = 'hidden'; gone.cancel();
+      } else { img.style.visibility = 'hidden'; palRig(slot, false); }
+      if (!still()) return;
+      await hold(reduce() ? 1200 : 2200); if (!still()) return;
+      pals[slot] = next; img.src = 'img/friend-' + next.id + '-s.webp'; img.alt = 'となりで つりを する ' + next.name;
+      const mt = metToday(); if (!mt.ids.includes(next.id)) mt.ids.push(next.id);
+      save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {}; save.pals[next.id] = true; store();
+      img.style.visibility = '';
+      if (!reduce()) { await walk(img, off, 0, 'backwards'); if (!still()) return; }
+      palRig(slot, true);   // ついて から、さおと ウキを だす
+      const guest = next.home !== save.area;
+      palSay(slot, guest ? 'あそびに きたよ' : 'こんにちは'); say(next.name + (guest ? 'が あそびに きたよ。' : 'が きたよ。'));
+    } finally {
+      img.style.visibility = ''; palRig(slot, true); swapAnims.forEach(a => { try { a.cancel(); } catch {} }); swapAnims = [];   // どんな おわりかたでも、すがたが のこらない ように
+      swapping = false; nextSwap = Date.now() + swapGap();
+    }
+  }
+  setInterval(() => {
+    if (Date.now() >= nextSwap && !swapping && !document.hidden && !flying && (phase === 'idle' || phase === 'caught') && $('held-friend').hidden && !document.querySelector('dialog[open]')) swapPal();
+  }, 1000);
 
   // つりばを えらぶ
   const areaName = id => AREAS.find(a => a.id === id).name;
@@ -1632,7 +1699,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   hud(); drawEquip(); setPhase('idle');
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
   setTimeout(chatter, Number(query.get('chat')) || 5000);
-  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends]};
+  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id)};
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
