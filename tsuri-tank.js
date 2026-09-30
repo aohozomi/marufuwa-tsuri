@@ -416,7 +416,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     <p class="tk-sr" role="status" id="tk-sr"></p><ul class="tk-sr" id="tk-list"></ul>`;
   document.body.append(dlg);
   const stage = $(dlg, '.tk-stage'), room = $(dlg, '.tk-room'), water = $(dlg, '.tk-water'), layer = $(dlg, '.tk-layer'), base = $(dlg, '.tk-base'), placedBox = $(dlg, '.tk-placed'), rays = $(dlg, '.tk-rays');
-  const tip = $(dlg, '.tk-card'), empty = $(dlg, '.tk-empty'), mascot = $(dlg, '.tk-mascot'), says = $(dlg, '.tk-says'), sr = $(dlg, '#tk-sr'), list = $(dlg, '#tk-list');
+  const tip = $(dlg, '.tk-card'), empty = $(dlg, '.tk-empty'), mascot = $(dlg, '.tk-mascot'), mascotAlt0 = $(dlg, '.tk-mascot').alt, says = $(dlg, '.tk-says'), sr = $(dlg, '#tk-sr'), list = $(dlg, '#tk-list');
   const tray = $(dlg, '.tk-tray'), items = $(dlg, '.tk-items'), placedList = $(dlg, '.tk-placedlist'), decoBtn = $(dlg, '.tk-deco-btn'), earBtn = $(dlg, '.tk-ear'), sndBtn = $(dlg, '.tk-snd'), photo = $(dlg, '.tk-photo');
   const friendsEls = [...dlg.querySelectorAll('.tk-friend')], guestEl = $(dlg, '.tk-guest');
   const starwall = $(dlg, '.tk-starwall'), lampBtn = $(dlg, '.tk-lampbtn'), rice = $(dlg, '.tk-rice');
@@ -765,7 +765,21 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     setTimeout(() => r.remove(), 1400);
   }
   // まるふわの 絵：つりびよりで えらんだ「ふくの いろ」（じぶんの どうぐ）が あれば、その 色で（tsuri-wear.js。おへやの しゃしんにも そのまま 写る）。読めなければ 水色の まま
-  const setMascot = face => { const url = BASE + 'img/game-' + face + '.webp'; if (window.TsuriWear) window.TsuriWear.apply(mascot, url); else mascot.src = url; };
+  let ownOn = false, ownLoading = false;   // じぶんの こ（下の ownSync）が 出て いる あいだは、まるふわの 顔・ふくの いろは かえない（1まいの えの まま）
+  const setMascot = face => { if (ownOn) return; const url = BASE + 'img/game-' + face + '.webp'; if (window.TsuriWear) window.TsuriWear.apply(mascot, url); else mascot.src = url; };
+  // じぶんの こ：つりびよりの しゅじんこうが「じぶんの こ」（save.avatar='own' と 正しい save.own）なら、おへやの まるふわの かわりに その 子が いる。
+  //   絵は tsuri-own.js（TsuriOwn.src・かんせい するまでは かりの かお）。ひらく たびに よんで そろえる。tsuri-own.js が まだ ない ページでは 1回だけ よみこむ。こわれた own は まるふわの まま。
+  const ownLevel = xp => Math.floor(Math.sqrt(1 + (Number(xp) || 0) / 12));
+  function ownSync() {
+    const sv = readSave(), O = window.TsuriOwn, wants = sv.avatar === 'own' && sv.own && typeof sv.own === 'object';
+    if (wants && !O && !ownLoading) { ownLoading = true; try { const sc = document.createElement('script'); sc.src = BASE + 'tsuri-own.js'; sc.onload = () => { if (isOpen()) ownSync(); }; sc.onerror = () => {}; document.head.append(sc); } catch {} return; }
+    const ok = wants && O && typeof O.valid === 'function' && typeof O.src === 'function' && O.valid(sv.own);
+    if (!ok) { if (ownOn) { ownOn = false; mascot.alt = mascotAlt0; setMascot('blue'); } return; }
+    ownOn = true; mascot.removeAttribute('data-wear');
+    let src = ''; try { src = O.src(sv.own, ownLevel(sv.xp), u => { if (ownOn && u) mascot.src = u; }); } catch {}
+    if (src) mascot.src = src;
+    try { mascot.alt = typeof O.label === 'function' ? String(O.label(sv.own)) : mascotAlt0; } catch { mascot.alt = mascotAlt0; }
+  }
   if (!window.TsuriWear) { try { const sc = document.createElement('script'); sc.src = BASE + 'tsuri-wear.js'; sc.onload = () => { setMascot('blue'); if (window.TsuriWear.warm) window.TsuriWear.warm(['blue', 'smile', 'sparkle', 'apricot', 'mint'].map(f => BASE + 'img/game-' + f + '.webp')); }; document.head.append(sc); } catch {} }
   else { setMascot('blue'); if (window.TsuriWear.warm) window.TsuriWear.warm(['blue', 'smile', 'sparkle', 'apricot', 'mint'].map(f => BASE + 'img/game-' + f + '.webp')); }
   function mood(face, ms) {
@@ -1433,7 +1447,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     resetSecrets();
     // となりに いる なかまが かわって いたら、へやの なかまも かえる（つりばを かえた あと）
     friendsEls.forEach(el => { const src2 = friendSrc(el.dataset.who === 'a' ? 'friend-a' : 'friend-b'); if (src2 && el.getAttribute('src') !== src2) el.setAttribute('src', src2); });
-    layoutRoom(); paintWater(); layoutRoom();
+    layoutRoom(); paintWater(); layoutRoom(); ownSync();
     if (visit && visit.starry) { starry = true; applyStarry(); }   // おくった 人の へやが ほしぞらの とき
     const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
     if (arrivals.length) {
