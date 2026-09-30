@@ -396,6 +396,23 @@ dialog .count{text-align:center;margin:0 0 12px}
 #book-grid div[data-seen=false] b{width:62px;height:62px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:3px dashed #b9cbd4;color:#9fb3bd}
 #book-grid div[data-rare="4"][data-seen=true]{border-color:#e0a61c;background:#fffaf0}
 dialog .close{display:block;margin:auto;min-width:160px}
+/* じぶんの どうぐ */
+.hud.menu{flex-wrap:wrap}
+.hud.menu > *{flex:1 1 30% !important;min-width:88px}
+#gear-preview{display:flex;justify-content:center;align-items:flex-end;gap:14px;margin:6px 0 10px;min-height:96px}
+#gear-preview img{display:block;height:88px;width:auto;object-fit:contain}
+#gear-preview .pv-float{height:70px}
+#gear-preview .pv-gear{height:56px}
+#gear-body h3{margin:12px 0 4px;font-size:1rem}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.swatches button{min-width:64px;min-height:64px;padding:4px 4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:18px;font-size:.72rem;line-height:1.2}
+.swatches button i{display:block;width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #24465355}
+.swatches button[aria-pressed=true]{--c1:#fff6cf;--c2:#ffd98a;--side:#d39a1c;--ink:#593700}
+.swatches button[aria-disabled=true]{opacity:.55}
+.swatches button[aria-disabled=true] i{filter:grayscale(.6)}
+.gear-label{display:block;margin:14px 0 4px;font-weight:800;font-size:.9rem}
+#gear-bucket{width:100%;font:inherit;font-size:1.05rem;border:2px solid #b9d1db;border-radius:14px;padding:8px 12px;margin-bottom:6px}
+#gear-note{min-height:1.4em;margin:0 0 8px}
 
 @media(prefers-reduced-motion:reduce){
   .who,#shadow{transition:none}
@@ -411,18 +428,18 @@ dialog .close{display:block;margin:auto;min-width:160px}
 :root[data-night=true]{color:#e8f1f8;background:#0d1a2e}
 :root[data-night=true] #backdrop{filter:brightness(.3) saturate(1.1)}
 :root[data-night=true] main{background:#13253d;box-shadow:0 12px 30px #0007}
-:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo){color-scheme:dark}
+:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear){color-scheme:dark}
 :root[data-night=true] .actions{background:linear-gradient(#13253d00,#13253d 28%)}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo)::backdrop{background:#000000b3}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear)::backdrop{background:#000000b3}
 /* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:focus-visible{outline-color:#a9dcff}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) button:focus-visible{outline-color:#a9dcff}
 :root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small{color:#a9bfd2}
 :root[data-night=true] #bucket-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
 :root[data-night=true] #book-grid div[data-seen=false]{background:#16283f;color:#9db3c6}
@@ -467,9 +484,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <span>ずかん <strong id="seen">0</strong> / <span id="all">30</span></span>
     <div class="level" id="level-box" role="group" aria-label="つりびと レベル"><span>つりびと レベル <strong id="level">1</strong></span><span class="level-bar" aria-hidden="true"><i id="level-fill"></i></span></div>
   </div>
-  <div class="hud">
+  <div class="hud menu">
     <button id="open-bucket" type="button" style="flex:1">バケツ</button>
     <button id="open-book" type="button" style="flex:1">ずかん</button>
+    <button id="open-gear" type="button" style="flex:1" aria-label="じぶんの どうぐ">どうぐ</button>
     <a class="pill plaza" href="hiroba/" style="flex:1">ひろば</a>
   </div>
 
@@ -624,6 +642,17 @@ dialog .close{display:block;margin:auto;min-width:160px}
     </div>
     <p class="count" id="photo-status" role="status">かってに とうこうは しません。</p>
     <button class="close" type="button" id="close-photo">とじる</button>
+  </dialog>
+
+  <dialog id="gear" aria-labelledby="gear-title">
+    <h2 id="gear-title">じぶんの どうぐ</h2>
+    <p class="count">すきな いろに して、じぶんだけの どうぐに しよう。レベルが あがると、いろが ふえるよ。</p>
+    <div id="gear-preview" aria-hidden="true"></div>
+    <div id="gear-body"></div>
+    <label class="gear-label" for="gear-bucket">バケツの なまえ（ひらがな・カタカナで 8もじまで）</label>
+    <input id="gear-bucket" type="text" maxlength="8" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done">
+    <p class="count" id="gear-note" role="status"></p>
+    <button class="close" type="button" id="close-gear">とじる</button>
   </dialog>
 
   <dialog id="shop" aria-labelledby="shop-title">
@@ -998,7 +1027,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false;
   function setPhase(next) { phase = next; if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
-  function face(name) { marufuwa.src = 'img/game-' + name + '.webp'; }
+  let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
+  function face(name) { curFace = name; marufuwa.src = wearUrl(name) || 'img/game-' + name + '.webp'; }
   function hud() {
     $('total').textContent = String(save.total);
     $('seen').textContent = $('book-seen').textContent = String(seenCount());
@@ -1151,6 +1181,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('card-fish').textContent = fish.icon; $('card-name').replaceChildren(ruby(fish.kanji));
     $('card-size').replaceChildren(cm(size) + ' センチ　', starEl(fish, nushi));
     if (found) gift.push(found + '（さかなが もって いたよ）');
+    if (leveled) unlockNames(lvBefore, lvNow).forEach(name => gift.push(name));
     const tags = [];
     if (leveled) tags.push('レベルアップ！');
     if (fish === LUCKY) tags.push('きょうの ラッキー'); if (save.fish[fish.id].count === 10) tags.push('10ぴきめ！ なかよし');
@@ -1338,7 +1369,106 @@ dialog .close{display:block;margin:auto;min-width:160px}
     setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false'; lock(false);
     say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
   });
-  function drawEquip() { $('equip').replaceChildren(gearImg('rod', save.rod, RODS[save.rod].icon), ' ' + RODS[save.rod].name + '　', gearImg('bait', save.bait, BAITS[save.bait].icon), ' ' + BAITS[save.bait].name); }
+  // じぶんの どうぐ：ウキ・ルアー・さお・まるふわの ふく の いろと、バケツの なまえ。すきな もので あいちゃくを（マスター直命）。いろは レベルで ふえる
+  // save.my = {float, lure, rod, wear, bucket}。あいことば（MF1）に そのまま はいる。かならず「そのまま」に もどせる
+  const GEAR = {
+    float: {title: 'ウキの いろ', from: ['#ff7a68', '#d8382e', '#e8483f'], list: [
+      {k: 'aka', n: 'あか', lv: 1, c: '#e8483f'}, {k: 'ao', n: 'あお', lv: 1, c: '#3a8ee0', pal: ['#8fc6ff', '#2a7fd4', '#3a8ee0']}, {k: 'kiiro', n: 'きいろ', lv: 1, c: '#f5c430', pal: ['#ffe27a', '#f0b81a', '#f5c430']},
+      {k: 'momo', n: 'もも', lv: 5, c: '#f0709f', pal: ['#ffb0cc', '#f0649a', '#f0709f']}, {k: 'midori', n: 'みどり', lv: 10, c: '#4cc177', pal: ['#8fe6a8', '#3fb56b', '#4cc177']},
+      {k: 'murasaki', n: 'むらさき', lv: 15, c: '#9670e8', pal: ['#c9b3ff', '#8a63e0', '#9670e8']}, {k: 'kin', n: 'きん', lv: 20, c: 'linear-gradient(135deg,#fff0a0,#e6b325)', pal: ['#ffe89a', '#d9a520', '#e6b325']},
+      {k: 'niji', n: 'にじ', lv: 30, c: 'linear-gradient(135deg,#ff8fa3,#ffd34d,#8fe3a8,#7fd0f2,#b79cf0)', pal: ['#ff8fa3', '#ffd34d', '#b79cf0']}]},
+    lure: {title: 'ルアーの いろ（きらきら えさ）', from: ['#eaf7ff', '#ffd6ee', '#b8f2ff', '#9fd8f5'], list: [
+      {k: 'gin', n: 'ぎん', lv: 1, c: 'linear-gradient(135deg,#eaf7ff,#ffd6ee,#b8f2ff)'}, {k: 'ao', n: 'あお', lv: 1, c: '#3f8fe8', pal: ['#dff0ff', '#8fc6ff', '#5aa6f5', '#2f7ed8']}, {k: 'momo', n: 'もも', lv: 1, c: '#ff8fc1', pal: ['#fff0f7', '#ffc2dd', '#ff8fc1', '#e0609a']},
+      {k: 'kiiro', n: 'きいろ', lv: 3, c: '#f5c030', pal: ['#fff6d0', '#ffe07a', '#f5c030', '#c99410']}, {k: 'midori', n: 'みどり', lv: 10, c: '#5fd68a', pal: ['#eafff0', '#a8f0c0', '#5fd68a', '#2fa860']},
+      {k: 'murasaki', n: 'むらさき', lv: 15, c: '#a07de8', pal: ['#f3ecff', '#cbb5ff', '#a07de8', '#6f47c8']}, {k: 'kin', n: 'きん', lv: 20, c: 'linear-gradient(135deg,#fff6d0,#f5c030,#c99410)', pal: ['#fff6d0', '#ffe07a', '#f5c030', '#c99410']},
+      {k: 'niji', n: 'にじ', lv: 30, c: 'linear-gradient(135deg,#ff8fa3,#ffd34d,#8fe3a8,#7fd0f2,#b79cf0)', pal: ['#ffd0da', '#fff0b0', '#c8f3d6', '#c4e9fb']}, {k: 'yoru', n: 'よぞら', lv: 40, c: 'linear-gradient(135deg,#7a86d8,#232e78)', pal: ['#c8d0f0', '#7a86d8', '#3f4aa8', '#232e78']}]},
+    rod: {title: 'さおの いろ', from: [['#a5723e', '#7a4f26', '#dcae78'], ['#b9d67c', '#5c7a2a', '#e6f4b8'], ['#fbf8ff', '#e2d8fb', '#c5b3f0']], list: [
+      {k: 'moto', n: 'そのまま', lv: 1, c: '#a5723e'}, {k: 'shiro', n: 'しろ', lv: 1, c: '#f2f2f8', pal: ['#f4f4f8', '#b8bcc8', '#ffffff'], line: '#b8bcc8'}, {k: 'kuro', n: 'くろ', lv: 1, c: '#3a3a48', pal: ['#3a3a48', '#1e1e28', '#7a7a90'], line: '#2a2a34'},
+      {k: 'ao', n: 'あお', lv: 8, c: '#3a8ee0', pal: ['#6db8ff', '#2a7fd4', '#cfe8ff'], line: '#2a7fd4'}, {k: 'momo', n: 'もも', lv: 12, c: '#f0709f', pal: ['#ffb0cc', '#e0609a', '#ffe0ee'], line: '#e0609a'},
+      {k: 'kin', n: 'きん', lv: 20, c: 'linear-gradient(135deg,#fff0a0,#e6b325)', pal: ['#e6b325', '#a87a10', '#fff0a0'], line: '#d9a520'}, {k: 'niji', n: 'にじ', lv: 30, c: 'linear-gradient(135deg,#ff8fa3,#ffd34d,#8fe3a8,#7fd0f2,#b79cf0)', pal: ['#ff8fc1', '#b79cf0', '#ffe9a8'], line: '#b79cf0'}]},
+    wear: {title: 'まるふわの ふくの いろ', list: [
+      {k: 'ao', n: 'あお', lv: 1, c: '#7fbcff'}, {k: 'momo', n: 'もも', lv: 1, c: '#ff9fc4', h: 335, s: 1, v: 1.04}, {k: 'midori', n: 'みどり', lv: 1, c: '#7fd6a0', h: 140, s: .95, v: 1},
+      {k: 'kiiro', n: 'きいろ', lv: 8, c: '#ffd45a', h: 45, s: 1.05, v: 1.08}, {k: 'murasaki', n: 'むらさき', lv: 15, c: '#b79cf0', h: 265, s: .9, v: 1.02},
+      {k: 'aka', n: 'あか', lv: 20, c: '#ff7a68', h: 5, s: 1.05, v: 1.05}, {k: 'orenji', n: 'オレンジ', lv: 25, c: '#ffab5a', h: 28, s: 1.05, v: 1.06}, {k: 'shiro', n: 'しろ', lv: 30, c: '#eef2f8', h: 215, s: .18, v: 1.12},
+      {k: 'kuro', n: 'くろ', lv: 40, c: '#4a5060', h: 220, s: .25, v: .5}]}
+  };
+  const myLv = () => levelOf(save.xp || 0);
+  const gearOpt = kind => { const list = GEAR[kind].list, want = save.my && save.my[kind]; const o = list.find(x => x.k === want); return o && o.lv <= myLv() ? o : list[0]; };   // まだ ひらいて いない いろは つかえない（そのままに もどる）
+  const swap = (svg, from, to) => from.reduce((t, c, i) => t.split(c).join(to[i]), svg);
+  const floatSvg = () => { const o = gearOpt('float'); if (!ART || !ART.float || !o.pal) return ART && ART.float || ''; let t = swap(ART.float, GEAR.float.from, o.pal); if (o.k === 'niji') t = t.split('<stop offset="0" stop-color="' + o.pal[0] + '"/><stop offset="0.5" stop-color="' + o.pal[1] + '"/>').join('<stop offset="0" stop-color="#ff8fa3"/><stop offset="0.17" stop-color="#ffd34d"/><stop offset="0.34" stop-color="#8fe3a8"/><stop offset="0.5" stop-color="#7fd0f2"/>'); return t; };
+  const lureSvg = () => { const o = gearOpt('lure'), svg = ART && ART.bait && ART.bait[1]; return svg && o.pal ? swap(svg, GEAR.lure.from, o.pal) : svg || ''; };
+  const rodSvg = i => { const o = gearOpt('rod'), svg = ART && ART.rod && ART.rod[i]; return svg && o.pal ? swap(svg, GEAR.rod.from[i], o.pal) : svg || ''; };
+  const svgImg = (svg, cls) => { const im = new Image(); im.src = ART.uri(svg); im.alt = ''; im.draggable = false; if (cls) im.className = cls; return im; };
+  // まるふわの ふく：あおい ぶぶんの いろあいだけ かえる（しろ・ほほ・め・かばんは そのまま）
+  function wearUrl(name) {
+    const o = gearOpt('wear'); if (o.k === 'ao' || !o.h) return '';
+    const key = o.k + '|' + name; if (wearCache.has(key)) return wearCache.get(key);
+    wearCache.set(key, '');
+    const im = new Image(); im.onload = () => {
+      try {
+        const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'); x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, c.width, c.height), px = d.data;
+        for (let i = 0; i < px.length; i += 4) {
+          if (px[i + 3] < 8) continue;
+          const r = px[i] / 255, g = px[i + 1] / 255, b = px[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), df = mx - mn; if (mx < .25 || df < .1) continue;
+          let h = mx === r ? ((g - b) / df) % 6 : mx === g ? (b - r) / df + 2 : (r - g) / df + 4; h *= 60; if (h < 0) h += 360;
+          if (h < 170 || h > 260) continue;   // あおの ぶぶんだけ
+          const s = Math.min(1, df / mx * o.s), v = Math.min(1, mx * o.v), C = v * s, X = C * (1 - Math.abs((o.h / 60) % 2 - 1)), m = v - C, hh = Math.floor(o.h / 60) % 6;
+          const [rr, gg, bb] = [[C, X, 0], [X, C, 0], [0, C, X], [0, X, C], [X, 0, C], [C, 0, X]][hh];
+          px[i] = Math.round((rr + m) * 255); px[i + 1] = Math.round((gg + m) * 255); px[i + 2] = Math.round((bb + m) * 255);
+        }
+        x.putImageData(d, 0, 0); wearCache.set(key, c.toDataURL('image/png'));
+        if (curFace === name && gearOpt('wear').k === o.k) marufuwa.src = wearCache.get(key);
+        if ($('gear').open) drawGear();
+      } catch (e) {}
+    };
+    im.src = 'img/game-' + name + '.webp'; return '';
+  }
+  const bucketName = () => (save.my && typeof save.my.bucket === 'string') ? save.my.bucket.slice(0, 8) : '';
+  function applyMy() {   // どうぐの いろを がめんに あわせる
+    if (ART && ART.float) $('float').style.setProperty('--fimg', 'url("' + ART.uri(floatSvg()) + '")');
+    face(curFace); drawEquip();
+    $('bucket-title').textContent = bucketName() || 'バケツ'; $('open-bucket').setAttribute('aria-label', bucketName() ? 'バケツ（' + bucketName() + '）' : 'バケツ');
+  }
+  function unlockNames(before, now) { const out = []; for (const g of Object.values(GEAR)) for (const o of g.list) if (o.lv > before && o.lv <= now) out.push(g.title.split('（')[0] + '：' + o.n); return out; }
+  function drawGear() {
+    const my = save.my || {}, lv = myLv(), on = document.activeElement && $('gear-body').contains(document.activeElement) ? document.activeElement.dataset.k : '';
+    const parts = [];
+    for (const [kind, g] of Object.entries(GEAR)) {
+      const head = document.createElement('h3'); head.textContent = g.title; const box = document.createElement('div'); box.className = 'swatches'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', g.title);
+      const cur = gearOpt(kind);
+      for (const o of g.list) {
+        const b = document.createElement('button'), sw = document.createElement('i'), open = o.lv <= lv;
+        b.type = 'button'; b.dataset.k = kind + ':' + o.k; sw.style.background = o.c; b.append(sw, open ? o.n : 'レベル ' + o.lv);
+        b.setAttribute('aria-pressed', String(open && cur.k === o.k)); if (!open) b.setAttribute('aria-disabled', 'true');
+        b.setAttribute('aria-label', o.n + (open ? (cur.k === o.k ? '。つかって いる' : '') : '。レベル ' + o.lv + ' で もらえるよ'));
+        b.addEventListener('click', () => {
+          if (!open) { $('gear-note').textContent = o.n + 'は、レベル ' + o.lv + ' に なると もらえるよ。'; return; }
+          save.my = {...(save.my || {}), [kind]: o.k}; store(); applyMy(); drawGear(); $('gear-note').textContent = g.title.split('（')[0] + 'を「' + o.n + '」に したよ。';
+        });
+        box.append(b);
+      }
+      parts.push(head, box);
+    }
+    $('gear-body').replaceChildren(...parts);
+    if (on) { const again = $('gear-body').querySelector('[data-k="' + on + '"]'); if (again) again.focus({preventScroll: true}); }
+    // みほん（いま えらんで いる もの）
+    const pv = [], me = new Image(); me.src = marufuwa.src; me.alt = ''; pv.push(me);
+    if (ART && ART.float) pv.push(svgImg(floatSvg(), 'pv-float'));
+    if (ART && ART.rod) pv.push(svgImg(rodSvg(save.rod), 'pv-gear'));
+    if (ART && ART.bait) pv.push(svgImg(save.bait === 1 ? lureSvg() : ART.bait[save.bait], 'pv-gear'));
+    $('gear-preview').replaceChildren(...pv);
+    $('gear-bucket').value = bucketName();
+  }
+  const BAD = ['しね', 'ころす', 'ころし'];   // きんしごは さいしょうげん（バケツの なまえは、そとには でません）
+  $('gear-bucket').addEventListener('change', () => {
+    const v = $('gear-bucket').value.trim();
+    if (v && !/^[ぁ-んァ-ヶー]+$/.test(v)) { $('gear-note').textContent = 'ひらがな・カタカナで かいてね。'; $('gear-bucket').value = bucketName(); return; }
+    if (BAD.some(w => v.includes(w))) { $('gear-note').textContent = 'そのなまえは つかえないよ。べつの なまえを えらんでね。'; $('gear-bucket').value = bucketName(); return; }
+    save.my = {...(save.my || {}), bucket: v}; store(); applyMy(); $('gear-note').textContent = v ? 'バケツの なまえを「' + v + '」に したよ。' : 'バケツの なまえを もどしたよ。';
+  });
+  $('open-gear').addEventListener('click', () => { $('gear-note').textContent = ''; drawGear(); $('gear').showModal(); });
+  $('close-gear').addEventListener('click', () => $('gear').close());
+  function drawEquip() { const rodImg = ART && ART.rod && ART.rod[save.rod] ? svgImg(rodSvg(save.rod), 'art') : gearImg('rod', save.rod, RODS[save.rod].icon), baitImg = save.bait === 1 && ART && ART.bait ? svgImg(lureSvg(), 'art') : gearImg('bait', save.bait, BAITS[save.bait].icon); $('equip').replaceChildren(rodImg, ' ' + RODS[save.rod].name + '　', baitImg, ' ' + BAITS[save.bait].name); }
 
   // おみせ。うでまえを みて、こえを かけて くれる（くらべない。ほめるだけ）
   const shop = $('shop');
@@ -1763,10 +1893,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
   if (save.total === 0) say('「なげる」を おしてね。');
   else if (mythDay) say(welcome + 'きょうは、なにかが いる きが する…。');
   else say(welcome + 'きょうの ラッキーさかなは「' + LUCKY.name + '」。' + areaName(LUCKY.area) + 'に いるよ。' + (rainy ? 'きょうは あめ。' : '') + (save.total >= AREAS.find(a => a.id === BOSS.area).need ? ' きょうの ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ。' : ''));
-  hud(); drawEquip(); setPhase('idle');
+  applyMy(); hud(); setPhase('idle');
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
   setTimeout(chatter, Number(query.get('chat')) || 5000);
-  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0)};
+  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name)};
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
