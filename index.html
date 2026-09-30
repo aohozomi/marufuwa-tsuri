@@ -345,6 +345,11 @@ body.gazing #tegami{display:none}
 /* つれた しらせ：けしきの そらの ところに かさねる。スクロール しなくても、つぎの ボタンが みえる */
 #card{position:absolute;z-index:6;left:3%;right:3%;top:2.5%;display:flex;flex-direction:column;align-items:center;text-align:center;background:#ffffffeb;border:2px solid #bfdce8;border-radius:18px;padding:4px 10px 5px;box-shadow:0 4px 12px #24465326}
 #card[hidden]{display:none}
+/* つれた 直後は まるふわと さかなが しゅやく。カードは 1.5びょう あとに ふわっと（タップで すぐ）。うごきを へらす 人には ぱっと */
+#card{transition:opacity .5s ease,translate .5s ease}
+#card[data-wait=true]{opacity:0;translate:0 -8px;visibility:hidden;pointer-events:none}
+@media(prefers-reduced-motion:reduce){#card{transition:none}}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}   /* 目には 出さず、読み上げ（aria-live）だけ */
 #card .line{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 8px;margin:0}
 #card #card-word{display:none}
 #easy{--c1:#e3fbef;--c2:#8fe0b4;--side:#3fa873;--ink:#0f4a36;flex:1 1 40%;min-height:54px;font-size:.95rem}
@@ -1227,9 +1232,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // あめ。ひに よって ふる（4にちに 1かい くらい）。あめの ひは、めずらしい こが でやすい
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
-  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false;
-  function setPhase(next) { phase = next; if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0;
+  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
+  // つれた けっかの ながい ぶんは 目には 出さない（カードと ペンギンが みせる）。読み上げ（aria-live）にだけ のこす。あとから ほかの ことばが 書かれたら（外付けも）ふつうに 見える
+  function sayQuiet(text) { const span = document.createElement('span'); span.className = 'sr-only'; span.textContent = text; status.replaceChildren(span); }
+  function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; }
+  function cardWait(ms) { clearTimeout(cardTimer); $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
   function face(name) { curFace = name; marufuwa.src = wearUrl(name) || 'img/game-' + name + '.webp'; }
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
@@ -1395,11 +1404,12 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('card-size').replaceChildren(cm(size) + ' センチ　', starEl(fish, nushi));
     if (found) gift.push(found + '（さかなが もって いたよ）');
     if (leveled) unlockNames(lvBefore, lvNow).forEach(name => gift.push(name));
+    const mile = MILES[save.total], levelInBand = leveled && !mile;   // レベルアップは 1か所だけ：ふつうは ペンギンの おび。10ぴきめ などの おいわいと かさなる ときだけ カードの タグ
     const tags = [];
     if (leveled) tags.push('レベルアップ！');
     if (fish === LUCKY) tags.push('きょうの ラッキー'); if (save.fish[fish.id].count === 10) tags.push('10ぴきめ！ なかよし');
     if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]); if (fish.season) tags.push(L('この つきの さかな', 'This month' + String.fromCharCode(39) + 's fish'));
-    $('card-tags').replaceChildren(...tags.map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = text; return tag; }));
+    $('card-tags').replaceChildren(...(levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = text; return tag; }));
     // 「ぴったり」の ごほうび：はんこが おされる
     if (perfects >= 2) { const stamp = document.createElement('span'); stamp.className = 'stamp'; stamp.textContent = 'ぴったり ×' + perfects; $('card-tags').append(stamp); tags.push('ぴったり ×' + perfects); }
     // あたらしい つりばが ひらいたら、そのまま いける ボタンを だす
@@ -1407,13 +1417,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
     go.hidden = !opened; if (opened) { go.textContent = opened.name + 'に いって みる？'; go.dataset.area = opened.id; }
     // あんないの ペンギンが、まいかい ひとこと
     const left = BASE - seenCount();
-    const mile = MILES[save.total]; if (mile) party(mile[0]); else if (leveled && lvNow % 5 === 0) party('🎉');   // 5レベルごとの ふしめ だけ おいわい
+    if (mile) party(mile[0]); else if (leveled && lvNow % 5 === 0) party('🎉');   // 5レベルごとの ふしめ だけ おいわい
     const guideWord = mile ? mile[1] : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : fish.season ? L('この つきの さかな だよ！ また らいねんも あえるよ。', 'This month' + String.fromCharCode(39) + 's fish! You can meet it again next year.') : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
     $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
     last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY};
-    setPhase('caught');
+    setPhase('caught'); cardWait(1500);   // 1.5びょうは カードを 出さず、まるふわと さかなと えんしゅつが しゅやく
     // つれた さかなを、まるふわが かかげる
     const held = $('held'), f = feet(mine);
     held.replaceChildren(fishImg(fish)); held.dataset.art = artOf(fish) ? '1' : ''; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.45' : ''; place(held, {x: f.x + 5, y: f.y - (nushi ? 1 : 3)}); held.hidden = false;   // むねの まえで だっこ する（かおは かくさない。つれた しらせとも、バケツとも かさならない）
@@ -1430,7 +1440,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     // れんだ しても、うれしい しゅんかんが きえない ように、すこしだけ まつ
     button.textContent = 'もういちど なげる'; button.dataset.hot = 'false'; lock(true); caughtAt = performance.now();
     setTimeout(() => { if (phase === 'caught') lock(false); }, 1000);
-    say(fish.name + 'が つれた。' + cm(size) + 'センチ。' + tags.join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (guideWord === 'いい こが つれたね。' ? '' : '　ペンギン：' + guideWord));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
+    sayQuiet(fish.name + 'が つれた。' + cm(size) + 'センチ。' + (levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (guideWord === 'いい こが つれたね。' ? '' : '　ペンギン：' + guideWord));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
   }
 
   function act() {
@@ -1450,7 +1460,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   });
   document.addEventListener('keyup', event => { if (event.key === ' ' && event.target === button) event.preventDefault(); });   // はなした ときの 2かいめを ふせぐ
   // わや みずを じかに おしても、ひける
-  scene.addEventListener('click', event => { if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); });
+  scene.addEventListener('click', event => { if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); else if (phase === 'caught' && $('card').dataset.wait && !event.target.closest('button')) cardShow(); });   // つれた 直後の 1.5びょうの あいだ、けしきを タップしても すぐ カードが 出る
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') ringStart = performance.now(); });
 
   // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
