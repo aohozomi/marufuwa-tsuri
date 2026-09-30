@@ -1062,13 +1062,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // こうしきサイトに いる こは、ぜんいん でる。つりばごとに すんで いる こが ちがう
   const PALS = [
     {id: 'usagi', name: 'ミントの うさぎ', word: 'ぴょん と つれた', home: 'L'}, {id: 'kawauso', name: 'ラテの かわうそ', word: 'いい いし、みつけた', home: 'L'},
-    {id: 'hiyoko', name: 'レモンの ひよこ', word: 'ぴよ。きょうも はれ', home: 'L'}, {id: 'ribbon', name: 'リボンの うさぎ', word: 'リボン、にあう？', home: 'L'},
+    {id: 'hiyoko', name: 'レモンの ひよこ', word: 'ぴよ！ きょうも いい ひ', home: 'L'}, {id: 'ribbon', name: 'リボンの うさぎ', word: 'リボン、にあう？', home: 'L'},
     {id: 'panda', name: 'おひるね パンダ', word: 'ふわぁ、ねむい', home: 'R'}, {id: 'kojika', name: 'おほしさまの こじか', word: 'もりの においが する', home: 'R'},
     {id: 'tanuki', name: 'クローバーの たぬき', word: 'よつば、さがそ', home: 'R'}, {id: 'risu', name: 'チョコの りす', word: 'どんぐり、たべる？', home: 'R'},
     {id: 'neko', name: 'ももの ねこ', word: 'にゃ、つれた', home: 'H'}, {id: 'koinu', name: 'はちみつの こいぬ', word: 'わん！ たのしい', home: 'H'},
-    {id: 'hamster', name: 'いちごの ハムスター', word: 'ほっぺに いれとこ', home: 'H'}, {id: 'hoho', name: 'ほほきずの ねこ', word: 'へっちゃら だよ', home: 'H'},
+    {id: 'hamster', name: 'いちごの ハムスター', word: 'ほっぺに いれとこ', home: 'H'}, {id: 'hoho', name: 'ほほきずの ねこ', word: 'いっしょに いようね', home: 'H'},
     {id: 'azarashi', name: 'さくらの あざらし', word: 'うみ、きもちいい', home: 'B'}, {id: 'alpaca', name: 'わたあめの アルパカ', word: 'かぜが ふわふわ', home: 'B'},
-    {id: 'gantai', name: 'がんたいの くま', word: 'ほしが みえるよ', home: 'B'}
+    {id: 'gantai', name: 'がんたいの くま', word: 'ほしが みえるよ', dayWord: 'ほしが みえるよ。ひるでも ね', home: 'B'}
   ];
   let pals = [PALS[0], PALS[1]];
   // おくりもの（14_…の しよう）。URL に のせるのは すうじだけ：?gift=魚.大きさ×10.なかま.ひとこと.あいじるし（れい 12.194.8.3.48217）。
@@ -1548,10 +1548,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
   const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
   const bubble = $('bubble');
+  const palWord = p => p.dayWord && timeOfDay() !== 'n' ? p.dayWord : p.word;   // なかまの ひとことは じかんに あわせる（がんたいの くま：ひるは「ひるでも ね」）
   function chatter() {
     if (!document.hidden && (phase === 'idle' || phase === 'waiting') && !book.open && !swapping) {   // アタリ・ひいて いる・つれた あとは しゃべらない（わの タイミングに めが いく）
       const who = Math.random() < .5 ? 0 : 1, f = feet(friends[who]);
-      bubble.textContent = Math.random() < .25 ? pals[who].word : WORDS[Math.floor(Math.random() * WORDS.length)];
+      bubble.textContent = Math.random() < .25 ? palWord(pals[who]) : WORDS[Math.floor(Math.random() * WORDS.length)];
       place(bubble, {x: f.x, y: f.y - 19}); bubble.hidden = false;
       const half = bubble.offsetWidth / scene.clientWidth * 50; place(bubble, {x: Math.min(98 - half, Math.max(2 + half, f.x)), y: f.y - 19});   // がめんの はしで きれない よう
       const theirFish = FISH[Math.floor(Math.random() * 3)];
