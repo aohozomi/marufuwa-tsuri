@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>まるふわの ひろば</title>
-<meta name="description" content="ちいさな まちで あそべます。まるふわと ともだちが あるく ひろば。つりばへ、おにぎりキャッチへ、まるふわの おへやへ。いそがなくて だいじょうぶ。">
+<meta name="description" content="ちいさな まちで あそべます。まるふわと ともだちが あるく ひろば。つりばへ、まるふわの おへやへ。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#b9edf5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23a8dc93'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%F0%9F%8C%B3%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="まるふわの ひろば">
-<meta property="og:description" content="ちいさな まちで あそべます。まるふわと ともだちが あるく ひろば。つりば・おにぎりキャッチ・まるふわの おへやへ いけるよ。むりょう・インストールなし。">
+<meta property="og:description" content="ちいさな まちで あそべます。まるふわと ともだちが あるく ひろば。つりばや まるふわの おへやへ いけるよ。むりょう・インストールなし。">
 <meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/">
 <meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/og.png">
 <meta property="og:image:width" content="1200">
@@ -199,7 +199,6 @@ button.zk.on{--c1:#fff4c2;--c2:#ffe27a99}
 .prop.open .door{transform:scaleX(.25)}
 .mark{position:absolute;left:50%;top:-6%;transform:translateX(-50%);z-index:2;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;line-height:1;background:#ffffffe6;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 0 #9cc9e0,0 6px 8px #24465333;animation:markbob 2.2s ease-in-out infinite;pointer-events:none}
 .prop[data-id=pier] .mark{left:74%}
-.prop[data-id=stall] .mark{top:-4%}
 .prop[data-id=lot1] .mark{left:92%;top:2%}
 .prop[data-id=lot2] .mark{left:8%;top:2%}
 @supports (width:1cqw){#scene{container-type:inline-size}.mark{width:clamp(22px,9.44cqw,34px);height:clamp(22px,9.44cqw,34px);font-size:clamp(.8rem,3.19cqw,1.15rem);border-width:clamp(2px,.83cqw,3px)}}   /* せまい がめんでは しるしを ちいさく（かんばんの もじに かぶらない）。しるしは かざり */
@@ -237,14 +236,13 @@ button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ff
 
 #status{min-height:3.4em;margin:10px 4px 6px;text-align:center;font-size:.98rem;line-height:1.6;font-weight:700}
 /* いきさき */
-#places{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 12px}
+#places{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:6px 0 12px}
 #places button,#places-wait button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:82px;padding:8px 6px;font-size:.98rem;line-height:1.3;border-radius:26px;text-align:center}
 #places button::before,#places-wait button::before{left:8%;right:8%;height:30%}
 #places button b,#places-wait button b{font-size:1.75rem;line-height:1}
 #places button small,#places-wait button small{font-weight:700;font-size:.74rem;opacity:.85}
 button[data-dest=tsuri]{--c1:#e6f7ff;--c2:#86d3f3;--side:#3f9fd0;--ink:#0d3d57}
 button[data-dest=oheya]{--c1:#fff0ec;--c2:#ffb8a8;--side:#df806f;--ink:#5a1f14}
-button[data-dest=onigiri]{--c1:#f0ffea;--c2:#a6e3ae;--side:#52b066;--ink:#123f1c}
 #places-wait{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 14px}
 #places-wait button{min-height:68px;--c1:#fff8d8;--c2:#ffe59a;--side:#d39a1c;--ink:#593700;border-style:dashed}
 #places-wait button b{font-size:1.4rem}
@@ -401,7 +399,6 @@ body.calm .cloud.c2{left:56%}
   <nav id="places" aria-label="いきさき">
     <button type="button" data-dest="tsuri"><b aria-hidden="true">🎣</b>つりば<small>つりびより</small></button>
     <button type="button" data-dest="oheya"><b aria-hidden="true">🐠</b>まるふわの おへや<small>すいそう</small></button>
-    <button type="button" data-dest="onigiri"><b aria-hidden="true">🍙</b>おにぎり キャッチ<small>&nbsp;</small></button>
   </nav>
   <nav id="places-wait" aria-label="まだ できて いない ばしょ">
     <button type="button" data-dest="kouji1"><b aria-hidden="true">🚧</b>こうじちゅう<small>ちかぢか あそべます <span aria-hidden="true">🎈</span></small></button>
@@ -697,7 +694,7 @@ const PALS = {
     lines: ['おかねは いらないよ。あそぶと どうぐが ふえるよ', 'この ぼうし、おきにいり。にあう？', 'つりばに おいでよ。おおきい こが いるかも', 'おにぎり、おいしい よね', 'いつでも ゆっくり して いってね', 'ここは いい ところ だよね'],
     rain: ['あめの ひは、めずらしい こが でやすいんだって', 'おみせの のれん、ぬれない かな'], night: ['よるの つりばも すてきだよ', 'おつきさま、まんまるだね'], morning: ['きょうの おみせ、じゅんび できたよ'], evening: ['そろそろ おみせを しまう じかん'] },
   penguin: { name: 'あんないの ペンギン', size: .745, pitch: [659, 880, 659], hello: 'ひろばへ ようこそ',
-    lines: ['つりば、おへや、おにぎり。すきな ところへ どうぞ', 'まだ こうじちゅうの ばしょも あるよ。たのしみに ね', 'スカーフ、あったかいよ', 'ふんすいを さんかい さわると… ないしょ！', 'いけを じっと みて いると、いい ことが あるよ', 'いそがなくて だいじょうぶ', 'ここに いて いいんだよ'],
+    lines: ['つりば、おへや。すきな ところへ どうぞ', 'まだ こうじちゅうの ばしょも あるよ。たのしみに ね', 'スカーフ、あったかいよ', 'ふんすいを さんかい さわると… ないしょ！', 'いけを じっと みて いると、いい ことが あるよ', 'いそがなくて だいじょうぶ', 'ここに いて いいんだよ'],
     rain: ['あめの ひは、みずたまりが たのしいね', 'ぼく、ぬれるの へいき'], night: ['よるは ほしが きれいに みえるよ', 'つきを さわると… どうなるかな'], morning: ['きょうも いい ひに なるよ'], evening: ['そらの いろが かわるよ。ゆうがた だね'] },
   alpaca: { name: 'わたあめの アルパカ', size: .633, pitch: [784, 1047, 988], hello: 'かぜが ふわふわ して いるね',
     lines: ['もこもこ、さわって みる？', 'ふわふわは、こころにも あるんだよ', 'かぜに ふかれると、ねむく なるね', 'ゆっくり ゆっくり、いこうね', 'スカーフ、おそろいに する？', 'ここは あったかい ばしょ だね'],
@@ -737,7 +734,7 @@ const PALS = {
 // ─── ばしょ（かんばん・たてもの・かざり）。すうじは 360×560 の せかいの なかの いち ───
 const SVG = {
   house: `<svg viewBox="0 0 122 126" xmlns="http://www.w3.org/2000/svg"><ellipse cx="61" cy="120" rx="54" ry="6" fill="#0b2a4a" opacity=".16"/><rect x="16" y="56" width="90" height="62" rx="14" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.5"/><rect x="88" y="14" width="14" height="30" rx="4" fill="#e9c9a0" stroke="#7a4b34" stroke-width="2.5"/><path d="M5 62 Q61 -14 117 62 Q61 50 5 62Z" fill="#ff9f8f" stroke="#7a4b34" stroke-width="2.5" stroke-linejoin="round"/><path d="M26 52 Q61 12 96 52" fill="none" stroke="#ffd6cc" stroke-width="5" stroke-linecap="round"/><circle cx="35" cy="88" r="11" style="fill:var(--win,#bfe3f5)" stroke="#7a4b34" stroke-width="2.5"/><path d="M35 77v22M24 88h22" stroke="#7a4b34" stroke-width="2"/><rect x="21" y="101" width="28" height="9" rx="3" fill="#e5bf8c" stroke="#7a4b34" stroke-width="2"/><g><circle cx="27" cy="99" r="3.4" fill="#ff9ab8"/><circle cx="35" cy="97" r="3.4" fill="#ffd25e"/><circle cx="43" cy="99" r="3.4" fill="#ff9ab8"/></g><g class="door"><path d="M58 118 V94 a15 15 0 0 1 30 0 V118Z" fill="#7fd6a4" stroke="#7a4b34" stroke-width="2.5"/><circle cx="82" cy="105" r="2.6" fill="#ffd25e" stroke="#7a4b34" stroke-width="1.2"/></g><rect x="34" y="40" width="54" height="22" rx="7" fill="#f6dcae" stroke="#7a4b34" stroke-width="2.5"/><text x="61" y="56" text-anchor="middle" font-size="14" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">おへや</text></svg>`,
-  stall: `<svg viewBox="0 -14 118 134" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="oc"><path d="M59 8 Q66 6 72 15 L108 70 Q113 79 103 79 L15 79 Q5 79 10 70 L46 15 Q52 6 59 8Z"/></clipPath></defs><ellipse cx="59" cy="114" rx="54" ry="6" fill="#0b2a4a" opacity=".16"/><rect x="12" y="74" width="94" height="38" rx="8" fill="#e5bf8c" stroke="#7a4b34" stroke-width="2.5"/><path d="M36 78v32M59 78v32M82 78v32" stroke="#c99a62" stroke-width="2"/><path d="M59 8 V-11" stroke="#7a4b34" stroke-width="2.5" stroke-linecap="round"/><path d="M59 -11 L79 -5 L59 1Z" fill="#ff8f6b" stroke="#7a4b34" stroke-width="2" stroke-linejoin="round"/><path d="M59 8 Q66 6 72 15 L108 70 Q113 79 103 79 L15 79 Q5 79 10 70 L46 15 Q52 6 59 8Z" fill="#fff"/><g clip-path="url(#oc)"><rect x="0" y="58" width="118" height="24" fill="#35594a"/></g><path d="M59 8 Q66 6 72 15 L108 70 Q113 79 103 79 L15 79 Q5 79 10 70 L46 15 Q52 6 59 8Z" fill="none" stroke="#7a4b34" stroke-width="2.5" stroke-linejoin="round"/><circle cx="48" cy="38" r="3" fill="#5a3b2a"/><circle cx="70" cy="38" r="3" fill="#5a3b2a"/><ellipse cx="41" cy="45" rx="5" ry="3" fill="#ffb3c1" opacity=".85"/><ellipse cx="77" cy="45" rx="5" ry="3" fill="#ffb3c1" opacity=".85"/><path d="M54 44 q5 5 10 0" fill="none" stroke="#5a3b2a" stroke-width="2.2" stroke-linecap="round"/><rect x="20" y="82" width="78" height="29" rx="7" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.5"/><text x="59" y="94" text-anchor="middle" font-size="11.5" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">おにぎり</text><text x="59" y="107" text-anchor="middle" font-size="11.5" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">キャッチ</text></svg>`,
+  hedge: `<svg viewBox="0 0 112 66" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="62" rx="52" ry="4.5" fill="#0b2a4a" opacity=".14"/><g style="fill:var(--tree)" stroke="#3f7a4a" stroke-opacity=".5" stroke-width="2"><circle cx="22" cy="44" r="18"/><circle cx="52" cy="38" r="24"/><circle cx="86" cy="44" r="20"/></g><g fill="#fff" opacity=".18" stroke="none"><circle cx="44" cy="28" r="9"/><circle cx="16" cy="38" r="6"/><circle cx="82" cy="36" r="6"/></g><g stroke="none" style="opacity:var(--blo,1)"><circle cx="14" cy="46" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="30" cy="52" r="3" style="fill:var(--bl2,#ffd25e)"/><circle cx="44" cy="34" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="60" cy="44" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="72" cy="30" r="3" style="fill:var(--bl2,#ffd25e)"/><circle cx="80" cy="52" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="96" cy="42" r="2.6" style="fill:var(--bl2,#ffd25e)"/><circle cx="52" cy="56" r="2.6" style="fill:var(--bl1,#ff9ab8)"/></g><path d="M33 29 Q43 10 56 11 Q71 13 77 30 Q66 22 54 22 Q42 22 33 29Z" fill="#fff" stroke="none" style="opacity:var(--cap,0)"/></svg>`,
   pier: `<svg viewBox="0 0 104 76" xmlns="http://www.w3.org/2000/svg"><ellipse cx="52" cy="72" rx="46" ry="4" fill="#0b2a4a" opacity=".14"/><polygon points="20,74 46,74 41,34 25,34" fill="#d9b07c" stroke="#7a4b34" stroke-width="2.2" stroke-linejoin="round"/><g stroke="#a9794a" stroke-width="1.6"><line x1="22" y1="62" x2="44" y2="62"/><line x1="23.5" y1="50" x2="42.5" y2="50"/><line x1="25" y1="41" x2="41" y2="41"/></g><line x1="27" y1="46" x2="10" y2="6" stroke="#8a5a2b" stroke-width="3" stroke-linecap="round"/><path d="M10 6 Q2 22 6 33" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="6" cy="36" r="4" fill="#fff" stroke="#e8543f" stroke-width="2.2"/><rect x="78" y="14" width="5" height="60" rx="1.5" fill="#8a6a52"/><rect x="54" y="24" width="52" height="26" rx="7" fill="#e3f6ff" stroke="#7a4b34" stroke-width="2.5"/><text x="80" y="42" text-anchor="middle" font-size="14" font-weight="900" fill="#0d3d57" font-family="system-ui,sans-serif">つりば</text></svg>`,
   fountain: `<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg"><ellipse cx="60" cy="84" rx="54" ry="6" fill="#0b2a4a" opacity=".16"/><ellipse cx="60" cy="66" rx="52" ry="18" fill="#f3ead8" stroke="#7a4b34" stroke-width="2.5"/><ellipse cx="60" cy="63" rx="43" ry="12.5" style="fill:var(--water1)" stroke="#7a4b34" stroke-opacity=".5" stroke-width="1.5"/><path d="M22 68 Q60 86 98 68" fill="none" stroke="#e3d3b8" stroke-width="2"/><rect x="53" y="32" width="14" height="32" rx="5" fill="#f3ead8" stroke="#7a4b34" stroke-width="2.2"/><ellipse cx="60" cy="36" rx="22" ry="7" fill="#f3ead8" stroke="#7a4b34" stroke-width="2.2"/><ellipse cx="60" cy="35" rx="17" ry="4.5" style="fill:var(--water1)"/><g fill="none" stroke="#f4fcff" stroke-width="3" stroke-linecap="round"><path class="jet" d="M60 30 Q46 6 32 42"/><path class="jet" d="M60 30 L60 8"/><path class="jet" d="M60 30 Q74 6 88 42"/></g><g fill="#f4fcff"><circle cx="60" cy="6" r="2.4"/><circle cx="31" cy="44" r="2"/><circle cx="89" cy="44" r="2"/></g></svg>`,
   lamp: `<svg viewBox="0 0 70 90" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="lg"><stop offset="0" stop-color="#fff3b8" stop-opacity=".95"/><stop offset="1" stop-color="#fff3b8" stop-opacity="0"/></radialGradient></defs><circle cx="35" cy="24" r="34" fill="url(#lg)" style="opacity:var(--lamp)"/><rect x="33" y="38" width="4" height="46" fill="#8a6a52"/><ellipse cx="35" cy="86" rx="9" ry="3.5" fill="#7a5a44"/><rect x="26" y="14" width="18" height="24" rx="7" style="fill:var(--lampfill,#fff8dc)" stroke="#7a4b34" stroke-width="2"/><path d="M24 16h22l-4-7h-14z" fill="#ffb18f" stroke="#7a4b34" stroke-width="2" stroke-linejoin="round"/></svg>`,
@@ -750,7 +747,7 @@ const SVG = {
 const PROPS = [
   { id: 'pier', x: 78, y: 286, w: 104, h: 76, svg: SVG.pier, dest: 'tsuri', mark: '🎣' },
   { id: 'house', x: 180, y: 264, w: 122, h: 126, svg: SVG.house, dest: 'oheya', mark: '🐠' },
-  { id: 'stall', x: 296, y: 270, w: 118, h: 134, svg: SVG.stall, dest: 'onigiri', mark: '🍙' },
+  { id: 'hedge', x: 300, y: 272, w: 112, h: 66, svg: SVG.hedge },
   { id: 'fountain', x: 180, y: 416, w: 120, h: 90, svg: SVG.fountain, secret: 'fountain', block: { ell: [180, 393, 58, 22] } },
   { id: 'lamp-l', x: 126, y: 350, w: 70, h: 90, svg: SVG.lamp },
   { id: 'lamp-r', x: 234, y: 350, w: 70, h: 90, svg: SVG.lamp },
@@ -762,11 +759,9 @@ const PROPS = [
   { id: 'lot1', x: 62, y: 526, w: 122, h: 80, svg: SVG.lot1, dest: 'kouji1', mark: '🚧', block: { rect: [0, 452, 126, 528] } },
   { id: 'lot2', x: 298, y: 526, w: 122, h: 80, svg: SVG.lot2, dest: 'kouji2', mark: '🚧', block: { rect: [234, 452, 360, 528] } }
 ];
-const ONIGIRI_URL = 'https://ao-hozumi.nexus7-2012.chatgpt.site/ja/marufuwa-game/';
 const DEST = {
   tsuri: { name: 'つりば', at: { x: 90, y: 296 }, kind: 'go', url: () => new URL('../', location.href).href, pan: -.8, motif: () => { tone(660, .08, 'triangle', 0, .05, 990); zap(.06, .08, .04); } },
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
-  onigiri: { name: 'おにぎりキャッチ', at: { x: 296, y: 292 }, kind: 'go', url: () => ONIGIRI_URL, pan: .8, motif: () => { tone(523, .07, 'square', 0, .04); tone(392, .1, 'square', .09, .04); } },
   thanks: { name: 'ありがとうの いし', at: { x: 320, y: 444 }, kind: 'thanks', pan: .8 },
   kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 62, y: 540 }, kind: 'wait', line: 'ここは まだ こうじちゅう。ちかぢか あそべるよ。たのしみに まっててね', pan: -.8 },
   kouji2: { name: 'こうじちゅうの ばしょ（ちかぢか）', at: { x: 298, y: 540 }, kind: 'wait', line: 'ここも こうじちゅう。ちかぢか あそべるよ。おたのしみに', pan: .8 }
@@ -1379,10 +1374,10 @@ function setHl(id) { layerProps.querySelectorAll('.prop.hl').forEach(p => p.clas
 const dirWord = (x, from) => { const dx = x - from.x; return Math.abs(dx) < 40 ? 'ちかく' : dx < 0 ? 'ひだり' : 'みぎ'; };
 function listenAround() {
   lastInput = T; startAmbient();
-  const order = ['tsuri', 'oheya', 'onigiri'];
+  const order = ['tsuri', 'oheya'];
   order.forEach((id, i) => setTimeout(() => { const d = DEST[id]; if (d.motif) asKind('guide', () => d.motif()); }, i * 650));
   const near = friends.filter(f => dist(f, player) < 150).map(f => f.name + '（' + dirWord(f.x, player) + '）');
-  narrate('ひだりの おくに つりば。まんなかの おくに おへや。みぎの おくに おにぎりキャッチ。' + (near.length ? 'ちかくに ' + near.join('、') + ' が いるよ。' : 'ちかくには だれも いないよ。') + 'まんなかには ふんすいが あるよ。');
+  narrate('ひだりの おくに つりば。まんなかの おくに おへや。' + (near.length ? 'ちかくに ' + near.join('、') + ' が いるよ。' : 'ちかくには だれも いないよ。') + 'まんなかには ふんすいが あるよ。');
 }
 function findFriend() {
   lastInput = T; const f = nearestFriend(true); if (!f) return; talkTo(f);
@@ -1509,7 +1504,7 @@ function update(dt) {
   if (faceUntil && T > faceUntil) setFace('blue');
   for (const b of bubbles.slice()) if (T > b.until) removeBubble(b);
   if (!trip || !trip.leaving) for (const f of friends) if (f.cool <= 0 && f.talking <= 0 && dist(f, player) < 58 && !player.path.length && !player.then) greet(f);
-  if (T > nextNear) { nextNear = T + .35; const t = nearestThing(), note = t ? t.kind + (t.id || t.name) : ''; if (note !== nearNote) { nearNote = note; if (t && (kb || !player.moving) && !trip) narrate(t.kind === 'dest' ? t.name + 'の まえ。スペースキーで はいれるよ' : t.kind === 'friend' ? t.name + 'が ちかくに いるよ' : 'ふんすいの ちかく'); } updateAmbient(); }
+  if (T > nextNear) { nextNear = T + .35; const t = nearestThing(), note = t ? t.kind + (t.id || t.name) : ''; if (note !== nearNote) { nearNote = note; if (t && (kb || !player.moving) && !trip && !(t.kind === 'friend' && bubbles.some(b => b.actor === t.f))) narrate(t.kind === 'dest' ? t.name + 'の まえ。スペースキーで はいれるよ' : t.kind === 'friend' ? t.name + 'が ちかくに いるよ' : 'ふんすいの ちかく'); } updateAmbient(); }
   if (T > nextClock) { nextClock = T + 30; if (timeOfDay() !== curTime) { applyTime(); narrate(TIME_LABEL[curTime] + 'に なったよ'); } }
   // ひとりで ながく いると、ともだちが あいに くる
   if (!reduce() && T - lastInput > 30 && T > nextVisitAt && !trip && !player.path.length) {
@@ -1748,9 +1743,6 @@ setTimeout(() => {
 // はじめて きた 日：4びょう たっても だれも さわらない 時だけ、まるふわが 1かい「さわって みてね」（字が よめない 子にも 目で わかる）
 setTimeout(() => { if (own.visits <= 1 && lastInput === 0 && !trip && !document.hidden && !api.paused) speak(player, 'さわって みてね', 3800, true); }, 4200);
 requestAnimationFrame(frame);
-// おにぎりキャッチから きた 人（リンクの ?from=onigiri・04 の つなぎ4）：さいしょに ともだちが ひとこと。ひらいたら アドレスから 消す（もういちど 読みこんでも くりかえさない）。名前・かずは 言わない・記録に 書かない
-let fromWhere = ''; try { const u = new URL(location.href); fromWhere = u.searchParams.get('from') || ''; if (u.searchParams.has('from')) { u.searchParams.delete('from'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } } catch {}
-if (fromWhere === 'onigiri') setTimeout(() => { const f = nearestFriend(false); if (!f) return; speak(f, 'おにぎりキャッチから きたんだね。いらっしゃい！', 4600); hop(f); setFace('mint', 2600); sfx.greet(f); }, 1200);
 addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag || main.sndAmb === false) stopAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); renderWishStars(); renderPlush(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else { startAmbient(); lastInput = T; } });
 addEventListener('pageshow', e => { if (e.persisted) { curtain.style.display = 'none'; trip = null; player.el.classList.remove('gone'); const house = propEl('house'); if (house) house.classList.remove('open'); measure(); narrate('ひろばに もどったよ'); } });
@@ -1761,7 +1753,7 @@ const api = window.Hiroba = {
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), bgm: window.TsuriBgm ? window.TsuriBgm.state() : null, reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
   goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   season: () => SEASON, seasonOf, special: () => SPECIAL, specialOf, renderSeason, SEASON_LINES, SPECIAL_LINES, DROPS, pickDrop: () => dropEl && pickDrop(dropEl), drop: () => dropEl && ({ id: DROPS[SEASON].id, name: DROPS[SEASON].name, x: Number(dropEl.dataset.x), y: Number(dropEl.dataset.y) }),
-  plush: () => plushEls.map(e => ({ id: Number(e.dataset.id), x: Number(e.dataset.x), y: Number(e.dataset.y) })), renderPlush, nushiIds, plushTap: el => plushTap(el), openZukan, drawZukan, showZukanPal, from: () => fromWhere,
+  plush: () => plushEls.map(e => ({ id: Number(e.dataset.id), x: Number(e.dataset.x), y: Number(e.dataset.y) })), renderPlush, nushiIds, plushTap: el => plushTap(el), openZukan, drawZukan, showZukanPal,
   sfx, startAmbient, stopAmbient, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,
   say: () => statusEl.textContent
 };
@@ -1770,7 +1762,7 @@ const api = window.Hiroba = {
 addEventListener('load', () => {
   const E = window.TsuriEn; if (!E || E.lang !== 'en') return;
   document.title = "Marufuwa's Plaza — Marufuwa Fishing Days";
-  const meta = document.querySelector('meta[name=description]'); if (meta) meta.content = "A little town to play in. Marufuwa and friends walk around the plaza. Go fishing, play Onigiri Catch, visit Marufuwa's Room. No rush.";
+  const meta = document.querySelector('meta[name=description]'); if (meta) meta.content = "A little town to play in. Marufuwa and friends walk around the plaza. Go fishing or visit Marufuwa's Room. No rush.";
   const h = document.querySelector('h1.logo');
   if (h) {
     h.setAttribute('aria-label', "Marufuwa's Plaza");
@@ -1796,7 +1788,7 @@ addEventListener('load', () => {
     'なかまずかん': 'Friend Book', 'ひろばで あった なかまが、いろつきで ならぶよ。まだの こは しるしだけ。いそがなくて だいじょうぶ。': 'Friends you have met in the plaza appear in color. Friends you haven’t met yet are just a mark. No need to rush.',
     'なかまを さわって みてね。': 'Touch a friend!', 'ひろばを あるいて、なかまに あいにいこう。いそがなくて だいじょうぶ。': 'Walk around the plaza and meet some friends. No need to rush.',
     'なかまずかんを ひらいたよ。あった なかまが ならんで いるよ。': 'Opened the Friend Book. The friends you have met are lined up.', 'なかまずかんを ひらいたよ。まだ だれにも あって いないよ。': 'Opened the Friend Book. You haven’t met anyone yet.', 'なかまずかんを とじたよ。': 'Closed the Friend Book.',
-    'おにぎりキャッチから きたんだね。いらっしゃい！': 'You came from Onigiri Catch! Welcome!'
+    'つりば、おへや。すきな ところへ どうぞ': 'Fishing spot, the room. Go wherever you like.'
   }, DROP_EN = { 'さくらのはなびら': 'cherry blossom petal', 'あおいは': 'fresh green leaf', 'どんぐり': 'acorn', 'ゆきのけっしょう': 'snow crystal' }, dropEn = n => DROP_EN[n] || null;
   const withA = s => (/^[aeiou]/i.test(s) ? 'an ' : 'a ') + s, capA = s => withA(s).replace(/^./, c => c.toUpperCase());   // a／an（acorn は an）
   if (E.add) E.add({ ex: Object.assign({ 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, window.TsuriMame ? Object.fromEntries(window.TsuriMame.lines.map(l => [l.ja, l.en])) : {}, { 'ベンチ': 'Bench', 'ベンチへ あるいて いくよ': 'Walking to the bench.', 'ベンチに すわったよ。ゆっくり やすもう': 'You sat on the bench. Let’s rest slowly.', 'きょうも きてくれて、うれしいな': 'Thank you for coming again today. I’m happy!', 'いっしょに ひとやすみ、いいね': 'Resting together is nice.', 'ねがいの ほし': 'Wishing Star', 'つりばで ねがった ほしだよ': 'A star from a wish you made at the fishing spot.', 'なかまが あつまって きたよ。「しゃしんを とる」を おしてね': 'Everyone gathered around. Press “Take a photo”!', 'もうすこし まってね': 'Coming soon. Please wait a little!', 'かんばんの うらに、なにか かいて あったよ。「もうすこし まってね」': 'There was something written on the back of the sign: “Coming soon. Please wait a little!”' }, SEASON_EN), rules: [
