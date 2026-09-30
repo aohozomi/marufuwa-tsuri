@@ -1536,11 +1536,12 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('gear-preview').replaceChildren(...pv);
     $('gear-bucket').value = bucketName();
   }
-  const BAD = ['しね', 'ころす', 'ころし'];   // きんしごは さいしょうげん（バケツの なまえは、そとには でません）
+  const BAD = ['しね', 'ころす', 'ころし'], BAD_EN = ['kill', 'suicide', 'rape', 'fuck', 'shit', 'nazi'], BAD_EN_WORD = ['die', 'dead', 'sex', 'kms'];   // きんしごは さいしょうげん（バケツの なまえは、そとには でません）。英語は 単語ごと（Diego などを とめない）
+  const badName = v => BAD.some(w => v.includes(w)) || v.toLowerCase().split(/[^a-z]+/).some(w => BAD_EN_WORD.includes(w) || BAD_EN.some(b => w.startsWith(b)));   // 英語は 単語の はじめで（Skillet を とめない）
   $('gear-bucket').addEventListener('change', () => {
     const v = $('gear-bucket').value.trim();
-    if (v && !/^[ぁ-んァ-ヶー]+$/.test(v)) { $('gear-note').textContent = 'ひらがな・カタカナで かいてね。'; $('gear-bucket').value = bucketName(); return; }
-    if (BAD.some(w => v.includes(w))) { $('gear-note').textContent = 'そのなまえは つかえないよ。べつの なまえを えらんでね。'; $('gear-bucket').value = bucketName(); return; }
+    if (v && !/^[ぁ-んァ-ヶーA-Za-z0-9 ]+$/.test(v)) { $('gear-note').textContent = 'ひらがな・カタカナ・アルファベット・すうじで かいてね。'; $('gear-bucket').value = bucketName(); return; }
+    if (badName(v)) { $('gear-note').textContent = 'そのなまえは つかえないよ。べつの なまえを えらんでね。'; $('gear-bucket').value = bucketName(); return; }
     save.my = {...(save.my || {}), bucket: v}; store(); applyMy(); $('gear-note').textContent = v ? 'バケツの なまえを「' + v + '」に したよ。' : 'バケツの なまえを もどしたよ。';
   });
   $('open-gear').addEventListener('click', () => { $('gear-note').textContent = ''; drawGear(); $('gear').showModal(); });
