@@ -1967,6 +1967,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ctx.fillStyle = night ? '#cfe0ff' : color('--star') === '1' ? '#fff' : '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 920, 112, 440);   // ゲームの なまえ。みた ひとが、さがして これる ように
     ctx.font = '28px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + T(last.area), 920, 160, 440);
+    if (save.nameOnCard === true && bucketName()) { ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText(L('バケツ：', 'Bucket: ') + bucketName(), 920, 198, 440); }   // 本人が えらんだ ときだけ（はじめは OFF）。なまえは この 画像の なかだけ。URL・ひとことの もじには いれない
     if (night) {
       nushiSeal(ctx, 1136, 226, T('ぬし'));
       const pal = pals[0] || PALS[0], friend = await loadImg('img/friend-' + pal.id + '-s.webp');   // となりの こも「わっ！」と びっくり（ぴょんと はねて、ふきだしに ！？）
@@ -1984,7 +1985,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + (last.lucky ? '\nEveryone has the same lucky fish today!' : '') + '\n' + TAG() + '\n' + HOME_SHARE()
       : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + (last.lucky ? '\nきょうの ラッキーさかな、みんな おなじ！' : '') + '\n#まるふわつりびより\n' + HOME;
     const snap = last;   // ぬし・まぼろし・ずかん かんせい の しゃしんだけ「かべがみ」が つくれる
-    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of Marufuwa holding up ' + last.fish.name : last.fish.name + 'を かかげる まるふわの しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null);
+    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of Marufuwa holding up ' + last.fish.name : last.fish.name + 'を かかげる まるふわの しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null, () => takePhoto());
   }
   // こんしゅうの きろく：つった かずと しゅるいを ならべる だけ。れんぞくの ひにちは かぞえない・ほかの ひとや せんしゅうと くらべない。おやすみの しゅうは「おやすみでも いいよ」
   const weekKey = t => { const x = new Date(t.getFullYear(), t.getMonth(), t.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x.getFullYear() * 10000 + (x.getMonth() + 1) * 100 + x.getDate(); };   // げつようびの ひづけ（20260928 など）
@@ -2081,10 +2082,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       : (full ? 'シールちょう、ぜんぶ あつめた！ ' : 'シールちょう ' + seen + ' / ' + BASE + '。') + '\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
     await showPhoto(canvas, 'marufuwa-tsuri-seal-' + seen + '.png', EN() ? 'A photo of the sticker album with ' + seen + (seen === 1 ? ' kind' : ' kinds') + ' of stickers.' : 'あつめた シールが ならんだ シールちょうの しゃしん。' + seen + 'しゅるい', words);
   }
+  let wallMaker = null, photoRegen = null, paintPhotoName = () => {};   // しゃしんの まど（かべがみ・なまえ）の じょうたい
   {   // しゃしんの まどの ボタン：がぞうを コピー／ともだちに おしえる（どちらも 自分で おした ときだけ・かってに おくらない）
     const row = $('photo-x').parentElement, copy = document.createElement('button'), invite = document.createElement('button');
+    const nameBtn = document.createElement('button'); nameBtn.id = 'photo-name'; nameBtn.type = 'button'; nameBtn.className = 'pill'; nameBtn.hidden = true; nameBtn.setAttribute('aria-pressed', 'false');
+    const paintName = () => { const on = save.nameOnCard === true; nameBtn.textContent = L('バケツの なまえを のせる：' + (on ? 'ON' : 'OFF'), 'Show bucket name: ' + (on ? 'ON' : 'OFF')); nameBtn.setAttribute('aria-pressed', String(on)); nameBtn.setAttribute('aria-label', nameBtn.textContent + L('。ほんとうの なまえは のせないでね', '. Please do not use your real name')); };
+    paintPhotoName = paintName;
+    nameBtn.addEventListener('click', async () => {
+      const st = $('photo-status'); save.nameOnCard = save.nameOnCard !== true; store(); paintName();
+      st.textContent = save.nameOnCard ? L('バケツの なまえを のせたよ。ほんとうの なまえは のせないでね。', 'Added the bucket name. Please do not use your real name.') : L('バケツの なまえを はずしたよ。', 'Removed the bucket name.');
+      if (photoRegen) { try { await photoRegen(); } catch {} st.textContent = save.nameOnCard ? L('バケツの なまえを のせたよ。ほんとうの なまえは のせないでね。', 'Added the bucket name. Please do not use your real name.') : L('バケツの なまえを はずしたよ。', 'Removed the bucket name.'); }
+    });
     const wall = document.createElement('button'); wall.id = 'photo-wall'; wall.type = 'button'; wall.className = 'pill'; wall.hidden = true;
-    copy.id = 'photo-copy'; invite.id = 'photo-invite'; copy.type = invite.type = 'button'; copy.className = invite.className = 'pill'; copy.hidden = true; row.append(copy, invite, wall);
+    copy.id = 'photo-copy'; invite.id = 'photo-invite'; copy.type = invite.type = 'button'; copy.className = invite.className = 'pill'; copy.hidden = true; row.append(copy, invite, wall, nameBtn);
     wall.addEventListener('click', async () => {
       const st = $('photo-status'); if (!wallMaker) return;
       try {
@@ -2093,7 +2103,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         st.textContent = L('かべがみを ほぞん したよ。しゃしんアプリから かべがみに してね。', 'Saved the wallpaper. Set it as your wallpaper from your photo app.');
       } catch { st.textContent = L('かべがみを つくれなかったよ。', 'Could not make the wallpaper.'); }
     });
-    const paint = () => { wall.textContent = L('かべがみに する', 'Make a wallpaper'); copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
+    const paint = () => { paintName(); wall.textContent = L('かべがみに する', 'Make a wallpaper'); copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint); else paint();
     copy.addEventListener('click', async () => {
       const st = $('photo-status');
@@ -2107,9 +2117,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       } catch (error) { st.textContent = error && error.name === 'AbortError' ? L('やめました。', 'Cancelled.') : L('リンクを おくれなかったよ。', 'Could not share the link.'); }
     });
   }
-  let wallMaker = null;
-  async function showPhoto(canvas, fileName, alt, words, nushiCard, wall) {
+  async function showPhoto(canvas, fileName, alt, words, nushiCard, wall, regen) {
     const status = $('photo-status'); $('photo').dataset.nushi = String(!!nushiCard); wallMaker = wall || null; $('photo-wall').hidden = !wallMaker;
+    photoRegen = regen || null; $('photo-name').hidden = !(photoRegen && bucketName()); paintPhotoName();   // なまえを のせる ボタンは つれた しゃしんで、バケツに なまえが ある ときだけ
     const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(Error('png')), 'image/png'));
     if (photoURL) URL.revokeObjectURL(photoURL);
     photoFile = new File([blob], fileName, {type: 'image/png'}); photoURL = URL.createObjectURL(blob);
