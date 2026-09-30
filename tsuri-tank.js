@@ -273,14 +273,14 @@
 .tk-giftlist{position:absolute;left:8px;right:8px;top:8px;max-height:calc(100% - 16px);overflow:auto;z-index:30;background:#fffdf6;border:2px solid #b9d1db;border-radius:18px;padding:12px 14px 14px;box-shadow:0 8px 24px #0004;color:#244653;word-break:keep-all;overflow-wrap:break-word}
 .tk-giftlist:focus{outline:none}
 .tk-giftlist h3{margin:0 0 2px;font-size:1.05rem;text-align:center}
-.tk-giftsub{margin:0 0 8px;font-size:.85rem;line-height:1.6;text-align:center;color:#506874}
+.tk-giftsub{margin:0 0 8px;font-size:.9rem;line-height:1.6;text-align:center;color:#506874}
 .tk-giftrows{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
 .tk-giftrow{display:flex;gap:10px;align-items:center;border:2px solid #d5e6ed;border-radius:14px;padding:6px 10px;background:#fff}
 .tk-giftrow .tk-giftimg{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:32px;line-height:1}
 .tk-giftrow .tk-giftimg img{width:100%;height:100%;object-fit:contain;display:block}
 .tk-giftrow .tk-gifttext{min-width:0;display:block;line-height:1.5}
 .tk-giftrow b{display:block;font-size:.95rem}
-.tk-giftrow small{display:block;font-size:.82rem;color:#506874}
+.tk-giftrow small{display:block;font-size:.9rem;color:#506874}
 .tk-giftclose{display:block;margin:0 auto;min-width:160px;min-height:48px}
 .tk-rice{display:flex;align-items:center;justify-content:center;border-radius:14px}
 .tk-rice svg{width:60%;height:auto;display:block;pointer-events:none}
