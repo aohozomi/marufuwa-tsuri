@@ -72,6 +72,8 @@ button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-s
 .spot::before,#keeper::before{display:none}
 #scene .spot,#scene #keeper{box-shadow:none;transition:none}
 #scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
+.skip{position:absolute;left:8px;top:-80px;z-index:200;padding:12px 16px;border-radius:14px;background:#fff;color:#0b4a6b;font-weight:800;text-decoration:none;border:3px solid #0b4a6b}
+.skip:focus{top:8px}   /* Tab の ひとつ めで「なげる」へ とべる（おおくの ボタンを とばせる） */
 .friend-hit{position:absolute;z-index:3;width:13%;height:24%;min-height:0;padding:0;transform:translate(-50%,-100%);background:none;border:0;border-radius:40%;box-shadow:none;cursor:pointer}   /* なかまの うえの みえない ボタン（おすと はなしかける） */
 .friend-hit::before,.friend-hit::after{display:none}
 #scene:not([data-phase=idle]):not([data-phase=waiting]) .friend-hit,#scene[data-tooku=true] .friend-hit,body.gazing .friend-hit{pointer-events:none}   /* まって いる とき・なにも して いない ときだけ おせる（ひく とき・カードが でて いる ときは けしきを おして「ひく」「カード」が できる） */
@@ -574,6 +576,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 </style>
 </head>
 <body>
+<a class="skip" href="#main-button">つりを はじめる（「なげる」へ）</a>
 <main>
   <noscript><p class="lead" style="margin:24px 16px;font-size:1.1rem;line-height:1.9;text-align:center;color:#244653">JavaScript が オフに なって いるよ。オンに すると あそべるよ。<br>おうちの ひとに きいて みてね。<br><small>This game needs JavaScript. Please turn it on in your browser settings.</small></p></noscript>
   <!-- うしろの けしき（かり）。パソコンの ひろい がめんで、さゆうが まっしろに ならない ように -->
@@ -1276,6 +1279,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       SND_BTN.forEach(x => { const b = document.createElement('button'); b.id = x.id; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); g.append(b); });
       { const y = document.createElement('button'); y.id = 'snd-yomi'; y.type = 'button'; y.hidden = true; y.setAttribute('aria-pressed', 'false'); g.append(y); }
       body.append(g); }
+    { const kb = document.createElement('p'); kb.id = 'kbd-note'; kb.className = 'note'; kb.style.flex = '1 1 100%'; kb.style.textAlign = 'left'; body.append(kb); }   // キーボードの つかいかた
     box.append(head, body);
     box.open = typeof save.assistOpen === 'boolean' ? save.assistOpen : !!save.easy;
     head.addEventListener('click', () => setTimeout(() => { save.assistOpen = box.open; store(); }, 0));   // ひらく／とじる を おぼえる
@@ -1649,6 +1653,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     event.preventDefault(); act();
   });
   document.addEventListener('keyup', event => { if (event.key === ' ' && event.target === button) event.preventDefault(); });   // はなした ときの 2かいめを ふせぐ
+  // キーボード：1・2・3 で せき、G で ながめる／もどる、Esc で ながめるを おわる（まどが ひらいて いる とき・もじを かく ところでは きかない）
+  document.addEventListener('keydown', event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.repeat || document.querySelector('dialog[open]')) return;
+    if (event.target.closest && event.target.closest('input, textarea, select')) return;
+    if (event.key >= '1' && event.key <= '3') { moveTo(Number(event.key) - 1); return; }
+    if (event.key === 'g' || event.key === 'G') { $('gaze').click(); return; }
+    if (event.key === 'Escape' && document.body.classList.contains('gazing')) $('gaze').click();
+  });
   // わや みずを じかに おしても、ひける
   scene.addEventListener('click', event => { if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); else if (phase === 'caught' && $('card').dataset.wait && !event.target.closest('button')) cardShow(); });   // つれた 直後の 1.5びょうの あいだ、けしきを タップしても すぐ カードが 出る
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') ringStart = performance.now(); });
@@ -1863,6 +1875,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     face(curFace); drawEquip();
     $('bucket-title').textContent = bucketName() || 'バケツ'; paintBucketLabel();
   }
+  function paintKbd() { const kb = $('kbd-note'); if (kb) kb.textContent = L('キーボード：1・2・3 で ばしょ／Space か Enter で なげる・ひく／G で ながめる／Esc で ながめるを おわる', 'Keyboard: 1, 2, 3 choose a seat / Space or Enter to cast and reel / G to gaze / Esc to stop gazing'); }
+  function paintSkip() { paintKbd(); const a = document.querySelector('.skip'); if (a) a.textContent = L('つりを はじめる（「なげる」へ）', 'Skip to fishing (the Cast button)'); }   // English の ひょうが そろって から
   function paintBucketLabel() { $('open-bucket').setAttribute('aria-label', bucketName() ? L('バケツ（' + bucketName() + '）', 'Bucket (' + bucketName() + ')') : L('バケツ', 'Bucket')); }   // English の ひょうが そろって から もういちど
   function unlockNames(before, now) { const out = []; for (const g of Object.values(GEAR)) for (const o of g.list) if (o.lv > before && o.lv <= now) out.push(g.title.split('（')[0] + '：' + o.n); return out; }
   function drawGear() {
@@ -2825,7 +2839,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   drawSound();
   // おかえり／ふかい よる：かぞえない・せめない・アドバイスしない。ひさしぶりに きた ひとには、きろくは そのままだと つたえる。よなかに ひらいた ひとには、ゆっくり ながめよう と だけ
   const away = save.last ? Date.now() - save.last : 0, hourNow = new Date().getHours();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawToday(); drawPlazaNote(); drawBadge(); paintBucketLabel(); });   // 英語の ときは tsuri-en.js が よみこまれて から 書きなおす
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawToday(); drawPlazaNote(); drawBadge(); paintBucketLabel(); paintSkip(); });   // 英語の ときは tsuri-en.js が よみこまれて から 書きなおす
   // てがみ：tsuri-tegami.js は defer なので、ぜんぶ よみこまれて から（DOMContentLoaded）。あいた ひにちは かぞえない・出さない
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => tegamiInit(away)); else tegamiInit(away);
   const welcome = (away >= 3 * 86400000 ? 'おかえり。ずかんも きろくも、そのままだよ。' : '') + (hourNow >= 1 && hourNow < 5 ? 'ねむれない？ ゆっくり ながめよう。' : '');
