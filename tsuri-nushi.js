@@ -34,6 +34,13 @@
 @keyframes nushi-ray{0%{opacity:0;height:0}25%{opacity:.9}100%{opacity:0;height:70cqw}}
 @keyframes nushi-flash{0%{opacity:.85}100%{opacity:0}}
 @keyframes nushi-shake{0%,100%{translate:0 0}25%{translate:-.6% .3%}75%{translate:.6% -.3%}}
+#nushi-fx .bang{position:absolute;left:var(--x);top:var(--y);translate:-50% -100%;font-weight:900;font-size:clamp(1.2rem,7cqw,2.2rem);color:#ff5a3c;-webkit-text-stroke:2px #fff;paint-order:stroke;animation:nushi-bang .6s ease-out forwards;animation-delay:var(--d,0s);opacity:0}
+#nushi-fx .word{position:absolute;left:var(--x);top:var(--y);translate:-50% -100%;background:#fff;border:2px solid #ffb347;border-radius:14px;padding:2px 10px;font-size:.8rem;font-weight:800;white-space:nowrap;color:#5a3a10;opacity:0;animation:nushi-word 2.6s ease-out forwards;animation-delay:var(--d,0s)}
+#scene .who[data-nushi-jump=true]{animation:nushi-jump .9s ease-out 2}
+@keyframes nushi-bang{0%{opacity:0;transform:scale(.4) translateY(10%)}30%{opacity:1;transform:scale(1.25)}100%{opacity:1;transform:scale(1)}}
+@keyframes nushi-word{0%{opacity:0;transform:translateY(6px)}12%,80%{opacity:1;transform:translateY(0)}100%{opacity:0}}
+@keyframes nushi-jump{0%,100%{translate:0 0;rotate:0deg}30%{translate:0 -16%;rotate:-8deg}60%{translate:0 0}80%{translate:0 -8%;rotate:6deg}}
+@media(prefers-reduced-motion:reduce){#scene .who[data-nushi-jump=true]{animation:none}}
 @media(prefers-reduced-motion:reduce){#nushi-fx .ring,#nushi-fx .splash,#scene[data-nushi-shake=true]{animation:none!important}#nushi-fx .halo{animation:none;opacity:.6}#nushi-fx .ray{animation-duration:2.4s}}
 `;
   document.head.append(style);
@@ -88,6 +95,20 @@
     }
     el('halo', {x: p.x, y: p.y});
   }
+
+  // まわりの なかまが びっくりする：「！」が でて、とびあがって、「わあ！」「すごい！」
+  function friendsReact() {
+    const s = scene.getBoundingClientRect(), words = [['わあ！', 'すごい！'], ['ぬしだ！', 'おおきい…！'], ['みて みて！', 'やったね！']][Math.floor(Math.random() * 3)];
+    ['friend-a', 'friend-b'].forEach((id, i) => {
+      const f = document.getElementById(id); if (!f || f.hidden) return;
+      const r = f.getBoundingClientRect(), x = ((r.left + r.width / 2 - s.left) / s.width * 100) + '%', y = ((r.top - s.top) / s.height * 100) + '%';
+      setTimeout(() => {
+        el('bang', {x, y, d: '0s'}).textContent = '！';
+        f.dataset.nushiJump = 'true'; setTimeout(() => { delete f.dataset.nushiJump; }, 1900);
+        setTimeout(() => { el('word', {x, y, d: '0s'}).textContent = words[i]; }, 700);
+      }, 350 + i * 260);
+    });
+  }
   function landed() {
     // つれた：ひかりが ぱっと ひろがり、きんいろの ひかりの すじ
     stopDrum(); fx.textContent = ''; dim.dataset.on = 'false';
@@ -95,7 +116,8 @@
     const held = document.getElementById('held'), r = held && !held.hidden ? held.getBoundingClientRect() : null, s = scene.getBoundingClientRect();
     const x = r ? ((r.left + r.width / 2 - s.left) / s.width * 100) + '%' : '50%', y = r ? ((r.top + r.height / 2 - s.top) / s.height * 100) + '%' : '55%';
     for (let i = 0; i < 12; i++) el('ray', {x, y, r: (i * 30 + 15) + 'deg', d: (i % 3) * .08 + 's'});
-    setTimeout(() => { if (scene.dataset.phase === 'caught') fx.textContent = ''; }, 2600);
+    friendsReact();
+    setTimeout(() => { if (scene.dataset.phase === 'caught') fx.textContent = ''; }, 4200);
     active = false;
   }
 
