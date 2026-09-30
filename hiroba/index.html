@@ -928,14 +928,14 @@ const PROPS = [
   { id: 'bench-l', x: 64, y: 430, w: 70, h: 38, svg: SVG.bench, secret: 'bench', block: { rect: [30, 418, 98, 432] } },
   { id: 'bench-r', x: 296, y: 430, w: 70, h: 38, svg: SVG.bench, secret: 'bench', block: { rect: [262, 418, 330, 432] } },
   { id: 'stone', x: 342, y: 446, w: 30, h: 46, svg: SVG.stone, dest: 'thanks', mark: '⭐', block: { rect: [326, 430, 360, 450] } },
-  { id: 'lot1', x: 308, y: 152, w: 88, h: 58, svg: SVG.lot1, dest: 'kouji1', mark: '🚧' },   // こうじちゅうは 右上（マスター直・総司令部）
+  { id: 'lot1', x: 308, y: 272, w: 88, h: 58, svg: SVG.lot1, dest: 'kouji1', mark: '🚧' },   // こうじちゅうは 右上の 地面の上（おへやの右・空に 浮かせない。10/1 マスター「ういてる」・総司令部）
   { id: 'well', x: 298, y: 526, w: 122, h: 80, svg: SVG.well, dest: 'ido', mark: '💧', block: { rect: [234, 452, 360, 528] } }
 ];
 const DEST = {
   tsuri: { name: 'つりば', at: { x: 90, y: 296 }, kind: 'go', url: () => new URL('../', location.href).href, pan: -.8, motif: () => { tone(660, .08, 'triangle', 0, .05, 990); zap(.06, .08, .04); } },
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
   thanks: { name: 'ありがとうの いし', at: { x: 320, y: 444 }, kind: 'thanks', pan: .8 },
-  kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 306, y: 276 }, kind: 'wait', line: 'ここは まだ こうじちゅう。ちかぢか あそべるよ。たのしみに まっててね', pan: .8 },
+  kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 306, y: 314 }, kind: 'wait', line: 'ここは まだ こうじちゅう。ちかぢか あそべるよ。たのしみに まっててね', pan: .8 },
   ido: { name: 'いど', at: { x: 298, y: 540 }, kind: 'well', pan: .8 }
 };
 
@@ -2315,5 +2315,7 @@ addEventListener('load', () => {
 <script defer src="../tsuri-tank.js"></script>
 <script defer src="../tsuri-en.js"></script>
 <script defer src="../tsuri-en-hiroba.js"></script>
+<script defer src="../tsuri-ruby-dict.js"></script>
+<script defer src="../tsuri-ruby.js"></script>   <!-- ふりがな：にほんごの ひらがなの ことばを 漢字＋ふりがなに（ジョブズ1の エンジン。本体の「ふりがな」ボタン・?noruby=1 と おなじ スイッチ） -->
 </body>
 </html>

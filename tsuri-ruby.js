@@ -70,7 +70,7 @@
   let enabled = !(q.get('noruby') === '1' || (() => { try { return localStorage.getItem('marufuwa-ruby-off') === '1'; } catch { return false; } })());
   const isEn = () => !!(root.TsuriEn && root.TsuriEn.lang === 'en');
   let D = null, observer = null, busy = false, scheduled = 0; const pending = new Set(), made = new WeakSet();
-  const SKIP = 'script,style,textarea,input,select,option,ruby,rt,rp,[data-noruby],#status,.bubble,#bubble,.sr-only,#hm-live,.hm-note,[class*="hm-"],[id^="hm-"],[id^="tk-"],[class*="tk-"],#tank,#himitsu,title,head';
+  const SKIP = 'svg,canvas,script,style,textarea,input,select,option,ruby,rt,rp,[data-noruby],#status,.bubble,#bubble,.sr-only,#hm-live,.hm-note,[class*="hm-"],[id^="hm-"],[id^="tk-"],[class*="tk-"],#tank,#himitsu,title,head';
   function ensureDict() {
     if (D) return D; if (typeof root.TsuriRubyDict !== 'string') return null;
     D = parse(root.TsuriRubyDict);
