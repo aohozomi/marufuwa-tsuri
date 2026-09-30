@@ -1241,13 +1241,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // あめ。ひに よって ふる（4にちに 1かい くらい）。あめの ひは、めずらしい こが でやすい
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
-  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0;
+  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0;
   function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
   // つれた けっかの ながい ぶんは 目には 出さない（カードと ペンギンが みせる）。読み上げ（aria-live）にだけ のこす。あとから ほかの ことばが 書かれたら（外付けも）ふつうに 見える
   function sayQuiet(text) { const span = document.createElement('span'); span.className = 'sr-only'; span.textContent = text; status.replaceChildren(span); }
-  function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; }
-  function cardWait(ms) { clearTimeout(cardTimer); $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
+  function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; if (!cardShownAt) cardShownAt = performance.now(); }   // カードが 出た 時刻（つれた 直後は 0）
+  function cardWait(ms) { clearTimeout(cardTimer); cardShownAt = 0; $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
   function face(name) { curFace = name; marufuwa.src = wearUrl(name) || 'img/game-' + name + '.webp'; }
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
@@ -1454,6 +1454,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   function act() {
     startAmbient();   // おとを ON に して いた ひとは、さいしょに おした ときから なみの おと
+    // つれた 直後：カードが まだ なら、さいしょの 1回の おしは カードを すぐ 出す（なげない）。カードが 出て から 1びょうは なげない（れんだ しても 結果が きえない）
+    if (phase === 'caught' && (!cardShownAt || performance.now() - cardShownAt < 1000)) { if (!cardShownAt) cardShow(); return; }
     if (phase === 'caught' && performance.now() - caughtAt < 1000) return;
     if (phase === 'idle' || phase === 'caught') cast();
     else if (phase === 'bite') startReel();
