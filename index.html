@@ -1072,6 +1072,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     {id: 'azarashi', name: 'さくらの あざらし', word: 'うみ、きもちいい', home: 'B'}, {id: 'alpaca', name: 'わたあめの アルパカ', word: 'かぜが ふわふわ', home: 'B'},
     {id: 'gantai', name: 'がんたいの くま', word: 'ほしが みえるよ', home: 'B'}
   ];
+  const TWINS = ['usagi', 'ribbon'];   // そっくりな うさぎ2ひき（ミント×リボン）は となりに ならべない（どちらが じぶんの ともだちか わからなく なる）
   let pals = [PALS[0], PALS[1]];
   // おくりもの（14_…の しよう）。URL に のせるのは すうじだけ：?gift=魚.大きさ×10.なかま.ひとこと.あいじるし（れい 12.194.8.3.48217）。
   // ならびじゅん（FISH・PALS・GIFT_WORDS）は かえない。おくりものの URL が ばんごうで さす。もらった さかなは バケツと べつの いれもの（save.gifts・12ひきまで）
@@ -1086,7 +1087,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   tidyGifts(save);
   function callPals() {
     const now = new Date(), seed = now.getFullYear() * 372 + now.getMonth() * 31 + now.getDate();
-    const locals = PALS.filter(p => p.home === save.area), first = locals[seed % locals.length], rest = locals.filter(p => p !== first);
+    const locals = PALS.filter(p => p.home === save.area), first = locals[seed % locals.length], rest = locals.filter(p => p !== first && !(TWINS.includes(first.id) && TWINS.includes(p.id)));
     pals = [first, rest[Math.floor(seed / 7) % rest.length]];
     pals.forEach((pal, i) => { const img = $(i ? 'friend-b' : 'friend-a'); img.src = 'img/friend-' + pal.id + '-s.webp'; img.alt = 'となりで つりを する ' + pal.name; });
     save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {};
@@ -1604,7 +1605,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function palRig(slot, on) { const k = slot ? 'b' : 'a'; ['float-', 'rod-', 'line-'].forEach(name => { const el = $(name + k); if (el) el.style.visibility = on ? '' : 'hidden'; }); }   // いない あいだは、さおと ウキも かくす
   function pickNewcomer(here) {   // きょう まだ あって ない こを さきに。ぜんいん あったら はじめから。1わりは ほかの つりばの こが あそびに くる
     const mt = metToday(), met = new Set(mt.ids), present = new Set(here.map(p => p.id)), visitor = Math.random() < .1;
-    const homes = PALS.filter(p => p.home === save.area && !present.has(p.id)), away = PALS.filter(p => p.home !== save.area && !present.has(p.id));
+    const twinClash = p => TWINS.includes(p.id) && here.some(h => TWINS.includes(h.id) && h.id !== p.id);
+    const homes = PALS.filter(p => p.home === save.area && !present.has(p.id) && !twinClash(p)), away = PALS.filter(p => p.home !== save.area && !present.has(p.id) && !twinClash(p));
     const list = visitor && away.length ? away : homes;
     let pool = list.filter(p => !met.has(p.id));
     if (!pool.length) { if (list === homes) mt.ids = mt.ids.filter(id => !PALS.some(p => p.id === id && p.home === save.area)); pool = list; }
