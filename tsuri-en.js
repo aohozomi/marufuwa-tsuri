@@ -530,6 +530,10 @@
     (document.head || document.documentElement).append(css); }
   // ページの 題と 説明：ふだんは 釣りの もの。ひろば など べつの ページは <html data-en-page> で この 既定を とばして、TsuriEn.page({title, description}) で 自分の 題・説明を きめる
   const meta = document.querySelector('meta[name=description]');
+  // ホームがめんに おく 時の なまえも 英語に（iPhone は apple-mobile-web-app-title、Android(Chrome) は manifest）。manifest の あるページ（釣りの 本体）だけ
+  { const mf = document.querySelector('link[rel=manifest]'), at = document.querySelector('meta[name=apple-mobile-web-app-title]');
+    if (mf && /(^|\/)manifest\.webmanifest$/.test(mf.getAttribute('href') || '')) mf.setAttribute('href', mf.getAttribute('href').replace('manifest.webmanifest', 'manifest-en.webmanifest'));
+    if (at) at.setAttribute('content', 'Fishing Days'); }
   window.TsuriEn.page = ({ title, description } = {}) => { if (title) document.title = title; if (description && meta) meta.content = description; };
   if (!document.documentElement.hasAttribute('data-en-page')) window.TsuriEn.page({ title: 'Marufuwa Fishing Days — a no-rush fishing game', description: "No rush. Let one go, and nothing is lost. A cozy fishing game that runs in your browser — free, no login, no install." });
   function start() {
