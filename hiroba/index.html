@@ -647,17 +647,27 @@ player.face = 'blue'; player.x = 180; player.y = 520;
 let faceUntil = 0;
 function setFace(name, ms) { if (player.face !== name) { player.face = name; player.img.src = BASE + 'img/game-' + name + '.webp'; } faceUntil = ms ? T + ms / 1000 : 0; }
 
+// ─── 釣りで あった 子が、ひろばで おぼえて いる ひとこと（読むのは つりびよりの きろく marufuwa-tsuri-v1 の metToday と bucket だけ。そとへは 何も おくらない）───
+const FISH_MEMO = [['まるあじ',10,25],['ふわふぐ',8,20],['もちだい',15,40],['ころいわし',5,15],['ぽてかれい',20,45],['しらたまえび',3,12],['ぷかくらげ',5,30],['こつぶがに',3,10],['わたあめきんぎょ',5,18],['まんまるいか',10,35],['ふくふくたこ',15,50],['にじいろべら',10,30],['あさやけだい',25,60],['ゆうやけさば',20,45],['ほしぞらあなご',30,80],['おもちひらめ',25,70],['さくらます',30,60],['ぽんぽんはりせんぼん',10,35],['ころころかめ',15,40],['ねむりいるか',100,180],['つきみまんぼう',80,200],['ひだまりえい',40,120],['みかづきたちうお',60,130],['しゃぼんだまうお',5,15],['みずいろのこ',12,30],['みんとのこ',12,30],['あぷりこっとのこ',12,30],['らべんだーのこ',12,30],['きんのまるごい',40,90],['まるくじら',200,400],['つきあかりのきんぎょ',20,40],['ほしくずのこい',60,120],['しんじゅのたい',40,90],['にじいろくじら',300,600]];   // つりびよりの 魚の なまえ・ちいさい／おおきい（名前は 本体と そろえる）
+function metInFishingToday() { const m = main && main.metToday; return m && m.d === dayKey && Array.isArray(m.ids) ? m.ids.filter(id => PALS[id]) : []; }
+function memoryLine() {
+  const b = main && Array.isArray(main.bucket) ? main.bucket[0] : null, info = b && FISH_MEMO[b.id];
+  if (!info || !Number.isFinite(b.at) || Date.now() - b.at > 4 * 3600 * 1000) return 'さっき つりばで あったね。また あえて うれしいな';   // さいきんの 魚が なければ、あった ことだけ
+  const big = Number.isFinite(b.size) && b.size >= info[1] + (info[2] - info[1]) * .65;
+  return big ? 'さっきの ' + info[0] + '、おおきかったね！' : 'さっき ' + info[0] + 'が つれたんだね。よかったね';
+}
 function chooseFriends() {
   const force = (q.get('friends') || '').split(',').filter(id => PALS[id]);
   if (force.length) return force.slice(0, 6);
   const rnd = mulberry((today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 + 3), ids = Object.keys(PALS);
   for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
-  return ids.slice(0, 5);
+  const memo = metInFishingToday().slice(0, 2);   // 釣りで あった 子を、ひろばにも（さいだい 2ひき）。すいそうの となりにも 同じ 子が くる
+  return [...memo, ...ids.slice(0, 5).filter(id => !memo.includes(id))].slice(0, 5);
 }
 const SLOTS = [{ x: 84, y: 368 }, { x: 276, y: 368 }, { x: 120, y: 440 }, { x: 240, y: 440 }, { x: 180, y: 336 }, { x: 140, y: 316 }];
 const friends = chooseFriends().map((id, i) => {
   const a = makeActor(id, PALS[id].name, BASE + 'img/friend-' + id + '-s.webp', 68, PALS[id].size, 'friend');
-  a.home = SLOTS[i]; a.x = a.home.x; a.y = a.home.y; a.speed = 30; a.state = 'idle'; a.timer = 1 + Math.random() * 4; a.cool = 0; a.talking = 0; a.bag = []; a.friend = true;
+  a.home = SLOTS[i]; a.x = a.home.x; a.y = a.home.y; a.speed = 30; a.state = 'idle'; a.timer = 1 + Math.random() * 4; a.cool = 0; a.talking = 0; a.bag = []; a.friend = true; a.mem = metInFishingToday().includes(id) ? memoryLine() : '';
   a.el.setAttribute('aria-hidden', 'true');
   return a;
 });
@@ -783,6 +793,7 @@ function render() {
 // ─── ともだちの ひとこと ───
 function lineFor(f, first) {
   const p = PALS[f.id];
+  if (f.mem) { const m = f.mem; f.mem = ''; return HELLO[curTime] + '！ ' + m; }   // 釣りで あった 子は、さいしょの ひとことで それを いう（1回だけ）
   if (first) return HELLO[curTime] + '！ ' + p.hello;
   if (!f.bag.length) {
     const pool = [...p.lines];
