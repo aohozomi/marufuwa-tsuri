@@ -360,7 +360,7 @@
     [/^(🐠)?すいそう(\d+)$/, (_, e, n) => `${e || ''} Aquarium ${n}`.trim()],
     [/^すいそうをみる。あたらしいなかまが(\d+)ひき$/, (_, n) => `View the aquarium. ${n} new friends`],
     [new RegExp('^(?:' + COMFORT_KEYS + ')(?:・(?:' + COMFORT_KEYS + '))*$'), x => x.split('・').map(w => COMFORT_EN[w] || w).join(', ')],   // 見出しの「いま：」の 中（span）だけが 単独で とどく 時
-    [/^つかいやすくする（いま：(.+)）$/, (_, x) => `Comfort options (now: ${x === 'ふつう' ? 'Normal' : x === 'じぶんのせってい' ? 'Custom' : x.split('・').map(w => COMFORT_EN[w] || w).join(', ')})`],
+    [/^つかいやすくする（いま：(.+)）$/, (_, x) => `Comfort options (now: ${x === 'ふつう' ? 'Normal' : /^じぶんの[\s　]*せってい$/.test(x) ? 'Custom' : x.split('・').map(w => COMFORT_EN[w] || w).join(', ')})`],
     [/^ばしょをかえる（いま：(.+)）$/, (_, a) => `Change spot (now: ${nmArea(a)})`],
     [/^つりばをかえる（いま：(.+)）$/, (_, a) => `Change fishing spot (now: ${nmArea(a)})`],
     [/^じかんをかえる（いま：(.+)）$/, (_, a) => `Change time (now: ${nmTime(a)})`],
