@@ -461,6 +461,8 @@ body.gazing .assist{display:none}
 @media(prefers-reduced-motion:reduce){#nushi-flash{display:none}}   /* けしきの いきものを しまう（うごく ものが きに なる 人の ために） */
 #main-button{--c1:#2a8cc0;--c2:#0e5a82;--side:#0a4262;--ink:#fff;flex:1 1 100%;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
 #main-button::after{content:"";position:absolute;left:16px;top:50%;width:34px;height:34px;transform:translateY(-50%);background:var(--rodimg) center/contain no-repeat;pointer-events:none;opacity:.95}   /* ボタンの ひだりに ちいさな さおの え（もじには かぶらない・かざり） */
+#main-button[data-pulse=true]{animation:pulse 2s ease-in-out infinite}   /* さいしょの 1ぴき まえだけ：「ここを おして」と ゆっくり ふくらむ（ちかちかは しない） */
+@keyframes pulse{50%{scale:1.035}}
 #main-button[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
 .note{text-align:center;font-size:.85rem;color:#506874;line-height:2.3;margin-top:18px}
@@ -522,7 +524,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
 @media(prefers-reduced-motion:reduce){
   .who,#shadow{transition:none}
-  #scene svg *,.who,.spot svg,#rain,.logo span,.logo i,.bd-trees circle,.friend-float{animation:none !important}
+  #scene svg *,.who,.spot svg,#rain,.logo span,.logo i,.bd-trees circle,.friend-float,#main-button[data-pulse=true]{animation:none !important}
   /* うきの ゆれ・「ちょんちょん」・みずの わ・さかなの かげ・にじいろの ひかり も、うごきを へらす せっていでは とめる（ゆびの うごきに ついて くる 物だけ のこす） */
   #scene .float,#scene #float,#float[data-nibble=true],.float::before,.float::after,#reel .ring,#scene #shadow,#scene[data-phase=reel] #shadow,.shadow[data-rare="5"],.held[data-rare="5"],#book-grid div[data-rare="5"][data-seen=true] b{animation:none !important}
   #reel .back,#main-button,#reel .ring{transition:none !important}
@@ -1377,7 +1379,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0;
-  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
