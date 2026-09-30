@@ -303,6 +303,7 @@
     [/^おくりものだな。もらったさかなが(\d+)ひき。おすと、ひらくよ。$/, (_, n) => `Gift shelf. ${n} fish received. Press to open.`],
     [/^おくりものだなをひらいたよ。もらったさかなが(\d+)ひきいるよ。$/, (_, n) => `Opened the gift shelf. ${n} fish received.`],
     [/^([^\d.].*?)\s*([\d.]+)センチ$/, (_, f, cm) => (JP.test(f) && !FISH_MAP.has(f) ? null : `${nmFish(f)} ${cm} cm`)],
+    [/^(?:[^×]+×\d+){2,}$/, s => { const out = []; for (const m of s.matchAll(/([^×]+)×(\d+)/g)) { const t = tailEn(m[1]); if (t == null) return null; out.push(`${t} ×${m[2]}`); } return out.join(', '); }],   // バケツの「ひろった かざり」（かいがら ×2　ながれぎ ×1）
     [/^(.+?)×(\d+)$/, (_, n, k) => { const t = tailEn(n); return t == null ? null : `${t} ×${k}`; }],
     [/^(.+?)をもどす$/, (_, n) => { const t = tailEn(n); return t == null ? null : `Put back ${t}`; }],
     [/^(.+?)をもどしたよ。$/, (_, n) => { const t = tailEn(n); return t == null ? null : `Put back ${t}.`; }],
