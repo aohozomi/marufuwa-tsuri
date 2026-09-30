@@ -970,6 +970,14 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (Number.isInteger(other.released)) { const released = Math.max(save.released || 0, other.released, (save.released || 0) + other.released - was(['released'])); if (released !== (save.released || 0)) { save.released = released; changed = true; } }
     if (Number.isInteger(other.wishes)) { const wishes = Math.max(save.wishes || 0, other.wishes, (save.wishes || 0) + other.wishes - was(['wishes'])); if (wishes !== (save.wishes || 0)) { save.wishes = wishes; changed = true; } }
     if (Number.isInteger(other.tegami) && other.tegami > (save.tegami || 0)) { save.tegami = other.tegami; changed = true; }
+    if (other.week && Number.isInteger(other.week.k) && Number.isInteger(other.week.n) && Array.isArray(other.week.ids)) {   // こんしゅうの きろく：あたらしい しゅうを とり、おなじ しゅうは かずを あわせる
+      const mine = save.week;
+      if (!mine || other.week.k > mine.k) { if (mine && mine.n > 0) save.lastWeek = mine; save.week = {k: other.week.k, n: other.week.n, ids: other.week.ids.filter(id => Number.isInteger(id) && FISH[id]), top: other.week.top && FISH[other.week.top.id] ? other.week.top : null}; changed = true; }
+      else if (other.week.k === mine.k) {
+        const n = Math.max(mine.n, other.week.n, mine.n + other.week.n - was(['week', 'n'])), ids = [...new Set([...mine.ids, ...other.week.ids.filter(id => Number.isInteger(id) && FISH[id])])];
+        if (n !== mine.n || ids.length !== mine.ids.length) { mine.n = n; mine.ids = ids; if (other.week.top && FISH[other.week.top.id] && (!mine.top || weekScore(FISH[other.week.top.id], other.week.top.size) > weekScore(FISH[mine.top.id], mine.top.size))) mine.top = other.week.top; changed = true; }
+      }
+    }
     if (Array.isArray(other.gifts) || Array.isArray(other.gotGifts)) {   // もらった さかな：あいじるし（code）で あわせる。あたらしい じゅんに 12ひきまで
       const before = JSON.stringify([save.gifts, save.gotGifts]), theirs = {gifts: other.gifts, gotGifts: other.gotGifts}; tidyGifts(theirs);
       const have = new Set((Array.isArray(save.gifts) ? save.gifts : []).map(g => g.code));
@@ -1225,8 +1233,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function drawToday() {
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
     const boss = save.total >= AREAS.find(a => a.id === BOSS.area).need, sf = seasonFish();
-    box.hidden = false;
-    box.textContent = (sf ? L('この つきの さかな：「' + sf.name + '」。', 'This month' + String.fromCharCode(39) + 's fish: ' + sf.name + '. ') : '') + (EN()
+    box.hidden = false; const sunday = new Date().getDay() === 0 && weekShown() && weekShown().now;
+    box.textContent = (sunday ? L('きょうは にちようび。こんしゅうの きろくを、ずかんの まどから しゃしんに できるよ。', 'It is Sunday. You can make this week' + String.fromCharCode(39) + 's photo from the sticker book.') + ' ' : '') + (sf ? L('この つきの さかな：「' + sf.name + '」。', 'This month' + String.fromCharCode(39) + 's fish: ' + sf.name + '. ') : '') + (EN()
       ? 'Everyone has the same lucky fish today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (boss ? ' Today' + String.fromCharCode(39) + 's Giant tends to show up at ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ') — same for everyone.' : '')
       : 'きょうは みんな おなじ さかなが ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (boss ? 'ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ（これも みんな おなじ）。' : ''));
   }
@@ -1373,7 +1381,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const had = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))];
     save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
     const lvBefore = levelOf(save.xp || 0); save.xp = (save.xp || 0) + xpFor(fish, {nushi, first, record, big, perfects}); const lvNow = levelOf(save.xp), leveled = lvNow > lvBefore;
-    save.total++; save.streak = first ? 0 : (save.streak || 0) + 1;
+    save.total++; save.streak = first ? 0 : (save.streak || 0) + 1; bumpWeek(fish, size);
     save.bucket = [{id: fish.id, size, at: Date.now(), nushi}, ...(Array.isArray(save.bucket) ? save.bucket : [])].slice(0, 10);
     // ときどき、さかなが かざりを もって いる。すいそうに おける
     const found = Math.random() < (Number(probe('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
@@ -1782,6 +1790,62 @@ dialog .close{display:block;margin:auto;min-width:160px}
       : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + (last.lucky ? '\nきょうの ラッキーさかな、みんな おなじ！' : '') + '\n#まるふわつりびより\n' + HOME;
     await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of Marufuwa holding up ' + last.fish.name : last.fish.name + 'を かかげる まるふわの しゃしん', words, night);
   }
+  // こんしゅうの きろく：つった かずと しゅるいを ならべる だけ。れんぞくの ひにちは かぞえない・ほかの ひとや せんしゅうと くらべない。おやすみの しゅうは「おやすみでも いいよ」
+  const weekKey = t => { const x = new Date(t.getFullYear(), t.getMonth(), t.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x.getFullYear() * 10000 + (x.getMonth() + 1) * 100 + x.getDate(); };   // げつようびの ひづけ（20260928 など）
+  const weekRange = k => { const a = new Date(Math.floor(k / 10000), Math.floor(k / 100) % 100 - 1, k % 100), b = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 6); return (a.getMonth() + 1) + '/' + a.getDate() + (EN() ? ' - ' : '〜') + (b.getMonth() + 1) + '/' + b.getDate(); };
+  const weekScore = (f, size) => f.rare * 100 + size / f.max;   // いちばん めずらしい こ（おなじ めずらしさなら おおきい ほう）
+  function bumpWeek(f, size) {
+    const k = weekKey(new Date());
+    if (!save.week || save.week.k !== k) { if (save.week && save.week.n > 0) save.lastWeek = save.week; save.week = {k, n: 0, ids: [], top: null}; }
+    const w = save.week; w.n++; if (!w.ids.includes(f.id)) w.ids.push(f.id);
+    if (!w.top || !FISH[w.top.id] || weekScore(f, size) > weekScore(FISH[w.top.id], w.top.size)) w.top = {id: f.id, size};
+  }
+  function weekShown() {   // いま みせる しゅう：こんしゅうに 1ぴきでも いれば こんしゅう。まだ なら、いちばん あたらしい つった しゅう
+    const ok = w => w && Number.isInteger(w.k) && Number.isInteger(w.n) && w.n > 0 && Array.isArray(w.ids), now = weekKey(new Date());
+    const w = ok(save.week) ? save.week : ok(save.lastWeek) ? save.lastWeek : null;
+    return w ? {w, now: w.k === now} : null;
+  }
+  async function weekPhoto() {
+    const shown = weekShown();
+    if (!shown) { say(L('まだ つって いないよ。1ぴき つると、こんしゅうの しゃしんが つくれるよ。', 'No catches yet. Catch one and you can make this week' + String.fromCharCode(39) + 's photo.')); return false; }
+    const {w, now} = shown, ids = w.ids.filter(id => FISH[id]), tops = w.top && FISH[w.top.id] ? FISH[w.top.id] : null;
+    const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 675;
+    const ctx = canvas.getContext('2d'), color = name => getComputedStyle(scene).getPropertyValue(name).trim() || '#fff';
+    const sky = ctx.createLinearGradient(0, 0, 0, 675); sky.addColorStop(0, color('--sky1')); sky.addColorStop(1, color('--sky2')); ctx.fillStyle = sky; ctx.fillRect(0, 0, 1200, 675);
+    ctx.fillStyle = color('--ground'); ctx.beginPath(); ctx.moveTo(0, 470); ctx.lineTo(1200, 450); ctx.lineTo(1200, 560); ctx.lineTo(0, 580); ctx.fill();
+    const water = ctx.createLinearGradient(0, 560, 0, 675); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2')); ctx.fillStyle = water; ctx.beginPath(); ctx.moveTo(0, 580); ctx.lineTo(1200, 560); ctx.lineTo(1200, 675); ctx.lineTo(0, 675); ctx.fill();
+    const me = await loadImg(marufuwa.src), friend = await loadImg('img/friend-' + (pals[0] || PALS[0]).id + '-s.webp');
+    if (me) { const tall = 300, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, 150 - wide / 2, 590 - tall, wide, tall); }
+    if (friend) { const tall = 170, wide = tall * friend.naturalWidth / friend.naturalHeight; ctx.drawImage(friend, 320 - wide / 2, 588 - tall, wide, tall); }
+    ctx.fillStyle = '#fffffff0'; roundRect(ctx, 400, 38, 760, 570, 40); ctx.fill(); ctx.strokeStyle = '#bfdce8'; ctx.lineWidth = 5; ctx.stroke();
+    ctx.fillStyle = '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.font = 'bold 54px system-ui,sans-serif'; ctx.fillText(now ? L('こんしゅうの つり', 'This week' + String.fromCharCode(39) + 's fishing') : L('このまえの つり', 'A recent fishing week'), 780, 112, 680);
+    ctx.font = '30px system-ui,sans-serif'; ctx.fillText(weekRange(w.k), 780, 160, 680);
+    ctx.fillStyle = '#17658a'; ctx.font = 'bold 84px system-ui,sans-serif'; ctx.fillText(EN() ? w.n + (w.n === 1 ? ' fish' : ' fish') : w.n + ' ひき', 780, 262, 680);
+    ctx.fillStyle = '#244653'; ctx.font = 'bold 40px system-ui,sans-serif'; ctx.fillText(EN() ? ids.length + (ids.length === 1 ? ' kind' : ' kinds') : ids.length + ' しゅるい', 780, 318, 680);
+    // あった こ（シールの まるい 絵。10こまで。6こ より おおい ときは 2だんに ならべる）
+    const show = ids.slice(0, 10), perRow = show.length <= 6 ? show.length : Math.ceil(show.length / 2), rows = show.length <= 6 ? 1 : 2, gap = 104, r = 38, top0 = rows === 1 ? 402 : 364;
+    for (let i = 0; i < show.length; i++) {
+      const row = Math.floor(i / perRow), inRow = row === rows - 1 ? show.length - perRow * (rows - 1) : perRow, col = i - row * perRow;
+      const f = FISH[show[i]], cx = 780 - (inRow - 1) * gap / 2 + col * gap, cy = top0 + row * 78, art = artOf(f) ? await loadImg(artOf(f)) : null;
+      const face = ctx.createLinearGradient(0, cy - r, 0, cy + r); (f.rare === 5 ? ['#ffd0da', '#c4e9fb'] : f.rare === 4 ? ['#fff6cf', '#ffd25e'] : f.rare === 3 ? ['#f3ecff', '#cdb8f5'] : ['#f2fbff', '#cfeaf9']).forEach((tone, n) => face.addColorStop(n, tone));
+      ctx.save(); ctx.shadowColor = '#24465340'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4; ctx.fillStyle = face; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      ctx.lineWidth = 6; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+      if (art) ctx.drawImage(art, cx - r + 8, cy - r + 8, (r - 8) * 2, (r - 8) * 2); else { ctx.font = '42px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText(f.icon, cx, cy + 3); ctx.textBaseline = 'alphabetic'; }
+    }
+    if (ids.length > 10) { ctx.fillStyle = '#506874'; ctx.font = 'bold 28px system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.fillText('+' + (ids.length - 10), 780 + (perRow - 1) * gap / 2 + 52, top0 + (rows - 1) * 78 + 10, 90); ctx.textAlign = 'center'; }
+    ctx.fillStyle = '#593700'; ctx.font = 'bold 34px system-ui,sans-serif';
+    if (tops) ctx.fillText(EN() ? 'Rarest: ' + tops.name : 'いちばん めずらしい こ：' + tops.name, 780, 532, 680);
+    const CLOSING = [['ゆっくり いこうね。', 'Nice and slow.'], ['のんびり、のんびり。', 'Easy does it.'], ['おつかれさま。また あおうね。', 'See you again soon.'], ['きょうも いい かぜ。', 'A gentle breeze today.'], ['そこに いて くれて ありがとう。', 'Glad you are here.']];
+    const pick = CLOSING[w.k % CLOSING.length]; ctx.fillStyle = '#3a5a68'; ctx.font = '32px system-ui,sans-serif'; ctx.fillText(L(pick[0], pick[1]), 780, 584, 680);
+    ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6; ctx.font = 'bold 26px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 36, 640); ctx.font = 'bold 24px system-ui,sans-serif'; ctx.fillText(TAG(), 36, 610);
+    ctx.textAlign = 'right'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, ''), 1160, 648); ctx.shadowBlur = 0;
+    const words = EN()
+      ? (now ? 'This week' + String.fromCharCode(39) + 's fishing: ' : 'A fishing week: ') + w.n + (w.n === 1 ? ' fish' : ' fish') + ', ' + ids.length + (ids.length === 1 ? ' kind' : ' kinds') + '.\nWent fishing with Marufuwa!\n' + TAG() + '\n' + HOME_SHARE()
+      : (now ? 'こんしゅうの つり：' : 'ある しゅうの つり：') + w.n + 'ひき・' + ids.length + 'しゅるい。\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
+    await showPhoto(canvas, 'marufuwa-tsuri-week-' + w.k + '.png', EN() ? 'A card of one fishing week: ' + w.n + ' caught, ' + ids.length + ' kinds' : 'ひとしゅうかんの つりの カード。' + w.n + 'ひき・' + ids.length + 'しゅるい', words);
+    return true;
+  }
   // シールちょうの 1まい。あつめた シールが ならぶ。30しゅるい そろうと「ぜんぶ あつめた！」
   async function bookPhoto() {
     const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1350;
@@ -1848,6 +1912,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
     say(last.fish.name + 'を みずに かえしたよ。また あおうね。');
   });
   $('close-photo').addEventListener('click', () => photo.close());
+  { const b = document.createElement('button'); b.id = 'week-photo'; b.type = 'button'; $('book-photo').after(b);
+    const paint = () => { b.textContent = L('こんしゅうの きろくを しゃしんに', 'Turn this week into a photo'); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint); else paint();
+    b.addEventListener('click', async () => { try { if (await weekPhoto()) { $('book').close(); photo.showModal(); } } catch { say(L('しゃしんを つくれなかったよ。もういちど ためしてね。', 'Could not make the photo. Please try again.')); } }); }
   $('book-photo').addEventListener('click', async () => {
     try { await bookPhoto(); $('book').close(); photo.showModal(); } catch { say('しゃしんを つくれなかったよ。もういちど ためしてね。'); }
   });
