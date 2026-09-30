@@ -152,6 +152,12 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 .chips button{min-height:48px;padding:4px 8px;font-size:.82rem;line-height:1.3}
 .chips button[aria-checked=true]{--c1:#ffe6ef;--c2:#ff9fbd;--side:#d9628a;--ink:#5a1230}
 #gift-word{font-weight:800}
+.hud.keep{flex-wrap:wrap}
+#open-home[hidden]{display:none}
+#home-steps{display:grid;gap:8px;margin:0 0 10px}
+#home-steps p{margin:0;padding:8px 12px;border:2px solid #d5e6ed;border-radius:14px;background:#fff;line-height:1.7;font-size:.92rem}
+#home-steps b{display:block}
+:root[data-night=true] #home-steps p{background:#1a3250;border-color:#2d4d70}
 /* ながめる を もっと ゆったり：おやすみタイマー・ぜんがめん は ながめる 中だけ。なにも しないと ボタンが きえて、景色だけに（さわると もどる）。おやすみで 景色が ゆっくり くらく */
 #sleep,#fullscreen{display:none;flex:0 1 auto;min-height:52px}
 body.gazing #sleep,body.gazing #fullscreen{display:block}
@@ -469,18 +475,18 @@ dialog .close{display:block;margin:auto;min-width:160px}
 :root[data-night=true]{color:#e8f1f8;background:#0d1a2e}
 :root[data-night=true] #backdrop{filter:brightness(.3) saturate(1.1)}
 :root[data-night=true] main{background:#13253d;box-shadow:0 12px 30px #0007}
-:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter){color-scheme:dark}
+:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen){color-scheme:dark}
 :root[data-night=true] .actions{background:linear-gradient(#13253d00,#13253d 28%)}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter)::backdrop{background:#000000b3}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen)::backdrop{background:#000000b3}
 /* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter) button:focus-visible{outline-color:#a9dcff}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen) button:focus-visible{outline-color:#a9dcff}
 :root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small,:root[data-night=true] #gift-list small{color:#a9bfd2}
 :root[data-night=true] #bucket-list div,:root[data-night=true] #gift-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
 :root[data-night=true] #book-grid div[data-seen=false]{background:#16283f;color:#9db3c6}
@@ -642,6 +648,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   <div class="hud keep">
     <button id="open-keep" type="button" style="flex:1">きろくを のこす・もどす</button>
     <a class="pill quiet" href="anshin/" style="flex:1">おうちの かたへ</a>
+    <button id="open-home" type="button" style="flex:1 1 100%">ホームがめんに おく</button>
   </div>
 
   <dialog id="keep" aria-labelledby="keep-title">
@@ -729,6 +736,19 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <p class="count" id="gift-keep"></p>
     <p class="count" id="gift-return"></p>
     <div class="photo-actions" id="gift-actions"></div>
+  </dialog>
+
+  <dialog id="homescreen" aria-labelledby="home-title">
+    <h2 id="home-title">ホームがめんに おく</h2>
+    <p class="count" id="home-lead"></p>
+    <div id="home-steps"></div>
+    <p class="count" id="home-warn"></p>
+    <div class="photo-actions">
+      <button id="home-install" type="button" class="give" hidden>いま ホームがめんに おく</button>
+      <button id="home-keep" type="button">きろくを のこす・もどす</button>
+    </div>
+    <p class="count" id="home-say" role="status"></p>
+    <button class="close" type="button" id="close-home">とじる</button>
   </dialog>
 
   <dialog id="letter" aria-labelledby="letter-title">
@@ -1872,6 +1892,43 @@ dialog .close{display:block;margin:auto;min-width:160px}
   $('close-give').addEventListener('click', () => giveBox.close());
   $('send-gift').addEventListener('click', () => { if (phase === 'caught' && last && !last.released && giftable(last.fish, last.nushi)) openGive(last.fish, last.size); });
 
+  // ホームがめんに おく：アイコンから すぐ ひらける（総司令部の manifest・sw.js・tsuri-sw-register.js）。iPhone は 共有→ホームがめんに ついか、Android は メニュー→ホームがめんに ついか。
+  // ちゅうい：アイコンから ひらくと ブラウザ（Safari など）とは きろくの ほぞん先が べつ。きろくを うつす ほうほう（リンクを コピー→はる）を ここで つたえる
+  const STANDALONE = probe('standalone') === '1' || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  let installEvent = null;
+  window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); installEvent = event; $('home-install').hidden = false; });
+  window.addEventListener('appinstalled', () => { installEvent = null; $('home-install').hidden = true; say(L('ホームがめんに おいたよ！', 'Added to your home screen!')); });
+  $('open-home').hidden = STANDALONE;
+  $('open-home').addEventListener('click', () => {
+    const steps = [
+      [L('iPhone（Safari）', 'iPhone (Safari)'), L('したの「きょうゆう」ボタン（しかくに ↑）を おして、「ホームがめんに ついか」を えらんでね。', 'Tap the Share button (a square with an arrow), then choose "Add to Home Screen".')],
+      [L('Android（Chrome）', 'Android (Chrome)'), L('みぎうえの「⋮」を おして、「ホームがめんに ついか」（か「アプリを インストール」）を えらんでね。', 'Tap the ⋮ menu, then choose "Add to Home screen" (or "Install app").')],
+      [L('Xの アプリの なかでは できません', 'Not from inside the X app'), L('Safari や Chrome で ひらいてから やってね。', 'Open the game in Safari or Chrome first.')]
+    ];
+    $('home-lead').textContent = L('アイコンを ホームがめんに おくと、すぐ ひらけるよ。ネットが ない ところでも ひらけるよ。', 'Put the icon on your home screen to open the game quickly — even without an internet connection.');
+    $('home-steps').replaceChildren(...steps.map(([head, body]) => { const p = document.createElement('p'), b = document.createElement('b'); b.textContent = head; p.append(b, body); return p; }));
+    $('home-warn').textContent = L('ちゅうい：アイコンから ひらくと、いままでの きろくが みえない ことが あるよ（ブラウザと アイコンは、きろくの ほぞん先が べつ）。さきに「きろくを のこす・もどす」で「リンクを コピー」して、アイコンの ゲームの「きろくを もどす」に はってね。', 'Note: records are stored separately for the browser and for the home-screen icon, so the icon may start empty. First copy your records with "Save / Restore records" → "Copy link", then paste it into "Restore" inside the icon.');
+    $('home-install').hidden = !installEvent; $('home-say').textContent = '';
+    $('homescreen').showModal();
+  });
+  $('home-install').addEventListener('click', async () => {
+    if (!installEvent) return;
+    try { installEvent.prompt(); const choice = await installEvent.userChoice; $('home-say').textContent = choice && choice.outcome === 'accepted' ? L('ホームがめんに おくよ。', 'Adding it now.') : L('あとで でも いいよ。', 'Maybe later — that is fine.'); } catch {}
+    installEvent = null; $('home-install').hidden = true;
+  });
+  $('home-keep').addEventListener('click', () => { $('homescreen').close(); $('open-keep').click(); });
+  $('close-home').addEventListener('click', () => $('homescreen').close());
+  // アイコンで ひらいた のに きろくが からの とき：Safari で あそんだ きろくが あるかも しれない ので、うつす ほうほうを 1ぎょう（1かい とじたら もう 出さない）
+  function homeHint() {
+    if (!STANDALONE || save.hintHome || save.total > 0 || Object.keys(save.fish).length) return;
+    const hint = document.createElement('p'), text = document.createElement('span'), close = document.createElement('button');
+    hint.className = 'inapp-hint'; hint.id = 'home-hint'; hint.setAttribute('role', 'note');
+    text.textContent = L('Safariで あそんだ きろくが あれば、「きろくを のこす・もどす」で もどせるよ。', 'If you played in Safari before, you can bring your records here with "Save / Restore records".');
+    close.type = 'button'; close.textContent = '×'; close.setAttribute('aria-label', L('とじる（もう だしません）', 'Close (do not show again)'));
+    close.addEventListener('click', () => { save.hintHome = true; store(); hint.remove(); button.focus(); });
+    hint.append(text, close); document.querySelector('.actions').after(hint);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', homeHint); else homeHint();
   // てがみ（総司令部の 文の束 tsuri-tegami.js）：2日 いじょう あいて もどった とき「ひさしぶり」、よなか（1〜4じ）は「よなか」の てがみ。景色の すみに ✉ を 出す だけ。
   // ひらくのも ひらかないのも じゆう。ひらいた ひは もう 出さない（save.tegami＝その日の かず）。ごほうびは ない・日数は 出さない・せめない
   const letterBox = $('letter'), tegami = $('tegami');
@@ -2272,5 +2329,6 @@ dialog .close{display:block;margin:auto;min-width:160px}
 <script defer src="tsuri-tooku.js"></script>
 <script defer src="tsuri-en.js"></script>
 <script defer src="tsuri-tegami.js"></script>
+<script defer src="tsuri-sw-register.js"></script>
 </body>
 </html>
