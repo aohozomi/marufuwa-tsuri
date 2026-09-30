@@ -809,10 +809,11 @@
   }
 
   // ─── しゃしん：部屋ぜんたいを 1枚の絵に。ほぞん／ひとに みせる ───
-  const svgImage = svg => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+  const svgCache = new Map();   // おなじ 絵は 覚えておく（動画の 材料づくりで 1コマごとに 読み直さない。多すぎたら 空に する）
+  const svgImage = svg => { const hit = svgCache.get(svg); if (hit) return Promise.resolve(hit); return new Promise((res, rej) => { const im = new Image(); im.onload = () => { if (svgCache.size > 60) svgCache.clear(); svgCache.set(svg, im); res(im); }; im.onerror = rej; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }); };
   // 絵が もう よみこまれて いる／もう しっぱい して いる時は、すぐ こたえる（しっぱいした絵を いつまでも またない）
   const imgReady = el => new Promise(res => { if (!el) res(null); else if (el.complete) res(el.naturalWidth ? el : null); else { el.addEventListener('load', () => res(el), { once: true }); el.addEventListener('error', () => res(null), { once: true }); } });
-  async function snapshot() {
+  async function snapshot(o = {}) {   // o: { video, dataURL, type, quality }。ふだんの しゃしんは 引数なし（PNG）。動画の 材料づくりでは あわも 描いて すぐ 文字（data URL）で 返す
     const K = 3, cvs = document.createElement('canvas'); cvs.width = ROOM.w * K; cvs.height = ROOM.h * K;
     const ctx = cvs.getContext('2d'); ctx.scale(K, K);
     const t = ROOM.tank, rp = palette();
@@ -846,6 +847,16 @@
       else { ctx.font = `${Math.round(size * .9)}px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif`; ctx.fillText(o.f.icon, 0, 0); }
       ctx.restore();
     }
+    if (o.video) {   // あわ（CSS の アニメ）も 描く
+      const wr = water.getBoundingClientRect();
+      for (const b of water.querySelectorAll('.tk-bub')) {
+        const r = b.getBoundingClientRect(), op = parseFloat(getComputedStyle(b).opacity); if (!(op > .02) || r.width < 1) continue;
+        const bx = t.x + (r.left + r.width / 2 - wr.left) * kx, by = t.y + (r.top + r.height / 2 - wr.top) * ky, br = r.width / 2 * kx;
+        ctx.save(); ctx.globalAlpha = Math.min(1, op) * .85; const bg = ctx.createRadialGradient(bx - br * .35, by - br * .35, br * .05, bx, by, br);
+        bg.addColorStop(0, '#ffffff'); bg.addColorStop(.5, '#ffffffb0'); bg.addColorStop(1, '#ffffff40'); ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill();
+        ctx.lineWidth = .8; ctx.strokeStyle = '#ffffff99'; ctx.stroke(); ctx.restore();
+      }
+    }
     const glass = ctx.createLinearGradient(0, t.y, 0, t.y + t.h * .16); glass.addColorStop(0, '#ffffff59'); glass.addColorStop(1, '#ffffff00'); ctx.fillStyle = glass; ctx.fillRect(t.x, t.y, t.w, t.h * .16);
     ctx.restore();
     ctx.drawImage(await svgImage(frameSvg()), 0, 0, ROOM.w, ROOM.h);
@@ -857,6 +868,7 @@
     ctx.save(); ctx.fillStyle = '#fffdf6ee'; ctx.strokeStyle = '#e3d3b0'; ctx.lineWidth = 2; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(10, ROOM.h - 68, 190, 56, 14); else ctx.rect(10, ROOM.h - 68, 190, 56); ctx.fill(); ctx.stroke();
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#7a4b34'; ctx.font = '800 14px system-ui,sans-serif'; ctx.fillText('まるふわ つりびより', 22, ROOM.h - 47);
     ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText('つれた かず ' + total + '　シールちょう ' + gotN + ' / ' + baseN, 22, ROOM.h - 27); ctx.restore();
+    if (o.dataURL) return cvs.toDataURL(o.type || 'image/png', o.quality);   // 裏の 画面でも すぐ 返る（toBlob は 1びょうに 1回に なる）
     return new Promise(res => cvs.toBlob(b => res(b), 'image/png'));
   }
   async function takePhoto() {
@@ -1071,5 +1083,5 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) { stopAmbience(); if (actx && actx.state === 'running') actx.suspend().catch(() => {}); } else if (isOpen() && sfx) { startAmbience(); } });
   refreshBadge(); refreshSound();
 
-  window.TsuriTank = { open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), version: 4 };
+  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), version: 4 };
 })();
