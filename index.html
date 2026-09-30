@@ -24,7 +24,7 @@
 <meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="ゆうがたの みずうみで、まるふわが きんいろの さかなを かかげて いる">
+<meta property="og:image:alt" content="よるの ひろばに、ちょうちんの あかりと つきと ふんすい。まるふわと ともだちが あつまって いる">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" as="image" href="img/game-blue.webp" fetchpriority="high">
 <link rel="preload" as="script" href="tsuri-wear.js"><link rel="preload" as="script" href="tsuri-daily.js"><link rel="preload" as="script" href="tsuri-mame.js"><link rel="preload" as="script" href="tsuri-art.js"><link rel="preload" as="script" href="tsuri-art-season.js"><link rel="preload" as="script" href="tsuri-art-real.js"><link rel="preload" as="script" href="tsuri-town.js"><link rel="preload" as="script" href="tsuri-koe.js"><link rel="preload" as="script" href="tsuri-bgm.js">   <!-- ほんたいの まえに ならぶ script は じゅんばんに よむと おそい。さきに ならんで よむ -->
@@ -371,6 +371,11 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 
 #reel{position:absolute;z-index:5;width:36%;aspect-ratio:1/1;transform:translate(-50%,-50%);display:none;pointer-events:none}
 #scene[data-phase=reel] #reel{display:block}
+/* やめる：けしきの まんなか うえ（わの そと・「いまだ！」から とおい）。ちいさく うすく。おす ところは 44px */
+#scene #quit{display:none;position:absolute;z-index:6;left:0;right:0;top:8px;margin:0 auto;width:fit-content;min-width:44px;min-height:44px;padding:2px 16px;font-size:.85rem;border-width:2px;box-shadow:0 2px 0 var(--side);opacity:.92;-webkit-backdrop-filter:none;backdrop-filter:none}
+#scene #quit::before{display:none}
+#scene[data-phase=waiting] #quit,#scene[data-phase=bite] #quit,#scene[data-phase=reel] #quit{display:block}
+#scene #quit:active:not(:disabled){transform:translateY(2px);box-shadow:none}
 #reel .back{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#ffffff2e 0%,#17323d2e 70%,#17323d14 100%);box-shadow:inset 0 0 0 2px #ffffff55}
 #scene #keeper:disabled{opacity:1}
 /* まと：わが ここに かさなったら「いまだ」。かさなって いる あいだ、きんいろに ひかる */
@@ -732,6 +737,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       <div class="back"></div><div class="ring"></div><div class="target"></div>
       <div id="hp"><i></i></div><div id="hp-label" aria-hidden="true"></div><div id="combo"></div><div id="judge"></div><div id="swim-tag"></div>
     </div>
+    <button id="quit" type="button"></button>
 
     <p id="guide"><img src="img/friend-penguin-s.webp" width="180" height="180" alt="あんないの ペンギン"><span id="guide-word"></span></p>
     <div id="card">
@@ -1637,7 +1643,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const shout = document.createElement('span'); shout.className = 'bubble'; shout.textContent = 'えいっ'; shout.setAttribute('aria-hidden', 'true'); place(shout, {x: f.x, y: f.y - 24}); scene.append(shout);
     shout.animate([{opacity: 0, translate: '0 8px'}, {opacity: 1, translate: '0 0', offset: .3}, {opacity: 1, offset: .7}, {opacity: 0, translate: '0 -8px'}], {duration: 900}).onfinish = () => shout.remove();
     $('float').animate([{translate: -dx + 'px ' + -dy + 'px', opacity: 0}, {translate: -dx + 'px ' + -dy + 'px', opacity: 1, offset: .4}, {translate: -dx * reach + 'px ' + (-dy - lift) + 'px', offset: .7}, {translate: '0 0'}], {duration: 900, easing: 'ease-in'}).onfinish = () => {
-      flying = false; layout();
+      flying = false; layout(); if (phase === 'idle') return;   // とんで いる 途中で やめた ときは ぽちゃんを だしない
       for (let i = 0; i < 2; i++) {
         const ring = document.createElement('i'); ring.className = 'ripple'; place(ring, w); scene.append(ring);
         ring.animate([{scale: '.3', opacity: .9}, {scale: '2.4', opacity: 0}], {duration: 700, delay: i * 180, easing: 'ease-out', fill: 'backwards'}).onfinish = () => ring.remove();
@@ -1657,7 +1663,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     hpMax = hp = Math.min(12, 3 + fish.rare * 2 + (nushi ? 5 : 0)); period = 1850 - fish.rare * 250;   // ぬしでも さいだい 12（16だと ながすぎて つかれる）
     if (save.total === 0) { hpMax = hp = 3; period = 1700; }   // さいしょの 1ぴきは、かならず すぐ つれる
     if (fish.legend) { hpMax = hp = 7; period = 1500; }   // まぼろしは、でて きたら つれる。わは ゆっくり
-    swim = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; perfects = 0; misses = 0; restUntil = 0;
+    swim = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; perfects = 0; perfectStreak = 0; misses = 0; restUntil = 0;
     // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
     hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
     ringStart = reelStartAt = performance.now(); ringSync();
@@ -1813,6 +1819,18 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     sayQuiet(fish.name + 'が つれた。' + cm(size) + 'センチ。' + (levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (PLAIN_WORDS.some(w => guideWord === w[0] || guideWord === w[1]) ? '' : '　ペンギン：' + guideWord) + (hintWord ? '　' + hintWord : ''));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
   }
 
+  // やめる：アタリまち・アタリ・ひいて いる 最中に、いつでも もどれる（Esc でも）。「にがした」あつかい：つれた かず・ずかんは ふえない・へらない。ばつも ない
+  function paintQuit() { const q = $('quit'); if (!q) return; q.textContent = L('やめる', 'Stop'); q.setAttribute('aria-label', L('つりを やめる', 'Stop fishing')); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintQuit); else paintQuit();
+  function quitFishing() {
+    if (phase !== 'waiting' && phase !== 'bite' && phase !== 'reel') return;
+    clearTimeout(biteTimer); clearTimeout(nibbleTimer); delete $('float').dataset.nibble;
+    stopGuide(); ringStop(); tensionOff(); flying = false; perfectStreak = 0;
+    face('blue'); $('held').hidden = true; button.textContent = 'なげる'; button.dataset.hot = 'false'; lock(false);
+    setPhase('idle'); say(L('やめたよ。また いつでも。', 'Stopped. Come back anytime.'));
+    try { button.focus({preventScroll: true}); } catch {}
+  }
+  $('quit').addEventListener('click', quitFishing);
   function act() {
     startAmbient();   // おとを ON に して いた ひとは、さいしょに おした ときから なみの おと
     // つれた 直後：カードが まだ なら、さいしょの 1回の おしは カードを すぐ 出す（なげない）。カードが 出て から 1びょうは なげない（れんだ しても 結果が きえない）
@@ -1845,6 +1863,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   document.addEventListener('keydown', event => {
     if (event.altKey || event.ctrlKey || event.metaKey || event.repeat || document.querySelector('dialog[open]')) return;
     if (event.target.closest && event.target.closest('input, textarea, select')) return;
+    if (event.key === 'Escape' && (phase === 'waiting' || phase === 'bite' || phase === 'reel')) { quitFishing(); return; }   // つりの とちゅうで やめる
     if (event.key >= '1' && event.key <= '3') { moveTo(Number(event.key) - 1); return; }
     if (event.key === 'g' || event.key === 'G') { $('gaze').click(); return; }
     if (event.key === 'Escape' && document.body.classList.contains('gazing')) $('gaze').click();
