@@ -93,7 +93,10 @@
   function processText(tn) {
     if (made.has(tn) || !tn.parentNode || skip(tn)) return;
     const parts = convert(tn.data, ensureDict()); if (!parts) return;
-    const frag = build(tighten(parts)); tn.parentNode.replaceChild(frag, tn);
+    const frag = build(tighten(parts)), par = tn.parentNode;
+    // ふくろが flex／grid（.pill など）だと ruby が ひとつずつ ばらばらの 箱に なり、折り返しや ふりがなの 位置が くずれる → ひとつの span に まとめて 1つの 箱に する
+    let box = false; try { box = par.nodeType === 1 && (par.classList.contains('pill') || /flex|grid/.test(getComputedStyle(par).display)); } catch {}
+    if (box) { const w = document.createElement('span'); w.className = 'rbw'; w.append(frag); par.replaceChild(w, tn); } else par.replaceChild(frag, tn);
   }
   function walk(rootNode) {
     if (!rootNode || skip(rootNode)) return;
@@ -121,7 +124,7 @@
   function start() {
     if (HIRA_MODE) { startHira(); return; }
     if (!enabled || isEn() || !ensureDict()) return;
-    const st = document.createElement('style'); st.textContent = 'ruby{ruby-position:over}rt{font-size:.52em;font-weight:700;line-height:1;letter-spacing:0}'; document.head.append(st);
+    const st = document.createElement('style'); st.textContent = 'ruby{ruby-position:over;white-space:nowrap}rt{font-size:.52em;font-weight:700;line-height:1;letter-spacing:0}'; document.head.append(st);
     schedule(document.body);
     observer = new MutationObserver(records => {
       if (busy) return;
