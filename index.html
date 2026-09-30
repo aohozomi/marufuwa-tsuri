@@ -1302,7 +1302,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   if (speech) { try { speech.addEventListener('voiceschanged', yomiPick); } catch {} }
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
-  let ambient = null, ambientOut = null, ambientDuck = null, sleepMuted = false;
+  let ambient = null, ambientOut = null, ambientDuck = null, sleepMuted = false, areaTimer = 0;
   function startAmbient() {
     if (!sndOn('amb') || ambient || sleepMuted) return;
     try {
@@ -1313,15 +1313,45 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       for (let i = 0; i < fade; i++) { const w = i / fade * Math.PI / 2; data[len - fade + i] = data[len - fade + i] * Math.cos(w) + data[i] * Math.sin(w); }   // おわりを はじめに まぜて、くりかえしの つなぎめを なくす（はじめの 0.6びょうは 1かい だけ）
       const noise = audio.createBufferSource(); noise.buffer = buffer; noise.loop = true; noise.loopStart = fade / rate; noise.loopEnd = len / rate;
       const soft = audio.createBiquadFilter(); soft.type = 'lowpass'; soft.frequency.value = 900;
-      const swell = audio.createGain(); swell.gain.value = .05; const out = audio.createGain(), duck = audio.createGain(); out.gain.value = 1; duck.gain.value = guide ? .5 : 1; out.connect(duck); duck.connect(audio.destination); ambientOut = out; ambientDuck = duck;   // まとめの おんりょう（おやすみで ふわっと きえる）
+      const swell = audio.createGain(); swell.gain.value = save.area === 'R' ? .03 : .05; const out = audio.createGain(), duck = audio.createGain(); out.gain.value = 1; duck.gain.value = guide ? .5 : 1; out.connect(duck); duck.connect(audio.destination); ambientOut = out; ambientDuck = duck;   // まとめの おんりょう（おやすみで ふわっと きえる）
       const lfo = audio.createOscillator(), depth = audio.createGain(); lfo.frequency.value = .11; depth.gain.value = .04; lfo.connect(depth).connect(swell.gain);
       noise.connect(soft).connect(swell).connect(out);
       const nodes = [noise, lfo];
       if (rainy) { const drops = audio.createBufferSource(), thin = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = buffer; drops.loop = true; drops.loopStart = fade / rate; drops.loopEnd = len / rate; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; quiet.gain.value = .035; drops.connect(thin).connect(quiet).connect(out); nodes.push(drops); }
+      if (save.area === 'R') {   // かわ：せせらぎ（たかめの ざわざわを ゆっくり ゆらす）
+        const brook = audio.createBufferSource(), band = audio.createBiquadFilter(), quiet = audio.createGain(), trem = audio.createOscillator(), tdepth = audio.createGain();
+        brook.buffer = buffer; brook.loop = true; brook.loopStart = fade / rate; brook.loopEnd = len / rate; brook.playbackRate.value = 1.6; band.type = 'bandpass'; band.frequency.value = 2400; band.Q.value = 1.2; quiet.gain.value = .018;
+        trem.frequency.value = 5.3; tdepth.gain.value = .008; trem.connect(tdepth).connect(quiet.gain); brook.connect(band).connect(quiet).connect(out); nodes.push(brook, trem);
+      }
       nodes.forEach(node => node.start()); ambient = nodes;
+      clearTimeout(areaTimer); areaTimer = setTimeout(areaSound, Number(probe('areasound')) || 9000 + Math.random() * 12000);
     } catch {}
   }
-  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; ambientOut = null; ambientDuck = null; }
+  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; ambientOut = null; ambientDuck = null; clearTimeout(areaTimer); areaTimer = 0; }
+  const restartAmbient = () => { if (ambient) { stopAmbient(); startAmbient(); } };   // つりばを かえたら その つりばの おとに
+  // つりばごとの ときどきの おと（みなとまち＝とおくの きてき・かもめ／ふねの うえ＝きしむ おと）。ひく あいだと かくれて いる ときは ならさない。おおきさは なみより ずっと ちいさい
+  function areaSound() {
+    clearTimeout(areaTimer); areaTimer = 0;
+    if (!ambient || !ambientOut || !audio || !sndOn('amb')) return;
+    if (phase !== 'reel' && !document.hidden) { try { if (save.area === 'H') (Math.random() < .5 ? horn : gull)(); else if (save.area === 'B') creak(); } catch {} }
+    const fixed = Number(probe('areasound')); areaTimer = setTimeout(areaSound, fixed || (save.area === 'H' ? 25000 + Math.random() * 45000 : save.area === 'B' ? 14000 + Math.random() * 26000 : 60000));
+  }
+  function horn() {   // とおくの きてき（ひくく ゆっくり ふくらんで きえる）
+    const ctx = audio, at = ctx.currentTime + .05, g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 520;
+    g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(.014, at + .9); g.gain.setValueAtTime(.014, at + 1.9); g.gain.linearRampToValueAtTime(0, at + 3.4);
+    [196, 247].forEach(f => { const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.setValueAtTime(f, at); o.connect(lp); o.start(at); o.stop(at + 3.5); }); lp.connect(g); g.connect(ambientOut);
+  }
+  function gull() {   // かもめ（みじかい ふたこえ）
+    const ctx = audio, t0 = ctx.currentTime + .05, lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3200; lp.connect(ambientOut);
+    [[1750, 1250, 0, .2], [1500, 1050, .28, .26]].forEach(([f0, f1, d, len]) => {
+      const o = ctx.createOscillator(), e = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(f0, t0 + d); o.frequency.linearRampToValueAtTime(f1, t0 + d + len);
+      e.gain.setValueAtTime(0, t0 + d); e.gain.linearRampToValueAtTime(.012, t0 + d + .04); e.gain.linearRampToValueAtTime(0, t0 + d + len); o.connect(e); e.connect(lp); o.start(t0 + d); o.stop(t0 + d + len + .02);
+    });
+  }
+  function creak() {   // ふねが きしむ（ひくく みじかい「ぎぃ…」）
+    const ctx = audio, t0 = ctx.currentTime + .05, o = ctx.createOscillator(), bp = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(95, t0); o.frequency.linearRampToValueAtTime(58, t0 + .9);
+    bp.type = 'bandpass'; bp.frequency.value = 320; bp.Q.value = 7; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.013, t0 + .25); g.gain.linearRampToValueAtTime(0, t0 + .95); o.connect(bp); bp.connect(g); g.connect(ambientOut); o.start(t0); o.stop(t0 + 1);
+  }
   function duckAmbient(on) {   // あんないの おと（ポ・ピコン）が なって いる 間だけ、なみを はんぶんに（−6dB）。おわると ゆっくり もどる
     if (!ambientDuck || !audio) return;
     try { const t = audio.currentTime, g = ambientDuck.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(on ? .5 : 1, t, on ? .08 : .4); } catch {}
@@ -1793,7 +1823,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     syncTabs($('areas'), AREAS.map(area => ({k: area.id, text: area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
       if (save.total < area.need) { say(L('あと ' + (area.need - save.total) + 'ひきで いけるよ。', (area.need - save.total) + ' more catches to unlock this spot.')); return; }   // まだ いけない：ことばだけ
       if (save.area === area.id) return;
-      save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals();
+      save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals(); restartAmbient();
       setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false';
       say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
     }})));
@@ -1811,7 +1841,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   $('go-area').addEventListener('click', event => {
     event.stopPropagation(); const area = AREAS.find(a => a.id === $('go-area').dataset.area); if (!area || save.total < area.need) return;
-    save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals();
+    save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals(); restartAmbient();
     setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false'; lock(false);
     say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
   });
