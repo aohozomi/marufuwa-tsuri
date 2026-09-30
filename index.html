@@ -930,6 +930,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const TIME_NAME = {a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru'};
 
   const HOME = 'https://aohozomi.github.io/marufuwa-tsuri/';   // あそべる ばしょ。しゃしんと きょうゆうの ぶんに いれる
+  const LV = () => 'Lv. ' + levelOf(save.xp || 0);   // しゃしんカードの すみに ちいさく（へらない・ほかの ひとと くらべない）
+  const HOME_HOST = HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, '');   // カードの すみに いれる「あそべる ばしょ」
   // English mode（外付け tsuri-en.js・総司令部）が よみこまれて いて 英語の とき だけ、えの なかの もじと 共有の ぶんを 英語に する。日本語の ときは ぜんぶ そのまま
   const EN = () => !!(window.TsuriEn && TsuriEn.lang === 'en');
   const T = text => window.TsuriEn && TsuriEn.t ? TsuriEn.t(text) : text;   // ひょうに ある ことばは 英語に、ない ものは そのまま
@@ -1782,7 +1784,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       ctx.fillStyle = '#ff5a3c'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 42px system-ui,sans-serif'; ctx.fillText('!?', 622, 264); ctx.restore();
     }
     ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6;
-    ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(EN() ? 'Caught ' + save.total + '  ·  Stickers ' + seenCount() + '/' + BASE : 'つれた かず ' + save.total + '　シールちょう ' + seenCount() + ' / ' + BASE, 46, 596);
+    ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(EN() ? 'Caught ' + save.total + '  ·  Stickers ' + seenCount() + '/' + BASE + '  ·  ' + LV() : 'つれた かず ' + save.total + '　シールちょう ' + seenCount() + ' / ' + BASE + '　' + LV(), 46, 596);
     ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText(TAG(), 46, 642);   // えの なかには さくしゃの なまえは いれない
     ctx.textAlign = 'right'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, ''), 1160, 644);   // すみに ちいさく、あそべる ばしょ（この 1まいだけの れいがい・マスター 許可）
     ctx.shadowBlur = 0;
@@ -1839,7 +1841,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (tops) ctx.fillText(EN() ? 'Rarest: ' + tops.name : 'いちばん めずらしい こ：' + tops.name, 780, 532, 680);
     const CLOSING = [['ゆっくり いこうね。', 'Nice and slow.'], ['のんびり、のんびり。', 'Easy does it.'], ['おつかれさま。また あおうね。', 'See you again soon.'], ['きょうも いい かぜ。', 'A gentle breeze today.'], ['そこに いて くれて ありがとう。', 'Glad you are here.']];
     const pick = CLOSING[w.k % CLOSING.length]; ctx.fillStyle = '#3a5a68'; ctx.font = '32px system-ui,sans-serif'; ctx.fillText(L(pick[0], pick[1]), 780, 584, 680);
-    ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6; ctx.font = 'bold 26px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 36, 640); ctx.font = 'bold 24px system-ui,sans-serif'; ctx.fillText(TAG(), 36, 610);
+    ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6; ctx.font = 'bold 26px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 36, 640); ctx.font = 'bold 24px system-ui,sans-serif'; ctx.fillText(TAG() + (EN() ? '  ·  ' : '　') + LV(), 36, 610);
     ctx.textAlign = 'right'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, ''), 1160, 648); ctx.shadowBlur = 0;
     const words = EN()
       ? (now ? 'This week' + String.fromCharCode(39) + 's fishing: ' : 'A fishing week: ') + w.n + (w.n === 1 ? ' fish' : ' fish') + ', ' + ids.length + (ids.length === 1 ? ' kind' : ' kinds') + '.\nWent fishing with Marufuwa!\n' + TAG() + '\n' + HOME_SHARE()
@@ -1878,8 +1880,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
       ctx.restore();
       ctx.fillStyle = got ? '#244653' : '#9fb3bd'; ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 21px system-ui,sans-serif'; ctx.fillText(got ? f.name : '', cx, cy + nameDy, cell - 10);
     });
-    ctx.fillStyle = '#244653'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days  ·  Caught ' + save.total : 'まるふわ つりびより　つれた かず ' + save.total, 600, 1262);
-    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillStyle = '#3a5a68'; ctx.fillText(TAG(), 600, 1310);
+    ctx.fillStyle = '#244653'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days  ·  Caught ' + save.total + '  ·  ' + LV() : 'まるふわ つりびより　つれた かず ' + save.total + '　' + LV(), 600, 1262);
+    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillStyle = '#3a5a68'; ctx.textAlign = 'left'; ctx.fillText(TAG(), 46, 1317);
+    ctx.textAlign = 'right'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(HOME_HOST, 1160, 1319);   // すみに ちいさく、あそべる ばしょ（つれた しゃしんと おなじ いち・おなじ おおきさ・さくしゃの なまえは いれない）
     const words = EN()
       ? (full ? 'Sticker album complete! ' : 'Sticker album ' + seen + '/' + BASE + '.') + '\nWent fishing with Marufuwa!\n' + TAG() + '\n' + HOME_SHARE()
       : (full ? 'シールちょう、ぜんぶ あつめた！ ' : 'シールちょう ' + seen + ' / ' + BASE + '。') + '\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
