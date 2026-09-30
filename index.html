@@ -879,6 +879,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script src="tsuri-art.js"></script>
 <script src="tsuri-art-season.js"></script>
 <script src="tsuri-art-real.js"></script>
+<script src="tsuri-town.js"></script>
 <script src="tsuri-bgm.js"></script>
 <script>
 (() => {
@@ -1152,6 +1153,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     {id: 'gantai', name: 'がんたいの くま', word: 'ほしが みえるよ', home: 'B'}
   ];
   const TWINS = ['usagi', 'ribbon'];   // そっくりな うさぎ2ひき（ミント×リボン）は となりに ならべない（どちらが じぶんの ともだちか わからなく なる）
+  // 街人（天の あたらしい なかま）：PALS（15にん）は そのまま。tsuri-town.js（build_town_art.py が 絵の そろった 子だけ ならべる）から あとで 足して、となりに くる・いれかわる なかまに する。
+  // ?town=id,id は 手もとの けんさ（すでに ある img/friend-<id>-s.webp の id を ならべる）
+  const TOWN = (() => {
+    const list = [], seen = new Set(PALS.map(p => p.id)), homes = AREAS.map(a => a.id);
+    const add = t => { if (!t || typeof t.id !== 'string' || !/^[a-z]{2,12}$/.test(t.id) || seen.has(t.id) || typeof t.name !== 'string' || !t.name || t.name.length > 24) return; seen.add(t.id); list.push({id: t.id, name: t.name, en: typeof t.en === 'string' ? t.en.slice(0, 40) : '', word: 'ぼーっと するね', home: homes.includes(t.home) ? t.home : homes[list.length % homes.length], town: true}); };   // すむ ばしょが なければ 4つりばに ばらす
+    try { (window.TsuriTown && Array.isArray(window.TsuriTown.list) ? window.TsuriTown.list : []).forEach(add); } catch {}
+    (query.get('town') || '').split(',').filter(Boolean).slice(0, 8).forEach((id, i) => add({id, name: id + 'の なかま', en: id + ' the pal', home: homes[i % homes.length]}));   // 手もとの けんさ
+    return list;
+  })();
+  const ROSTER = PALS.concat(TOWN);   // となりに くる なかま ぜんいん（おくりもの・水槽の けんさが よむ PALS は かえない）
+  const palName = p => L(p.name, p.en || T(p.name));   // English は 街人が 自分の 名前を もつ（PALS の 15にんは 英語の ひょうに ある）
+  const palAlt = p => p.town ? L('となりで つりを する ' + p.name, 'Fishing next to you: ' + palName(p)) : 'となりで つりを する ' + p.name;
+  const giverOf = () => pals.find(p => PALS.includes(p)) || PALS[0];   // おくりものの「だれから」は PALS の 15にんの うち（街人が となりでも おなじ ばんごうで とどく）
   let pals = [PALS[0], PALS[1]];
   // おくりもの（14_…の しよう）。URL に のせるのは すうじだけ：?gift=魚.大きさ×10.なかま.ひとこと.あいじるし（れい 12.194.8.3.48217）。
   // ならびじゅん（FISH・PALS・GIFT_WORDS）は かえない。おくりものの URL が ばんごうで さす。もらった さかなは バケツと べつの いれもの（save.gifts・12ひきまで）
@@ -1166,9 +1180,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   tidyGifts(save);
   function callPals() {
     const now = new Date(), seed = now.getFullYear() * 372 + now.getMonth() * 31 + now.getDate();
-    const locals = PALS.filter(p => p.home === save.area), first = locals[seed % locals.length], rest = locals.filter(p => p !== first && !(TWINS.includes(first.id) && TWINS.includes(p.id)));
+    const locals = ROSTER.filter(p => p.home === save.area), first = locals[seed % locals.length], rest = locals.filter(p => p !== first && !(TWINS.includes(first.id) && TWINS.includes(p.id)));
     pals = [first, rest[Math.floor(seed / 7) % rest.length]];
-    pals.forEach((pal, i) => { const img = $(i ? 'friend-b' : 'friend-a'); img.src = 'img/friend-' + pal.id + '-s.webp'; img.alt = 'となりで つりを する ' + pal.name; });
+    pals.forEach((pal, i) => { const img = $(i ? 'friend-b' : 'friend-a'); img.src = 'img/friend-' + pal.id + '-s.webp'; img.alt = palAlt(pal); });
     paintFriendLabels();
     save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {};
     pals.forEach(pal => { save.pals[pal.id] = true; const mt = metToday(); if (!mt.ids.includes(pal.id)) mt.ids.push(pal.id); }); store();
@@ -1754,7 +1768,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const palWord = p => PAL_DAYWORD[p.id] && timeOfDay() !== 'n' ? PAL_DAYWORD[p.id] : p.word;   // なかまの ひとことは じかんに あわせる（がんたいの くま：ひるは「ひるでも ね」）
   // なかまを おすと はなしかける：なまえ＋ひとこと＋ぴょん（つる ときの わの じゃまに ならない ように、まって いる 間・なにも して いない 間だけ）
   let talkAt = 0;
-  function paintFriendLabels() { pals.forEach((pal, i) => { const b = $(i ? 'talk-b' : 'talk-a'); if (b) b.setAttribute('aria-label', L(pal.name + 'に はなしかける', 'Talk to ' + T(pal.name))); }); }
+  function paintFriendLabels() { pals.forEach((pal, i) => { const b = $(i ? 'talk-b' : 'talk-a'); if (b) b.setAttribute('aria-label', L(pal.name + 'に はなしかける', 'Talk to ' + palName(pal))); }); }
   function talkTo(i) {
     if (!(phase === 'idle' || phase === 'waiting') || swapping || performance.now() - talkAt < 800) return; talkAt = performance.now();
     const pal = pals[i], f = feet(friends[i]), word = palWord(pal), img = $(i ? 'friend-b' : 'friend-a');
@@ -1762,7 +1776,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const half = bubble.offsetWidth / scene.clientWidth * 50; place(bubble, {x: Math.min(98 - half, Math.max(2 + half, f.x)), y: f.y - 19});
     if (!reduce()) img.animate([{translate: '0 0'}, {translate: '0 -14px'}, {translate: '0 0'}], {duration: 420, easing: 'ease-out'});
     setTimeout(() => { bubble.hidden = true; }, 2600);
-    say(L(pal.name + '：「' + word + '」', T(pal.name) + ': “' + T(word) + '”'));
+    say(L(pal.name + '：「' + word + '」', palName(pal) + ': “' + T(word) + '”'));
   }
   ['talk-a', 'talk-b'].forEach((id, i) => $(id).addEventListener('click', () => talkTo(i)));
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintFriendLabels);
@@ -1789,11 +1803,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     setTimeout(chatter, Number(query.get('chat')) || (9000 + Math.random() * 8000));
   }
 
-  // なかまの いれかわり：だいたい 10ぷん（8〜14ぷん）に 1にん。「またね」と てを ふって あるいて いき、すこし あいて、べつの こが あるいて きて「こんにちは」
+  // なかまの いれかわり：だいたい 15ふん（10〜20ぷん）に 1にん。「またね」と てを ふって あるいて いき、すこし あいて、べつの こが あるいて きて「こんにちは」
   // つりの さいちゅう（まって いる・かかった・ひいて いる）は かわらない。「うごきを へらす」ときは、あるかずに いれかわる だけ。てもとの けんさは ?pals=びょう
   const dayKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
   function metToday() { const m = save.metToday; if (!m || m.d !== dayKey() || !Array.isArray(m.ids)) save.metToday = {d: dayKey(), ids: []}; return save.metToday; }   // きょう あった こ
-  const swapGap = () => { const sec = Number(probe('pals')); return sec > 0 ? sec * 1000 : (8 + Math.random() * 6) * 60000; };
+  const swapGap = () => { const sec = Number(probe('pals')); return sec > 0 ? sec * 1000 : (10 + Math.random() * 10) * 60000; };   // 10〜20ぷんに 1かい しずかに（せかさない）
   let nextSwap = Date.now() + swapGap(), swapping = false, swapFast = false, swapEpoch = 0, slotFlip = Math.random() < .5 ? 0 : 1, swapAnims = [];
   const hold = ms => new Promise(done => setTimeout(done, swapFast ? 0 : ms));
   function finishSwap() { swapFast = true; swapAnims.forEach(a => { try { a.finish(); } catch {} }); }
@@ -1814,10 +1828,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function pickNewcomer(here) {   // きょう まだ あって ない こを さきに。ぜんいん あったら はじめから。1わりは ほかの つりばの こが あそびに くる
     const mt = metToday(), met = new Set(mt.ids), present = new Set(here.map(p => p.id)), visitor = Math.random() < .1;
     const twinClash = p => TWINS.includes(p.id) && here.some(h => TWINS.includes(h.id) && h.id !== p.id);
-    const homes = PALS.filter(p => p.home === save.area && !present.has(p.id) && !twinClash(p)), away = PALS.filter(p => p.home !== save.area && !present.has(p.id) && !twinClash(p));
+    const homes = ROSTER.filter(p => p.home === save.area && !present.has(p.id) && !twinClash(p)), away = ROSTER.filter(p => p.home !== save.area && !present.has(p.id) && !twinClash(p));
     const list = visitor && away.length ? away : homes;
     let pool = list.filter(p => !met.has(p.id));
-    if (!pool.length) { if (list === homes) mt.ids = mt.ids.filter(id => !PALS.some(p => p.id === id && p.home === save.area)); pool = list; }
+    if (!pool.length) { if (list === homes) mt.ids = mt.ids.filter(id => !ROSTER.some(p => p.id === id && p.home === save.area)); pool = list; }
     return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
   }
   async function swapPal() {
@@ -1828,7 +1842,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     try {
       if (!next) return;
       const W = scene.clientWidth, seat = feet(friends[slot]).x, side = seat < 50 ? -1 : 1, off = side * ((side < 0 ? seat : 100 - seat) / 100 * W + W * .2);   // はしまで の きょり(px)
-      palSay(slot, 'またね'); say(old.name + 'が「またね」と かえって いったよ。');
+      palSay(slot, 'またね'); say(old.town ? L(old.name + 'が「またね」と かえって いったよ。', palName(old) + ' waved goodbye and left.') : old.name + 'が「またね」と かえって いったよ。');
       if (!reduce() && !swapFast) {
         const wave = img.animate([{rotate: '0deg'}, {rotate: '12deg'}, {rotate: '-10deg'}, {rotate: '12deg'}, {rotate: '0deg'}], {duration: 900}); swapAnims.push(wave);
         try { await wave.finished; } catch {}
@@ -1838,14 +1852,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       } else { img.style.visibility = 'hidden'; palRig(slot, false); }
       if (!still()) return;
       await hold(reduce() ? 1200 : 2200); if (!still()) return;
-      pals[slot] = next; img.src = 'img/friend-' + next.id + '-s.webp'; img.alt = 'となりで つりを する ' + next.name; paintFriendLabels();   // いれかわった なかまの なまえで「はなしかける」の ラベルも かきなおす
+      pals[slot] = next; img.src = 'img/friend-' + next.id + '-s.webp'; img.alt = palAlt(next); paintFriendLabels();   // いれかわった なかまの なまえで「はなしかける」の ラベルも かきなおす
       const mt = metToday(); if (!mt.ids.includes(next.id)) mt.ids.push(next.id);
       save.pals = save.pals && typeof save.pals === 'object' ? save.pals : {}; save.pals[next.id] = true; store();
       img.style.visibility = '';
       if (!reduce()) { await walk(img, off, 0, 'backwards'); if (!still()) return; }
       palRig(slot, true);   // ついて から、さおと ウキを だす
       const guest = next.home !== save.area;
-      palSay(slot, guest ? 'あそびに きたよ' : 'こんにちは'); say(next.name + (guest ? 'が あそびに きたよ。' : 'が きたよ。'));
+      palSay(slot, guest ? 'あそびに きたよ' : 'こんにちは'); say(next.town ? L(next.name + (guest ? 'が あそびに きたよ。' : 'が きたよ。'), palName(next) + (guest ? ' came to visit.' : ' has arrived.')) : next.name + (guest ? 'が あそびに きたよ。' : 'が きたよ。'));
     } finally {
       img.style.visibility = ''; palRig(slot, true); swapAnims.forEach(a => { try { a.cancel(); } catch {} }); swapAnims = [];   // どんな おわりかたでも、すがたが のこらない ように
       swapping = false; nextSwap = Date.now() + swapGap();
@@ -2432,14 +2446,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function openGive(f, size) {
     giving = {f, size}; givingWord = 1; drawWords();
     $('give-fish').replaceChildren(fishImg(f)); $('give-what').replaceChildren(ruby(f.kanji), '　' + cm(size) + 'センチ');
-    $('give-from').textContent = (pals[0] || PALS[0]).name + ' から とどくよ。';
+    $('give-from').textContent = giverOf().name + ' から とどくよ。';
     giveSay('リンクを おくる ときは、おうちの ひとと いっしょに つかってね。');
     giveBox.showModal(); giveWords.children[givingWord].focus();
   }
   const newSeal = () => { const a = new Uint32Array(1); try { crypto.getRandomValues(a); } catch { a[0] = Math.floor(Math.random() * 4294967296); } return String(10000 + a[0] % 90000); };
   $('give-go').addEventListener('click', async () => {
     if (!giving) return;
-    const {f, size} = giving, code = [f.id, Math.min(9999, Math.round(size * 10)), Math.max(0, PALS.indexOf(pals[0])), givingWord, newSeal()].join('.');
+    const {f, size} = giving, code = [f.id, Math.min(9999, Math.round(size * 10)), Math.max(0, PALS.indexOf(giverOf())), givingWord, newSeal()].join('.');
     const url = HOME + '?gift=' + code, text = EN() ? 'I caught a ' + f.name + ' (' + cm(size) + ' cm) in Marufuwa Fishing Days. This one is for you! ' + TAG() : 'まるふわ つりびよりで ' + f.name + ' ' + cm(size) + 'センチ、つったよ。あげる！ #まるふわつりびより';
     if (navigator.share) {
       try { await navigator.share({text, url}); giveSay('きょうゆうの がめんを とじました。'); return; }
@@ -2771,11 +2785,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       })); }
     const decor = save.decor && typeof save.decor === 'object' ? Object.entries(save.decor) : [];
     $('decor-list').textContent = decor.length ? decor.map(([name, count]) => name + ' ×' + count).join('　') : 'まだ ないよ。さかなが ときどき もって くるよ。';
-    $('pal-list').replaceChildren(...PALS.map(pal => {
+    $('pal-list').replaceChildren(...ROSTER.map(pal => {
       const met = save.pals && save.pals[pal.id], tag = document.createElement('span'), img = document.createElement('img');
       tag.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;text-align:center;line-height:1.3;font-size:.75rem;width:84px;word-break:keep-all;text-wrap:balance;';
       img.src = 'img/friend-' + pal.id + '-s.webp'; img.width = img.height = 52; img.alt = ''; img.style.objectFit = 'contain'; if (!met) { img.style.opacity = '.35'; img.style.filter = 'grayscale(1)'; }   // まだ あって ない 子は、絵だけ うすく（「？」の 字は はっきり）
-      tag.append(img, met ? pal.name : '？');
+      tag.append(img, met ? (pal.town ? palName(pal) : pal.name) : '？');
       if (met && save.loved && Number.isInteger(save.loved[pal.id]) && FISH[save.loved[pal.id]]) { const heart = document.createElement('small'); heart.className = 'pal-love'; heart.append('♡ ', FISH[save.loved[pal.id]].name); tag.append(heart); }   // みせて よろこんだ なかまには ♡ と「すきな さかな」
       return tag;
     }));
