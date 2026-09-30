@@ -400,7 +400,8 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 #hp-label{position:absolute;left:50%;top:76.5%;transform:translateX(-50%);white-space:nowrap;font-weight:900;font-size:.78rem;color:#fff;background:#17323dcc;border-radius:10px;padding:1px 9px}
 #judge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;font-weight:900;font-size:clamp(1.1rem,5.5vw,1.7rem);color:#fff;-webkit-text-stroke:1px #7a4a00;text-shadow:0 2px 0 #7a4a00,0 0 10px #000a}
 #judge[data-power="3"]{color:#ffe14d;font-size:clamp(1.6rem,8vw,2.5rem)}   /* ぴったり：おおきく */
-#judge[data-power="1"]{font-size:clamp(.9rem,4.4vw,1.25rem);opacity:.9}   /* ちかい：ちいさく */
+#judge[data-power="1"]{font-size:clamp(.9rem,4.4vw,1.25rem);opacity:.9}
+#judge[data-center="1"]{font-size:clamp(1.9rem,9.5vw,2.9rem)}   /* ど真ん中：いちばん おおきく */   /* ちかい：ちいさく */
 #combo{position:absolute;left:50%;top:18%;transform:translateX(-50%);white-space:nowrap;font-weight:900;font-size:.9rem;color:#fff;text-shadow:0 1px 4px #000b}
 .spark{position:absolute;z-index:6;width:12px;height:12px;background:#fff6a8;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);pointer-events:none}
 
@@ -1475,6 +1476,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const SFX = {
     tick: i => guideTone([392, 494, 587, 740][i], .05, 'sine', 0, [.151, .127, .113, .1][i]),   // ぽ・ぽ・ぽ・ぽ（sine＝たかい ひびきが ない・ひくい おとほど おおきく）
     pikon: () => guideChord([659, 988], .09, 'triangle', .06),   // いまだ
+    center: () => guideTone(98, .32, 'sine', 0, .1),   // ど真ん中：ひくい ドンッ
     perfect: () => { guideChord([523, 659, 784, 1047], .06, 'triangle', .045); guideTone(131, .22, 'sine', 0, .09); guideTone(262, .16, 'triangle', 0, .05); },   // ぴったり：4おと＋ひくい ふとい おと（ちかい・いいねより ずっと おおきく ふとい）
     surface: () => { tone(260, .14, 'sine', 0, .05, 150); zap(.08, .02, .03); },   // ぽちゃ（さかなが かおを だす）
     nice: () => { guideTone(523, .06, 'triangle', 0, .04); guideTone(784, .09, 'triangle', .06, .04); },   // いいね
@@ -1626,6 +1628,23 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     pitatto: {name: 'ぴたっと', tip: 'とちゅうで、いちど とまるよ', f: p => p < .34 ? 1 - p * 1.18 : p < .58 ? .6 : .6 * (1 - (p - .58) / .42)}
   };
   const swimOf = f => f.legend ? 'yuttari' : f.rare === 1 ? ['yuttari', 'yurari'][f.id % 2] : f.rare === 2 ? ['yurari', 'guigui', 'yuttari'][f.id % 3] : f.rare === 3 ? ['guigui', 'furafura', 'pitatto'][f.id % 3] : ['furafura', 'pitatto'][f.id % 2];
+  // 魚ごとの くせ（おなじ 魚は まいかい おなじ＝おぼえると じょうずに なる）：せっかち＝はじめが はやい／のんびり＝はじめが ゆっくり／ためる＝まとの まえで ちょっと とまる。およぎの かたちだけ かえる（はんていの つくりは そのまま）。ずかんの カードに ひらがな 1ご
+  const QUIRKS = {hasty: {ja: 'せっかち', en: 'Hasty', tip: ['はじめが はやい', 'quick at the start']}, calm: {ja: 'のんびり', en: 'Laid-back', tip: ['はじめが ゆっくり', 'slow at the start']}, hold: {ja: 'ためる', en: 'Holds', tip: ['まとの まえで ちょっと とまる', 'pauses just before the target']}};
+  const quirkOf = f => !f || f.legend ? '' : [null, 'hasty', 'calm', 'hold'][(f.id * 5 + 2) % 4] || '';
+  function withQuirk(base, q) {
+    if (!q || !QUIRKS[q]) return base;
+    let warp = p => p;
+    if (q === 'hasty') warp = p => Math.pow(p, .78);
+    else if (q === 'calm') warp = p => Math.pow(p, 1.3);
+    else if (q === 'hold') {
+      let hitP = 1; for (let i = 0; i <= 400; i++) if (base.f(i / 400) <= TARGET) { hitP = i / 400; break; }
+      const a = Math.max(.05, hitP - .12), hold = .08;
+      if (hitP + .12 > .93) return base;   // よゆうが ない およぎは くせなし
+      warp = p => p <= a ? p : p <= a + hold ? a : a + (p - a - hold) * (1 - a) / (1 - a - hold);
+    }
+    return {name: base.name, tip: base.tip, quirk: q, f: p => base.f(warp(Math.min(1, Math.max(0, p))))};
+  }
+  let swimBase = null, qk = '', plannedBase = null, nushiPhase2 = false;
   let swim = SWIMS.yurari, hitAt = 0, perfects = 0, spinning = 0, misses = 0, restUntil = 0, restBlip = 0, ringAnim = null;
   const cycleTime = () => (performance.now() - ringStart) % period;
   const ringSize = () => swim.f(cycleTime() / period);
@@ -1640,6 +1659,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const blindNow = () => curMode() === 'easy' || (reduce() && !sndOn('guide'));   // タイミングを みない（わが みえない・きこえない）人には はりも かけない
   const tensionOn = () => !!fish && save.total > 0 && !blindNow() && (fish.rare >= modeCfg().min || nushi || !!fish.legend);   // はじめの 1ぴきは かならず つれる
   function windowMs() { const k = (curMode() === 'hard' && !save.slow ? MODE_CFG.hard.win : 1) * (1 + .15 * skillMul('me')), cfg = modeCfg(), lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); return (Math.max((save.slow ? 180 : 120) * k, (.06 + .1 * (1 - away) + save.rod * .025) * period * k) + Math.min(cfg.cap, slips * cfg.step)) * (save.total === 0 ? 2 : 1); }   // しっかりでも ゆったり（save.slow）の ときは まどを せまく しない   // ぴったりに ならなかった れんぞく（いいね・ちかい）ごとに +45ms（うえ 360ms）。ずれ つづける ひとを またせすぎない（ぴったりで もどる。ものさし _kenpin_tmp/sim_reel.mjs SLIP=1：★3 ±0.3びょう ずれる ひと 5.7→4.8びょう・ぴったり ねらう・れんだは かわらない）   // はじめての 1ぴきだけ、「いまだ」の まどを 2ばい（ばつは ない・さいしょの 1ぴきは かならず つれる）
+  const swimTagText = () => EN() ? T(swimBase ? swimBase.name : swim.name) + (qk ? ' · ' + QUIRKS[qk].en : '') : (swimBase ? swimBase.name : swim.name) + (qk ? '・' + QUIRKS[qk].ja : '');
+  function nushiRally() {   // ぬしが はんぶん より すくなく なったら「はりきる」：わが すこし はやく なり、くせが かわる／ふえる（はんてい・まどの つくりは そのまま。にげやすさは あそびかたの きまりの まま）
+    period = Math.round(period * .86); qk = qk === 'hasty' ? 'hold' : 'hasty'; swim = withQuirk(swimBase, qk);
+    hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
+    ringStart = performance.now(); ringSync(); startGuide(); $('swim-tag').textContent = save.easy ? 'らくちん' : swimTagText();
+    say(L('ぬしが はりきってる！ ゆっくり あわせよう。', 'The Guardian is fired up! Take it steady.'));
+    if (!reduce()) { const w = floatAt(mine), el = document.createElement('span'); el.className = 'hop plop'; el.setAttribute('aria-hidden', 'true'); el.style.fontWeight = '900'; el.style.color = '#fff'; el.textContent = L('はりきってる！', 'Fired up!'); place(el, {x: w.x + 2, y: w.y - 10}); scene.append(el); el.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -22px'}], {duration: 1400}).onfinish = () => el.remove(); }
+  }
   function startGuide() {
     // うごきを へらす せっていでも、おとの あんないは とめない（めが みえなくて、うごきも へらしたい ひとの ため）
     stopGuide(); if (!sndOn('guide') || save.easy) return;
@@ -1713,8 +1740,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const w = floatAt(mine), el = document.createElement('span'); el.className = 'hop surface'; el.setAttribute('aria-hidden', 'true'); el.replaceChildren(fishImg(fish)); place(el, {x: w.x + 2, y: w.y - 3}); scene.append(el);
     el.animate([{opacity: 0, translate: '0 26px', scale: '.5'}, {opacity: 1, translate: '0 -6px', scale: '1', offset: .35}, {opacity: 1, translate: '0 -8px', scale: '1', offset: .7}, {opacity: 0, translate: '0 10px', scale: '.8'}], {duration: 600, easing: 'ease-out'}).onfinish = () => el.remove();
   }
-  function splash(power) {   // みずしぶき：おおものほど おおきく（うごきを へらす ときは なし）
-    if (reduce() || !fish) return; const w = floatAt(mine), big = nushi || fish.legend ? 2 : fish.rare * .3 + .6, k = ({3: 1.9, 2: 1, 1: .4})[power] || 1, n = Math.max(2, Math.round((2 + big * 3 + power) * k));   // ぴったり＝おおきな しぶき／ちかい＝ちいさな しぶき
+  function splash(power, center) {   // みずしぶき：おおものほど おおきく（うごきを へらす ときは なし）
+    if (reduce() || !fish) return; const w = floatAt(mine), big = nushi || fish.legend ? 2 : fish.rare * .3 + .6, k = (center ? 2.7 : ({3: 1.9, 2: 1, 1: .4})[power]) || 1, n = Math.max(2, Math.round((2 + big * 3 + power) * k));   // ぴったり＝おおきな しぶき／ちかい＝ちいさな しぶき
     for (let i = 0; i < n; i++) {
       const d = document.createElement('i'), ang = -Math.PI * (.12 + .76 * Math.random()), far = (16 + Math.random() * 20) * (.6 + big * .6) * (.6 + .4 * k), size = (3 + Math.random() * 3 + big * 2.5) * (.7 + .3 * k);
       d.className = 'drop'; d.setAttribute('aria-hidden', 'true'); d.style.width = d.style.height = size.toFixed(1) + 'px'; place(d, w); scene.append(d);
@@ -1813,7 +1840,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
     shadow.style.setProperty('--swim', wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});
     // かかる まえの「ちょんちょん」。ウキが ちいさく ゆれて、もうすぐ くると わかる
-    nibbleTimer = setTimeout(() => { if (phase === 'waiting') { $('float').dataset.nibble = 'true'; SFX.nibble(); say('ちょん、ちょん…。なにか きたかも。'); } }, Math.max(flight ? flight + 150 : 0, wait - 750));   // ちゃくすいの まえに ちょんちょん しない（さいしょの 1ぴきは まちが 1.3びょうと みじかい）
+    nibbleTimer = curMode() === 'hard' ? 0 : setTimeout(() => { if (phase === 'waiting') { $('float').dataset.nibble = 'true'; SFX.nibble(); say('ちょん、ちょん…。なにか きたかも。'); } }, Math.max(flight ? flight + 150 : 0, wait - 750));   // ちゃくすいの まえに ちょんちょん しない（さいしょの 1ぴきは まちが 1.3びょうと みじかい）
     biteTimer = setTimeout(() => { delete $('float').dataset.nibble; if (phase === 'waiting') bite(); }, wait);   // まって いる 間だけ アタリ（ほかの じょうたいなら なにも しない）
   }
   // なげる うごき：うしろに そって、えいっと ふって、ウキが ゆみなりに とんで、ぽちゃん
@@ -1845,7 +1872,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     hpMax = hp = Math.min(12, 3 + fish.rare * 2 + (nushi ? 5 : 0)); period = 1850 - fish.rare * 250;   // ぬしでも さいだい 12（16だと ながすぎて つかれる）
     if (save.total === 0) { hpMax = hp = 3; period = 1700; }   // さいしょの 1ぴきは、かならず すぐ つれる
     if (fish.legend) { hpMax = hp = 7; period = 1500; }   // まぼろしは、でて きたら つれる。わは ゆっくり
-    swim = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; perfects = 0; perfectStreak = 0; slips = 0; misses = 0; restUntil = 0;
+    plannedBase = nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + (fish.max - fish.min) * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8);   // おおきさは さきに きめる（おおきい ほど わが すこし はやい・±10%）
+    if (save.total > 0 && !fish.legend && !query.get('swim')) { const sn = nushi ? 1 : Math.min(1, Math.max(0, (plannedBase - fish.min) / ((fish.max - fish.min) || 1))); period = Math.round(period * (1 - .1 * (2 * sn - 1))); }
+    swimBase = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; qk = query.has('quirk') ? (QUIRKS[query.get('quirk')] ? query.get('quirk') : '') : (query.get('swim') || save.total === 0 ? '' : quirkOf(fish)); nushiPhase2 = false;   // ?swim=・さいしょの 1ぴきは くせなし
+    swim = withQuirk(swimBase, qk); perfects = 0; perfectStreak = 0; slips = 0; misses = 0; restUntil = 0;
     // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
     hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
     ringStart = reelStartAt = performance.now(); ringSync(); tension = 0; tensionAt = performance.now(); closeStreak = 0; tStage = 0; $('reel').dataset.tens = tensionOn() ? 'on' : 'off'; paintTension();
@@ -1856,7 +1886,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     shadow.style.left = $('reel').style.left; shadow.style.top = $('reel').style.top;
     wanderStart = performance.now(); startGuide(); cancelAnimationFrame(spinning); spinning = requestAnimationFrame(spin);
     button.textContent = 'いまだ！';
-    $('swim-tag').textContent = save.easy ? 'らくちん' : swim.name;   // （しっかりでも およぎの なまえ）
+    $('swim-tag').textContent = save.easy ? 'らくちん' : swimTagText();   // （しっかりでも およぎの なまえ）
     // みじかく。ちいさい こでも ひとめで わかる ように
     say(save.easy || (reduce() && !sndOn('guide')) ? 'おすだけで、つれるよ。' : sndOn('guide') ? '「ピコン」で、おしてね。' : 'ひかったら、おしてね。');
   }
@@ -1890,9 +1920,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     if (performance.now() - reelStartAt >= 5500) hp = 0;   // どんな ひきかたでも 5.5びょう たてば つれる（さかなが つかれる。ばつは ない・ずれる ひとの さいだい じかんを のばさない）
     $('hp').firstElementChild.style.width = (Math.ceil(hp / 2) / Math.ceil(hpMax / 2) * 100) + '%';   // めもりに そろえる（1めもり＝あと 1かい）
-    const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
-    const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
-    if (power === 3) { SFX.perfect(); buzz(40); }   // ピロリロッ
+    const center = power === 3 && miss <= 40 && !blind;   // ど真ん中（±40ms）：「ぴったり！！！」・いちばん おおきな しぶき・ふるえ ながめ
+    const word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
+    const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power); judge.dataset.center = center ? '1' : '';
+    if (power === 3) { SFX.perfect(); if (center) SFX.center(); buzz(center ? [40, 40, 90] : 40); }   // ピロリロッ（ど真ん中は ひくい おとを もう ひとつ）
     else if (power === 2) SFX.nice();   // ピコッ
     else SFX.close();   // ポフッ
     $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
@@ -1902,18 +1933,18 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       marufuwa.animate(big3 ? [{rotate: '-7deg', scale: '1 1'}, {rotate: '-27deg', scale: '.9 1.1', translate: '-12px -4px'}, {rotate: '-7deg', scale: '1 1'}] : small1 ? [{rotate: '-7deg', scale: '1 1'}, {rotate: '-11deg', scale: '.98 1.02'}, {rotate: '-7deg', scale: '1 1'}] : [{rotate: '-7deg', scale: '1 1'}, {rotate: '-20deg', scale: '.94 1.06', translate: '-8px 0'}, {rotate: '-7deg', scale: '1 1'}], {duration: big3 ? 320 : 260, easing: 'ease-out'});
       judge.animate(big3 ? [{scale: '.5'}, {scale: '1.7', offset: .6}, {scale: '1.25'}] : small1 ? [{scale: '.8'}, {scale: '1'}] : [{scale: '.6'}, {scale: '1.25'}, {scale: '1'}], {duration: big3 ? 300 : 260, easing: 'ease-out'});
       kickUntil = performance.now() + 380; kickPower = power;   // さおの しなり（ぴったり＝おおきく）
-      if (power === 3) sparkle(); else if (power === 1) puff();
-      splash(power);
+      if (power === 3) sparkle(center ? 14 : 8); else if (power === 1) puff();
+      splash(power, center);
     }
     if (surfaced) surface();
     if (snapped) { escapeNow(); return; }
     if (hp === 0) caught(); else { const stage = hp <= 2 ? 0 : hp <= Math.ceil(hpMax / 2) ? 1 : 2;   // あと 1かい／もうすぐ／もうちょっと（つぎの ひきで さいてい 2つ へるので、のこり 2いかは かならず あと 1かい）
-      say(L(word + ' ' + ['あと 1かい！', 'もうすぐ！', 'もうちょっと。'][stage], ({3: 'Perfect!!', 2: 'Nice!', 1: 'So close!'})[power] + ' ' + ['One more!', 'Almost there!', 'Keep going.'][stage]), true); }
+      say(L(word + ' ' + ['あと 1かい！', 'もうすぐ！', 'もうちょっと。'][stage], (center ? 'PERFECT!!!' : ({3: 'Perfect!!', 2: 'Nice!', 1: 'So close!'})[power]) + ' ' + ['One more!', 'Almost there!', 'Keep going.'][stage]), true); if (nushi && !fish.legend && !nushiPhase2 && hp <= Math.ceil(hpMax / 2)) { nushiPhase2 = true; setTimeout(() => { if (phase === 'reel') nushiRally(); }, 350); } }
   }
-  function sparkle() {
+  function sparkle(n = 8) {
     const reel = $('reel');
-    for (let i = 0; i < 8; i++) {
-      const star = document.createElement('i'), angle = Math.PI * 2 * i / 8 + Math.random() * .5, far = 60 + Math.random() * 40;
+    for (let i = 0; i < n; i++) {
+      const star = document.createElement('i'), angle = Math.PI * 2 * i / n + Math.random() * .5, far = 60 + Math.random() * 40;
       star.className = 'spark'; star.style.left = reel.style.left; star.style.top = reel.style.top; scene.append(star);
       star.animate([{translate: '-50% -50%', scale: '.4', opacity: 1}, {translate: (Math.cos(angle) * far - 6) + 'px ' + (Math.sin(angle) * far - 6) + 'px', scale: '1.3', opacity: 0}], {duration: 620, easing: 'ease-out'}).onfinish = () => star.remove();
     }
@@ -1951,7 +1982,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const range = fish.max - fish.min;
     // ねらって「ぴったり」を だした ぶん、すこし おおきい こが つれる（1かいで 2.5%、さいだい 10%）。れんだ より、ねらう ほうが とく
     const aimed = 1 + Math.min(.1, perfects * .025);
-    const size = Math.round((nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + range * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8)) * aimed * 100) / 100;
+    const size = Math.round((plannedBase != null ? plannedBase : nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + range * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8)) * aimed * 100) / 100; plannedBase = null;   // 「ひく」まえに きめた おおきさ
     const old = save.fish[fish.id], first = !old, record = !first && size > old.best, big = !nushi && size >= fish.min + range * .8, firstNushi = nushi && !(old && old.nushi);
     const had = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))];
     save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
@@ -3415,7 +3446,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (fact) { cell.tabIndex = 0; cell.setAttribute('role', 'button'); cell.dataset.fact = '1'; const showFact = () => { const box = $('book-fact'); box.hidden = false; box.replaceChildren(L(f.name + '　' + fact.ja, T(f.name) + ' — ' + fact.en)); box.dataset.for = String(f.id); }; cell.addEventListener('click', showFact); cell.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showFact(); } }); }   // おすと まめちしき
       const icon = document.createElement('b'); if (got || met) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
-      cell.append(icon, got || met ? ruby(f.kanji) : 'まだ あってない', ...(met ? [document.createElement('br'), L('あえたよ（まだ つれてない）', 'Met it (not caught yet)')] : []), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
+      cell.append(icon, got || met ? ruby(f.kanji) : 'まだ あってない', ...(met ? [document.createElement('br'), L('あえたよ（まだ つれてない）', 'Met it (not caught yet)')] : []), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(got && quirkOf(f) ? [document.createElement('br'), L('くせ：' + QUIRKS[quirkOf(f)].ja + '（' + QUIRKS[quirkOf(f)].tip[0] + '）', 'Quirk: ' + QUIRKS[quirkOf(f)].en + ' (' + QUIRKS[quirkOf(f)].tip[1] + ')')] : []), ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
       return cell;
     };
     {   // つりばごとに ならべる（みずうみ・かわ・みなとまち・ふねの うえ）。「くらべる」では なく、じぶんの あつめぐあいが わかる
