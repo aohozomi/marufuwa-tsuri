@@ -21,6 +21,13 @@
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const readJSON = key => { try { const d = JSON.parse(localStorage.getItem(key)); return d && typeof d === 'object' ? d : null; } catch { return null; } };
   const soundOn = () => (readJSON(MAIN_KEY) || {}).sound === true;
+  // おとの せってい（つりびよりの「つかいやすく する」→「おとの せってい」）：こうかおん（sndFx）を きった 人には、ひみつを 見つけた 時の おとも ならさない（項目が なければ 入）。
+  // ひみつノートの「もういちど きく」は じぶんで おした ものなので、こうかおんを きっていても ならす（「おと」が ON の 時だけ＝'ui'）。
+  // やさしい おと（soft）：かくばった なみは まるい なみに・1.8kHz より たかい おとは 1オクターブ さげる（本体と おなじ かんがえ）
+  let sndKind = 'fx';
+  const sndSet = () => readJSON(MAIN_KEY) || {};
+  const kindOn = () => { const st = sndSet(); return st.sound === true && (sndKind === 'ui' || st.sndFx !== false); };
+  const asKind = (k, fn) => { const p = sndKind; sndKind = k; try { return fn(); } finally { sndKind = p; } };
   let speed = 1, skew = 0, muted = false;        // 検査用：時間を はやめる／すすめる／ひみつの 待ち時間を 止める（ほかの 検査が 仮想の 時計を 進める 間、こじか・ねこが 勝手に 出ないように）
   const dur = ms => ms / speed, later = (fn, ms) => setTimeout(fn, dur(ms)), clock = () => performance.now() + skew;
   const say = text => { if (status) status.textContent = text; };
@@ -31,18 +38,19 @@
   const ready = () => { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; };
   const route = (c, node, pan) => { if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); node.connect(p); p.connect(c.destination); } else node.connect(c.destination); };
   function tone(freq, len = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, pan = 0) {
-    if (!soundOn()) return;
+    if (!kindOn()) return;
     try {
       const c = ready(), at = c.currentTime + delay, osc = c.createOscillator(), vol = c.createGain();
+      let rounded = false; if (sndSet().soft === true) { if (type === 'square') { type = 'triangle'; rounded = true; } if (freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; } }
       osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
       if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + len);
-      const level = osc.type === 'triangle' ? loud * 2.2 : loud;
+      const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud;
       vol.gain.setValueAtTime(level, at); vol.gain.setValueAtTime(level * .6, at + len * .5); vol.gain.setValueAtTime(0, at + len);
       osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + len + .02);
     } catch {}
   }
   function zap(len = .1, delay = 0, loud = .06, pan = 0) {
-    if (!soundOn()) return;
+    if (!kindOn()) return;
     try {
       const c = ready(), at = c.currentTime + delay;
       if (!hiss) { hiss = c.createBuffer(1, c.sampleRate * .5, c.sampleRate); const d = hiss.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
@@ -286,6 +294,10 @@
     'hiroba-spin': ['🌀', 'まるふわの くるくる', 'まるふわが くるくると まわったよ。'],
     'hiroba-meteor': ['🌠', 'ひろばの ながれぼし', 'ひろばの よぞらに、ながれぼしが とんだよ。'],
     'hiroba-pond': ['🐟', 'いけの さかな', 'いけで さかなが ぴょんと はねたよ。'],
+    'hiroba-bench': ['🪑', 'ベンチで ひとやすみ', 'ベンチで ゆっくり すわって いたら、なかまが となりに きて くれたよ。'],
+    'hiroba-wishstar': ['🌟', 'ねがいの ほし', 'つりばで ねがった ぶんだけ、よるの ひろばの そらに ほしが ふえるよ。'],
+    'hiroba-group': ['📷', 'みんなで しゃしん', 'なかまが ぜんいん あつまって きたよ。'],
+    'hiroba-kouji': ['🚧', 'かんばんの うら', 'こうじちゅうの かんばんの うらに、なにか かいて あったよ。'],
     'hiroba-thanks': ['🌟', 'ありがとうの ほしぞら', 'ありがとうの いしを ひらいて、あそんで くれた ひとの ほしを みたよ。'],
     'kotoba-hajimari': ['✨', 'はじめの ことば', 'ひみつの ことばを みつけたよ。ことばは、これから ふえるかも しれないよ。']
   };
@@ -322,7 +334,7 @@
   function replay(id) {
     if (!NOTE[id]) return false;
     let text = NOTE[id][2];
-    if (REPLAY[id]) REPLAY[id]();
+    if (REPLAY[id]) asKind('ui', () => REPLAY[id]());
     else if (/^heya-/.test(id) && window.TsuriTank && typeof window.TsuriTank.replay === 'function') { const t = window.TsuriTank.replay(id); if (t) text = t; }
     else chord([988, 1319, 1568], .07);
     const live = $('hm-live'); if (live) live.textContent = text;
@@ -440,7 +452,11 @@
       'ことばを しって いたら、ここに いれてね。まちがえても、なにも おこらないよ。': 'If you know a word, type it here. If you get it wrong, nothing happens.',
       'ひみつの ことばが みつかったよ！': 'You found a secret word!', 'この ことばは もう みつけて いるよ。いつでも どうぞ。': 'You already found this word. Feel free to enter it anytime.',
       'みつからなかったよ。ことばが ちがうのかも。もういちど ためしてね。': 'Not found. Maybe the word is different. Please try again.', 'ことばを いれてね。': 'Please enter a word.',
-      'ひみつの ことばを みつけたよ。ことばは、これから ふえるかも しれないよ。': 'You found a secret word. There might be more words from now on.'
+      'ひみつの ことばを みつけたよ。ことばは、これから ふえるかも しれないよ。': 'You found a secret word. There might be more words from now on.',
+      'ベンチで ひとやすみ': 'A Rest on the Bench', 'ベンチで ゆっくり すわって いたら、なかまが となりに きて くれたよ。': 'While you rested quietly on the bench, a friend came and sat next to you.',
+      'ねがいの ほし': 'Wishing Star', 'つりばで ねがった ぶんだけ、よるの ひろばの そらに ほしが ふえるよ。': 'The more wishes you make at the fishing spot, the more stars appear in the plaza sky at night.',
+      'みんなで しゃしん': 'Group Photo', 'なかまが ぜんいん あつまって きたよ。': 'All the friends gathered around.',
+      'かんばんの うら': 'Back of the Sign', 'こうじちゅうの かんばんの うらに、なにか かいて あったよ。': 'There was something written on the back of the construction sign.'
     }, rules: [
       [/^(ひみつのことばがみつかったよ！|このことばはもうみつけているよ。いつでもどうぞ。)(.+)$/, (_, a, b) => { const E = window.TsuriEn, x = E && E.tr ? E.tr(a) : null, y = E && E.tr ? E.tr(b) : null; return x == null || y == null ? null : x + ' ' + y; }],
       [/^✨(.+)✨$/, (_, a) => { const E = window.TsuriEn, x = E && E.tr ? E.tr(a) : null; return x == null ? null : '✨ ' + x + ' ✨'; }],

@@ -146,6 +146,15 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 .bubble::after{content:"";position:absolute;left:calc(var(--tx,50%) - 7px);bottom:-8px;width:12px;height:12px;background:#fff;border-right:2px solid #b9d1db;border-bottom:2px solid #b9d1db;transform:rotate(45deg) skew(8deg,8deg);border-radius:0 0 4px 0}
 @keyframes pop{from{opacity:0;scale:.85}to{opacity:1;scale:1}}
 .fx{position:absolute;z-index:950;pointer-events:none;font-size:1.3rem;line-height:1;left:0;top:0}
+button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ffb300;outline-offset:2px}
+@keyframes snapPulse{50%{scale:1.06}}
+@media(prefers-reduced-motion:reduce){button.pulse{animation:none}}
+.kouji-back{position:absolute;left:19%;top:1%;width:62%;height:31%;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff6cf;border:2.5px solid #7a4b34;border-radius:8px;color:#593700;font-weight:900;font-size:clamp(9px,2.9vw,12px);line-height:1.2;pointer-events:none;z-index:2}   /* こうじちゅうの かんばんの うら（きつねの 字・5回で うらがえり） */
+.actor.sitting img{translate:0 6px}   /* ベンチで ひとやすみ：すわる 絵は ないので、ベンチの まえへ ちょっと さげて おく */
+#wishstars{position:absolute;inset:0;z-index:3;pointer-events:none}
+.wstar{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;display:grid;place-items:center;font-size:15px;line-height:1;color:#ffe27a;text-shadow:0 0 6px #fff6b0;opacity:.78;cursor:pointer;pointer-events:auto;animation:wtwinkle 3.6s ease-in-out infinite;animation-delay:calc(var(--d,0) * 1s)}   /* つりばで ねがった ぶんの 星（よるだけ・さわれる・44px） */
+@keyframes wtwinkle{50%{opacity:.42;scale:.86}}
+@media(prefers-reduced-motion:reduce){.wstar{animation:none}}
 .meteor{position:absolute;z-index:2;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;cursor:pointer;pointer-events:auto}
 .meteor::before{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:#fffbe0;box-shadow:0 0 10px 4px #fff6a8,-30px -14px 14px 2px #fff6a866,-16px -7px 8px 2px #fff6a8aa}
 /* あめ */
@@ -339,6 +348,7 @@ body.calm .cloud.c2{left:56%}
         <button type="button" data-touch="orb" id="touch-orb">おひさま</button>
         <button type="button" data-touch="cloud">くも</button>
         <button type="button" data-touch="tree">き</button>
+        <button type="button" data-touch="bench">ベンチ</button>
         <button type="button" data-touch="me">まるふわ</button>
         <button type="button" data-touch="thanks" id="touch-thanks" hidden>ありがとうの いし</button>
       </div>
@@ -426,6 +436,13 @@ function writeSound(on) {
   main = readJSON(MAIN_KEY) || main;
 }
 const soundOn = () => soundFlag;
+// おとの せってい（つりびよりの「つかいやすく する」→「おとの せってい」）：こうかおん（sndFx）・なみと あめ（sndAmb）・あんない（sndGuide）を きった 人には、その しゅるいの おとを ならさない（項目が なければ 入）。
+//   あんない＝「まわりを きく」の ばしょの おと／なみと あめ＝ふんすいの みず・あめ・とり・こおろぎ／のこりは こうかおん。「おとを つけたよ」の かくにんの おと（sfx.on）は いつも ならす（'ui'）。
+//   やさしい おと（soft）：かくばった なみは まるい なみに・1.8kHz より たかい おとは 1オクターブ さげる。「おと」ぜんたいが OFF なら 今までどおり ならさない
+let sndKind = 'fx';
+const sndOk = () => soundOn() && (sndKind === 'ui' || !main || main[sndKind === 'guide' ? 'sndGuide' : sndKind === 'amb' ? 'sndAmb' : 'sndFx'] !== false);
+const asKind = (k, fn) => { const p = sndKind; sndKind = k; try { return fn(); } finally { sndKind = p; } };
+const soft = () => !!(main && main.soft === true);
 const reduceOS = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const reduce = () => own.motion === 'less' || reduceOS();
 
@@ -449,6 +466,7 @@ function applyTime() {
   const hour = new Date().getHours(), night = hour >= 19 || hour < 5;
   scene.dataset.dim = String(night && curTime !== 'n');
   const orb = $('touch-orb'); if (orb) orb.textContent = curTime === 'n' ? 'おつきさま' : 'おひさま';
+  renderWishStars();
 }
 
 // ─── おと（むかしの ゲームき ふう：かくばった なみ・さんかくの なみ・みじかい ざっ だけ）───
@@ -456,18 +474,19 @@ let ac = null, noiseBuf = null, amb = null;
 function ready() { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
 function route(c, node, pan) { if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); node.connect(p); p.connect(c.destination); } else node.connect(c.destination); }
 function tone(freq, len = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, pan = 0) {
-  if (!soundOn()) return;
+  if (!sndOk()) return;
   try {
     const c = ready(), at = c.currentTime + delay, osc = c.createOscillator(), vol = c.createGain();
+    let rounded = false; if (soft()) { if (type === 'square') { type = 'triangle'; rounded = true; } if (freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; } }
     osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
     if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + len);
-    const level = osc.type === 'triangle' ? loud * 2.2 : loud;
+    const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud;
     vol.gain.setValueAtTime(level, at); vol.gain.setValueAtTime(level * .6, at + len * .5); vol.gain.setValueAtTime(0, at + len);
     osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + len + .02);
   } catch {}
 }
 function zap(len = .1, delay = 0, loud = .06, pan = 0) {
-  if (!soundOn()) return;
+  if (!sndOk()) return;
   try {
     const c = ready(), at = c.currentTime + delay;
     if (!noiseBuf) { noiseBuf = c.createBuffer(1, c.sampleRate * .5, c.sampleRate); const d = noiseBuf.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
@@ -487,6 +506,9 @@ const sfx = {
   enter: () => chord([523, 659, 784, 1047, 1319], .06),
   door: () => { tone(220, .12, 'triangle', 0, .05, 330); tone(660, .06, 'square', .1, .03); },
   greet: f => chord(PALS[f.id].pitch, .08, 'square', panRel(f.x), .04),
+  kouji: () => { zap(.05, 0, .05); tone(150, .07, 'triangle', 0, .05, 90); tone(392, .07, 'square', .2, .04); tone(523, .07, 'square', .3, .04); tone(784, .14, 'triangle', .4, .05); },
+  group: () => { chord([659, 784, 988, 1319], .08); zap(.06, .5, .05); tone(1568, .05, 'square', .52, .03); },
+  sit: () => chord([392, 523], .09, 'triangle'),
   hammer: () => { for (let i = 0; i < 3; i++) { zap(.05, i * .22, .05); tone(150, .07, 'triangle', i * .22, .05, 90); } },
   wish: () => { chord([1047, 1319, 1568, 2093, 2637], .07); tone(3136, .3, 'square', .4, .02); },
   meteor: () => tone(2800, .55, 'square', 0, .025, 500),
@@ -495,12 +517,12 @@ const sfx = {
   splash: pan => { zap(.09, 0, .05, pan); tone(880, .05, 'square', .02, .03, 1320, pan); },
   spin: () => chord([523, 659, 784, 1047, 784, 1047, 1319], .05),
   water: pan => tone(1568, .04, 'triangle', 0, .04, 2093, pan),
-  bird: pan => { tone(2400, .045, 'square', 0, .012, 3000, pan); tone(3000, .045, 'square', .07, .012, 2500, pan); },
-  cricket: pan => { for (let i = 0; i < 3; i++) tone(4200, .02, 'square', i * .05, .006, 0, pan); }
+  bird: pan => asKind('amb', () => { tone(2400, .045, 'square', 0, .012, 3000, pan); tone(3000, .045, 'square', .07, .012, 2500, pan); }),
+  cricket: pan => asKind('amb', () => { for (let i = 0; i < 3; i++) tone(4200, .02, 'square', i * .05, .006, 0, pan); })
 };
 // おとの ずっと ながれる ぶぶん：ふんすいの みず（ちかづくと おおきく）、あめの ひは あめの おと
 function startAmbient() {
-  if (!soundOn() || amb || document.hidden) return;
+  if (!soundOn() || (main && main.sndAmb === false) || amb || document.hidden) return;
   try {
     const c = ready(), len = c.sampleRate * 3, buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
     let v = 0; for (let i = 0; i < len; i++) { v = v * .9 + (Math.random() * 2 - 1) * .1; d[i] = v * 3.2; }
@@ -602,8 +624,8 @@ const PROPS = [
   { id: 'lamp-r', x: 234, y: 350, w: 70, h: 90, svg: SVG.lamp },
   { id: 'tree-l', x: 16, y: 384, w: 68, h: 112, svg: SVG.tree, secret: 'tree', block: { rect: [0, 358, 32, 388] } },
   { id: 'tree-r', x: 344, y: 384, w: 68, h: 112, svg: SVG.tree, secret: 'tree', block: { rect: [328, 358, 360, 388] } },
-  { id: 'bench-l', x: 64, y: 430, w: 70, h: 38, svg: SVG.bench, block: { rect: [30, 418, 98, 432] } },
-  { id: 'bench-r', x: 296, y: 430, w: 70, h: 38, svg: SVG.bench, block: { rect: [262, 418, 330, 432] } },
+  { id: 'bench-l', x: 64, y: 430, w: 70, h: 38, svg: SVG.bench, secret: 'bench', block: { rect: [30, 418, 98, 432] } },
+  { id: 'bench-r', x: 296, y: 430, w: 70, h: 38, svg: SVG.bench, secret: 'bench', block: { rect: [262, 418, 330, 432] } },
   { id: 'stone', x: 342, y: 446, w: 30, h: 46, svg: SVG.stone, dest: 'thanks', mark: '⭐', block: { rect: [326, 430, 360, 450] } },
   { id: 'lot1', x: 62, y: 526, w: 122, h: 80, svg: SVG.lot1, dest: 'kouji1', mark: '🚧', block: { rect: [0, 452, 126, 528] } },
   { id: 'lot2', x: 298, y: 526, w: 122, h: 80, svg: SVG.lot2, dest: 'kouji2', mark: '🚧', block: { rect: [234, 452, 360, 528] } }
@@ -895,6 +917,7 @@ function greet(f, forced) {
   const line = lineFor(f, first), ms = Math.min(8000, Math.max(3600, 1600 + line.length * 85)); f.talking = ms / 1000; speak(f, line, ms);   // ながい ひとことは ゆっくり（1もじ 0.085びょう・さいだい 8びょう）
   own.metToday[f.id] = true; own.met[f.id] = (own.met[f.id] || 0) + 1; saveOwn(); renderPalRow();
   sfx.greet(f); hop(f); setFace(first ? 'mint' : 'smile', 2400);
+  groupCheck(f);
 }
 function talkTo(f) {
   lastInput = T;
@@ -909,6 +932,16 @@ function nearestFriend(unmetFirst) {
 }
 function updateFriend(f, dt) {
   f.cool = Math.max(0, f.cool - dt);
+  if (f.sit) {   // ベンチで ひとやすみ：まるふわの となりへ いって たつ
+    if (!sit) { f.sit = null; f.state = 'idle'; f.timer = 2; }
+    else {
+      if (f.path.length && !reduce()) { stepActor(f, dt); f.moving = true; return; }
+      f.moving = false;
+      if (!f.sit.said) { f.sit.said = true; speak(f, f.sit.line, 4200); narrate(f.name + 'が となりに すわったよ'); hop(f); sfx.greet(f); seen('bench'); }
+      return;
+    }
+  }
+  if (f.group) { if (T >= f.group.until) { f.group = null; f.state = 'idle'; f.timer = 2; } else { if (f.path.length && !reduce()) { stepActor(f, dt); f.moving = true; } else f.moving = false; return; } }   // みんなで しゃしん：あつまって ならぶ
   if (f.talking > 0) { f.talking -= dt; if (f.talking <= 0 && f.state === 'talk') { f.state = 'idle'; f.timer = 2 + Math.random() * 3; } if (f.state === 'talk') { f.moving = false; return; } }
   if (reduce()) { f.moving = false; return; }
   if (f.state === 'idle') {
@@ -946,7 +979,7 @@ function wish(x, y) {
   narrate('ねがいごとを したよ。かなうと いいね。'); seen('wish'); setFace('sparkle', 2600);
   const f = nearestFriend(false); if (f && dist(player, f) < 140) setTimeout(() => speak(f, 'かなうと いいね', 2600), 600);
 }
-function secretTap(kind) {
+function secretTap(kind, el) {
   lastInput = T;
   if (kind === 'fountain') {
     sfx.water(panRel(180)); const p = { x: 180, y: 392 };
@@ -961,6 +994,11 @@ function secretTap(kind) {
   } else if (kind === 'tree') {
     sfx.leaf(); if (!reduce()) for (let i = 0; i < 6; i++) fxAt(70 + Math.random() * 220, 300 + Math.random() * 50, '🍃', [{ translate: '-50% -50%', opacity: 1, rotate: '0deg' }, { translate: `calc(-50% + ${(Math.random() * 2 - 1) * 40 * k}px) calc(-50% + ${90 * k}px)`, opacity: 0, rotate: (Math.random() * 2 - 1) * 200 + 'deg' }], { duration: 1500 + Math.random() * 600, delay: i * 90, easing: 'ease-in', fill: 'backwards' });
     narrate('はっぱが ひらひら おちて きたよ'); seen('tree');
+  } else if (kind === 'bench') { benchGo(el);
+  } else if (kind === 'wishstar') {
+    const i = Number(el && el.dataset.i) || 0, notes = [784, 988, 1175, 1319, 1568];
+    tone(notes[i % notes.length], .16, 'triangle', 0, .05, notes[i % notes.length] * 1.5); sparkles(Number(el && el.dataset.x) || 180, Number(el && el.dataset.y) || 80, 5, 34);
+    narrate('つりばで ねがった ほしだよ'); seen('wishstar');
   } else if (kind === 'me') { tapMascot(); }
   else if (kind === 'thanks') { openThanks(); }
 }
@@ -973,6 +1011,26 @@ function tapMascot() {
     speak(player, 'くるくる〜', 1800);
   } else { const w = pick(['えへへ', 'くすぐったい', 'ふふっ', 'にこにこ', 'なあに？']); speak(player, w, 1600); setFace('smile', 1400); }
 }
+// ─── ねがいの ほし（04 の つなぎ1）───
+// つりばで ながれぼしに ねがった 回数（本体の きろく wishes・読むだけ）ぶん、よるの ひろばの 空に うすい 星が ふえる（30こ まで・数は 出さない・見た目だけ・さわると 音が ひとつ）。
+// ばしょは 番号で きまる（あとから ふえても いままでの 星は うごかない）。おつきさま（みぎうえ）は さける。いちばん さいしょの 星だけ キーボード・よみあげで とどく（あとは かざり）
+function renderWishStars() {
+  try {
+    const old = scene.querySelector('#wishstars'); if (old) old.remove();
+    const n = curTime === 'n' ? Math.max(0, Math.min(30, Math.floor(Number(main && main.wishes) || 0))) : 0; if (!n) return;
+    const box = document.createElement('span'); box.id = 'wishstars';
+    for (let i = 0; i < n; i++) {
+      const rnd = mulberry(i * 7919 + 13), r1 = rnd(), r2 = rnd();
+      let x = 14 + r1 * 332; const y = 14 + r2 * 132; if (x > 262 && y < 96) x = 14 + r1 * 0.74 * 332;
+      const el = document.createElement('span'); el.className = 'wstar'; el.dataset.secret = 'wishstar'; el.dataset.i = String(i); el.dataset.x = x.toFixed(1); el.dataset.y = y.toFixed(1); el.textContent = '★';
+      el.style.left = (x / W * 100) + '%'; el.style.top = (y / H * 100) + '%'; el.style.setProperty('--d', String(((i * 37) % 30) / 10));
+      if (i === 0) { el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'ねがいの ほし'); el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); secretTap('wishstar', el); } }); }   // scene の 「ちかくの ものと あそぶ」（Enter・スペース）に 二重に ならない
+      else el.setAttribute('aria-hidden', 'true');
+      box.append(el);
+    }
+    scene.append(box);
+  } catch {}
+}
 let meteorEl = null;
 function shootingStar(byTap) {
   if (meteorEl || reduce() && !byTap) return;
@@ -984,6 +1042,84 @@ function shootingStar(byTap) {
   narrate('ながれぼしが とんだよ。さわると ねがいごとが できるよ'); seen('meteor');
 }
 function meteorTap() { if (!meteorEl) return; measure(); const r = meteorEl.getBoundingClientRect(); meteorEl.remove(); meteorEl = null; wish((r.left - box.left) / k, (r.top - box.top) / k); }
+
+// ─── ベンチで ひとやすみ（04 の ひろば6）───
+// ベンチの まえに すわって 30びょう ゆっくり して いると、仲間が 1ぴきずつ きて まるふわの となりに たつ（ふたりまで）。「やすむ こと」が ごほうび（がんばらなくて いい・何も へらない）。
+// すわる 絵は ないので、まるふわを ベンチの まえへ ちょっと さげて おく。うごくと おわる。うごきを へらす 設定では 歩かずに その 場所に ふっと たつ
+const BENCH = { 'bench-l': { seat: { x: 64, y: 440 }, side: [44, 84] }, 'bench-r': { seat: { x: 296, y: 440 }, side: [276, 316] } };
+const SIT_LINES = ['きょうも きてくれて、うれしいな', 'いっしょに ひとやすみ、いいね'];
+let sit = null;
+function benchGo(el) {
+  lastInput = T; cancelTrip(false);
+  const id = el && BENCH[el.dataset.id] ? el.dataset.id : (dist(player, BENCH['bench-l'].seat) <= dist(player, BENCH['bench-r'].seat) ? 'bench-l' : 'bench-r'), b = BENCH[id];
+  narrate('ベンチへ あるいて いくよ');
+  walkTo(b.seat.x, b.seat.y, () => sitStart(id));
+}
+function sitStart(id) {
+  sit = { id, since: T, next: T + 30, comers: [] };
+  player.el.classList.add('sitting'); sfx.sit(); setFace('smile', 2400);
+  narrate('ベンチに すわったよ。ゆっくり やすもう');
+}
+function sitEnd() {
+  if (!sit) return; sit = null; player.el.classList.remove('sitting');
+  friends.forEach(f => { if (f.sit) { f.sit = null; f.state = 'idle'; f.timer = 2; } });
+}
+function sitTick() {
+  if (T < sit.next || sit.comers.length >= 2) return;
+  const b = BENCH[sit.id], spot = { x: b.side[sit.comers.length], y: b.seat.y };
+  const f = friends.filter(x => !x.sit && !x.group).sort((a, c) => dist(a, b.seat) - dist(c, b.seat))[0];
+  if (!f) { sit.next = T + 8; return; }
+  f.sit = { spot, line: SIT_LINES[sit.comers.length] }; f.talking = 0; f.state = 'sit'; f.cool = 30;
+  sit.comers.push(f); sit.next = T + 14;
+  if (reduce()) { f.x = spot.x; f.y = spot.y; f.path = []; } else { f.path = findPath(f, spot); f.speed = 60; }
+}
+
+// ─── みんなで しゃしん（04 の ひろば8）───
+// いま ひろばに いる 仲間 ぜんいんに、ひらいて いる あいだに 1回ずつ あいさつ すると、仲間が まるふわの よこに ならんで あつまる。
+// 「しゃしんを とる」を ひからせて しらせる だけ（かってに とらない・かってに ひらかない）。名前・人数は 出さない（「あと ○ひき」とは 言わない・くらべない）。しゃしんには ひづけだけ。
+// うごきを へらす 設定では 歩かず、その 場所に ならぶ（ふっと あつまる）
+const groupSeen = new Set();
+let groupUntil = 0, groupTimer = 0;
+function groupCheck(f) {
+  groupSeen.add(f.id);
+  if (groupUntil > T || !friends.length || !friends.every(x => groupSeen.has(x.id)) || (trip && trip.leaving)) return;
+  groupGather();
+}
+function groupGather() {
+  groupUntil = T + 16; seen('group'); sfx.group();
+  const n = friends.length;   // ふんすいの まえの あいている 横の 帯（ベンチと 工事の 場所の あいだ・y 442）に ならぶ
+  friends.forEach((f, i) => {
+    const spot = nearestFree(180 + (i - (n - 1) / 2) * 50, 442);
+    f.group = { until: groupUntil }; f.talking = 0; f.state = 'group'; f.cool = 16;
+    if (reduce()) { f.x = spot.x; f.y = spot.y; f.path = []; f.moving = false; }
+    else { f.path = findPath(f, spot); f.speed = 70; }
+  });
+  setFace('sparkle', 2400); hop(player, 1);
+  narrate('なかまが あつまって きたよ。「しゃしんを とる」を おしてね');
+  $('snap').classList.add('pulse');
+  clearTimeout(groupTimer); groupTimer = setTimeout(groupEnd, 16000);
+}
+function groupEnd() { clearTimeout(groupTimer); $('snap').classList.remove('pulse'); groupUntil = 0; friends.forEach(f => { if (f.group) { f.group = null; f.state = 'idle'; f.timer = 2; } }); }
+
+// ─── こうじちゅうの かんばん（04 の ひろば7・匂わせだけ）───
+// 「こうじちゅう」の 場所（つづけて 5びょう いないに 5回）を さわると、かんばんが うらがえり、きつねの 字で「もうすこし まってね」。
+// なにが できるかは 言わない（予告に しない・カードゲーム 等は 今は 手を つけない 方針）。ただの あそびごころ。うごきを へらす 設定では うらがえらず、ふっと 出て きえる だけ
+const koujiTaps = { kouji1: { n: 0, at: -99 }, kouji2: { n: 0, at: -99 } };
+function koujiTap(id) { const t = koujiTaps[id]; if (!t) return 0; if (T - t.at > 5) t.n = 0; t.n += 1; t.at = T; return t.n; }
+function koujiFlip(id) {
+  koujiTaps[id].n = 0; seen('kouji');
+  const pr = PROPS.find(p => p.dest === id), el = pr && propEl(pr.id); if (!el) return;
+  el.querySelectorAll('.kouji-back').forEach(x => x.remove());
+  const card = document.createElement('div'); card.className = 'kouji-back'; card.textContent = 'もうすこし まってね'; el.append(card);
+  sfx.kouji(); sparkles(pr.x, pr.y - pr.h * .75, 6, 30); setFace('sparkle', 2600); hop(player, 1);
+  narrate('かんばんの うらに、なにか かいて あったよ。「もうすこし まってね」');
+  const done = () => card.remove();
+  const frames = reduce()
+    ? [{ opacity: 0 }, { opacity: 1, offset: .1 }, { opacity: 1, offset: .9 }, { opacity: 0 }]
+    : [{ transform: 'perspective(260px) rotateY(90deg)', opacity: 0 }, { transform: 'perspective(260px) rotateY(0)', opacity: 1, offset: .16 }, { transform: 'perspective(260px) rotateY(0)', opacity: 1, offset: .86 }, { transform: 'perspective(260px) rotateY(-90deg)', opacity: 0 }];
+  card.animate(frames, { duration: reduce() ? 3600 : 4200, easing: 'ease-in-out' }).onfinish = done;
+  setTimeout(done, 4600);   // うごきが とまって いても（裏の 画面でも）かならず きえる
+}
 
 // ─── いきさき ───
 let trip = null;
@@ -998,7 +1134,7 @@ function goDest(id) {
 function arrive(id) {
   const d = DEST[id]; if (!trip || trip.id !== id) return;
   if (d.kind === 'thanks') { trip = null; sfx.arrive(); openThanks(); return; }
-  if (d.kind === 'wait') { trip = null; sfx.hammer(); setFace('apricot', 2600); hop(player, 2); speak(player, 'こうじちゅう だって', 2200, true); narrate(d.line); return; }
+  if (d.kind === 'wait') { trip = null; if (koujiTap(id) >= 5) { koujiFlip(id); return; } sfx.hammer(); setFace('apricot', 2600); hop(player, 2); speak(player, 'こうじちゅう だって', 2200, true); narrate(d.line); return; }
   sfx.arrive(); setFace('sparkle', 3000);
   if (d.kind === 'tank') { enterTank(); return; }
   leave(id);
@@ -1033,7 +1169,7 @@ const dirWord = (x, from) => { const dx = x - from.x; return Math.abs(dx) < 40 ?
 function listenAround() {
   lastInput = T; startAmbient();
   const order = ['tsuri', 'oheya', 'onigiri'];
-  order.forEach((id, i) => setTimeout(() => { const d = DEST[id]; if (d.motif) { d.motif(); } }, i * 650));
+  order.forEach((id, i) => setTimeout(() => { const d = DEST[id]; if (d.motif) asKind('guide', () => d.motif()); }, i * 650));
   const near = friends.filter(f => dist(f, player) < 150).map(f => f.name + '（' + dirWord(f.x, player) + '）');
   narrate('ひだりの おくに つりば。まんなかの おくに おへや。みぎの おくに おにぎりキャッチ。' + (near.length ? 'ちかくに ' + near.join('、') + ' が いるよ。' : 'ちかくには だれも いないよ。') + 'まんなかには ふんすいが あるよ。');
 }
@@ -1057,7 +1193,7 @@ function drawMotion() {
 }
 function setSoundOn(on) {
   writeSound(on); drawSound(); lastInput = T;
-  if (soundOn()) { startAmbient(); sfx.on(); narrate('おとを つけたよ。ふんすいに ちかづくと、みずの おとが おおきく なるよ。「まわりを きく」で、ばしょの おとが きけるよ。'); } else { stopAmbient(); narrate('おとを けしたよ。'); }
+  if (soundOn()) { startAmbient(); asKind('ui', () => sfx.on()); narrate('おとを つけたよ。ふんすいに ちかづくと、みずの おとが おおきく なるよ。「まわりを きく」で、ばしょの おとが きけるよ。'); } else { stopAmbient(); narrate('おとを けしたよ。'); }
   if (window.TsuriBgm) window.TsuriBgm.refresh();
 }
 $('sound').addEventListener('click', () => setSoundOn(!soundOn()));
@@ -1088,7 +1224,7 @@ scene.addEventListener('click', e => {
   const actorEl = t.closest('.actor');
   if (actorEl) { if (actorEl.dataset.id === 'me') tapMascot(); else talkTo(byId(actorEl.dataset.id)); return; }
   const destEl = t.closest('[data-dest]'); if (destEl) { goDest(destEl.dataset.dest); return; }
-  const secretEl = t.closest('[data-secret]'); if (secretEl) { secretTap(secretEl.dataset.secret); return; }
+  const secretEl = t.closest('[data-secret]'); if (secretEl) { secretTap(secretEl.dataset.secret, secretEl); return; }
   cancelTrip(false);
   const p = worldPoint(e), spot = nearestFree(clamp(p.x, 8, W - 8), clamp(p.y, 267, 550));
   sfx.tap(); tapRing(spot.x, spot.y);
@@ -1154,6 +1290,8 @@ function swapFriend(slot, now) {
 let nearNote = '', nextNear = 0, nextVisitAt = 30, nextClock = 30, nextBird = 6, nextJump = 14, nextMeteor = 45, nextSwap = swapGap();
 function update(dt) {
   T += dt;
+  if (groupUntil && T >= groupUntil) groupEnd();   // みんなで しゃしんの あつまりを おえる（ひかるのも やめる）
+  if (sit) { if (player.moving) sitEnd(); else sitTick(); }   // ベンチで ひとやすみ：うごいたら おわり
   const kb = keyMove(dt); if (!kb) stepActor(player, dt);
   animateActor(player, dt);
   friends.forEach(f => { updateFriend(f, dt); animateActor(f, dt); });
@@ -1359,7 +1497,7 @@ setTimeout(() => {
 // はじめて きた 日：4びょう たっても だれも さわらない 時だけ、まるふわが 1かい「さわって みてね」（字が よめない 子にも 目で わかる）
 setTimeout(() => { if (own.visits <= 1 && lastInput === 0 && !trip && !document.hidden && !api.paused) speak(player, 'さわって みてね', 3800, true); }, 4200);
 requestAnimationFrame(frame);
-addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag) stopAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); } });
+addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag || main.sndAmb === false) stopAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); renderWishStars(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else { startAmbient(); lastInput = T; } });
 addEventListener('pageshow', e => { if (e.persisted) { curtain.style.display = 'none'; trip = null; player.el.classList.remove('gone'); const house = propEl('house'); if (house) house.classList.remove('open'); measure(); narrate('ひろばに もどったよ'); } });
 
@@ -1368,6 +1506,7 @@ const api = window.Hiroba = {
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), bgm: window.TsuriBgm ? window.TsuriBgm.state() : null, reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
   goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
+  sfx, startAmbient, stopAmbient, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,
   say: () => statusEl.textContent
 };
 // ─── English mode（tsuri-en.js と 総司令部の 表 tsuri-en-hiroba.js が ある 英語の 時だけ）：ひろばの 題・ロゴと、表に ない 文を 足す ───
@@ -1387,12 +1526,13 @@ addEventListener('load', () => {
     h.style.fontSize = 'clamp(1.3rem,6.4vw,2rem)'; h.style.flexWrap = 'wrap';
   }
   const MONTH = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  if (E.add) E.add({ ex: Object.assign({ 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, window.TsuriMame ? Object.fromEntries(window.TsuriMame.lines.map(l => [l.ja, l.en])) : {}), rules: [
+  if (E.add) E.add({ ex: Object.assign({ 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, window.TsuriMame ? Object.fromEntries(window.TsuriMame.lines.map(l => [l.ja, l.en])) : {}, { 'ベンチ': 'Bench', 'ベンチへ あるいて いくよ': 'Walking to the bench.', 'ベンチに すわったよ。ゆっくり やすもう': 'You sat on the bench. Let’s rest slowly.', 'きょうも きてくれて、うれしいな': 'Thank you for coming again today. I’m happy!', 'いっしょに ひとやすみ、いいね': 'Resting together is nice.', 'ねがいの ほし': 'Wishing Star', 'つりばで ねがった ほしだよ': 'A star from a wish you made at the fishing spot.', 'なかまが あつまって きたよ。「しゃしんを とる」を おしてね': 'Everyone gathered around. Press “Take a photo”!', 'もうすこし まってね': 'Coming soon. Please wait a little!', 'かんばんの うらに、なにか かいて あったよ。「もうすこし まってね」': 'There was something written on the back of the sign: “Coming soon. Please wait a little!”' }), rules: [
     [/^きょうのラッキーさかなは「(.+)」。みんなおなじだよ$/, (_, f) => "Today's lucky fish is the " + (E.h && E.h.nmFish ? E.h.nmFish(f) : f) + '. Everyone has the same one!'],   // ありがとうの ほしぞら：名前は そのまま（「さん」は 英語に ない）。月は 月の なまえ
     // 釣りで あった 子の さいしょの ひとこと＝「あいさつ！ さっき ○○が つれたんだね…」。表の あいさつの きまりは 決まった 文だけ 引く ので、あとの 文（さっきの 魚）は E.t で 訳して あいさつを つなぐ
     [/^(おはよう|こんにちは|こんばんは)！(さっき.+)$/, (_, g, rest) => { const r = E.t(rest); return r === rest ? null : ({ 'おはよう': 'Good morning', 'こんにちは': 'Hello', 'こんばんは': 'Good evening' })[g] + '! ' + r; }],
     // ふきだしの 読みあげ「なまえ：「せりふ」」（表の きまりは 決まった せりふだけ）：さっきの 魚の ひとことと、ペンギンの「きょうの ラッキーさかな」も 英語に
     [/^(.+?)：「((?:(?:おはよう|こんにちは|こんばんは)！)?(?:さっき|きょうのラッキーさかな).+)」$/, (_, who, inner) => { const r = E.t(inner), w = E.t(who); return r === inner || w === who ? null : w + ': “' + r + '”'; }],
+    [/^(.+?)がとなりにすわったよ$/, (_, who) => { const w = E.t(who); return w === who ? null : w + ' sat down next to you.'; }],
     [/^(.+)さん、ありがとう$/, (_, n) => n + ', thank you!'], [/^(.+)さん$/, (_, n) => n],
     [/^(\d{1,2})がつ$/, (_, m) => MONTH[Number(m)] || null], [/^(\d{1,2})がつにきてくれたよ$/, (_, m) => MONTH[Number(m)] ? 'Visited in ' + MONTH[Number(m)] + '.' : null]
   ] });

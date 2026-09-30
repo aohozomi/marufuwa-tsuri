@@ -576,6 +576,12 @@
   //   ぜんぶ その場で合成する（サンプル・ダウンロードなし）。おとが OFF の時は、AudioContext も作らない。
   //   魚ごとの「なまえの おと」：大きい魚ほど低く、めずらしいほど ゆたかな音色。ぬしは ゆっくり ふくらむ低い和音。
   let actx = null, master = null, noiseBuf = null, hissBuf = null, ambience = null, bubbleTimer = 0, sfx = false, lastCue = 0, lastGather = 0, listen = false;
+  // おとの せってい（つりびよりの「つかいやすく する」→「おとの せってい」）：こうかおん（sndFx）・なみと あめ（sndAmb）・あんない（sndGuide）を きった 人には、その しゅるいの おとを ならさない（項目が なければ 入）。
+  //   魚の「なまえの おと」（みみで ながめる・さわる・およいで とおる・うた）は「あんない」、みずの おとと あわは「なみと あめ」、のこりは「こうかおん」。ノートの「もういちど きく」は じぶんで おした ので 'ui'（「おと」が ON なら ならす）。
+  //   やさしい おと（soft）：かくばった なみは まるい なみに・1.8kHz より たかい おとは 1オクターブ さげる。「おと」ぜんたい（sound）が OFF なら 今までどおり ぜんぶ ならさない
+  let sndKind = 'fx';
+  const kindOk = () => { if (sndKind === 'ui') return true; const st = readSave(); return st[sndKind === 'guide' ? 'sndGuide' : sndKind === 'amb' ? 'sndAmb' : 'sndFx'] !== false; };
+  const asKind = (k, fn) => { const p = sndKind; sndKind = k; try { return fn(); } finally { sndKind = p; } };
   const mainSound = () => readSave().sound === true;
   function soundNow() { const main = mainSound(); return tank.sound !== undefined && tank.soundMain === main ? tank.sound : main; }
   function refreshSound() { sfx = soundNow(); if (!sfx) stopAmbience(); else if (isOpen()) startAmbience(); syncSoundButton(); bgmRefresh(); return sfx; }
@@ -592,15 +598,19 @@
   // むかしの ゲームき ふう（つりびよりと おなじ）：かくばった なみ（square）と、さんかくの なみ（triangle）と、みじかい ざつおん だけ。
   // ぷつっと はじまって、すぱっと きれる。たかさは だんだんに うごく（ピロリッ、ヒュ〜）
   function tone(freq, len, o = {}) {
+    if (!sfx || !kindOk()) return;
     const c = audio(); if (!c) return;
     const t = c.currentTime + (o.at || 0), osc = c.createOscillator(), g = c.createGain(), vol = o.vol === undefined ? .1 : o.vol;
-    osc.type = o.type === 'square' ? 'square' : 'triangle'; osc.frequency.setValueAtTime(freq, t);
+    let type = o.type === 'square' ? 'square' : 'triangle', rounded = false;
+    if (readSave().soft === true) { if (type === 'square') { type = 'triangle'; rounded = true; } if (freq >= 1800) freq /= 2; }
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
     if (o.glide) osc.frequency.linearRampToValueAtTime(Math.max(30, freq * o.glide), t + len);
-    const level = osc.type === 'triangle' ? vol * 1.5 : vol * .7;   // さんかくの なみは ちいさく きこえるので すこし たす
+    const level = osc.type === 'triangle' ? vol * (rounded ? 1.2 : 1.5) : vol * .7;   // さんかくの なみは ちいさく きこえるので すこし たす
     g.gain.setValueAtTime(level, t); g.gain.setValueAtTime(level * .6, t + len * .5); g.gain.setValueAtTime(0, t + len);
     osc.connect(g); g.connect(panner(c, o.pan)); osc.start(t); osc.stop(t + len + .02);
   }
   function noise(len, o = {}) {   // みじかい ざっ（ざらざらした ざつおん。むかしの ゲームきの ドラムの おと）
+    if (!sfx || !kindOk()) return;
     const c = audio(); if (!c) return;
     if (!hissBuf) { hissBuf = c.createBuffer(1, c.sampleRate, c.sampleRate); const d = hissBuf.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
     const t = c.currentTime + (o.at || 0), src = c.createBufferSource(), g = c.createGain();
@@ -613,7 +623,8 @@
   const REG = { 1: 'ふつう', 2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル', 5: 'まぼろし' };
   const regOf = o => o.nushi ? 'ぬし' : REG[o.f.rare];
   const sizeWord = (f, nushi) => nushi || f.rare >= 4 ? 'とても おおきい' : sizeNorm(f) > .62 ? 'おおきい' : sizeNorm(f) > .3 ? 'ふつうの おおきさ' : 'ちいさい';
-  function fishVoice(f, pan, vol = .1, nushi = false) {   // 魚の「なまえの おと」（ぬしと スペシャルは、ながい ファンファーレふう）
+  function fishVoice(f, pan, vol = .1, nushi = false) { return asKind('guide', () => fishVoiceRaw(f, pan, vol, nushi)); }   // 魚の「なまえの おと」は 耳で 魚を さがす ための「あんない」
+  function fishVoiceRaw(f, pan, vol, nushi) {   // （ぬしと スペシャルは、ながい ファンファーレふう）
     if (!sfx) return;
     const fr = fishFreq(f);
     if (nushi || f.rare >= 4) { tone(fr, .3, { type: 'triangle', vol: vol * 1.2, pan }); tone(fr * 1.5, .3, { type: 'triangle', vol: vol * .8, pan, at: .11 }); tone(fr * 2, .42, { type: 'square', vol: vol * .5, pan, at: .22 }); if (f.rare === 5) tone(fr * 3, .34, { type: 'square', vol: vol * .35, pan, at: .5 }); }
@@ -623,7 +634,7 @@
   }
   const panOf = x => clamp((x / W - .5) * 1.8, -.9, .9);
   function startAmbience() {   // ひくく ゆっくりの みずの おと＋ときどき あわ
-    if (ambience || !sfx) return;
+    if (ambience || !sfx || readSave().sndAmb === false) return;
     const c = audio(); if (!c) return;
     try {
       if (!noiseBuf) { noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
@@ -632,7 +643,7 @@
       lfo.frequency.value = .09; depth.gain.value = .012; lfo.connect(depth); depth.connect(swell.gain);
       src.connect(soft); soft.connect(swell); swell.connect(master); src.start(); lfo.start(); ambience = [src, lfo];
     } catch {}
-    const blip = () => { clearTimeout(bubbleTimer); if (!sfx || !isOpen()) return; if (!reduced()) tone(380 + Math.random() * 520, .1, { vol: .022, glide: 1.9, pan: Math.random() * 1.6 - .8 }); bubbleTimer = setTimeout(blip, 1600 + Math.random() * 3800); };
+    const blip = () => { clearTimeout(bubbleTimer); if (!sfx || !isOpen()) return; if (!reduced()) asKind('amb', () => tone(380 + Math.random() * 520, .1, { vol: .022, glide: 1.9, pan: Math.random() * 1.6 - .8 })); bubbleTimer = setTimeout(blip, 1600 + Math.random() * 3800); };
     bubbleTimer = setTimeout(blip, 1200);
   }
   function stopAmbience() { clearTimeout(bubbleTimer); if (ambience) ambience.forEach(n => { try { n.stop(); } catch {} }); ambience = null; }
@@ -1180,7 +1191,7 @@
     'heya-okaeshi': { text: 'さかなたちが、ありがとう って いってる みたい。', play: cueBubbles },
     'heya-uta': { text: 'まるふわが、すいそうの うたを うたったよ。', play: () => [523, 659, 784, 659, 523, 784].forEach((f, i) => tone(f, .24, { type: 'triangle', vol: .07, at: i * .3 })) }
   };
-  function replay(id) { const r = REPLAY[id]; if (!r) return null; refreshSound(); r.play(); return r.text; }
+  function replay(id) { const r = REPLAY[id]; if (!r) return null; refreshSound(); asKind('ui', () => r.play()); return r.text; }
   function secret(id) {   // 検査・ノート用：ひみつを その場で おこす
     if (!isOpen()) return false;
     if (id === 'lamp') { toggleLamp(); return true; }
