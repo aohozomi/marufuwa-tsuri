@@ -570,6 +570,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
 #nakama-me{display:flex;align-items:center;gap:10px;justify-content:center;margin:0 0 10px;font-weight:800;text-align:center}
 #nakama-me img,#nakama-card img{object-fit:contain;filter:drop-shadow(0 3px 2px #0003)}
 #nakama-card{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:3px solid #bfdce8;border-radius:18px;padding:10px;margin:0 0 12px;background:#fff;color:#244653}
+#trophy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:0 0 12px}
+#trophy-grid > div{display:grid;grid-template-columns:2.2rem 1fr;align-items:center;gap:6px;border:3px solid #d5e6ed;border-radius:14px;padding:6px 8px;background:#fff;color:#244653;line-height:1.35;font-size:.8rem}
+#trophy-grid b{font-size:1.5rem;text-align:center}
+#trophy-grid small{display:block;color:#506874;font-size:.72rem}
+#trophy-grid > div[data-got=false]{background:#eef4f7;color:#566d79;border-style:dashed}
+#trophy-grid > div[data-tier="3"][data-got=true]{border-color:#e0a61c;background:#fffaf0}
+#trophy-grid > div[data-tier="2"][data-got=true]{border-color:#9fb3c2}
+#trophy-grid > div[data-tier="1"][data-got=true]{border-color:#c98a5a}
+#trophy-toast{position:absolute;z-index:6;left:50%;bottom:44px;transform:translateX(-50%);margin:0;max-width:92%;padding:4px 14px;border-radius:999px;background:#fff7d6f2;border:2px solid #e0a61c;color:#4a2f00;font-weight:900;font-size:.85rem;text-align:center;pointer-events:none}   /* きねんを もらった とき。ひからない・うごかない */
+#trophy-toast[hidden]{display:none}
 #nakama-card[hidden]{display:none}
 #nakama-card .nk-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 #nakama-card span{font-size:.85rem;line-height:1.5}
@@ -631,18 +641,18 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 :root[data-night=true]{color:#e8f1f8;background:#0d1a2e}
 :root[data-night=true] #backdrop{filter:brightness(.3) saturate(1.1)}
 :root[data-night=true] main{background:#13253d;box-shadow:0 12px 30px #0007}
-:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore){color-scheme:dark}
+:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore){color-scheme:dark}
 :root[data-night=true] .actions{background:linear-gradient(#13253d00,#13253d 28%)}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore)::backdrop{background:#000000b3}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore)::backdrop{background:#000000b3}
 /* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) button:focus-visible{outline-color:#a9dcff}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) button:focus-visible{outline-color:#a9dcff}
 :root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small,:root[data-night=true] #gift-list small{color:#a9bfd2}
 :root[data-night=true] #bucket-list div,:root[data-night=true] #gift-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
 :root[data-night=true] #book-grid div[data-seen=false]{background:#16283f;color:#9db3c6}
@@ -651,6 +661,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 :root[data-night=true] #nakama-grid .nk[data-me=true]{border-color:#f2c14e}
 :root[data-night=true] #nakama-grid .nk small{color:#f2c14e}
 :root[data-night=true] #nakama-grid .nk-none{background:#16283f;color:#9db3c6}
+:root[data-night=true] #trophy-grid > div{background:#1a3250;border-color:#2d4d70;color:#e8f1f8}
+:root[data-night=true] #trophy-grid small{color:#a9bfd2}
+:root[data-night=true] #trophy-grid > div[data-got=false]{background:#16283f;color:#9db3c6}
+:root[data-night=true] #trophy-grid > div[data-tier="3"][data-got=true]{border-color:#f2c14e;background:#2c2a1e}
+:root[data-night=true] #trophy-toast{background:#3a3016f2;color:#ffe9a0;border-color:#f2c14e}
 :root[data-night=true] #nakama-party .slot{color:#9db3c6;border-color:#4a6b8c}
 :root[data-night=true] #nakama-party button.slot{background:#1a3250;color:#e8f1f8;border-color:#ff9fc4}
 :root[data-night=true] #nakama-card button[aria-pressed=true]{--ink:#5a0f2a}
@@ -700,6 +715,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   <div class="hud menu">
     <button id="open-bucket" type="button" style="flex:1">バケツ</button>
     <button id="open-book" type="button" style="flex:1">ずかん</button>
+    <button id="open-trophy" type="button" style="flex:1"></button>
     <button id="open-gear" type="button" style="flex:1" aria-label="じぶんの どうぐ">どうぐ</button>
     <button id="open-nakama" type="button" style="flex:1"></button>
     <a class="pill plaza" href="hiroba/" style="flex:1">ひろば</a>
@@ -777,6 +793,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <div class="float friend-float" id="float-b" aria-hidden="true"></div>
     <img class="who" id="marufuwa" src="img/game-blue.webp" fetchpriority="high" width="240" height="320" alt="つりを する まるふわ" draggable="false">
     <div class="bubble" id="bubble" aria-hidden="true" hidden></div>
+    <p id="trophy-toast" aria-hidden="true" hidden></p>
     <span class="held" id="held" aria-hidden="true" hidden></span>
     <span class="held" id="held-friend" aria-hidden="true" hidden></span>
 
@@ -881,6 +898,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     </div>
     <p class="count" id="photo-status" role="status">かってに とうこうは しません。</p>
     <button class="close" type="button" id="close-photo">とじる</button>
+  </dialog>
+
+  <dialog id="trophy" aria-labelledby="trophy-title">
+    <h2 id="trophy-title"></h2>
+    <p class="count" id="trophy-lead"></p>
+    <div id="trophy-grid" role="list"></div>
+    <button class="close" type="button" id="close-trophy"></button>
   </dialog>
 
   <dialog id="nakama" aria-labelledby="nakama-title">
@@ -1158,6 +1182,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (Array.isArray(other.party) && !(Array.isArray(save.party) && save.party.length)) { const ids = other.party.filter((id, i, a) => typeof id === 'string' && /^[a-z]{2,12}$/.test(id) && a.indexOf(id) === i).slice(0, 4); if (ids.length) { save.party = ids; changed = true; } }
     if (Array.isArray(other.fav)) { const have = new Set(Array.isArray(save.fav) ? save.fav : []), more = other.fav.filter(id => typeof id === 'string' && /^[a-z]{2,12}$/.test(id) && !have.has(id)); if (more.length) { save.fav = [...(Array.isArray(save.fav) ? save.fav : []), ...more]; changed = true; } }
     for (const key of ['palXp', 'palsAt', 'bond']) if (other[key] && typeof other[key] === 'object') for (const [id, v] of Object.entries(other[key])) if (/^[a-z]{2,12}$/.test(id) && Number.isFinite(v) && v > ((save[key] && save[key][id]) || 0)) { save[key] = save[key] && typeof save[key] === 'object' ? save[key] : {}; save[key][id] = v; changed = true; }   // けいけんち・あった じかん・なかよし：おおきい ほう
+    if (other.trophies && typeof other.trophies === 'object') for (const [id, at] of Object.entries(other.trophies)) if (/^[a-z0-9]{2,12}$/.test(id) && Number.isFinite(at) && !(save.trophies && save.trophies[id])) { save.trophies = save.trophies && typeof save.trophies === 'object' ? save.trophies : {}; save.trophies[id] = at; changed = true; }   // きねん：どちらかに あれば のこる
+    if (other.tflag && typeof other.tflag === 'object') for (const k of Object.keys(other.tflag)) if (other.tflag[k] === true && /^[a-z0-9]{2,12}$/.test(k) && !tf(k)) { save.tflag = save.tflag && typeof save.tflag === 'object' ? save.tflag : {}; save.tflag[k] = true; changed = true; }
+    for (const k of ['gazeMin', 'photoN', 'dayN']) if (Number.isInteger(other[k]) && other[k] > (save[k] || 0)) { save[k] = other[k]; changed = true; }
     if (typeof other.avatar === 'string' && !save.avatar && /^[a-z]{2,12}$/.test(other.avatar)) { save.avatar = other.avatar; changed = true; }   // じぶんの キャラ（あとで えらべば うわがき）
     if (other.plopHint === true && save.plopHint !== true) { save.plopHint = true; changed = true; }   // さいしょの「ぽちゃん」は 1かい きり
     if (Number.isInteger(other.bookSeen) && other.bookSeen > (Number.isInteger(save.bookSeen) ? save.bookSeen : 0)) { save.bookSeen = other.bookSeen; changed = true; }
@@ -1452,7 +1479,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     surface: () => { tone(260, .14, 'sine', 0, .05, 150); zap(.08, .02, .03); },   // ぽちゃ（さかなが かおを だす）
     nice: () => { guideTone(523, .06, 'triangle', 0, .04); guideTone(784, .09, 'triangle', .06, .04); },   // いいね
     close: () => guideTone(196, .09, 'sine', 0, .05, 150),   // ちかい：ちいさな ぷに だけ
-    palup: () => chord([262, 330, 392], .07, 'triangle', .03),   // なかまが レベルアップ（ひくい おと）
+    palup: () => chord([262, 330, 392], .07, 'triangle', .03),
+    trophy: () => chord([262, 330, 392, 523], .08, 'triangle', .03),   // きねん（ひくい おと・1200Hz いか）   // なかまが レベルアップ（ひくい おと）
     snap: () => { tone(196, .24, 'sine', 0, .05, 110); tone(147, .3, 'sine', .06, .04, 98); },   // ぷつん…（ひくくて やわらかい・おどろかせない）
     rest: () => guideTone(180, .05, 'triangle', 0, .03, 150),   // やすみの ぷ
     nibble: () => { guideTone(660, .05, 'triangle', 0, .04); guideTone(660, .05, 'triangle', .22, .04); },   // ちょん、ちょん
@@ -1934,6 +1962,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const found = Math.random() < (Number(probe('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
     if (found) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[found] = (save.decor[found] || 0) + 1; }
     const palUps = partyGain(perfects);   // いっしょに いく こに けいけんち
+    { const fl = save.tflag = save.tflag && typeof save.tflag === 'object' ? save.tflag : {}; fl['t' + TIME_NAME[timeOfDay()]] = true; if (rainy) fl.rain = true; if (big) fl.big = true; if (perfects >= 3) fl.perfect3 = true; if (perfects >= 5) fl.perfect5 = true; if (curMode() === 'hard' && fish.rare >= 3) fl.hard = true; const pn = prefPals().party.length; if (pn >= 1) fl.party1 = true; if (pn >= 4) fl.party4 = true; }   // きねんの しるし
     store(); hud(); drawEquip();
     const gift = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))].filter(item => !had.includes(item)).map(item => item.name);
     $('card-fish').textContent = fish.icon; $('card-name').replaceChildren(...(nushi && !fish.legend ? [L('ぬしの ', 'Guardian '), ruby(fish.kanji)] : [ruby(fish.kanji)])); $('card').dataset.nushi = String(!!nushi && !fish.legend);   // ぬし専用カード
@@ -1963,7 +1992,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('more-summary').textContent = L('ほかの こと', 'More'); $('more-catch').open = false;   // つれた あとの ボタンは 主役 2つだけ。ほかは たたむ
     resultSpecial = !!(leveled || first || nushi || record || fish.rare >= 4 || mile || fish.legend); resultAck = save.total === 1; ackAt = 0;   // けっかを みた「1かい」で わける（さいしょの 1ぴきだけは そのまま なげる）
     $('take-photo').textContent = resultSpecial ? L('しゃしんで おしえる', 'Photo to share') : 'しゃしんを とる';   // レベルアップ・はじめて・ぬし・きろくの すぐ あとが いちばん おしえたい：しゃしんの まどに「ともだちに おしえる」が ある
-    drawAudioSize(); setPhase('caught'); cardWait(1500); koeGet(); announceUps(palUps, 1800); if (Math.random() < 1 / 3 && !swapping) nextSwap = Math.min(nextSwap, Date.now() + 9000 + Math.random() * 6000);   // つれた あと 3ぶんの 1で となりの こが かわる（カードが ある あいだは かえない）   // 1.5びょうは カードを 出さず、まるふわと さかなと えんしゅつが しゅやく
+    drawAudioSize(); setPhase('caught'); cardWait(1500); koeGet(); announceUps(palUps, 1800); checkTrophies(false); if (Math.random() < 1 / 3 && !swapping) nextSwap = Math.min(nextSwap, Date.now() + 9000 + Math.random() * 6000);   // つれた あと 3ぶんの 1で となりの こが かわる（カードが ある あいだは かえない）   // 1.5びょうは カードを 出さず、まるふわと さかなと えんしゅつが しゅやく
     // つれた さかなを、まるふわが かかげる
     const held = $('held'), f = feet(mine);
     held.replaceChildren(fishImg(fish)); held.dataset.art = artOf(fish) ? '1' : ''; held.dataset.rare = String(fish.rare); held.style.scale = nushi ? '1.25' : ''; place(held, {x: f.x + 5, y: f.y + (nushi ? 3.5 : -3)}); held.hidden = false;   // むねの まえで だっこ する（かおは かくさない。つれた しらせとも、バケツとも かさならない）。ぬしは ひとまわり おおきく、そのぶん おなかの ほうへ さげて かおに かからない ように（1.45ばいだと かおを かくして いた）
@@ -2729,7 +2758,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。Xは、おうちの ひと（おとな）と いっしょに つかってね。';
   }
   $('take-photo').addEventListener('click', async () => {
-    try { await takePhoto(); photo.showModal(); } catch { say('しゃしんを つくれなかったよ。もういちど ためしてね。'); }
+    try { await takePhoto(); photo.showModal(); save.photoN = (save.photoN || 0) + 1; store(); checkTrophies(false); } catch { say('しゃしんを つくれなかったよ。もういちど ためしてね。'); }
   });
   // そっと にがす：つった さかなを みずに かえす。ずかんや きろくは そのまま（へらない）。「にがした こ」の かずを、やさしく のこす
   $('release').addEventListener('click', () => {
@@ -3204,6 +3233,99 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   });
   $('close-bucket').addEventListener('click', () => bucket.close());
 
+  // ---- きねん（トロフィー）：あそぶほど もらえる（銅・銀・金の 3だん・40こ）。とりにがしなし・くらべない・ばつなし・きげんつき なし。いままでの きろくからも あとから つく ----
+  const TIER = {1: ['🥉', 'どう', 'Bronze'], 2: ['🥈', 'ぎん', 'Silver'], 3: ['🥇', 'きん', 'Gold']};
+  const tf = k => !!(save.tflag && save.tflag[k]);
+  const caughtFish = () => Object.keys(save.fish).map(id => FISH[id]).filter(Boolean);
+  const nPal = () => ROSTER.filter(metPal).length;
+  const bestPalLv = () => Math.max(1, ...Object.keys(save.palXp || {}).map(id => palLv(id)));
+  const TROPHIES = [   // [id, だん, なまえ, English, ヒント, hint, え, しらべる]
+    ['c1', 1, 'はじめての 1ぴき', 'First catch', 'ひとつ つって みよう', 'Catch your first fish', '🎣', () => save.total >= 1],
+    ['c10', 1, '10ぴき つった', '10 catches', 'ゆっくり つろう', 'Take it easy', '🐟', () => save.total >= 10],
+    ['c50', 2, '50ぴき つった', '50 catches', 'のんびり つづけよう', 'Keep going at your pace', '🐟', () => save.total >= 50],
+    ['c100', 3, '100ぴき つった', '100 catches', 'たくさん あそんだね', 'A lot of fishing', '🐟', () => save.total >= 100],
+    ['b5', 1, 'ずかん 5しゅるい', '5 in the book', 'いろんな こに あおう', 'Meet different fish', '📖', () => seenCount() >= 5],
+    ['b15', 2, 'ずかん 15しゅるい', '15 in the book', 'ずかんを うめよう', 'Fill the book', '📖', () => seenCount() >= 15],
+    ['bAll', 3, 'ずかん ぜんぶ', 'Book complete', 'ぜんぶ あつめよう', 'Collect them all', '📚', () => seenCount() >= BASE],
+    ['a2', 1, '2つの つりばで つった', 'Two fishing spots', 'べつの つりばへ いこう', 'Visit another spot', '🗺️', () => new Set(caughtFish().map(f => f.area)).size >= 2],
+    ['a4', 2, '4つの つりばで つった', 'All four spots', 'ぜんぶの つりばへ', 'Visit every spot', '🗺️', () => new Set(caughtFish().filter(f => !f.legend).map(f => f.area)).size >= 4],
+    ['t4', 2, '4つの じかんで つった', 'Morning to night', 'あさ・ひる・ゆうがた・よる', 'Morning, noon, evening, night', '🌗', () => ['tasa', 'thiru', 'tyuu', 'tyoru'].every(tf)],
+    ['tn', 1, 'よるに つった', 'A night catch', 'よるの つりばへ', 'Fish at night', '🌙', () => tf('tyoru')],
+    ['rain', 1, 'あめの ひに つった', 'A rainy day', 'あめの ひに つりを', 'Fish on a rainy day', '☔', () => tf('rain')],
+    ['nushi', 2, 'ぬしを つった', 'A Guardian', 'おおきな かげを まとう', 'Look for a huge shadow', '👑', () => caughtFish().some(f => save.fish[f.id].nushi)],
+    ['nushi3', 3, 'ぬしを 3しゅるい', 'Three Guardians', 'ぬしに たくさん あおう', 'Meet more Guardians', '👑', () => caughtFish().filter(f => save.fish[f.id].nushi).length >= 3],
+    ['legend', 3, 'まぼろしに あえた', 'A mythical fish', 'にじいろの かげ', 'A rainbow shadow', '🌈', () => caughtFish().some(f => f.legend)],
+    ['season', 2, 'この つきの さかなを つった', 'A seasonal fish', 'つきごとに ちがう さかな', 'A fish that changes by month', '🍁', () => caughtFish().some(f => f.season)],
+    ['rare4', 2, 'スペシャルな こを つった', 'A special one', 'きんいろの かげ', 'A golden shadow', '✨', () => caughtFish().some(f => f.rare === 4 && !f.legend)],
+    ['koi', 3, 'きんの まるごい', 'The golden carp', 'みずうみの きんいろ', 'Gold in the lake', '🏅', () => caughtFish().some(f => f.name === 'きんのまるごい')],
+    ['big', 1, 'おおものを つった', 'A big one', 'おおきい こを ねらおう', 'Aim for a big one', '📏', () => tf('big')],
+    ['p3', 1, 'ぴったり 3かい', 'Three perfects', 'ぴったりを つづけよう', 'Keep landing perfects', '⭕', () => tf('perfect3')],
+    ['p5', 2, 'ぴったり 5かい', 'Five perfects', 'もっと ぴったり', 'Even more perfects', '⭕', () => tf('perfect5')],
+    ['hard', 2, 'しっかりで つった', 'Caught in Focused', '「しっかり」で ★3を', 'A ★3 in Focused play', '🎯', () => tf('hard')],
+    ['esc', 1, 'にげられても だいじょうぶ', 'It is okay to lose one', 'にげられても また くるよ', 'Fish that got away come back', '🌊', () => !!(save.seenFish && Object.keys(save.seenFish).length)],
+    ['rel', 1, 'そっと にがした', 'Set one free', 'つった こを みずへ', 'Let a fish go', '💧', () => (save.released || 0) >= 1],
+    ['rel10', 2, 'そっと 10ぴき', 'Set ten free', 'やさしく にがそう', 'Be gentle', '💧', () => (save.released || 0) >= 10],
+    ['fav', 1, '♡を つけた', 'A first heart', 'なかまを ♡に', 'Heart a friend', '♡', () => !!(save.fav && save.fav.length)],
+    ['avatar', 1, 'じぶんの キャラ', 'Your own character', 'なかまを えらんで つろう', 'Fish as a friend', '🧑‍🎤', () => !!avatarPal()],
+    ['party1', 1, 'なかまと いっしょに つった', 'Fishing together', 'いっしょに いく なかまを', 'Take a friend along', '🤝', () => tf('party1')],
+    ['party4', 2, 'なかま 4にんで つった', 'Four friends along', '4にんで いっしょに', 'Go with four friends', '👥', () => tf('party4')],
+    ['pal5', 1, 'であった なかま 5にん', '5 friends met', 'いろんな なかまに あおう', 'Meet more friends', '🐾', () => nPal() >= 5],
+    ['pal10', 2, 'であった なかま 10にん', '10 friends met', 'もっと たくさん', 'Even more friends', '🐾', () => nPal() >= 10],
+    ['palAll', 3, 'であった なかま ぜんいん', 'Everyone met', 'みんなと あおう', 'Meet everyone', '🐾', () => nPal() >= ROSTER.length && ROSTER.length > 0],
+    ['plv5', 2, 'なかまが レベル 5', 'A friend at level 5', 'いっしょに いよう', 'Go along together', '⭐', () => bestPalLv() >= 5],
+    ['bond', 2, 'しんゆうが できた', 'A best friend', 'ずっと いっしょに', 'Stay together for a long time', '💞', () => Object.values(save.bond || {}).some(v => v >= 3)],
+    ['lv5', 1, 'つりびと レベル 5', 'Angler level 5', 'つづけて あそぼう', 'Keep playing', '🎣', () => levelOf(save.xp || 0) >= 5],
+    ['lv10', 2, 'つりびと レベル 10', 'Angler level 10', 'もっと つづけて', 'Keep on', '🎣', () => levelOf(save.xp || 0) >= 10],
+    ['lv20', 3, 'つりびと レベル 20', 'Angler level 20', 'ながく あそんだね', 'A long time together', '🎣', () => levelOf(save.xp || 0) >= 20],
+    ['g10', 1, 'ながめる 10ぷん', '10 minutes of gazing', 'ぼーっと しよう', 'Just relax', '🪷', () => (save.gazeMin || 0) >= 10],
+    ['g60', 2, 'ながめる 1じかん', 'An hour of gazing', 'ゆっくり すごそう', 'Take your time', '🪷', () => (save.gazeMin || 0) >= 60],
+    ['gift', 1, 'おくりものを もらった', 'A gift', 'ともだちから おくりもの', 'A gift from a friend', '🎁', () => !!((save.gifts && save.gifts.length) || (save.gotGifts && save.gotGifts.length))],
+    ['ph1', 1, 'しゃしんを とった', 'A first photo', 'つれたら しゃしんを', 'Take a photo of a catch', '📷', () => (save.photoN || 0) >= 1],
+    ['ph10', 2, 'しゃしん 10まい', '10 photos', 'おもいでを のこそう', 'Keep your memories', '📷', () => (save.photoN || 0) >= 10],
+    ['d10', 2, '10にち あそんだ', '10 days', 'また あした', 'See you tomorrow', '📅', () => (save.dayN || 0) >= 10],
+    ['d30', 3, '30にち あそんだ', '30 days', 'ながく なかよし', 'Long-time friends', '📅', () => (save.dayN || 0) >= 30]
+  ];
+  let trophyQueue = [], trophyShowing = false;
+  function checkTrophies(quiet) {   // かくにん：あたらしく もらえた ものが あれば しるす。quiet＝いままでの きろくから あとづけ（おしらせは しない）
+    save.trophies = save.trophies && typeof save.trophies === 'object' ? save.trophies : {}; const fresh = [];
+    for (const t of TROPHIES) { if (save.trophies[t[0]]) continue; let ok = false; try { ok = !!t[7](); } catch {} if (ok) { save.trophies[t[0]] = Date.now(); fresh.push(t); } }
+    if (fresh.length) { store(); drawTrophyBadge(); if (!quiet) { trophyQueue.push(...fresh); runTrophyQueue(); } }
+    return fresh;
+  }
+  function runTrophyQueue() {   // 1こずつ・せかさない（つりの さいちゅうは まつ・カードが でて いる あいだも まって から）
+    if (trophyShowing || !trophyQueue.length) return;
+    if (!(phase === 'idle' || (phase === 'caught' && !$('card').dataset.wait))) { setTimeout(runTrophyQueue, 1500); return; }
+    const t = trophyQueue.shift(), el = $('trophy-toast'); trophyShowing = true;
+    el.textContent = L('きねん：' + t[2], 'Trophy: ' + t[3]); el.hidden = false; SFX.trophy(); say(L('きねん：' + t[2] + '（' + TIER[t[1]][1] + '）', 'Trophy: ' + t[3] + ' (' + TIER[t[1]][2] + ')'), true);
+    setTimeout(() => { el.hidden = true; trophyShowing = false; setTimeout(runTrophyQueue, 900); }, 3400);
+  }
+  function drawTrophyBadge() {
+    const b = $('open-trophy'); if (!b) return; let badge = $('trophy-badge');
+    if (!badge) { badge = document.createElement('b'); badge.id = 'trophy-badge'; badge.className = 'book-badge'; badge.setAttribute('aria-hidden', 'true'); badge.hidden = true; b.append(badge); }
+    const got = Object.keys(save.trophies || {}).filter(id => TROPHIES.some(t => t[0] === id)).length, n = Math.max(0, got - (Number.isInteger(save.trophySeen) ? save.trophySeen : 0));
+    badge.hidden = !n; badge.textContent = String(n);
+    b.setAttribute('aria-label', L('きねん。' + (n ? 'あたらしい ' + n + 'こ' : ''), 'Trophies.' + (n ? ' ' + n + ' new' : '')));
+  }
+  function drawTrophyText() { $('open-trophy').firstChild && $('open-trophy').firstChild.nodeType === 3 ? ($('open-trophy').firstChild.nodeValue = L('きねん', 'Trophies')) : $('open-trophy').prepend(L('きねん', 'Trophies')); $('close-trophy').textContent = L('とじる', 'Close'); }
+  function drawTrophies() {
+    const got = TROPHIES.filter(t => save.trophies && save.trophies[t[0]]);
+    $('trophy-title').textContent = L('きねん', 'Trophies');
+    $('trophy-lead').textContent = L('あそぶほど もらえるよ。とりにがしは ないよ。' + got.length + ' / ' + TROPHIES.length, 'You earn these as you play. You cannot miss any. ' + got.length + ' / ' + TROPHIES.length);
+    $('trophy-grid').replaceChildren(...TROPHIES.map(t => {
+      const has = !!(save.trophies && save.trophies[t[0]]), d = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), sm = document.createElement('small');
+      d.dataset.got = String(has); d.dataset.tier = String(t[1]); d.setAttribute('role', 'listitem');
+      icon.textContent = has ? t[6] : '？'; icon.setAttribute('aria-hidden', 'true');
+      text.append(has ? L(t[2], t[3]) : L(t[4], t[5])); sm.textContent = TIER[t[1]][0] + ' ' + L(TIER[t[1]][1], TIER[t[1]][2]); text.append(sm);   // まだの ものは ヒントを だす
+      d.setAttribute('aria-label', has ? L('もらった：' + t[2] + '（' + TIER[t[1]][1] + '）', 'Earned: ' + t[3] + ' (' + TIER[t[1]][2] + ')') : L('まだ：' + t[4], 'Not yet: ' + t[5]));
+      d.append(icon, text); return d;
+    }));
+  }
+  $('open-trophy').addEventListener('click', () => { checkTrophies(true); save.trophySeen = Object.keys(save.trophies || {}).filter(id => TROPHIES.some(t => t[0] === id)).length; store(); drawTrophyBadge(); drawTrophies(); $('trophy').showModal(); });
+  $('close-trophy').addEventListener('click', () => $('trophy').close());
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawTrophyText(); drawTrophyBadge(); }); else { drawTrophyText(); drawTrophyBadge(); }
+  setInterval(() => { if (!document.hidden && document.body.classList.contains('gazing')) { save.gazeMin = (save.gazeMin || 0) + 1; store(); checkTrophies(false); } }, 60000);   // ながめて いた じかん（ひらいて いる あいだだけ）
+  { const dk = dayKey(); if (save.dayLast !== dk) { save.dayN = (save.dayN || 0) + 1; save.dayLast = dk; store(); } }   // あそんだ ひ
+  checkTrophies(true);   // いままでの きろくから あとづけ（しずかに）
   // ---- なかま：であった こを えらぶ（108にんに ふえても おなじ しくみ）。じぶんの キャラ／いっしょに いく なかま（4にんまで）／♡。まるふわは しゅじんこう（いつでも もどせる）----
   function rosterById(id) { return ROSTER.find(p => p.id === id) || null; }
   function metPal(p) { return !!(save.pals && save.pals[p.id]); }
@@ -3218,7 +3340,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const nkBtn = (text, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = text; b.addEventListener('click', fn); return b; };
   function nkText() { const o = $('open-nakama'); o.textContent = L('なかま', 'Friends'); o.setAttribute('aria-label', L('なかま。じぶんの キャラと、いっしょに いく なかまを えらぶ', 'Friends. Choose who you fish as and who comes along')); $('close-nakama').textContent = L('とじる', 'Close'); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', nkText); else nkText();
-  function afterNakamaChange(focusSel) { store(); callPals(); layout(); paintWatchers(); drawNakama(); const b = focusSel ? nakama.querySelector(focusSel) : null; if (b) b.focus({preventScroll: true}); }
+  function afterNakamaChange(focusSel) { store(); checkTrophies(false); callPals(); layout(); paintWatchers(); drawNakama(); const b = focusSel ? nakama.querySelector(focusSel) : null; if (b) b.focus({preventScroll: true}); }
   function chooseAvatar(p) {   // p＝えらんだ こ／null＝まるふわに もどす
     save.avatar = p ? p.id : null; if (p) save.party = (Array.isArray(save.party) ? save.party : []).filter(id => id !== p.id);
     paintAvatar(); SFX.loved();
