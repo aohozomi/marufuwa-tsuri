@@ -10,6 +10,14 @@
   E.add({
     ex: {
       "「まるふわつりびより」「まるふわのひろば」について": "About “Marufuwa Fishing Days” and “Marufuwa’s Plaza”",
+      "じぶんでおしたときだけはたらくボタン": "Buttons that work only when you press them",
+      "「ともだちにおしえる」…たんまつのきょうゆうメニューがひらきます（つかえないたんまつでは、リンクをコピーします）。おくるなかみは、ゲームのなまえと、ひとことのしょうかいと、リンクだけです。あそんだきろくははいりません。おくりさきは、おつかいのかたがえらびます。": "“Tell a friend”… Opens your device’s share menu (on devices without one, it copies the link). What is sent is only the game’s name, a short line of introduction, and the link. Your play record is not included. The person using the device chooses who to send it to.",
+      "「がぞうをコピー」…しゃしんのえをコピーするだけです（このたんまつのなかだけ）。ゲームがそとへおくることはありません。": "“Copy the picture”… Just copies the photo image (only inside this device). The game never sends it outside.",
+      "「バケツのなまえをのせる」…はじめはOFFです。ONにしたときだけ、しゃしんのえのなかにバケツのなまえをかきます。Xにかくぶんしょうやリンクにははいりません。いつでもOFFにもどせます。": "“Show bucket name”… It is OFF at first. Only when you turn it ON, the bucket name is written inside the photo image. It does not go into the text you post to X or into the link. You can switch it back OFF anytime.",
+      "「かべがみにする」…しゃしんからスマホのかべがみようのえをつくって、このたんまつにほぞんします（そとへはおくりません）。": "“Make a wallpaper”… Makes a phone-wallpaper picture from the photo and saves it on this device (nothing is sent outside).",
+      "どれも、おしたときだけはたらきます。ゲームがかってにおくったり、コピーしたり、かきかえたりしません。": "Each of these works only when you press it. The game never sends, copies or rewrites anything on its own.",
+      "おとのせってい…「つかいやすくする」のなかで、あんないのおと・こうかおん・なみとあめのおとを1つずつきれます。ひろば・おへや・ひみつのおとも、おなじせっていにしたがいます。「やさしいおと」「ゆったり」もえらべます。": "Sound settings… In “Comfort options,” you can turn off guide sounds, effect sounds, and wave & rain sounds one by one. Sounds in the Plaza, the Room and the secrets follow the same settings. You can also choose “Gentle sound” and “Relaxed.”",
+      "よみあげ…「つかいやすくする」のなかの「よみあげ」をONにすると、がめんのことばをこえでよみます。このたんまつのなかにあるにほんごのこえ（ローカルのこえ）だけをつかうので、ことばはそとへでません。にほんごのこえがないたんまつやEnglishでは、ボタンがでません。はじめはOFFです。": "Read aloud… If you turn on “Read aloud” in “Comfort options,” the words on the screen are read out in a voice. Only a Japanese voice that is already inside this device (a local voice) is used, so the words never leave the device. On devices with no Japanese voice, and in English, the button does not appear. It is OFF at first.",
       "ひとこと": "In short",
       "「まるふわつりびより」は、いそがなくてもだいじょうぶな、のんびりつりのゲームです。にがしても、なにもへりません。": "“Marufuwa Fishing Days” is a relaxed fishing game where there is no need to hurry. Even if you let a fish go, nothing is lost.",
       "ちいさなおこさんもあんしんしてあそべるように、おかね・こうこく・ログイン・ほかのひととのやりとりを、さいしょからいれていません。": "So that even small children can play with peace of mind, we did not include money, ads, logins, or interaction with other people from the start.",
