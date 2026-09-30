@@ -786,13 +786,20 @@
     return (Array.isArray(raw) ? raw : []).filter(g => g && Number.isInteger(g.id) && g.id >= 0 && g.id < fl.length && Number.isFinite(g.size)).slice(0, SHELF.max).map(g => { const f = fl[g.id]; return { id: g.id, name: f.name, icon: f.icon, size: Math.round(g.size * 10) / 10, from: palName(g.pal), word: giftWord(g.word), at: Number.isFinite(g.at) ? g.at : 0 }; });
   }
   const artOf = id => { try { return (window.TsuriArt && window.TsuriArt[id]) || ''; } catch { return ''; } };
+  function shelfSlots(n) {   // だなの 場所（へや 360×640 の 中の 位置と 大きさ）。画面の だなと しゃしんで おなじ 計算
+    const per = SHELF.cols * SHELF.rows, out = [];
+    for (let i = 0; i < Math.min(n, SHELF.max); i++) {
+      const p = SHELF.panels[Math.floor(i / per)], k = i % per, c = k % SHELF.cols, r = Math.floor(k / SHELF.cols), cw = (p.w - 8) / SHELF.cols, ch = (p.h - 6) / SHELF.rows, size = Math.min(cw, ch) - 4;
+      out.push({ x: p.x + 4 + c * cw + (cw - size) / 2, y: p.y + 3 + r * ch + (ch - size) / 2, size });
+    }
+    return out;
+  }
   function renderShelf() {
     gifts = giftsNow(); shelf.replaceChildren(); shelf.hidden = shelfBtn.hidden = !gifts.length;
     if (!gifts.length) { closeGifts(); return; }
-    const per = SHELF.cols * SHELF.rows;
+    const slots = shelfSlots(gifts.length);
     gifts.forEach((g, i) => {
-      const p = SHELF.panels[Math.floor(i / per)], k = i % per, c = k % SHELF.cols, r = Math.floor(k / SHELF.cols), cw = (p.w - 8) / SHELF.cols, ch = (p.h - 6) / SHELF.rows, size = Math.min(cw, ch) - 4;
-      const x = p.x + 4 + c * cw + (cw - size) / 2, y = p.y + 3 + r * ch + (ch - size) / 2, art = artOf(g.id); let el;
+      const { x, y, size } = slots[i], art = artOf(g.id); let el;
       if (art) { el = new Image(); el.src = art; el.alt = ''; el.draggable = false; } else { el = document.createElement('span'); el.textContent = g.icon; el.style.fontSize = 'calc(' + (size * .8).toFixed(1) + 'px * var(--s))'; }
       el.className = 'tk-gf'; Object.assign(el.style, { left: pct(x, ROOM.w), top: pct(y, ROOM.h), width: pct(size, ROOM.w), height: pct(size, ROOM.h) }); shelf.append(el);
     });
@@ -914,6 +921,14 @@
     const ctx = cvs.getContext('2d'); ctx.scale(K, K);
     const t = ROOM.tank, rp = palette();
     ctx.drawImage(await svgImage(roomSvg()), 0, 0, ROOM.w, ROOM.h);
+    { // おくりもの だな：もらった さかなを 引き出しの ガラスに（画面の だなと おなじ 場所。数には 入れない）
+      const gs = gifts, sl = shelfSlots(gs.length);
+      for (let i = 0; i < gs.length && i < sl.length; i++) {
+        const sp = sl[i], art = artOf(gs[i].id);
+        if (art) { const im = await new Promise(res => { const i2 = new Image(); i2.onload = () => res(i2); i2.onerror = () => res(null); i2.src = art; }); if (im) ctx.drawImage(im, sp.x, sp.y, sp.size, sp.size); }
+        else { ctx.save(); ctx.font = Math.round(sp.size * .8) + 'px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(gs[i].icon, sp.x + sp.size / 2, sp.y + sp.size / 2); ctx.restore(); }
+      }
+    }
     if (rp.night || rp.dusk) { ctx.save(); ctx.globalAlpha = rp.night ? (starry ? .6 : .5) : .12; ctx.fillStyle = rp.night ? '#0c2048' : '#ff8a3c'; ctx.fillRect(0, 0, ROOM.w, ROOM.h); ctx.restore(); }
     if (starry) { ctx.save(); STARS.forEach((st, i) => { ctx.globalAlpha = .55 + (i % 3) * .15; ctx.fillStyle = st.c; ctx.fill(new Path2D(starPath(st.x, st.y, st.s))); }); ctx.restore(); }
     if (!riceGone) ctx.drawImage(await svgImage(riceSvg()), RICE.x, RICE.y, RICE.w, RICE.h);
