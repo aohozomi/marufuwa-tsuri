@@ -122,6 +122,9 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .hud button{--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
 .hud button::after{content:"";position:absolute;left:12%;top:18%;width:7px;height:7px;border-radius:50%;background:#ffffffe6;pointer-events:none}
 .areas small{display:block;font-weight:600;font-size:.75rem}
+#open-book{position:relative}
+.book-badge{position:absolute;top:-8px;right:-4px;min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:#ffd34d;color:#593700;font-size:.8rem;font-weight:900;line-height:20px;text-align:center;border:2px solid #fff;box-shadow:0 2px 4px #0003}   /* ずかんに あたらしい こが いるよ（あかい ばっじは けいこくに みえる ので きんいろ） */
+.book-badge[hidden]{display:none}
 .areas button[aria-disabled=true],#shop-list button[aria-disabled=true]{--c1:#f2f6f9;--c2:#dfe8ee;--side:#b7c6d0;--ink:#3b5463;cursor:default}   /* まだ いけない：うすく（opacity）せず、いろを おとなしく。もじは くっきり */
 .time-box{margin-bottom:10px;font-size:.85rem}
 .time-box summary{cursor:pointer;padding:13px 4px;font-weight:800}
@@ -992,6 +995,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (Number.isInteger(other.wishes)) { const wishes = Math.max(save.wishes || 0, other.wishes, (save.wishes || 0) + other.wishes - was(['wishes'])); if (wishes !== (save.wishes || 0)) { save.wishes = wishes; changed = true; } }
     if (Number.isInteger(other.tegami) && other.tegami > (save.tegami || 0)) { save.tegami = other.tegami; changed = true; }
     if (other.audioSet === true && save.audioSet !== true) { save.audioSet = true; changed = true; }
+    if (Number.isInteger(other.bookSeen) && other.bookSeen > (Number.isInteger(save.bookSeen) ? save.bookSeen : 0)) { save.bookSeen = other.bookSeen; changed = true; }
     if (other.week && Number.isInteger(other.week.k) && Number.isInteger(other.week.n) && Array.isArray(other.week.ids)) {   // こんしゅうの きろく：あたらしい しゅうを とり、おなじ しゅうは かずを あわせる
       const mine = save.week;
       if (!mine || other.week.k > mine.k) { if (mine && mine.n > 0) save.lastWeek = mine; save.week = {k: other.week.k, n: other.week.n, ids: other.week.ids.filter(id => Number.isInteger(id) && FISH[id]), top: other.week.top && FISH[other.week.top.id] ? other.week.top : null}; changed = true; }
@@ -1330,9 +1334,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
       ? 'Everyone has the same lucky fish today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (luckyLeft ? ' ' + luckyLeft + ' more catches to unlock that spot.' : '') + (boss ? ' Today' + String.fromCharCode(39) + 's Guardian tends to show up at ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ') — same for everyone.' : '')
       : 'きょうは みんな おなじ さかなが ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (luckyLeft ? 'まだ いけないけど、あと ' + luckyLeft + 'ひきで いけるよ。' : '') + (boss ? 'ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ（これも みんな おなじ）。' : ''));
   }
+  function drawBadge() {   // ずかんに まだ みて いない あたらしい さかなが いる とき（かず）。ひらいたら きえる。へらす・くらべる ものでは ない
+    const b = $('open-book'); if (!b) return; let badge = $('book-badge');
+    if (!badge) { badge = document.createElement('b'); badge.id = 'book-badge'; badge.className = 'book-badge'; badge.setAttribute('aria-hidden', 'true'); badge.hidden = true; b.append(badge); }
+    const have = Object.keys(save.fish).filter(id => FISH[id]).length, n = Number.isInteger(save.bookSeen) ? Math.max(0, have - save.bookSeen) : 0;
+    badge.hidden = !n; badge.textContent = String(n);
+    if (n) b.setAttribute('aria-label', L('ずかん。あたらしい ' + n + ' しゅるい', 'Sticker book. ' + n + ' new')); else b.removeAttribute('aria-label');
+  }
   function hud() {
     $('total').textContent = String(save.total);
-    drawToday();
+    drawToday(); drawBadge();
     $('seen').textContent = $('book-seen').textContent = String(seenCount());
     const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
     $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%';
@@ -2463,6 +2474,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   const book = $('book');
   $('open-book').addEventListener('click', () => {
+    save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); drawBadge();   // ひらいた → みた ことに なる
     { const myth = FISH.filter(f => f.legend), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? '★5の まぼろしの こ：ぜんいんに あえたよ！' : '★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'); }
     $('book-grid').replaceChildren(...FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])).map(f => {
       const got = save.fish[f.id], cell = document.createElement('div');
@@ -2611,6 +2623,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   if (save.total === 0) say('「なげる」を おしてね。');
   else if (mythDay) say(welcome + 'きょうは、ふしぎな ひ。みずが きらきら して いるよ。');
   else say(welcome + 'きょうの ラッキーさかなは「' + LUCKY.name + '」。' + areaName(LUCKY.area) + 'に いるよ。' + (rainy ? 'きょうは あめ。' : '') + (save.total >= AREAS.find(a => a.id === BOSS.area).need ? ' きょうの ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ。' : ''));
+  if (!Number.isInteger(save.bookSeen)) { save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); }   // はじめてなら「ぜんぶ みた」ことに（バッジは これから ふえた ぶんだけ）
   applyMy(); hud(); setPhase('idle');
   if (location.hash === '#restored') { say('きろくを もどしたよ。つづきから あそべるよ。'); try { history.replaceState(null, '', location.pathname + location.search); } catch {} }
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
