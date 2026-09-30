@@ -622,6 +622,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
       <button id="keep-copy" type="button">コピーする</button>
       <button id="keep-load" type="button">この もじで もどす</button>
     </div>
+    <p class="count" style="font-size:.85rem">べつの ブラウザ（Safariなど）で あそびたい ときは、「リンクを コピー」して、その ブラウザの アドレスらんに はって ひらいてね。リンクには きろくが ぜんぶ はいって いるので、ほかの ひとには おくらないでね。</p>
+    <div class="photo-actions"><button id="keep-link" type="button">リンクを コピー（べつの ブラウザへ）</button></div>
     <p class="count" id="keep-status" role="status"></p>
     <button class="close" type="button" id="close-keep">とじる</button>
   </dialog>
@@ -696,6 +698,14 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <p class="count" id="gift-keep"></p>
     <p class="count" id="gift-return"></p>
     <div class="photo-actions" id="gift-actions"></div>
+  </dialog>
+
+  <dialog id="restore" aria-labelledby="restore-title">
+    <h2 id="restore-title">きろくを もどす？</h2>
+    <p class="count" id="restore-what"></p>
+    <p class="count" id="restore-now"></p>
+    <p class="count" id="restore-say" role="status"></p>
+    <div class="photo-actions" id="restore-actions"></div>
   </dialog>
 
   <dialog id="shop" aria-labelledby="shop-title">
@@ -1679,18 +1689,56 @@ dialog .close{display:block;margin:auto;min-width:160px}
     keepCode.value = pack(); keepCode.select();
     try { await navigator.clipboard.writeText(keepCode.value); keepSay('コピー したよ。メモなどに はって のこしてね。'); } catch { keepSay('もじを えらんだよ。ながおしして、コピー してね。'); }
   });
+  // きろくの もじ（MF1.…）と、リンク（…#restore=MF1.…）の どちらでも よめる。#の あとは サーバーに おくられない。かたちが おかしければ なげる（よぶ ほうが やさしい ことばに する）
+  function readKeep(raw) {
+    const at = String(raw).indexOf('MF1.'); if (at < 0) throw Error('form');
+    let body = String(raw).slice(at + 4).replace(/[^A-Za-z0-9+/=_-]/g, '').replace(/-/g, '+').replace(/_/g, '/'); while (body.length % 4) body += '=';
+    const data = JSON.parse(decodeURIComponent(escape(atob(body))));
+    if (!data || typeof data.fish !== 'object' || data.fish === null || !Number.isInteger(data.total) || data.total < 0) throw Error('shape');
+    const fishes = {}; for (const [id, got] of Object.entries(data.fish)) if (FISH[id] && got && Number.isFinite(got.best) && Number.isInteger(got.count)) fishes[id] = {count: got.count, best: got.best, nushi: !!got.nushi};
+    return {data, fishes};
+  }
+  function applyKeep(got) {   // もどす：いまの きろくを おきかえて、よみこみ なおす（もどった あと「もどしたよ」を 1かい いう ため #restored を つける）
+    save = {...got.data, fish: got.fishes}; store(true);
+    try { history.replaceState(null, '', location.pathname + location.search + '#restored'); } catch {}
+    location.reload();
+  }
+  async function copyText(text) {   // コピー：ふつうの ほうほう → ふるい ほうほう の じゅん
+    try { await navigator.clipboard.writeText(text); return true; } catch {}
+    try { const t = document.createElement('textarea'); t.value = text; t.readOnly = true; t.style.cssText = 'position:fixed;left:-9999px;top:0'; document.body.append(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return !!ok; } catch { return false; }
+  }
   $('keep-load').addEventListener('click', () => {
     try {
-      const text = keepCode.value.trim(); if (!text.startsWith('MF1.')) throw Error('form');
-      const data = JSON.parse(decodeURIComponent(escape(atob(text.slice(4)))));
-      if (!data || typeof data.fish !== 'object' || data.fish === null || !Number.isInteger(data.total) || data.total < 0) throw Error('shape');
-      const fishes = {}; for (const [id, got] of Object.entries(data.fish)) if (FISH[id] && got && Number.isFinite(got.best) && Number.isInteger(got.count)) fishes[id] = {count: got.count, best: got.best, nushi: !!got.nushi};
-      if (data.total < save.total && $('keep-load').dataset.sure !== 'yes') { $('keep-load').dataset.sure = 'yes'; keepSay('いまの きろく（' + save.total + 'ひき）より すくない きろく（' + data.total + 'ひき）です。もどすなら、もういちど おしてね。'); return; }
-      save = {...data, fish: fishes}; delete $('keep-load').dataset.sure;
-      store(true); location.reload();
-    } catch { keepSay('この もじは、よめなかったよ。「MF1.」から はじまる もじを、ぜんぶ はってね。'); }
+      const got = readKeep(keepCode.value.trim());
+      if (got.data.total < save.total && $('keep-load').dataset.sure !== 'yes') { $('keep-load').dataset.sure = 'yes'; keepSay('いまの きろく（' + save.total + 'ひき）より すくない きろく（' + got.data.total + 'ひき）です。もどすなら、もういちど おしてね。'); return; }
+      delete $('keep-load').dataset.sure; applyKeep(got);
+    } catch { keepSay('この もじは、よめなかったよ。「MF1.」から はじまる もじ（か、きろくの リンク）を、ぜんぶ はってね。'); }
+  });
+  $('keep-link').addEventListener('click', async () => {   // べつの ブラウザへ うつす リンク（もじは ぜんぶ じぶんの きろく。ほかの ひとには おくらない）
+    const url = HOME + '#restore=' + pack().replace(/[+]/g, '-').replace(/[/]/g, '_').replace(/=+$/, '');
+    let ok = await copyText(url);
+    if (!ok && navigator.share) try { await navigator.share({url}); ok = true; } catch {}
+    keepSay(ok ? 'リンクを コピー したよ。べつの ブラウザの アドレスらんに はって ひらいてね。ほかの ひとには おくらないでね。' : 'コピーが できなかったよ。「コピーする」で もじを コピーしてね。');
   });
   $('close-keep').addEventListener('click', () => keep.close());
+
+  // リンクで ひらいた とき（…#restore=MF1.…）：「この きろくを もどす？」。いまの きろくの ほうが おおければ、まもる ほうを さきに ならべる
+  const restoreBox = $('restore');
+  function dropRestoreHash() { try { history.replaceState(null, '', location.pathname + location.search); } catch {} }
+  function restoreOpen() {
+    const hit = /^#restore=(MF1[.].+)$/.exec(location.hash); if (!hit) return;
+    let got; try { got = readKeep(hit[1]); } catch { dropRestoreHash(); return; }   // よめない：なにも おこさない
+    const {data, fishes} = got, seen = Object.keys(fishes).filter(id => !FISH[id].legend).length, level = levelOf(Number.isInteger(data.xp) ? data.xp : migrateXp({fish: fishes}));
+    const empty = save.total === 0 && Object.keys(save.fish).length === 0, less = data.total < save.total;
+    $('restore-what').textContent = 'もどす きろく：つれた かず ' + data.total + 'ひき・シールちょう ' + seen + ' / ' + BASE + '・レベル ' + level;
+    $('restore-now').textContent = empty ? '' : 'いまの きろく：つれた かず ' + save.total + 'ひき';
+    $('restore-say').textContent = empty ? 'この ブラウザは まだ きろくが ないよ。もどすと、つづきから あそべるよ。' : less ? 'いまの きろくの ほうが おおいよ。もどすと、いまの きろくは なくなるよ。' : 'もどすと、いまの きろくは、この きろくに おきかわるよ。';
+    const go = giftBtn(less ? 'それでも もどす' : 'もどす', () => { restoreBox.close(); dropRestoreHash(); applyKeep(got); }, !less), no = giftBtn('もどさない', () => { restoreBox.close(); dropRestoreHash(); });
+    $('restore-actions').replaceChildren(...(less ? [no, go] : [go, no]));
+    restoreBox.showModal(); (less ? no : go).focus();
+  }
+  addEventListener('hashchange', restoreOpen);
+  setTimeout(restoreOpen, 500);
 
   // おくりもの：おくる（ひとことを えらんで リンクを つくる）と、もらう（?gift=… が ついて いたら 1まい）。URL には すうじだけ。じぶんの さかなは へらない
   // もらった さかなは バケツと べつの いれもの。つれた かず・レベル・ずかん・じぶんの きろくには かぞえない（にせの URL で ずかんが うまらない）
@@ -1719,9 +1767,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       try { await navigator.share({text, url}); giveSay('きょうゆうの がめんを とじました。'); return; }
       catch (error) { if (error.name === 'AbortError') { giveSay('やめました。'); return; } }
     }
-    let copied = false;   // きょうゆうが ない・つかえない とき：リンクを コピー
-    try { await navigator.clipboard.writeText(text + '\n' + url); copied = true; } catch {}
-    if (!copied) try { const t = document.createElement('textarea'); t.value = text + '\n' + url; t.readOnly = true; t.style.cssText = 'position:fixed;left:-9999px;top:0'; document.body.append(t); t.select(); copied = document.execCommand('copy'); t.remove(); } catch {}
+    const copied = await copyText(text + '\n' + url);   // きょうゆうが ない・つかえない とき：リンクを コピー
     giveSay(copied ? 'リンクを コピー したよ。おくりたい ところに はってね。おうちの ひとと いっしょに つかってね。' : 'コピーが できなかったよ。もういちど ためしてね。');
   });
   $('close-give').addEventListener('click', () => giveBox.close());
@@ -1752,6 +1798,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     giftScreen({title: 'うけとったよ！ ありがとう', f: FISH[g.id], size: g.size, say: 'バケツの「もらった さかな」に いれたよ。', keep: 'この ブラウザの なかに ほぞんされるよ。' + (document.documentElement.dataset.inapp === 'x' ? 'Xの なかで ひらいた ときは、Safariなどの ブラウザとは べつに ほぞんされるよ。' : ''), back: back ? 'おかえしに ひとつ おくる？　あとで でも いいよ。' : '', actions});
   }
   function giftOpen(raw) {
+    if (restoreBox.open) return;   // きろくを もどす 窓が さき（おくりものは、つぎに ひらいた とき）
     if (raw.length > 24 || location.href.length > 300 || !GIFT_CODE.test(raw)) { dropGiftParam(); return; }
     const part = raw.split('.'), [id, tenths, palN, wordN] = part.map(Number), f = FISH[id];
     if (!f) { giftScreen({title: 'おくりものが とどいたよ', say: 'よくわからない さかなが きたよ。', actions: [giftClose]}); dropGiftParam(); return; }
@@ -2038,6 +2085,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   else if (mythDay) say(welcome + 'きょうは、なにかが いる きが する…。');
   else say(welcome + 'きょうの ラッキーさかなは「' + LUCKY.name + '」。' + areaName(LUCKY.area) + 'に いるよ。' + (rainy ? 'きょうは あめ。' : '') + (save.total >= AREAS.find(a => a.id === BOSS.area).need ? ' きょうの ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ。' : ''));
   applyMy(); hud(); setPhase('idle');
+  if (location.hash === '#restored') { say('きろくを もどしたよ。つづきから あそべるよ。'); try { history.replaceState(null, '', location.pathname + location.search); } catch {} }
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
   setTimeout(chatter, Number(query.get('chat')) || 5000);
   window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
