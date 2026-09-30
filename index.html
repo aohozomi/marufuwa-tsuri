@@ -168,7 +168,7 @@ html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.a
 #gaze{--c1:#eee6ff;--c2:#b9a2ee;--side:#8a6bd0;--ink:#33205f;min-height:68px;padding:4px 14px;font-size:.95rem}
 body.gazing main > *:not(#scene):not(.sub-actions):not(#status){display:none !important}
 body.gazing main{background:none;box-shadow:none;padding-top:4vh}
-body.gazing #take-photo,body.gazing #easy,body.gazing #release,body.gazing #send-gift{display:none}
+body.gazing #take-photo,body.gazing #easy,body.gazing #release,body.gazing #send-gift,body.gazing #more-catch{display:none}
 body.gazing .actions{justify-content:center;margin-top:14px}
 body.gazing #gaze{min-height:52px;opacity:.85}
 body.gazing #status{color:#244653;background:#ffffffc9;border-radius:14px;padding:4px 10px;display:inline-block}
@@ -437,6 +437,15 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions{gap:12px;margin:16px 0 6px;flex-wrap:wrap}
 #take-photo,#gaze,#release,#send-gift,#show-pal{flex:1 1 40%;min-height:54px}
+/* つれた あとは 主役の 2つ（もういちど なげる・しゃしんを とる）だけ。ほかは「ほかの こと ▸」に たたむ（読み上げ・キーボードは 主役 → たたみ の じゅん） */
+#more-catch{flex:1 1 40%}
+#more-catch[open]{flex-basis:100%}
+#more-catch[hidden]{display:none}
+#more-catch>summary{display:flex;align-items:center;justify-content:center;gap:6px;list-style:none;min-height:54px;padding:4px 14px;font-size:.95rem}
+#more-catch>summary::-webkit-details-marker{display:none}
+#more-catch>summary::after{content:"▸";font-size:.9em}
+#more-catch[open]>summary::after{content:"▾"}
+#more-catch .more-body{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
 #show-pal{--c1:#ffe6ef;--c2:#ff9fbd;--side:#d9628a;--ink:#5a1230}
 #show-pal[hidden]{display:none}
 #release{--c1:#e3fbef;--c2:#8fe0b4;--side:#3fa873;--ink:#0f4a36}
@@ -713,9 +722,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   <div class="actions">
     <button id="main-button" type="button">なげる</button>
     <button id="take-photo" type="button" hidden>しゃしんを とる</button>
-    <button id="release" type="button" hidden>そっと にがす</button>
-    <button id="show-pal" type="button" hidden>となりの こに みせる</button>
-    <button id="send-gift" class="give" type="button" hidden>さかなを おくる</button>
+    <details id="more-catch" class="more-catch" hidden>
+      <summary id="more-summary" class="pill"></summary>
+      <div class="more-body">
+        <button id="release" type="button" hidden>そっと にがす</button>
+        <button id="show-pal" type="button" hidden>となりの こに みせる</button>
+        <button id="send-gift" class="give" type="button" hidden>さかなを おくる</button>
+      </div>
+    </details>
     <button id="easy" type="button" aria-pressed="false">らくちん：OFF</button>
     <button id="gaze" type="button" aria-pressed="false">ながめる</button>
     <button id="sleep" type="button">おやすみタイマー：なし</button>
@@ -1414,7 +1428,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
-  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
@@ -1647,6 +1661,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
     last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY, album: !!(first && left === 0), badge: (first && left === 0 ? L('ずかん かんせい！', 'Sticker book complete!') : mile ? L(save.total + 'ひきめ！', 'Catch #' + save.total + '!') : '') , firstNushi};   // 節目：ずかん かんせい／10・30・50…ひきめ／はじめての ぬし
     resultSpecial = !!(leveled || first || nushi || record || fish.rare >= 4 || mile || fish.legend); resultAck = save.total === 1; ackAt = 0;   // けっかを みた「1かい」で わける（さいしょの 1ぴきだけは そのまま なげる）
+    $('more-summary').textContent = L('ほかの こと', 'More'); $('more-catch').open = false;   // つれた あとの ボタンは 主役 2つだけ。ほかは たたむ
     $('take-photo').textContent = resultSpecial ? L('しゃしんで おしえる', 'Photo to share') : 'しゃしんを とる';   // レベルアップ・はじめて・ぬし・きろくの すぐ あとが いちばん おしえたい：しゃしんの まどに「ともだちに おしえる」が ある
     drawAudioSize(); setPhase('caught'); cardWait(1500);   // 1.5びょうは カードを 出さず、まるふわと さかなと えんしゅつが しゅやく
     // つれた さかなを、まるふわが かかげる
@@ -2856,7 +2871,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // ばしょは、ふだんは しまって おく。おすと、4つ ぜんぶ でる
     // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）。つれた あとだけ「しゃしん・にがす・おくる」が さき（つれる まえは それらが 出ないので、おとが いちばん さき）
     const audio = document.createElement('div'); audio.className = 'audio-row'; audio.append($('sound'), ...(window.TsuriBgm ? [TsuriBgm.button({sound: () => !!save.sound, enableSound: () => $('sound').click(), onToggle: audioChosen})] : []));   // おとと BGM は 1くみ（となりどうし）
-    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('take-photo'), $('release'), $('show-pal'), $('send-gift'), audio, $('gaze'), $('sleep'), $('fullscreen'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
+    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('take-photo'), $('more-catch'), audio, $('gaze'), $('sleep'), $('fullscreen'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
     drawAudioSize();
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('つりばを かえる（いま：', now, '）'); where.append(head, $('areas'));
