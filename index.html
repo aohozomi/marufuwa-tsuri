@@ -1561,7 +1561,16 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (speech) { try { speech.addEventListener('voiceschanged', yomiPick); } catch {} }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawYomi);   // English の ひょうが そろって から（はじめは EN でないと みえる）
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
-  let ambient = null, ambientOut = null, ambientDuck = null, sleepMuted = false, areaTimer = 0;
+  let ambient = null, ambientOut = null, ambientDuck = null, ambientEl = null, ambientFileFailed = false, sleepMuted = false, areaTimer = 0;
+  // なみの おと：ファイル（snd/waves.ogg・iOS は waves.m4a・29.4びょう・つなぎめなし）を くりかえす。よめない・ない ときは いままでの ごうせいに もどる。あめの おとや せせらぎ・ふくは ごうせいの まま かさねる。おんりょうは ごうせいと おなじ きこえ（ごうせい −31dBFS・ファイル −20.6dBFS→ゲイン 0.3／かわは 0.18）
+  const AMB_FILE = (() => { try { const a = document.createElement('audio'); return !a.canPlayType ? '' : a.canPlayType('audio/ogg; codecs="vorbis"') ? 'snd/waves.ogg' : a.canPlayType('audio/mp4; codecs="mp4a.40.2"') ? 'snd/waves.m4a' : ''; } catch { return ''; } })();
+  function startWaveFile(out) {
+    const el = new Audio(); el.loop = true; el.preload = 'auto'; ambientEl = el;
+    const fallback = () => { if (ambientEl !== el) return; ambientFileFailed = true; try { el.pause(); } catch {} ambientEl = null; if (ambient) { stopAmbient(); startAmbient(); } };   // ファイルが よめない とき：ごうせいに もどす
+    el.addEventListener('error', fallback, {once: true});
+    try { const src = audio.createMediaElementSource(el), g = audio.createGain(); g.gain.value = save.area === 'R' ? .18 : .3; src.connect(g).connect(out); el.src = AMB_FILE; } catch { fallback(); return; }
+    const pr = el.play(); if (pr && pr.catch) pr.catch(fallback);
+  }
   function startAmbient() {
     if (!sndOn('amb') || ambient || sleepMuted) return;
     try {
@@ -1574,19 +1583,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const soft = audio.createBiquadFilter(); soft.type = 'lowpass'; soft.frequency.value = 900;
       const swell = audio.createGain(); swell.gain.value = save.area === 'R' ? .03 : .05; const out = audio.createGain(), duck = audio.createGain(); out.gain.value = 1; duck.gain.value = guide ? .5 : 1; out.connect(duck); duck.connect(audio.destination); ambientOut = out; ambientDuck = duck;   // まとめの おんりょう（おやすみで ふわっと きえる）
       const lfo = audio.createOscillator(), depth = audio.createGain(); lfo.frequency.value = .11; depth.gain.value = .04; lfo.connect(depth).connect(swell.gain);
-      noise.connect(soft).connect(swell).connect(out);
-      const nodes = [noise, lfo];
+      const useFile = !!AMB_FILE && !ambientFileFailed; if (!useFile) noise.connect(soft).connect(swell).connect(out);
+      const nodes = useFile ? [] : [noise, lfo];
       if (rainy) { const drops = audio.createBufferSource(), thin = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = buffer; drops.loop = true; drops.loopStart = fade / rate; drops.loopEnd = len / rate; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; quiet.gain.value = .035; drops.connect(thin).connect(quiet).connect(out); nodes.push(drops); }
       if (save.area === 'R') {   // かわ：せせらぎ（たかめの ざわざわを ゆっくり ゆらす）
         const brook = audio.createBufferSource(), band = audio.createBiquadFilter(), quiet = audio.createGain(), trem = audio.createOscillator(), tdepth = audio.createGain();
         brook.buffer = buffer; brook.loop = true; brook.loopStart = fade / rate; brook.loopEnd = len / rate; brook.playbackRate.value = 1.6; band.type = 'bandpass'; band.frequency.value = 2400; band.Q.value = 1.2; quiet.gain.value = .018;
         trem.frequency.value = 5.3; tdepth.gain.value = .008; trem.connect(tdepth).connect(quiet.gain); brook.connect(band).connect(quiet).connect(out); nodes.push(brook, trem);
       }
-      nodes.forEach(node => node.start()); ambient = nodes;
+      nodes.forEach(node => node.start()); ambient = nodes; if (useFile) startWaveFile(out);
       clearTimeout(areaTimer); areaTimer = setTimeout(areaSound, Number(probe('areasound')) || 9000 + Math.random() * 12000);
     } catch {}
   }
-  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; ambientOut = null; ambientDuck = null; clearTimeout(areaTimer); areaTimer = 0; }
+  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); if (ambientEl) { try { ambientEl.pause(); ambientEl.removeAttribute('src'); ambientEl.load(); } catch {} ambientEl = null; } ambient = null; ambientOut = null; ambientDuck = null; clearTimeout(areaTimer); areaTimer = 0; }
   const restartAmbient = () => { if (ambient) { stopAmbient(); startAmbient(); } };   // つりばを かえたら その つりばの おとに
   // つりばごとの ときどきの おと（みなとまち＝とおくの きてき・かもめ／ふねの うえ＝きしむ おと）。ひく あいだと かくれて いる ときは ならさない。おおきさは なみより ずっと ちいさい
   function areaSound() {
@@ -3675,7 +3684,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       html.dataset.ready = 'fresh'; delete html.dataset.time; setTimeout(() => { html.dataset.ready = 'true'; }, 500);   // 早い script の <html data-time> は やくめが おわり（けしきの data-time が うけつぐ）
     });
   }
-  window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
+  window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
