@@ -2447,7 +2447,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       } catch (error) { st.textContent = error && error.name === 'AbortError' ? L('やめました。', 'Cancelled.') : L('リンクを おくれなかったよ。', 'Could not share the link.'); }
     });
   }
-  async function showPhoto(canvas, fileName, alt, words, nushiCard, wall, regen) {
+  async function showPhoto(canvas, fileName, alt, words, nushiCard, wall, regen, video) {
     const status = $('photo-status'); $('photo').dataset.nushi = String(!!nushiCard); wallMaker = wall || null; $('photo-wall').hidden = !wallMaker;
     videoMaker = video || null; resetClip(); $('photo-video').hidden = !(videoMaker && videoOk());   // どうがで おしえる：ぬし・★5・まぼろしの しゃしんの ときだけ
     photoRegen = regen || null; $('photo-name').hidden = !(photoRegen && bucketName()); paintPhotoName();   // なまえを のせる ボタンは つれた しゃしんで、バケツに なまえが ある ときだけ
