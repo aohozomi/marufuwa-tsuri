@@ -2722,7 +2722,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const words = EN()
       ? (now ? 'This week' + String.fromCharCode(39) + 's fishing: ' : 'A fishing week: ') + w.n + (w.n === 1 ? ' fish' : ' fish') + ', ' + ids.length + (ids.length === 1 ? ' kind' : ' kinds') + '.\nWent fishing with Marufuwa!\n' + TAG() + '\n' + HOME_SHARE()
       : (now ? 'こんしゅうの つり：' : 'ある しゅうの つり：') + w.n + 'ひき・' + ids.length + 'しゅるい。\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
-    await showPhoto(canvas, 'marufuwa-tsuri-week-' + w.k + '.png', EN() ? 'A card of one fishing week: ' + w.n + ' caught, ' + ids.length + ' kinds' : 'ひとしゅうかんの つりの カード。' + w.n + 'ひき・' + ids.length + 'しゅるい', words);
+    await showPhoto(canvas, 'marufuwa-tsuri-week-' + w.k + '.png', EN() ? 'A card of one fishing week: ' + w.n + ' caught, ' + ids.length + ' kinds' : 'いっしゅうかんの つりの カード。' + w.n + 'ひき・' + ids.length + 'しゅるい', words);
     return true;
   }
   // シールちょうの 1まい。あつめた シールが ならぶ。30しゅるい そろうと「ぜんぶ あつめた！」

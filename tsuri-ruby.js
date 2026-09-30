@@ -18,7 +18,12 @@
       const digitOnly = key[0] === '^'; if (digitOnly) key = key.slice(1); if (!key) return;
       const endOnly = key.endsWith('$'); if (endOnly) key = key.slice(0, -1); if (!key) return;
       const seg = []; const re = /([^《》]+)《([^《》]+)》|([^《》]+)/g; let m;
-      while ((m = re.exec(mk))) { if (m[1] !== undefined) seg.push({b: m[1], r: m[2]}); else seg.push({t: m[3]}); }
+      while ((m = re.exec(mk))) {
+        if (m[1] !== undefined) {   // 土台の 先頭が かなで、よみが その かなで はじまらない ときは、かなを 土台から 出す（り人《びと》→ り＋人《びと》）
+          const b = m[1], r = m[2], lead = /^[^㐀-鿿々〆ヶ]+/.exec(b);
+          if (lead && b.length > lead[0].length && !r.startsWith(lead[0])) { seg.push({t: lead[0]}); seg.push({b: b.slice(lead[0].length), r}); } else seg.push({b, r});
+        } else seg.push({t: m[3]});
+      }
       if (seg.length) { (digitOnly ? dmap : map).set(key, seg); if (endOnly) ends.add(key); maxLen.n = Math.max(maxLen.n, key.length); }
     });
     return {map, dmap, ends, maxLen: maxLen.n};
