@@ -749,7 +749,7 @@ function startAmbient() {
     src.connect(band); band.connect(gain); if (pan) { gain.connect(pan); pan.connect(gentleBus(c)); } else gain.connect(gentleBus(c));
     src.start();
     const nodes = [src]; let rainGain = null;
-    if (rainy) { const drops = c.createBufferSource(), thin = c.createBiquadFilter(); rainGain = c.createGain(); drops.buffer = buf; drops.loop = true; drops.playbackRate.value = 2.2; thin.type = 'lowpass'; thin.frequency.value = GENTLE.noiseLp; rainGain.gain.value = .03; drops.connect(thin); thin.connect(rainGain); rainGain.connect(gentleBus(c)); drops.start(); nodes.push(drops); }
+    if (false && rainy) { /* 10/1 マスター「雨の音 消して・雑音にしか きこえん」：雨の音は 鳴らさない（雨は 見た目だけ） */ const drops = c.createBufferSource(), thin = c.createBiquadFilter(); rainGain = c.createGain(); drops.buffer = buf; drops.loop = true; drops.playbackRate.value = 2.2; thin.type = 'lowpass'; thin.frequency.value = GENTLE.noiseLp; rainGain.gain.value = .03; drops.connect(thin); thin.connect(rainGain); rainGain.connect(gentleBus(c)); drops.start(); nodes.push(drops); }
     amb = { nodes, gain, pan };
     updateAmbient();
   } catch {}
