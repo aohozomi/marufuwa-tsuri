@@ -56,7 +56,9 @@
     ['ぴょん と つれた', 'Boing! Got one.'], ['いい いし、みつけた', 'Found a nice stone.'], ['ぴよ。きょうも はれ', 'Peep. Sunny again today.'], ['リボン、にあう？', 'Does my ribbon look nice?'],
     ['ふわぁ、ねむい', 'Yaaawn, sleepy.'], ['もりの においが する', 'It smells like the forest.'], ['よつば、さがそ', "Let's look for a four-leaf clover."], ['どんぐり、たべる？', 'Want an acorn?'],
     ['にゃ、つれた', 'Meow. Caught one.'], ['わん！ たのしい', 'Woof! This is fun.'], ['ほっぺに いれとこ', "I'll stash it in my cheeks."], ['へっちゃら だよ', "I'm doing okay."],
-    ['うみ、きもちいい', 'The sea feels nice.'], ['かぜが ふわふわ', 'The breeze is so fluffy.'], ['ほしが みえるよ', 'I can see the stars.']];
+    ['うみ、きもちいい', 'The sea feels nice.'], ['かぜが ふわふわ', 'The breeze is so fluffy.'], ['ほしが みえるよ', 'I can see the stars.'],
+    // 9/30 15:27 ジョブズ1 が ひろばと ことばを そろえた（ひよこ・ほほきずの ねこ・がんたいの くま〔ひるの ひとこと〕）。ひろばの 英訳（tsuri-en-hiroba.js）と おなじ ひびき
+    ['ぴよ！ きょうも いい ひ', "Peep! It's a good day again."], ['いっしょに いようね', "Let's be together."], ['ほしが みえるよ。ひるでも ね', 'I can see stars. Even in the daytime.']];
   const AREA = { 'みずうみ': ['Lake', 'the Lake'], 'かわ': ['River', 'the River'], 'みなとまち': ['Harbor Town', 'Harbor Town'], 'ふねのうえ': ['On the Boat', 'the Boat'] };
   const TIME = { 'あさ': ['Morning', 'morning'], 'ひる': ['Day', 'daytime'], 'ゆうがた': ['Evening', 'evening'], 'よる': ['Night', 'night'] };
   const FISH_MAP = new Map(FISH_JA.map((j, i) => [j, FISH_EN[i]]));
