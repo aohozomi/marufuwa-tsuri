@@ -72,6 +72,7 @@
   // ---- 1) まるごと おなじ 文（ふりがなの「よみ」で そろえた もじ・すきまなし）----
   const EX = new Map(Object.entries({
     // あたまの ぶぶん
+    'いそがなくて、だいじょうぶ。にがしても、へらないよ。1ぴき10〜20びょうくらい。むりょうであそべるよ。': "No rush, it's okay. Even if one gets away, nothing is lost. About 10–20 seconds per fish. Free to play.",
     'いそがなくて、だいじょうぶ。にがしても、へらないよ。1ぴき30びょうくらい。むりょうであそべます。': "No rush, it's okay. Let one go, and nothing is lost. About 30 seconds a fish. Free to play.",
     '1ぴき30びょうくらい。むりょうであそべます。': 'About 30 seconds a fish. Free to play.',
     'おみせ': 'Shop', 'なげる': 'Cast', 'もういちどなげる': 'Cast again', 'まってる…': 'Waiting…', 'ひく！': 'Reel in!', 'いまだ！': 'Now!',
@@ -85,10 +86,13 @@
     'じかんででやすいさかながかわるよ（あさ・ひる・ゆうがた・よる）。きろくはこのたんまつのなかだけにのこります。ログインもインストールもいりません。はいけいとさかなのえは、いまはかりのものです。':
       'Which fish appear changes with the time (morning, day, evening, night). Your records stay only on this device. No login or install needed. The backgrounds and fish art are placeholders for now.',
     'きろくをのこす・もどす': 'Save / Restore records', 'おうちのかたへ': 'For grown-ups',
+    'じかんででやすいさかながかわるよ（あさ・ひる・ゆうがた・よる）。きろくはこのたんまつのなかだけにのこるよ。ログインもインストールもいらないよ。はいけいとさかなのえは、いまはかりのものだよ。': 'What you can catch changes with the time (morning, day, evening, night). Your records stay only on this device. No login or install needed. The background and fish pictures are temporary for now.',
+    'きろくはこのたんまつのなかだけにあるよ。したのもじをどこかにほぞんしておくと、きえてももどせるよ。': 'Your records exist only on this device. Save the text below somewhere, and you can restore them even if they disappear.',
     'きろくはこのたんまつのなかだけにあります。したのもじをどこかにほぞんしておくと、きえてももどせます。': 'Your records live only on this device. Save the code below somewhere, and you can restore them even if they disappear.',
     'きろくのもじ': 'Record code', 'コピーする': 'Copy', 'このもじでもどす': 'Restore from this code', 'とじる': 'Close',
     'おさかなシールちょう': 'Fish Sticker Album', 'シールちょうをしゃしんに': 'Turn the album into a photo', 'さいきんつった10ぴき。つりばをかえても、きえないよ。': 'Your last 10 catches. They stay even if you change spots.',
-    'ひろったかざり': 'Decorations you found', 'あったなかま': 'Friends you met', 'ひみつノート': 'Secret Notebook', 'しゃしん': 'Photo', 'ほぞんする': 'Save', 'ほぞん': 'Save', 'みせる（きょうゆう）': 'Share', 'Xにかく': 'Post to X',
+    'さいきんつったこ': 'Recent catches', '10ぴきまでのこるよ。つりばをかえても、きえないよ。': 'Up to 10 are kept. They stay even if you change fishing spots.', 'さかながくれたかざり': 'Decorations from fish', 'であったなかま': 'Friends you met',
+    'ひろったかざり': 'Decorations you found', 'あったなかま': 'Friends you met', 'ひみつノート': 'Secret Notebook', 'しゃしん': 'Photo', 'ほぞんする': 'Save', 'ほぞん': 'Save', 'みせる（きょうゆう）': 'Share', 'Xにかく': 'Post to X', 'Xにのせる': 'Post to X',
     'かってにとうこうはしません。': 'Nothing is posted without you.',
     'じぶんのどうぐ': 'My Gear', 'すきないろにして、じぶんだけのどうぐにしよう。レベルがあがると、いろがふえるよ。': 'Pick your favorite colors and make your gear your own. More colors unlock as your level goes up.',
     'バケツのなまえ（ひらがな・カタカナで8もじまで）': 'Bucket name (up to 8 characters)',
@@ -109,7 +113,7 @@
     'ここにしよう。「なげる」をおしてね。': 'Here we go. Press “Cast”.', '「なげる」をおしてね。': 'Press “Cast”.',
     'ぽちゃん。のんびりまとう。': "Plop. Let's wait, nice and easy.", 'ちょん、ちょん…。なにかきたかも。': 'Nibble, nibble… Something might be coming.',
     'おすだけで、つれるよ。': "Just press, and you'll catch it.", '「ピコン」で、おしてね。': 'Press at the “ping”.', 'ひかったら、おしてね。': 'Press when it glows.',
-    'ぴったり！！': 'Perfect!!', 'いいね！': 'Nice!', 'おしい！': 'So close!',
+    'ぴったり！！': 'Perfect!!', 'いいね！': 'Nice!', 'おしい！': 'So close!', 'ちかい！': 'So close!',
     'つれた！': 'Got one!', 'のんびりだね': 'Nice and slow.', 'いいかぜ': 'Nice breeze.', 'おおきいのきたかも': 'Maybe a big one is coming.', 'おなかすいたね': "I'm getting hungry.", 'きょうはいいひ': 'Such a nice day.',
     'あめもいいね': 'Rain is nice, too.', 'ぽつぽつきこえる': 'Pitter-patter…', 'かさ、いる？': 'Need an umbrella?', 'あめのひはよくつれるよ': 'You catch more on rainy days.',
     'またね': 'See you!', 'こんにちは': 'Hello!', 'あそびにきたよ': 'Came to visit!',
@@ -120,7 +124,7 @@
     'らくちんにしたよ。おすだけでつれるよ。': "Easy mode is on. Just press, and you'll catch it.", 'らくちんをやめたよ。わがひかったらおしてね。': 'Easy mode is off. Press when the ring glows.',
     'ふるえをつけたよ。': 'Vibration is on.', 'ふるえをけしたよ。': 'Vibration is off.', 'けしきのいきものをだしたよ。': 'Wildlife is back.', 'けしきのいきものをしまったよ。': 'Wildlife is put away.',
     'おかえり。ずかんもきろくも、そのままだよ。': 'Welcome back. Your Fish Book and records are just as you left them.', 'ねむれない？ゆっくりながめよう。': "Can't sleep? Let's watch quietly.",
-    'きょうは、なにかがいるきがする…。': 'Somehow, it feels like something is out there today…',
+    'きょうは、なにかがいるきがする…。': 'Somehow, it feels like something is out there today…', 'きょうは、ふしぎなひ。みずがきらきらしているよ。': 'Today is a mysterious day. The water is sparkling.',
     'はじめてだね。ゆっくりどうぞ。': "It's your first time. Take it slow.", 'なれてきたね。': "You're getting used to it.", 'じょうずになったね。': "You're getting good at this.", 'もうめいじんだね。': "You're a master now.",
     'まだからっぽ。のんびりいこう。': "Still empty. Let's take it easy.", 'まだないよ。さかながときどきもってくるよ。': 'None yet. Fish sometimes bring them.', 'まだあってない': 'Not met yet', 'いつでも': 'Any time',
     'ぜんがめんであそぶには、うえの⋮からブラウザ（Safariなど）でひらいてね。': 'For full screen, open this in your browser (Safari, etc.) from the ⋮ menu.',
@@ -145,8 +149,8 @@
 
   // ---- 1b) ふきん・ラベル・おくりもの（本体の あたらしい ぶぶん）----
   Object.entries({
-    'つかいやすくする（いま：': 'Comfort options (now: ', 'ばしょをかえる（いま：': 'Change spot (now: ', 'じかんをかえる（いま：': 'Change time (now: ',
-    'つれたかず': 'Caught', 'つりびとレベル': 'Angler Lv.', '/30しゅるい': '/30 kinds', 'つりばをえらぶ': 'Choose a spot', 'じかんをえらぶ': 'Choose the time',
+    'つかいやすくする（いま：': 'Comfort options (now: ', 'ばしょをかえる（いま：': 'Change spot (now: ', 'つりばをかえる（いま：': 'Change fishing spot (now: ', 'じかんをかえる（いま：': 'Change time (now: ',
+    'つれたかず': 'Caught', 'つりびとレベル': 'Angler Lv.', '/30しゅるい': '/30 kinds', 'しゅるい': 'kinds', 'つりばをえらぶ': 'Choose a spot', 'じかんをえらぶ': 'Choose the time',
     'ながれぼしにねがいごとをする': 'Make a wish on the shooting star', 'ひだりのばしょでつる': 'Fish at the left spot', 'まんなかのばしょでつる': 'Fish at the middle spot', 'みぎのばしょでつる': 'Fish at the right spot',
     'おみせのきつねにはなしかける': 'Talk to the shop fox', 'あんないのペンギン': 'Guide penguin', 'とうだい': 'Lighthouse', 'まるまど': 'Round window', 'つき': 'Moon', 'ランプ': 'Lamp', 'おにぎり': 'Rice ball',
     'さかなのデータ': 'Fish data', 'つりをするまるふわ': 'Marufuwa fishing', 'とったしゃしん': 'Photo you took', 'すいそうをながめるまるふわ': 'Marufuwa watching the aquarium',
@@ -356,6 +360,7 @@
     [new RegExp('^(?:' + COMFORT_KEYS + ')(?:・(?:' + COMFORT_KEYS + '))*$'), x => x.split('・').map(w => COMFORT_EN[w] || w).join(', ')],   // 見出しの「いま：」の 中（span）だけが 単独で とどく 時
     [/^つかいやすくする（いま：(.+)）$/, (_, x) => `Comfort options (now: ${x === 'ふつう' ? 'Normal' : x.split('・').map(w => COMFORT_EN[w] || w).join(', ')})`],
     [/^ばしょをかえる（いま：(.+)）$/, (_, a) => `Change spot (now: ${nmArea(a)})`],
+    [/^つりばをかえる（いま：(.+)）$/, (_, a) => `Change fishing spot (now: ${nmArea(a)})`],
     [/^じかんをかえる（いま：(.+)）$/, (_, a) => `Change time (now: ${nmTime(a)})`],
     [/^(.+?)についたよ。きょうは(.+?)と(.+?)がいるよ。$/, (_, a, p1, p2) => `Arrived at ${nmArea(a, true)}. Today, ${nmPal(p1)} and ${nmPal(p2)} are here.`],
     [/^(あさ|ひる|ゆうがた|よる)になったよ。(（とけいにあわせているよ。）)?$/, (_, t, c) => `It's now ${nmTime(t, true)}.${c ? ' (Following your clock.)' : ''}`],
@@ -371,7 +376,7 @@
     [/^(.+?)をみずにかえしたよ。またあおうね。$/, (_, f) => `${nmFish(f)} went back to the water. See you again.`],
     [/^あたらしくふえたよ：(.*)$/, (_, r) => { const t = tailEn(r); return t == null ? null : `New: ${t}`; }],
     [/^ぴったり×(\d+)$/, (_, n) => `Perfect ×${n}`],
-    [/^(ぴったり！！|いいね！|おしい！)あとすこし。$/, (_, w) => `${EX.get(norm(w))} Almost there.`],
+    [/^(ぴったり！！|いいね！|おしい！|ちかい！)あとすこし。$/, (_, w) => `${EX.get(norm(w))} Almost there.`],
     [/^(にじいろにひかるかげ…！なんだろう。|とてもおおきなかげ…！ぬしかも。|きんいろのかげ…！スペシャルなこかも。|ひかるかげがきた！|きた！)「ひく！」をおしてね。いそがなくてだいじょうぶ。$/, (_, w) => ({
       'にじいろにひかるかげ…！なんだろう。': 'A rainbow-colored shadow…! What could it be?', 'とてもおおきなかげ…！ぬしかも。': 'A huge shadow…! Could it be the Guardian?',
       'きんいろのかげ…！スペシャルなこかも。': 'A golden shadow…! Maybe a Special one.', 'ひかるかげがきた！': 'A shining shadow appeared!', 'きた！': 'A bite!' }[w] + ' Press “Reel in!” No rush.')],
@@ -383,7 +388,7 @@
     [/^いまのきろく（(\d+)ひき）よりすくないきろく（(\d+)ひき）です。もどすなら、もういちどおしてね。$/, (_, a, b) => `This record (${b} catches) is smaller than your current one (${a} catches). Press again to restore anyway.`],
     [/^このもじは、よめなかったよ。「MF1\.」からはじまるもじを、ぜんぶはってね。$/, () => "Couldn't read that code. Please paste the whole code that starts with “MF1.”."],
     [/^かってにとうこうはしません。Xにのせるときは、ほぞんしたえをそえてね。Xは、おうちのひと（おとな）といっしょにつかってね。$/, () => 'Nothing is posted without you. When posting to X, attach the saved picture. Please use X with a grown-up.'],
-    [/^Xにかく。あたらしいまどがひらきます。おうちのひとといっしょにつかってね$/, () => 'Post to X. A new window opens. Please use it with a grown-up.'],
+    [/^Xに(?:かく|のせる)。あたらしいまどがひらきます。おうちのひとといっしょにつかってね$/, () => 'Post to X. Opens a new window. Use it together with a grown-up.'],
   ];
 
   // ---- 3) かけら（長い じゅんに おきかえる）。ぜんぶ おきかわれば 英語に なる ----
