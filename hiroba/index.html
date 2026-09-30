@@ -46,6 +46,9 @@ try {
       });
     });
   }
+  // ページを うつる とき ふわっと 重なる（本体と おなじ）。「うごきを へらす」（ゲームの スイッチ・ひろばの スイッチ）では 出さない
+  var skipVT = function (e) { if (!e.viewTransition) return; var less = document.documentElement.dataset.calm === 'true'; try { less = less || (JSON.parse(localStorage.getItem('marufuwa-hiroba-v1')) || {}).motion === 'less'; } catch (x) {} if (less) e.viewTransition.skipTransition(); };
+  addEventListener('pageswap', skipVT); addEventListener('pagereveal', skipVT);
 } catch (e) {}
 </script>
 <style>
@@ -62,6 +65,10 @@ button::before,.pill::before{content:"";position:absolute;left:10%;right:10%;top
 button:active:not(:disabled),.pill:active{transform:translateY(4px) scale(.98,.93);box-shadow:0 1px 0 var(--side),0 3px 6px #2446532b,inset 0 -3px 6px #00000014,inset 0 3px 5px #ffffffcc}
 button:disabled{opacity:.6;cursor:default;box-shadow:0 2px 0 var(--side),inset 0 -4px 6px #0000000f}
 @media(prefers-reduced-motion:reduce){button,.pill{transition:none}button:active:not(:disabled),.pill:active{transform:none}}
+/* ページを うつる とき：ふわっと 重なる（.32びょう・つりびより本体と おなじ 書き方）。「うごきを へらす」では 出さない。対応していない ブラウザは いままで どおり */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
 button:focus-visible{outline:3px solid #286b88;outline-offset:3px}
 main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px auto calc(56px + env(safe-area-inset-bottom));padding:12px 14px 18px;background:#f4fbfff5;border-radius:32px;box-shadow:0 12px 30px #2446531f;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 #backdrop{position:fixed;inset:0;width:100%;height:100%;z-index:-1}
