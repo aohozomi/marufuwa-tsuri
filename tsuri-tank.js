@@ -248,11 +248,11 @@
 .tk-card .tk-cardbody{display:flex;gap:10px;align-items:center}
 .tk-card .tk-cardl{flex:1;min-width:0}
 .tk-card .tk-cardname{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:1.1rem;font-weight:900;line-height:1.4}
-.tk-card .tk-tag{background:#3aa0d8;color:#fff;font-size:.7rem;border-radius:9px;padding:0 8px;line-height:1.7}
+.tk-card .tk-tag{background:#1f78ad;color:#fff;font-size:.7rem;border-radius:9px;padding:0 8px;line-height:1.7}
 .tk-card .tk-newburst{background:#ffd34d;color:#8a4b00;font-size:.7rem;font-weight:900;padding:1px 8px;border-radius:10px;transform:rotate(-8deg);border:2px solid #fff;box-shadow:0 0 0 2px #f0b400}
 .tk-card dl{margin:4px 0 0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:1px 10px;align-items:baseline;font-size:.82rem}
 .tk-card dt{color:#506874;white-space:nowrap}.tk-card dd{margin:0;font-weight:800;overflow-wrap:anywhere}   /* ラベルは 1行（せまい 画面・もじ おおきくで「さ・い・だ・い」と たてに ならばない） */
-.tk-card .tk-big{font-size:1.3rem;color:#e0407c;line-height:1.3}.tk-card .tk-stars{color:#e0a61c;letter-spacing:.08em}
+.tk-card .tk-big{font-size:1.3rem;color:#e0407c;line-height:1.3}.tk-card .tk-stars{color:#b07a00;letter-spacing:.08em}   /* ★の 金は 白い 地の 上で 2.1対1 だった → 本体の ★と おなじ こい 金（role=img の 図形は 3対1 いじょう）に */
 .tk-card .tk-cardart{flex:none;font-size:3rem;line-height:1;text-align:center;width:3.6rem}
 #tk.tk-tiny .tk-card .tk-cardart{display:none}   /* ちいさな がめん（およそ 340px いか）は かざりの 絵を はぶいて もじに はばを 使う（絵は 水槽の 魚で 見える） */
 #tk.tk-tiny .tk-card .tk-big{font-size:1.1rem}
@@ -290,7 +290,7 @@
 .tk-fish[data-rainbow]{animation:tk-rainbow 7s linear infinite}
 .tk-fish[data-legend]:not([data-rainbow]){filter:drop-shadow(0 0 6px #fff6b8)}
 @keyframes tk-rainbow{from{filter:hue-rotate(0deg) drop-shadow(0 0 6px #fff6b8)}to{filter:hue-rotate(360deg) drop-shadow(0 0 6px #fff6b8)}}
-.tk-card .tk-tag.tk-myth{background:linear-gradient(90deg,#ff8fb1,#ffb84d,#5fc98f,#4cb6e6,#a98be8);text-shadow:0 1px 0 #0005}
+.tk-card .tk-tag.tk-myth{background:linear-gradient(90deg,#ff8fb1,#ffb84d,#5fc98f,#4cb6e6,#a98be8);color:#2f2054;text-shadow:none}   /* にじいろの 地に 白い もじは 1.7対1 だった → こい むらさきの もじ（どの 色の 上でも 5対1 いじょう） */
 .tk-lampbtn,.tk-rice,.tk-shelfbtn{position:absolute;z-index:6;padding:0;margin:0;border:0;background:none;box-shadow:none;min-height:0;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:none;-webkit-backdrop-filter:none;backdrop-filter:none}   /* 本体の ボタンの ガラスの ぼかしを 消す（うしろの だなの 絵が ぼやけない） */
 .tk-lampbtn::before,.tk-rice::before,.tk-shelfbtn::before{display:none}
 .tk-lampbtn:active,.tk-rice:active,.tk-shelfbtn:active{transform:none;box-shadow:none}
@@ -724,7 +724,7 @@
     const name = mk('div', 'tk-cardname'); name.append(mk('span', '', o.f.name));
     if (o.nushi) name.append(mk('span', 'tk-tag', 'ぬし')); else if (o.f.rare === 5) name.append(mk('span', 'tk-tag tk-myth', 'まぼろし')); else if (o.f.rare === 4) name.append(mk('span', 'tk-tag', 'スペシャル')); else if (o.f.season) name.append(mk('span', 'tk-tag', 'きせつ'));
     if (o.fresh) name.append(mk('span', 'tk-newburst', 'NEW'));
-    const dl = mk('dl'), big = mk('span', 'tk-big', o.best.toFixed(2) + 'cm'), stars = mk('span', 'tk-stars', starsOf(o.f, o.nushi)); stars.setAttribute('aria-label', 'めずらしさ ' + starCount(o.f, o.nushi) + ' / 5');
+    const dl = mk('dl'), big = mk('span', 'tk-big', o.best.toFixed(2) + 'cm'), stars = mk('span', 'tk-stars', starsOf(o.f, o.nushi)); stars.setAttribute('role', 'img'); stars.setAttribute('aria-label', 'めずらしさ ' + starCount(o.f, o.nushi) + ' / 5');
     const row = (k, v) => { const dt = mk('dt', '', k), dd = mk('dd'); dd.append(v); dl.append(dt, dd); };
     row('さいだい', big); row('めずらしさ', stars); row('あつめた', mk('span', '', o.count + 'ひき'));
     const art = mk('div', 'tk-cardart', o.f.icon); art.setAttribute('aria-hidden', 'true');
