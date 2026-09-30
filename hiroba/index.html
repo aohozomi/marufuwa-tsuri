@@ -1984,7 +1984,8 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   roundPath(ctx, PX, PY, W * S, H * S, 38); ctx.clip(); ctx.translate(PX, PY); ctx.scale(S, S);
   const rainy = scene.dataset.rain === 'true', dimF = css.getPropertyValue('--dim').trim() || 'brightness(1)';
   if (hasFilter) ctx.filter = dimF + (rainy ? ' brightness(.93) saturate(.9)' : '');
-  ctx.drawImage(await svgImg(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H);
+  if (scene.dataset.art === 'on' && $('art')) { for (const im of $('art').querySelectorAll('img')) ctx.drawImage(im, 0, 0, W, H); }   // 絵の さしかえが ある 時は その 絵を 写す
+  else ctx.drawImage(await svgImg(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H);
   ctx.filter = 'none';
   // おひさま・おつきさま・くも
   const orb = css.getPropertyValue('--orb').trim() || '#fff2a8', night = curTime === 'n';
@@ -2009,6 +2010,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
     if (el.classList.contains('plush')) { drawPlush(el); continue; }
     const u = unit(el);
     if (el.classList.contains('prop')) {
+      const ai = el.querySelector('img.art-prop'); if (ai) { if (hasFilter) ctx.filter = dimF; ctx.drawImage(ai, u.x, u.y, u.w, u.h); ctx.filter = 'none'; continue; }   // 絵に さしかえた 置き物
       const svg = el.querySelector('svg'); if (!svg) continue;
       const ecs = getComputedStyle(el), lamp = /^lamp/.test(el.dataset.id || '');
       if (hasFilter && !lamp) ctx.filter = ((ecs.getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim();
@@ -2019,6 +2021,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
       if (hasFilter) ctx.filter = dimF; ctx.drawImage(el.querySelector('img'), u.x, u.y, u.w, u.h); ctx.filter = 'none';
     }
   }
+  if (scene.dataset.art === 'on' && $('art-front')) { for (const im of $('art-front').querySelectorAll('img')) ctx.drawImage(im, 0, 0, W, H); }   // 前景の 絵（キャラの 手前）
   // ふきだし
   for (const b of layerBubbles.querySelectorAll('.bubble')) {
     const u = unit(b), fs = (parseFloat(getComputedStyle(b).fontSize) || 15) / k;
