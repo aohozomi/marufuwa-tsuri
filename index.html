@@ -2057,6 +2057,23 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       : (full ? 'シールちょう、ぜんぶ あつめた！ ' : 'シールちょう ' + seen + ' / ' + BASE + '。') + '\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
     await showPhoto(canvas, 'marufuwa-tsuri-seal-' + seen + '.png', EN() ? 'A photo of the sticker album with ' + seen + (seen === 1 ? ' kind' : ' kinds') + ' of stickers.' : 'あつめた シールが ならんだ シールちょうの しゃしん。' + seen + 'しゅるい', words);
   }
+  {   // しゃしんの まどの ボタン：がぞうを コピー／ともだちに おしえる（どちらも 自分で おした ときだけ・かってに おくらない）
+    const row = $('photo-x').parentElement, copy = document.createElement('button'), invite = document.createElement('button');
+    copy.id = 'photo-copy'; invite.id = 'photo-invite'; copy.type = invite.type = 'button'; copy.className = invite.className = 'pill'; copy.hidden = true; row.append(copy, invite);
+    const paint = () => { copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint); else paint();
+    copy.addEventListener('click', async () => {
+      const st = $('photo-status');
+      try { await navigator.clipboard.write([new ClipboardItem({'image/png': photoFile})]); st.textContent = L('がぞうを コピー したよ。はりつけて つかってね。', 'Copied the picture. Paste it wherever you like.'); } catch { st.textContent = L('コピーが できなかったよ。「ほぞんする」を つかってね。', 'Could not copy. Please use Save instead.'); }
+    });
+    invite.addEventListener('click', async () => {
+      const st = $('photo-status'), url = HOME_SHARE();
+      try {
+        if (navigator.share) { await navigator.share({title: L('まるふわ つりびより', 'Marufuwa Fishing Days'), text: L('ゆっくり たのしめる つりゲームだよ。', 'A relaxing fishing game.'), url}); st.textContent = L('きょうゆうの がめんを とじました。', 'Closed the share screen.'); }
+        else st.textContent = (await copyText(url)) ? L('リンクを コピー したよ。ともだちに おくってね。（おうちの ひとと いっしょに）', 'Copied the link. Send it to a friend (with a grown-up).') : L('コピーが できなかったよ。', 'Could not copy the link.');
+      } catch (error) { st.textContent = error && error.name === 'AbortError' ? L('やめました。', 'Cancelled.') : L('リンクを おくれなかったよ。', 'Could not share the link.'); }
+    });
+  }
   async function showPhoto(canvas, fileName, alt, words, nushiCard) {
     const status = $('photo-status'); $('photo').dataset.nushi = String(!!nushiCard);
     const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(Error('png')), 'image/png'));
@@ -2066,6 +2083,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('photo-save').href = photoURL; $('photo-save').download = photoFile.name;
     $('photo-x').href = 'https://x.com/intent/tweet?' + new URLSearchParams({text: words});
     $('photo-share').hidden = !(navigator.share && navigator.canShare && navigator.canShare({files: [photoFile]}));
+    $('photo-copy').hidden = !(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write);   // がぞうを コピー：つかえる たんまつだけ
     if (!$('photo-share').hidden) $('photo-share').parentElement.prepend($('photo-share'));   // スマホは「きょうゆう」（しゃしん つき・1タップ）を いちばん さきに。「ほぞんして から Xに そえる」は うしろ
     $('photo-share').onclick = async () => { try { await navigator.share({files: [photoFile], text: words}); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (error) { status.textContent = error.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
     status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。Xは、おうちの ひと（おとな）と いっしょに つかってね。';
