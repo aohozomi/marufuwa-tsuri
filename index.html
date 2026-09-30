@@ -557,6 +557,23 @@ dialog .count{text-align:center;margin:0 0 12px}
 #book-grid div[data-seen=false] b{width:62px;height:62px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:3px dashed #b9cbd4;color:#9fb3bd}
 #book-grid div[data-rare="4"][data-seen=true]{border-color:#e0a61c;background:#fffaf0}
 dialog .close{display:block;margin:auto;min-width:160px}
+/* なかま：であった こを ならべて、えらんだ こを「このこで つる」 */
+#nakama-me{display:flex;align-items:center;gap:10px;justify-content:center;margin:0 0 10px;font-weight:800;text-align:center}
+#nakama-me img,#nakama-card img{object-fit:contain;filter:drop-shadow(0 3px 2px #0003)}
+#nakama-card{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:3px solid #bfdce8;border-radius:18px;padding:10px;margin:0 0 12px;background:#fff;color:#244653}
+#nakama-card[hidden]{display:none}
+#nakama-card button{min-height:44px;padding:4px 16px;font-size:.9rem}
+#nakama-me button{min-height:44px;padding:4px 14px;font-size:.85rem}
+#nakama-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin:0 0 12px}
+#nakama-grid .nk{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:96px;padding:6px 2px;font-size:.72rem;line-height:1.25;text-align:center;border:3px solid #d5e6ed;border-radius:16px;background:#fff;color:#244653;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;word-break:keep-all;text-wrap:balance}
+#nakama-grid .nk::before{display:none}
+#nakama-grid .nk img{width:52px;height:52px;object-fit:contain}
+#nakama-grid button.nk[aria-pressed=true]{border-color:#e0679a;background:#fff2f7}
+#nakama-grid .nk[data-me=true]{border-color:#e0a61c}
+#nakama-grid .nk small{color:#7a4b00;font-weight:800}
+#nakama-grid .nk-none{color:#566d79;background:#eef4f7}
+#nakama-grid .nk-none img{opacity:.35;filter:grayscale(1)}
+#marufuwa[data-avatar]{width:17%;aspect-ratio:1/1}   /* まるふわ いがいの こを えらんだ とき（なかまと おなじ しかくい え） */
 dialog .close-top{position:sticky;top:0;z-index:3;display:block;margin:0 0 6px auto;min-height:44px;min-width:96px;padding:4px 14px;font-size:.85rem}   /* ながい まどの うえの「とじる」（したまで いかなくても とじられる） */
 dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカスを あてる（わくは いらない） */
 /* じぶんの どうぐ */
@@ -591,21 +608,26 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 :root[data-night=true]{color:#e8f1f8;background:#0d1a2e}
 :root[data-night=true] #backdrop{filter:brightness(.3) saturate(1.1)}
 :root[data-night=true] main{background:#13253d;box-shadow:0 12px 30px #0007}
-:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore){color-scheme:dark}
+:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore){color-scheme:dark}
 :root[data-night=true] .actions{background:linear-gradient(#13253d00,#13253d 28%)}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore)::backdrop{background:#000000b3}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore)::backdrop{background:#000000b3}
 /* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift,#letter,#homescreen,#restore) button:focus-visible{outline-color:#a9dcff}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#give,#gift,#letter,#homescreen,#restore) button:focus-visible{outline-color:#a9dcff}
 :root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small,:root[data-night=true] #gift-list small{color:#a9bfd2}
 :root[data-night=true] #bucket-list div,:root[data-night=true] #gift-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
 :root[data-night=true] #book-grid div[data-seen=false]{background:#16283f;color:#9db3c6}
+:root[data-night=true] #nakama-card,:root[data-night=true] #nakama-grid .nk{background:#1a3250;border-color:#2d4d70;color:#e8f1f8}
+:root[data-night=true] #nakama-grid button.nk[aria-pressed=true]{background:#3a2740;border-color:#ff9fc4}
+:root[data-night=true] #nakama-grid .nk[data-me=true]{border-color:#f2c14e}
+:root[data-night=true] #nakama-grid .nk small{color:#f2c14e}
+:root[data-night=true] #nakama-grid .nk-none{background:#16283f;color:#9db3c6}
 :root[data-night=true] #book-grid div[data-rare="4"][data-seen=true]{background:#2c2a1e;border-color:#b98a1a}
 :root[data-night=true] #book-grid div[data-rare="5"][data-seen=true]{background:linear-gradient(135deg,#3b2a3d,#39351f,#213b2b,#203549,#2f2a4b);border-color:#8c72c9}
 :root[data-night=true] #shop-list button b{background:#1a3250;border-color:#2d4d70}
@@ -653,6 +675,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="open-bucket" type="button" style="flex:1">バケツ</button>
     <button id="open-book" type="button" style="flex:1">ずかん</button>
     <button id="open-gear" type="button" style="flex:1" aria-label="じぶんの どうぐ">どうぐ</button>
+    <button id="open-nakama" type="button" style="flex:1"></button>
     <a class="pill plaza" href="hiroba/" style="flex:1">ひろば</a>
   </div>
   <p class="note" id="plaza-note" hidden></p>
@@ -832,6 +855,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     </div>
     <p class="count" id="photo-status" role="status">かってに とうこうは しません。</p>
     <button class="close" type="button" id="close-photo">とじる</button>
+  </dialog>
+
+  <dialog id="nakama" aria-labelledby="nakama-title">
+    <h2 id="nakama-title"></h2>
+    <p class="count" id="nakama-lead"></p>
+    <div id="nakama-me"></div>
+    <div id="nakama-card" hidden></div>
+    <div id="nakama-grid"></div>
+    <button class="close" type="button" id="close-nakama"></button>
   </dialog>
 
   <dialog id="gear" aria-labelledby="gear-title">
@@ -1094,6 +1126,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (Number.isInteger(other.wishes)) { const wishes = Math.max(save.wishes || 0, other.wishes, (save.wishes || 0) + other.wishes - was(['wishes'])); if (wishes !== (save.wishes || 0)) { save.wishes = wishes; changed = true; } }
     if (Number.isInteger(other.tegami) && other.tegami > (save.tegami || 0)) { save.tegami = other.tegami; changed = true; }
     if (other.audioSet === true && save.audioSet !== true) { save.audioSet = true; changed = true; }
+    if (typeof other.avatar === 'string' && !save.avatar && /^[a-z]{2,12}$/.test(other.avatar)) { save.avatar = other.avatar; changed = true; }   // じぶんの キャラ（あとで えらべば うわがき）
     if (other.plopHint === true && save.plopHint !== true) { save.plopHint = true; changed = true; }   // さいしょの「ぽちゃん」は 1かい きり
     if (Number.isInteger(other.bookSeen) && other.bookSeen > (Number.isInteger(save.bookSeen) ? save.bookSeen : 0)) { save.bookSeen = other.bookSeen; changed = true; }
     if (other.loved && typeof other.loved === 'object') for (const [pid, fid] of Object.entries(other.loved)) if (Number.isInteger(fid) && !(save.loved && save.loved[pid] !== undefined)) { save.loved = save.loved && typeof save.loved === 'object' ? save.loved : {}; save.loved[pid] = fid; changed = true; }   // ♡ の ついた なかま：すきな さかなの ばんごう
@@ -1215,7 +1248,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   tidyGifts(save);
   function callPals() {
     const now = new Date(), seed = now.getFullYear() * 372 + now.getMonth() * 31 + now.getDate();
-    const locals = ROSTER.filter(p => p.home === save.area), first = locals[seed % locals.length], rest = locals.filter(p => p !== first && !(TWINS.includes(first.id) && TWINS.includes(p.id)));
+    const av0 = avatarPal(), local0 = ROSTER.filter(p => p.home === save.area && p !== av0), locals = local0.length > 2 ? local0 : ROSTER.filter(p => p !== av0), first = locals[seed % locals.length], rest = locals.filter(p => p !== first && !(TWINS.includes(first.id) && TWINS.includes(p.id)));
     pals = [first, rest[Math.floor(seed / 7) % rest.length]];
     pals.forEach((pal, i) => { const img = $(i ? 'friend-b' : 'friend-a'); img.src = 'img/friend-' + pal.id + '-s.webp'; img.alt = palAlt(pal); });
     paintFriendLabels();
@@ -1587,7 +1620,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; if (!cardShownAt) { cardShownAt = performance.now(); if (phase === 'caught') lockFor(1000); } }   // カードが 出た 時刻（つれた 直後は 0）
   function cardWait(ms) { clearTimeout(cardTimer); cardShownAt = 0; $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
-  function face(name) { curFace = name; marufuwa.src = wearUrl(name) || 'img/game-' + name + '.webp'; }
+  function face(name) { curFace = name; const av = avatarPal(); marufuwa.src = av ? 'img/friend-' + av.id + '-s.webp' : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
   function drawToday() {
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
@@ -1991,7 +2024,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function palRig(slot, on) { const k = slot ? 'b' : 'a'; ['float-', 'rod-', 'line-'].forEach(name => { const el = $(name + k); if (el) el.style.visibility = on ? '' : 'hidden'; }); }   // いない あいだは、さおと ウキも かくす
   function pickNewcomer(here) {   // きょう まだ あって ない こを さきに。ぜんいん あったら はじめから。1わりは ほかの つりばの こが あそびに くる
-    const mt = metToday(), met = new Set(mt.ids), present = new Set(here.map(p => p.id)), visitor = Math.random() < .1;
+    const mt = metToday(), met = new Set(mt.ids), present = new Set(here.map(p => p.id)), visitor = Math.random() < .1; if (avatarPal()) present.add(avatarPal().id);   // じぶんの キャラは となりに こない
     const twinClash = p => TWINS.includes(p.id) && here.some(h => TWINS.includes(h.id) && h.id !== p.id);
     const homes = ROSTER.filter(p => p.home === save.area && !present.has(p.id) && !twinClash(p)), away = ROSTER.filter(p => p.home !== save.area && !present.has(p.id) && !twinClash(p));
     const list = visitor && away.length ? away : homes;
@@ -2302,7 +2335,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     bottomScrim(ctx, 530);
     if (night) nushiBackdrop(ctx, last.fish.id * 97 + 7);
     const me = await loadImg(marufuwa.src);   // decode() は 見えない タブだと おわらない ことが ある。load で まつ（よめなくても しゃしんは つくる）
-    if (me) { const tall = 330, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, (night ? 200 : 230) - wide / 2, 488 - tall, wide, tall); }
+    if (me) { const tall = me.naturalWidth / me.naturalHeight > .9 ? 290 : 330, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, (night ? 200 : 230) - wide / 2, 488 - tall, wide, tall); }   // まるふわ（たてながの え）は 330。えらんだ なかま（しかくい え）は 290（おなじ くらいの おおきさに みえる）
     ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '170px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
     const fishArt = artOf(last.fish) ? await loadImg(artOf(last.fish)) : null;
     if (last.fish.rare === 4 && 'filter' in ctx) ctx.filter = fishArt ? 'drop-shadow(0 0 16px #ffd34d)' : 'sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 16px #ffd34d)';
@@ -2354,7 +2387,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + (last.lucky ? '\nEveryone has the same lucky fish today!' : '') + '\n' + TAG() + '\n' + HOME_SHARE()
       : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + (last.lucky ? '\nきょうの ラッキーさかな、みんな おなじ！' : '') + '\n#まるふわつりびより\n' + HOME;
     const snap = last;   // ぬし・まぼろし・ずかん かんせい の しゃしんだけ「かべがみ」が つくれる
-    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of Marufuwa holding up ' + last.fish.name : last.fish.name + 'を かかげる まるふわの しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null, () => takePhoto(), (snap.nushi || snap.fish.legend || snap.fish.rare >= 4) ? () => makeVideo(snap) : null);
+    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of ' + (avatarPal() ? palName(avatarPal()) : 'Marufuwa') + ' holding up ' + last.fish.name : last.fish.name + 'を かかげる ' + (avatarPal() ? avatarPal().name : 'まるふわ') + 'の しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null, () => takePhoto(), (snap.nushi || snap.fish.legend || snap.fish.rare >= 4) ? () => makeVideo(snap) : null);
   }
   // どうが（3びょう）：ぬし・★5・まぼろしを かかげる しゅんかん。canvas を MediaRecorder で ろく画（この たんまつの なかだけ・外へは おくらない）。
   // もじは ゲームの なまえと URL だけ（さかなの なまえ・おおきさ・さくしゃの なまえは いれない）。ちかちかは しない（うす暗い ところから ゆっくり あかるく・さいごに ゆっくり くらく・ほしは ゆっくり ちる）
@@ -2377,7 +2410,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const frame = t => {
       ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalAlpha = 1; ctx.drawImage(bg, 0, 0);
       const rise = Math.min(1, Math.max(0, (t - .5) / .9)), e = 1 - Math.pow(1 - rise, 3), up = (1 - e) * 220;
-      if (me) { const tall = 330, wide = tall * me.naturalWidth / me.naturalHeight, hop = t > 1.2 && t < 2.4 ? -Math.abs(Math.sin((t - 1.2) * 5.2)) * 14 : 0; ctx.drawImage(me, hx - wide / 2, 488 - tall + hop, wide, tall); }
+      if (me) { const tall = me.naturalWidth / me.naturalHeight > .9 ? 290 : 330, wide = tall * me.naturalWidth / me.naturalHeight, hop = t > 1.2 && t < 2.4 ? -Math.abs(Math.sin((t - 1.2) * 5.2)) * 14 : 0; ctx.drawImage(me, hx - wide / 2, 488 - tall + hop, wide, tall); }
       if (rise > 0) {
         const r = 190 * (.85 + .15 * Math.sin(t * 5)), g = ctx.createRadialGradient(fx, fy + up, 10, fx, fy + up, r); g.addColorStop(0, 'rgba(255,226,120,' + (.55 * e).toFixed(2) + ')'); g.addColorStop(1, 'rgba(255,226,120,0)'); ctx.fillStyle = g; ctx.fillRect(fx - r, fy + up - r, r * 2, r * 2);
         ctx.save(); ctx.translate(fx, fy + up); const s = sc * (.55 + .45 * e); ctx.scale(s, s); ctx.rotate(Math.sin(t * 4) * .05 * e);
@@ -3040,6 +3073,46 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     bucket.showModal();
   });
   $('close-bucket').addEventListener('click', () => bucket.close());
+
+  // ---- なかま：であった こから、じぶんの キャラを えらぶ（108にんに ふえても おなじ しくみ。まるふわは しゅじんこう・いつでも もどせる）----
+  function rosterById(id) { return ROSTER.find(p => p.id === id) || null; }
+  function metPal(p) { return !!(save.pals && save.pals[p.id]); }
+  function avatarPal() { const p = typeof save.avatar === 'string' ? rosterById(save.avatar) : null; return p && metPal(p) ? p : null; }
+  function paintAvatar() {
+    const av = avatarPal(); if (av) marufuwa.dataset.avatar = av.id; else delete marufuwa.dataset.avatar;
+    face(curFace);
+    if (av || marufuwa.dataset.altSet) { marufuwa.dataset.altSet = av ? '1' : ''; marufuwa.alt = av ? L('つりを する ' + av.name, 'Fishing: ' + palName(av)) : L('つりを する まるふわ', 'Marufuwa fishing'); }
+  }
+  const nakama = $('nakama'), nk = {pick: null};
+  const nkImg = (p, size) => { const im = document.createElement('img'); im.src = p ? 'img/friend-' + p.id + '-s.webp' : 'img/game-blue.webp'; im.width = im.height = size; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; return im; };
+  const nkBtn = (text, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = text; b.addEventListener('click', fn); return b; };
+  function nkText() { const o = $('open-nakama'); o.textContent = L('なかま', 'Friends'); o.setAttribute('aria-label', L('なかま。じぶんの キャラを えらぶ', 'Friends. Choose who you fish as')); $('close-nakama').textContent = L('とじる', 'Close'); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', nkText); else nkText();
+  function chooseAvatar(p) {   // p＝えらんだ こ／null＝まるふわに もどす
+    save.avatar = p ? p.id : null; store(); paintAvatar(); callPals(); layout(); SFX.loved();
+    say(p ? L(p.name + 'で つるよ。', 'Fishing as ' + palName(p) + '.') : L('まるふわに もどしたよ。', 'Back to Marufuwa.'));
+    drawNakama(); const b = nk.pick ? nakama.querySelector('#nakama-card button') : null; if (b) b.focus({preventScroll: true});
+  }
+  function drawNakama() {
+    nkText(); const av = avatarPal(), all = ROSTER, metN = all.filter(metPal).length;
+    $('nakama-title').textContent = L('なかま', 'Friends');
+    $('nakama-lead').textContent = L('であった なかまから、じぶんの キャラを えらべるよ。まるふわは いつでも もどれる。', 'Pick who you fish as from the friends you have met. You can always go back to Marufuwa.') + ' ' + L('であった なかま ' + metN + ' / ' + all.length, 'Met ' + metN + ' / ' + all.length);
+    const me = $('nakama-me'), who = document.createElement('span'); who.textContent = L('いま：', 'Now: ') + (av ? palName(av) : L('まるふわ', 'Marufuwa'));
+    me.replaceChildren(nkImg(av, 56), who, ...(av ? [nkBtn(L('まるふわに もどす', 'Back to Marufuwa'), () => chooseAvatar(null))] : []));
+    const card = $('nakama-card'), sel = nk.pick ? rosterById(nk.pick) : null;
+    card.hidden = !sel; if (sel) { const name = document.createElement('b'); name.textContent = palName(sel); card.replaceChildren(nkImg(sel, 88), name, nkBtn(av === sel ? L('まるふわに もどす', 'Back to Marufuwa') : L('このこで つる', 'Fish as this friend'), () => chooseAvatar(av === sel ? null : sel))); }
+    $('nakama-grid').replaceChildren(...all.map(p => {
+      if (!metPal(p)) { const d = document.createElement('div'); d.className = 'nk nk-none'; d.append(nkImg(p, 52), L('？', '?')); d.setAttribute('aria-label', L('まだ あって ない', 'Not met yet')); return d; }
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'nk'; b.dataset.id = p.id; b.setAttribute('aria-pressed', String(nk.pick === p.id)); if (av === p) b.dataset.me = 'true';
+      b.append(nkImg(p, 52), palName(p)); if (av === p) { const m = document.createElement('small'); m.textContent = L('つってる', 'Fishing'); b.append(m); }
+      b.addEventListener('click', () => { nk.pick = nk.pick === p.id ? null : p.id; const y = nakama.scrollTop; drawNakama(); const again = $('nakama-grid').querySelector('[data-id="' + p.id + '"]'); if (again) again.focus({preventScroll: true}); nakama.scrollTop = y; });
+      return b;
+    }));
+  }
+  $('open-nakama').addEventListener('click', () => { nk.pick = null; drawNakama(); nakama.showModal(); });
+  $('close-nakama').addEventListener('click', () => nakama.close());
+  if (avatarPal()) paintAvatar();   // まえに えらんだ こで はじまる
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { if (avatarPal()) paintAvatar(); });   // English の えいご（alt）は ことばが きまって から もういちど（きまる まえに かいた 日本語は のこる）
 
   const book = $('book');
   $('open-book').addEventListener('click', () => {
