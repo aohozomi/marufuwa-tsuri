@@ -256,7 +256,7 @@
 .tk-card .tk-cardart{flex:none;font-size:3rem;line-height:1;text-align:center;width:3.6rem}
 #tk.tk-tiny .tk-card .tk-cardart{display:none}   /* ちいさな がめん（およそ 340px いか）は かざりの 絵を はぶいて もじに はばを 使う（絵は 水槽の 魚で 見える） */
 #tk.tk-tiny .tk-card .tk-big{font-size:1.1rem}
-.tk-card .tk-cardclose{margin-top:6px;min-height:40px;width:100%;padding:2px 12px;font-size:.9rem}
+.tk-card .tk-cardclose{margin-top:6px;min-height:44px;width:100%;padding:2px 12px;font-size:.9rem}
 .tk-card[hidden],.tk-empty[hidden],.tk-tray[hidden],.tk-photo[hidden]{display:none}
 .tk-empty{z-index:8;left:0;top:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:#fff;font-weight:800;line-height:1.7;text-shadow:0 1px 4px #0a3a5599;padding:12px;pointer-events:none;white-space:pre-line;font-size:.9rem}
 .tk-empty button{pointer-events:auto;text-shadow:none;min-height:44px;padding:4px 14px}
