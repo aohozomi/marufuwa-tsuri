@@ -360,8 +360,10 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 #reel .ring{position:absolute;inset:0;border-radius:50%;border:7px solid #fff;box-shadow:0 0 0 2px #286b88,inset 0 0 0 2px #286b88,0 0 14px #ffffffb0;will-change:transform}
 #reel[data-hot=true] .ring{border-color:#ffe14d;box-shadow:0 0 0 2px #a56c19,inset 0 0 0 2px #a56c19,0 0 18px #ffd34d}
 @keyframes shrink{from{transform:scale(1)}to{transform:scale(0)}}
-#hp{position:absolute;left:50%;top:76%;width:62%;height:9%;transform:translateX(-50%);border-radius:10px;background:#ffffffc9;border:2px solid #286b88;overflow:hidden}
+#hp{position:absolute;left:50%;top:67%;width:62%;height:9%;transform:translateX(-50%);border-radius:10px;background:#ffffffc9;border:2px solid #286b88;overflow:hidden}
 #hp i{display:block;height:100%;width:100%;background:#5bc0a0;transition:width .2s}
+#hp::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(100% / var(--steps,5) - 2px),#286b88 calc(100% / var(--steps,5) - 2px),#286b88 calc(100% / var(--steps,5)))}   /* めもり：1めもり＝あと 1かい（どんな ひきかたでも 1かいで さいてい 2つ へる） */
+#hp-label{position:absolute;left:50%;top:79%;transform:translateX(-50%);white-space:nowrap;font-weight:900;font-size:.78rem;color:#fff;background:#17323dcc;border-radius:10px;padding:1px 9px}
 #judge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;font-weight:900;font-size:clamp(1.1rem,5.5vw,1.7rem);color:#fff;-webkit-text-stroke:1px #7a4a00;text-shadow:0 2px 0 #7a4a00,0 0 10px #000a}
 #judge[data-power="3"]{color:#ffe14d;font-size:clamp(1.3rem,6.5vw,2rem)}
 #combo{position:absolute;left:50%;top:18%;transform:translateX(-50%);white-space:nowrap;font-weight:900;font-size:.9rem;color:#fff;text-shadow:0 1px 4px #000b}
@@ -695,7 +697,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <div id="bang" aria-hidden="true">！</div>
     <div id="reel" aria-hidden="true">
       <div class="back"></div><div class="ring"></div><div class="target"></div>
-      <div id="hp"><i></i></div><div id="combo"></div><div id="judge"></div><div id="swim-tag"></div>
+      <div id="hp"><i></i></div><div id="hp-label" aria-hidden="true"></div><div id="combo"></div><div id="judge"></div><div id="swim-tag"></div>
     </div>
 
     <p id="guide"><img src="img/friend-penguin-s.webp" width="180" height="180" alt="あんないの ペンギン"><span id="guide-word"></span></p>
@@ -1523,7 +1525,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
     hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
     ringStart = performance.now(); ringSync();
-    $('hp').firstElementChild.style.width = '100%'; $('judge').textContent = $('combo').textContent = ''; combo = 0;
+    $('hp').firstElementChild.style.width = '100%'; $('hp').style.setProperty('--steps', String(Math.ceil(hpMax / 2))); $('hp-label').textContent = L('さかなの ちから', 'Fish power'); $('judge').textContent = $('combo').textContent = ''; combo = 0;
     setPhase('reel'); face('smile');
     // わの なかに さかなの かげを いれる
     const shadow = $('shadow'); shadow.style.setProperty('--swim', '.3s'); shadow.style.setProperty('--w', '15%');
@@ -1552,7 +1554,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     combo = power >= 2 ? combo + 1 : 0;
     // 「ちかい」は 2つ ひける。ちかいが 3かい つづくと 3つ（さいだい +2）。ずれる ひとの まちが みじかく なる（ものさし _kenpin_tmp/sim_reel.mjs：★3で おおきく ずれる ひと 9.1→4.0びょう・さいだい 17→8びょう。ぴったり ねらう ひと 3.3びょう・れんだ 2.1びょう）。「ぴったり」は 4つ・れんぞくは さらに +1
     hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0) - (power === 1 ? Math.min(2, (misses + 1) >> 1) : 0));
-    $('hp').firstElementChild.style.width = (hp / hpMax * 100) + '%';
+    $('hp').firstElementChild.style.width = (Math.ceil(hp / 2) / Math.ceil(hpMax / 2) * 100) + '%';   // めもりに そろえる（1めもり＝あと 1かい）
     const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
     if (power === 3) { guideChord([1047, 1319, 1568, 2093], .045); buzz(40); }   // ピロリロッ
@@ -1565,7 +1567,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       judge.animate([{scale: '.6'}, {scale: '1.25'}, {scale: '1'}], {duration: 260, easing: 'ease-out'});
       if (power === 3) sparkle(); else if (power === 1) puff();
     }
-    if (hp === 0) caught(); else say(word + ' あと すこし。', true);
+    if (hp === 0) caught(); else { const stage = hp <= 2 ? 0 : hp <= Math.ceil(hpMax / 2) ? 1 : 2;   // あと 1かい／もうすぐ／もうちょっと（つぎの ひきで さいてい 2つ へるので、のこり 2いかは かならず あと 1かい）
+      say(L(word + ' ' + ['あと 1かい！', 'もうすぐ！', 'もうちょっと。'][stage], ({3: 'Perfect!!', 2: 'Nice!', 1: 'So close!'})[power] + ' ' + ['One more!', 'Almost there!', 'Keep going.'][stage]), true); }
   }
   function sparkle() {
     const reel = $('reel');
