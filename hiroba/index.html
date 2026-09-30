@@ -384,6 +384,8 @@ body.calm .cloud.c2{left:56%}
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
 <script src="../tsuri-daily.js"></script>
+<script src="../tsuri-wear.js"></script>
+<script src="../tsuri-mame.js"></script>
 
 <script>
 (() => {
@@ -690,8 +692,11 @@ const FACES = ['blue', 'smile', 'mint', 'apricot', 'sparkle'];
 FACES.forEach(f => { const i = new Image(); i.src = BASE + 'img/game-' + f + '.webp'; });
 const player = makeActor('me', 'まるふわ', BASE + 'img/game-blue.webp', 100, .75, 'me');
 player.face = 'blue'; player.x = 180; player.y = 520;
+// まるふわの 絵を 出す 所：つりびよりで えらんだ「ふくの いろ」（じぶんの どうぐ）が あれば その 色で。しゃしんにも そのまま 写る。読めない 時は 水色の まま
+const showFace = name => { const url = BASE + 'img/game-' + name + '.webp'; if (window.TsuriWear) window.TsuriWear.apply(player.img, url); else player.img.src = url; };
+showFace('blue'); if (window.TsuriWear && window.TsuriWear.warm) window.TsuriWear.warm(FACES.map(f => BASE + 'img/game-' + f + '.webp'));
 let faceUntil = 0;
-function setFace(name, ms) { if (player.face !== name) { player.face = name; player.img.src = BASE + 'img/game-' + name + '.webp'; } faceUntil = ms ? T + ms / 1000 : 0; }
+function setFace(name, ms) { if (player.face !== name) { player.face = name; showFace(name); } faceUntil = ms ? T + ms / 1000 : 0; }
 
 // ─── 釣りで あった 子が、ひろばで おぼえて いる ひとこと（読むのは つりびよりの きろく marufuwa-tsuri-v1 の metToday と bucket だけ。そとへは 何も おくらない）───
 const FISH_MEMO = [['まるあじ',10,25],['ふわふぐ',8,20],['もちだい',15,40],['ころいわし',5,15],['ぽてかれい',20,45],['しらたまえび',3,12],['ぷかくらげ',5,30],['こつぶがに',3,10],['わたあめきんぎょ',5,18],['まんまるいか',10,35],['ふくふくたこ',15,50],['にじいろべら',10,30],['あさやけだい',25,60],['ゆうやけさば',20,45],['ほしぞらあなご',30,80],['おもちひらめ',25,70],['さくらます',30,60],['ぽんぽんはりせんぼん',10,35],['ころころかめ',15,40],['ねむりいるか',100,180],['つきみまんぼう',80,200],['ひだまりえい',40,120],['みかづきたちうお',60,130],['しゃぼんだまうお',5,15],['みずいろのこ',12,30],['みんとのこ',12,30],['あぷりこっとのこ',12,30],['らべんだーのこ',12,30],['きんのまるごい',40,90],['まるくじら',200,400],['つきあかりのきんぎょ',20,40],['ほしくずのこい',60,120],['しんじゅのたい',40,90],['にじいろくじら',300,600]];   // つりびよりの 魚の なまえ・ちいさい／おおきい（名前は 本体と そろえる）
@@ -712,6 +717,23 @@ function luckyLine() {
     if (!window.TsuriDaily) return '';
     const f = FISH_MEMO[window.TsuriDaily.lucky(30)];
     return f ? 'きょうの ラッキーさかなは「' + f[0] + '」。みんな おなじ だよ' : '';
+  } catch { return ''; }
+}
+// あんないの ペンギンの「まめちしき」（さかなの まめちしき 30こ・共有ファイル tsuri-mame.js）。つった さかなが あれば その さかなの ものから
+// （さいきんの さかな → つった さかな → ぜんぶ）。おなじ ものは ぜんぶ 言う まで くりかえさない。読めない 時は 何も 言わない（ふつうの おはなし）
+const mameTold = new Set();
+function mameLine() {
+  try {
+    const M = window.TsuriMame; if (!M) return '';
+    const fish = main && main.fish && typeof main.fish === 'object' ? main.fish : {};
+    const caught = Object.keys(fish).map(Number).filter(id => Number.isInteger(id) && id >= 0 && id < M.count && fish[id] && fish[id].count > 0);
+    const recent = main && Array.isArray(main.bucket) && main.bucket[0] ? Number(main.bucket[0].id) : -1;
+    const all = Array.from({ length: M.count }, (_, i) => i);
+    let pool = recent >= 0 && recent < M.count && !mameTold.has(recent) ? [recent] : caught.filter(id => !mameTold.has(id));
+    if (!pool.length) pool = all.filter(id => !mameTold.has(id));
+    if (!pool.length) { mameTold.clear(); pool = caught.length ? caught : all; }
+    const id = pool[Math.floor(Math.random() * pool.length)]; mameTold.add(id);
+    return M.ja(id) || '';
   } catch { return ''; }
 }
 function chooseFriends() {
@@ -855,6 +877,7 @@ function lineFor(f, first) {
   if (f.mem) { const m = typeof f.mem === 'function' ? f.mem() : f.mem; f.mem = ''; return HELLO[curTime] + '！ ' + m; }   // 釣りで あった 子は、さいしょの ひとことで それを いう（1回だけ）
   if (first) return HELLO[curTime] + '！ ' + p.hello;
   if (f.lucky) { f.lucky = false; const l = luckyLine(); if (l) return l; }   // ペンギンの 2かいめの おはなし：きょうの ラッキーさかな
+  if (f.id === 'penguin') { f.n = (f.n || 0) + 1; if (f.n % 3 === 0) { const m = mameLine(); if (m) return f.lastLine = m; } }   // ペンギンの おはなしの 3かいに 1回は さかなの まめちしき
   if (!f.bag.length) {
     const pool = [...p.lines];
     if (rainy) pool.push(...p.rain, ...p.rain);
@@ -869,7 +892,7 @@ function greet(f, forced) {
   if (!forced && (f.cool > 0 || f.talking > 0)) return;
   const first = !own.metToday[f.id];
   f.cool = 16; f.talking = 3.6; f.path = []; f.then = null; f.state = 'talk';
-  speak(f, lineFor(f, first), 3600);
+  const line = lineFor(f, first), ms = Math.min(8000, Math.max(3600, 1600 + line.length * 85)); f.talking = ms / 1000; speak(f, line, ms);   // ながい ひとことは ゆっくり（1もじ 0.085びょう・さいだい 8びょう）
   own.metToday[f.id] = true; own.met[f.id] = (own.met[f.id] || 0) + 1; saveOwn(); renderPalRow();
   sfx.greet(f); hop(f); setFace(first ? 'mint' : 'smile', 2400);
 }
@@ -1118,7 +1141,7 @@ function swapFriend(slot, now) {
   const oldName = f.name, quick = !!now || reduce();
   const change = () => {
     f.id = id; f.name = PALS[id].name; f.aspect = PALS[id].size; f.el.dataset.id = id; f.el.style.width = (f.h * f.aspect / W * 100) + '%'; f.el.style.aspectRatio = String(f.aspect); f.img.src = BASE + 'img/friend-' + id + '-s.webp';
-    f.bag = []; f.lastLine = ''; f.mem = ''; f.lucky = id === 'penguin'; f.cool = 5; f.talking = 0; f.state = 'idle'; f.timer = 2 + Math.random() * 3; f.path = []; f.moving = false;
+    f.bag = []; f.lastLine = ''; f.mem = ''; f.n = 0; f.lucky = id === 'penguin'; f.cool = 5; f.talking = 0; f.state = 'idle'; f.timer = 2 + Math.random() * 3; f.path = []; f.moving = false;
     f.el.classList.remove('leaving'); if (!quick) { f.el.classList.add('arriving'); setTimeout(() => f.el.classList.remove('arriving'), 900); }
     [$('friend-a'), $('friend-b')].forEach((img, j) => { if (img && friends[j]) img.setAttribute('src', BASE + 'img/friend-' + friends[j].id + '-s.webp'); });   // すいそうの となりも 同じ 子に
     renderPalRow(); if (!quick) speak(f, HELLO[curTime] + '！ ' + PALS[id].hello, 3000, true);
@@ -1364,7 +1387,7 @@ addEventListener('load', () => {
     h.style.fontSize = 'clamp(1.3rem,6.4vw,2rem)'; h.style.flexWrap = 'wrap';
   }
   const MONTH = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  if (E.add) E.add({ ex: { 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, rules: [
+  if (E.add) E.add({ ex: Object.assign({ 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, window.TsuriMame ? Object.fromEntries(window.TsuriMame.lines.map(l => [l.ja, l.en])) : {}), rules: [
     [/^きょうのラッキーさかなは「(.+)」。みんなおなじだよ$/, (_, f) => "Today's lucky fish is the " + (E.h && E.h.nmFish ? E.h.nmFish(f) : f) + '. Everyone has the same one!'],   // ありがとうの ほしぞら：名前は そのまま（「さん」は 英語に ない）。月は 月の なまえ
     // 釣りで あった 子の さいしょの ひとこと＝「あいさつ！ さっき ○○が つれたんだね…」。表の あいさつの きまりは 決まった 文だけ 引く ので、あとの 文（さっきの 魚）は E.t で 訳して あいさつを つなぐ
     [/^(おはよう|こんにちは|こんばんは)！(さっき.+)$/, (_, g, rest) => { const r = E.t(rest); return r === rest ? null : ({ 'おはよう': 'Good morning', 'こんにちは': 'Hello', 'こんばんは': 'Good evening' })[g] + '! ' + r; }],

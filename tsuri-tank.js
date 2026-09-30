@@ -671,9 +671,13 @@
     r.animate([{ opacity: .9, transform: 'scale(.3)' }, { opacity: 0, transform: 'scale(1.8)' }], { duration: 1100, easing: 'ease-out' }).onfinish = () => r.remove();
     setTimeout(() => r.remove(), 1400);
   }
+  // まるふわの 絵：つりびよりで えらんだ「ふくの いろ」（じぶんの どうぐ）が あれば、その 色で（tsuri-wear.js。おへやの しゃしんにも そのまま 写る）。読めなければ 水色の まま
+  const setMascot = face => { const url = BASE + 'img/game-' + face + '.webp'; if (window.TsuriWear) window.TsuriWear.apply(mascot, url); else mascot.src = url; };
+  if (!window.TsuriWear) { try { const sc = document.createElement('script'); sc.src = BASE + 'tsuri-wear.js'; sc.onload = () => { setMascot('blue'); if (window.TsuriWear.warm) window.TsuriWear.warm(['blue', 'smile', 'sparkle', 'apricot', 'mint'].map(f => BASE + 'img/game-' + f + '.webp')); }; document.head.append(sc); } catch {} }
+  else { setMascot('blue'); if (window.TsuriWear.warm) window.TsuriWear.warm(['blue', 'smile', 'sparkle', 'apricot', 'mint'].map(f => BASE + 'img/game-' + f + '.webp')); }
   function mood(face, ms) {
-    mascot.src = BASE + 'img/game-' + face + '.webp'; clearTimeout(moodTimer);
-    moodTimer = setTimeout(() => { mascot.src = BASE + 'img/game-blue.webp'; }, ms || 2600);
+    setMascot(face); clearTimeout(moodTimer);
+    moodTimer = setTimeout(() => { setMascot('blue'); }, ms || 2600);
   }
   function say(text, force) {
     if (!text || (text === lastSay && !force)) return;
@@ -1212,7 +1216,7 @@
     start();
   }
   function close() { if (dlg.open) dlg.close(); bgmLeave(); closeGifts(); }   // 「とじた」の しらせ（close イベント）は あとから 来る。BGM は すぐ 止める
-  dlg.addEventListener('close', () => { resetSecrets(); clearTimeout(sayTimer); clearTimeout(zenTimer); clearTimeout(moodTimer); clearTimeout(rotateTimer); clearTimeout(sayPending); cancelAnimationFrame(raf); raf = 0; tip.hidden = true; photo.hidden = true; setDeco(false); setListen(false); refreshBadge(); mascot.src = BASE + 'img/game-blue.webp'; stopAmbience(); bgmLeave(); closeGifts(); if (sfx) cueClose(); });
+  dlg.addEventListener('close', () => { resetSecrets(); clearTimeout(sayTimer); clearTimeout(zenTimer); clearTimeout(moodTimer); clearTimeout(rotateTimer); clearTimeout(sayPending); cancelAnimationFrame(raf); raf = 0; tip.hidden = true; photo.hidden = true; setDeco(false); setListen(false); refreshBadge(); setMascot('blue'); stopAmbience(); bgmLeave(); closeGifts(); if (sfx) cueClose(); });
   $(dlg, '.tk-close').addEventListener('click', close);
   $(empty, 'button').addEventListener('click', close);
   $(dlg, '.tk-cam').addEventListener('click', takePhoto);
