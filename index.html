@@ -25,6 +25,10 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="ゆうがたの みずうみで、まるふわが きんいろの さかなを かかげて いる">
 <meta name="twitter:card" content="summary_large_image">
+<script>
+// よるは ページも くらく（まぶしく ない ように）。さいしょの 1コマから。あとで 本体が がめんの じかんに あわせて なおす
+try { var h = new Date().getHours(), t = (JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}).time; if (matchMedia('(prefers-color-scheme: dark)').matches || t === 'n' || h >= 19 || h < 5) { document.documentElement.dataset.night = 'true'; document.querySelector('meta[name=theme-color]').content = '#0f1c33'; } } catch (e) {}
+</script>
 <style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light;touch-action:manipulation}   /* ダブルタップの ひろがりを ふせぐ（つまんで ひろげるのは できる） */
 *{box-sizing:border-box}
@@ -208,6 +212,9 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 /* みずの なかの かげ。つる まえから、どんな こが きたか みえる */
 .shadow{position:absolute;z-index:2;width:var(--w,12%);aspect-ratio:5/2;transform:translate(-50%,-50%);border-radius:50%;background:#0b2a4a70;pointer-events:none}
 .shadow::after{content:"";position:absolute;right:-24%;top:8%;width:36%;height:84%;background:inherit;clip-path:polygon(0 50%,100% 0,100% 100%)}
+.shadow.ambient-fish{opacity:.72}
+.shadow.ambient-fish.art{aspect-ratio:var(--ar,2.4);border-radius:0;-webkit-mask:var(--m) center/100% 100% no-repeat;mask:var(--m) center/100% 100% no-repeat}
+.shadow.ambient-fish.art::after{display:none}
 .shadow[data-rare="3"]{background:#ffffffb8}
 .shadow[data-rare="4"]{background:#ffd34de0;filter:drop-shadow(0 0 6px #ffe9a0)}
 #shadow{visibility:hidden;transition:left var(--swim,3s) ease-in-out,top var(--swim,3s) ease-in-out}
@@ -365,6 +372,34 @@ dialog .close{display:block;margin:auto;min-width:160px}
   #reel .ring{display:none}
   #hp i{transition:none}
 }
+/* よる：がめんが よる・ほんとうの よる・スマホが くらい モード、の どれかで、ページも くらく（まぶしく ない ように）。水槽・ひみつには ふれない */
+:root[data-night=true]{color:#e8f1f8;background:#0d1a2e}
+:root[data-night=true] #backdrop{filter:brightness(.3) saturate(1.1)}
+:root[data-night=true] main{background:#13253d;box-shadow:0 12px 30px #0007}
+:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo){color-scheme:dark}
+:root[data-night=true] .actions{background:linear-gradient(#13253d00,#13253d 28%)}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo)::backdrop{background:#000000b3}
+/* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:focus-visible{outline-color:#a9dcff}
+:root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small{color:#a9bfd2}
+:root[data-night=true] #bucket-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
+:root[data-night=true] #book-grid div[data-seen=false]{background:#16283f;color:#9db3c6}
+:root[data-night=true] #book-grid div[data-rare="4"][data-seen=true]{background:#2c2a1e;border-color:#b98a1a}
+:root[data-night=true] #book-grid div[data-rare="5"][data-seen=true]{background:linear-gradient(135deg,#3b2a3d,#39351f,#213b2b,#203549,#2f2a4b);border-color:#8c72c9}
+:root[data-night=true] #shop-list button b{background:#1a3250;border-color:#2d4d70}
+:root[data-night=true] #card{background:#142a44ee;border-color:#3a5f88}
+:root[data-night=true] #equip{background:#142840e0;border-color:#3a5f88}
+:root[data-night=true] #photo-img{border-color:#2d4d70}
+:root[data-night=true] .bubble{background:#dbe7f1;border-color:#8fb0c8}
+:root[data-night=true] .stars{color:#f2c14e}
+/* よるの かげは、くらい みずに しずむ ので、うすい あお（つきの ひかりを うけた かげ）。ぬしは もっと あかるく */
+#scene[data-time=yoru] .shadow:not([data-rare="3"]):not([data-rare="4"]):not([data-rare="5"]){mix-blend-mode:normal;background:#a9c8f5a6}
+#scene[data-time=yoru] .shadow[data-nushi=true]:not([data-rare="4"]):not([data-rare="5"]){background:#dbe8ffd0}
 </style>
 </head>
 <body>
@@ -463,8 +498,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <span class="held" id="held" aria-hidden="true" hidden></span>
     <span class="held" id="held-friend" aria-hidden="true" hidden></span>
 
-    <div class="shadow drift" style="top:90%;--w:9%;--lap:41s" aria-hidden="true"></div>
-    <div class="shadow drift" style="top:96%;--w:30%;--lap:67s;animation-delay:-30s" aria-hidden="true"></div>
+    <div class="shadow drift ambient-fish" data-fish="3" style="top:90%;--w:9%;--lap:41s" aria-hidden="true"></div>
+    <div class="shadow drift ambient-fish" data-fish="12" style="top:96%;--w:30%;--lap:67s;animation-delay:-30s" aria-hidden="true"></div>
     <div class="shadow" id="shadow" aria-hidden="true"></div>
     <div class="float" id="float" aria-hidden="true"></div>
     <div id="bang" aria-hidden="true">！</div>
@@ -1489,6 +1524,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
   $('close-book').addEventListener('click', () => book.close());
 
   scene.dataset.time = TIME_NAME[timeOfDay()];
+  {   // よるは ページぜんたいを くらく。がめんの じかん／ほんとうの よる（data-dim）／スマホの くらい モード、の どれか
+    const dark = matchMedia('(prefers-color-scheme: dark)'), theme = document.querySelector('meta[name=theme-color]');
+    const sync = () => { const night = scene.dataset.time === 'yoru' || scene.dataset.dim === 'true' || dark.matches; document.documentElement.dataset.night = String(night); if (theme) theme.content = night ? '#0f1c33' : '#b9edf5'; };
+    new MutationObserver(sync).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-dim']});
+    if (dark.addEventListener) dark.addEventListener('change', sync);
+    sync();
+  }
   $('all').textContent = String(BASE);
   // ならびじゅん：けしきと「なげる」を いちばん うえに。あまり つかわない ものは したへ（はじめての こが まよわない ように）
   {
@@ -1506,6 +1548,12 @@ dialog .close{display:block;margin:auto;min-width:160px}
   drawEasy();
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
+  if (ART && ART.shadow && ART.shadowMask) document.querySelectorAll('.ambient-fish[data-fish]').forEach(el => {
+    const id = el.getAttribute('data-fish');
+    if (!ART.shadow[id]) return;
+    const ratio = ART.meta && ART.meta.shadowAspect && ART.meta.shadowAspect[id];
+    el.classList.add('art'); el.style.setProperty('--m', ART.shadowMask(id)); el.style.setProperty('--ar', String(ratio || 2.4));
+  });   // 水の なかを およぐ さかなは、魚種ごとの かげに
   if (ART && ART.float) document.querySelectorAll('.float').forEach(el => { el.classList.add('art'); el.style.setProperty('--fimg', 'url("' + ART.uri(ART.float) + '")'); });   // ウキの え
   drawWater(performance.now()); drawSky(performance.now()); drawSoil();
   if (!reduce()) requestAnimationFrame(flow); else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
