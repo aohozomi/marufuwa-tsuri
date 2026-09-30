@@ -937,6 +937,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const WEIGHT = {1: 60, 2: 28, 3: 26, 4: 8};
   // 4 は スペシャル（とくべつな しゅるい）。ぬしは しゅるいでは なく、どの さかなにも いる とくだいの 1ぴき
   const RARE_LABEL = {2: 'ちょっと めずらしい', 3: 'めずらしい', 4: 'スペシャル', 5: 'まぼろし'};
+  const TAG_FIRST = ['ぬし', 'はじめて！', '10ぴきめ！ なかよし', 'レベルアップ！', 'きょうの ラッキー'];   // ふだの たいせつな じゅん
+  const tagsShown = list => { const r = t => { const i = TAG_FIRST.indexOf(t); return i < 0 ? 99 : i; }; return [...list].sort((a, b) => r(a) - r(b)).slice(0, 3); };   // 3つまで（のこりは しゃしん・バケツ・よみあげで わかる）
   const starCount = (f, nushi) => Math.min(5, f.rare + (nushi ? 1 : 0));
   const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
   const starEl = (f, nushi) => { const el = document.createElement('span'); el.className = 'stars'; el.textContent = starsOf(f, nushi); el.setAttribute('role', 'img'); el.setAttribute('aria-label', 'めずらしさ ' + starCount(f, nushi) + ' / 5'); return el; };   // 読み上げは「めずらしさ 3 / 5」
@@ -1497,7 +1499,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (leveled) tags.push('レベルアップ！');
     if (fish === LUCKY) tags.push('きょうの ラッキー'); if (save.fish[fish.id].count === 10) tags.push('10ぴきめ！ なかよし');
     if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]); if (fish.season) tags.push(L('この つきの さかな', 'This month' + String.fromCharCode(39) + 's fish'));
-    $('card-tags').replaceChildren(...(levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = T(text); return tag; }));   // 英語の ときは さいしょから 英語で わたす（日本語の まま わたすと 外付けの 英語エンジンが <span> を ひとまとめに して タグの ふちが きえる）
+    $('card-tags').replaceChildren(...tagsShown(levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = T(text); return tag; }));   // 英語の ときは さいしょから 英語で わたす（日本語の まま わたすと 外付けの 英語エンジンが <span> を ひとまとめに して タグの ふちが きえる）
     // 「ぴったり」の ごほうび：はんこが おされる
     if (perfects >= 2) { const stamp = document.createElement('span'); stamp.className = 'stamp'; stamp.textContent = T('ぴったり ×' + perfects); $('card-tags').append(stamp); tags.push('ぴったり ×' + perfects); }
     // あたらしい つりばが ひらいたら、そのまま いける ボタンを だす
