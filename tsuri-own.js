@@ -181,7 +181,7 @@
       const nm = T(name(d), en(d)); pname.firstChild.textContent = nm; pimg.alt = '';
       const s = api.src(d, lv, u => { if (host.isConnected && root.isConnected) pimg.src = u; }); if (s) pimg.src = s;
       go.textContent = T('これに きめる', 'Choose this'); cancel.textContent = T('やめる', 'Cancel');
-      note.textContent = api.PROVISIONAL ? T('いまの え は かりの もの。もうすぐ ほんものに かわるよ。', 'The picture is a stand-in for now. A finished one is coming.') : ''; note.hidden = !api.PROVISIONAL;
+      note.textContent = api.PROVISIONAL ? T('えは じゅんばんに ほんものに いれかえちゅう。', 'The pictures are being swapped for the real thing, one by one.') : ''; note.hidden = !api.PROVISIONAL;
     }
     function pick(k, v, b) {
       if (k === 'item' && ITEM_LV[v] > lv) { speak(T('こもの「' + ITEMS[v][0] + '」は レベル ' + ITEM_LV[v] + ' で ひらくよ。', 'The accessory “' + ITEMS[v][1] + '” unlocks at level ' + ITEM_LV[v] + '.')); return; }

@@ -852,7 +852,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
   <p class="note" id="about-note"><span class="ic" aria-hidden="true">🕐</span> <ruby>時間<rt aria-hidden="true">じかん</rt></ruby>で <ruby>出<rt aria-hidden="true">で</rt></ruby>る <ruby>魚<rt aria-hidden="true">さかな</rt></ruby>が <ruby>変<rt aria-hidden="true">か</rt></ruby>わる（<ruby>朝<rt aria-hidden="true">あさ</rt></ruby>・<ruby>昼<rt aria-hidden="true">ひる</rt></ruby>・<ruby>夕<rt aria-hidden="true">ゆう</rt></ruby>・<ruby>夜<rt aria-hidden="true">よる</rt></ruby>）<br>
   <span class="ic" aria-hidden="true">💾</span> <ruby>記録<rt aria-hidden="true">きろく</rt></ruby>は この <ruby>端末<rt aria-hidden="true">たんまつ</rt></ruby>だけ・ログイン <ruby>不要<rt aria-hidden="true">ふよう</rt></ruby><br>
-  <span class="ic" aria-hidden="true">🎨</span> <ruby>絵<rt aria-hidden="true">え</rt></ruby>は <ruby>今<rt aria-hidden="true">いま</rt></ruby>は <ruby>仮<rt aria-hidden="true">かり</rt></ruby></p>
+  <span class="ic" aria-hidden="true">🎨</span> <ruby>絵<rt aria-hidden="true">え</rt></ruby>は <ruby>順番<rt aria-hidden="true">じゅんばん</rt></ruby>に <ruby>本物<rt aria-hidden="true">ほんもの</rt></ruby>に <ruby>入<rt aria-hidden="true">い</rt></ruby>れかえ<ruby>中<rt aria-hidden="true">ちゅう</rt></ruby></p>
   <div class="hud keep">
     <button id="open-keep" type="button" style="flex:1">きろくを のこす・もどす</button>
     <a class="pill quiet" href="anshin/" style="flex:1">おうちの かたへ</a>
@@ -1955,6 +1955,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // 「ちかい」は 2つ ひける。ちかいが 3かい つづくと 3つ（さいだい +2）。ずれる ひとの まちが みじかく なる（ものさし _kenpin_tmp/sim_reel.mjs：★3で おおきく ずれる ひと 9.1→4.0びょう・さいだい 17→8びょう。ぴったり ねらう ひと 3.3びょう・れんだ 2.1びょう）。「ぴったり」は 4つ・れんぞくは さらに +1
     hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0) - (power === 1 && misses >= 3 ? 1 : 0));   // ちかい＝1。3かい つづくと 2（ずれ つづける ひとを またせすぎない）
     if (power === 3 && hp === 1) hp = 0;   // 「ぴったり」で のこりが 1 なら、そのまま つれる（1かいぶんの ために もう 1しゅう またせない）
+    const center = power === 3 && miss <= 40 && !blind;   // ど真ん中（±40ms）：「ぴったり！！！」・いちばん おおきな しぶき・ふるえ ながめ
+    if (center && fish.rare <= 3 && !nushi && !fish.legend) hp = 0;   // ねらう ほうびに：ど真ん中なら ★3 までの ふつうの さかなは 1かいで つれる（ぴったり ねらう 2.2→1.6びょう・れんだ 2.1びょう（つれる 4わり）。ぬし・まぼろし・★4 は そのまま。ものさし _kenpin_tmp/sim_tension_c.mjs）
     let snapped = false;
     if (tensionOn()) {   // いとの はり：ちかい＝おおきく・いいね＝ちゅうくらい・ぴったり＝ぬける。かぎりを こえると「ぷつん」（この ひきで つれる ときは つれる ほうが さき）
       const cfg = modeCfg(), gk = (save.slow ? .5 : 1) * Math.max(.5, 1 - .2 * skillMul('chikara')); tickTension();
@@ -1964,7 +1966,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     if (performance.now() - reelStartAt >= 5500) hp = 0;   // どんな ひきかたでも 5.5びょう たてば つれる（さかなが つかれる。ばつは ない・ずれる ひとの さいだい じかんを のばさない）
     $('hp').firstElementChild.style.width = (Math.ceil(hp / 2) / Math.ceil(hpMax / 2) * 100) + '%';   // めもりに そろえる（1めもり＝あと 1かい）
-    const center = power === 3 && miss <= 40 && !blind;   // ど真ん中（±40ms）：「ぴったり！！！」・いちばん おおきな しぶき・ふるえ ながめ
     const word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power); judge.dataset.center = center ? '1' : '';
     if (power === 3) { SFX.perfect(); if (center) SFX.center(); buzz(center ? [40, 40, 90] : 40); }   // ピロリロッ（ど真ん中は ひくい おとを もう ひとつ）
@@ -2418,7 +2419,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (!EN()) return;
     const ic = t => '<span class="ic" aria-hidden="true">' + t + '</span> ', lead = $('lead-text'), about = $('about-note');
     if (lead) lead.innerHTML = ic('🐟') + 'No rush. Nothing is lost if one escapes<br><small>' + ic('⏱') + '10–20 sec per fish · Free</small>';
-    if (about) about.innerHTML = ic('🕐') + 'Fish change with the time of day<br>' + ic('💾') + 'Saved on this device · no login<br>' + ic('🎨') + 'Art is temporary';
+    if (about) about.innerHTML = ic('🕐') + 'Fish change with the time of day<br>' + ic('💾') + 'Saved on this device · no login<br>' + ic('🎨') + 'Art is being swapped for the real thing, one by one';
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintExplain); else paintExplain();
   function paintKbd() { const kb = $('kbd-note'); if (kb) kb.textContent = L('⌨ 1〜3 ばしょ／Space・Enter なげる・ひく／G ながめる／Esc もどる', '⌨ 1–3 seat / Space·Enter cast & reel / G gaze / Esc back'); }
@@ -3550,7 +3551,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     {   // きせつの さかな（月ごと 1しゅ）。ずかんの 30しゅるいには かぞえない。「また らいねん あえるよ」だけ。せかさない・かずを くらべない
       const now = monthNow(), head = document.createElement('h3'), note = document.createElement('p');
       head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L('きせつの さかな', 'Seasonal fish');
-      note.style.cssText = 'grid-column:1/-1;margin:0;text-align:center;font-size:.82rem;line-height:1.7'; note.textContent = L('つき ごとに 1しゅ。ずかんの 30しゅるいには かぞえないよ。あえなくても、また らいねん あえるよ。（えは いまは かり）', 'One kind each month. They are not part of the 30 kinds. If you miss one, you can meet it again next year. (The pictures are temporary for now.)');
+      note.style.cssText = 'grid-column:1/-1;margin:0;text-align:center;font-size:.82rem;line-height:1.7'; note.textContent = L('つき ごとに 1しゅ。ずかんの 30しゅるいには かぞえないよ。あえなくても、また らいねん あえるよ。（えは じゅんばんに ほんものに いれかえちゅう）', 'One kind each month. They are not part of the 30 kinds. If you miss one, you can meet it again next year. (The pictures are being swapped for the real thing, one by one.)');
       $('book-grid').append(head, note, ...FISH.filter(f => f.season).map(f => {
         const got = save.fish[f.id], cell = document.createElement('div');
         cell.dataset.seen = String(!!got); cell.dataset.rare = '3'; cell.dataset.nushi = String(!!(got && got.nushi));
