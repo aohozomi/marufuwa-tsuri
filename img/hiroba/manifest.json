@@ -1,0 +1,4 @@
+{
+  "ready": false,
+  "note": "天が描く『リアル』な背景が届いたら ready を true にして sets に季節×時間の絵を書く（発注書 20_ひろばを「リアル」に_背景の発注書案）。例：sets['aki-hiru'] = { layers: { sky, far, ground, water, front }, props: { house: 'prop-house-hiru.webp' } }。絵が無い間は今の SVG のまま。"
+}

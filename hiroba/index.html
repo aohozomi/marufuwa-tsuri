@@ -153,8 +153,13 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 .pl-tag svg{width:6px;height:6px;display:block}
 /* なかまずかん（ひろばで あった なかまが いろつき・まだの こは しるしだけ・かず・わりあいは 出さない） */
 #zukan{padding:14px}
-#zukan-list{list-style:none;padding:0;margin:8px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
-#zukan-list li{display:flex}
+#zukan-list,#zukan-now{list-style:none;padding:0;margin:6px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+#zukan-list li,#zukan-now li{display:flex}
+#zukan h3{font-size:.95rem;margin:12px 0 2px;color:#244653}
+#zukan-party{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0}
+.zk.slot{min-height:84px;display:flex;align-items:center;justify-content:center;border:3px dotted #9cc9e0;background:#f4fbff;color:#506874;font-weight:800;font-size:.8rem;border-radius:16px}
+button.zk.slot{border:0;background:none}
+.zk small{display:block;font-size:.68rem;font-weight:800;color:#8a4a00}
 .zk{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;min-height:84px;padding:5px 3px;border-radius:16px;font-size:.72rem;line-height:1.3;text-align:center}
 button.zk{--c1:#ffffffe6;--c2:#e6f6fdcc;border-radius:16px;font-weight:800;min-height:84px;padding:5px 3px}
 button.zk img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 2px 0 #ffd25e)}
@@ -236,6 +241,10 @@ button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ff
 .meteor{position:absolute;z-index:2;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;cursor:pointer;pointer-events:auto}
 .meteor::before{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:#fffbe0;box-shadow:0 0 10px 4px #fff6a8,-30px -14px 14px 2px #fff6a866,-16px -7px 8px 2px #fff6a8aa}
 /* あめ */
+#art,#art-front{position:absolute;inset:0;pointer-events:none}
+#art img,#art-front img{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;user-select:none}
+#scene[data-art=on] #bg{display:none}
+.prop[data-art] img.art-prop{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
 #rain{position:absolute;inset:-20% 0 0 0;z-index:900;pointer-events:none;display:none;background-image:radial-gradient(circle at 50% 50%,#ffffff70 0 1.6px,#ffffff00 2.6px),radial-gradient(circle at 20% 70%,#ffffff55 0 1.3px,#ffffff00 2.2px),radial-gradient(circle at 80% 30%,#ffffff45 0 1.2px,#ffffff00 2px);background-size:96px 150px,130px 190px,110px 170px;animation:rain 3.2s linear infinite}   /* 10/1 マスター「雨が 気持ち悪い」：ななめの 線を やめ、ぽつぽつの 粒が ゆっくり おちる（つりばの あめと 同じ 考え） */
 #scene[data-rain=true] #rain{display:block}
 @keyframes rain{to{background-position:0 150px,0 190px,0 170px}}
@@ -427,14 +436,12 @@ body.calm .cloud.c2{left:56%}
     <button type="button" data-dest="ido"><b aria-hidden="true">💧</b>いど<small>のぞいて みよう</small></button>
   </nav>
 
-  <section id="friends" aria-labelledby="friends-title">
-    <h2 id="friends-title">いま ひろばに いる なかま</h2>
-    <ul id="pal-row"></ul>
+  <section id="friends">
     <div class="row">
       <button id="find" type="button">ともだちに あいにいく</button>
       <button id="listen" type="button">まわりを きく</button>
       <button id="snap" type="button">しゃしんを とる</button>
-      <button id="zukan-btn" type="button">なかまずかん</button>
+      <button id="zukan-btn" type="button">なかま</button>
     </div>
     <details id="touch"><summary>さわれる もの</summary>
       <div class="row">
@@ -481,9 +488,14 @@ body.calm .cloud.c2{left:56%}
   <button class="close" type="button" id="close-photo">とじる</button>
 </dialog>
 <dialog id="zukan" aria-labelledby="zukan-title">
-  <h2 id="zukan-title">なかまずかん</h2>
-  <p class="count">ひろばで あった なかまが、いろつきで ならぶよ。まだの こは しるしだけ。いそがなくて だいじょうぶ。</p>
-  <ul id="zukan-list"></ul>
+  <h2 id="zukan-title">なかま</h2>
+  <p class="count">ひろばに いる なかまと、いっしょに いく なかまが ここに ならぶよ。すうじは じぶんの ぶんだけ。いそがなくて だいじょうぶ。</p>
+  <h3 id="zn-now-h">いま ひろばに いる なかま</h3>
+  <ul id="zukan-now" class="zk-grid"></ul>
+  <h3 id="zn-party-h">いっしょに いく なかま（4にんまで）</h3>
+  <div id="zukan-party" class="zk-slots"></div>
+  <h3 id="zn-all-h">ぜんいん</h3>
+  <ul id="zukan-list" class="zk-grid"></ul>
   <div id="zukan-cap" role="status" aria-live="polite">なかまを さわって みてね。</div>
   <div id="zukan-fav"></div>
   <button class="close" type="button" id="close-zukan">とじる</button>
@@ -526,8 +538,8 @@ const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const MAIN_KEY = 'marufuwa-tsuri-v1', OWN_KEY = 'marufuwa-hiroba-v1';
 const readJSON = key => { try { const d = JSON.parse(localStorage.getItem(key)); return d && typeof d === 'object' ? d : null; } catch { return null; } };
 let main = readJSON(MAIN_KEY) || {};
-const own = Object.assign({ motion: 'auto', met: {}, day: '', metToday: {}, secrets: {}, last: '', leftAt: 0, visits: 0, metAt: {}, seenAt: {}, told: {}, firstAt: {}, guestDay: {} }, readJSON(OWN_KEY) || {});
-for (const k of ['metAt', 'seenAt', 'told', 'firstAt', 'guestDay']) if (!own[k] || typeof own[k] !== 'object' || Array.isArray(own[k])) own[k] = {};   // なかまの「あった 日時」「きた 日時」「あたらしい なかまが きたよ を 言った 子」（じぶんの きろく）
+const own = Object.assign({ motion: 'auto', met: {}, day: '', metToday: {}, secrets: {}, last: '', leftAt: 0, visits: 0, metAt: {}, seenAt: {}, told: {}, firstAt: {}, guestDay: {}, companion: {}, together: {} }, readJSON(OWN_KEY) || {});
+for (const k of ['metAt', 'seenAt', 'told', 'firstAt', 'guestDay', 'companion', 'together']) if (!own[k] || typeof own[k] !== 'object' || Array.isArray(own[k])) own[k] = {};   // なかまの「あった 日時」「きた 日時」「あたらしい なかまが きたよ を 言った 子」（じぶんの きろく）
 const saveOwn = () => { try { localStorage.setItem(OWN_KEY, JSON.stringify(own)); } catch {} };
 let soundFlag = main.sound === true;
 function writeSound(on) {
@@ -589,7 +601,7 @@ function applyTime() {
   const hour = new Date().getHours(), night = hour >= 19 || hour < 5;
   scene.dataset.dim = String(night && curTime !== 'n');
   const orb = $('touch-orb'); if (orb) orb.textContent = curTime === 'n' ? 'おつきさま' : 'おひさま';
-  renderWishStars(); renderSeason();
+  renderWishStars(); renderSeason(); if (typeof applyArt === 'function') applyArt();
 }
 // きせつの つぶ：はる＝はなびら／あき＝おちば／ふゆ＝ゆき（ゆっくり おちる）／なつの よる＝ほたる（ゆっくり ひかる・1びょうに 1かいも ひからない）。
 // あめの ひは 出さない。うごきを へらす（reduce）時は おちきって ねて いる すがたで ならべる。さわれない・よみあげない（かざり）
@@ -807,6 +819,17 @@ function writeMain(patch) {   // つりびよりの きろくに、♡（fav）�
   } catch {}
   main = readJSON(MAIN_KEY) || main;
 }
+// ─── なかま（10/1 マスター直：「自分の 広場が 埋まって いく」）───
+//   ひろばの 住人＝なかま＝つりびより本体の save.palXp[id]>0（釣りで いっしょに すごした 子）か ♡ か save.party の 子（＋ ひろばで「なかまに なる？」に「はい」した 子）。
+//   レベルは 本体と おなじ しき（Lv＝floor(√(1＋けいけんち÷12))）。けいけんちの すうじは 出さない。主人公（save.avatar）は まるふわの かわりに ひろばを あるく ので、なかまの 住人には ならない
+const PARTY_MAX = 4, WALK_MAX = 8, ACTOR_MAX = 10, NO_PARTY = new Set(['penguin', 'kogitsune']);   // あんない・おみせの 子は さそわない
+const avatarId = () => { const a = readMain().avatar; return typeof a === 'string' && PALS[a] ? a : ''; };
+const palXpOf = id => { const v = readMain().palXp; return v && typeof v === 'object' && Number.isFinite(v[id]) ? Math.max(0, v[id]) : 0; };
+const palLv = id => Math.max(1, Math.floor(Math.sqrt(1 + palXpOf(id) / 12)));
+const bondFor = lv => lv < 3 ? 1 : lv < 8 ? 2 : 3;   // 本体と おなじ（Lv1〜2＝1・Lv3〜7＝2・Lv8〜＝3）
+const mainParty = () => { const l = readMain().party, av = avatarId(), out = []; if (Array.isArray(l)) for (const id of l) if (typeof id === 'string' && PALS[id] && id !== av && !NO_PARTY.has(id) && !out.includes(id)) out.push(id); return out.slice(0, PARTY_MAX); };
+const isCompanion = id => !!PALS[id] && !NO_PARTY.has(id) && id !== avatarId() && (palXpOf(id) > 0 || favList().includes(id) || mainParty().includes(id) || own.companion[id] === 1);
+const companionIds = () => Object.keys(PALS).filter(isCompanion);
 const castPool = () => { const av = readMain().avatar; return Object.keys(PALS).filter(id => id !== av); };   // つりびよりの「なかま」で じぶんの キャラに えらんだ 子（save.avatar）は ひろばを あるく なかまから のぞく（じぶんが ふたりに ならない）
 const favList = () => { const l = readMain().fav, av = readMain().avatar, out = []; if (Array.isArray(l)) for (const id of l) if (typeof id === 'string' && PALS[id] && id !== av && !out.includes(id)) out.push(id); return out; };   // じぶんの キャラは ♡の なかまに ふくめない（ひろばに 出ない ため）
 const isFav = id => favList().includes(id);
@@ -834,6 +857,7 @@ function castLayers(pool, dayNo, special, town) {
 const LAYER_DAY = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
 const LAYERS = castLayers(CAST_ORDER, LAYER_DAY, SPECIAL, TOWN_LIST.map(x => x.id)), layerW = new Map();
 LAYERS.resident.forEach(id => layerW.set(id, LAYER_W.resident)); LAYERS.daily.forEach(id => layerW.set(id, LAYER_W.daily)); LAYERS.guests.forEach(id => layerW.set(id, LAYER_W.guest));
+const rotationPool = () => { const comp = companionIds(), here = new Set(friends.map(f => f.id)), away = comp.filter(id => !here.has(id)); return comp.length < 3 ? castPool() : away; };   // なかまが 3にん いじょう なら、ひろばに いない なかまだけ（なかまが ぜんいん いる 時は かえない）
 const castEnv = () => ({ now: Date.now(), last: lastOf, isNew: newFace, local: isLocalId, w: id => layerW.get(id) || 1, rnd: Math.random });
 // 「さいきん あって いない」順。あたらしい 子は はじめて あうまで 時間の たつのを 3ばいに かぞえる（3ばい 出やすい）。ならんだ ときは くじびき
 function castOrder(env, pool) {
@@ -990,8 +1014,19 @@ FACES.forEach(f => { const i = new Image(); i.src = BASE + 'img/game-' + f + '.w
 const player = makeActor('me', 'まるふわ', BASE + 'img/game-blue.webp', 100, .75, 'me');
 player.face = 'blue'; player.x = 180; player.y = 520;
 // まるふわの 絵を 出す 所：つりびよりで えらんだ「ふくの いろ」（じぶんの どうぐ）が あれば その 色で。しゃしんにも そのまま 写る。読めない 時は 水色の まま
-const showFace = name => { const url = BASE + 'img/game-' + name + '.webp'; if (window.TsuriWear) window.TsuriWear.apply(player.img, url); else player.img.src = url; };
-showFace('blue'); if (window.TsuriWear && window.TsuriWear.warm) window.TsuriWear.warm(FACES.map(f => BASE + 'img/game-' + f + '.webp'));
+const showFace = name => {
+  const av = avatarId();   // つりびよりの「なかま」で じぶんの キャラに えらんだ 子が いれば、その 子が ひろばでも 主人公（かおの へんかは なし）
+  if (av) { const u = BASE + 'img/friend-' + av + '-s.webp'; if (player.img.getAttribute('src') !== u) player.img.src = u; return; }
+  const url = BASE + 'img/game-' + name + '.webp'; if (window.TsuriWear) window.TsuriWear.apply(player.img, url); else player.img.src = url;
+};
+function applyAvatar() {
+  const av = avatarId(), p = av ? PALS[av] : null;
+  if ((player.avatar || '') === av) return; player.avatar = av;
+  player.name = p ? p.name : 'まるふわ'; player.aspect = p ? p.size : .75; player.el.dataset.avatar = av;
+  const fit = () => { if (player.avatar && player.img.naturalWidth > 0 && player.img.naturalHeight > 0) player.aspect = player.img.naturalWidth / player.img.naturalHeight; player.el.style.width = (player.h * player.aspect / W * 100) + '%'; player.el.style.aspectRatio = String(player.aspect); };
+  fit(); showFace(player.face || 'blue'); if (p) { if (player.img.complete) fit(); else player.img.addEventListener('load', fit, { once: true }); }
+}
+showFace('blue'); applyAvatar(); if (window.TsuriWear && window.TsuriWear.warm) window.TsuriWear.warm(FACES.map(f => BASE + 'img/game-' + f + '.webp'));
 let faceUntil = 0;
 function setFace(name, ms) { if (player.face !== name) { player.face = name; showFace(name); } faceUntil = ms ? T + ms / 1000 : 0; }
 
@@ -1036,20 +1071,26 @@ function mameLine() {
 function chooseFriends() {
   const force = (q.get('friends') || '').split(',').filter(id => PALS[id]);
   if (force.length) return force.slice(0, 6);
-  const env = castEnv(), forced = [], favs = favList();
-  if (favs.length) forced.push(castOrder(env, favs)[0]);   // ♡の 子は かならず 1にん あるいて いる（2にん いじょう なら さいきん あって いない 子）
+  const env = castEnv(), forced = [...mainParty()], favs = favList();   // 本体で えらんだ「いっしょに いく なかま」は かならず ひろばに いる
+  if (favs.length && !forced.some(id => favs.includes(id))) forced.push(castOrder(env, favs)[0]);   // ♡の 子は かならず 1にん あるいて いる（2にん いじょう なら さいきん あって いない 子）
   for (const id of metInFishingToday().slice(0, 2)) if (PALS[id] && !forced.includes(id)) forced.push(id);   // 釣りで あった 子を、ひろばにも（さいだい 2ひき）。すいそうの となりにも 同じ 子が くる
   if (LAYERS.guests.length && forced.length < 3) { const g = castOrder(env, LAYERS.guests.filter(id => !forced.includes(id)))[0]; if (g) forced.push(g); }   // お正月・たなばた・おおみそかの 日は、とくべつな おきゃくが 1にん はじめから いる
-  return castInitial(env, castPool(), 5, forced);
+  const comp = companionIds(), target = Math.min(WALK_MAX, Math.max(3, comp.length)), out = [];   // 住人＝なかま（さいだい 8にん・おおい 時は 入れかわり）。なかまが 3にん みまんの 間は ほかの 子で 3にんに する
+  const envC = { ...env, local: () => true };
+  for (const id of forced) if (!out.includes(id) && out.length < target) out.push(id);
+  for (const id of castInitial(envC, comp, Math.min(target, comp.length), out)) if (!out.includes(id) && out.length < target) out.push(id);
+  if (out.length < target) for (const id of castInitial(env, castPool().filter(id => !comp.includes(id) && !out.includes(id)), target - out.length, [])) if (!out.includes(id) && out.length < target) out.push(id);
+  return out;
 }
-const SLOTS = [{ x: 84, y: 368 }, { x: 276, y: 368 }, { x: 120, y: 440 }, { x: 240, y: 440 }, { x: 180, y: 336 }, { x: 140, y: 316 }];
-const friends = chooseFriends().map((id, i) => {
+const SLOTS = [{ x: 84, y: 368 }, { x: 276, y: 368 }, { x: 120, y: 440 }, { x: 240, y: 440 }, { x: 180, y: 336 }, { x: 140, y: 316 }, { x: 228, y: 316 }, { x: 70, y: 480 }, { x: 290, y: 480 }, { x: 180, y: 510 }];
+function spawnFriend(id, home, opt = {}) {   // ひろばを あるく 子を 1にん つくる（さいしょの 住人・「いっしょに いく」で よばれた 子・通りすがり）
   const a = makeActor(id, PALS[id].name, BASE + 'img/friend-' + id + '-s.webp', 68, PALS[id].size, 'friend');
-  a.lucky = id === 'penguin'; a.since = 0; fitAspect(a);
-  a.home = SLOTS[i]; a.x = a.home.x; a.y = a.home.y; a.speed = 30; a.state = 'idle'; a.timer = 1 + Math.random() * 4; a.cool = 0; a.talking = 0; a.bag = []; a.friend = true; a.mem = metInFishingToday().includes(id) ? memoryLine : '';   // ひとことは 話す 時に つくる（おへやの 表 tsuri-tank.js は あとから 読まれる ため）
+  a.lucky = id === 'penguin'; a.since = opt.since || 0; fitAspect(a);
+  a.home = home; a.x = opt.x === undefined ? a.home.x : opt.x; a.y = opt.y === undefined ? a.home.y : opt.y; a.speed = 30; a.state = 'idle'; a.timer = 1 + Math.random() * 4; a.cool = 0; a.talking = 0; a.bag = []; a.friend = true; a.mem = metInFishingToday().includes(id) ? memoryLine : '';   // ひとことは 話す 時に つくる（おへやの 表 tsuri-tank.js は あとから 読まれる ため）
   a.el.setAttribute('aria-hidden', 'true');
   return a;
-});
+}
+const friends = chooseFriends().map((id, i) => spawnFriend(id, SLOTS[i % SLOTS.length]));
 { const nowMs = Date.now(); friends.forEach(f => { own.seenAt[f.id] = nowMs; }); saveOwn(); }   // いま ひろばに いる 子（「さいきん あって いない」の 数えかた）
 const byId = id => actors.find(a => a.id === id);
 // すいそうの へやに よぶ ともだち（さいしょの 2ひき）
@@ -1213,6 +1254,7 @@ function nearestFriend(unmetFirst) {
 function updateFriend(f, dt) {
   f.cool = Math.max(0, f.cool - dt);
   if (f.party) { followTick(f, dt); return; }   // いっしょに つりに いく 子は まるふわの うしろに ついて あるく
+  if (f.passer && passerTick(f, dt)) return;   // 通りすがりの 子：はしから 来て、ぶらぶらして、かえる
   if (f.sit) {   // ベンチで ひとやすみ：まるふわの となりへ いって たつ
     if (!sit) { f.sit = null; f.state = 'idle'; f.timer = 2; }
     else {
@@ -1442,14 +1484,15 @@ const groupSeen = new Set();
 let groupUntil = 0, groupTimer = 0;
 function groupCheck(f) {
   groupSeen.add(f.id);
-  if (groupUntil > T || !friends.length || !friends.every(x => groupSeen.has(x.id)) || (trip && trip.leaving)) return;
+  const here = friends.filter(x => !x.passer).slice(0, WALK_MAX);
+  if (groupUntil > T || !here.length || !here.every(x => groupSeen.has(x.id)) || (trip && trip.leaving)) return;
   groupGather();
 }
 function groupGather() {
   groupUntil = T + 16; seen('group'); sfx.group();
-  const n = friends.length;   // ふんすいの まえの あいている 横の 帯（ベンチと 工事の 場所の あいだ・y 442）に ならぶ
-  friends.forEach((f, i) => {
-    const spot = nearestFree(180 + (i - (n - 1) / 2) * 50, 442);
+  const gf = friends.filter(x => !x.passer).slice(0, WALK_MAX), n = gf.length;   // ふんすいの まえの あいている 横の 帯（ベンチの あいだ・y 442）に ならぶ（さいだい 8にん）
+  gf.forEach((f, i) => {
+    const spot = nearestFree(180 + (i - (n - 1) / 2) * Math.min(50, 300 / Math.max(1, n - 1)), 442);
     f.group = { until: groupUntil }; f.talking = 0; f.state = 'group'; f.cool = 16;
     if (reduce()) { f.x = spot.x; f.y = spot.y; f.path = []; f.moving = false; }
     else { f.path = findPath(f, spot); f.speed = 70; }
@@ -1533,7 +1576,6 @@ function arrive(id) {
 function leave(id) {
   const d = DEST[id]; trip = { id, leaving: true };
   own.last = id; own.leftAt = Date.now(); saveOwn();
-  if (id === 'tsuri') writeMain({ party: mergedParty() });   // いっしょに つれて いく 子（つりびよりの きろく save.party）。本体の「なかま」で えらんだ 子は のこし、ひろばで さそった 子を 足す（4にんまで）
   speak(player, 'いってきます！', 1500, true); narrate(d.name + 'へ いってきます！'); sfx.enter();
   const r = player.el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
   curtain.querySelector('span').textContent = d.name + 'へ…'; curtain.style.display = 'flex';
@@ -1570,13 +1612,7 @@ function findFriend() {
 }
 
 // ─── がめんの ぶひん ───
-function renderPalRow() {
-  $('pal-row').replaceChildren(...friends.map(f => {
-    const li = document.createElement('li'), img = document.createElement('img'), met = !!own.metToday[f.id];
-    li.dataset.met = String(met); img.src = BASE + 'img/friend-' + f.id + '-s.webp'; img.alt = ''; img.width = img.height = 52;
-    li.append(img, f.name + (met ? '' : '（まだ）')); li.setAttribute('aria-label', f.name + (met ? '。きょう あったよ' : '。きょう まだ あって いないよ')); return li;
-  }));
-}
+function renderPalRow() { drawNow(); drawPartySlots(); }   // いま ひろばに いる なかま・いっしょに いく なかまの 一覧（なかまの がめんの 中）
 function drawSound() { const on = soundOn(); $('sound').textContent = on ? 'おと：ON' : 'おと：OFF'; $('sound').setAttribute('aria-pressed', String(on)); }
 function drawMotion() {
   const os = reduceOS(), less = reduce(); document.body.classList.toggle('calm', own.motion === 'less'); renderSeason();
@@ -1664,13 +1700,27 @@ let viaKeyFlag = false;
 // ─── いっしょに つりに いく（なかま 4にんまで・「いっしょに あそぶ」だけ。あらそわない・くらべない）───
 //   話しかけた あとに「いっしょに つりに いく？」（はい／また こんど）。はい＝その 子が まるふわの うしろに ついて あるく（れつ）。つりばへ いく とき、つりびよりの きろく save.party に
 //   つれて いく 子の id（さいだい 4）を かいて から うつる。ことわる ことは ない・かぞえない・ばつも ない。うごきを へらす 時は あるかず、まるふわの うしろに ならぶ。
-const PARTY_MAX = 4, NO_PARTY = new Set(['penguin', 'kogitsune']);   // あんない・おみせの 子は さそわない
 const party = [], trail = [];
 const partyIds = () => party.map(f => f.id);
-function mergedParty() {   // 本体で えらんだ save.party（名簿に いる 子だけ）＋ ひろばで さそった 子。ひろばで「ここで まつ」に した 子は はずす。さいだい 4にん（あたらしい 子を のこす）
-  const base = Array.isArray(readMain().party) ? readMain().party.filter((id, i, a) => typeof id === 'string' && PALS[id] && a.indexOf(id) === i && !partyLeft.has(id)) : [];
-  const out = [...base]; for (const id of partyIds()) if (!out.includes(id)) out.push(id);
-  return out.slice(-PARTY_MAX);
+function syncMainParty() {   // 本体の save.party に かく：ひろばに いない（ほかの ところに いる）なかまは そのまま のこし、ひろばに いる なかまは いまの れつ（つれて いく 子）に する。さいだい 4にん（あたらしい 子を のこす）
+  const absent = mainParty().filter(id => !friends.some(x => x.id === id));
+  writeMain({ party: [...absent, ...partyIds()].slice(-PARTY_MAX) });
+}
+// ─── レベル（本体と おなじ しき）：ひろばで いっしょに すごした 10分ごとに けいけんち +5 を 本体の save.palXp に 足す。すうじは 出さない（レベルだけ）───
+let togetherAcc = 0, togetherSave = 0;
+function togetherIds() { const ids = new Set(); party.forEach(f => ids.add(f.id)); friends.forEach(f => { if (!f.passer && isFav(f.id)) ids.add(f.id); }); if (typeof sit !== 'undefined' && sit && sit.comers) sit.comers.forEach(id => ids.add(id)); return ids; }
+function gainXp(id, n) {
+  const before = palLv(id), cur = readMain(), px = { ...(cur.palXp && typeof cur.palXp === 'object' ? cur.palXp : {}) }, bd = { ...(cur.bond && typeof cur.bond === 'object' ? cur.bond : {}) };
+  px[id] = (Number.isFinite(px[id]) ? Math.max(0, px[id]) : 0) + n; const now = Math.max(1, Math.floor(Math.sqrt(1 + px[id] / 12))); bd[id] = bondFor(now);
+  writeMain({ palXp: px, bond: bd });
+  if (now > before) { const f = friends.find(x => x.id === id); if (f) { speak(f, 'レベル ' + now + ' に なったよ！', 3400, true); hop(f); } sfx.pick(); narrate(PALS[id].name + 'が レベル ' + now + ' に なったよ。'); renderPalRow(); }
+}
+function tickTogether(dt) {
+  togetherAcc += dt; if (togetherAcc < 1) return; const s = togetherAcc; togetherAcc = 0;
+  if (document.hidden || trip || T - lastInput > 180 || !friends.length) return;
+  let dirty = false;
+  for (const id of togetherIds()) { if (NO_PARTY.has(id) || id === avatarId()) continue; own.together[id] = (own.together[id] || 0) + s; dirty = true; if (own.together[id] >= 600) { own.together[id] -= 600; gainXp(id, 5); } }
+  if (dirty && T > togetherSave) { togetherSave = T + 30; saveOwn(); }
 }
 function trailPush() { const l = trail[trail.length - 1]; if (!l || dist(l, player) >= 6) { trail.push({ x: player.x, y: player.y }); if (trail.length > 120) trail.shift(); } }
 function trailAt(gap) {   // まるふわが あるいた あとを、gap だけ さかのぼった ところ
@@ -1689,39 +1739,102 @@ function followTick(f, dt) {
   const target = trailAt(30 * (i + 1)) || lineSpot(i);
   if (dist(f, target) > 2.5) { f.path = [target]; f.speed = player.moving ? 104 : 70; stepActor(f, dt); } else { f.path = []; f.moving = false; }
 }
-const partyLeft = new Set();   // ひろばで「ここで まつ」に した 子（本体の save.party から も はずす）
 function joinParty(f) {
-  if (!f || party.includes(f)) return;
-  partyLeft.delete(f.id);
+  if (!f || party.includes(f) || NO_PARTY.has(f.id) || f.id === avatarId()) return;
   if (party.length >= PARTY_MAX) { const old = party.shift(); old.party = false; old.state = 'idle'; old.timer = 2; old.cool = 20; narrate(old.name + 'は ひろばで まってるね。'); }   // 5にんめは、いちばん まえから いる 子が ひろばで まつ（ことわらない）
-  f.party = true; f.state = 'follow'; f.path = []; f.talking = 0; f.cool = 12; f.sit = null; party.push(f);
+  f.party = true; f.state = 'follow'; f.path = []; f.talking = 0; f.cool = 12; f.sit = null; party.push(f); syncMainParty();
   speak(f, 'いっしょに いく！', 2400, true); hop(f); sfx.greet(f);
   narrate(f.name + 'が いっしょに いくよ。つりばへ いくと、いっしょに つれて いくよ。');
 }
 function leaveParty(f) {
   const i = party.indexOf(f); if (i < 0) return;
-  party.splice(i, 1); partyLeft.add(f.id); f.party = false; f.state = 'idle'; f.timer = 2; f.path = []; f.cool = 20;
+  party.splice(i, 1); f.party = false; f.state = 'idle'; f.timer = 2; f.path = []; f.cool = 20; syncMainParty();
   speak(f, 'ここで まってるね', 2400, true); narrate(f.name + 'は ひろばで まってるよ。');
 }
+for (const id of mainParty()) { const pf = friends.find(x => x.id === id); if (pf && party.length < PARTY_MAX) { pf.party = true; pf.state = 'follow'; pf.path = []; pf.cool = 12; party.push(pf); const s = lineSpot(party.length - 1); pf.x = s.x; pf.y = s.y; } }   // 本体で えらんだ「いっしょに いく なかま」は ひろばでも まるふわの うしろに
 let inviteF = null, inviteTimer = 0;
 function closeInvite() { const el = $('invite'); if (el && !el.hidden) el.hidden = true; inviteF = null; clearTimeout(inviteTimer); }
 function openInvite(f, viaKey) {
   if (!f || NO_PARTY.has(f.id) || trip) return;
-  const inParty = party.includes(f), tk = tokuOf(f.id);
-  inviteF = f; $('invite-q').textContent = inParty ? f.name + 'は いっしょに いるよ。ここで まって いて もらう？' : f.name + 'に「いっしょに つりに いく？」';
+  const inParty = party.includes(f), tk = tokuOf(f.id), join = !isCompanion(f.id);   // なかまじゃない 子には「なかまに なる？」
+  inviteF = f; $('invite-q').textContent = join ? f.name + 'に「なかまに なる？」' : inParty ? f.name + 'は いっしょに いるよ。ここで まって いて もらう？' : f.name + 'に「いっしょに つりに いく？」';
   $('invite-toku').textContent = tk ? f.name + 'は「' + TOKU[tk] + '」' : ''; $('invite-toku').hidden = !tk;
-  $('invite-yes').textContent = inParty ? 'ここで まつ' : 'はい'; $('invite-no').textContent = inParty ? 'いっしょに いく' : 'また こんど';
+  $('invite-yes').textContent = !join && inParty ? 'ここで まつ' : 'はい'; $('invite-no').textContent = !join && inParty ? 'いっしょに いく' : 'また こんど';
   $('invite').hidden = false;
-  setTimeout(() => { if (inviteF === f) narrate(f.name + 'に「いっしょに つりに いく？」と きいて みよう。したの「はい」か「また こんど」を えらんでね。' + (tk ? f.name + 'は「' + TOKU[tk] + '」。' : '')); }, 2400);   // あいさつの ひとことを よみおえて から
+  setTimeout(() => { if (inviteF === f) narrate(f.name + 'に「' + (join ? 'なかまに なる？' : 'いっしょに つりに いく？') + '」と きいて みよう。したの「はい」か「また こんど」を えらんでね。' + (tk ? f.name + 'は「' + TOKU[tk] + '」。' : '')); }, 2400);   // あいさつの ひとことを よみおえて から
   if (viaKey) $('invite-yes').focus();
   clearTimeout(inviteTimer); inviteTimer = setTimeout(closeInvite, 14000);
 }
-$('invite-yes').addEventListener('click', () => { const f = inviteF; if (!f) return; const inParty = party.includes(f); closeInvite(); lastInput = T; if (inParty) leaveParty(f); else joinParty(f); });
-$('invite-no').addEventListener('click', () => { const f = inviteF; closeInvite(); lastInput = T; if (f) narrate(party.includes(f) ? f.name + 'は いっしょに いくよ。' : 'うん、また こんど。いつでも さそってね。'); });
+$('invite-yes').addEventListener('click', () => { const f = inviteF; if (!f) return; const inParty = party.includes(f), join = !isCompanion(f.id); closeInvite(); lastInput = T; if (join) becomeCompanion(f); else if (inParty) leaveParty(f); else joinParty(f); });
+$('invite-no').addEventListener('click', () => { const f = inviteF; closeInvite(); lastInput = T; if (f) narrate(party.includes(f) ? f.name + 'は いっしょに いくよ。' : isCompanion(f.id) ? 'うん、また こんど。いつでも さそってね。' : 'うん、また こんど。いつでも はなしかけてね。'); });
 
 // ─── ともだちの いれかわり：4〜8ふんに 1にん。「またね！」と いなくなり、べつの 子が「こんにちは」と くる。えらびかたは「さいきん あって いない」順（なかま名簿）。
 //   歩いて いる とちゅう・話して いる 子・いっしょに つりに いく 子・♡の 子は かえない（♡の 子が いない 時だけ ♡の 子を よぶ）。「うごきを へらす」の 時は ふっと かわる ───
 const swapGap = () => { const s = Number(q.get('swap')); return s > 0 ? s : 240 + Math.random() * 240; };   // 4〜8ふんに 1にん（?swap=びょう は けんさ用・ひろばの 時計＝あそんで いる 時間）
+// ─── ひろばの 住人を ふやす・へらす（さいだい 10にん：なかま 8にん＋通りすがり 2にん）───
+const actorIdx = f => actors.indexOf(f);
+function removeFriend(f) {
+  const i = friends.indexOf(f); if (i < 0) return;
+  if (inviteF === f) closeInvite(); f.sit = null; f.group = null; const pi = party.indexOf(f); if (pi >= 0) party.splice(pi, 1);
+  for (const b of bubbles.slice()) if (b.actor === f) removeBubble(b);
+  friends.splice(i, 1); const ai = actorIdx(f); if (ai >= 0) actors.splice(ai, 1); f.el.remove(); renderPalRow();
+  [$('friend-a'), $('friend-b')].forEach((img, j) => { if (img && friends[j]) img.setAttribute('src', BASE + 'img/friend-' + friends[j].id + '-s.webp'); });
+}
+function ensureActorRoom() {   // あいている 席が なければ、いちばん ながく いる 子（いっしょに いく 子・♡の 子・話して いる 子は のぞく）が かえる
+  if (friends.length < ACTOR_MAX) return true;
+  const cand = friends.filter(f => !f.party && !isFav(f.id) && f.state === 'idle' && f.talking <= 0 && !bubbles.some(b => b.actor === f)).sort((a, b) => (a.since || 0) - (b.since || 0))[0];
+  if (!cand) return false; removeFriend(cand); return true;
+}
+function summonFriend(id) {   // ひろばの はしから あるいて くる（うごきを へらす 時は その ばに ふっと）
+  if (!PALS[id] || friends.some(f => f.id === id) || !ensureActorRoom()) return null;
+  const fromLeft = player.x > 180, home = SLOTS[friends.length % SLOTS.length], y = clamp(player.y, 300, 540);
+  const f = spawnFriend(id, home, { x: fromLeft ? 18 : W - 18, y, since: T });
+  friends.push(f); own.seenAt[id] = Date.now(); saveOwn();
+  if (reduce()) { const s = nearestFree(clamp(player.x + (fromLeft ? -40 : 40), 14, W - 14), y); if (s) { f.x = s.x; f.y = s.y; } }
+  renderPalRow(); return f;
+}
+// ─── 通りすがり（10/1 マスター直：なかまじゃない 子が たまに 来る。話しかけて「なかまに なる？」→はい で なかまに。ことわっても なにも ない・数えない）───
+//   10〜20分に 1回（なかまが 3にん みまんの 間は 1〜2分に 1回）・さいだい 2にん。ひろばの はしから あるいて きて、100〜160びょう ぶらぶらして、かえる（うごきを へらす 時は ふっと 出て ふっと きえる）。
+//   ?passer=びょう で 間かくを かえる／?passer=off で 出さない（?friends= で えらんだ 時も 出さない＝けんさ用）
+const PASSER_OFF = q.get('passer') === 'off' || (q.has('friends') && !q.has('passer'));
+const passerGap = () => { const s = Number(q.get('passer')); if (s > 0) return s; return companionIds().length < 3 ? 70 + Math.random() * 70 : 600 + Math.random() * 600; };
+let nextPasser = PASSER_OFF ? 1e12 : (Number(q.get('passer')) > 0 ? Number(q.get('passer')) : (companionIds().length < 3 ? 30 + Math.random() * 30 : 240 + Math.random() * 240));
+const passerPool = () => { const here = new Set(friends.map(f => f.id)); return castPool().filter(id => !NO_PARTY.has(id) && !isCompanion(id) && !here.has(id)); };
+function spawnPasser() {
+  if (trip || document.hidden || groupUntil > T || friends.filter(f => f.passer).length >= 2) return null;
+  const pool = passerPool(); if (!pool.length || !ensureActorRoom()) return null;
+  const id = castOrder(castEnv(), pool)[0], fromLeft = Math.random() < .5, spot = nearestFree(clamp(110 + Math.random() * 140, 30, 330), clamp(410 + (Math.random() - .5) * 110, 330, 520));
+  const f = spawnFriend(id, spot, { x: fromLeft ? 14 : W - 14, y: clamp(spot.y + (Math.random() - .5) * 80, 300, 540), since: T });
+  f.passer = true; f.passerUntil = T + 100 + Math.random() * 60; f.state = 'enter'; friends.push(f); own.seenAt[id] = Date.now(); saveOwn();
+  if (reduce()) { f.x = spot.x; f.y = spot.y; f.state = 'idle'; f.path = []; } else { f.path = findPath(f, spot); f.speed = 46; }
+  narrate('だれか とおりかかったよ。はなしかけて みてね。'); renderPalRow(); return f;
+}
+function leavePasser(f) {
+  if (reduce()) { removeFriend(f); return; }
+  const e = nearestFree(f.x < 180 ? 14 : W - 14, clamp(f.y, 300, 540)) || { x: f.x < 180 ? 14 : W - 14, y: f.y };
+  f.state = 'leave'; f.talking = 0; f.path = findPath(f, e); f.speed = 50;
+}
+function passerTick(f, dt) {   // はしから あるいて くる → ぶらぶら → はしへ かえって きえる
+  if (f.state === 'enter') { if (f.path.length && !reduce()) { stepActor(f, dt); f.moving = true; return true; } f.moving = false; f.state = 'idle'; f.timer = 2; return true; }
+  if (f.state === 'leave') { if (f.path.length && !reduce()) { stepActor(f, dt); f.moving = true; return true; } removeFriend(f); return true; }
+  if (T > f.passerUntil && f.talking <= 0 && inviteF !== f && f.state === 'idle' && !bubbles.some(b => b.actor === f)) { leavePasser(f); return true; }
+  return false;
+}
+function trimWalkers() {   // なかまが ふえて 8にんを こえたら、ながく いる 子から ひろばを おやすみ（なかまの ままで、また 入れかわりで くる）
+  for (let guard = 0; guard < 6 && friends.filter(f => !f.passer).length > WALK_MAX; guard++) {
+    const cand = friends.filter(f => !f.passer && !f.party && !isFav(f.id) && f.state === 'idle' && f.talking <= 0 && !bubbles.some(b => b.actor === f)).sort((a, b) => (a.since || 0) - (b.since || 0))[0];
+    if (!cand) break; removeFriend(cand);
+  }
+}
+function becomeCompanion(f) {   // 「なかまに なる？」に「はい」：本体の save.palXp を 1 に（レベル 1）・あった ことに・なかまの 住人に
+  const id = f.id, cur = readMain(), now = Date.now(), obj = v => (v && typeof v === 'object' && !Array.isArray(v) ? { ...v } : {});
+  const px = obj(cur.palXp), bd = obj(cur.bond), pals = obj(cur.pals), at = obj(cur.palsAt);
+  px[id] = Math.max(1, Number.isFinite(px[id]) ? px[id] : 0); bd[id] = Math.max(1, Number.isFinite(bd[id]) ? bd[id] : 0) || 1; pals[id] = true; if (!Number.isFinite(at[id])) at[id] = now;
+  writeMain({ palXp: px, bond: bd, pals, palsAt: at }); own.companion[id] = 1; saveOwn();
+  f.passer = false; f.since = T; f.passerUntil = 0;
+  speak(f, 'やった！ なかまだね', 2800, true); hop(f); sfx.pick(); narrate(f.name + 'が なかまに なったよ。ひろばが にぎやかに なるね。');
+  trimWalkers(); renderPalRow(); if ($('zukan') && $('zukan').open) drawZukanAll();
+}
 function fitAspect(f) {   // 街人の 絵の たて よこ ひ は 絵が よみこまれて から あわせる
   const done = () => { const p = PALS[f.id]; if (p && p.town && f.img.naturalWidth > 0 && f.img.naturalHeight > 0) { const r = f.img.naturalWidth / f.img.naturalHeight; if (Math.abs(r - p.size) > .01) { p.size = r; f.aspect = r; f.el.style.width = (f.h * r / W * 100) + '%'; f.el.style.aspectRatio = String(r); } } };
   if (f.img.complete) done(); else f.img.addEventListener('load', done, { once: true });
@@ -1730,7 +1843,7 @@ function swapFriend(slot, now, forceId) {
   if (trip || player.then || player.path.length) return false;
   const favs = favList(), env = castEnv(), favWalkers = friends.filter(f => favs.includes(f.id));
   const rotate = !forceId && favs.length > 1 && favWalkers.length === 1 && Math.random() < .3;   // ♡の 子が 2にん いじょう の とき、ときどき べつの ♡の 子に かわる
-  const ok = f => f.state === 'idle' && f.talking <= 0 && !f.party && !bubbles.some(b => b.actor === f) && (rotate ? favs.includes(f.id) : !favs.includes(f.id));
+  const ok = f => !f.passer && f.state === 'idle' && f.talking <= 0 && !f.party && !bubbles.some(b => b.actor === f) && (rotate ? favs.includes(f.id) : !favs.includes(f.id));
   const cand = friends.map((f, i) => ({ f, i })).filter(x => (slot === undefined || x.i === slot) && ok(x.f));
   if (!cand.length) return false;
   cand.sort((a, b) => (a.f.since || 0) - (b.f.since || 0));   // いちばん ながく いる 子から
@@ -1738,7 +1851,7 @@ function swapFriend(slot, now, forceId) {
   let id = forceId;
   if (!id && rotate) id = castOrder(env, favs.filter(x => x !== f.id))[0];
   if (!id && favs.length && !favWalkers.length) id = castOrder(env, favs)[0];
-  if (!id) id = castReplace(env, castPool(), present, f.id);
+  if (!id) id = castReplace(env, rotationPool(), present, f.id);
   if (!id || present.includes(id) || !PALS[id]) return false;
   const oldName = f.name, quick = !!now || reduce();
   const change = () => {
@@ -1765,14 +1878,6 @@ function toggleFav(id) {   // つりびよりと おなじ きろく save.fav �
   narrate(has ? PALS[id].name + 'を ♡から はずしたよ。' : PALS[id].name + 'を ♡に したよ。ひろばで いつも あえるよ。'); asKind('ui', () => sfx.tap());
   if (!has) ensureFav(); renderPalRow();
 }
-function paintZukanFav(id) {
-  const box = $('zukan-fav'); if (!box) return; box.replaceChildren();
-  const fb = document.createElement('button'); fb.type = 'button'; fb.className = 'zk-fav'; fb.dataset.id = id; paintFavBtn(fb, id);
-  fb.addEventListener('click', () => { toggleFav(id); paintFavBtn(fb, id); drawZukanMarks(); });
-  box.append(fb);
-  const bd = bondOf(id); if (bd) { const s = document.createElement('span'); s.className = 'zk-bond'; s.setAttribute('role', 'img'); s.setAttribute('aria-label', ['', 'なかよし', 'もっと なかよし', 'とても なかよし'][bd]); s.textContent = '●'.repeat(bd) + '○'.repeat(3 - bd); box.append(s); }
-}
-function drawZukanMarks() { const favs = favList(); $('zukan-list').querySelectorAll('button.zk').forEach(b => { const on = favs.includes(b.dataset.id), old = b.querySelector('.zk-heart'); if (on && !old) { const h = document.createElement('i'); h.className = 'zk-heart'; h.setAttribute('aria-hidden', 'true'); h.textContent = '♡'; b.append(h); } else if (!on && old) old.remove(); b.setAttribute('aria-label', PALS[b.dataset.id].name + (on ? '。すきな なかま' : '')); }); }
 let nextFavCheck = 3, nearNote = '', nextNear = 0, nextVisitAt = 30, nextClock = 30, nextBird = 6, nextJump = 14, nextMeteor = 45, nextSwap = swapGap();
 function update(dt) {
   T += dt;
@@ -1782,6 +1887,8 @@ function update(dt) {
   animateActor(player, dt);
   if (party.length) trailPush();
   friends.forEach(f => { updateFriend(f, dt); animateActor(f, dt); });
+  tickTogether(dt);
+  if (T > nextPasser) { nextPasser = T + passerGap(); spawnPasser(); }   // 通りすがりの 子
   if (inviteF && (dist(player, inviteF) > 150 || !friends.includes(inviteF))) closeInvite();
   if (T > nextFavCheck) { nextFavCheck = T + 3; ensureFav(); }
   if (faceUntil && T > faceUntil) setFace('blue');
@@ -1950,8 +2057,8 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   // したの おび：きょうの ともだち（あった こは いろつき）と ひづけ
   ctx.save(); ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillStyle = '#244653'; ctx.font = '800 38px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif';
   ctx.fillText(TE('きょうの ともだち'), OW / 2, PY + H * S + 46);
-  const n = friends.length, size = 104, gap = 20, rowW = n * size + (n - 1) * gap; let ix = (OW - rowW) / 2; const iy = PY + H * S + 78;
-  for (const f of friends) {
+  const pf = friends.filter(f => !f.passer).slice(0, WALK_MAX), n = pf.length, gap = 20, size = Math.min(104, Math.floor((OW - 40 - (n - 1) * gap) / Math.max(1, n))), rowW = n * size + (n - 1) * gap; let ix = (OW - rowW) / 2; const iy = PY + H * S + 78;
+  for (const f of pf) {
     const met = !!own.metToday[f.id], im = f.img; ctx.save(); ctx.globalAlpha = met ? 1 : .35; if (hasFilter && !met) ctx.filter = 'grayscale(1)';
     const sc = Math.min(size / im.naturalWidth, size / im.naturalHeight); ctx.drawImage(im, ix + (size - im.naturalWidth * sc) / 2, iy + (size - im.naturalHeight * sc), im.naturalWidth * sc, im.naturalHeight * sc); ctx.restore(); ix += size + gap;
   }
@@ -1982,46 +2089,106 @@ async function openPhoto() {
 $('snap').addEventListener('click', () => { lastInput = T; openPhoto(); });
 $('close-photo').addEventListener('click', () => photoDlg.close());
 
-// ─── なかまずかん（07 の 小・ひろばで あった なかま）───
-// ひろばで あいさつを した なかま（記録 own.met）が いろつきで ならぶ。まだの こは しるし（てんせんの まるに「？」）だけ。名前・かず・わりあい・ヒントは 出さない（あつめる あつを つくらない）。
-// さわると なまえと ひとこと。よみあげには「あった なかま」だけ（まだの こは よみあげない）。なにも へらない・罰なし
-function drawZukan() {
-  const met = id => metEver(id), ids = Object.keys(PALS);   // ひろばで あった 子＋つりで あった 子（つりびよりの きろく）
+// ─── なかま（ずかん・いま ひろばに いる 子・いっしょに いく なかま（4にんまで）・♡・レベルを 1つの がめんに）───
+// 「いま ひろばに いる なかま」は ここに うつった（前は ひろばの 下に ならんで いた）。すうじ（レベル）は じぶんの ぶんだけ・くらべない・数えない。なにも へらない・罰なし。
+let zkSel = '';
+const tileMarks = id => [party.some(f => f.id === id) ? 'いっしょ' : '', isFav(id) ? '♡' : '', palXpOf(id) > 0 ? 'Lv ' + palLv(id) : ''].filter(Boolean).join(' ');
+const palLabel = id => PALS[id].name + (palXpOf(id) > 0 ? '。レベル ' + palLv(id) : '') + (isFav(id) ? '。すきな なかま' : '') + (party.some(f => f.id === id) ? '。いっしょに いくよ' : '');
+function palButton(id, cls) {
+  const b = document.createElement('button'), im = document.createElement('img'), m = tileMarks(id); b.type = 'button'; b.className = 'zk ' + (cls || '') + (zkSel === id ? ' on' : ''); b.dataset.id = id;
+  im.src = BASE + 'img/friend-' + id + '-s.webp'; im.alt = ''; im.width = im.height = 46; im.loading = 'lazy'; im.decoding = 'async'; b.append(im, PALS[id].name);
+  if (m) { const s = document.createElement('small'); s.textContent = m; b.append(s); } b.setAttribute('aria-label', palLabel(id)); return b;
+}
+function drawNow() { const ul = $('zukan-now'); if (!ul) return; ul.replaceChildren(...friends.map(f => { const li = document.createElement('li'); li.append(palButton(f.id, 'now')); return li; })); }
+function drawPartySlots() {
+  const box = $('zukan-party'); if (!box) return; const ids = mainParty(), kids = [];
+  for (let i = 0; i < PARTY_MAX; i++) { if (!ids[i]) { const d = document.createElement('div'); d.className = 'zk slot'; d.textContent = 'あき'; kids.push(d); } else kids.push(palButton(ids[i], 'slot')); }
+  box.replaceChildren(...kids);
+}
+function drawZukan() {   // ぜんいん（あった 子＝ひろばで あった 子・つりで あった 子・なかま）
+  const met = id => metEver(id) || isCompanion(id), ids = Object.keys(PALS);
   $('zukan-list').replaceChildren(...ids.map(id => {
     const li = document.createElement('li');
-    if (met(id)) { const b = document.createElement('button'), im = document.createElement('img'); b.type = 'button'; b.className = 'zk'; b.dataset.id = id; im.src = BASE + 'img/friend-' + id + '-s.webp'; im.alt = ''; im.width = im.height = 56; im.loading = 'lazy'; im.decoding = 'async'; b.append(im, PALS[id].name); b.setAttribute('aria-label', PALS[id].name); li.append(b); }
+    if (met(id)) li.append(palButton(id, ''));
     else { const s = document.createElement('span'); s.className = 'zk not'; s.setAttribute('aria-hidden', 'true'); s.textContent = '？'; li.append(s); }
     return li;
   }));
   return ids.some(met);
 }
-// ともだち帳の 1人ぶん：「10がつ1にち ひろばで あったよ。」（日づけは はじめて あった 日）／ひろばの 記録が ふるい 子は「ひろばで あったよ。」／つりで あった 子は「つりで あったよ。」／とくい
-//   かいすう・じゅんい・くらべは 出さない（なかよしの しるし ●○ が その かわり）
+function drawZukanAll() { drawNow(); drawPartySlots(); return drawZukan(); }
+function paintFavBtn(btn, id) { const on = isFav(id); btn.setAttribute('aria-pressed', String(on)); btn.textContent = on ? '♡ すきな なかま（はずす）' : '♡ すきな なかまに する'; }
+function paintPartyBtn(btn, id) { const on = mainParty().includes(id); btn.setAttribute('aria-pressed', String(on)); btn.textContent = on ? 'おるすばんに する' : 'いっしょに いく'; }
+function togglePartyById(id) {   // 「なかま」の がめんから：いっしょに いく／おるすばんに する（ひろばに いる 子は その ばで、いない 子は ひろばへ よぶ）
+  if (!PALS[id] || NO_PARTY.has(id) || id === avatarId()) return;
+  const f = friends.find(x => x.id === id), on = mainParty().includes(id);
+  if (f) { if (on || f.party) leaveParty(f); else joinParty(f); }
+  else if (on) writeMain({ party: mainParty().filter(x => x !== id) });
+  else { const nf = summonFriend(id); if (nf) joinParty(nf); else writeMain({ party: [...mainParty(), id].slice(-PARTY_MAX) }); }
+  drawZukanAll(); paintZukanActions(id);
+}
+function paintZukanActions(id) {
+  const box = $('zukan-fav'); if (!box) return; box.replaceChildren();
+  const fb = document.createElement('button'); fb.type = 'button'; fb.className = 'zk-fav'; fb.dataset.id = id; paintFavBtn(fb, id);
+  fb.addEventListener('click', () => { toggleFav(id); paintFavBtn(fb, id); drawZukanAll(); }); box.append(fb);
+  if (!NO_PARTY.has(id) && id !== avatarId()) { const pb = document.createElement('button'); pb.type = 'button'; pb.className = 'zk-fav zk-party'; pb.dataset.id = id; paintPartyBtn(pb, id); pb.addEventListener('click', () => { togglePartyById(id); paintPartyBtn(pb, id); }); box.append(pb); }
+}
+// ともだち帳の 1人ぶん：「10がつ1にち ひろばで あったよ。」（日づけは はじめて あった 日）／ひろばの 記録が ふるい 子は「ひろばで あったよ。」／つりで あった 子は「つりで あったよ。」／レベル（あそんだ 子だけ）／とくい。かいすう・じゅんいは 出さない
 function bookLines(id) {
   const out = [], p = PALS[id], fa = ownAt('firstAt', id), hiroba = Number(own.met && own.met[id]) > 0;
   if (hiroba) { const d = fa ? new Date(fa) : null; out.push((d && Number.isFinite(d.getTime()) ? (d.getMonth() + 1) + 'がつ' + d.getDate() + 'にち ' : '') + 'ひろばで あったよ。'); }
   else if (mainAt(id) > 0) out.push('つりで あったよ。');
+  if (palXpOf(id) > 0) out.push('レベル ' + palLv(id));
   const tk = tokuOf(id); if (tk && p) out.push(p.name + 'は「' + TOKU[tk] + '」');
   return out;
 }
 function showZukanPal(id) {
-  const p = PALS[id]; if (!p) return;
-  $('zukan-list').querySelectorAll('button.zk').forEach(x => x.classList.toggle('on', x.dataset.id === id));
+  const p = PALS[id]; if (!p) return; zkSel = id;
+  $('zukan').querySelectorAll('button.zk[data-id]').forEach(x => x.classList.toggle('on', x.dataset.id === id));
   const s = document.createElement('span'), sm = document.createElement('small'); s.textContent = p.name; sm.textContent = p.hello;
-  const extra = bookLines(id).map(l => { const e = document.createElement('small'); e.textContent = l; return e; });   // はじめて あった 日・あった ばしょ・とくい（かいすうは 出さない）
-  $('zukan-cap').replaceChildren(s, sm, ...extra); paintZukanFav(id);
+  const extra = bookLines(id).map(l => { const e = document.createElement('small'); e.textContent = l; return e; });
+  $('zukan-cap').replaceChildren(s, sm, ...extra); paintZukanActions(id);
   asKind('fx', () => chord(p.pitch, .08, 'round', 0, .04));
 }
 function openZukan() {
-  lastInput = T; const any = drawZukan(); drawZukanMarks(); if ($('zukan-fav')) $('zukan-fav').replaceChildren();
-  $('zukan-cap').replaceChildren(Object.assign(document.createElement('span'), { textContent: any ? 'なかまを さわって みてね。' : 'ひろばを あるいて、なかまに あいにいこう。いそがなくて だいじょうぶ。' }));
+  lastInput = T; zkSel = ''; const any = drawZukanAll(); if ($('zukan-fav')) $('zukan-fav').replaceChildren();
+  $('zukan-cap').replaceChildren(Object.assign(document.createElement('span'), { textContent: 'なかまを さわって みてね。' }));
   const dlg = $('zukan'); if (!dlg.open) dlg.showModal();
-  narrate('なかまずかんを ひらいたよ。' + (any ? 'あった なかまが ならんで いるよ。' : 'まだ だれにも あって いないよ。')); asKind('ui', () => sfx.on());
+  narrate('なかまの がめんを ひらいたよ。いま ひろばに いる なかまと、いっしょに いく なかまが ならんで いるよ。'); asKind('ui', () => sfx.on());
 }
 $('zukan-btn').addEventListener('click', openZukan);
-$('close-zukan').addEventListener('click', () => { $('zukan').close(); narrate('なかまずかんを とじたよ。'); });   // ボタンで とじた 時は すぐ しらせる（Esc で とじた 時は 下の close の しらせ）
-$('zukan-list').addEventListener('click', e => { const b = e.target.closest('button.zk'); if (b) showZukanPal(b.dataset.id); });
-document.addEventListener('close', e => { if (e.target && e.target.id === 'zukan') narrate('なかまずかんを とじたよ。'); }, true);
+$('close-zukan').addEventListener('click', () => { $('zukan').close(); narrate('なかまの がめんを とじたよ。'); });   // ボタンで とじた 時は すぐ しらせる（Esc で とじた 時は 下の close の しらせ）
+$('zukan').addEventListener('click', e => { const b = e.target.closest('button.zk[data-id]'); if (b) showZukanPal(b.dataset.id); });
+document.addEventListener('close', e => { if (e.target && e.target.id === 'zukan') narrate('なかまの がめんを とじたよ。'); }, true);
+
+// ─── 絵の さしかえ（「ひろばを リアルに」の 準備。20_ひろばを「リアル」に_背景の発注書案）───
+//   img/hiroba/manifest.json に { ready: true, sets: { 'aki-hiru': { layers: { sky, far, ground, water, front }, props: { house: 'prop-house-hiru.webp', … } }, … } } が あれば、
+//   いまの 季節×じかんの 絵を あとから よんで、空・遠景・地面が そろったら 今の SVG（#bg）と さしかえる（water・front・置き物は あれば）。よめない 絵・ない 層は SVG の まま。
+//   あたらしい 絵が なければ（いまは ready:false）なにも しない。当たり判定・歩ける 範囲・道さがしは かわらない。?art=off で つかわない・?artdir=… は けんさ用（同じ 場所の 道だけ）
+const artState = { man: null, key: '' };
+const ART_DIR = (() => { const d = q.get('artdir'); return d && /^[\w\-./]+$/.test(d) && !/^(https?:)?\/\//.test(d) ? d.replace(/\/?$/, '/') : BASE + 'img/hiroba/'; })();
+function clearArt() {
+  artState.key = ''; scene.removeAttribute('data-art'); ['art', 'art-front'].forEach(id => { const e = $(id); if (e) e.remove(); });
+  PROPS.forEach(p => { const el = propEl(p.id); if (el && el.dataset.art) { el.innerHTML = p.svg + (p.mark ? `<span class="mark" aria-hidden="true">${p.mark}</span>` : ''); delete el.dataset.art; } });
+}
+const loadArtImg = url => new Promise(res => { const im = new Image(); im.decoding = 'async'; im.alt = ''; im.draggable = false; im.onload = () => res(im); im.onerror = () => res(null); im.src = url; });
+async function applyArt() {
+  const man = artState.man; if (!man) return;
+  const tkey = ({ a: 'yuu', h: 'hiru', y: 'yuu', n: 'yoru' })[curTime] || 'hiru', key = SEASON + '-' + tkey;
+  if (artState.key === key) return; artState.key = key;
+  const set = man.sets && man.sets[key]; if (!set || !set.layers) { clearArt(); artState.key = key; return; }
+  const names = ['sky', 'far', 'ground', 'water', 'front'], [sky, far, ground, water, front] = await Promise.all(names.map(n => set.layers[n] ? loadArtImg(ART_DIR + set.layers[n]) : null));
+  if (artState.key !== key) return;   // その あいだに じかんが かわった
+  if (!sky || !far || !ground) { clearArt(); artState.key = key; return; }   // 空・遠景・地面が そろわなければ SVG の まま
+  ['art', 'art-front'].forEach(id => { const e = $(id); if (e) e.remove(); });
+  const back = document.createElement('div'); back.id = 'art'; back.setAttribute('aria-hidden', 'true'); back.append(...[sky, far, ground, water].filter(Boolean)); $('bg').after(back);
+  if (front) { const fr = document.createElement('div'); fr.id = 'art-front'; fr.setAttribute('aria-hidden', 'true'); fr.style.zIndex = '950'; fr.append(front); $('bubbles').before(fr); }
+  scene.dataset.art = 'on';
+  if (set.props && typeof set.props === 'object') for (const p of PROPS) {
+    const f = set.props[p.id]; if (!f || typeof f !== 'string') continue; const im = await loadArtImg(ART_DIR + f); if (artState.key !== key) return; const el = propEl(p.id); if (!im || !el) continue;
+    const mark = el.querySelector('.mark'); im.className = 'art-prop'; el.dataset.art = '1'; el.replaceChildren(im); if (mark) el.append(mark);
+  }
+}
+(async () => { if (q.get('art') === 'off') return; try { const r = await fetch(ART_DIR + 'manifest.json', { cache: 'no-cache' }); if (!r.ok) return; const man = await r.json(); if (man && man.ready === true && man.sets && typeof man.sets === 'object') { artState.man = man; applyArt(); } } catch {} })();
 
 // ─── はじまり ───
 buildProps(); applyTime(); drawSound(); drawMotion(); renderPalRow(); renderPlush(); loadThanks();
@@ -2038,7 +2205,7 @@ setTimeout(() => { const g = friends.find(f => LAYERS.guests.includes(f.id)); if
 // はじめて きた 日：4びょう たっても だれも さわらない 時だけ、まるふわが 1かい「さわって みてね」（字が よめない 子にも 目で わかる）
 setTimeout(() => { if (own.visits <= 1 && lastInput === 0 && !trip && !document.hidden && !api.paused) speak(player, 'さわって みてね', 3800, true); }, 4200);
 requestAnimationFrame(frame);
-addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag || main.sndAmb === false) stopAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); renderWishStars(); renderPlush(); ensureFav(); } });
+addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; applyAvatar(); renderPalRow(); soundFlag = main.sound === true; drawSound(); if (!soundFlag || main.sndAmb === false) stopAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); renderWishStars(); renderPlush(); ensureFav(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else { startAmbient(); lastInput = T; } });
 addEventListener('pageshow', e => { if (e.persisted) { curtain.style.display = 'none'; trip = null; player.el.classList.remove('gone'); const house = propEl('house'); if (house) house.classList.remove('open'); measure(); narrate('ひろばに もどったよ'); } });
 
@@ -2046,7 +2213,7 @@ const api = window.Hiroba = {
   version: 1, paused: false, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), bgm: window.TsuriBgm ? window.TsuriBgm.state() : null, reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
-  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, cast: { list: () => CAST_ORDER.slice(), town: () => TOWN_LIST.map(x => x.id), newest: () => [...NEWEST], local: isLocalId, isNew: newFace, lastOf, order: pool => castOrder(castEnv(), pool), initial: (pool, n, forced) => castInitial(castEnv(), pool, n, forced), sim: castSim, homes: LOCAL_HOMES.slice(), gap: swapGap, announce: announceNew, buildLayers: castLayers, pool: castPool, layers: () => ({ resident: LAYERS.resident.slice(), daily: LAYERS.daily.slice(), guests: LAYERS.guests.slice() }), weight: id => layerW.get(id) || 1, weights: () => ({ ...LAYER_W }), announceGuest, toku: tokuOf, tokuWords: () => ({ ...TOKU }), favLines: favLinesOf }, fav: { list: favList, is: isFav, toggle: toggleFav, ensure: ensureFav, bond: bondOf }, party: { ids: partyIds, join: joinParty, leave: leaveParty, invite: openInvite, close: closeInvite, max: PARTY_MAX, size: () => party.length }, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
+  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, cast: { list: () => CAST_ORDER.slice(), town: () => TOWN_LIST.map(x => x.id), newest: () => [...NEWEST], local: isLocalId, isNew: newFace, lastOf, order: pool => castOrder(castEnv(), pool), initial: (pool, n, forced) => castInitial(castEnv(), pool, n, forced), sim: castSim, homes: LOCAL_HOMES.slice(), gap: swapGap, announce: announceNew, buildLayers: castLayers, art: { state: () => ({ key: artState.key, on: scene.dataset.art === 'on', ready: !!artState.man }), dir: ART_DIR }, pool: castPool, touch: () => { lastInput = T; }, spawnPasser, passers: () => friends.filter(f => f.passer).map(f => f.id), companions: companionIds, isCompanion, lv: palLv, xp: palXpOf, avatar: avatarId, mainParty, spawn: summonFriend, remove: removeFriend, gainXp, together: () => ({ ...own.together }), partyToggle: togglePartyById, drawAll: drawZukanAll, layers: () => ({ resident: LAYERS.resident.slice(), daily: LAYERS.daily.slice(), guests: LAYERS.guests.slice() }), weight: id => layerW.get(id) || 1, weights: () => ({ ...LAYER_W }), announceGuest, toku: tokuOf, tokuWords: () => ({ ...TOKU }), favLines: favLinesOf }, fav: { list: favList, is: isFav, toggle: toggleFav, ensure: ensureFav, bond: bondOf }, party: { ids: partyIds, join: joinParty, leave: leaveParty, invite: openInvite, close: closeInvite, max: PARTY_MAX, size: () => party.length }, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   season: () => SEASON, seasonOf, special: () => SPECIAL, specialOf, renderSeason, SEASON_LINES, SPECIAL_LINES, DROPS, pickDrop: () => dropEl && pickDrop(dropEl), drop: () => dropEl && ({ id: DROPS[SEASON].id, name: DROPS[SEASON].name, x: Number(dropEl.dataset.x), y: Number(dropEl.dataset.y) }),
   plush: () => plushEls.map(e => ({ id: Number(e.dataset.id), x: Number(e.dataset.x), y: Number(e.dataset.y) })), renderPlush, nushiIds, plushTap: el => plushTap(el), openZukan, drawZukan, showZukanPal,
   sfx, startAmbient, stopAmbient, audio: { tone, zap, chord }, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,
@@ -2089,7 +2256,10 @@ addEventListener('load', () => {
   }, DROP_EN = { 'さくらのはなびら': 'cherry blossom petal', 'あおいは': 'fresh green leaf', 'どんぐり': 'acorn', 'ゆきのけっしょう': 'snow crystal' }, dropEn = n => DROP_EN[n] || null;
   if (E.add) {   // なかま名簿（街人の なまえ・ひとこと）と、♡・いっしょに つりに いく の ことば
     const N = s => { try { const r = E.t(s); return r || s; } catch { return s; } }, TOKU_EN = { めがいいよ: 'sharp-eyed', ちからもちだよ: 'strong', うんがいいよ: 'lucky', おちついているよ: 'calm' };
-    const ex = { 'まるふわ、きたね': 'Marufuwa, you’re here!', 'つりで あったよ。': 'We met while fishing.', 'はい': 'Yes', 'また こんど': 'Maybe later', 'ここで まつ': 'Wait here', 'いっしょに いく': 'Come along', 'いっしょに いく！': 'Let’s go together!', 'ここで まってるね': 'I’ll wait here.', 'うん、また こんど。いつでも さそってね。': 'Okay, maybe next time. Ask me anytime.',
+    const ex = { 'なかま': 'Friends', 'ひろばに いる なかまと、いっしょに いく なかまが ここに ならぶよ。すうじは じぶんの ぶんだけ。いそがなくて だいじょうぶ。': 'Friends in the plaza and friends coming along are here. Numbers are only yours. No need to rush.', 'いっしょに いく なかま（4にんまで）': 'Coming along (up to 4)', 'ぜんいん': 'Everyone', 'あき': 'Empty', 'おるすばんに する': 'Stay behind',
+      'なかまの がめんを ひらいたよ。いま ひろばに いる なかまと、いっしょに いく なかまが ならんで いるよ。': 'Opened the Friends screen. Friends in the plaza and friends coming along are lined up.', 'なかまの がめんを とじたよ。': 'Closed the Friends screen.',
+      'うん、また こんど。いつでも はなしかけてね。': 'Okay, maybe next time. Talk to me anytime.', 'だれか とおりかかったよ。はなしかけて みてね。': 'Someone is passing by. Try talking to them!', 'やった！ なかまだね': 'Yay! We’re friends now.',
+      'まるふわ、きたね': 'Marufuwa, you’re here!', 'つりで あったよ。': 'We met while fishing.', 'はい': 'Yes', 'また こんど': 'Maybe later', 'ここで まつ': 'Wait here', 'いっしょに いく': 'Come along', 'いっしょに いく！': 'Let’s go together!', 'ここで まってるね': 'I’ll wait here.', 'うん、また こんど。いつでも さそってね。': 'Okay, maybe next time. Ask me anytime.',
       '♡ すきな なかまに する': '♡ Make a favorite', '♡ すきな なかま（はずす）': '♡ Favorite (remove)', 'なかよし': 'Friends', 'もっと なかよし': 'Closer friends', 'とても なかよし': 'Best friends',
       'ぼーっと するね': 'Just relaxing…', 'いい ところだね': 'This is a nice place.', 'ゆっくり あるこうよ': 'Let’s walk slowly.', 'ひろば、すき': 'I like the plaza.', 'なにも しなくて いいんだよ': 'You don’t have to do anything.', 'きょうも あえて うれしいな': 'I’m happy to see you again today.', 'ふんすいの おと、すき': 'I like the sound of the fountain.',
       'あめの おと、いいね': 'The sound of rain is nice.', 'あまやどり、いっしょに しよう': 'Let’s shelter from the rain together.', 'よるの ひろば、しずかだね': 'The plaza is quiet at night.', 'おはよう。いい あさだね': 'Good morning. It’s a nice morning.', 'ゆうやけ、きれいだね': 'The sunset is beautiful.',
@@ -2106,6 +2276,13 @@ addEventListener('load', () => {
       [/^(.+?)は「(めがいいよ|ちからもちだよ|うんがいいよ|おちついているよ)」$/, (_, n, k) => N(n) + ' is ' + TOKU_EN[k] + '.'],
       [/^(.+?)を♡からはずしたよ。$/, (_, n) => 'Removed ' + N(n) + ' from your favorites.'], [/^(.+?)を♡にしたよ。ひろばでいつもあえるよ。$/, (_, n) => N(n) + ' is now a favorite. You can always meet in the plaza.'],
       [/^(.+?)。すきななかま$/, (_, n) => N(n) + '. Favorite'],
+      [/^(いっしょ)?(♡)?(Lv\s*\d+)?$/, (_, a, h, l) => (!a && !h && !l) ? null : [a ? 'Along' : '', h || '', l ? 'Lv ' + l.replace(/Lv\s*/, '') : ''].filter(Boolean).join(' ')],   // なかまの タイルの しるし
+      [/^(.+?)(?:。レベル(\d+))?(。すきななかま)?(。いっしょにいくよ)?$/, (_, n, lv, fav, along) => (!lv && !fav && !along) ? null : N(n) + (lv ? '. Level ' + lv : '') + (fav ? '. Favorite' : '') + (along ? '. Coming along' : '')],
+      [/^レベル(\d+)$/, (_, n) => 'Level ' + n], [/^レベル(\d+)になったよ！$/, (_, n) => 'Level ' + n + '!'],
+      [/^(.+?)がレベル(\d+)になったよ。$/, (_, n, lv) => N(n) + ' reached level ' + lv + '.'],
+      [/^(.+?)に「なかまになる？」$/, (_, n) => 'Ask ' + N(n) + ': “Want to be friends?”'],
+      [/^(.+?)に「なかまになる？」ときいてみよう。したの「はい」か「またこんど」をえらんでね。(?:(.+?)は「(.+?)」。)?$/, (_, n, m, k) => 'Ask ' + N(n) + ' “Want to be friends?” Choose “Yes” or “Maybe later” below.' + (m && TOKU_EN[k] ? ' ' + N(m) + ' is ' + TOKU_EN[k] + '.' : '')],
+      [/^(.+?)がなかまになったよ。ひろばがにぎやかになるね。$/, (_, n) => N(n) + ' is now a friend. The plaza is getting lively!'],
       [/^(?:(\d+)がつ(\d+)にち)?ひろばであったよ。$/, (_, m, d) => m ? 'We met in the plaza on ' + ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][Number(m) - 1] + ' ' + d + '.' : 'We met in the plaza.']
     ] });
   }
