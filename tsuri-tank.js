@@ -179,7 +179,7 @@
 .tk-stage{position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;background:#fff8ea}
 .tk-room{position:relative;flex:none;overflow:hidden;--s:1}
 .tk-room>svg,.tk-room>img,.tk-room>div,.tk-room>p{position:absolute;display:block}
-.tk-roomsvg,.tk-lamp,.tk-frame,.tk-dim{left:0;top:0;width:100%;height:100%;pointer-events:none}
+.tk-roomsvg,.tk-lamp,.tk-frame,.tk-dim,.tk-shelf{left:0;top:0;width:100%;height:100%;pointer-events:none}
 .tk-dim{background:#0c2048;opacity:0;transition:opacity 1.2s;-webkit-mask:linear-gradient(#000,#000);mask:linear-gradient(#000,#000)}
 .tk-room[data-time=yoru] .tk-dim{opacity:.5}
 .tk-room[data-time=yuu] .tk-dim{opacity:.12;background:#ff8a3c}
@@ -261,11 +261,26 @@
 .tk-fish[data-legend]:not([data-rainbow]){filter:drop-shadow(0 0 6px #fff6b8)}
 @keyframes tk-rainbow{from{filter:hue-rotate(0deg) drop-shadow(0 0 6px #fff6b8)}to{filter:hue-rotate(360deg) drop-shadow(0 0 6px #fff6b8)}}
 .tk-card .tk-tag.tk-myth{background:linear-gradient(90deg,#ff8fb1,#ffb84d,#5fc98f,#4cb6e6,#a98be8);text-shadow:0 1px 0 #0005}
-.tk-lampbtn,.tk-rice{position:absolute;z-index:6;padding:0;margin:0;border:0;background:none;box-shadow:none;min-height:0;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:none}
-.tk-lampbtn::before,.tk-rice::before{display:none}
-.tk-lampbtn:active,.tk-rice:active{transform:none;box-shadow:none}
-.tk-lampbtn:focus-visible,.tk-rice:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a99}
-.tk-lampbtn{border-radius:14px}
+.tk-lampbtn,.tk-rice,.tk-shelfbtn{position:absolute;z-index:6;padding:0;margin:0;border:0;background:none;box-shadow:none;min-height:0;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:none;-webkit-backdrop-filter:none;backdrop-filter:none}   /* 本体の ボタンの ガラスの ぼかしを 消す（うしろの だなの 絵が ぼやけない） */
+.tk-lampbtn::before,.tk-rice::before,.tk-shelfbtn::before{display:none}
+.tk-lampbtn:active,.tk-rice:active,.tk-shelfbtn:active{transform:none;box-shadow:none}
+.tk-lampbtn:focus-visible,.tk-rice:focus-visible,.tk-shelfbtn:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a99}
+.tk-lampbtn,.tk-shelfbtn{border-radius:14px}
+.tk-shelf{position:absolute}
+.tk-shelf[hidden],.tk-shelfbtn[hidden],.tk-giftlist[hidden]{display:none}
+.tk-shelf .tk-gf{position:absolute;object-fit:contain;display:flex;align-items:center;justify-content:center;line-height:1;filter:drop-shadow(0 1px 1px #0003)}
+.tk-giftlist{position:absolute;left:8px;right:8px;top:8px;max-height:calc(100% - 16px);overflow:auto;z-index:30;background:#fffdf6;border:2px solid #b9d1db;border-radius:18px;padding:12px 14px 14px;box-shadow:0 8px 24px #0004;color:#244653;word-break:keep-all;overflow-wrap:break-word}
+.tk-giftlist:focus{outline:none}
+.tk-giftlist h3{margin:0 0 2px;font-size:1.05rem;text-align:center}
+.tk-giftsub{margin:0 0 8px;font-size:.85rem;line-height:1.6;text-align:center;color:#506874}
+.tk-giftrows{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
+.tk-giftrow{display:flex;gap:10px;align-items:center;border:2px solid #d5e6ed;border-radius:14px;padding:6px 10px;background:#fff}
+.tk-giftrow .tk-giftimg{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:32px;line-height:1}
+.tk-giftrow .tk-giftimg img{width:100%;height:100%;object-fit:contain;display:block}
+.tk-giftrow .tk-gifttext{min-width:0;display:block;line-height:1.5}
+.tk-giftrow b{display:block;font-size:.95rem}
+.tk-giftrow small{display:block;font-size:.82rem;color:#506874}
+.tk-giftclose{display:block;margin:0 auto;min-width:160px;min-height:48px}
 .tk-rice{display:flex;align-items:center;justify-content:center;border-radius:14px}
 .tk-rice svg{width:60%;height:auto;display:block;pointer-events:none}
 .tk-rice.tk-gone{visibility:hidden}
@@ -307,6 +322,7 @@
     <div class="tk-head tk-chrome"><h2 id="tk-title">まるふわの おへや</h2><div class="tk-headbtns"><button type="button" class="tk-cam" aria-label="しゃしんを とる">📷<span> しゃしん</span></button><button type="button" class="tk-snd" aria-pressed="false" aria-label="おと：OFF">🔇</button><button type="button" class="tk-close">とじる</button></div></div>
     <div class="tk-stage"><div class="tk-room" data-time="hiru">
       <div class="tk-roomsvg" style="left:0;top:0;width:100%;height:100%"></div>
+      <div class="tk-shelf" aria-hidden="true" hidden></div>
       <div class="tk-dim"></div>
       <div class="tk-starwall" aria-hidden="true" style="left:0;top:0;width:100%;height:100%"></div>
       ${fa ? '<img class="tk-friend" data-who="a" src="' + fa + '" alt="" draggable="false">' : ''}
@@ -315,6 +331,7 @@
       <div class="tk-lamp" style="left:0;top:0;width:100%;height:100%;pointer-events:none"></div>
       <button type="button" class="tk-lampbtn" aria-pressed="false" aria-label="ランプ" style="left:41.7%;top:0;width:16.7%;height:8.8%"></button>
       <button type="button" class="tk-rice" aria-label="おにぎり" style="left:53.1%;top:80.2%;width:15.6%;height:8.2%"></button>
+      <button type="button" class="tk-shelfbtn" aria-expanded="false" aria-label="おくりもの だな" style="left:3.9%;top:39.7%;width:92.2%;height:14.4%" hidden></button>
       <div class="tk-water" data-tk="water">
         <svg class="tk-rays" viewBox="0 0 328 180" preserveAspectRatio="xMidYMin slice" aria-hidden="true"></svg>
         <div class="tk-base" aria-hidden="true"></div>
@@ -325,7 +342,8 @@
       <div class="tk-frame" style="left:0;top:0;width:100%;height:100%;pointer-events:none"></div>
       <p class="tk-says" aria-live="off" style="margin:0"></p>
       <div class="tk-card" hidden role="group" aria-label="さかなの データ"></div>
-    </div></div>
+    </div>
+    <div class="tk-giftlist" hidden role="group" aria-labelledby="tk-gift-title"><h3 id="tk-gift-title">おくりもの だな</h3><p class="tk-giftsub">もらった さかなが ならんで いるよ。つれた かずには、はいらないよ。</p><ul class="tk-giftrows"></ul><button type="button" class="tk-giftclose">とじる</button></div></div>
     <div class="tk-tray" hidden><p></p><div class="tk-items"></div><div class="tk-placedlist"></div><div class="tk-trayrow"><button type="button" class="tk-clear">ぜんぶ もどす</button><button type="button" class="tk-done">おわる</button></div></div>
     <div class="tk-actions tk-chrome"><button type="button" class="tk-feed">ごはんを あげる</button><button type="button" class="tk-deco-btn" aria-pressed="false">かざる</button><button type="button" class="tk-ear" aria-pressed="false">みみで ながめる</button></div>
     <div class="tk-photo" hidden><p></p><img alt="とった しゃしん"><div class="tk-photorow"><a class="tk-save" download="marufuwa-osuisou.png">ほぞん</a><button type="button" class="tk-share" hidden>ひとに みせる</button><button type="button" class="tk-photoclose">とじる</button></div></div>
@@ -336,6 +354,7 @@
   const tray = $(dlg, '.tk-tray'), items = $(dlg, '.tk-items'), placedList = $(dlg, '.tk-placedlist'), decoBtn = $(dlg, '.tk-deco-btn'), earBtn = $(dlg, '.tk-ear'), sndBtn = $(dlg, '.tk-snd'), photo = $(dlg, '.tk-photo');
   const friendsEls = [...dlg.querySelectorAll('.tk-friend')];
   const starwall = $(dlg, '.tk-starwall'), lampBtn = $(dlg, '.tk-lampbtn'), rice = $(dlg, '.tk-rice');
+  const shelf = $(dlg, '.tk-shelf'), shelfBtn = $(dlg, '.tk-shelfbtn'), giftBox = $(dlg, '.tk-giftlist'), giftRows = $(dlg, '.tk-giftrows');
   $(dlg, '.tk-roomsvg').innerHTML = roomSvg(); $(dlg, '.tk-lamp').innerHTML = lampSvg(); $(dlg, '.tk-frame').innerHTML = frameSvg();
   for (const child of [$(dlg, '.tk-roomsvg'), $(dlg, '.tk-lamp'), $(dlg, '.tk-frame')]) { const s = child.querySelector('svg'); if (s) { s.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;display:block'; } }
 
@@ -641,6 +660,7 @@
     else if (roll < .16 && left > 0 && left <= 5) text ='ずかんまで あと ' + left + 'しゅるい。ゆっくり あいにいこうね。';
     else if (roll < .2 && left === 0) text = 'ずかん、ぜんぶ そろったね。ありがとう。';
     else if (roll < .35) { const f = pick(cur); text = pick(SAY.touch(f.name)); if (f.rare >= 3) mood(f.rare >= 4 ? 'sparkle' : 'apricot', 3200); }
+    else if (roll < .5 && gifts.length) text = pick(['だなに、もらった さかなが いるよ。', 'おくりもの、うれしかったね。', 'もらった さかな、ならんで いるね。']);
     else if (roll < .6 && SAY[time]) text = pick(SAY[time]);
     else text = pick(SAY.any);
     say(text);
@@ -748,6 +768,49 @@
   const bgmOpen = () => { if (window.TsuriBgm) bgmEnter(); else loadBgm().then(B => { if (B && isOpen()) bgmEnter(); }); };
   const bgmLeave = () => { if (window.TsuriBgm) window.TsuriBgm.leave('tank'); };
   function bgmRefresh() { if (window.TsuriBgm) window.TsuriBgm.refresh(); }
+
+  // ─── おくりもの だな（もらった さかな。本体の Tsuri.gifts() を 読む。バケツとは べつ・つれた かずには 入れない・12ひきまで）───
+  //   へやの 引き出しの ガラス 2まいに 小さく ならぶ（3×2 ずつ）。だなの まんなかの 大きな ボタンを おすと、ひとつずつ「だれから・ひとこと」が 読める。
+  //   なまえの ならびは 本体の PALS・GIFT_WORDS と おなじ（本体は ならびじゅんを かえない やくそく。契約の 検査が 本体の ソースと 突きあわせる）。
+  //   URL の 文字は 一切 画面に 出さない（出すのは この 表から 引いた ことばだけ）。ぬし・まぼろしは 贈れない（本体が 決める）。
+  const PAL_NAME = ['ミントの うさぎ', 'ラテの かわうそ', 'レモンの ひよこ', 'リボンの うさぎ', 'おひるね パンダ', 'おほしさまの こじか', 'クローバーの たぬき', 'チョコの りす', 'ももの ねこ', 'はちみつの こいぬ', 'いちごの ハムスター', 'ほほきずの ねこ', 'さくらの あざらし', 'わたあめの アルパカ', 'がんたいの くま'];
+  const GIFT_WORD = ['ひとこと なし', 'これ、あげる！', 'いっしょに つろうね', 'おおきいの つれたよ', 'きょうも おつかれさま', 'ゆっくり しようね', 'また あそぼうね', 'みて みて！', 'いい ことが ありますように', 'ありがとう。'];
+  const SHELF = { panels: [{ x: 22, y: 264, w: 152, h: 72 }, { x: 186, y: 264, w: 152, h: 72 }], cols: 3, rows: 2, max: 12 };
+  let gifts = [];
+  const palName = i => Number.isInteger(i) && PAL_NAME[i] ? PAL_NAME[i] : 'だれか', giftWord = i => Number.isInteger(i) && i > 0 && GIFT_WORD[i] ? GIFT_WORD[i] : '';
+  function giftsNow() {
+    let raw = readSave().gifts;   // 記録（本体が すぐ 書く）を 先に 読む＝ひろばの ページでも 同じ。なければ 本体の Tsuri.gifts()
+    if (!Array.isArray(raw)) { try { const T = window.Tsuri; raw = T && typeof T.gifts === 'function' ? T.gifts() : []; } catch { raw = []; } }
+    const fl = fishList();
+    return (Array.isArray(raw) ? raw : []).filter(g => g && Number.isInteger(g.id) && g.id >= 0 && g.id < fl.length && Number.isFinite(g.size)).slice(0, SHELF.max).map(g => { const f = fl[g.id]; return { id: g.id, name: f.name, icon: f.icon, size: Math.round(g.size * 10) / 10, from: palName(g.pal), word: giftWord(g.word), at: Number.isFinite(g.at) ? g.at : 0 }; });
+  }
+  const artOf = id => { try { return (window.TsuriArt && window.TsuriArt[id]) || ''; } catch { return ''; } };
+  function renderShelf() {
+    gifts = giftsNow(); shelf.replaceChildren(); shelf.hidden = shelfBtn.hidden = !gifts.length;
+    if (!gifts.length) { closeGifts(); return; }
+    const per = SHELF.cols * SHELF.rows;
+    gifts.forEach((g, i) => {
+      const p = SHELF.panels[Math.floor(i / per)], k = i % per, c = k % SHELF.cols, r = Math.floor(k / SHELF.cols), cw = (p.w - 8) / SHELF.cols, ch = (p.h - 6) / SHELF.rows, size = Math.min(cw, ch) - 4;
+      const x = p.x + 4 + c * cw + (cw - size) / 2, y = p.y + 3 + r * ch + (ch - size) / 2, art = artOf(g.id); let el;
+      if (art) { el = new Image(); el.src = art; el.alt = ''; el.draggable = false; } else { el = document.createElement('span'); el.textContent = g.icon; el.style.fontSize = 'calc(' + (size * .8).toFixed(1) + 'px * var(--s))'; }
+      el.className = 'tk-gf'; Object.assign(el.style, { left: pct(x, ROOM.w), top: pct(y, ROOM.h), width: pct(size, ROOM.w), height: pct(size, ROOM.h) }); shelf.append(el);
+    });
+    shelfBtn.setAttribute('aria-label', 'おくりもの だな。もらった さかなが ' + gifts.length + 'ひき。おすと、ひらくよ。');
+  }
+  function openGifts() {
+    if (!gifts.length) return;
+    giftRows.replaceChildren(...gifts.map(g => { const li = document.createElement('li'), im = document.createElement('span'), tx = document.createElement('span'), b = document.createElement('b'), sm = document.createElement('small'), art = artOf(g.id);
+      li.className = 'tk-giftrow'; im.className = 'tk-giftimg'; im.setAttribute('aria-hidden', 'true'); if (art) { const img = new Image(); img.src = art; img.alt = ''; img.draggable = false; im.append(img); } else im.textContent = g.icon;
+      tx.className = 'tk-gifttext'; b.textContent = g.name + '　' + g.size.toFixed(1) + 'センチ'; sm.textContent = '🎁 ' + g.from + ' から' + (g.word ? '　「' + g.word + '」' : ''); tx.append(b, sm); li.append(im, tx); return li; }));
+    giftBox.hidden = false; shelfBtn.setAttribute('aria-expanded', 'true'); giftBox.tabIndex = -1; giftBox.focus({ preventScroll: true }); giftBox.scrollTop = 0;   // さいしょの 1まいから 読める（とじるは Tab で）
+    sr.textContent = 'おくりもの だなを ひらいたよ。もらった さかなが ' + gifts.length + 'ひき いるよ。'; resetZen();
+  }
+  function closeGifts(focus) {
+    if (giftBox.hidden) return; giftBox.hidden = true; shelfBtn.setAttribute('aria-expanded', 'false'); if (focus && !shelfBtn.hidden) shelfBtn.focus();
+  }
+  shelfBtn.addEventListener('click', () => { if (giftBox.hidden) openGifts(); else closeGifts(true); });
+  $(giftBox, '.tk-giftclose').addEventListener('click', () => closeGifts(true));
+  dlg.addEventListener('cancel', e => { if (!giftBox.hidden) { e.preventDefault(); closeGifts(true); } });   // Esc は まず だなを とじる（おへやは そのまま）
 
   // ─── 魚の入れかえ：水槽に出ているのは、いっぺんに数ひきだけ。ときどき入れかわる ───
   const capFor = () => W < 420 ? 8 : 12;
@@ -1073,14 +1136,14 @@
     } else say(total ? pick(SAY.any) : pick(SAY.empty), true);
     refreshBadge(); resetZen();
     setListen(false); refreshSound(); if (sfx) { cueOpen(); startAmbience(); }
-    bgmOpen();
+    bgmOpen(); closeGifts(); renderShelf();
     clearTimeout(sayTimer); sayTimer = setTimeout(autoSay, 8000);
     clearTimeout(rotateTimer); rotateTimer = setTimeout(rotate, 40000);
     applyCombos(2); resetNap();
     start();
   }
-  function close() { if (dlg.open) dlg.close(); bgmLeave(); }   // 「とじた」の しらせ（close イベント）は あとから 来る。BGM は すぐ 止める
-  dlg.addEventListener('close', () => { resetSecrets(); clearTimeout(sayTimer); clearTimeout(zenTimer); clearTimeout(moodTimer); clearTimeout(rotateTimer); clearTimeout(sayPending); cancelAnimationFrame(raf); raf = 0; tip.hidden = true; photo.hidden = true; setDeco(false); setListen(false); refreshBadge(); mascot.src = BASE + 'img/game-blue.webp'; stopAmbience(); bgmLeave(); if (sfx) cueClose(); });
+  function close() { if (dlg.open) dlg.close(); bgmLeave(); closeGifts(); }   // 「とじた」の しらせ（close イベント）は あとから 来る。BGM は すぐ 止める
+  dlg.addEventListener('close', () => { resetSecrets(); clearTimeout(sayTimer); clearTimeout(zenTimer); clearTimeout(moodTimer); clearTimeout(rotateTimer); clearTimeout(sayPending); cancelAnimationFrame(raf); raf = 0; tip.hidden = true; photo.hidden = true; setDeco(false); setListen(false); refreshBadge(); mascot.src = BASE + 'img/game-blue.webp'; stopAmbience(); bgmLeave(); closeGifts(); if (sfx) cueClose(); });
   $(dlg, '.tk-close').addEventListener('click', close);
   $(empty, 'button').addEventListener('click', close);
   $(dlg, '.tk-cam').addEventListener('click', takePhoto);
@@ -1117,5 +1180,5 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) { stopAmbience(); if (actx && actx.state === 'running') actx.suspend().catch(() => {}); } else if (isOpen() && sfx) { startAmbience(); } });
   refreshBadge(); refreshSound();
 
-  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), version: 4 };
+  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), version: 4 };
 })();
