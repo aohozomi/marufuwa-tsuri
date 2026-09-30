@@ -1187,6 +1187,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (other.tflag && typeof other.tflag === 'object') for (const k of Object.keys(other.tflag)) if (other.tflag[k] === true && /^[a-z0-9]{2,12}$/.test(k) && !tf(k)) { save.tflag = save.tflag && typeof save.tflag === 'object' ? save.tflag : {}; save.tflag[k] = true; changed = true; }
     for (const k of ['gazeMin', 'photoN', 'dayN']) if (Number.isInteger(other[k]) && other[k] > (save[k] || 0)) { save[k] = other[k]; changed = true; }
     if (typeof other.avatar === 'string' && !save.avatar && /^[a-z]{2,12}$/.test(other.avatar)) { save.avatar = other.avatar; changed = true; }   // じぶんの キャラ（あとで えらべば うわがき）
+    if (other.modeTip === true && save.modeTip !== true) { save.modeTip = true; changed = true; }
+    if (other.homeTip === true && save.homeTip !== true) { save.homeTip = true; changed = true; }
     if (other.plopHint === true && save.plopHint !== true) { save.plopHint = true; changed = true; }   // さいしょの「ぽちゃん」は 1かい きり
     if (Number.isInteger(other.bookSeen) && other.bookSeen > (Number.isInteger(save.bookSeen) ? save.bookSeen : 0)) { save.bookSeen = other.bookSeen; changed = true; }
     if (other.loved && typeof other.loved === 'object') for (const [pid, fid] of Object.entries(other.loved)) if (Number.isInteger(fid) && !(save.loved && save.loved[pid] !== undefined)) { save.loved = save.loved && typeof save.loved === 'object' ? save.loved : {}; save.loved[pid] = fid; changed = true; }   // ♡ の ついた なかま：すきな さかなの ばんごう
@@ -1732,7 +1734,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (!reduce()) { const w = floatAt(mine), el = document.createElement('span'); el.className = 'hop plop'; el.setAttribute('aria-hidden', 'true'); el.style.fontWeight = '900'; el.style.color = '#fff'; el.textContent = L('ぷつん…', 'Snap…'); place(el, {x: w.x + 2, y: w.y - 8}); scene.append(el); el.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -22px'}], {duration: 1100}).onfinish = () => el.remove(); marufuwa.animate([{rotate: '0deg'}, {rotate: '9deg'}, {rotate: '-4deg'}, {rotate: '0deg'}], {duration: 520, easing: 'ease-out'}); }
     endFishing(L('にげられた… また くるよ。', 'It got away… it will come back.'));
     escapeRun++;
-    if (escapeRun >= 3 && !escapeHinted && curMode() !== 'easy') { escapeHinted = true; setTimeout(() => say(L('むずかしい ときは、「あそびかた」で「らくちん」も えらべるよ。', 'If it feels hard, you can choose Easy in Play style.')), 2200); }   // 3かい つづいたら 1かいだけ、やさしく（せめない）
+    if (escapeRun >= 3 && !escapeHinted && curMode() !== 'easy') { escapeHinted = true; if ($('assist')) $('assist').open = true; setTimeout(() => say(L('むずかしい ときは、「あそびかた」で「らくちん」も えらべるよ。', 'If it feels hard, you can choose Easy in Play style.')), 2200); }   // 3かい つづいたら 1かいだけ、やさしく（せめない）
   }
   function tensionOff() { const rp = $('line-pull'), rb = $('rod-bend'); if (!rp || rp.style.visibility !== 'visible') return; rp.style.visibility = rb.style.visibility = 'hidden'; $('rod-me').style.visibility = $('line-me').style.visibility = ''; tLevel = -1; }
   function surface() {   // 「ぴったり」が 3れんぞく：さかなが みずの おもてに ひょいと かおを だす（かげ→ほんものの え・0.6びょう・ひくい「ぽちゃ」）。かぞえない・くらべない・「うごきを へらす」では おとと じだけ（かおは だしません）
@@ -2014,7 +2016,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // あんないの ペンギンが、まいかい ひとこと
     const left = BASE - seenCount();
     if (mile) party(mile[0]); else if (leveled && lvNow % 5 === 0) party('🎉');   // 5レベルごとの ふしめ だけ おいわい
-    const guideWord = mile ? mile[1] : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : fish.season ? L('この つきの さかな だよ！ また らいねんも あえるよ。', 'This month' + String.fromCharCode(39) + 's fish! You can meet it again next year.') : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : plainWord();   // ふつうの ときは、やさしい ひとことを こうたいで（つづけて おなじに ならない）
+    const modeTipNow = save.total >= 3 && !save.modeTip && !mile; if (modeTipNow) { save.modeTip = true; if ($('assist')) $('assist').open = true; }   // 3びき つったら 1かいだけ「あそびかたを えらべる」（せっていの おりたたみも ひらく）
+    const homeTipNow = save.total >= 5 && !save.homeTip && !STANDALONE && !mile && !modeTipNow; if (homeTipNow) save.homeTip = true;   // 5ひき つったら 1かいだけ「ホームがめんに おく」
+    const guideWord = mile ? mile[1] : homeTipNow ? L('ホームがめんに おくと、アプリみたいに すぐ あそべるよ（したの「ホームがめんに おく」）。', 'Add it to your home screen to play like an app (the button lower down).') : modeTipNow ? L('「つかいやすくする」で あそびかたを えらべるよ。らくちん・ふつう・しっかり。', 'You can pick a play style under “Comfort options”: Easy, Normal or Focused.') : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : fish.season ? L('この つきの さかな だよ！ また らいねんも あえるよ。', 'This month' + String.fromCharCode(39) + 's fish! You can meet it again next year.') : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : plainWord();   // ふつうの ときは、やさしい ひとことを こうたいで（つづけて おなじに ならない）
     const hintWord = plopHintDue && save.sound !== true && save.sndFx !== false ? L('おとを つけると、もっと きもちいいよ。', 'Turn on sound for an even nicer feel.') : ''; plopHintDue = false;   // さいしょの ぽちゃんの あと 1かいだけ
     if (hintWord) { const hint = document.createElement('span'); hint.className = 'guide-hint'; hint.textContent = hintWord; $('guide-word').replaceChildren(guideWord, hint); } else $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
@@ -2106,9 +2110,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // ぼーっと おちつく ことば だけ（しつもん・めいれい・せかす ことばは 0）。よみあげは しない（ふきだしだけ）。ばめん：n＝ふだん／asa・hiru・yuu・yoru／rain／get＝つれた あと／wait＝ながく まって いる
   const KOE = window.TsuriKoe && typeof window.TsuriKoe === 'object' ? window.TsuriKoe : {}, koeRecent = [];
   let waitedFrom = 0;   // なげて から まって いる じかんの はじまり
+  // いっしょに いく なかまの「なかよし」の ひとこと（しつもん・めいれい・せかす ことばは 0。よりそう ことばだけ）
+  const PARTY_LINES = [['いっしょに いると おちつくな', 'It feels calm being with you'], ['きょうも いっしょ、うれしいな', 'Happy to be together again today'], ['また つれて きて くれて ありがとう', 'Thanks for bringing me along again'], ['ここ、すきだな', 'I like it here'], ['ゆっくり しようね', 'Let' + String.fromCharCode(39) + 's take it easy'], ['あなたと いると たのしい', 'It is fun with you'], ['のんびり いっしょに いよう', 'Let' + String.fromCharCode(39) + 's hang out together'], ['いい ひだね', 'It is a nice day'], ['なみの おと、すきだな', 'I like the sound of the waves'], ['そばに いるよ', 'I am right here']];
   function koeLine(pal, extra) {   // [にほんご, English] か null
-    const set = KOE[pal.id]; if (!set) return null;
+    const inParty = prefPals().party.includes(pal), set = KOE[pal.id] || (inParty ? {} : null); if (!set) return null;   // いっしょに いく なかまは、ぜんいん「なかよし」の ひとことも（108にんでも おなじ）
     const all = []; ['n', TIME_NAME[timeOfDay()], rainy ? 'rain' : '', extra || ''].filter(Boolean).forEach(c => (Array.isArray(set[c]) ? set[c] : []).forEach((pair, i) => { if (Array.isArray(pair) && pair[0] && pair[1]) all.push({key: pal.id + ':' + c + ':' + i, pair, hot: c === extra}); }));
+    if (inParty) PARTY_LINES.forEach((pair, i) => all.push({key: 'party:' + i, pair, hot: false}));
     if (!all.length) return null;
     const fresh = all.filter(x => !koeRecent.includes(x.key)), hot = fresh.filter(x => x.hot);
     const pool = hot.length && Math.random() < .7 ? hot : fresh.length ? fresh : [all.slice().sort((a, b) => koeRecent.indexOf(a.key) - koeRecent.indexOf(b.key))[0]];   // ぜんぶ でた あとは いちばん ふるい もの から（1かい ずつ ぐるっと まわる）
@@ -3622,6 +3629,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => tegamiInit(away)); else tegamiInit(away);
   const welcome = (away >= 3 * 86400000 ? 'おかえり。ずかんも きろくも、そのままだよ。' : '') + (hourNow >= 1 && hourNow < 5 ? 'ねむれない？ ゆっくり ながめよう。' : '');
   save.last = Date.now(); store();
+  // おかえり：6じかん いじょう あいたら、となりの なかまが「おかえり！」。ときどき ちいさな おみやげ（かいがら など・かぞえない・ばつなし・「ひさしぶり」でも せめない）
+  if (away >= 6 * 3600000 && save.total > 0) setTimeout(() => {
+    const pal = pals[Math.random() < .5 ? 0 : 1], far = away >= 3 * 86400000; if (!pal) return;
+    palBubble(pal, far ? L('ひさしぶり！', 'Long time no see!') : L('おかえり！', 'Welcome back!'));
+    if (Math.random() < .6) { const item = DECOR[Math.floor(Math.random() * DECOR.length)]; save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[item] = (save.decor[item] || 0) + 1; store(); setTimeout(() => say(L(pal.name + 'が「' + item + '」を おみやげに くれたよ。', palName(pal) + ' brought you a souvenir: ' + T(item) + '.')), 1600); }
+  }, 2200);
   if (save.total === 0) say('「なげる」を おしてね。');
   else if (mythDay) say(welcome + 'きょうは、ふしぎな ひ。みずが きらきら して いるよ。');
   else {
