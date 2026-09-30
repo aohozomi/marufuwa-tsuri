@@ -471,7 +471,7 @@ dialog::backdrop{background:#17323d66}
 dialog h2{margin:0 0 4px;text-align:center}
 dialog .count{text-align:center;margin:0 0 12px}
 #book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:12px}
-#book-grid div{border:2px solid #d5e6ed;border-radius:14px;padding:8px 4px;text-align:center;font-size:.78rem;line-height:1.5;background:#fff}
+#book-grid div{border:2px solid #d5e6ed;border-radius:14px;padding:8px 4px;text-align:center;font-size:.78rem;background:#fff}
 #book-grid div[data-seen=false]{background:#eef4f7;color:#7d939d}
 #book-grid b{display:block;font-size:1.9rem;line-height:1.2}
 /* あった こは、ぷっくり シールに なって はられる。すこし かたむく */
@@ -711,7 +711,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   <dialog id="book" aria-labelledby="book-title">
     <h2 id="book-title">おさかな シールちょう</h2>
-    <p class="count"><span id="book-seen">0</span> / 30 しゅるい</p>
+    <p class="count"><span id="book-seen">0</span> / <span id="book-base">30</span> しゅるい</p>
     <p class="count" id="book-myth"></p>
     <div id="book-grid"></div>
     <div class="photo-actions"><button id="book-photo" type="button">シールちょうを しゃしんに</button></div>
@@ -2492,7 +2492,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (dark.addEventListener) dark.addEventListener('change', sync);
     sync();
   }
-  $('all').textContent = String(BASE);
+  $('all').textContent = $('book-base').textContent = String(BASE);
   // Xの アプリの なかの ブラウザで ひらかれた ときだけ、景色の すぐ したに 1ぎょう：ぜんがめんで あそぶ ほうほう。とじたら おぼえて、もう だしません
   {
     const IN_APP_X = new RegExp('Twitter|TwitterAndroid|(^|[^A-Za-z])X/[0-9]'), asked = probe('inapp');   // けんさ：?inapp=x で だす／?inapp=no で けす（てもとだけ）
