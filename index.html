@@ -130,6 +130,8 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 #open-book{position:relative}
 .book-fact{position:sticky;bottom:0;margin:8px 0;padding:10px 12px;background:#fffbe6;border:2px solid #d9a520;border-radius:14px;color:#593700;font-size:.9rem;font-weight:700;line-height:1.7;text-align:center;box-shadow:0 -6px 12px #0000001a}   /* まめちしき（したに ついて くる） */
 .book-fact[hidden]{display:none}
+.pal-love{color:#a8305f}   /* みせて よろこんだ なかま：「♡ すきな さかな」（4.5対1 いじょう） */
+:root[data-night=true] .pal-love{color:#ff9fc4}
 #book-grid div[data-fact="1"]{cursor:pointer}
 html[data-clean=true],html[data-clean=true] body,html[data-clean=true] main{background:transparent !important;box-shadow:none !important;border-color:transparent !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
 html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.actions){display:none !important}   /* ?clean=1：けしきと「なげる」だけ（OBS の ブラウザソース などで つかう）。ほかの ひとの ふつうの がめんには ふれない */
@@ -498,7 +500,7 @@ dialog h2{margin:0 0 4px;text-align:center}
 dialog .count{text-align:center;margin:0 0 12px}
 #book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:12px}
 #book-grid div{border:2px solid #d5e6ed;border-radius:14px;padding:8px 4px;text-align:center;font-size:.78rem;background:#fff}
-#book-grid div[data-seen=false]{background:#eef4f7;color:#7d939d}
+#book-grid div[data-seen=false]{background:#eef4f7;color:#566d79}   /* まだ あって ない こ：2.9対1→4.9対1（よめる いろ） */
 #book-grid b{display:block;font-size:1.9rem;line-height:1.2}
 /* あった こは、ぷっくり シールに なって はられる。すこし かたむく */
 #book-grid div[data-seen=true] b{position:relative;width:62px;height:62px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:2.1rem;border-radius:50%;border:4px solid #fff;
@@ -2751,7 +2753,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       tag.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;text-align:center;line-height:1.3;font-size:.75rem;width:84px;word-break:keep-all;text-wrap:balance;';
       img.src = 'img/friend-' + pal.id + '-s.webp'; img.width = img.height = 52; img.alt = ''; img.style.objectFit = 'contain'; if (!met) { img.style.opacity = '.35'; img.style.filter = 'grayscale(1)'; }   // まだ あって ない 子は、絵だけ うすく（「？」の 字は はっきり）
       tag.append(img, met ? pal.name : '？');
-      if (met && save.loved && Number.isInteger(save.loved[pal.id]) && FISH[save.loved[pal.id]]) { const heart = document.createElement('small'); heart.style.color = '#c94b7b'; heart.append('♡ ', FISH[save.loved[pal.id]].name); tag.append(heart); }   // みせて よろこんだ なかまには ♡ と「すきな さかな」
+      if (met && save.loved && Number.isInteger(save.loved[pal.id]) && FISH[save.loved[pal.id]]) { const heart = document.createElement('small'); heart.className = 'pal-love'; heart.append('♡ ', FISH[save.loved[pal.id]].name); tag.append(heart); }   // みせて よろこんだ なかまには ♡ と「すきな さかな」
       return tag;
     }));
     bucket.showModal();
