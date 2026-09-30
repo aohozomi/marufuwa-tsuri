@@ -90,7 +90,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .hud button::after{content:"";position:absolute;left:12%;top:18%;width:7px;height:7px;border-radius:50%;background:#ffffffe6;pointer-events:none}
 .areas small{display:block;font-weight:600;font-size:.7rem}
 .time-box{margin-bottom:10px;font-size:.85rem}
-.time-box summary{cursor:pointer;padding:6px 4px;font-weight:800}
+.time-box summary{cursor:pointer;padding:13px 4px;font-weight:800}   /* ゆびで おす ところは 44px いじょう */
 .time-box .times{margin:6px 0 0}
 /* ほんとうは よるなのに あかるい じかんを えらんだ とき。まぶしく しない */
 #scene[data-dim=true] > svg:first-of-type{filter:brightness(.62) saturate(.85)}
@@ -323,6 +323,14 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions{gap:12px;margin:16px 0 6px;flex-wrap:wrap}
 #take-photo,#gaze{flex:1 1 40%;min-height:54px}
+#sound{flex:1 1 100%;min-height:54px}
+body.gazing #sound{flex:0 1 auto}
+/* つかいやすく する（ふだんは とじて いる）。らくちん・ふるえ を、おとなも こどもも えらべる。ひらいた／とじた と えらんだ ものは おぼえて おく */
+.assist{flex:1 1 100%;margin-bottom:0}
+.assist-body{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.assist-body button{flex:1 1 40%;min-height:54px;font-size:.95rem}
+#sound[aria-pressed=true],#buzz[aria-pressed=true]{--c1:#e3f3ff;--c2:#8fd0f5;--side:#4b9cc9;--ink:#0d3a55}   /* ON の ときは、ほんのり あおく（もじでも ON と かいて ある） */
+body.gazing .assist{display:none}
 #main-button{--c1:#2a8cc0;--c2:#0e5a82;--side:#0a4262;--ink:#fff;flex:1 1 100%;min-height:68px;font-size:1.35rem;text-shadow:0 2px 0 #0e4a66}
 #main-button[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
 #status{min-height:1.7em;text-align:center;margin:10px 0 0;font-size:.95rem}
@@ -842,7 +850,21 @@ dialog .close{display:block;margin:auto;min-width:160px}
   }
   const chord = (notes, gap = .07, type = 'square', loud = .05) => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud));
   const FANFARE = .032;   // おいわいの おとは ひかえめに（あんないの おとが きこえる ように。ジョブズ1の そくてい）
-  function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {} }
+  // ふるえ：かかった ときと つれた とき。さわりに びんかんな こも いるので、いれきり できる。「うごきを へらす」の 人は はじめから なし
+  const canBuzz = typeof navigator.vibrate === 'function';
+  const buzzOn = () => typeof save.buzz === 'boolean' ? save.buzz : !reduce();
+  function buzz(pattern) { try { if (canBuzz && buzzOn()) navigator.vibrate(pattern); } catch {} }
+  function drawBuzz() { const b = $('buzz'); if (!b) return; const on = buzzOn(); b.textContent = on ? 'ふるえ：ON' : 'ふるえ：OFF'; b.setAttribute('aria-pressed', String(on)); }
+  function assistBox() {   // 「つかいやすく する」。ひらいた／とじた は おぼえる。まえから らくちんの 人は ひらいた ままで はじめる
+    const box = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span'), body = document.createElement('div');
+    box.className = 'time-box assist'; box.id = 'assist'; now.id = 'assist-now'; head.append('つかいやすく する（いま：', now, '）'); body.className = 'assist-body';
+    body.append($('easy'));
+    if (canBuzz) { const b = document.createElement('button'); b.id = 'buzz'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
+    box.append(head, body);
+    box.open = typeof save.assistOpen === 'boolean' ? save.assistOpen : !!save.easy;
+    head.addEventListener('click', () => setTimeout(() => { save.assistOpen = box.open; store(); }, 0));   // ひらく／とじる を おぼえる
+    return box;
+  }
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
   let ambient = null;
   function startAmbient() {
@@ -1537,15 +1559,25 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const rows = document.querySelectorAll('main > .hud'), label = text => { const h = document.createElement('h2'); h.className = 'menu-label'; h.textContent = text; return h; };
     // ばしょは、ふだんは しまって おく。おすと、4つ ぜんぶ でる
     // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）
-    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('easy'), $('gaze')); document.querySelector('.actions').after(sub);
+    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('gaze'), assistBox()); document.querySelector('.actions').after(sub);
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
     status.after(where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
   }
-  // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる
-  function drawEasy() { const on = !!save.easy; $('easy').textContent = on ? 'らくちん：ON' : 'らくちん：OFF'; $('easy').setAttribute('aria-pressed', String(on)); scene.dataset.easy = String(on); }
+  // つかいやすく する（ふだんは とじて いる 折りたたみ）：らくちん・ふるえ。名前で 年れいを わけない（おとなも えらべる）
+  // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる。えらんだ ことは おぼえて おく
+  function drawEasy() {
+    const on = !!save.easy; $('easy').textContent = on ? 'らくちん：ON' : 'らくちん：OFF'; $('easy').setAttribute('aria-pressed', String(on)); scene.dataset.easy = String(on);
+    const parts = []; if (on) parts.push('らくちん'); if (canBuzz && !buzzOn()) parts.push('ふるえ なし');
+    if ($('assist-now')) $('assist-now').textContent = parts.length ? parts.join('・') : 'ふつう';
+  }
   $('easy').addEventListener('click', () => { save.easy = !save.easy; store(); drawEasy(); say(save.easy ? 'らくちんに したよ。おすだけで つれるよ。' : 'らくちんを やめたよ。わが ひかったら おしてね。'); });
-  drawEasy();
+  $('buzz') && $('buzz').addEventListener('click', () => {
+    save.buzz = !buzzOn(); store(); drawBuzz(); drawEasy();
+    if (save.buzz) buzz(80);   // どんな ふるえか、すぐ わかる ように
+    say(save.buzz ? 'ふるえを つけたよ。' : 'ふるえを けしたよ。');
+  });
+  drawBuzz(); drawEasy();
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
   if (ART && ART.shadow && ART.shadowMask) document.querySelectorAll('.ambient-fish[data-fish]').forEach(el => {
