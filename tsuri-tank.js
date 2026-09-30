@@ -165,6 +165,14 @@
 #tk .tk-headbtns button{min-height:44px;min-width:44px;padding:6px 12px;white-space:nowrap}
 #tk .tk-snd{font-size:1.15rem;line-height:1}
 @media(max-width:450px){#tk .tk-head h2{font-size:1rem}#tk .tk-headbtns button{padding:6px 10px}#tk .tk-cam span{display:none}#tk .tk-cam{min-width:46px}}
+/* へやの はばが せまい（400px より 小さい）時：ゆびで おす ボタンが 枠から はみ出さない ように 小さく まとめる（パソコンでも 背の高さで へやが 細く なる ので、画面の はばでは なく へやの はばで きめる） */
+#tk .tk-head h2{min-width:0;overflow:hidden;text-overflow:ellipsis}
+#tk.tk-narrow .tk-head{padding:8px 8px 4px;gap:4px}
+#tk.tk-narrow .tk-head h2{font-size:.95rem}
+#tk.tk-narrow .tk-headbtns{gap:4px}
+#tk.tk-narrow .tk-headbtns button{padding:6px 8px}
+#tk.tk-narrow .tk-cam span{display:none}
+#tk.tk-narrow .tk-cam{min-width:46px}
 #tk .tk-chrome{transition:opacity 1.4s ease}
 #tk.tk-zen .tk-chrome{opacity:.12}
 .tk-stage{position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;background:#fff8ea}
@@ -364,6 +372,7 @@
     const cs = getComputedStyle(stage), aw = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ah = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     const s = Math.max(.3, Math.min(aw / ROOM.w, ah / ROOM.h));
     if (aw > ROOM.w * s + 40) dlg.style.width = Math.max(300, Math.ceil(ROOM.w * s) + 28) + 'px';   // 背の高さで きまる時は、ダイアログを部屋のはばに合わせる
+    dlg.classList.toggle('tk-narrow', dlg.getBoundingClientRect().width < 400);   // へやの はばが せまい 時は、上の ボタンを 小さく まとめる
     room.style.width = (ROOM.w * s).toFixed(1) + 'px'; room.style.height = (ROOM.h * s).toFixed(1) + 'px'; room.style.setProperty('--s', String(s));
     water.style.borderRadius = (14 * s).toFixed(1) + 'px'; says.style.fontSize = (13 * s).toFixed(1) + 'px'; says.style.borderRadius = (16 * s).toFixed(1) + 'px';
     const r = water.getBoundingClientRect();
