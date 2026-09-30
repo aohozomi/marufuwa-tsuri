@@ -16,7 +16,7 @@
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const css = `
-#ikimono{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;contain:layout paint}
+#ikimono{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;contain:layout paint;container-type:inline-size}
 #ikimono .i{position:absolute;left:0;top:0;width:var(--w,6%);aspect-ratio:1/1;translate:-50% -50%;will-change:transform}
 #ikimono .i svg{position:static;width:100%;height:100%;display:block;overflow:visible}
 #ikimono .fly{animation:iki-fly var(--lap,26s) linear infinite;animation-delay:var(--d,0s)}
@@ -35,19 +35,19 @@
 #ikimono .sit svg{animation:iki-breathe 2.8s ease-in-out infinite alternate;transform-origin:50% 100%}
 #ikimono .hop{animation:iki-hop 7s ease-in-out infinite;animation-delay:var(--d,0s)}
 #scene[data-time=yoru] #ikimono .day,#scene[data-dim=true] #ikimono .day{filter:brightness(.62)}
-@keyframes iki-fly{from{transform:translate(-12vw,0)}to{transform:translate(112vw,var(--rise,-6vw))}}
+@keyframes iki-fly{from{transform:translate(-12cqw,0)}to{transform:translate(112cqw,var(--rise,-6cqw))}}
 @keyframes iki-bob{from{transform:translateY(-8%)}to{transform:translateY(8%)}}
 @keyframes iki-flap{from{transform:scaleY(1)}to{transform:scaleY(-.55)}}
 @keyframes iki-wing{from{transform:scaleX(1)}to{transform:scaleX(.18)}}
 @keyframes iki-buzz{from{transform:scaleY(1)}to{transform:scaleY(.35)}}
-@keyframes iki-flutter{0%{transform:translate(0,0)}20%{transform:translate(7vw,-5vw)}40%{transform:translate(13vw,1vw)}60%{transform:translate(6vw,-7vw)}80%{transform:translate(-3vw,-2vw)}100%{transform:translate(0,0)}}
-@keyframes iki-hover{0%,18%{transform:translate(0,0)}22%,48%{transform:translate(11vw,-2vw)}52%,78%{transform:translate(4vw,3vw)}82%,100%{transform:translate(0,0)}}
+@keyframes iki-flutter{0%{transform:translate(0,0)}20%{transform:translate(7cqw,-5cqw)}40%{transform:translate(13cqw,1cqw)}60%{transform:translate(6cqw,-7cqw)}80%{transform:translate(-3cqw,-2cqw)}100%{transform:translate(0,0)}}
+@keyframes iki-hover{0%,18%{transform:translate(0,0)}22%,48%{transform:translate(11cqw,-2cqw)}52%,78%{transform:translate(4cqw,3cqw)}82%,100%{transform:translate(0,0)}}
 @keyframes iki-glow{0%,100%{opacity:.08}45%,60%{opacity:.95}}
-@keyframes iki-drift{from{transform:translate(0,0)}to{transform:translate(var(--dx,5vw),var(--dy,-4vw))}}
-@keyframes iki-fall{from{transform:translate(0,-10vw)}to{transform:translate(var(--dx,10vw),86vw)}}
+@keyframes iki-drift{from{transform:translate(0,0)}to{transform:translate(var(--dx,5cqw),var(--dy,-4cqw))}}
+@keyframes iki-fall{from{transform:translate(0,-10cqw)}to{transform:translate(var(--dx,10cqw),86cqw)}}
 @keyframes iki-spin{from{transform:rotate(-40deg)}to{transform:rotate(50deg)}}
 @keyframes iki-breathe{from{transform:scale(1,1)}to{transform:scale(1.03,.97)}}
-@keyframes iki-hop{0%,86%,100%{transform:translate(0,0)}90%{transform:translate(1.2vw,-2.4vw)}94%{transform:translate(2.4vw,0)}}
+@keyframes iki-hop{0%,86%,100%{transform:translate(0,0)}90%{transform:translate(1.2cqw,-2.4cqw)}94%{transform:translate(2.4cqw,0)}}
 @media(prefers-reduced-motion:reduce){#ikimono *{animation:none!important}#ikimono .glow{opacity:.7}}
 `;
   const style = document.createElement('style'); style.id = 'ikimono-style'; style.textContent = css; document.head.append(style);
@@ -104,14 +104,14 @@
       if (!sea) put('sit hop day', ART.kaeru(), between(20, 30), 60, {w: '7%', d: '-' + between(0, 6).toFixed(1) + 's'});
     } else if (time === 'yoru') {
       // よる：ほたる（うみでは でない）
-      if (!sea && now !== 'fuyu') for (let i = 0; i < 7; i++) put('glow', '', between(6, 94), between(36, 58), {w: between(1.8, 2.8).toFixed(1) + '%', lap: between(3.6, 6.4).toFixed(1) + 's', lap2: between(12, 22).toFixed(0) + 's', d: '-' + between(0, 6).toFixed(1) + 's', dx: between(-6, 6).toFixed(1) + 'vw', dy: between(-5, 3).toFixed(1) + 'vw'});
+      if (!sea && now !== 'fuyu') for (let i = 0; i < 7; i++) put('glow', '', between(6, 94), between(36, 58), {w: between(1.8, 2.8).toFixed(1) + '%', lap: between(3.6, 6.4).toFixed(1) + 's', lap2: between(12, 22).toFixed(0) + 's', d: '-' + between(0, 6).toFixed(1) + 's', dx: between(-6, 6).toFixed(1) + 'cqw', dy: between(-5, 3).toFixed(1) + 'cqw'});
     } else {
       // そらを とぶ とり：うみは かもめ、ほかは ことり（あさは おおめ）
       const birds = time === 'asa' ? 3 : time === 'hiru' ? 1 : 2;
       for (let i = 0; i < birds; i++) {
         const y = between(8, 30), lap = between(22, 38);
         if (quiet) put('day', sea ? ART.kamome() : ART.kotori(['#8fc7e8', '#f2c46b', '#e89aa8'][i % 3]), between(12, 88), y, {w: '6%'});
-        else put('fly day', sea ? ART.kamome() : ART.kotori(['#8fc7e8', '#f2c46b', '#e89aa8'][i % 3]), 0, y, {w: sea ? '8%' : '6%', lap: lap.toFixed(0) + 's', d: '-' + between(0, lap).toFixed(1) + 's', rise: between(-9, 3).toFixed(1) + 'vw'});
+        else put('fly day', sea ? ART.kamome() : ART.kotori(['#8fc7e8', '#f2c46b', '#e89aa8'][i % 3]), 0, y, {w: sea ? '8%' : '6%', lap: lap.toFixed(0) + 's', d: '-' + between(0, lap).toFixed(1) + 's', rise: between(-9, 3).toFixed(1) + 'cqw'});
       }
       if (!sea) {
         // ちょうちょ（はる・なつの ひる と あさ）
@@ -122,9 +122,9 @@
     }
     // きせつの ふる もの（あめの ひは ださない）。すくなめ：みている ひとの じゃまを しない
     if (!rain && !quiet) {
-      if (now === 'haru' && time !== 'yoru') for (let i = 0; i < 5; i++) put('fall', ART.hanabira(), between(0, 90), 0, {w: '3%', lap: between(11, 17).toFixed(0) + 's', d: '-' + between(0, 16).toFixed(1) + 's', dx: between(4, 16).toFixed(0) + 'vw', spin: between(2.5, 5).toFixed(1) + 's'});
-      if (now === 'aki' && !sea) for (let i = 0; i < 4; i++) put('fall day', ART.ochiba(['#e8913a', '#d9552e', '#e8c23a'][i % 3]), between(0, 90), 0, {w: '3.6%', lap: between(12, 19).toFixed(0) + 's', d: '-' + between(0, 18).toFixed(1) + 's', dx: between(4, 18).toFixed(0) + 'vw', spin: between(3, 6).toFixed(1) + 's'});
-      if (now === 'fuyu') for (let i = 0; i < 12; i++) put('fall snow', '', between(0, 96), 0, {w: between(1, 1.8).toFixed(1) + '%', lap: between(13, 22).toFixed(0) + 's', d: '-' + between(0, 22).toFixed(1) + 's', dx: between(-4, 8).toFixed(0) + 'vw'});
+      if (now === 'haru' && time !== 'yoru') for (let i = 0; i < 5; i++) put('fall', ART.hanabira(), between(0, 90), 0, {w: '3%', lap: between(11, 17).toFixed(0) + 's', d: '-' + between(0, 16).toFixed(1) + 's', dx: between(4, 16).toFixed(0) + 'cqw', spin: between(2.5, 5).toFixed(1) + 's'});
+      if (now === 'aki' && !sea) for (let i = 0; i < 4; i++) put('fall day', ART.ochiba(['#e8913a', '#d9552e', '#e8c23a'][i % 3]), between(0, 90), 0, {w: '3.6%', lap: between(12, 19).toFixed(0) + 's', d: '-' + between(0, 18).toFixed(1) + 's', dx: between(4, 18).toFixed(0) + 'cqw', spin: between(3, 6).toFixed(1) + 's'});
+      if (now === 'fuyu') for (let i = 0; i < 12; i++) put('fall snow', '', between(0, 96), 0, {w: between(1, 1.8).toFixed(1) + '%', lap: between(13, 22).toFixed(0) + 's', d: '-' + between(0, 22).toFixed(1) + 's', dx: between(-4, 8).toFixed(0) + 'cqw'});
     }
   }
 
