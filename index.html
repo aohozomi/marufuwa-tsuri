@@ -129,6 +129,7 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 .photo-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
 .pill{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #0e4a66}
 .pill[hidden]{display:none}
+.pill.quiet{--c1:#ffffffd9;--c2:#bfe6f9b3;--side:#9cc9e0;--ink:#244653;text-shadow:none}   /* ひかえめな リンク（おうちの かたへ）。ふつうの ボタンと おなじ 色 */
 #bucket-list{display:grid;gap:6px}
 #bucket-list div{display:grid;grid-template-columns:2.4rem 1fr;align-items:center;gap:8px;border:2px solid #d5e6ed;border-radius:14px;padding:6px 10px;line-height:1.45;font-size:.9rem;background:#fff}
 #bucket-list b{font-size:1.8rem;text-align:center}
@@ -393,6 +394,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:focus-visible{outline-color:#a9dcff}
 :root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small{color:#a9bfd2}
 :root[data-night=true] #bucket-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
@@ -539,6 +542,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   <ruby>背景<rt>はいけい</rt></ruby>と <ruby>魚<rt>さかな</rt></ruby>の <ruby>絵<rt>え</rt></ruby>は、<ruby>今<rt>いま</rt></ruby>は <ruby>仮<rt>かり</rt></ruby>の ものです。</p>
   <div class="hud keep">
     <button id="open-keep" type="button" style="flex:1">きろくを のこす・もどす</button>
+    <a class="pill quiet" href="anshin/" style="flex:1">おうちの かたへ</a>
   </div>
 
   <dialog id="keep" aria-labelledby="keep-title">
@@ -579,7 +583,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <div class="photo-actions">
       <a id="photo-save" class="pill" download="marufuwa-tsuri.png">ほぞんする</a>
       <button id="photo-share" type="button" class="pill">みせる（きょうゆう）</button>
-      <a id="photo-x" class="pill" target="_blank" rel="noopener noreferrer">Xに かく</a>
+      <a id="photo-x" class="pill" target="_blank" rel="noopener noreferrer" aria-label="Xに かく。あたらしい まどが ひらきます。おうちの ひとと いっしょに つかってね">Xに かく</a>
     </div>
     <p class="count" id="photo-status" role="status">かってに とうこうは しません。</p>
     <button class="close" type="button" id="close-photo">とじる</button>
@@ -1249,8 +1253,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.fillStyle = color('--ground'); ctx.beginPath(); ctx.moveTo(0, 400); ctx.lineTo(1200, 380); ctx.lineTo(1200, 520); ctx.lineTo(0, 480); ctx.fill();
     const water = ctx.createLinearGradient(0, 480, 0, 675); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2'));
     ctx.fillStyle = water; ctx.beginPath(); ctx.moveTo(0, 480); ctx.lineTo(1200, 520); ctx.lineTo(1200, 675); ctx.lineTo(0, 675); ctx.fill();
-    const me = new Image(); me.src = marufuwa.src; await me.decode();
-    const tall = 330, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, 230 - wide / 2, 488 - tall, wide, tall);
+    const me = await loadImg(marufuwa.src);   // decode() は 見えない タブだと おわらない ことが ある。load で まつ（よめなくても しゃしんは つくる）
+    if (me) { const tall = 330, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, 230 - wide / 2, 488 - tall, wide, tall); }
     ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '170px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
     const fishArt = artOf(last.fish) ? await loadImg(artOf(last.fish)) : null;
     if (last.fish.rare === 4 && 'filter' in ctx) ctx.filter = fishArt ? 'drop-shadow(0 0 16px #ffd34d)' : 'sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 16px #ffd34d)';
@@ -1326,7 +1330,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('photo-x').href = 'https://x.com/intent/tweet?' + new URLSearchParams({text: words});
     $('photo-share').hidden = !(navigator.share && navigator.canShare && navigator.canShare({files: [photoFile]}));
     $('photo-share').onclick = async () => { try { await navigator.share({files: [photoFile], text: words}); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (error) { status.textContent = error.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
-    status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。';
+    status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。Xは、おうちの ひと（おとな）と いっしょに つかってね。';
   }
   $('take-photo').addEventListener('click', async () => {
     try { await takePhoto(); photo.showModal(); } catch { say('しゃしんを つくれなかったよ。もういちど ためしてね。'); }
