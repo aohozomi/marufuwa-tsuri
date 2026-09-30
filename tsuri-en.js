@@ -170,6 +170,21 @@
     'そのなまえはつかえないよ。べつのなまえをえらんでね。': "That name can't be used. Please choose another one.",
     'もらったよ': 'Received', 'だれか': 'Someone', 'あと': 'Only ', 'ひき': ' left',
     'てがみがとどいたよ': 'A letter has arrived', 'てがみがとどいているよ': 'A letter is waiting for you',
+    // おくりものを うけとる 画面（index.html giftOpen／giftTake）
+    'うけとる': 'Accept', 'あとで': 'Later', 'うけとったよ！ありがとう': 'Received! Thank you.', 'もううけとったよ': 'Already received',
+    'うけとると、バケツの「もらったさかな」にはいるよ。': 'Once you accept, it goes into “Fish you received” in your bucket.',
+    'バケツの「もらったさかな」にいれたよ。': 'Put into “Fish you received” in your bucket.', 'バケツの「もらったさかな」にいるよ。': 'It’s in “Fish you received” in your bucket.',
+    'このブラウザのなかにほぞんされるよ。': 'It’s saved inside this browser.',
+    'Xのなかでひらいたときは、Safariなどのブラウザとはべつにほぞんされるよ。': 'If you opened this inside X, it’s saved separately from browsers like Safari.',
+    'この ブラウザの なかに ほぞんされるよ。Xの なかで ひらいた ときは、Safariなどの ブラウザとは べつに ほぞんされるよ。': 'It’s saved inside this browser. If you opened this inside X, it’s saved separately from browsers like Safari.',
+    'おかえしにひとつおくる？あとででもいいよ。': 'Send one back? Later is fine, too.', 'おかえしをえらぶ': 'Choose one to send back', 'バケツをみる': 'Open bucket',
+    'よくわからないさかながきたよ。': 'A fish we don’t recognize came along.', 'きろくをのこす': 'Save your records',
+    // ひみつの ことば（tsuri-himitsu.js の T）
+    'ひみつのことば': 'Secret Word', 'ためす': 'Try it', 'ひみつノートをひらく': 'Open the Secret Notebook',
+    'ことばをしっていたら、ここにいれてね。まちがえても、なにもおこらないよ。': 'If you know a word, type it here. If you get it wrong, nothing happens.',
+    'ひみつのことばがみつかったよ！': 'You found a secret word!', 'このことばはもうみつけているよ。いつでもどうぞ。': 'You’ve already found this word. Feel free to enter it anytime.',
+    'みつからなかったよ。ことばがちがうのかも。もういちどためしてね。': 'Nothing found. Maybe the word is different. Try again.', 'ことばをいれてね。': 'Please type a word.',
+    'はじめのことば': 'First Words', 'ひみつのことばをみつけたよ。ことばは、これからふえるかもしれないよ。': 'You found a secret word. More words may appear in the future.',
     'おくりものだな': 'Gift Shelf', 'もらったさかながならんでいるよ。つれたかずには、はいらないよ。': "Fish you received are lined up here. They don't count toward your catches.",
     // なかまの おしゃべり（tsuri-oshaberi.js）
     'あさのみずはすきとおってるね': 'The morning water is so clear.', 'おはよう。きょうものんびりいこう': "Good morning. Let's take it easy today, too.", 'あさはとりがよくなくね': 'Birds sing a lot in the morning.',
@@ -223,14 +238,81 @@
     'ひろばのながれぼし': 'Plaza Shooting Star', 'ひろばのよぞらに、ながれぼしがとんだよ。': "A shooting star flew across the plaza's night sky.", 'いけのさかな': 'Pond Fish', 'いけでさかながぴょんとはねたよ。': 'A fish leaped out of the pond.',
     'ありがとうのほしぞら': 'Thank-You Starry Sky', 'ありがとうのいしをひらいて、あそんでくれたひとのほしをみたよ。': 'You opened the thank-you stone and saw the stars of people who played.', 'もういちどきく': 'Listen again',
   }).forEach(([k, v]) => EX.set(k, v));
+  // ---- 1d) まるふわの おへや（すいそう・tsuri-tank.js）の ことば：ひとこと・よみあげ・かざり・しゃしん ----
+  Object.entries({
+    'きょうも おつかれさま。': 'Good work today.', 'まだ だれも いないよ。': 'No one is here yet.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': "No one's here yet. Fish you catch will swim here.",
+    'すいそうは まだ からっぽです。': 'The aquarium is still empty.', 'ずかん、ぜんぶ そろったね。ありがとう。': 'Your Fish Book is complete. Thank you.',
+    'だなに、もらった さかなが いるよ。': 'The fish you received are on the shelf.', 'おくりもの、うれしかったね。': 'Gifts are so nice to get.', 'もらった さかな、ならんで いるね。': 'The fish you received are lined up.',
+    'ゆっくり あいにいこうね。': "Let's go meet them slowly.",
+    'ゆったり およいでるね。': 'Swimming so leisurely.', 'ちょっと めずらしい こだよ。': "That's a bit of a rare one.", 'めずらしい こ！ あえて うれしいね。': 'A rare one! So glad to meet it.',
+    'スペシャルな こだよ！ きらきら してるね。': "It's a special one! So sparkly.", 'まぼろしの こ…！ ほんとうに いたんだ。': 'A mythical one…! They really exist.',
+    'はじめまして！': 'Nice to meet you!', 'ぬしだよ！ すごいね。': "It's a Giant! Amazing.",
+    'めずらしさ': 'Rarity', 'さいだい': 'Largest', 'あつめた': 'Collected',
+    'ひるまは ランプが なくても あかるいね。': "It's bright enough in the daytime, even without the lamp.", 'わあ… ほしぞらみたい。': 'Wow… like a starry sky.',
+    'ランプを けしたよ。かべが ほしぞらに なったよ。': 'You turned off the lamp. The wall became a starry sky.', 'ぽっと あかるく なったね。': 'It suddenly got bright and cozy.', 'ランプを つけたよ。': 'You turned on the lamp.',
+    'おにぎり、おいしそう。': 'That rice ball looks yummy.', 'はんぶんこ、しよっか。': 'Shall we split it?', 'おにぎりを さわったよ。': 'You touched the rice ball.', 'おにぎりを はんぶんこ したよ。': 'You split the rice ball.',
+    'はんぶんこ しよ': "Let's split it.", 'おいしいね': 'Yummy.',
+    'まるふわが うとうと しはじめたよ。': 'Marufuwa started to doze off.', '…ねてないよ。': "…I wasn't sleeping.",
+    'ほしの びんが ひかって いるよ。': 'The star bottle is glowing.', 'ほしの びんが できたよ。よるに なると ひかるよ。': 'You made a star bottle. It glows at night.',
+    'ちいさな もりで、さかなが やすんで いるよ。': 'Fish are resting in the tiny forest.', 'ちいさな もりが できたよ。よるに なると さかなが やすみに くるよ。': 'You made a tiny forest. At night, fish come to rest.',
+    'ありがとう、って いってるみたい。': 'They seem to be saying thank you.', 'さかなたちが、ありがとう って いってる みたい。': 'The fish seem to be saying thank you.',
+    '♪ ふん ふふん ♪': '♪ Hum hum hmm ♪', 'まるふわが、すいそうの うたを うたったよ。': 'Marufuwa sang the aquarium song.',
+    'ごはんを あげたよ。さかなが あつまって くるよ。': 'You fed them. The fish are gathering.', 'ふつうの ながめかたに もどったよ。': 'Back to the normal way of watching.', 'みみで ながめるを おわりました。': 'Finished listening mode.',
+    'Tab キーで さかなを えらぶと、なまえの おとが 鳴ります。': 'Choose a fish with the Tab key to hear its name sound.', 'Enter で くわしく しらべます。': 'Press Enter to see details.',
+    'BGMは、みみで ながめる あいだ おやすみします。': 'BGM takes a rest while you are listening.',
+    'おとを つけたよ。': 'Sound is on.', 'おとを つけました。': 'Sound turned on.', 'おとを けしたよ。': 'Sound is off.', 'おとを けしました。': 'Sound turned off.',
+    'おとと BGMを つけたよ。': 'Sound and BGM are on.', 'BGMを つけたよ。': 'BGM is on.', 'BGMを けしたよ。': 'BGM is off.', 'しずかな きょくが ながれるよ。': 'A quiet tune is playing.',
+    'かざりを えらんで、すいそうを タップ。おいた かざりを タップすると、もどせるよ。': 'Choose a decoration, then tap the aquarium. Tap a placed decoration to take it back.',
+    'まだ かざりは ないよ。さかなが ときどき もって くるよ。': 'No decorations yet. Fish sometimes bring them.', 'かざりを おわる': 'Done decorating', 'ぜんぶ もどしたよ。また かざろうね。': "Everything is back. Let's decorate again.",
+    'しゃしんが とれたよ。「ほぞん」を おすか、がぞうを ながおしで ほぞんできるよ。': 'Photo taken! Press “Save”, or long-press the image to save it.', 'しゃしんが とれました。': 'Photo taken.',
+    'ごめんね、しゃしんが うまく とれなかったよ。': "Sorry, the photo didn't come out well.",
+    'おやすみタイマー：なし': 'Sleep timer: off', 'ぜんがめん': 'Full screen', 'ぜんがめんを やめる': 'Exit full screen',
+    // きろくを もどす 窓（リンクで ひらいた とき）・きょうゆう・コピー・Xの ヒント
+    'この ブラウザは まだ きろくが ないよ。もどすと、つづきから あそべるよ。': 'This browser has no records yet. Restore to pick up where you left off.',
+    'いまの きろくの ほうが おおいよ。もどすと、いまの きろくは なくなるよ。': 'Your current record is bigger. If you restore, your current record will be lost.',
+    'もどすと、いまの きろくは、この きろくに おきかわるよ。': 'If you restore, your current record will be replaced by this one.',
+    'もどす': 'Restore', 'それでも もどす': 'Restore anyway', 'もどさない': 'Don’t restore',
+    'コピーが できなかったよ。「コピーする」で もじを コピーしてね。': "Couldn't copy. Use “Copy” to copy the code.", 'コピーが できなかったよ。もういちど ためしてね。': "Couldn't copy. Please try again.",
+    'リンクを コピー したよ。おくりたい ところに はってね。おうちの ひとと いっしょに つかってね。': 'Link copied. Paste it where you want to send it. Please use it together with a grown-up.',
+    'きょうゆうの がめんを とじました。': 'Closed the share screen.', 'やめました。': 'Cancelled.', '「ほぞんする」を つかってね。': 'Please use “Save”.',
+    'ぜんがめんで あそぶには、⋮ から ブラウザ（Safariなど）で ひらいてね。きろくは ブラウザごとに べつだよ。うつす ときは「きろくを のこす」から。': 'To play full screen, open this in a browser (such as Safari) from the ⋮ menu. Your records are separate in each browser. To move them, use “Save your records”.',
+    'とじる（もう だしません）': 'Close (won’t show again)',
+    'ホームがめんに おく': 'Add to home screen', 'いま ホームがめんに おく': 'Add it now',
+  }).forEach(([k, v]) => EX.set(k, v));
   for (const [k, v] of [...EX]) { const nk = norm(k); if (nk !== k) { EX.delete(k); EX.set(nk, v); } }   // かぎの すきまを そろえる
   const COLOR = { 'あか': 'Red', 'あお': 'Blue', 'きいろ': 'Yellow', 'もも': 'Pink', 'みどり': 'Green', 'むらさき': 'Purple', 'きん': 'Gold', 'にじ': 'Rainbow', 'ぎん': 'Silver', 'よぞら': 'Night sky', 'しろ': 'White', 'くろ': 'Black', 'オレンジ': 'Orange', 'そのまま': 'As is' };
   const OFTEN = s => s.split('・').map(t => nmTime(t, true)).join(', ');
 
   // ---- 2) ルール（すうじ・なまえが はいる 文）----
+  const REG_EN = { 'ふつう': 'Common', 'ちょっとめずらしい': 'A bit rare', 'めずらしい': 'Rare', 'スペシャル': 'Special', 'まぼろし': 'Mythical', 'ぬし': 'Giant' };
+  const SIZE_EN = { 'とてもおおきい': 'very large', 'おおきい': 'large', 'ふつうのおおきさ': 'medium-sized', 'ちいさい': 'small' };
+  const SIDE_EN = { 'ひだり': 'left', 'みぎ': 'right', 'まんなか': 'middle' };
+  const up = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const REG_RE = 'ふつう|ちょっとめずらしい|めずらしい|スペシャル|まぼろし|ぬし', SIZE_RE = 'とてもおおきい|おおきい|ふつうのおおきさ|ちいさい', SIDE_RE = 'ひだり|みぎ|まんなか';
   const RULES = [
+    // すいそう（おへや）：よみあげ・ならびの ことば
+    [new RegExp(`^(.+?)。(${REG_RE})。(${SIZE_RE})。(${SIDE_RE})にいます。$`), (_, f, r, s, w) => `${nmFish(f)}. ${REG_EN[r]}. ${up(SIZE_EN[s])}. On the ${SIDE_EN[w]}.`],
+    [new RegExp(`^(.+?)。(${REG_RE})。さいだい([\\d.]+)センチ、あつめた(\\d+)ひき。$`), (_, f, r, cm, n) => `${nmFish(f)}. ${REG_EN[r]}. Largest ${cm} cm, collected ${n}.`],
+    [/^いま(\d+)ひきおよいでいます。$/, (_, n) => `${n} fish are swimming now.`],
+    [new RegExp(`^ひだりからじゅんに、(.+)。$`), (_, list) => { const out = []; for (const it of list.split('、')) { const m = new RegExp(`^(${SIDE_RE})の(.+?)（(${SIZE_RE})）$`).exec(it); if (!m) return null; out.push(`${nmFish(m[2])} (${SIZE_EN[m[3]]}, ${SIDE_EN[m[1]]})`); } return `From left to right: ${out.join(', ')}.`; }],
+    [/^(\d+)ひきいるよ。みみをすませてね。$/, (_, n) => `${n} fish here. Listen closely.`],
+    [/^ずかんまであと(\d+)しゅるい。$/, (_, n) => `${n} more kinds to complete your Fish Book.`],
+    [/^(.+?)がすいそうにようこそ。$/, (_, f) => `Welcome to the aquarium, ${nmFish(f)}!`],
+    [/^おくりものだな。もらったさかなが(\d+)ひき。おすと、ひらくよ。$/, (_, n) => `Gift shelf. ${n} fish received. Press to open.`],
+    [/^おくりものだなをひらいたよ。もらったさかなが(\d+)ひきいるよ。$/, (_, n) => `Opened the gift shelf. ${n} fish received.`],
+    [/^([^\d.].*?)\s*([\d.]+)センチ$/, (_, f, cm) => (JP.test(f) && !FISH_MAP.has(f) ? null : `${nmFish(f)} ${cm} cm`)],
+    [/^(.+?)×(\d+)$/, (_, n, k) => { const t = tailEn(n); return t == null ? null : `${t} ×${k}`; }],
+    [/^(.+?)をもどす$/, (_, n) => { const t = tailEn(n); return t == null ? null : `Put back ${t}`; }],
+    [/^(.+?)をもどしたよ。$/, (_, n) => { const t = tailEn(n); return t == null ? null : `Put back ${t}.`; }],
+    [/^(.+?)をおいたよ。$/, (_, n) => { const t = tailEn(n); return t == null ? null : `Placed ${t}.`; }],
+    [/^(\d+)ひき$/, (_, n) => `${n} fish`],
+    [/^もどすきろく：つれたかず(\d+)ひき・シールちょう(\d+)\s*\/\s*(\d+)・レベル(\d+)$/, (_, a, b, c, d) => `Record to restore: caught ${a} · Fish Book ${b} / ${c} · Lv. ${d}`],
+    [/^いまのきろく：つれたかず(\d+)ひき$/, (_, a) => `Current record: caught ${a}`],
     [/^(.+)をおくる$/, (_, f) => `Send ${nmFish(f)}`],
     [/^(.*?)🎁\s*(.+?)から(?:「(.+?)」)?$/, (_, pre, p, w) => { const who = p === 'だれか' ? 'Someone' : nmPal(p); const word = w ? (EX.get(norm(w)) || null) : ''; if (w && word == null) return null; return `${pre.replace(/[　\s]+/g, ' ').trim()} 🎁 From ${who}${w ? `: “${word}”` : ''}`.trim(); }],
+    [/^(.+?)から$/, (_, p) => (p === 'だれか' ? 'From someone' : PAL_MAP.has(p) ? `From ${nmPal(p)}` : null)],   // おくりものの「なかま から」
+    [/^(ひみつのことばがみつかったよ！|このことばはもうみつけているよ。いつでもどうぞ。)(.*)$/, (_, a, r) => { const tail = r ? (EX.get(r) || tr(r)) : ''; return tail == null ? null : `${EX.get(a)}${tail ? ' ' + tail : ''}`; }],
+    [/^✨\s*(.+?)\s*✨$/, (_, q) => { const t = tr(q); return t == null ? null : `✨ ${t} ✨`; }],
     [/^あと(\d+)ひき$/, (_, n) => `${n} to go`],
     [/^(.+?)、げんきそう。$/, (_, f) => `${nmFish(f)} looks lively.`],
     [/^(.+?)がこっちをみたよ。$/, (_, f) => `${nmFish(f)} looked over here.`],
@@ -319,13 +401,27 @@
   }
   const tidy = s => s.replace(/\s+/g, ' ').replace(/\s+([.,!?:;)])/g, '$1').replace(/\(\s+/g, '(').trim();
 
+  // 1つの 文（まるごと 一致 → ルール → かけら）。訳せなければ null
+  function piece(p) {
+    if (EX.has(p)) return EX.get(p);
+    for (const [re, fn] of RULES) { const m = re.exec(p); if (m) { const r = fn(...m); if (r != null) return r; } }
+    return tailEn(p);
+  }
+  // 「。！？」で 区切って、ぜんぶ 訳せた ときだけ 1つに つなぐ（つなぎ書きの 文・あとから ふえた 文の ため）
+  function splitEn(k) {
+    const parts = k.match(/[^。！？]+[。！？]+[」）』]?/g);
+    if (!parts) return null;
+    const rest = k.slice(parts.join('').length); if (rest) parts.push(rest);
+    if (parts.length < 2) return null;
+    const out = [];
+    for (const p of parts) { const e = piece(p); if (e == null) return null; out.push(e); }
+    return out.join(' ');
+  }
   function tr(ja) {
     const k = norm(ja);
     if (!k) return null;
-    if (EX.has(k)) return EX.get(k);
-    for (const [re, fn] of RULES) { const m = re.exec(k); if (m) { const r = fn(...m); if (r != null) return r; } }
-    const t = tailEn(k);
-    return t;
+    const t = piece(k);
+    return t != null ? t : splitEn(k);
   }
   window.TsuriEn.t = s => (JP.test(String(s)) ? (tr(s) ?? s) : s);
   window.TsuriEn.tr = tr;
