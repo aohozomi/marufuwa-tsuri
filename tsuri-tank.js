@@ -154,7 +154,7 @@
   // ─── 見た目（CSS）───
   const css = document.createElement('style');
   css.textContent = `
-#tk-open{position:relative;flex:1;white-space:nowrap}
+#tk-open{position:relative;flex:1;white-space:normal;line-height:1.3;min-width:0}   /* せまい がめん・もじを おおきく でも もじが はみ出さない（おりかえす） */
 #tk-open .tk-badge{position:absolute;right:-4px;top:-8px;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:#e8543f;color:#fff;font-size:.8rem;line-height:20px;text-align:center;border:2px solid #fff}
 #tk-open .tk-badge[hidden]{display:none}
 #tk{padding:0;border:2px solid #bfdce8;border-radius:24px;width:min(560px,calc(100vw - 12px));max-width:none;height:min(96dvh,900px);max-height:calc(100dvh - 12px);overflow:hidden;background:#f3fafd;color:#244653}
@@ -170,7 +170,7 @@
 /* へやの はばが せまい（400px より 小さい）時：ゆびで おす ボタンが 枠から はみ出さない ように 小さく まとめる（パソコンでも 背の高さで へやが 細く なる ので、画面の はばでは なく へやの はばで きめる） */
 #tk .tk-head h2{min-width:0;overflow:hidden;text-overflow:ellipsis}
 #tk.tk-narrow .tk-head{padding:8px 8px 4px;gap:4px}
-#tk.tk-narrow .tk-head h2{font-size:.95rem}
+#tk.tk-narrow .tk-head h2{font-size:.95rem;white-space:normal;line-height:1.25}   /* 題が「まるふわの おへ…」と 切れない（おりかえす） */
 #tk.tk-narrow .tk-headbtns{gap:4px}
 #tk.tk-narrow .tk-headbtns button{padding:6px 8px}
 #tk.tk-narrow .tk-cam span{display:none}
@@ -248,7 +248,7 @@
 .tk-placedlist .tk-back{min-height:40px;padding:2px 10px 2px 6px;font-size:.8rem;display:flex;align-items:center;gap:4px}
 .tk-fish:focus-visible{outline:3px solid #fff;outline-offset:1px;border-radius:50%;box-shadow:0 0 0 6px #17658a99}
 .tk-listen .tk-water{box-shadow:inset 0 0 0 3px #ffe27a}
-#tk .tk-actions{display:flex;gap:6px;padding:8px 10px 12px}
+#tk .tk-actions{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 12px}   /* せまい がめん・もじを おおきく の 時は 2だんに おりかえす（はみ出さない） */
 #tk .tk-actions button{flex:1;min-height:52px;padding:6px 6px;font-size:.86rem;line-height:1.25;word-break:keep-all}   /* 「ながめ／る」の ように 1もじ だけ 下へ 落ちない（すきまで 切る） */
 #tk .tk-actions button[aria-pressed=true]{background:#17658a;color:#fff;border-color:#0e4a66}
 .tk-photo{position:absolute;inset:0;z-index:30;background:#0d2a3aee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px}

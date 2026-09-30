@@ -21,6 +21,32 @@
 try { var lc = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:', ask = lc ? new URLSearchParams(location.search).get('inapp') : null;
   if (ask === 'x' || (ask !== 'no' && /Twitter|TwitterAndroid|(^|[^A-Za-z])X\/[0-9]/.test(navigator.userAgent))) document.documentElement.dataset.inapp = 'x'; } catch (e) {}
 </script>
+<script>
+// つりびよりの「つかいやすく する」（うごきを へらす・もじを おおきく）に、ひろばも したがう（本体の index.html と おなじ しかけ・おなじ 記録 marufuwa-tsuri-v1 の calm・large を よむだけ）。
+// うごきを へらす：matchMedia を さしかえて、おへや・ひみつの 部品も ふくめて おなじ せっていに したがう。CSS の「うごきを へらす」の きまりは、よみこみが おわって から :root[data-calm] つきで うつす
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {};
+  if (early.large === true) document.documentElement.dataset.large = 'true';
+  if (early.calm === true) {
+    document.documentElement.dataset.calm = 'true';
+    var realMM = window.matchMedia.bind(window); window.__realMatchMedia = realMM;
+    window.matchMedia = function (q) { var m = realMM(q); return /prefers-reduced-motion[ ]*:[ ]*reduce/.test(String(q)) ? new Proxy(m, {get: function (t, k) { if (k === 'matches') return true; var v = t[k]; return typeof v === 'function' ? v.bind(t) : v; }}) : m; };
+    document.addEventListener('DOMContentLoaded', function () {
+      Array.prototype.forEach.call(document.styleSheets, function (sheet) {
+        var rules; try { rules = Array.prototype.slice.call(sheet.cssRules); } catch (e) { return; }
+        rules.forEach(function (rule) {
+          if (rule.type !== 4 || !/prefers-reduced-motion[ ]*:[ ]*reduce/.test(rule.media.mediaText)) return;
+          Array.prototype.forEach.call(rule.cssRules, function (inner) {
+            if (inner.type !== 1) return;
+            var sel = inner.selectorText.split(',').map(function (x) { return ':root[data-calm=true] ' + x.trim(); }).join(',');
+            try { sheet.insertRule(sel + '{' + inner.style.cssText + '}', sheet.cssRules.length); } catch (e) {}
+          });
+        });
+      });
+    });
+  }
+} catch (e) {}
+</script>
 <style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light}
 *{box-sizing:border-box}
@@ -50,7 +76,9 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 .logo i{display:inline-block;width:.45em}
 .logo span:nth-of-type(4n+1){--k:#4bb3e0;--d:#2a86b3}.logo span:nth-of-type(4n+2){--k:#46c79a;--d:#2a9a72}.logo span:nth-of-type(4n+3){--k:#ff9a6b;--d:#d96f40}.logo span:nth-of-type(4n){--k:#a98be8;--d:#7c5fc4}
 @keyframes bounce{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -4px;rotate:3deg}}
-.hud{display:flex;gap:8px}
+.hud{display:flex;gap:8px;flex-wrap:wrap}
+:root[data-large=true]{font-size:125%}   /* もじを おおきく（つかいやすく する）：ぜんぶの もじ（rem）が 1.25ばい */
+:root[data-large=true] .hud button{white-space:normal;line-height:1.3}
 .hud button{min-height:46px;padding:4px 12px;font-size:.82rem;--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
 .hud button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36}
 .hud button[disabled]{opacity:1}
@@ -355,6 +383,7 @@ body.calm .cloud.c2{left:56%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
+<script src="../tsuri-daily.js"></script>
 
 <script>
 (() => {
@@ -669,6 +698,15 @@ function memoryLine() {
   const big = Number.isFinite(b.size) && b.size >= info[1] + (info[2] - info[1]) * .65;
   return big ? 'さっきの ' + info[0] + '、おおきかったね！' : 'さっき ' + info[0] + 'が つれたんだね。よかったね';
 }
+// きょうの ラッキーさかな（日づけだけで きまる＝みんな おなじ。本体と おなじ 共有ファイル tsuri-daily.js）を、ペンギンが 2かいめの おはなしで 1回だけ おしえる。
+// ぬしの ばしょ・じかんは ここでは いわない（釣りの たのしみを うばわない）。日づけが ずれても エラーに ならない（ずれた 日づけの ラッキーが でる だけ）
+function luckyLine() {
+  try {
+    if (!window.TsuriDaily) return '';
+    const f = FISH_MEMO[window.TsuriDaily.lucky(30)];
+    return f ? 'きょうの ラッキーさかなは「' + f[0] + '」。みんな おなじ だよ' : '';
+  } catch { return ''; }
+}
 function chooseFriends() {
   const force = (q.get('friends') || '').split(',').filter(id => PALS[id]);
   if (force.length) return force.slice(0, 6);
@@ -680,6 +718,7 @@ function chooseFriends() {
 const SLOTS = [{ x: 84, y: 368 }, { x: 276, y: 368 }, { x: 120, y: 440 }, { x: 240, y: 440 }, { x: 180, y: 336 }, { x: 140, y: 316 }];
 const friends = chooseFriends().map((id, i) => {
   const a = makeActor(id, PALS[id].name, BASE + 'img/friend-' + id + '-s.webp', 68, PALS[id].size, 'friend');
+  a.lucky = id === 'penguin';
   a.home = SLOTS[i]; a.x = a.home.x; a.y = a.home.y; a.speed = 30; a.state = 'idle'; a.timer = 1 + Math.random() * 4; a.cool = 0; a.talking = 0; a.bag = []; a.friend = true; a.mem = metInFishingToday().includes(id) ? memoryLine() : '';
   a.el.setAttribute('aria-hidden', 'true');
   return a;
@@ -808,6 +847,7 @@ function lineFor(f, first) {
   const p = PALS[f.id];
   if (f.mem) { const m = f.mem; f.mem = ''; return HELLO[curTime] + '！ ' + m; }   // 釣りで あった 子は、さいしょの ひとことで それを いう（1回だけ）
   if (first) return HELLO[curTime] + '！ ' + p.hello;
+  if (f.lucky) { f.lucky = false; const l = luckyLine(); if (l) return l; }   // ペンギンの 2かいめの おはなし：きょうの ラッキーさかな
   if (!f.bag.length) {
     const pool = [...p.lines];
     if (rainy) pool.push(...p.rain, ...p.rain);
@@ -983,7 +1023,7 @@ function drawSound() { const on = soundOn(); $('sound').textContent = on ? 'お�
 function drawMotion() {
   const os = reduceOS(), less = reduce(); document.body.classList.toggle('calm', own.motion === 'less');
   const b = $('calm'); b.textContent = less ? 'うごき：すくない' : 'うごき：ふつう'; b.setAttribute('aria-pressed', String(less)); b.disabled = os;
-  b.setAttribute('aria-label', os ? 'うごき：すくない（この たんまつの せっていに あわせて いるよ）' : (less ? 'うごきを すくなく して いるよ。おすと ふつうに もどるよ' : 'うごきを すくなく する'));
+  b.setAttribute('aria-label', os ? (document.documentElement.dataset.calm === 'true' ? 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）' : 'うごき：すくない（この たんまつの せっていに あわせて いるよ）') : (less ? 'うごきを すくなく して いるよ。おすと ふつうに もどるよ' : 'うごきを すくなく する'));
 }
 function setSoundOn(on) {
   writeSound(on); drawSound(); lastInput = T;
@@ -1071,7 +1111,7 @@ function swapFriend(slot, now) {
   const oldName = f.name, quick = !!now || reduce();
   const change = () => {
     f.id = id; f.name = PALS[id].name; f.aspect = PALS[id].size; f.el.dataset.id = id; f.el.style.width = (f.h * f.aspect / W * 100) + '%'; f.el.style.aspectRatio = String(f.aspect); f.img.src = BASE + 'img/friend-' + id + '-s.webp';
-    f.bag = []; f.lastLine = ''; f.mem = ''; f.cool = 5; f.talking = 0; f.state = 'idle'; f.timer = 2 + Math.random() * 3; f.path = []; f.moving = false;
+    f.bag = []; f.lastLine = ''; f.mem = ''; f.lucky = id === 'penguin'; f.cool = 5; f.talking = 0; f.state = 'idle'; f.timer = 2 + Math.random() * 3; f.path = []; f.moving = false;
     f.el.classList.remove('leaving'); if (!quick) { f.el.classList.add('arriving'); setTimeout(() => f.el.classList.remove('arriving'), 900); }
     [$('friend-a'), $('friend-b')].forEach((img, j) => { if (img && friends[j]) img.setAttribute('src', BASE + 'img/friend-' + friends[j].id + '-s.webp'); });   // すいそうの となりも 同じ 子に
     renderPalRow(); if (!quick) speak(f, HELLO[curTime] + '！ ' + PALS[id].hello, 3000, true);
@@ -1310,7 +1350,8 @@ addEventListener('load', () => {
     h.style.fontSize = 'clamp(1.3rem,6.4vw,2rem)'; h.style.flexWrap = 'wrap';
   }
   const MONTH = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  if (E.add) E.add({ ex: {}, rules: [   // ありがとうの ほしぞら：名前は そのまま（「さん」は 英語に ない）。月は 月の なまえ
+  if (E.add) E.add({ ex: { 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, rules: [
+    [/^きょうのラッキーさかなは「(.+)」。みんなおなじだよ$/, (_, f) => "Today's lucky fish is the " + (E.h && E.h.nmFish ? E.h.nmFish(f) : f) + '. Everyone has the same one!'],   // ありがとうの ほしぞら：名前は そのまま（「さん」は 英語に ない）。月は 月の なまえ
     [/^(.+)さん、ありがとう$/, (_, n) => n + ', thank you!'], [/^(.+)さん$/, (_, n) => n],
     [/^(\d{1,2})がつ$/, (_, m) => MONTH[Number(m)] || null], [/^(\d{1,2})がつにきてくれたよ$/, (_, m) => MONTH[Number(m)] ? 'Visited in ' + MONTH[Number(m)] + '.' : null]
   ] });
