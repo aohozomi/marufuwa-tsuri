@@ -197,6 +197,7 @@
   // ─── 見た目（CSS）───
   const css = document.createElement('style');
   css.textContent = `
+html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-running body>*:not(#tk) *::before,html.tk-running body>*:not(#tk) *::after{animation-play-state:paused !important}   /* おへやを ひらいて いる あいだは、うしろの 画面（おへやの おくの 見えない 所）の CSS の 動きを 一時停止（電池・熱。見た目は かわらない。とじたら つづきから。ヘッドレス実測：うしろの 画面だけで CPU の 約 4わり＝_qa/tank_cpu_probe2.mjs） */
 #tk-open{position:relative;flex:1;white-space:normal;line-height:1.3;min-width:0}   /* せまい がめん・もじを おおきく でも もじが はみ出さない（おりかえす） */
 #tk-open .tk-badge{position:absolute;right:-4px;top:-8px;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:#e8543f;color:#fff;font-size:.8rem;line-height:20px;text-align:center;border:2px solid #fff}
 #tk-open .tk-badge[hidden]{display:none}
@@ -1389,7 +1390,7 @@
   $(linkBox, '.tk-linkclose').addEventListener('click', () => { linkBox.hidden = true; sendBtn.focus(); });
   $(linkBox, '.tk-linkcopy').addEventListener('click', async () => { let ok = false; try { await navigator.clipboard.writeText(lastLink); ok = true; } catch {} $(linkBox, '.tk-linkmsg').textContent = ok ? 'リンクを コピーしたよ。ともだちに はりつけて おくってね。' : 'コピーできなかったよ。したの リンクを おして えらんで コピーしてね。'; });
   dlg.addEventListener('cancel', e => { if (!linkBox.hidden) { e.preventDefault(); linkBox.hidden = true; sendBtn.focus(); } });
-  const endVisitUI = () => { visit = null; dlg.classList.remove('tk-visit'); visitBar.hidden = true; titleEl.textContent = 'まるふわの おへや'; linkBox.hidden = true; };
+  const endVisitUI = () => { document.documentElement.classList.remove('tk-running'); visit = null; dlg.classList.remove('tk-visit'); visitBar.hidden = true; titleEl.textContent = 'まるふわの おへや'; linkBox.hidden = true; };
   function backHome() {   // ほうもんを おわって、じぶんの おへやに もどる（ダイアログは とじない）
     if (!visit) return;
     visit = null; enter();
@@ -1422,7 +1423,7 @@
   function open(vis) {
     if (dlg.open) return;
     visit = vis && Array.isArray(vis.fish) && Array.isArray(vis.placed) ? vis : null;   // Event など へんな ものが 来ても ほうもんには ならない
-    dlg.showModal(); enter();
+    dlg.showModal(); document.documentElement.classList.add('tk-running'); enter();
   }
   function enter() {
     tank = readTank(); if (visit) tank.placed = visit.placed.map(p => ({ ...p }));
