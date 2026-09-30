@@ -123,6 +123,8 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .hud button::after{content:"";position:absolute;left:12%;top:18%;width:7px;height:7px;border-radius:50%;background:#ffffffe6;pointer-events:none}
 .areas small{display:block;font-weight:600;font-size:.75rem}
 #open-book{position:relative}
+html[data-clean=true],html[data-clean=true] body,html[data-clean=true] main{background:transparent !important;box-shadow:none !important;border-color:transparent !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.actions){display:none !important}   /* ?clean=1：けしきと「なげる」だけ（OBS の ブラウザソース などで つかう）。ほかの ひとの ふつうの がめんには ふれない */
 .seen-ring{display:inline-block;width:18px;height:18px;margin-right:6px;border-radius:50%;vertical-align:-3px;background:conic-gradient(#e08a00 var(--p,0%),#c9dbe4 0);-webkit-mask:radial-gradient(farthest-side,transparent 58%,#000 62%);mask:radial-gradient(farthest-side,transparent 58%,#000 62%)}   /* ずかんの すすみぐあい（ぜんぶ あつまると ぐるっと いっしゅう） */
 :root[data-night=true] .seen-ring{background:conic-gradient(#ffc24d var(--p,0%),#4b6a88 0)}
 .book-badge{position:absolute;top:-8px;right:-4px;min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:#ffd34d;color:#593700;font-size:.8rem;font-weight:900;line-height:20px;text-align:center;border:2px solid #fff;box-shadow:0 2px 4px #0003}   /* ずかんに あたらしい こが いるよ（あかい ばっじは けいこくに みえる ので きんいろ） */
@@ -1053,6 +1055,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   });
 
   const query = new URLSearchParams(location.search);
+  if (query.get('clean') === '1') document.documentElement.dataset.clean = 'true';
   // けんさようの あいず（legend・nushi・rare・decor）は、てもとで ひらいた ときだけ きく
   const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:', probe = key => local ? query.get(key) : null;
   function timeOfDay() {
