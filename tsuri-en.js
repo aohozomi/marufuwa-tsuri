@@ -296,7 +296,7 @@
 
   // ---- 2) ルール（すうじ・なまえが はいる 文）----
   // 「つかいやすくする（いま：…）」の 見出しに ならぶ 部品（本体が「・」で つなぐ。空白は norm で 消える）
-  const COMFORT_EN = { 'らくちん': 'Easy mode', 'ふるえなし': 'No vibration', 'いきものなし': 'No wildlife', 'あんないのおとなし': 'No guide sounds', 'こうかおんなし': 'No sound effects', 'なみとあめなし': 'No waves or rain', 'ゆったり': 'Extra time', 'やさしいおと': 'Soft sounds', 'よみあげ': 'Read aloud' };
+  const COMFORT_EN = { 'じぶんのせってい': 'Custom', 'ふつう': 'Normal', 'らくちん': 'Easy mode', 'ふるえなし': 'No vibration', 'いきものなし': 'No wildlife', 'あんないのおとなし': 'No guide sounds', 'こうかおんなし': 'No sound effects', 'なみとあめなし': 'No waves or rain', 'ゆったり': 'Extra time', 'やさしいおと': 'Soft sounds', 'よみあげ': 'Read aloud' };
   const COMFORT_KEYS = Object.keys(COMFORT_EN).join('|');
   const REG_EN = { 'ふつう': 'Common', 'ちょっとめずらしい': 'A bit rare', 'めずらしい': 'Rare', 'スペシャル': 'Special', 'まぼろし': 'Mythical', 'ぬし': 'Guardian' };
   const SIZE_EN = { 'とてもおおきい': 'very large', 'おおきい': 'large', 'ふつうのおおきさ': 'medium-sized', 'ちいさい': 'small' };
