@@ -110,6 +110,7 @@ a{color:#1f5f80}
 <li>ブラウザの<ruby>閲覧<rp>(</rp><rt>えつらん</rt><rp>)</rp></ruby>データを<ruby>消<rp>(</rp><rt>け</rt><rp>)</rp></ruby>すと、きろくも<ruby>消<rp>(</rp><rt>き</rt><rp>)</rp></ruby>えます。iPhone の Safari では、<ruby>長<rp>(</rp><rt>なが</rt><rp>)</rp></ruby>く<ruby>開<rp>(</rp><rt>ひら</rt><rp>)</rp></ruby>かないと きろくが<ruby>消<rp>(</rp><rt>き</rt><rp>)</rp></ruby>える ことが あります（Apple の<ruby>決<rp>(</rp><rt>き</rt><rp>)</rp></ruby>まり）。</li>
 <li><ruby>大切<rp>(</rp><rt>たいせつ</rt><rp>)</rp></ruby>な きろくは、ゲームの「きろくを のこす・もどす」で<ruby>文字<rp>(</rp><rt>もじ</rt><rp>)</rp></ruby>に して、メモに<ruby>残<rp>(</rp><rt>のこ</rt><rp>)</rp></ruby>せます。</li>
 <li>ぜんぶ<ruby>消<rp>(</rp><rt>け</rt><rp>)</rp></ruby>したい ときは、ブラウザの<ruby>設定<rp>(</rp><rt>せってい</rt><rp>)</rp></ruby>で、この サイトの データを<ruby>消<rp>(</rp><rt>け</rt><rp>)</rp></ruby>して ください（<ruby>手順<rp>(</rp><rt>てじゅん</rt><rp>)</rp></ruby>は ブラウザに よって<ruby>違<rp>(</rp><rt>ちが</rt><rp>)</rp></ruby>います）。</li>
+<li>オフラインでも あそべる ように、ゲームの<ruby>絵<rp>(</rp><rt>え</rt><rp>)</rp></ruby>や プログラムの コピーを、この ブラウザに ほぞんします（あそんだ きろくとは べつです）。ブラウザの データを<ruby>消<rp>(</rp><rt>け</rt><rp>)</rp></ruby>すと<ruby>消<rp>(</rp><rt>き</rt><rp>)</rp></ruby>えます。https の ページの ときだけで、Xの アプリなどでは はたらかない ことが <ruby>多<rp>(</rp><rt>おお</rt><rp>)</rp></ruby>いです。</li>
 </ul>
 
 <h2>ホームがめんに おく（すきな ときに）</h2>
@@ -139,6 +140,7 @@ a{color:#1f5f80}
 <li><ruby>保存<rp>(</rp><rt>ほぞん</rt><rp>)</rp></ruby>は ブラウザの localStorage です。<ruby>使<rp>(</rp><rt>つか</rt><rp>)</rp></ruby>う<ruby>名前<rp>(</rp><rt>なまえ</rt><rp>)</rp></ruby>は 7つ：<code>marufuwa-tsuri-v1</code>（つり）・<code>marufuwa-tsuri-tank-v1</code>（すいそう）・<code>marufuwa-himitsu-v1</code>（ひみつノート）・<code>marufuwa-hiroba-v1</code>（ひろば）・<code>marufuwa-bgm-v1</code>（BGM の ON／OFF だけ）・<code>marufuwa-tooku-v1</code>（とおく。ON に した ときだけ）・<code>marufuwa-lang-v1</code>（ことば：<ruby>日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>か English か。えらんだ ときだけ）。</li>
 <li><ruby>音<rp>(</rp><rt>おと</rt><rp>)</rp></ruby>を ON に する まで（BGM を ON に しても）、オーディオの<ruby>部品<rp>(</rp><rt>ぶひん</rt><rp>)</rp></ruby>は<ruby>作<rp>(</rp><rt>つく</rt><rp>)</rp></ruby>られません。BGM の<ruby>曲<rp>(</rp><rt>きょく</rt><rp>)</rp></ruby>は ファイルでは なく、ブラウザの<ruby>中<rp>(</rp><rt>なか</rt><rp>)</rp></ruby>で<ruby>作<rp>(</rp><rt>つく</rt><rp>)</rp></ruby>ります（ダウンロードは ありません）。</li>
 <li>クッキーは<ruby>使<rp>(</rp><rt>つか</rt><rp>)</rp></ruby>って いません。</li>
+<li>オフライン<ruby>用<rp>(</rp><rt>よう</rt><rp>)</rp></ruby>の しくみ（service worker・<code>sw.js</code>）：ネットが ある ときは、いつも いちばん あたらしい ものを とります。ネットが ない ときだけ、ほぞんした コピーを<ruby>出<rp>(</rp><rt>だ</rt><rp>)</rp></ruby>します。おなじ サイトの GET だけを あつかい、<ruby>外<rp>(</rp><rt>そと</rt><rp>)</rp></ruby>へは<ruby>何<rp>(</rp><rt>なに</rt><rp>)</rp></ruby>も<ruby>送<rp>(</rp><rt>おく</rt><rp>)</rp></ruby>りません。<code>?nosw=1</code> で ひらくと、この しくみと ほぞんを<ruby>外<rp>(</rp><rt>はず</rt><rp>)</rp></ruby>せます。</li>
 <li>ひみつの ことばは、ことばを ハッシュ（SHA-256）に して<ruby>調<rp>(</rp><rt>しら</rt><rp>)</rp></ruby>べます。ことばの<ruby>一覧<rp>(</rp><rt>いちらん</rt><rp>)</rp></ruby>は、プログラムの<ruby>中<rp>(</rp><rt>なか</rt><rp>)</rp></ruby>に そのままの<ruby>形<rp>(</rp><rt>かたち</rt><rp>)</rp></ruby>では<ruby>入<rp>(</rp><rt>はい</rt><rp>)</rp></ruby>って いません。ただし、<ruby>短<rp>(</rp><rt>みじか</rt><rp>)</rp></ruby>い ことばは ハッシュから わかって しまう ことが あるので、ごほうびは、とられても こまらない ものだけに します。</li>
 </ul>
 </details>
