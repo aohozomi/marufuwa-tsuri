@@ -99,7 +99,7 @@
   const pick = (arr, rnd = Math.random) => arr[Math.floor(rnd() * arr.length)];
   const TIME_PAL = { asa: ['#8fd3ee', '#4aa3cf'], hiru: ['#7fd0f2', '#3b9bd0'], yuu: ['#7aa9d6', '#44779f'], yoru: ['#3f6fa6', '#1d365f'] };
   function palette() {
-    const time = scene.dataset.time || 'hiru', cs = getComputedStyle(scene), base = TIME_PAL[time] || TIME_PAL.hiru;
+    const time = (visit && visit.time) || scene.dataset.time || 'hiru', cs = getComputedStyle(scene), base = TIME_PAL[time] || TIME_PAL.hiru;   // ほうもん中は リンクの じかん（おくった 人の へや）
     const w1 = hex(cs.getPropertyValue('--water1')) ? cs.getPropertyValue('--water1').trim() : base[0];
     const w2 = hex(cs.getPropertyValue('--water2')) ? cs.getPropertyValue('--water2').trim() : base[1];
     const night = time === 'yoru', dusk = time === 'yuu';
@@ -311,7 +311,7 @@
 .tk-visitbar[hidden]{display:none}
 .tk-visitbar p{margin:0;flex:1 1 200px}
 .tk-visitbar button{min-height:44px;min-width:44px;padding:4px 14px;font-size:.88rem;flex:0 0 auto}
-#tk.tk-visit .tk-guest,#tk.tk-visit .tk-cam,#tk.tk-visit .tk-deco-btn,#tk.tk-visit .tk-tray,#tk.tk-visit .tk-shelf,#tk.tk-visit .tk-shelfbtn,#tk.tk-visit .tk-giftlist,#tk.tk-visit .tk-bgm,#tk.tk-visit .tk-send,#tk.tk-visit .tk-linkbox,#tk.tk-visit .tk-empty button{display:none !important}   /* ほうもん中は 見るだけ：しゃしん・かざる・だな・BGM・おくる は 出さない */
+#tk.tk-visit .tk-cam,#tk.tk-visit .tk-deco-btn,#tk.tk-visit .tk-tray,#tk.tk-visit .tk-shelf,#tk.tk-visit .tk-shelfbtn,#tk.tk-visit .tk-giftlist,#tk.tk-visit .tk-bgm,#tk.tk-visit .tk-send,#tk.tk-visit .tk-linkbox,#tk.tk-visit .tk-empty button{display:none !important}   /* ほうもん中は 見るだけ：しゃしん・かざる・だな・BGM・おくる は 出さない */
 .tk-linkbox{position:absolute;inset:0;z-index:31;background:#0d2a3aee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;color:#fff;text-align:center}
 .tk-linkbox[hidden]{display:none}
 .tk-linkbox h3{margin:0;font-size:1.05rem}
@@ -411,7 +411,7 @@
     <div class="tk-tray" hidden><p></p><div class="tk-items"></div><div class="tk-placedlist"></div><div class="tk-trayrow"><button type="button" class="tk-clear">ぜんぶ もどす</button><button type="button" class="tk-done">おわる</button></div></div>
     <div class="tk-actions tk-chrome"><button type="button" class="tk-feed">ごはんを あげる</button><button type="button" class="tk-deco-btn" aria-pressed="false">かざる</button><button type="button" class="tk-ear" aria-pressed="false">みみで ながめる</button><button type="button" class="tk-send">おへやを おくる</button></div>
     <div class="tk-photo" hidden><p></p><img alt="とった しゃしん"><div class="tk-photorow"><a class="tk-save" download="marufuwa-osuisou.png">ほぞん</a><button type="button" class="tk-share" hidden>ひとに みせる</button><button type="button" class="tk-photoclose">とじる</button></div></div>
-    <div class="tk-linkbox" hidden role="group" aria-labelledby="tk-linktitle"><h3 id="tk-linktitle">おへやの リンク</h3><p class="tk-linkmsg"></p><p class="tk-linktext" tabindex="0"></p><p class="tk-linknote">リンクに はいって いるのは、さかなの ばんごうと、かざりの ばんごうと いちだけ。なまえや ひとこと、たんまつの しるしは はいって いないよ。みる ひとの きろくには、なにも のこらないよ。</p><div class="tk-photorow"><button type="button" class="tk-linkcopy">コピーする</button><button type="button" class="tk-linkclose">とじる</button></div></div>
+    <div class="tk-linkbox" hidden role="group" aria-labelledby="tk-linktitle"><h3 id="tk-linktitle">おへやの リンク</h3><p class="tk-linkmsg"></p><p class="tk-linktext" tabindex="0"></p><p class="tk-linknote">リンクに はいって いるのは、さかなの ばんごうと、かざりの ばんごうと いち、いまの じかん、あそびに きて いる なかまの ばんごうだけ。なまえや ひとこと、たんまつの しるしは はいって いないよ。みる ひとの きろくには、なにも のこらないよ。</p><div class="tk-photorow"><button type="button" class="tk-linkcopy">コピーする</button><button type="button" class="tk-linkclose">とじる</button></div></div>
     <p class="tk-sr" role="status" id="tk-sr"></p><ul class="tk-sr" id="tk-list"></ul>`;
   document.body.append(dlg);
   const stage = $(dlg, '.tk-stage'), room = $(dlg, '.tk-room'), water = $(dlg, '.tk-water'), layer = $(dlg, '.tk-layer'), base = $(dlg, '.tk-base'), placedBox = $(dlg, '.tk-placed'), rays = $(dlg, '.tk-rays');
@@ -1329,17 +1329,25 @@
   //   ひらいた 人は 見るだけ：あいての 記録には 何も 書かない・数えない（saveTank と markFound を とめる／ひみつの 鍵・BGM の 鍵・おと の 鍵にも 触らない）。
   //   かたちが 合わない リンクは 何も おこさない（エラーも 出さない）。ひらいたら アドレスから 消す。「じぶんの おへやに もどる」は ほうもん中 いつも 見える。
   //   かざりの ばんごうは この ならびが きまり（ふやす ときは うしろへ。まえの ばんごうを かえると リンクが こわれる）。
+//   ３ばんめ（あっても なくても よい。ないリンクは ふるい かたち）＝ばめん：じかん（1あさ 2ひる 3ゆうがた 4よる）＋ ほしぞら×10（4よるの ときだけ 1）＋ あそびに きて いる 子×100（0＝いない。1〜＝FRIEND_IDS の ならび、そのあと TsuriTown.list の ならび）。数字だけ。
+//   ならびは ふやす ときは うしろへ（FRIEND_IDS・TsuriTown.list とも）。しらない 子の ばんごうは 子だけ むしして へやは ひらく。
   const DECOR_IDS = ['かいがら', 'きれいな いし', 'ながれぎ', 'みずくさ', 'ちいさな びん', 'ほしの かけら', 'さくらの はなびら', 'あおい は', 'どんぐり', 'ゆきの けっしょう', 'ささぶね', 'やどかり'];
-  const HEYA_MAX = { len: 420, fish: 46, decor: 32 };
+  const HEYA_MAX = { len: 420, fish: 46, decor: 32, guest: 999 };
+  const TIMES = ['asa', 'hiru', 'yuu', 'yoru'];
+  const FRIEND_IDS = ['alpaca', 'azarashi', 'gantai', 'hamster', 'hiyoko', 'hoho', 'kawauso', 'kogitsune', 'koinu', 'kojika', 'neko', 'panda', 'penguin', 'ribbon', 'risu', 'tanuki', 'usagi'];   // むかしの 17にん（ならびは かえない）
+  const friendList = () => { const out = FRIEND_IDS.slice(); try { const l = window.TsuriTown && window.TsuriTown.list; if (Array.isArray(l)) for (const t of l) if (t && typeof t.id === 'string' && /^[a-z0-9_-]{1,32}$/i.test(t.id) && !out.includes(t.id)) out.push(t.id); } catch {} return out; };
   function encodeRoom() {
     const s = readSave(), tk = readTank();
     const ids = kinds().filter(f => s.fish[f.id] && s.fish[f.id].count > 0).map(f => f.id).slice(0, HEYA_MAX.fish), decor = [];
     for (const p of tk.placed) { const i = DECOR_IDS.indexOf(p.n); if (i < 0 || decor.length >= HEYA_MAX.decor) continue; decor.push(i * 10000 + Math.round(clamp(p.x, 0, 1) * 99) * 100 + Math.round(clamp(p.y, 0, 1) * 99)); }
-    return ids.length || decor.length ? ids.join('.') + '-' + decor.join('.') : '';
+    if (!ids.length && !decor.length) return '';
+    const ti = TIMES.indexOf(room.dataset.time) + 1, gi = guestId && !guestEl.hidden ? friendList().indexOf(guestId) + 1 : 0;
+    const sc = ti ? ti + (starry && ti === 4 ? 10 : 0) + Math.min(gi, HEYA_MAX.guest) * 100 : 0;   // へやが ひらいて いない（じかんが わからない）ときは ふるい かたち
+    return ids.join('.') + '-' + decor.join('.') + (sc ? '-' + sc : '');
   }
   function decodeRoom(code) {
     if (typeof code !== 'string' || !code || code.length > HEYA_MAX.len || !/^[0-9.-]+$/.test(code)) return null;
-    const parts = code.split('-'); if (parts.length !== 2) return null;
+    const parts = code.split('-'); if (parts.length < 2 || parts.length > 3) return null;
     const fishT = parts[0] ? parts[0].split('.') : [], decT = parts[1] ? parts[1].split('.') : [];
     if (fishT.length > HEYA_MAX.fish || decT.length > HEYA_MAX.decor || (!fishT.length && !decT.length)) return null;
     const total = kinds().length, fish = [], seenId = new Set(), placed = [];
@@ -1351,7 +1359,16 @@
       if (id >= DECOR_IDS.length) return null;
       placed.push({ n: DECOR_IDS[id], x: +(x / 99).toFixed(3), y: +(y / 99).toFixed(3) });
     }
-    return { fish, placed };
+    let time = '', starryOn = false, guest = '';
+    if (parts.length === 3) {
+      const t3 = parts[2]; if (!/^[0-9]{1,5}$/.test(t3)) return null;
+      const v = Number(t3); if (String(v) !== t3) return null;
+      const ti = v % 10, si = Math.floor(v / 10) % 10, gi = Math.floor(v / 100);
+      if (ti > 4 || si > 1 || (si === 1 && ti !== 4)) return null;
+      time = ti ? TIMES[ti - 1] : ''; starryOn = si === 1;
+      if (gi > 0) guest = friendList()[gi - 1] || '';   // しらない 子は むしして へやだけ ひらく
+    }
+    return { fish, placed, time, starry: starryOn, guest };
   }
   const roomLink = () => { const code = encodeRoom(); if (!code) return ''; try { const u = new URL(location.href); u.search = ''; u.hash = ''; u.searchParams.set('heya', code); return u.href; } catch { return ''; } };
   let lastLink = '';
@@ -1394,11 +1411,11 @@
   const favIds = () => { const l = readSave().fav, out = []; if (Array.isArray(l)) for (const id of l) if (typeof id === 'string' && /^[a-z0-9_-]{1,32}$/i.test(id) && !out.includes(id)) out.push(id); return out; };
   function renderGuest() {
     list.querySelectorAll('li[data-guest]').forEach(li => li.remove());
-    const ids = visit ? [] : favIds();
+    const ids = visit ? (visit.guest ? [visit.guest] : []) : favIds();
     if (!ids.length) { guestId = ''; guestEl.hidden = true; guestEl.removeAttribute('src'); return; }
     const slot = Math.max(0, ['asa', 'hiru', 'yuu', 'yoru'].indexOf(room.dataset.time));
     guestId = ids[slot % ids.length]; guestEl.src = BASE + 'img/friend-' + guestId + '-s.webp'; guestEl.hidden = false;
-    const li = document.createElement('li'); li.dataset.guest = '1'; li.textContent = 'すきな なかまが あそびに きて いるよ。'; list.append(li);
+    const li = document.createElement('li'); li.dataset.guest = '1'; li.textContent = visit ? 'ともだちが あそびに きて いるよ。' : 'すきな なかまが あそびに きて いるよ。'; list.append(li);
   }
   guestEl.addEventListener('error', () => { guestEl.hidden = true; });   // 絵が なければ 出さない
   // ─── 開く・閉じる ───
@@ -1416,6 +1433,7 @@
     // となりに いる なかまが かわって いたら、へやの なかまも かえる（つりばを かえた あと）
     friendsEls.forEach(el => { const src2 = friendSrc(el.dataset.who === 'a' ? 'friend-a' : 'friend-b'); if (src2 && el.getAttribute('src') !== src2) el.setAttribute('src', src2); });
     layoutRoom(); paintWater(); layoutRoom();
+    if (visit && visit.starry) { starry = true; applyStarry(); }   // おくった 人の へやが ほしぞらの とき
     const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
     if (arrivals.length) {
       const first = arrivals[0].fish;
@@ -1475,7 +1493,7 @@
 
   // ─── English mode（tsuri-en.js が あって 英語の 時だけ）：おくりもの だなの 文と、総司令部の 表に まだ ない 文を 足す ───
   {
-    const HEYA_EN = { 'さかなが すこし おおきく なったよ。': 'A fish has grown a little bigger.', 'さかなが おおきく そだったよ！': 'A fish has grown bigger!', 'さかなが すこし おおきく なって いるよ。': 'Some fish have grown a little bigger.', 'おおきく そだった さかなが いるよ。': 'Some fish have grown bigger.', 'そだち': 'Growth', 'すこし おおきく そだったよ': 'A little bigger', 'おおきく そだったよ': 'Bigger', 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to visit.', 'つくえの うえの おにぎり': 'Rice ball on the table', 'つくえの うえの おにぎりを、なかまと はんぶんこ したよ。': 'You shared the rice ball on the table with a friend.', 'だれかの おへや': "Someone's Room", 'だれかの おへやを みせて もらって いるよ。みるだけ。あなたの きろくには、なにも のこらないよ。': "You're visiting someone's room. Just looking. Nothing is saved to your own records.", 'じぶんの おへやに もどる': 'Back to my room', 'じぶんの おへやに もどったよ。': 'Back in your own room.', 'ようこそ。ゆっくり みていってね。': 'Welcome. Take your time looking around.', 'この おへやには、まだ さかなが いないよ。': 'There are no fish in this room yet.', 'おへやを おくる': 'Send my room', 'おへやの リンク': 'Room link', 'コピーする': 'Copy', 'リンクを コピーしたよ。ともだちに はりつけて おくってね。': 'Link copied. Paste it to send it to a friend.', 'したの リンクを コピーして、ともだちに おくってね。': 'Copy the link below and send it to a friend.', 'コピーできなかったよ。したの リンクを おして えらんで コピーしてね。': "Couldn't copy. Please select the link below and copy it.", 'リンクに はいって いるのは、さかなの ばんごうと、かざりの ばんごうと いちだけ。なまえや ひとこと、たんまつの しるしは はいって いないよ。みる ひとの きろくには、なにも のこらないよ。': 'The link contains only fish numbers and decoration numbers and positions. No names, messages or device marks. Nothing is saved to the viewer’s records.', 'まだ おくれる おへやが ないよ。さかなを つると おくれるよ。': 'There is no room to send yet. Catch a fish and you can send it.', 'おへやの リンクを おくったよ。': 'Sent the room link.', 'おへやの リンクを コピーしました。': 'Room link copied.', 'おへやの リンクが できました。': 'Room link is ready.', 'まだ おくれる おへやが ありません。': 'There is no room to send yet.', 'おへやの リンクを おくりました。': 'Sent the room link.' };
+    const HEYA_EN = { 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to play.', 'ともだちが あそびに きて いるよ。': 'A friend has come to visit.', 'さかなが すこし おおきく なったよ。': 'A fish has grown a little bigger.', 'さかなが おおきく そだったよ！': 'A fish has grown bigger!', 'さかなが すこし おおきく なって いるよ。': 'Some fish have grown a little bigger.', 'おおきく そだった さかなが いるよ。': 'Some fish have grown bigger.', 'そだち': 'Growth', 'すこし おおきく そだったよ': 'A little bigger', 'おおきく そだったよ': 'Bigger', 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to visit.', 'つくえの うえの おにぎり': 'Rice ball on the table', 'つくえの うえの おにぎりを、なかまと はんぶんこ したよ。': 'You shared the rice ball on the table with a friend.', 'だれかの おへや': "Someone's Room", 'だれかの おへやを みせて もらって いるよ。みるだけ。あなたの きろくには、なにも のこらないよ。': "You're visiting someone's room. Just looking. Nothing is saved to your own records.", 'じぶんの おへやに もどる': 'Back to my room', 'じぶんの おへやに もどったよ。': 'Back in your own room.', 'ようこそ。ゆっくり みていってね。': 'Welcome. Take your time looking around.', 'この おへやには、まだ さかなが いないよ。': 'There are no fish in this room yet.', 'おへやを おくる': 'Send my room', 'おへやの リンク': 'Room link', 'コピーする': 'Copy', 'リンクを コピーしたよ。ともだちに はりつけて おくってね。': 'Link copied. Paste it to send it to a friend.', 'したの リンクを コピーして、ともだちに おくってね。': 'Copy the link below and send it to a friend.', 'コピーできなかったよ。したの リンクを おして えらんで コピーしてね。': "Couldn't copy. Please select the link below and copy it.", 'リンクに はいって いるのは、さかなの ばんごうと、かざりの ばんごうと いち、いまの じかん、あそびに きて いる なかまの ばんごうだけ。なまえや ひとこと、たんまつの しるしは はいって いないよ。みる ひとの きろくには、なにも のこらないよ。': 'The link contains only numbers: fish numbers, decoration numbers and positions, the time of day, and a visiting friend’s number. No names, messages or device marks. Nothing is saved to the viewer’s records.', 'まだ おくれる おへやが ないよ。さかなを つると おくれるよ。': 'There is no room to send yet. Catch a fish and you can send it.', 'おへやの リンクを おくったよ。': 'Sent the room link.', 'おへやの リンクを コピーしました。': 'Room link copied.', 'おへやの リンクが できました。': 'Room link is ready.', 'まだ おくれる おへやが ありません。': 'There is no room to send yet.', 'おへやの リンクを おくりました。': 'Sent the room link.' };
     const GIFT_EN = { 'さくらのはなびら': 'Cherry blossom petal', 'あおいは': 'Fresh green leaf', 'どんぐり': 'Acorn', 'ゆきのけっしょう': 'Snow crystal', 'ささぶね': 'Bamboo-leaf boat', 'やどかり': 'Hermit crab' };   // ひみつで もらえる かざりの なまえ（訳表の かけら 表には 入らないので、ここで 訳す）
     const EN = { ex: { ...HEYA_EN, 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'パレード、はじまるよ！': "The parade is starting!", 'たのしかったね。': 'That was fun!', 'さかなたちが パレードを はじめたよ。': 'The fish started a parade.', 'パレードが おわったよ。': 'The parade is over.', 'さかなたちが パレードを したよ。': 'The fish had a parade.', 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
       [/^(.+?)×(\d+)$/, (_, n, k) => GIFT_EN[n] ? GIFT_EN[n] + ' ×' + k : null],   // かざりの ふだ（ひみつで もらえる かざり）
@@ -1491,5 +1509,5 @@
 
   // 検査用（音の 出口を 測る）：音の なまえ → よびだし。ふだんの ゲームでは つかわない
   const CUES = { sprinkle: () => cueSprinkle(180), munch: () => cueMunch(180), gather: () => { lastGather = -1e9; cueGather(); }, plop: () => cuePlop(180), pon: () => cuePon(180, false), ponOff: () => cuePon(180, true), shutter: cueShutter, open: cueOpen, close: cueClose, click: cueClick, lampOn: () => cueLamp(true), lampOff: () => cueLamp(false), happy: cueHappy, chime: cueChime, munchMany: cueMunchMany, bubbles: cueBubbles, parade: cueParade, blip: () => asKind('amb', () => tone(640, .1, { vol: .022, glide: 1.9 })), napBreath: () => tone(150, .9, { type: 'triangle', vol: .018, glide: .8 }), utouto: () => tone(150, .9, { type: 'triangle', vol: .04, glide: .8 }), tourNote: () => tone(fishFreq(kinds()[0]), .26, { type: 'triangle', vol: .08 }), tourEnd: () => [523, 659, 784].forEach((f, i) => tone(f, .5, { type: 'triangle', vol: .06, at: i * .02 })) };
-  window.TsuriTank = { grow: { sizes: () => fishes.map(o => ({ id: o.f.id, size: o.size, base: o.base, stage: o.stage })), stageOf, check: growCheck, mul: GROW_MUL.slice(), dayIdx, rec: id => { const g = growRec(id); return g ? { ...g } : null; }, reload: () => { tank = readTank(); } }, cues: { ...CUES, voice: (id, nushi) => { const f = kinds().find(k => k.id === id); if (f) fishVoice(f, 0, .09, !!nushi); }, ids: () => Object.keys(CUES) }, audio: { tone, noise }, frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open: () => open(), close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, parade: !!parade && !parade.still, paradeStill: !!parade && parade.still, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, guest: () => guestId, heya: { encode: encodeRoom, decode: decodeRoom, link: roomLink, open: code => { const v = decodeRoom(code); if (!v || dlg.open) return false; open(v); return true; }, visiting: () => !!visit, back: backHome, max: { ...HEYA_MAX }, decorIds: [...DECOR_IDS] }, version: 7 };
+  window.TsuriTank = { grow: { sizes: () => fishes.map(o => ({ id: o.f.id, size: o.size, base: o.base, stage: o.stage })), stageOf, check: growCheck, mul: GROW_MUL.slice(), dayIdx, rec: id => { const g = growRec(id); return g ? { ...g } : null; }, reload: () => { tank = readTank(); } }, cues: { ...CUES, voice: (id, nushi) => { const f = kinds().find(k => k.id === id); if (f) fishVoice(f, 0, .09, !!nushi); }, ids: () => Object.keys(CUES) }, audio: { tone, noise }, frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open: () => open(), close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, parade: !!parade && !parade.still, paradeStill: !!parade && parade.still, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, guest: () => guestId, heya: { encode: encodeRoom, decode: decodeRoom, link: roomLink, open: code => { const v = decodeRoom(code); if (!v || dlg.open) return false; open(v); return true; }, visiting: () => !!visit, back: backHome, max: { ...HEYA_MAX }, decorIds: [...DECOR_IDS], times: TIMES.slice(), friends: friendList }, version: 8 };
 })();
