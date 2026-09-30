@@ -332,6 +332,7 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 #line-pull{stroke:#e3f3ff;stroke-opacity:.85;stroke-width:2}   /* ひきの てごたえ：糸の はり＝ゆるい（うすい あお）→ふつう（きいろ）→ぴん（だいだい）。いろだけは「うごきを へらす」でも かわる */
 #line-pull[data-t="1"]{stroke:#fff1a0;stroke-opacity:.95;stroke-width:2.8}
 #line-pull[data-t="2"]{stroke:#ffae5a;stroke-opacity:1;stroke-width:3.8}
+#guide-word .guide-hint{display:inline-block;margin-left:.4em}   /* さいしょの ぽちゃんの あとの ひとこと（ぶんが くっつかない ように）*/
 .drop{position:absolute;z-index:4;border-radius:50%;background:#fff;border:1px solid #8fd0f2;pointer-events:none}   /* みずしぶき */
 .ripple{position:absolute;z-index:2;width:9%;aspect-ratio:2/1;transform:translate(-50%,-50%);border:3px solid #ffffffd9;border-radius:50%;pointer-events:none}
 .hop{position:absolute;z-index:4;font-size:1.3rem;pointer-events:none;transform:translate(-50%,-50%)}
@@ -1067,6 +1068,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (Number.isInteger(other.wishes)) { const wishes = Math.max(save.wishes || 0, other.wishes, (save.wishes || 0) + other.wishes - was(['wishes'])); if (wishes !== (save.wishes || 0)) { save.wishes = wishes; changed = true; } }
     if (Number.isInteger(other.tegami) && other.tegami > (save.tegami || 0)) { save.tegami = other.tegami; changed = true; }
     if (other.audioSet === true && save.audioSet !== true) { save.audioSet = true; changed = true; }
+    if (other.plopHint === true && save.plopHint !== true) { save.plopHint = true; changed = true; }   // さいしょの「ぽちゃん」は 1かい きり
     if (Number.isInteger(other.bookSeen) && other.bookSeen > (Number.isInteger(save.bookSeen) ? save.bookSeen : 0)) { save.bookSeen = other.bookSeen; changed = true; }
     if (other.loved && typeof other.loved === 'object') for (const [pid, fid] of Object.entries(other.loved)) if (Number.isInteger(fid) && !(save.loved && save.loved[pid] !== undefined)) { save.loved = save.loved && typeof save.loved === 'object' ? save.loved : {}; save.loved[pid] = fid; changed = true; }   // ♡ の ついた なかま：すきな さかなの ばんごう
     if (other.week && Number.isInteger(other.week.k) && Number.isInteger(other.week.n) && Array.isArray(other.week.ids)) {   // こんしゅうの きろく：あたらしい しゅうを とり、おなじ しゅうは かずを あわせる
@@ -1246,6 +1248,20 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh(i / 1024 - 1);
     low.type = 'lowpass'; low.frequency.value = save.soft ? 2400 : 4200; low.Q.value = .5; soft.curve = curve;
     low.connect(soft); soft.connect(ctx.destination); bus = {ctx, in: low, low}; return low;
+  }
+  // さいしょの「なげる」で だけ、やさしい「ぽちゃん」を 1かい（おとは はじめから OFF の まま。ひくい・みじかい・sine・ちいさい）。あとで ペンギンが「おとを つけると、もっと きもちいいよ」を 1かい だけ。2かいめ いこうは なし
+  // おと OFF の ひとが「おとが ある ゲームだ」と しる ための 1かい。「こうかおん」を きった ひと・おとを つけた ひとには ならさない
+  let plopHintDue = false;
+  function plopOnce() {
+    if (save.total > 0 || save.plopHint === true || save.sound === true || save.sndFx === false || document.hidden) return;   // はじめて あそぶ ひとの さいしょの 1かい だけ
+    save.plopHint = true; store(); plopHintDue = true;
+    try {
+      const ctx = ready(), at = ctx.currentTime, out = fxOut(ctx);
+      const o = ctx.createOscillator(), v = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(300, at); o.frequency.exponentialRampToValueAtTime(140, at + .16);
+      v.gain.setValueAtTime(0, at); v.gain.linearRampToValueAtTime(.05, at + .006); v.gain.exponentialRampToValueAtTime(.0008, at + .2); o.connect(v).connect(out); o.start(at); o.stop(at + .22);
+      const b = ctx.createOscillator(), bg = ctx.createGain(); b.type = 'sine'; b.frequency.setValueAtTime(520, at + .05); b.frequency.exponentialRampToValueAtTime(360, at + .12);   // ちいさな あわ
+      bg.gain.setValueAtTime(0, at + .05); bg.gain.linearRampToValueAtTime(.02, at + .056); bg.gain.exponentialRampToValueAtTime(.0005, at + .14); b.connect(bg).connect(out); b.start(at + .05); b.stop(at + .16);
+    } catch {}
   }
   function softenBus() { if (bus && bus.low) bus.low.frequency.value = save.soft ? 2400 : 4200; }   // 「やさしい おと」を きりかえた とき（つくって ある でぐちの ローパスを かえる）
   function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, kind = 'fx') {
@@ -1540,7 +1556,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     tone(220, .28, 'square', .2, .04, 880); tone(330, .1, 'triangle', .9, .06, 110); zap(.14, .9);   // ヒュ〜ッ…ポチャ
     button.textContent = 'まってる…'; lock(true); button.dataset.hot = 'false';
     // 「ぽちゃん」は ウキが みずに ついた しゅんかんに（とんで いる 間は まだ 言わない。うごきを へらす ときは すぐ）
-    if (flight) setTimeout(() => { if (phase === 'waiting') say('ぽちゃん。のんびり まとう。'); }, flight); else say('ぽちゃん。のんびり まとう。');
+    if (flight) setTimeout(() => { if (phase === 'waiting') say('ぽちゃん。のんびり まとう。'); if (phase === 'waiting' || phase === 'bite') plopOnce(); }, flight); else { say('ぽちゃん。のんびり まとう。'); plopOnce(); }
     // さいしょの 1ぴきは、すぐに くる（はじめての ひとを またせない）
     const wait = Number(query.get('wait')) || (save.total === 0 ? 1300 : 2200 + Math.random() * 3300);
     // かげが みぎから およいで くる。おおきさは さかなの おおきさ、いろは めずらしさ
@@ -1707,7 +1723,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const left = BASE - seenCount();
     if (mile) party(mile[0]); else if (leveled && lvNow % 5 === 0) party('🎉');   // 5レベルごとの ふしめ だけ おいわい
     const guideWord = mile ? mile[1] : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : fish.season ? L('この つきの さかな だよ！ また らいねんも あえるよ。', 'This month' + String.fromCharCode(39) + 's fish! You can meet it again next year.') : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : plainWord();   // ふつうの ときは、やさしい ひとことを こうたいで（つづけて おなじに ならない）
-    $('guide-word').textContent = guideWord;
+    const hintWord = plopHintDue && save.sound !== true && save.sndFx !== false ? L('おとを つけると、もっと きもちいいよ。', 'Turn on sound for an even nicer feel.') : ''; plopHintDue = false;   // さいしょの ぽちゃんの あと 1かいだけ
+    if (hintWord) { const hint = document.createElement('span'); hint.className = 'guide-hint'; hint.textContent = hintWord; $('guide-word').replaceChildren(guideWord, hint); } else $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
     last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY, album: !!(first && left === 0), badge: (first && left === 0 ? L('ずかん かんせい！', 'Sticker book complete!') : mile ? L(save.total + 'ひきめ！', 'Catch #' + save.total + '!') : '') , firstNushi};   // 節目：ずかん かんせい／10・30・50…ひきめ／はじめての ぬし
@@ -1731,7 +1748,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // れんだ しても、うれしい しゅんかんが きえない ように、すこしだけ まつ
     button.textContent = resultAck ? 'もういちど なげる' : L('つぎへ', 'Next'); button.dataset.hot = 'false'; lock(true); caughtAt = performance.now();
     setTimeout(() => { if (phase === 'caught') lock(false); }, 1000);
-    sayQuiet(fish.name + 'が つれた。' + cm(size) + 'センチ。' + (levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (PLAIN_WORDS.some(w => guideWord === w[0] || guideWord === w[1]) ? '' : '　ペンギン：' + guideWord));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
+    sayQuiet(fish.name + 'が つれた。' + cm(size) + 'センチ。' + (levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (PLAIN_WORDS.some(w => guideWord === w[0] || guideWord === w[1]) ? '' : '　ペンギン：' + guideWord) + (hintWord ? '　' + hintWord : ''));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
   }
 
   function act() {
