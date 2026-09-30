@@ -178,6 +178,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 #thanks summary{cursor:pointer;font-weight:800;padding:10px 4px;min-height:44px;display:list-item}
 @media(prefers-reduced-motion:reduce){
   .ty-star,.ty-bg{animation:none !important}
+  .actor.arriving{animation:none}.actor.leaving{transition:none}
   .logo span,.bd-trees circle,.waves path,.tuft,.cloud,.canopy,.jet,.arm,.mark,.actor img,#rain{animation:none !important}
   .prop,.door{transition:none}
   .cloud{left:8%}
@@ -192,6 +193,9 @@ body.calm .cloud{left:8%}
 body.calm .cloud.c2{left:56%}
 /* パソコン（ひろい 画面）：ひろばを 左に 大きく（画面の たかさに あわせる）、あそぶ ボタンなどは 右に。スマホ・せまい 画面は 今まで通り */
 .stage{display:block}
+.actor.leaving{opacity:0;transition:opacity .9s ease}
+@keyframes arrive{from{opacity:0}to{opacity:1}}
+.actor.arriving{animation:arrive .8s ease-out}
 @media (min-width:900px) and (min-height:560px){
   main{max-width:min(1180px,calc(100vw - 32px));padding:14px 28px 22px}
   .stage{display:grid;grid-template-columns:min(calc((100vh - 150px)*.6429),640px) minmax(340px,470px);grid-template-columns:min(calc((100dvh - 150px)*.6429),640px) minmax(340px,470px);column-gap:30px;justify-content:center;align-items:start}
@@ -1034,7 +1038,28 @@ function pondJump() {
   fxAt(jx, 254, arts.length ? { img: pick(arts) } : '🐟', [{ translate: '-50% 0', opacity: 0 }, { translate: `-50% ${-26 * k}px`, opacity: 1, offset: .4 }, { translate: `-50% 0`, opacity: 0 }], { duration: 900, easing: 'ease-out' });
   sfx.splash(-.7); narrate('いけで さかなが ぴょん と はねたよ', true); seen('pond');
 }
-let nearNote = '', nextNear = 0, nextVisitAt = 30, nextClock = 30, nextBird = 6, nextJump = 14, nextMeteor = 45;
+// ─── ともだちの いれかわり：だいたい 10ぷん（8〜14ぷん）に 1にん。「またね！」と いなくなり、べつの 子が「こんにちは」と くる（つりの となりの なかまと おなじ ペース）。歩いて いる とちゅう・話して いる 子は かえない。「うごきを へらす」の 時は すぐ 入れかえる ───
+const swapGap = () => { const s = Number(q.get('swap')); return s > 0 ? s : 480 + Math.random() * 360; };   // ?swap=びょう は けんさ用（ひろばの 時計＝あそんで いる 時間）
+function swapFriend(slot, now) {
+  if (trip || player.then || player.path.length) return false;
+  const cand = friends.map((f, i) => ({ f, i })).filter(x => (slot === undefined || x.i === slot) && x.f.state === 'idle' && x.f.talking <= 0 && !bubbles.some(b => b.actor === x.f));
+  if (!cand.length) return false;
+  const { f } = pick(cand), here = new Set(friends.map(x => x.id)), pool = Object.keys(PALS).filter(id => !here.has(id)), fresh = pool.filter(id => !own.metToday[id]), id = pick(fresh.length ? fresh : pool);
+  if (!id) return false;
+  const oldName = f.name, quick = !!now || reduce();
+  const change = () => {
+    f.id = id; f.name = PALS[id].name; f.aspect = PALS[id].size; f.el.dataset.id = id; f.el.style.width = (f.h * f.aspect / W * 100) + '%'; f.el.style.aspectRatio = String(f.aspect); f.img.src = BASE + 'img/friend-' + id + '-s.webp';
+    f.bag = []; f.lastLine = ''; f.mem = ''; f.cool = 5; f.talking = 0; f.state = 'idle'; f.timer = 2 + Math.random() * 3; f.path = []; f.moving = false;
+    f.el.classList.remove('leaving'); if (!quick) { f.el.classList.add('arriving'); setTimeout(() => f.el.classList.remove('arriving'), 900); }
+    [$('friend-a'), $('friend-b')].forEach((img, j) => { if (img && friends[j]) img.setAttribute('src', BASE + 'img/friend-' + friends[j].id + '-s.webp'); });   // すいそうの となりも 同じ 子に
+    renderPalRow(); if (!quick) speak(f, HELLO[curTime] + '！ ' + PALS[id].hello, 3000, true);
+    narrate(oldName + 'は かえったよ。' + f.name + 'が あそびに きたよ', true);
+  };
+  if (quick) { change(); return true; }
+  speak(f, 'またね！', 1500, true); f.state = 'talk'; f.talking = 1.7; hop(f); f.el.classList.add('leaving'); setTimeout(change, 1500);
+  return true;
+}
+let nearNote = '', nextNear = 0, nextVisitAt = 30, nextClock = 30, nextBird = 6, nextJump = 14, nextMeteor = 45, nextSwap = swapGap();
 function update(dt) {
   T += dt;
   const kb = keyMove(dt); if (!kb) stepActor(player, dt);
@@ -1058,6 +1083,7 @@ function update(dt) {
     nextJump = T + 16 + Math.random() * 20;
     if (!reduce() && !document.hidden) pondJump();
   }
+  if (T > nextSwap) { nextSwap = T + swapGap(); if (!swapFriend()) nextSwap = T + 20; }   // かえられない 時（歩いて いる など）は 20びょう あとに もう 1回
   if (curTime === 'n' && T > nextMeteor) { nextMeteor = T + 50 + Math.random() * 50; if (!reduce()) shootingStar(false); }
 }
 let last = 0;
@@ -1242,7 +1268,7 @@ const api = window.Hiroba = {
   version: 1, paused: false, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
-  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
+  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   say: () => statusEl.textContent
 };
 })();
