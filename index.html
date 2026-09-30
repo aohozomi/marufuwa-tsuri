@@ -581,7 +581,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   </div>
 
   <div class="areas" id="areas" role="group" aria-label="つりばを えらぶ"></div>
-  <details class="time-box"><summary>じかんを かえる（いま：<span id="time-now"></span>）</summary>
+  <details class="time-box"><summary><span id="time-emoji" aria-hidden="true"></span> じかんを かえる（いま：<span id="time-now"></span>）</summary>
     <div class="areas times" id="times" role="group" aria-label="じかんを えらぶ"></div>
   </details>
 
@@ -1673,7 +1673,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function drawTimes() {
     const hour = new Date().getHours(), night = hour >= 19 || hour < 5;
     scene.dataset.dim = String(night && timeOfDay() !== 'n');
-    $('time-now').textContent = TIME_LABEL[timeOfDay()];
+    $('time-now').textContent = TIME_LABEL[timeOfDay()]; $('time-emoji').textContent = {a: '🌅', h: '☀️', y: '🌇', n: '🌙'}[timeOfDay()] || '';   // いまの じかんの え（よみあげ しない）
     syncTabs($('times'), [['', 'いまの じかん'], ['a', 'あさ'], ['h', 'ひる'], ['y', 'ゆうがた'], ['n', 'よる']].map(([id, name]) => ({k: 't' + id, text: name, disabled: !(phase === 'idle' || phase === 'caught'), pressed: (save.time || '') === id, click: () => {
       save.time = id; store(); scene.dataset.time = TIME_NAME[timeOfDay()]; drawTimes();
       say(TIME_LABEL[timeOfDay()] + 'に なったよ。' + (id ? '' : '（とけいに あわせて いるよ）'));
