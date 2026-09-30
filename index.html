@@ -196,7 +196,11 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 .chips button[aria-checked=true]{--c1:#ffe6ef;--c2:#ff9fbd;--side:#d9628a;--ink:#5a1230}
 #gift-word{font-weight:800}
 :root[data-large=true]{font-size:125%}   /* もじを おおきく：ぜんぶの もじ（rem）が 1.25ばい */
-:root[data-large=true] .hud button,:root[data-large=true] .hud .pill{white-space:normal;line-height:1.3}   /* せまい がめんでも もじが はみ出さない（おって かえす） */
+:root[data-large=true] .hud button,:root[data-large=true] .hud .pill{white-space:normal;line-height:1.3}
+:root[data-large=true] #card{padding:3px 8px 4px}   /* もじを おおきく でも、つれた ふだが けしきを おおわない ように（ふだの もじは ふだんより 1わり ほど おおきい まま・高さは ふだんと おなじ） */
+:root[data-large=true] #card h2{font-size:.95rem;line-height:1.45}
+:root[data-large=true] #card p{font-size:.74rem;line-height:1.3}
+:root[data-large=true] #card .tag,:root[data-large=true] #card .stamp{font-size:.68rem}   /* せまい がめんでも もじが はみ出さない（おって かえす） */
 .hud.keep{flex-wrap:wrap}
 #open-home[hidden]{display:none}
 #home-steps{display:grid;gap:8px;margin:0 0 10px}
