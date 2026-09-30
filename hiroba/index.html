@@ -396,8 +396,9 @@ const TE = s => (window.TsuriEn ? window.TsuriEn.t(s) : s);   // English mode（
 // 魚の 絵（つりびよりと おなじ tsuri-art.js）。ひろばが ひらいて しばらくしてから、じゃまに ならない ように 読む。水槽（おへや）と いけの さかなが 使う。読めなくても 絵文字で 出る
 let artLoading = null;
 const loadScript = src => new Promise(res => { const s = document.createElement('script'); s.src = BASE + src; s.onload = () => res(true); s.onerror = () => res(false); document.head.append(s); });
-// きせつの さかな（34〜45ばん）の かりの 絵（tsuri-art-season.js）は、ふつうの 絵を 元に つくる ので あとに 読む。読めなくても 絵文字で 出る
-const loadArt = () => artLoading || (artLoading = window.TsuriArt ? Promise.resolve(true) : loadScript('tsuri-art.js').then(ok => ok ? loadScript('tsuri-art-season.js').then(() => true) : false));
+// つりびよりの 本体と おなじ じゅんばん：ふつうの 絵 → きせつの さかなの かりの 絵（tsuri-art-season.js・ふつうの 絵を 元に つくる）→ 本物の 絵（tsuri-art-real.js・ある 分だけ 差しかえる。
+// 絵の 場所は そのファイルの 場所から 作る ので ひろば（/hiroba/）から 読んでも ずれない。script 要素で 読む こと）。どれか 読めなくても 絵文字・かりの 絵で 出る
+const loadArt = () => artLoading || (artLoading = window.TsuriArt ? Promise.resolve(true) : loadScript('tsuri-art.js').then(ok => ok ? loadScript('tsuri-art-season.js').then(() => loadScript('tsuri-art-real.js')).then(() => true) : false));
 setTimeout(loadArt, 1800);
 const POND_ART = [0, 1, 2, 3, 8, 11, 12, 23];   // いけの さかな：ちいさくて まるい 子たち（TsuriArt の 番号）
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
