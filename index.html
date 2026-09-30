@@ -589,6 +589,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="open-gear" type="button" style="flex:1" aria-label="じぶんの どうぐ">どうぐ</button>
     <a class="pill plaza" href="hiroba/" style="flex:1">ひろば</a>
   </div>
+  <p class="note" id="plaza-note" hidden></p>
 
   <div class="areas" id="areas" role="group" aria-label="つりばを えらぶ"></div>
   <details class="time-box"><summary>じかんを かえる（いま：<span id="time-now"></span>）</summary>
@@ -1377,8 +1378,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     badge.hidden = !n; badge.textContent = String(n);
     if (n) b.setAttribute('aria-label', L('ずかん。あたらしい ' + n + ' しゅるい', 'Sticker book. ' + n + ' new')); else b.removeAttribute('aria-label');
   }
+  function drawPlazaNote() {   // 「ひろば」って なに？：3びき つって なれてから、ひとこと（せかさない・かならず ではない）
+    const box = $('plaza-note'); if (!box || document.readyState === 'loading') return;
+    box.hidden = save.total < 3; box.textContent = L('ひろばでは、おにぎりキャッチや まるふわの おへやで あそべるよ。', 'In the plaza, you can play Onigiri Catch and visit Marufuwa' + String.fromCharCode(39) + 's room.');
+  }
   function hud() {
-    $('total').textContent = String(save.total);
+    $('total').textContent = String(save.total); drawPlazaNote();
     drawToday(); drawBadge();
     $('seen').textContent = $('book-seen').textContent = String(seenCount()); $('seen-ring').style.setProperty('--p', Math.round(Math.min(1, seenCount() / BASE) * 100) + '%');
     const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
@@ -2679,7 +2684,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   drawSound();
   // おかえり／ふかい よる：かぞえない・せめない・アドバイスしない。ひさしぶりに きた ひとには、きろくは そのままだと つたえる。よなかに ひらいた ひとには、ゆっくり ながめよう と だけ
   const away = save.last ? Date.now() - save.last : 0, hourNow = new Date().getHours();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawToday);   // 英語の ときは tsuri-en.js が よみこまれて から 書きなおす
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawToday(); drawPlazaNote(); });   // 英語の ときは tsuri-en.js が よみこまれて から 書きなおす
   // てがみ：tsuri-tegami.js は defer なので、ぜんぶ よみこまれて から（DOMContentLoaded）。あいた ひにちは かぞえない・出さない
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => tegamiInit(away)); else tegamiInit(away);
   const welcome = (away >= 3 * 86400000 ? 'おかえり。ずかんも きろくも、そのままだよ。' : '') + (hourNow >= 1 && hourNow < 5 ? 'ねむれない？ ゆっくり ながめよう。' : '');
