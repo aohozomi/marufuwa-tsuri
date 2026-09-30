@@ -527,7 +527,7 @@
   let actx = null, master = null, noiseBuf = null, hissBuf = null, ambience = null, bubbleTimer = 0, sfx = false, lastCue = 0, lastGather = 0, listen = false;
   const mainSound = () => readSave().sound === true;
   function soundNow() { const main = mainSound(); return tank.sound !== undefined && tank.soundMain === main ? tank.sound : main; }
-  function refreshSound() { sfx = soundNow(); if (!sfx) stopAmbience(); else if (isOpen()) startAmbience(); syncSoundButton(); return sfx; }
+  function refreshSound() { sfx = soundNow(); if (!sfx) stopAmbience(); else if (isOpen()) startAmbience(); syncSoundButton(); bgmRefresh(); return sfx; }
   function audio() {
     const AC = window.AudioContext || window.webkitAudioContext;   // つかう時に探す（おとが OFF の間は、作らない）
     if (!sfx || !AC) return null;
@@ -700,6 +700,7 @@
     listen = on; dlg.classList.toggle('tk-listen', on); earBtn.setAttribute('aria-pressed', String(on));
     if (on) layer.removeAttribute('aria-hidden'); else layer.setAttribute('aria-hidden', 'true');
     for (const o of fishes) prepFocus(o);
+    bgmRefresh();
   }
   layer.addEventListener('focusin', e => {
     const o = fishes.find(f => f.el === (e.target.closest && e.target.closest('.tk-fish')));
@@ -725,6 +726,27 @@
     if (to) { cueOpen(); startAmbience(); say('おとを つけたよ。', true); sr.textContent = 'おとを つけました。'; } else { say('おとを けしたよ。', true); sr.textContent = 'おとを けしました。'; }
   }
   function syncSoundButton() { sndBtn.textContent = sfx ? '🔊' : '🔇'; sndBtn.setAttribute('aria-pressed', String(sfx)); sndBtn.setAttribute('aria-label', 'おと：' + (sfx ? 'ON' : 'OFF')); sndBtn.title = 'おと：' + (sfx ? 'ON' : 'OFF'); }
+
+  // ─── BGM（外付け tsuri-bgm.js。はじめは OFF。「おと」が ON の 時だけ ながれる。おへやを ひらいて いる 間だけ）───
+  //   曲：ひるは b（ぽこぽこ）、ランプを けした 星空の へやは c（ほしぞら）。「みみで ながめる」の 間は おやすみ（魚の なまえの おとを じゃましない）。
+  //   「BGM」ボタンは 下の ならびに 足す。おとが OFF の まま おしたら、おとも つける。ながす 音の 部品（AudioContext）は、おへやの ものを かりる。
+  let bgmBtn = null, bgmLoading = null, soundWasOff = false;
+  const loadBgm = () => window.TsuriBgm ? Promise.resolve(window.TsuriBgm) : (bgmLoading || (bgmLoading = new Promise(res => { const s = document.createElement('script'); s.src = BASE + 'tsuri-bgm.js'; s.onload = () => res(window.TsuriBgm || null); s.onerror = () => res(null); document.head.append(s); })));
+  function bgmEnter() {
+    const B = window.TsuriBgm; if (!B) return;
+    if (!bgmBtn) {
+      bgmBtn = B.button({
+        className: 'tk-bgm', sound: soundNow,
+        enableSound: () => { soundWasOff = true; toggleSound(true); },
+        onToggle: next => { const msg = next ? (soundWasOff ? 'おとと BGMを つけたよ。' : 'BGMを つけたよ。') + ' しずかな きょくが ながれるよ。' : 'BGMを けしたよ。'; soundWasOff = false; say(msg, true); sr.textContent = msg; }
+      });
+      $(dlg, '.tk-actions').append(bgmBtn);
+    }
+    B.enter('tank', { ctx: audio, sound: soundNow, starry: () => starry, mute: () => listen });
+  }
+  const bgmOpen = () => { if (window.TsuriBgm) bgmEnter(); else loadBgm().then(B => { if (B && isOpen()) bgmEnter(); }); };
+  const bgmLeave = () => { if (window.TsuriBgm) window.TsuriBgm.leave('tank'); };
+  function bgmRefresh() { if (window.TsuriBgm) window.TsuriBgm.refresh(); }
 
   // ─── 魚の入れかえ：水槽に出ているのは、いっぺんに数ひきだけ。ときどき入れかわる ───
   const capFor = () => W < 420 ? 8 : 12;
@@ -924,7 +946,7 @@
   const cueChime = () => [1568, 2093, 2637].forEach((f, i) => tone(f, .12, { type: 'triangle', vol: .05, at: i * .1 }));
   const cueMunchMany = () => { for (let i = 0; i < 3; i++) noise(.06, { at: .25 + i * .18, vol: .05 }); cueHappy(); };
   const cueBubbles = () => { [0, 1, 2].forEach(i => tone(560 + i * 110, .12, { type: 'triangle', vol: .06, at: i * .32, glide: 1.35 })); tone(1568, .2, { type: 'triangle', vol: .04, at: 1.1 }); };
-  function applyStarry() { room.classList.toggle('tk-starry', starry); lampBtn.setAttribute('aria-pressed', String(starry)); }
+  function applyStarry() { room.classList.toggle('tk-starry', starry); lampBtn.setAttribute('aria-pressed', String(starry)); bgmRefresh(); }
   // へや1：ランプを けすと ほしぞら（よるだけ）
   function toggleLamp() {
     if (room.dataset.time !== 'yoru') { say('ひるまは ランプが なくても あかるいね。', true); sr.textContent = 'ひるまは ランプが なくても あかるいね。'; cueClick(); return; }
@@ -1050,13 +1072,14 @@
     } else say(total ? pick(SAY.any) : pick(SAY.empty), true);
     refreshBadge(); resetZen();
     setListen(false); refreshSound(); if (sfx) { cueOpen(); startAmbience(); }
+    bgmOpen();
     clearTimeout(sayTimer); sayTimer = setTimeout(autoSay, 8000);
     clearTimeout(rotateTimer); rotateTimer = setTimeout(rotate, 40000);
     applyCombos(2); resetNap();
     start();
   }
-  function close() { if (dlg.open) dlg.close(); }
-  dlg.addEventListener('close', () => { resetSecrets(); clearTimeout(sayTimer); clearTimeout(zenTimer); clearTimeout(moodTimer); clearTimeout(rotateTimer); clearTimeout(sayPending); cancelAnimationFrame(raf); raf = 0; tip.hidden = true; photo.hidden = true; setDeco(false); setListen(false); refreshBadge(); mascot.src = BASE + 'img/game-blue.webp'; stopAmbience(); if (sfx) cueClose(); });
+  function close() { if (dlg.open) dlg.close(); bgmLeave(); }   // 「とじた」の しらせ（close イベント）は あとから 来る。BGM は すぐ 止める
+  dlg.addEventListener('close', () => { resetSecrets(); clearTimeout(sayTimer); clearTimeout(zenTimer); clearTimeout(moodTimer); clearTimeout(rotateTimer); clearTimeout(sayPending); cancelAnimationFrame(raf); raf = 0; tip.hidden = true; photo.hidden = true; setDeco(false); setListen(false); refreshBadge(); mascot.src = BASE + 'img/game-blue.webp'; stopAmbience(); bgmLeave(); if (sfx) cueClose(); });
   $(dlg, '.tk-close').addEventListener('click', close);
   $(empty, 'button').addEventListener('click', close);
   $(dlg, '.tk-cam').addEventListener('click', takePhoto);
@@ -1069,6 +1092,7 @@
     if (!sfx) toggleSound(true);
     setListen(true); tour();
     sr.textContent += ' Tab キーで さかなを えらぶと、なまえの おとが 鳴ります。Enter で くわしく しらべます。';
+    if (window.TsuriBgm && window.TsuriBgm.on()) sr.textContent += ' BGMは、みみで ながめる あいだ おやすみします。';
   });
   $(dlg, '.tk-done').addEventListener('click', () => setDeco(false));
   $(dlg, '.tk-clear').addEventListener('click', () => { tank.placed = []; saveTank(); renderPlaced(); renderTray(); say('ぜんぶ もどしたよ。また かざろうね。', true); });

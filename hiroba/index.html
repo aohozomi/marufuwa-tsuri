@@ -347,6 +347,7 @@ body.calm .cloud.c2{left:56%}
 <!-- すいそう「まるふわの おへや」を ひらく ための ざいりょう（つりびよりの すいそうを そのまま つかう） -->
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
+<script src="../tsuri-bgm.js"></script>
 
 <script>
 (() => {
@@ -976,10 +977,23 @@ function drawMotion() {
   const b = $('calm'); b.textContent = less ? 'うごき：すくない' : 'うごき：ふつう'; b.setAttribute('aria-pressed', String(less)); b.disabled = os;
   b.setAttribute('aria-label', os ? 'うごき：すくない（この たんまつの せっていに あわせて いるよ）' : (less ? 'うごきを すくなく して いるよ。おすと ふつうに もどるよ' : 'うごきを すくなく する'));
 }
-$('sound').addEventListener('click', () => {
-  writeSound(!soundOn()); drawSound(); lastInput = T;
+function setSoundOn(on) {
+  writeSound(on); drawSound(); lastInput = T;
   if (soundOn()) { startAmbient(); sfx.on(); narrate('おとを つけたよ。ふんすいに ちかづくと、みずの おとが おおきく なるよ。「まわりを きく」で、ばしょの おとが きけるよ。'); } else { stopAmbient(); narrate('おとを けしたよ。'); }
-});
+  if (window.TsuriBgm) window.TsuriBgm.refresh();
+}
+$('sound').addEventListener('click', () => setSoundOn(!soundOn()));
+// ─── BGM（外付け tsuri-bgm.js。はじめは OFF。「おと」が ON の 時だけ ながれる。ひろばの 曲：あさ・ひる・ゆうがた＝A、よる＝C）───
+//   「BGM」ボタンは おとの となり。おとが OFF の まま おしたら、おとも つける。ながす 音の 部品（AudioContext）は、ひろばの ものを かりる
+if (window.TsuriBgm) {
+  let soundWasOff = false;
+  $('sound').after(window.TsuriBgm.button({
+    id: 'bgm', sound: soundOn,
+    enableSound: () => { soundWasOff = true; setSoundOn(true); },
+    onToggle: next => { narrate(next ? (soundWasOff ? 'おとと BGMを つけたよ。しずかな きょくが ながれるよ。' : 'BGMを つけたよ。しずかな きょくが ながれるよ。') : 'BGMを けしたよ。'); soundWasOff = false; lastInput = T; }
+  }));
+  window.TsuriBgm.enter('hiroba', { ctx: ready, sound: soundOn, time: () => curTime });
+}
 $('calm').addEventListener('click', () => { own.motion = own.motion === 'less' ? 'auto' : 'less'; saveOwn(); drawMotion(); narrate(own.motion === 'less' ? 'うごきを すくなく したよ。ともだちは その ばに いるよ。' : 'うごきを ふつうに もどしたよ。'); });
 $('listen').addEventListener('click', listenAround);
 $('find').addEventListener('click', findFriend);
@@ -1260,14 +1274,14 @@ setTimeout(() => {
 // はじめて きた 日：4びょう たっても だれも さわらない 時だけ、まるふわが 1かい「さわって みてね」（字が よめない 子にも 目で わかる）
 setTimeout(() => { if (own.visits <= 1 && lastInput === 0 && !trip && !document.hidden && !api.paused) speak(player, 'さわって みてね', 3800, true); }, 4200);
 requestAnimationFrame(frame);
-addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag) stopAmbient(); } });
+addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag) stopAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else { startAmbient(); lastInput = T; } });
 addEventListener('pageshow', e => { if (e.persisted) { curtain.style.display = 'none'; trip = null; player.el.classList.remove('gone'); const house = propEl('house'); if (house) house.classList.remove('open'); measure(); narrate('ひろばに もどったよ'); } });
 
 const api = window.Hiroba = {
   version: 1, paused: false, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
-  state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
+  state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), bgm: window.TsuriBgm ? window.TsuriBgm.state() : null, reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
   goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   say: () => statusEl.textContent
 };
