@@ -1249,19 +1249,25 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     low.type = 'lowpass'; low.frequency.value = save.soft ? 2400 : 4200; low.Q.value = .5; soft.curve = curve;
     low.connect(soft); soft.connect(ctx.destination); bus = {ctx, in: low, low}; return low;
   }
-  // さいしょの「なげる」で だけ、やさしい「ぽちゃん」を 1かい（おとは はじめから OFF の まま。ひくい・みじかい・sine・ちいさい）。あとで ペンギンが「おとを つけると、もっと きもちいいよ」を 1かい だけ。2かいめ いこうは なし
+  // さいしょの「なげる」で だけ、やさしい「ぽちゃん」を 1かい（おとは はじめから OFF の まま。ひくい・みじかい・sine・ちいさい・<audio> で ならす＝おと OFF の あいだ AudioContext は つくらない）。あとで ペンギンが「おとを つけると、もっと きもちいいよ」を 1かい だけ。2かいめ いこうは なし
   // おと OFF の ひとが「おとが ある ゲームだ」と しる ための 1かい。「こうかおん」を きった ひと・おとを つけた ひとには ならさない
   let plopHintDue = false;
+  function plopWav() {   // 0.24びょうの WAV（16bit・22.05kHz・ひくい sine 300→140Hz＋ちいさな あわ）を その場で つくる（AudioContext は つかわない：おとが OFF の あいだは 1つも つくらない）
+    const rate = 22050, n = Math.round(rate * .24), buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf), put = (o, str) => { for (let k = 0; k < str.length; k++) v.setUint8(o + k, str.charCodeAt(k)); };
+    put(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); put(8, 'WAVE'); put(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); put(36, 'data'); v.setUint32(40, n * 2, true);
+    let ph = 0, ph2 = 0;
+    for (let k = 0; k < n; k++) {
+      const t = k / rate, f = t < .16 ? 300 * Math.pow(140 / 300, t / .16) : 140, env = t < .006 ? t / .006 : Math.pow(.016, (t - .006) / .194);   // すぱっと はじまり、すーっと きえる
+      ph += 2 * Math.PI * f / rate; let x = .12 * env * Math.sin(ph);
+      if (t >= .05 && t < .16) { const g = t < .056 ? (t - .05) / .006 : Math.pow(.025, (t - .056) / .084); ph2 += 2 * Math.PI * (520 * Math.pow(360 / 520, (t - .05) / .07)) / rate; x += .045 * g * Math.sin(ph2); }   // ちいさな あわ
+      v.setInt16(44 + k * 2, Math.max(-1, Math.min(1, x)) * 32000, true);
+    }
+    return new Blob([buf], {type: 'audio/wav'});
+  }
   function plopOnce() {
     if (save.total > 0 || save.plopHint === true || save.sound === true || save.sndFx === false || document.hidden) return;   // はじめて あそぶ ひとの さいしょの 1かい だけ
     save.plopHint = true; store(); plopHintDue = true;
-    try {
-      const ctx = ready(), at = ctx.currentTime, out = fxOut(ctx);
-      const o = ctx.createOscillator(), v = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(300, at); o.frequency.exponentialRampToValueAtTime(140, at + .16);
-      v.gain.setValueAtTime(0, at); v.gain.linearRampToValueAtTime(.05, at + .006); v.gain.exponentialRampToValueAtTime(.0008, at + .2); o.connect(v).connect(out); o.start(at); o.stop(at + .22);
-      const b = ctx.createOscillator(), bg = ctx.createGain(); b.type = 'sine'; b.frequency.setValueAtTime(520, at + .05); b.frequency.exponentialRampToValueAtTime(360, at + .12);   // ちいさな あわ
-      bg.gain.setValueAtTime(0, at + .05); bg.gain.linearRampToValueAtTime(.02, at + .056); bg.gain.exponentialRampToValueAtTime(.0005, at + .14); b.connect(bg).connect(out); b.start(at + .05); b.stop(at + .16);
-    } catch {}
+    try { const url = URL.createObjectURL(plopWav()), a = new Audio(url); a.volume = .9; a.onended = a.onerror = () => URL.revokeObjectURL(url); const p = a.play(); if (p && p.catch) p.catch(() => URL.revokeObjectURL(url)); } catch {}
   }
   function softenBus() { if (bus && bus.low) bus.low.frequency.value = save.soft ? 2400 : 4200; }   // 「やさしい おと」を きりかえた とき（つくって ある でぐちの ローパスを かえる）
   function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, kind = 'fx') {
@@ -2418,7 +2424,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     clip.id = 'photo-clip'; clip.hidden = true; clip.controls = true; clip.loop = true; clip.muted = true; clip.setAttribute('playsinline', ''); clip.style.cssText = 'display:block;width:100%;height:auto;border-radius:14px;margin:0 auto'; $('photo-img').after(clip);
     vsave.id = 'photo-clip-save'; vsave.className = 'pill'; vsave.hidden = true; vshare.id = 'photo-clip-share'; vshare.type = 'button'; vshare.className = 'pill'; vshare.hidden = true; row.append(vid, vsave, vshare);
     videoOk = () => typeof MediaRecorder === 'function' && !!HTMLCanvasElement.prototype.captureStream && !reduce();   // 対応ブラウザだけ・「うごきを へらす」では 出さない
-    resetClip = () => { clip.hidden = true; try { clip.pause(); } catch {} clip.removeAttribute('src'); if (videoUrl) { URL.revokeObjectURL(videoUrl); videoUrl = ''; } $('photo-img').hidden = false; vsave.hidden = vshare.hidden = true; vid.disabled = false; };
+    resetClip = () => { paintVideo(); clip.hidden = true; try { clip.pause(); } catch {} clip.removeAttribute('src'); if (videoUrl) { URL.revokeObjectURL(videoUrl); videoUrl = ''; } $('photo-img').hidden = false; vsave.hidden = vshare.hidden = true; vid.disabled = false; };
     const paintVideo = () => { clip.setAttribute('aria-label', L('どうが', 'Video')); vid.textContent = L('どうがで おしえる', 'Share as a video'); vid.setAttribute('aria-label', L('どうがで おしえる。3びょうの どうがを この たんまつの なかで つくるよ', 'Share as a video. A 3-second video is made on this device')); vsave.textContent = L('どうがを ほぞんする', 'Save the video'); vshare.textContent = L('どうがを みせる（きょうゆう）', 'Share the video'); };
     vid.addEventListener('click', async () => {
       const st = $('photo-status'); if (!videoMaker || vid.disabled) return; vid.disabled = true;
