@@ -2684,7 +2684,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); drawBadge();   // ひらいた → みた ことに なる
     { const myth = FISH.filter(f => f.legend), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? L('★5の まぼろしの こ：ぜんいんに あえたよ！', '★5 mythical fish: you have met them all!') : L('★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'), '★5 mythical fish: ' + myth.length + ' exist (met: ' + got + ').' + (seenCount() >= BASE ? '' : ' Collect all ' + BASE + ' kinds and you are more likely to meet them.')); }
     $('book-fact').hidden = true; $('book-fact').textContent = '';
-    $('book-grid').replaceChildren(...FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])).map(f => {
+    const makeCell = f => {
       const got = save.fish[f.id], cell = document.createElement('div');
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
       if (got && FACTS[f.id]) { cell.tabIndex = 0; cell.setAttribute('role', 'button'); cell.dataset.fact = '1'; const showFact = () => { const box = $('book-fact'); box.hidden = false; box.replaceChildren(L(f.name + '：' + FACTS[f.id][0], T(f.name) + ': ' + FACTS[f.id][1])); box.dataset.for = String(f.id); }; cell.addEventListener('click', showFact); cell.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showFact(); } }); }   // おすと まめちしき
@@ -2692,7 +2692,17 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
       cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
       return cell;
-    }));
+    };
+    {   // つりばごとに ならべる（みずうみ・かわ・みなとまち・ふねの うえ）。「くらべる」では なく、じぶんの あつめぐあいが わかる
+      const list = FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])), cells = [];
+      for (const a of AREAS) {
+        const inArea = list.filter(f => f.area === a.id); if (!inArea.length) continue;
+        const head = document.createElement('h3'), got = inArea.filter(f => save.fish[f.id]).length;
+        head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L(a.name + '　' + got + ' / ' + inArea.length, T(a.name) + '  ' + got + ' / ' + inArea.length);
+        cells.push(head, ...inArea.map(makeCell));
+      }
+      $('book-grid').replaceChildren(...cells);
+    }
     {   // きせつの さかな（月ごと 1しゅ）。ずかんの 30しゅるいには かぞえない。「また らいねん あえるよ」だけ。せかさない・かずを くらべない
       const now = monthNow(), head = document.createElement('h3'), note = document.createElement('p');
       head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L('きせつの さかな', 'Seasonal fish');
