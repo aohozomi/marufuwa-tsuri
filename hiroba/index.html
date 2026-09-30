@@ -225,7 +225,7 @@ body.calm .cloud.c2{left:56%}
   </svg>
 
   <div class="top">
-    <h1 class="logo" aria-label="まるふわの ひろば"><span style="--n:0" aria-hidden="true">ま</span><span style="--n:1" aria-hidden="true">る</span><span style="--n:2" aria-hidden="true">ふ</span><span style="--n:3" aria-hidden="true">わ</span><span style="--n:4" aria-hidden="true">の</span><i aria-hidden="true"></i><span style="--n:5" aria-hidden="true">ひ</span><span style="--n:6" aria-hidden="true">ろ</span><span style="--n:7" aria-hidden="true">ば</span></h1>
+    <h1 class="logo" data-en="1" aria-label="まるふわの ひろば"><span style="--n:0" aria-hidden="true">ま</span><span style="--n:1" aria-hidden="true">る</span><span style="--n:2" aria-hidden="true">ふ</span><span style="--n:3" aria-hidden="true">わ</span><span style="--n:4" aria-hidden="true">の</span><i aria-hidden="true"></i><span style="--n:5" aria-hidden="true">ひ</span><span style="--n:6" aria-hidden="true">ろ</span><span style="--n:7" aria-hidden="true">ば</span></h1>
     <div class="hud">
       <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
       <button id="calm" type="button" aria-pressed="false">うごき：ふつう</button>
@@ -363,6 +363,7 @@ const $ = id => document.getElementById(id);
 const scene = $('scene'), layerProps = $('props'), layerActors = $('actors'), layerBubbles = $('bubbles'), statusEl = $('status'), curtain = $('curtain');
 const q = new URLSearchParams(location.search);
 const W = 360, H = 560, BASE = '../';
+const TE = s => (window.TsuriEn ? window.TsuriEn.t(s) : s);   // English mode（tsuri-en.js）の 時だけ 訳す。日本語では そのまま かえす（canvas に かく もじ・共有の 文に 使う）
 // 魚の 絵（つりびよりと おなじ tsuri-art.js）。ひろばが ひらいて しばらくしてから、じゃまに ならない ように 読む。水槽（おへや）と いけの さかなが 使う。読めなくても 絵文字で 出る
 let artLoading = null;
 const loadArt = () => artLoading || (artLoading = window.TsuriArt ? Promise.resolve(true) : new Promise(res => { const s = document.createElement('script'); s.src = BASE + 'tsuri-art.js'; s.onload = () => res(true); s.onerror = () => res(false); document.head.append(s); }));
@@ -1169,7 +1170,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   const ctx = cvs.getContext('2d'), css = getComputedStyle(scene), hasFilter = 'filter' in ctx;
   const grad = ctx.createLinearGradient(0, 0, 0, OH); grad.addColorStop(0, '#dff2fb'); grad.addColorStop(1, '#f4fbff'); ctx.fillStyle = grad; ctx.fillRect(0, 0, OW, OH);
   // だいめい
-  const title = 'まるふわの ひろば', colors = ['#4bb3e0', '#46c79a', '#ff9a6b', '#a98be8'];
+  const title = TE('まるふわの ひろば'), colors = ['#4bb3e0', '#46c79a', '#ff9a6b', '#a98be8'];
   ctx.save(); ctx.font = '900 66px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   const glyphs = [...title], gw = glyphs.map(ch => ch === ' ' ? 30 : ctx.measureText(ch).width + 6), total = gw.reduce((a, b) => a + b, 0); let gx = (OW - total) / 2, gi = 0;
   glyphs.forEach((ch, i) => { if (ch !== ' ') { ctx.lineWidth = 15; ctx.strokeStyle = colors[gi % 4]; ctx.strokeText(ch, gx, 52); ctx.fillStyle = '#fff'; ctx.fillText(ch, gx, 52); gi++; } gx += gw[i]; });
@@ -1241,7 +1242,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   }
   // したの おび：きょうの ともだち（あった こは いろつき）と ひづけ
   ctx.save(); ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillStyle = '#244653'; ctx.font = '800 38px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif';
-  ctx.fillText('きょうの ともだち', OW / 2, PY + H * S + 46);
+  ctx.fillText(TE('きょうの ともだち'), OW / 2, PY + H * S + 46);
   const n = friends.length, size = 104, gap = 20, rowW = n * size + (n - 1) * gap; let ix = (OW - rowW) / 2; const iy = PY + H * S + 78;
   for (const f of friends) {
     const met = !!own.metToday[f.id], im = f.img; ctx.save(); ctx.globalAlpha = met ? 1 : .35; if (hasFilter && !met) ctx.filter = 'grayscale(1)';
@@ -1259,7 +1260,7 @@ async function openPhoto() {
     photoFile = new File([blob], 'marufuwa-hiroba.png', { type: 'image/png' }); photoURL = URL.createObjectURL(blob);
     $('photo-img').src = photoURL; $('photo-img').alt = 'きょうの ひろばの しゃしん。まるふわと ともだちが いるよ。'; $('photo-save').href = photoURL; $('photo-save').download = photoFile.name;
     const canShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [photoFile] })); $('photo-share').hidden = !canShare;
-    $('photo-share').onclick = async () => { try { await navigator.share({ files: [photoFile], text: 'まるふわの ひろばで あそんだよ　#まるふわつりびより' }); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (e) { status.textContent = e.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
+    $('photo-share').onclick = async () => { try { await navigator.share({ files: [photoFile], text: TE('まるふわの ひろばで あそんだよ　#まるふわつりびより') }); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (e) { status.textContent = e.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
     status.textContent = 'かってに とうこうは しません。「ほぞんする」で のこせるよ。';
     if (!photoDlg.open) photoDlg.showModal(); sfx.tap();
   } catch { narrate('しゃしんを つくれなかったよ。もういちど ためしてね。'); status.textContent = 'つくれなかったよ。もういちど ためしてね。'; }
@@ -1292,8 +1293,32 @@ const api = window.Hiroba = {
   goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   say: () => statusEl.textContent
 };
+// ─── English mode（tsuri-en.js と 総司令部の 表 tsuri-en-hiroba.js が ある 英語の 時だけ）：ひろばの 題・ロゴと、表に ない 文を 足す ───
+//   tsuri-en.js は ページの 題・ロゴを 「つりびより」に して しまうので、load の あとに ひろば用に 直す（h1 に data-en を つけて、ロゴの 作りかえを ふせいで ある）
+addEventListener('load', () => {
+  const E = window.TsuriEn; if (!E || E.lang !== 'en') return;
+  document.title = "Marufuwa's Plaza — Marufuwa Fishing Days";
+  const meta = document.querySelector('meta[name=description]'); if (meta) meta.content = "A little town to play in. Marufuwa and friends walk around the plaza. Go fishing, play Onigiri Catch, visit Marufuwa's Room. No rush.";
+  const h = document.querySelector('h1.logo');
+  if (h) {
+    h.setAttribute('aria-label', "Marufuwa's Plaza");
+    const mk = (ch, n) => { const sp = document.createElement('span'); sp.setAttribute('aria-hidden', 'true'); sp.style.setProperty('--n', String(n)); sp.textContent = ch; return sp; };
+    h.replaceChildren();   // tsuri-en.js が ロゴを ただの 文字に して いるので、からに してから 作りなおす（ゆれる 1もじずつ・まんなかの 🎣 の かわりの <i>）
+    [...'Marufuwa’s'].forEach((c, i) => h.append(mk(c, i)));
+    const ic = document.createElement('i'); ic.setAttribute('aria-hidden', 'true'); h.append(ic);
+    [...'Plaza'].forEach((c, i) => h.append(mk(c, i + 10)));
+    h.style.fontSize = 'clamp(1.3rem,6.4vw,2rem)'; h.style.flexWrap = 'wrap';
+  }
+  const MONTH = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  if (E.add) E.add({ ex: {}, rules: [   // ありがとうの ほしぞら：名前は そのまま（「さん」は 英語に ない）。月は 月の なまえ
+    [/^(.+)さん、ありがとう$/, (_, n) => n + ', thank you!'], [/^(.+)さん$/, (_, n) => n],
+    [/^(\d{1,2})がつ$/, (_, m) => MONTH[Number(m)] || null], [/^(\d{1,2})がつにきてくれたよ$/, (_, m) => MONTH[Number(m)] ? 'Visited in ' + MONTH[Number(m)] + '.' : null]
+  ] });
+});
 })();
 </script>
 <script defer src="../tsuri-tank.js"></script>
+<script defer src="../tsuri-en.js"></script>
+<script defer src="../tsuri-en-hiroba.js"></script>
 </body>
 </html>

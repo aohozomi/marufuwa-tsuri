@@ -433,6 +433,23 @@
   }
   setTimeout(fromUrl, 900);
 
+  // ─── English mode（tsuri-en.js が あって 英語の 時だけ）：ひみつの ことばの 文を 訳表に 足す ───
+  {
+    const EN = { ex: {
+      'ひみつの ことば': 'Secret Word', 'ためす': 'Try it', 'ひみつノートを ひらく': 'Open the Secret Notebook', 'はじめの ことば': 'First Word',
+      'ことばを しって いたら、ここに いれてね。まちがえても、なにも おこらないよ。': 'If you know a word, type it here. If you get it wrong, nothing happens.',
+      'ひみつの ことばが みつかったよ！': 'You found a secret word!', 'この ことばは もう みつけて いるよ。いつでも どうぞ。': 'You already found this word. Feel free to enter it anytime.',
+      'みつからなかったよ。ことばが ちがうのかも。もういちど ためしてね。': 'Not found. Maybe the word is different. Please try again.', 'ことばを いれてね。': 'Please enter a word.',
+      'ひみつの ことばを みつけたよ。ことばは、これから ふえるかも しれないよ。': 'You found a secret word. There might be more words from now on.'
+    }, rules: [
+      [/^(ひみつのことばがみつかったよ！|このことばはもうみつけているよ。いつでもどうぞ。)(.+)$/, (_, a, b) => { const E = window.TsuriEn, x = E && E.tr ? E.tr(a) : null, y = E && E.tr ? E.tr(b) : null; return x == null || y == null ? null : x + ' ' + y; }],
+      [/^✨(.+)✨$/, (_, a) => { const E = window.TsuriEn, x = E && E.tr ? E.tr(a) : null; return x == null ? null : '✨ ' + x + ' ✨'; }],
+      [/^(\d{1,2})がつ(\d{1,2})にち(あさ|ひる|ゆうがた|よる)?$/, (_, m, d, w) => { const MO = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][Number(m)], WH = { 'あさ': 'morning', 'ひる': 'daytime', 'ゆうがた': 'evening', 'よる': 'night' }; return MO ? MO + ' ' + Number(d) + (w ? ' · ' + WH[w] : '') : null; }]   // ひみつノートの 日づけ
+    ] };
+    const regEn = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !regEn.done) { regEn.done = true; E.add(EN); } };
+    addEventListener('load', regEn);
+  }
+
   window.TsuriHimitsu = {
     version: 1, found: foundMap, replay, open: () => { if (!noteDlg) buildNote(); drawNote(); noteDlg.showModal(); },
     kotoba: { version: 1, try: tryWord, open: openWord, list: () => WORDS.map(w => ({ id: w.id, title: titleOf(w.id), found: !!foundMap()[w.id] })) },
