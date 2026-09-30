@@ -690,6 +690,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   </div>
   <p id="status" role="status" aria-live="polite">「なげる」を おしてね。</p>
   <p id="today" class="note today" hidden></p>
+  <p id="nosave" class="note" role="status" style="font-weight:800" hidden></p>
 
   <p class="note"><ruby>時間<rt>じかん</rt></ruby>で <ruby>出<rt>で</rt></ruby>やすい <ruby>魚<rt>さかな</rt></ruby>が <ruby>変<rt>か</rt></ruby>わるよ（<ruby>朝<rt>あさ</rt></ruby>・<ruby>昼<rt>ひる</rt></ruby>・<ruby>夕方<rt>ゆうがた</rt></ruby>・<ruby>夜<rt>よる</rt></ruby>）。<br>
   <ruby>記録<rt>きろく</rt></ruby>は この <ruby>端末<rt>たんまつ</rt></ruby>の <ruby>中<rt>なか</rt></ruby>だけに <ruby>残<rt>のこ</rt></ruby>るよ。ログインも インストールも いらないよ。<br>
@@ -1027,8 +1028,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function store(replace) {
     try {
       if (!replace) { const now = localStorage.getItem(KEY); if (now && now !== stored) mergeIn(JSON.parse(now)); }
-      stored = JSON.stringify(save); localStorage.setItem(KEY, stored); base = JSON.parse(stored);
+      stored = JSON.stringify(save);
+      try { localStorage.setItem(KEY, stored); } catch { noSave(); }
+      base = JSON.parse(stored);
     } catch {}
+  }
+  let saveWarned = false;
+  function noSave() {   // きろくを かけない（プライベート ブラウズ・きんし・いっぱい）：1かいだけ しらせる（せめない・あそびは つづけられる）
+    if (saveWarned) return; saveWarned = true;
+    try { const text = L('きろくが のこらない かも しれないよ。ブラウザの せっていを みて みてね。あそびは つづけられるよ。', 'Your progress may not be saved. Please check your browser settings. You can keep playing.'), box = $('nosave'); if (box) { box.textContent = text; box.hidden = false; } else say(text); } catch {}   // ほかの ことばに かきかえられない よう、がめんに のこす
   }
   addEventListener('storage', event => {   // べつの タブで つった ぶんも、こちらの きろくに くわえる
     if (event.key !== KEY || !event.newValue) return;
