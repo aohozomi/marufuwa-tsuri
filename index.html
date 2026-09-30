@@ -1129,6 +1129,17 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // guide＝あんない（わ・ピコン・ちょんちょん・ピピッ・はんてい）／fx＝こうかおん（なげる・おいわい・おくりもの など）／amb＝なみと あめ／ui＝おとを つけた ときの かくにん（いつも ならす）
   const SND_KEY = {guide: 'sndGuide', fx: 'sndFx', amb: 'sndAmb'};
   const sndOn = kind => save.sound === true && (kind === 'ui' || save[SND_KEY[kind]] !== false);
+  // でぐち：たかい おと（4kHz より うえ）を すこし まるめる（かくばった なみが 耳に ささらない ように）。そのあと、おおきく なりすぎた ときだけ やわらかく おさえる（tanh。ふだんの おおきさ ±0.35dB の うちは ほぼ そのまま：そくてい ずみ）
+  // ※ DynamicsCompressor は つかわない（じどうで おとを 5dB ほど おおきく して、あんないの おおきさの ちょうせいを こわす）
+  let bus = null;
+  function fxOut(ctx) {
+    if (bus && bus.ctx === ctx) return bus.in;
+    if (!ctx.createBiquadFilter || !ctx.createWaveShaper) return ctx.destination;
+    const low = ctx.createBiquadFilter(), soft = ctx.createWaveShaper(), curve = new Float32Array(2049);
+    for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh(i / 1024 - 1);
+    low.type = 'lowpass'; low.frequency.value = 4200; low.Q.value = .5; soft.curve = curve;
+    low.connect(soft); soft.connect(ctx.destination); bus = {ctx, in: low}; return low;
+  }
   function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, kind = 'fx') {
     if (!sndOn(kind)) return;
     try {
@@ -1136,8 +1147,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
       osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
       if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + length);
       const level = osc.type === 'triangle' ? loud * 2.2 : loud;
-      vol.gain.setValueAtTime(level, at); vol.gain.setValueAtTime(level * .6, at + length * .5); vol.gain.setValueAtTime(0, at + length);
-      osc.connect(vol).connect(ctx.destination); osc.start(at); osc.stop(at + length + .02);
+      const rise = Math.min(.003, length / 4), fall = Math.min(.005, length / 4), g = vol.gain;
+      g.setValueAtTime(0, at); g.linearRampToValueAtTime(level, at + rise);
+      g.setValueAtTime(level, at + length * .5); g.linearRampToValueAtTime(level * .6, at + length * .5 + .002);
+      g.setValueAtTime(level * .6, at + length - fall); g.linearRampToValueAtTime(0, at + length);
+      osc.connect(vol).connect(fxOut(ctx)); osc.start(at); osc.stop(at + length + .02);
     } catch {}
   }
   function zap(length = .12, delay = 0, loud = .07, kind = 'fx') {   // みじかい ざっ（みずしぶき、けむり）
@@ -1146,8 +1160,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const ctx = ready(), at = ctx.currentTime + delay;
       if (!hiss) { hiss = ctx.createBuffer(1, ctx.sampleRate * .5, ctx.sampleRate); const d = hiss.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
       const src = ctx.createBufferSource(), vol = ctx.createGain(); src.buffer = hiss;
-      vol.gain.setValueAtTime(loud, at); vol.gain.linearRampToValueAtTime(0, at + length);
-      src.connect(vol).connect(ctx.destination); src.start(at); src.stop(at + length + .02);
+      vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud, at + .003); vol.gain.linearRampToValueAtTime(0, at + length);
+      src.connect(vol).connect(fxOut(ctx)); src.start(at); src.stop(at + length + .02);
     } catch {}
   }
   const chord = (notes, gap = .07, type = 'square', loud = .05, kind = 'fx') => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, kind));
@@ -1181,25 +1195,30 @@ dialog .close{display:block;margin:auto;min-width:160px}
     return box;
   }
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
-  let ambient = null, ambientOut = null, sleepMuted = false;
+  let ambient = null, ambientOut = null, ambientDuck = null, sleepMuted = false;
   function startAmbient() {
     if (!sndOn('amb') || ambient || sleepMuted) return;
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       if (audio.state === 'suspended') audio.resume();
-      const buffer = audio.createBuffer(1, audio.sampleRate * 3, audio.sampleRate), data = buffer.getChannelData(0);
-      let lastValue = 0; for (let i = 0; i < data.length; i++) { lastValue = lastValue * .96 + (Math.random() * 2 - 1) * .04; data[i] = lastValue * 6; }   // やわらかい ざーっ
-      const noise = audio.createBufferSource(); noise.buffer = buffer; noise.loop = true;
+      const rate = audio.sampleRate, len = Math.round(rate * 12), fade = Math.round(rate * .6), buffer = audio.createBuffer(1, len, rate), data = buffer.getChannelData(0);   // 12びょう（3びょうだと くりかえしが 聞こえる）
+      let lastValue = 0; for (let i = 0; i < len; i++) { lastValue = lastValue * .96 + (Math.random() * 2 - 1) * .04; data[i] = lastValue * 6; }   // やわらかい ざーっ
+      for (let i = 0; i < fade; i++) { const w = i / fade * Math.PI / 2; data[len - fade + i] = data[len - fade + i] * Math.cos(w) + data[i] * Math.sin(w); }   // おわりを はじめに まぜて、くりかえしの つなぎめを なくす（はじめの 0.6びょうは 1かい だけ）
+      const noise = audio.createBufferSource(); noise.buffer = buffer; noise.loop = true; noise.loopStart = fade / rate; noise.loopEnd = len / rate;
       const soft = audio.createBiquadFilter(); soft.type = 'lowpass'; soft.frequency.value = 900;
-      const swell = audio.createGain(); swell.gain.value = .05; const out = audio.createGain(); out.gain.value = 1; out.connect(audio.destination); ambientOut = out;   // まとめの おんりょう（おやすみで ふわっと きえる）
+      const swell = audio.createGain(); swell.gain.value = .05; const out = audio.createGain(), duck = audio.createGain(); out.gain.value = 1; duck.gain.value = guide ? .5 : 1; out.connect(duck); duck.connect(audio.destination); ambientOut = out; ambientDuck = duck;   // まとめの おんりょう（おやすみで ふわっと きえる）
       const lfo = audio.createOscillator(), depth = audio.createGain(); lfo.frequency.value = .11; depth.gain.value = .04; lfo.connect(depth).connect(swell.gain);
       noise.connect(soft).connect(swell).connect(out);
       const nodes = [noise, lfo];
-      if (rainy) { const drops = audio.createBufferSource(), thin = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = buffer; drops.loop = true; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; quiet.gain.value = .035; drops.connect(thin).connect(quiet).connect(out); nodes.push(drops); }
+      if (rainy) { const drops = audio.createBufferSource(), thin = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = buffer; drops.loop = true; drops.loopStart = fade / rate; drops.loopEnd = len / rate; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; quiet.gain.value = .035; drops.connect(thin).connect(quiet).connect(out); nodes.push(drops); }
       nodes.forEach(node => node.start()); ambient = nodes;
     } catch {}
   }
-  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; ambientOut = null; }
+  function stopAmbient() { if (ambient) ambient.forEach(node => { try { node.stop(); } catch {} }); ambient = null; ambientOut = null; ambientDuck = null; }
+  function duckAmbient(on) {   // あんないの おと（ポ・ピコン）が なって いる 間だけ、なみを はんぶんに（−6dB）。おわると ゆっくり もどる
+    if (!ambientDuck || !audio) return;
+    try { const t = audio.currentTime, g = ambientDuck.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(on ? .5 : 1, t, on ? .08 : .4); } catch {}
+  }
   function fadeAmbient(sec) {   // ふわっと きえる（おやすみタイマー）
     if (!ambient || !ambientOut || !audio) { stopAmbient(); return; }
     try { const t = audio.currentTime; ambientOut.gain.cancelScheduledValues(t); ambientOut.gain.setValueAtTime(ambientOut.gain.value, t); ambientOut.gain.linearRampToValueAtTime(0, t + sec); } catch {}
@@ -1235,16 +1254,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
     stopGuide(); if (!sndOn('guide') || save.easy) return;
     // ピコンは、おして から とどくまでの おくれ（やく 0.2びょう）の ぶん、はやめに ならす。ポ・ポ・ポ・ポは、おなじ まあいで
     const pikon = (hitAt - 200 + period) % period, gap = pikon > 320 ? pikon / 5 : 0, pitches = [392, 494, 587, 740];
-    let before = cycleTime();
+    let before = cycleTime(); duckAmbient(true);
     guide = setInterval(() => {
       if (phase !== 'reel') return stopGuide();
       const now = cycleTime(), passed = mark => before <= now ? before < mark && mark <= now : mark > before || mark <= now;
       if (gap) pitches.forEach((pitch, i) => { if (passed(pikon - gap * (4 - i))) guideTone(pitch, .05, 'triangle', 0, [.11, .0925, .0825, .0725][i]); });   // ひくい おとほど、おおきく（きこえかたを そろえる）
       if (passed(pikon)) guideChord([988, 1319], .07, 'square', .075);   // いまだ：ピコン
       before = now;
-    }, 15);
+    }, 10);
   }
-  function stopGuide() { clearInterval(guide); guide = 0; }
+  function stopGuide() { clearInterval(guide); guide = 0; duckAmbient(false); }
   // わを えがく。がめんの かきかえに あわせて、なめらかに
   function spin() {
     if (phase !== 'reel') { spinning = 0; return; }
