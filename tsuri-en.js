@@ -22,8 +22,9 @@
   const LANG = pickLang();
   // 日本語（ぜんかくの きごうも ふくむ）の となりの すきまだけ 消す。英語の ことばの あいだの すきまは のこす
   const JPX = '\\u3000-\\u30ff\\u3400-\\u9fff\\uff00-\\uffef';
-  const NORM_RE = new RegExp('(?<=[' + JPX + '])[\\s\\u3000]+|[\\s\\u3000]+(?=[' + JPX + '])', 'g');
-  const norm = s => String(s).replace(NORM_RE, '').trim();
+  // うしろ読み（(?<=…)）は iOS 16.3 いかの Safari で 例外に なるので つかわない：「日本語の まえの すきま」→「日本語の うしろの すきま」の 2回で 同じ 結果
+  const WS_BEFORE_JP = new RegExp('[\\s\\u3000]+(?=[' + JPX + '])', 'g'), WS_AFTER_JP = new RegExp('([' + JPX + '])[\\s\\u3000]+', 'g');
+  const norm = s => String(s).replace(WS_BEFORE_JP, '').replace(WS_AFTER_JP, '$1').trim();
   const missing = new Set();
   window.TsuriEn = { lang: LANG, t: s => s, missing: () => [...missing], toggle: null, add: () => {}, page: () => {} };   // add・page は 英語の ときだけ はたらく（add：ひろば など べつの ページの 訳を たす／page：ページごとの 題と 説明を 直す）
 
