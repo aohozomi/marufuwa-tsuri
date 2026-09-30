@@ -42,8 +42,9 @@ try { var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('maruf
 try {
   var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {};
   if (early.large === true) document.documentElement.dataset.large = 'true';   // もじを おおきく（つかいやすく する）
-  // ページの うつり（@view-transition）：itch の iframe など 対応していない 場では ViewTransition の promise が「InvalidStateError」で 落ちる → 先に catch を つけて 握りつぶす。「うごきを へらす」（ゲーム内スイッチ）の ときは ふわっと させない（skipTransition）
-  var vtCalm = early.calm === true, vtHandle = function (e) { var v = e.viewTransition; if (!v) return; ['ready', 'finished', 'updateCallbackDone'].forEach(function (k) { try { if (v[k] && v[k].catch) v[k].catch(function () {}); } catch (x) {} }); if (vtCalm) { try { v.skipTransition(); } catch (x) {} } };
+  // ページの うつり（@view-transition）：ふわっと 重なるのは「つり⇄ひろば」だけ。ひろば・本体の どちらにも 書いて ある ページ どうし でないと、ブラウザが「InvalidStateError: opt-in disabled」を 出す（おうちの かたへ は 書いて いない）→ 行き先が 本体・ひろば いがいの ときと「うごきを へらす」の ときは その場で skipTransition。かならず 先に catch を つけて 握りつぶす（itch の iframe など 対応していない 場でも おちない）
+  var vtCalm = early.calm === true, vtGo = function (e) { try { var p = new URL(e.activation.entry.url).pathname; return !/\/anshin\//.test(p) && /(\/|\/index\.html)$/.test(p); } catch (x) { return false; } };
+  var vtHandle = function (e) { var v = e.viewTransition; if (!v) return; ['ready', 'finished', 'updateCallbackDone'].forEach(function (k) { try { if (v[k] && v[k].catch) v[k].catch(function () {}); } catch (x) {} }); if (vtCalm || (e.type === 'pageswap' && !vtGo(e))) { try { v.skipTransition(); } catch (x) {} } };
   try { addEventListener('pageswap', vtHandle); addEventListener('pagereveal', vtHandle); } catch (x) {}
   if (early.calm === true) {
     document.documentElement.dataset.calm = 'true';
