@@ -499,6 +499,7 @@ rt{font-size:.62em;font-size:max(.62em,10px);letter-spacing:.02em;font-weight:70
 ruby{ruby-align:center}   /* 「無 料」「大 丈 夫」のように、ふりがなが ながい とき 漢字の あいだが ひらかない */
 #status,.lead,.note{text-wrap:balance;word-break:auto-phrase}   /* 「よ。」だけの 行を つくらない（あたらしい ブラウザ。ふるい ものは いつも どおり） */   /* ふりがなを よむ ひとが いちばん こまるので、10px より ちいさく しない */
 .lead{font-size:1rem}
+.ic{font-size:1.05em;margin-right:.1em}   /* せつめいの アイコン（よみあげ しない） */
 .lead{word-break:keep-all;overflow-wrap:anywhere}   /* 一まとまりの ことばの まんなかで 行を きらない（320px で「よ。」だけの 行を つくらない。auto-phrase・balance の ない ふるい ブラウザでも きく。ながい ことばは はみださない よう anywhere） */
 #float[data-nibble=true]{animation:nibble .22s ease-in-out 3 !important}
 @keyframes nibble{50%{translate:0 6px}}
@@ -617,7 +618,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <path d="M0 780 Q400 730 800 790 T1600 770 V900 H0Z" fill="#a7dba0"/>
   </svg>
   <h1 class="logo" aria-label="まるふわ つりびより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">つ</span><span aria-hidden="true">り</span><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
-  <p class="lead"><ruby>急<rt>いそ</rt></ruby>がなくて、<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>。<ruby>逃<rt>に</rt></ruby>がしても、<ruby>減<rt>へ</rt></ruby>らないよ。<br><small>1ぴき 10〜20<ruby>秒<rt>びょう</rt></ruby>くらい。<ruby>無料<rt>むりょう</rt></ruby>で あそべるよ。</small></p>
+  <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <ruby>急<rt>いそ</rt></ruby>がなくて <ruby>大丈夫<rt>だいじょうぶ</rt></ruby>・<ruby>逃<rt>に</rt></ruby>がしても <ruby>減<rt>へ</rt></ruby>らない<br><small><span class="ic" aria-hidden="true">⏱</span> 1ぴき 10〜20<ruby>秒<rt>びょう</rt></ruby>・<ruby>無料<rt>むりょう</rt></ruby></small></p>
   <div class="hud record">
     <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
     <span>つれた かず <strong id="total">0</strong></span>
@@ -746,9 +747,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   <p id="today" class="note today" hidden></p>
   <p id="nosave" class="note" role="status" style="font-weight:800" hidden></p>
 
-  <p class="note"><ruby>時間<rt>じかん</rt></ruby>で <ruby>出<rt>で</rt></ruby>やすい <ruby>魚<rt>さかな</rt></ruby>が <ruby>変<rt>か</rt></ruby>わるよ（<ruby>朝<rt>あさ</rt></ruby>・<ruby>昼<rt>ひる</rt></ruby>・<ruby>夕方<rt>ゆうがた</rt></ruby>・<ruby>夜<rt>よる</rt></ruby>）。<br>
-  <ruby>記録<rt>きろく</rt></ruby>は この <ruby>端末<rt>たんまつ</rt></ruby>の <ruby>中<rt>なか</rt></ruby>だけに <ruby>残<rt>のこ</rt></ruby>るよ。ログインも インストールも いらないよ。<br>
-  <ruby>背景<rt>はいけい</rt></ruby>と <ruby>魚<rt>さかな</rt></ruby>の <ruby>絵<rt>え</rt></ruby>は、<ruby>今<rt>いま</rt></ruby>は <ruby>仮<rt>かり</rt></ruby>の ものだよ。</p>
+  <p class="note" id="about-note"><span class="ic" aria-hidden="true">🕐</span> <ruby>時間<rt>じかん</rt></ruby>で <ruby>出<rt>で</rt></ruby>る <ruby>魚<rt>さかな</rt></ruby>が <ruby>変<rt>か</rt></ruby>わる（<ruby>朝<rt>あさ</rt></ruby>・<ruby>昼<rt>ひる</rt></ruby>・<ruby>夕<rt>ゆう</rt></ruby>・<ruby>夜<rt>よる</rt></ruby>）<br>
+  <span class="ic" aria-hidden="true">💾</span> <ruby>記録<rt>きろく</rt></ruby>は この <ruby>端末<rt>たんまつ</rt></ruby>だけ・ログイン <ruby>不要<rt>ふよう</rt></ruby><br>
+  <span class="ic" aria-hidden="true">🎨</span> <ruby>絵<rt>え</rt></ruby>は <ruby>今<rt>いま</rt></ruby>は <ruby>仮<rt>かり</rt></ruby></p>
   <div class="hud keep">
     <button id="open-keep" type="button" style="flex:1">きろくを のこす・もどす</button>
     <a class="pill quiet" href="anshin/" style="flex:1">おうちの かたへ</a>
@@ -1299,11 +1300,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const chord = (notes, gap = .07, type = 'square', loud = .05, kind = 'fx') => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, kind));
   const guideTone = (freq, length, type, delay, loud, slideTo) => tone(freq, length, type, delay, loud, slideTo, 'guide'), guideChord = (notes, gap, type, loud) => chord(notes, gap, type, loud, 'guide'), guideZap = (length, delay, loud) => zap(length, delay, loud, 'guide');
   const SND_BTN = [   // つかいやすく する の なかの「おとの せってい」。dflt＝はじめから ON。sample＝ONに した とき ちょっと ならす
-    {id: 'snd-guide', key: 'sndGuide', ja: 'あんないの おと', en: 'Guide sounds', hint: ['わの ポ・ポ・ポ・ポ と「ピコン」など', 'The beeps and the “ping”'], dflt: true, sample: () => { guideTone(587, .05, 'triangle', 0, .0825); setTimeout(() => guideChord([988, 1319], .07, 'square', .075), 260); }},
-    {id: 'snd-fx', key: 'sndFx', ja: 'こうかおん', en: 'Sound effects', hint: ['なげる おと・おいわいの おと など', 'Casting, celebrations and more'], dflt: true, sample: () => { tone(784, .06, 'triangle', 0, .05); tone(1047, .08, 'triangle', .07, .05); }},
-    {id: 'snd-amb', key: 'sndAmb', ja: 'なみと あめの おと', en: 'Waves and rain', hint: ['なみと あめの おと', 'The sound of waves and rain'], dflt: true, sample: () => {}},
-    {id: 'snd-slow', key: 'slow', ja: 'ゆったり', en: 'Extra time', hint: ['「ピコン」が はやめに なって、おす まどが ひろく なる', 'The “ping” comes earlier and the press window is wider'], dflt: false, on: ['ゆったりに したよ。「ピコン」が はやく なって、おす まどが ひろく なるよ。', 'Extra time is on. The “ping” comes earlier and the press window is wider.'], off: ['ゆったりを やめたよ。', 'Extra time is off.'], sample: () => { guideTone(587, .05, 'triangle', 0, .0825); setTimeout(() => guideChord([988, 1319], .07, 'square', .075), 260); }},
-    {id: 'snd-soft', key: 'soft', ja: 'やさしい おと', en: 'Soft sounds', hint: ['まるい おとで、たかい おとを ひくく する', 'Rounder tones, with high notes lowered'], dflt: false, on: ['やさしい おとに したよ。まるい おとで、たかい おとは ひくく なるよ。', 'Soft sounds are on. Tones are rounder and high notes are lower.'], off: ['やさしい おとを やめたよ。', 'Soft sounds are off.'], both: true, sample: () => { tone(988, .07, 'square', 0, .075, 0, 'ui'); tone(1319, .07, 'square', .07, .075, 0, 'ui'); tone(2093, .12, 'square', .2, .05, 0, 'ui'); }}
+    {id: 'snd-guide', key: 'sndGuide', ja: 'あんないの おと', en: 'Guide sounds', hint: ['わの おとと「ピコン」', 'Beeps and “ping”'], dflt: true, sample: () => { guideTone(587, .05, 'triangle', 0, .0825); setTimeout(() => guideChord([988, 1319], .07, 'square', .075), 260); }},
+    {id: 'snd-fx', key: 'sndFx', ja: 'こうかおん', en: 'Sound effects', hint: ['なげる・おいわいの おと', 'Cast and party sounds'], dflt: true, sample: () => { tone(784, .06, 'triangle', 0, .05); tone(1047, .08, 'triangle', .07, .05); }},
+    {id: 'snd-amb', key: 'sndAmb', ja: 'なみと あめの おと', en: 'Waves and rain', hint: ['しずかな しぜんの おと', 'Calm nature sounds'], dflt: true, sample: () => {}},
+    {id: 'snd-slow', key: 'slow', ja: 'ゆったり', en: 'Extra time', hint: ['「ピコン」が はやめ・おす はばが ひろい', 'Earlier “ping”, wider press window'], dflt: false, on: ['ゆったりに したよ。「ピコン」が はやく なって、おす まどが ひろく なるよ。', 'Extra time is on. The “ping” comes earlier and the press window is wider.'], off: ['ゆったりを やめたよ。', 'Extra time is off.'], sample: () => { guideTone(587, .05, 'triangle', 0, .0825); setTimeout(() => guideChord([988, 1319], .07, 'square', .075), 260); }},
+    {id: 'snd-soft', key: 'soft', ja: 'やさしい おと', en: 'Soft sounds', hint: ['まるくて ひくい おと', 'Rounder, lower tones'], dflt: false, on: ['やさしい おとに したよ。まるい おとで、たかい おとは ひくく なるよ。', 'Soft sounds are on. Tones are rounder and high notes are lower.'], off: ['やさしい おとを やめたよ。', 'Soft sounds are off.'], both: true, sample: () => { tone(988, .07, 'square', 0, .075, 0, 'ui'); tone(1319, .07, 'square', .07, .075, 0, 'ui'); tone(2093, .12, 'square', .2, .05, 0, 'ui'); }}
   ];
   const FANFARE = .032;   // おいわいの おとは ひかえめに（あんないの おとが きこえる ように。ジョブズ1の そくてい）
   // ふるえ：かかった ときと つれた とき。さわりに びんかんな こも いるので、いれきり できる。「うごきを へらす」の 人は はじめから なし
@@ -1342,11 +1343,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     try { speech.cancel(); const u = new SpeechSynthesisUtterance(String(text)); u.voice = yomiVoice; u.lang = yomiVoice.lang; u.rate = .95; u.volume = 1; speech.speak(u); } catch {}
   }
   function drawYomi() {
-    const b = $('snd-yomi'); if (!b) return; const ok = yomiAvail(); b.hidden = !ok; if (!ok) return;
+    const b = $('snd-yomi'); if (!b) return; const ok = yomiAvail(); b.hidden = !ok; if (!ok) { b.removeAttribute('aria-label'); return; }   // English・こえが ない とき：ボタンは かくす（よみあげの せつめいも のこさない）
     const on = save.yomi === true; b.textContent = 'よみあげ：' + (on ? 'ON' : 'OFF'); b.setAttribute('aria-pressed', String(on));
-    b.setAttribute('aria-label', b.textContent + '。がめんの ことばを こえで よむよ。この たんまつの なかだけで よむよ。スクリーンリーダーを つかって いる ひとは、OFF の ままが おすすめ');
+    b.setAttribute('aria-label', b.textContent + '。がめんを こえで よむ（この たんまつの なかだけ）。スクリーンリーダーの ひとは OFF が おすすめ');
   }
   if (speech) { try { speech.addEventListener('voiceschanged', yomiPick); } catch {} }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawYomi);   // English の ひょうが そろって から（はじめは EN でないと みえる）
   // なみの おと。ざざーん…と、ゆっくり よせて かえす。あめの ひは、あめの おとも
   let ambient = null, ambientOut = null, ambientDuck = null, sleepMuted = false, areaTimer = 0;
   function startAmbient() {
@@ -1530,9 +1532,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
     const boss = save.total >= AREAS.find(a => a.id === BOSS.area).need, sf = seasonFish(), luckyLeft = Math.max(0, AREAS.find(a => a.id === LUCKY.area).need - save.total);   // ラッキーの つりばが まだ いけない ときの のこり
     box.hidden = false; const sunday = new Date().getDay() === 0 && weekShown() && weekShown().now;
-    box.textContent = (sunday ? L('きょうは にちようび。こんしゅうの きろくを、ずかんの まどから しゃしんに できるよ。', 'It is Sunday. You can make this week' + String.fromCharCode(39) + 's photo from the sticker book.') + ' ' : '') + (sf ? L('この つきの さかな：「' + sf.name + '」。', 'This month' + String.fromCharCode(39) + 's fish: ' + sf.name + '. ') : '') + (EN()
-      ? 'Everyone has the same lucky fish today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (luckyLeft ? ' ' + luckyLeft + ' more catches to unlock that spot.' : '') + (boss ? ' Today' + String.fromCharCode(39) + 's Guardian tends to show up at ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ') — same for everyone.' : '')
-      : 'きょうは みんな おなじ さかなが ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (luckyLeft ? 'まだ いけないけど、あと ' + luckyLeft + 'ひきで いけるよ。' : '') + (boss ? 'ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ（これも みんな おなじ）。' : ''));
+    box.textContent = (sunday ? L('きょうは にちようび。こんしゅうの きろくを、ずかんの まどから しゃしんに できるよ。', 'It is Sunday. You can make this week' + String.fromCharCode(39) + 's photo from the sticker book.') + ' ' : '') + (sf ? L('こんげつ：「' + sf.name + '」。', 'Now: ' + sf.name + '. ') : '') + (EN()
+      ? 'Everyone' + String.fromCharCode(39) + 's lucky fish: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (luckyLeft ? ' ' + luckyLeft + ' more to unlock.' : '') + (boss ? ' Guardian: ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ').' : '')
+      : 'みんな おなじ ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (luckyLeft ? 'あと ' + luckyLeft + 'ひき。' : '') + (boss ? 'ぬし：「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」。' : ''));
   }
   function drawSeatHint() { document.body.dataset.seathint = String(!save.seatMoved && save.total >= 1 && save.total < 6); }   // 1〜5ひき つる あいだ、せきを うごかした ことが なければ ゆらゆら
   function drawBadge() {   // ずかんに まだ みて いない あたらしい さかなが いる とき（かず）。ひらいたら きえる。へらす・くらべる ものでは ない
@@ -2055,7 +2057,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     face(curFace); drawEquip();
     $('bucket-title').textContent = bucketName() || 'バケツ'; paintBucketLabel();
   }
-  function paintKbd() { const kb = $('kbd-note'); if (kb) kb.textContent = L('キーボード：1・2・3 で ばしょ／Space か Enter で なげる・ひく／G で ながめる／Esc で ながめるを おわる', 'Keyboard: 1, 2, 3 choose a seat / Space or Enter to cast and reel / G to gaze / Esc to stop gazing'); }
+  function paintExplain() {   // English の ときの トップの 説明・ページ したの 説明（みじかく。日本語は HTML に ある）
+    if (!EN()) return;
+    const ic = t => '<span class="ic" aria-hidden="true">' + t + '</span> ', lead = $('lead-text'), about = $('about-note');
+    if (lead) lead.innerHTML = ic('🐟') + 'No rush. Nothing is lost if one escapes<br><small>' + ic('⏱') + '10–20 sec per fish · Free</small>';
+    if (about) about.innerHTML = ic('🕐') + 'Fish change with the time of day<br>' + ic('💾') + 'Saved on this device · no login<br>' + ic('🎨') + 'Art is temporary';
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintExplain); else paintExplain();
+  function paintKbd() { const kb = $('kbd-note'); if (kb) kb.textContent = L('⌨ 1〜3 ばしょ／Space・Enter なげる・ひく／G ながめる／Esc もどる', '⌨ 1–3 seat / Space·Enter cast & reel / G gaze / Esc back'); }
   function paintSkip() { paintKbd(); const a = document.querySelector('.skip'); if (a) a.textContent = L('つりを はじめる（「なげる」へ）', 'Skip to fishing (the Cast button)'); }   // English の ひょうが そろって から
   function paintBucketLabel() { $('open-bucket').setAttribute('aria-label', bucketName() ? L('バケツ（' + bucketName() + '）', 'Bucket (' + bucketName() + ')') : L('バケツ', 'Bucket')); }   // English の ひょうが そろって から もういちど
   function unlockNames(before, now) { const out = []; for (const g of Object.values(GEAR)) for (const o of g.list) if (o.lv > before && o.lv <= now) out.push(g.title.split('（')[0] + '：' + o.n); return out; }
@@ -3124,7 +3133,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   save.last = Date.now(); store();
   if (save.total === 0) say('「なげる」を おしてね。');
   else if (mythDay) say(welcome + 'きょうは、ふしぎな ひ。みずが きらきら して いるよ。');
-  else say(welcome + 'きょうの ラッキーさかなは「' + LUCKY.name + '」。' + areaName(LUCKY.area) + 'に いるよ。' + (rainy ? 'きょうは あめ。' : '') + (save.total >= AREAS.find(a => a.id === BOSS.area).need ? ' きょうの ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ。' : ''));
+  else {
+    const boss0 = save.total >= AREAS.find(a => a.id === BOSS.area).need, welcomeEn = (away >= 3 * 86400000 ? 'Welcome back. Your book and records are just as you left them. ' : '') + (hourNow >= 1 && hourNow < 5 ? 'Can' + String.fromCharCode(39) + 't sleep? Let' + String.fromCharCode(39) + 's just watch slowly. ' : '');
+    const jaLine = welcome + 'きょうの ラッキー「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (rainy ? 'あめの ひ。' : '') + (boss0 ? 'ぬし「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」。' : '');
+    const enLine = () => welcomeEn + 'Lucky today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (rainy ? ' Rainy.' : '') + (boss0 ? ' Guardian: ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ').' : '');
+    say(L(jaLine, enLine()));
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { if (EN() && status.textContent === jaLine) say(enLine(), true); });   // English の ひょうが そろって から（はじめは 日本語で でる ため）
+  }
   if (!Number.isInteger(save.bookSeen)) { save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); }   // はじめてなら「ぜんぶ みた」ことに（バッジは これから ふえた ぶんだけ）
   applyMy(); hud(); setPhase('idle');
   if (location.hash === '#restored') { say('きろくを もどしたよ。つづきから あそべるよ。'); try { history.replaceState(null, '', location.pathname + location.search); } catch {} }
