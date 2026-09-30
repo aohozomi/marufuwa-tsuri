@@ -29,6 +29,30 @@
 // よるは ページも くらく（まぶしく ない ように）。さいしょの 1コマから。あとで 本体が がめんの じかんに あわせて なおす
 try { var h = new Date().getHours(), t = (JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}).time; if (matchMedia('(prefers-color-scheme: dark)').matches || t === 'n' || h >= 19 || h < 5) { document.documentElement.dataset.night = 'true'; document.querySelector('meta[name=theme-color]').content = '#0f1c33'; } } catch (e) {}
 </script>
+<script>
+// うごきを へらす（ゲームの 中の スイッチ）：スマホの せっていに くわえて、ここでも えらべる（せっていを しらない おうちの ひとや こどもの ために）。
+// matchMedia を さしかえて、外付けの ぶひんも ふくめて ぜんぶ おなじ せっていに したがう。CSS の「うごきを へらす」の きまりは、よみこみが おわって から :root[data-calm] つきで うつす
+try {
+  if ((JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}).calm === true) {
+    document.documentElement.dataset.calm = 'true';
+    var realMM = window.matchMedia.bind(window); window.__realMatchMedia = realMM;
+    window.matchMedia = function (q) { var m = realMM(q); return /prefers-reduced-motion[ ]*:[ ]*reduce/.test(String(q)) ? new Proxy(m, {get: function (t, k) { if (k === 'matches') return true; var v = t[k]; return typeof v === 'function' ? v.bind(t) : v; }}) : m; };
+    document.addEventListener('DOMContentLoaded', function () {
+      Array.prototype.forEach.call(document.styleSheets, function (sheet) {
+        var rules; try { rules = Array.prototype.slice.call(sheet.cssRules); } catch (e) { return; }
+        rules.forEach(function (rule) {
+          if (rule.type !== 4 || !/prefers-reduced-motion[ ]*:[ ]*reduce/.test(rule.media.mediaText)) return;
+          Array.prototype.forEach.call(rule.cssRules, function (inner) {
+            if (inner.type !== 1) return;
+            var sel = inner.selectorText.split(',').map(function (s) { return ':root[data-calm=true] ' + s.trim(); }).join(',');
+            try { sheet.insertRule(sel + '{' + inner.style.cssText + '}', sheet.cssRules.length); } catch (e) {}
+          });
+        });
+      });
+    });
+  }
+} catch (e) {}
+</script>
 <style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light;touch-action:manipulation}   /* ダブルタップの ひろがりを ふせぐ（つまんで ひろげるのは できる） */
 *{box-sizing:border-box}
@@ -384,7 +408,7 @@ body.gazing #sound,body.gazing .bgm-btn{flex:0 1 auto}
 .assist{flex:1 1 100%;margin-bottom:0}
 .assist-body{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
 .assist-body button{flex:1 1 40%;min-height:54px;font-size:.95rem}
-#sound[aria-pressed=true],#buzz[aria-pressed=true],#nature[aria-pressed=true],.bgm-btn[aria-pressed=true]{--c1:#e3f3ff;--c2:#8fd0f5;--side:#4b9cc9;--ink:#0d3a55}   /* ON の ときは、ほんのり あおく（もじでも ON と かいて ある） */
+#sound[aria-pressed=true],#buzz[aria-pressed=true],#nature[aria-pressed=true],#calm[aria-pressed=true],.bgm-btn[aria-pressed=true]{--c1:#e3f3ff;--c2:#8fd0f5;--side:#4b9cc9;--ink:#0d3a55}   /* ON の ときは、ほんのり あおく（もじでも ON と かいて ある） */
 body.gazing .assist{display:none}
 #scene[data-ikimono=off] #ikimono{display:none}
 /* とおくの けしき（tsuri-tooku.js）：ちかくの なかまの ウキは かくす。ひく わ（#reel）は、とおくの じぶんの ウキの あたりに ひらく */
@@ -1103,6 +1127,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     body.append($('easy'));
     if (canBuzz) { const b = document.createElement('button'); b.id = 'buzz'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
     { const b = document.createElement('button'); b.id = 'nature'; b.type = 'button'; b.setAttribute('aria-pressed', 'true'); body.append(b); }
+    { const b = document.createElement('button'); b.id = 'calm'; b.type = 'button'; b.setAttribute('aria-pressed', 'false'); body.append(b); }
     box.append(head, body);
     box.open = typeof save.assistOpen === 'boolean' ? save.assistOpen : !!save.easy;
     head.addEventListener('click', () => setTimeout(() => { save.assistOpen = box.open; store(); }, 0));   // ひらく／とじる を おぼえる
@@ -2320,6 +2345,20 @@ dialog .close{display:block;margin:auto;min-width:160px}
     save.ikimono = !natureOn(); store(); drawNature(); drawEasy();
     say(save.ikimono ? 'けしきの いきものを だしたよ。' : 'けしきの いきものを しまったよ。');
   });
+  // うごきを へらす：スマホの せってい（OSの「うごきを へらす」）か、この ボタン。ボタンを おすと、せっていを ほぞんして よみこみ なおす（外付けの ぶひんも ぜんぶ おなじ せっていに なる）
+  const osReduce = () => (window.__realMatchMedia || matchMedia.bind(window))('(prefers-reduced-motion: reduce)').matches;
+  function drawCalm() {
+    const b = $('calm'); if (!b) return; const os = osReduce(), on = os || save.calm === true;
+    b.textContent = L('うごきを へらす：' + (on ? 'ON' : 'OFF') + (os ? '（スマホの せってい）' : ''), 'Reduce motion: ' + (on ? 'ON' : 'OFF') + (os ? ' (phone setting)' : ''));
+    b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', L('うごきを へらす。いまは ' + (on ? 'ON' : 'OFF') + (os ? '。スマホの せっていで ONに なって いるよ' : ''), 'Reduce motion. Currently ' + (on ? 'on' : 'off') + (os ? '. Turned on by your phone settings' : '')));
+  }
+  $('calm') && $('calm').addEventListener('click', () => {
+    if (osReduce()) { say(L('スマホの せっていで、うごきは へらして いるよ。', 'Motion is already reduced by your phone settings.')); return; }
+    save.calm = !save.calm; store(); drawCalm();
+    say(L(save.calm ? 'うごきを へらすよ。よみこみ なおすね。' : 'うごきを もとに もどすよ。よみこみ なおすね。', save.calm ? 'Reducing motion. Reloading.' : 'Restoring motion. Reloading.'));
+    setTimeout(() => location.reload(), 900);
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawCalm); else drawCalm();   // 英語の ときは tsuri-en.js が よみこまれて から 書く
   drawBuzz(); drawNature(); drawEasy();
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
