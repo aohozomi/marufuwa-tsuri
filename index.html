@@ -719,15 +719,16 @@ dialog .close{display:block;margin:auto;min-width:160px}
 
   <dialog id="bucket" aria-labelledby="bucket-title">
     <h2 id="bucket-title">バケツ</h2>
-    <p class="count">さいきん つった 10ぴき。つりばを かえても、きえないよ。</p>
+    <h3 style="margin:10px 0 4px;font-size:1rem">さいきん つった こ</h3>
+    <p class="count">10ぴきまで のこるよ。つりばを かえても、きえないよ。</p>
     <div id="bucket-list"></div>
     <p id="release-note" class="count" hidden></p>
     <p id="gift-note" class="count" hidden>ぬしと まぼろしの こは、じぶんで つった ひとだけの たからもの。おくれないよ。</p>
     <h3 id="gift-head" style="margin:10px 0 4px;font-size:1rem" hidden>もらった さかな</h3>
     <div id="gift-list" hidden></div>
-    <h3 style="margin:10px 0 4px;font-size:1rem">ひろった かざり</h3>
+    <h3 style="margin:10px 0 4px;font-size:1rem">さかなが くれた かざり</h3>
     <p id="decor-list" style="margin:0 0 12px;line-height:1.8"></p>
-    <h3 style="margin:10px 0 4px;font-size:1rem">あった なかま</h3>
+    <h3 style="margin:10px 0 4px;font-size:1rem">であった なかま</h3>
     <p id="pal-list" style="margin:0 0 12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></p>
     <button class="close" type="button" id="close-bucket">とじる</button>
   </dialog>
@@ -738,7 +739,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <div class="photo-actions">
       <a id="photo-save" class="pill" download="marufuwa-tsuri.png">ほぞんする</a>
       <button id="photo-share" type="button" class="pill">みせる（きょうゆう）</button>
-      <a id="photo-x" class="pill" target="_blank" rel="noopener noreferrer" aria-label="Xに かく。あたらしい まどが ひらきます。おうちの ひとと いっしょに つかってね">Xに かく</a>
+      <a id="photo-x" class="pill" target="_blank" rel="noopener noreferrer" aria-label="Xに のせる。あたらしい まどが ひらきます。おうちの ひとと いっしょに つかってね">Xに のせる</a>
     </div>
     <p class="count" id="photo-status" role="status">かってに とうこうは しません。</p>
     <button class="close" type="button" id="close-photo">とじる</button>
@@ -1418,7 +1419,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     combo = power >= 2 ? combo + 1 : 0;
     hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0));
     $('hp').firstElementChild.style.width = (hp / hpMax * 100) + '%';
-    const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'おしい！';
+    const word = power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power);
     if (power === 3) { guideChord([1047, 1319, 1568, 2093], .045); buzz(40); }   // ピロリロッ
     else if (power === 2) { guideTone(784, .05); guideTone(1047, .08, 'square', .05); }   // ピコッ
@@ -2512,7 +2513,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('take-photo'), $('release'), $('send-gift'), audio, $('gaze'), $('sleep'), $('fullscreen'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
     drawAudioSize();
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
-    where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
+    where.className = 'time-box'; now.id = 'area-now'; head.append('つりばを かえる（いま：', now, '）'); where.append(head, $('areas'));
     status.after($('today'), where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
   }
   // つかいやすく する（ふだんは とじて いる 折りたたみ）：らくちん・ふるえ。名前で 年れいを わけない（おとなも えらべる）
