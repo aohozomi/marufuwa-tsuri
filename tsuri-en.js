@@ -215,6 +215,11 @@
     'つりははじめて？ゆっくりでいいよ': 'First time fishing? Take it slow.', 'ねむれない？いっしょにながめよう': "Can't sleep? Let's watch together.", 'こんなじかんまでおつかれさま': 'Good work, up this late.',
     'よなかのみずうみはぼくたちだけだね': "It's just us at the lake in the middle of the night.",
     // ぬしを つった とき・とおく
+    'このこは100ねんまえからこのみずうみにいるんだって': 'They say this one has lived in the lake for a hundred years.', 'みずうみのおくで、ほしをみてねむるんだって': 'They say it sleeps deep in the lake, watching the stars.',
+    'かわのぬしは、あめのひにうたをうたうんだって': 'They say the river Guardian sings on rainy days.', 'むかしから、かわのみずをきれいにしてくれているんだって': 'They say it has kept the river clean since long ago.',
+    'みなとのふねを、ずっとみまもっているんだって': 'They say it has always watched over the boats in the harbor.', 'まちのひとは「みなとのおじいさん」ってよぶんだって': 'The townsfolk call it “the old one of the harbor.”',
+    'ふかいうみのそこから、たまにあそびにくるんだって': 'They say it comes up from the deep sea now and then, just to visit.', 'つきのあかるいよるに、ふねのしたをとおるんだって': 'They say it passes under the boat on bright moonlit nights.',
+    'むかし、108のなかまがいたんだって': 'They say there were 108 friends here, long ago.', 'なかまはまだどこかにいるんだって': 'They say the friends are still out there somewhere.',
     'わあ！': 'Wow!', 'すごい！': 'Amazing!', 'ぬしだ！': "It's the Guardian!", 'おおきい…！': 'So big…!', 'みてみて！': 'Look, look!', 'やったね！': 'You did it!',
     'とおくからみているよ。ひろいみずうみで、のんびり。': 'Watching from far away. On the wide lake, nice and slow.', 'ちかくにもどったよ。': 'Back to the close view.',
     'ひろば・おへや・ながめるでながれる、しずかなBGM': 'Quiet BGM that plays in the Plaza, the Room, and Just watch',

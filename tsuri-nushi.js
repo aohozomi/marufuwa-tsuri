@@ -37,6 +37,7 @@
 @keyframes nushi-shake{0%,100%{translate:0 0}25%{translate:-.6% .3%}75%{translate:.6% -.3%}}
 #nushi-fx .bang{position:absolute;left:var(--x);top:var(--y);translate:-50% -100%;font-weight:900;font-size:clamp(1.2rem,7cqw,2.2rem);color:#ff5a3c;-webkit-text-stroke:2px #fff;paint-order:stroke;animation:nushi-bang .6s ease-out forwards;animation-delay:var(--d,0s);opacity:0}
 #nushi-fx .word{position:absolute;left:var(--x);top:var(--y);translate:-50% -100%;background:#fff;border:2px solid #ffb347;border-radius:14px;padding:2px 10px;font-size:.8rem;font-weight:800;white-space:nowrap;color:#5a3a10;opacity:0;animation:nushi-word 2.6s ease-out forwards;animation-delay:var(--d,0s)}
+#nushi-fx .word.lore{white-space:normal;max-width:86%;width:max-content;text-align:center;font-size:.9rem;font-weight:600;line-height:1.5;padding:6px 12px;animation-duration:4.4s}
 #scene .who[data-nushi-jump=true]{animation:nushi-jump .9s ease-out 2}
 @keyframes nushi-bang{0%{opacity:0;transform:scale(.4) translateY(10%)}30%{opacity:1;transform:scale(1.25)}100%{opacity:1;transform:scale(1)}}
 @keyframes nushi-word{0%{opacity:0;transform:translateY(6px)}12%,80%{opacity:1;transform:translateY(0)}100%{opacity:0}}
@@ -128,6 +129,14 @@
       }, 350 + i * 260);
     });
   }
+  // つれた あとの ひとこと：ぬしの いいつたえ（Dispatch の 案 E-4・10/1）。つりばごとに 2つ。こわい ことばは いれない
+  const LORE = {
+    L: ['この こは 100ねん まえから この みずうみに いるんだって', 'みずうみの おくで、ほしを みて ねむるんだって'],
+    R: ['かわの ぬしは、あめの ひに うたを うたうんだって', 'むかしから、かわの みずを きれいに してくれて いるんだって'],
+    H: ['みなとの ふねを、ずっと みまもって いるんだって', 'まちの ひとは「みなとの おじいさん」って よぶんだって'],
+    B: ['ふかい うみの そこから、たまに あそびに くるんだって', 'つきの あかるい よるに、ふねの したを とおるんだって'],
+  };
+  const lore = () => { const a = LORE[scene.dataset.area] || LORE.L; return a[Math.floor(Math.random() * a.length)]; };
   function landed() {
     // つれた：ひかりが ぱっと ひろがり、きんいろの ひかりの すじ
     stopDrum(); fx.textContent = ''; dim.dataset.on = 'false';
@@ -136,7 +145,8 @@
     const x = r ? ((r.left + r.width / 2 - s.left) / s.width * 100) + '%' : '50%', y = r ? ((r.top + r.height / 2 - s.top) / s.height * 100) + '%' : '55%';
     for (let i = 0; i < 12; i++) el('ray', {x, y, r: (i * 30 + 15) + 'deg', d: (i % 3) * .08 + 's'});
     friendsReact();
-    setTimeout(() => { if (scene.dataset.phase === 'caught') fx.textContent = ''; }, 4200);
+    setTimeout(() => { if (scene.dataset.phase === 'caught') { const w = el('word', {x: '50%', y: '30%', d: '0s'}); w.className += ' lore'; w.textContent = lore(); } }, 1700);   // いいつたえ（1.7びょう あと・まんなか の うえ）
+    setTimeout(() => { if (scene.dataset.phase === 'caught') fx.textContent = ''; }, 6200);
     clearTimeout(bossTimer); bossTimer = setTimeout(() => { delete scene.dataset.boss; }, 4200);   // 見せ場（！・わあ！）が おわる まで ひとこと・いきものは もどさない
     active = false;
   }
