@@ -1365,7 +1365,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     pitatto: {name: 'ぴたっと', tip: 'とちゅうで、いちど とまるよ', f: p => p < .34 ? 1 - p * 1.18 : p < .58 ? .6 : .6 * (1 - (p - .58) / .42)}
   };
   const swimOf = f => f.legend ? 'yuttari' : f.rare === 1 ? ['yuttari', 'yurari'][f.id % 2] : f.rare === 2 ? ['yurari', 'guigui', 'yuttari'][f.id % 3] : f.rare === 3 ? ['guigui', 'furafura', 'pitatto'][f.id % 3] : ['furafura', 'pitatto'][f.id % 2];
-  let swim = SWIMS.yurari, hitAt = 0, perfects = 0, spinning = 0, misses = 0, restUntil = 0, restBlip = 0;
+  let swim = SWIMS.yurari, hitAt = 0, perfects = 0, spinning = 0, misses = 0, restUntil = 0, restBlip = 0, ringAnim = null;
   const cycleTime = () => (performance.now() - ringStart) % period;
   const ringSize = () => swim.f(cycleTime() / period);
   // 「いまだ」までの じかんの ずれ（ミリびょう）。まえでも あとでも、ちかい ほうを かえす
@@ -1390,10 +1390,20 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function stopGuide() { clearInterval(guide); guide = 0; duckAmbient(false); }
   // わを えがく。がめんの かきかえに あわせて、なめらかに
+  // わの ちぢみは Web Animations（ブラウザの 描画スレッド）に まかせる：本体の しごとが おもい スマホでも コマ落ちしない（総司令部 9/30 測定：CPU 6倍おそい とき rAF は 25fps・最長 100ms 止まる）。あわせる じかん（hitAt・offBeat）は これまで どおり performance.now() で 決める
+  function ringSync() {
+    const ring = document.querySelector('#reel .ring'); if (!ring || !ring.animate) return;
+    if (ringAnim) { ringAnim.cancel(); ringAnim = null; }
+    const N = 120, kf = []; for (let i = 0; i <= N; i++) kf.push({transform: 'scale(' + Math.max(0, swim.f(i / N)).toFixed(4) + ')', easing: 'linear'});
+    ringAnim = ring.animate(kf, {duration: period, iterations: Infinity});
+    try { ringAnim.startTime = ringStart; } catch (e) {}   // document.timeline の じこく ＝ performance.now() と おなじ ものさし（1しゅうめの はじまりを ringStart に そろえる）
+    ring.style.transform = '';
+  }
+  function ringStop() { if (ringAnim) { ringAnim.cancel(); ringAnim = null; } }
   function spin() {
-    if (phase !== 'reel') { spinning = 0; return; }
+    if (phase !== 'reel') { spinning = 0; ringStop(); return; }
     const ring = document.querySelector('#reel .ring'), hot = Math.abs(offBeat()) <= windowMs();
-    ring.style.transform = 'scale(' + ringSize().toFixed(4) + ')';
+    if (!ringAnim) ring.style.transform = 'scale(' + ringSize().toFixed(4) + ')';   // animate が ない ふるい ブラウザだけ、いままでの やりかた
     $('reel').dataset.hot = String(hot);
     spinning = requestAnimationFrame(spin);
   }
@@ -1512,7 +1522,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     swim = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; perfects = 0; misses = 0; restUntil = 0;
     // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
     hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
-    ringStart = performance.now();
+    ringStart = performance.now(); ringSync();
     $('hp').firstElementChild.style.width = '100%'; $('judge').textContent = $('combo').textContent = ''; combo = 0;
     setPhase('reel'); face('smile');
     // わの なかに さかなの かげを いれる
@@ -1681,7 +1691,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   });
   // わや みずを じかに おしても、ひける
   scene.addEventListener('click', event => { if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); else if (phase === 'caught' && $('card').dataset.wait && !event.target.closest('button')) cardShow(); });   // つれた 直後の 1.5びょうの あいだ、けしきを タップしても すぐ カードが 出る
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') ringStart = performance.now(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') { ringStart = performance.now(); ringSync(); } });
 
   // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
   const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
