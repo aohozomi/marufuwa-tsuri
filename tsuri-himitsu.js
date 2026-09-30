@@ -139,6 +139,23 @@
 #hm-toast button{min-height:48px;min-width:120px;font-size:.9rem}
 :root[data-inapp=x] #hm-note,:root[data-inapp=x] #hm-word{max-height:calc(100dvh - 64px);margin:8px auto auto;overflow:auto}
 @media(prefers-reduced-motion:reduce){#hm-word-msg.pop{animation:none}}
+#scene .hm-boat{width:14%;min-width:44px;min-height:44px;aspect-ratio:1/1;transform:translate(-50%,-70%)}
+.hm-boat svg{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 2px #0b2a4a55);animation:hm-rock 2.4s ease-in-out infinite alternate}
+@keyframes hm-rock{from{transform:rotate(-4deg) translateY(-1px)}to{transform:rotate(4deg) translateY(2px)}}
+.hm-rainbow{position:absolute;z-index:1;left:6%;top:4%;width:88%;aspect-ratio:2/1;pointer-events:none;opacity:0;transition:opacity 2.6s ease}
+.hm-rainbow.on{opacity:.8}
+.hm-rainbow svg{display:block;width:100%;height:100%;overflow:visible}
+#scene[data-rainbow] #rain{opacity:.35}
+.hm-crabbox{display:flex;flex-direction:column;align-items:center;gap:4px;margin:0 0 12px}
+.hm-crabtrack{position:relative;width:100%;height:56px;overflow:hidden}
+.hm-crab{position:absolute;left:0;top:4px;width:56px;height:48px;min-width:0;min-height:0;padding:0;border:0;background:none;box-shadow:none;border-radius:12px;cursor:pointer;-webkit-backdrop-filter:none;backdrop-filter:none;transition:none;animation:hm-scuttle 7s ease-in-out infinite alternate}
+.hm-crab::before{display:none}
+.hm-crab:active:not(:disabled){transform:none;box-shadow:none}
+.hm-crab svg{width:100%;height:100%;display:block}
+.hm-crab:focus-visible{outline:3px solid #286b88;outline-offset:2px;background:#ffffffb3}
+@keyframes hm-scuttle{from{left:0}to{left:calc(100% - 56px)}}
+.hm-crabmsg{margin:0;font-size:.9rem;line-height:1.6;text-align:center;font-weight:800;min-height:1.6em}
+@media(prefers-reduced-motion:reduce){.hm-boat svg,.hm-crab{animation:none}.hm-crab{left:calc(50% - 28px)}.hm-rainbow{transition:none}}
 `;
   document.head.append(css);
 
@@ -250,11 +267,89 @@
     } else b.remove();
   }
 
+  // ─── ひみつで もらえる かざり（おへやの かざり）：ひみつの 鍵の gifts に 足す（さいだい 3こ・いっぱいでも おこらない）。ほかの ページが 書いた 物は そのまま ───
+  function giveGift(id) {
+    const d = readJSON(HM_KEY) || {}; if (!d.gifts || typeof d.gifts !== 'object' || Array.isArray(d.gifts)) d.gifts = {};
+    const have = Math.max(0, Math.floor(Number(d.gifts[id]) || 0)), full = have >= 3;
+    if (!full) d.gifts[id] = have + 1; d.v = 1;
+    try { localStorage.setItem(HM_KEY, JSON.stringify(d)); } catch {}
+    return { n: full ? have : have + 1, full };
+  }
+  const giftHave = id => { const d = readJSON(HM_KEY); return d && d.gifts && typeof d.gifts === 'object' && !Array.isArray(d.gifts) ? Math.max(0, Math.floor(Number(d.gifts[id]) || 0)) : 0; };
+  const decorArt = (name, size, fallback) => { try { const D = window.TsuriTank && window.TsuriTank.decor; const s = D && typeof D.markup === 'function' ? D.markup(name, size) : ''; if (s) return s; } catch {} return fallback; };
+
+  // ─── つり3 パンダの ささぶね（かわ・パンダが となりに いる・なげずに 25びょう）───
+  //   かわの 川上（みぎ）から ささぶねが ゆっくり ながれて くる（14びょう・かわの きしに そって）。ながれて いる 間は「ささぶね。ひろう」の ボタン（さわる・Tab と Enter）。
+  //   ひろうと おへやの かざり「ささぶね」に なる（ひみつの 鍵の gifts.sasabune・さいだい 3こ）。ひろわなくても なにも へらない（そのまま ながれて いく）。かわを はなれて もどると また ながれる。つりの 最中は ボタンを とめる
+  let boat = null, boatDone = false;
+  const boatFallback = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M2 22 C8 22 10 34 20 34 C30 34 32 22 38 22 C33 30 28 31 20 31 C12 31 7 30 2 22Z" fill="#8fe0a8" stroke="#4fae7c" stroke-width="2" stroke-linejoin="round"/></svg>';
+  function boatEvent() {
+    if (boat) return; boatDone = true;
+    const el = make('button', 'hm-hot hm-boat'); el.type = 'button'; el.setAttribute('aria-label', 'ささぶね。ひろう'); el.innerHTML = decorArt('ささぶね', 40, boatFallback);
+    const sv = el.querySelector('svg'); if (sv) sv.setAttribute('aria-hidden', 'true');
+    const lvl = x => shore(x) + 9, x0 = 106, x1 = -8, still = reduced();
+    el.style.left = (still ? 50 : x0) + '%'; el.style.top = lvl(still ? 50 : x0) + '%'; scene.append(el);
+    boat = { el, anim: null };
+    if (!still) { boat.anim = el.animate([{ left: x0 + '%', top: lvl(x0) + '%' }, { left: x1 + '%', top: lvl(x1) + '%' }], { duration: dur(14000), easing: 'linear', fill: 'forwards' }); boat.anim.onfinish = () => boatLeave(false); }
+    else later(() => boatLeave(false), 14000);
+    el.addEventListener('click', boatPick);
+    zap(.9, 0, .02, .3); zap(.9, .8, .015, -.3); tone(1319, .05, 'triangle', .3, .02);
+    say('かわの うえから、ささぶねが ながれて きたよ。ボタンで ひろえるよ。');
+  }
+  function boatLeave(picked) { if (!boat) return; const b = boat; boat = null; if (b.anim) b.anim.cancel(); b.el.remove(); if (!picked) say('ささぶねは、かわしもへ ながれて いったよ。'); }
+  function boatPick() {
+    if (!boat) return; const r = giveGift('sasabune'); markFound('tsuri-sasabune'); boatLeave(true);
+    chord([1047, 1319, 1568], .07, 'triangle', .04);
+    say(r.full ? 'ささぶねは もう いっぱい もって いるよ。おへやに かざって あげてね。' : 'ささぶねを ひろったよ。おへやに かざれるよ。');
+    const pa = palEl('panda'); if (pa) { const p = at(pa), b = make('div', 'bubble', 'ささぶね、いいね'); b.setAttribute('aria-hidden', 'true'); b.style.left = p.x + '%'; b.style.top = (p.y - 19) + '%'; scene.append(b); later(() => b.remove(), 3000); }
+  }
+
+  // ─── つり6 あめあがりの にじ（あめの ひ・よる いがい・その 回で 5ひき つる）───
+  //   本体の きろく save.total（つった かず）が ひらいた ときより 5 ふえたら、あめが よわまり、やまの うえに にじが かかる（ド・ミ・ソ・ド）。その 日は ひらき なおしても 出る（ひみつの 鍵に 日づけを のこす）。
+  //   しるし：#scene[data-rainbow="true"]（本体の しゃしんが にじを うつす 口に つかえる）。よるには 出ない。あめの ひだけ
+  const isRainy = () => scene.dataset.rain === 'true';
+  const totalNow = () => Math.max(0, Math.floor(Number((readJSON(MAIN_KEY) || {}).total) || 0));
+  const dayNow = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+  const RAINBOW = [['#ff9a9a', 90], ['#ffc48a', 85], ['#fff09a', 80], ['#a6e6a0', 75], ['#9ccbff', 70], ['#c9a8f5', 65]].map(([c, r]) => `<path d="M${100 - r} 100 A${r} ${r} 0 0 1 ${100 + r} 100" fill="none" stroke="${c}" stroke-width="5.4"/>`).join('');
+  let rainbow = null, total0 = totalNow(), rainbowLoud = false;
+  function showRainbow(loud) {
+    if (rainbow) return;
+    const el = make('div', 'hm-rainbow', `<svg viewBox="0 0 200 100" aria-hidden="true">${RAINBOW}</svg>`); el.setAttribute('aria-hidden', 'true'); scene.append(el); rainbow = el; scene.dataset.rainbow = 'true';
+    setTimeout(() => el.classList.add('on'), 30);
+    if (loud) {
+      chord([523, 659, 784, 1047], .12, 'triangle', .05); say('あめが やんで きたよ。にじが でてる');
+      const d = readJSON(HM_KEY) || {}; d.rainbow = dayNow(); d.v = 1; try { localStorage.setItem(HM_KEY, JSON.stringify(d)); } catch {}
+      markFound('tsuri-nijii');
+    }
+  }
+  function hideRainbow() { if (!rainbow) return; rainbow.remove(); rainbow = null; delete scene.dataset.rainbow; }
+
+  // ─── つり8 バケツの やどかり（バケツを 5かい のぞく）───
+  //   バケツを ひらく たびに かぞえて、5かいめ（10・15…）に、なかに やどかりが いる（バケツの まどの なかを かさかさ あるく）。さわると おへやの かざりに なる（gifts.yadokari・さいだい 3こ）。
+  //   3こ もって いれば もう でない。ひろわなくても なにも へらない。とじると きえる
+  let bucketOpens = 0, crabBox = null;
+  const crabFallback = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M33 32 Q40 8 22 7 Q10 8 13 26 Q15 31 33 32Z" fill="#ffe3c4" stroke="#d98a5a" stroke-width="2"/><path d="M14 33 Q24 38 33 33 L32 28 L14 28Z" fill="#ff9a7a" stroke="#d96f40" stroke-width="1.6"/></svg>';
+  function crabHide() { if (crabBox) { crabBox.remove(); crabBox = null; } }
+  function crabShow() {
+    if (!bucket || crabBox || giftHave('yadokari') >= 3) return;
+    const box = make('div', 'hm-crabbox'), track = make('div', 'hm-crabtrack'), b = make('button', 'hm-crab'), msg = make('p', 'hm-crabmsg');
+    b.type = 'button'; b.setAttribute('aria-label', 'バケツの なかに やどかり。さわる'); b.innerHTML = decorArt('やどかり', 48, crabFallback); const sv = b.querySelector('svg'); if (sv) sv.setAttribute('aria-hidden', 'true');
+    msg.setAttribute('role', 'status'); msg.setAttribute('aria-live', 'polite'); msg.textContent = 'バケツの なかに、やどかりが いたよ。さわると なかよしに なるよ。';
+    track.append(b); box.append(track, msg); const close = bucket.querySelector('.close'); if (close) close.before(box); else bucket.append(box); crabBox = box;
+    zap(.04, 0, .03); [0, 1, 2].forEach(i => zap(.03, .12 + i * .1, .03));
+    b.addEventListener('click', () => {
+      const r = giveGift('yadokari'); markFound('tsuri-yadokari'); chord([784, 988, 1175], .07, 'triangle', .04);
+      msg.textContent = r.full ? 'やどかりは もう いっぱい いるよ。おへやに かざって あげてね。' : 'やどかりが、すいそうに ひっこしたいって。おへやに かざれるよ。'; track.remove();
+    });
+  }
+
   // ─── まわして みる：ようすが かわった時の あとしまつ・さわる ボタンの 出し入れ ───
   let lastKey = '', idleSince = clock();
   function update() {
     const s = state(), key = s.area + '/' + s.time, moving = s.phase === 'bite' || s.phase === 'reel';
-    if (key !== lastKey) { lastKey = key; idleSince = clock(); }
+    if (key !== lastKey) { lastKey = key; idleSince = clock(); boatDone = false; if (boat) boatLeave(true); }
+    if (boat) boat.el.hidden = moving;
+    if (rainbow && s.time === 'yoru') hideRainbow();
     for (const h of Object.values(HOTS)) { const ok = h.when(s); h.el.hidden = !ok || moving; if (!ok) h.taps = 0; }
     if (!HOTS.toudai.when(s)) toudaiOff();
     if (nap && (s.time !== 'hiru' || !palEl('neko') || nap.pal !== palEl('neko'))) napEnd(false);
@@ -267,6 +362,11 @@
     const s = state(), waited = clock() - idleSince;
     if (!deerBusy && !deerDone && s.area === 'L' && s.time === 'asa' && waited >= 20000 && !pals().some(el => palOf(el) === 'kojika')) deerEvent();
     if (!nap && s.time === 'hiru' && waited >= 30000 && palEl('neko')) napStart();
+    if (!boat && !boatDone && s.area === 'R' && waited >= 25000 && palEl('panda')) boatEvent();
+    if (isRainy() && s.time !== 'yoru' && !rainbow) {
+      if (!rainbowLoud && totalNow() - total0 >= 5) { rainbowLoud = true; showRainbow(true); }   // はじめて かかる ときだけ おと・ことば
+      else if ((readJSON(HM_KEY) || {}).rainbow === dayNow()) showRainbow(false);   // その 日は ひらき なおしても 出る（しずかに）
+    }
   }
   new MutationObserver(update).observe(scene, { attributes: true, attributeFilter: ['data-phase', 'data-time', 'data-area'] });
   pals().forEach(el => new MutationObserver(update).observe(el, { attributes: true, attributeFilter: ['src'] }));
@@ -281,6 +381,9 @@
     'tsuri-marumado': ['🐋', 'まるまどの かげ', 'まるまどの むこうを、おおきな かげが ゆっくり とおったよ。'],
     'tsuri-neko': ['🐈', 'ねこの ひるね', 'ねこが すやすや ひるねを はじめたよ。'],
     'tsuri-tsuki': ['🐇', 'つきの うさぎ', 'つきに、もちを つく うさぎの かげが みえたよ。'],
+    'tsuri-sasabune': ['🎍', 'パンダの ささぶね', 'かわで パンダと ゆっくり して いたら、ささぶねが ながれて きたよ。おへやに かざれるよ。'],
+    'tsuri-nijii': ['🌈', 'あめあがりの にじ', 'あめの ひに たくさん つったら、あめが やんで にじが でたよ。'],
+    'tsuri-yadokari': ['🐚', 'バケツの やどかり', 'バケツを なんども のぞいたら、やどかりが でて きたよ。おへやに かざれるよ。'],
     'heya-lamp': ['💡', 'ほしぞらの へや', 'ランプを けしたら、かべが ほしぞらに なったよ。'],
     'heya-onigiri': ['🍙', 'おにぎり はんぶんこ', 'ラグの おにぎりを、なかまと はんぶんこ したよ。'],
     'heya-utouto': ['💤', 'まるふわの うとうと', 'まるふわが おへやで うとうと ねむったよ。'],
@@ -288,6 +391,7 @@
     'heya-mori': ['🌿', 'ちいさな もり', 'ちいさな もりで、さかなが やすんで いたよ。'],
     'heya-okaeshi': ['💗', 'ごはんの おれい', 'さかなたちが、ありがとう って いってる みたいだったよ。'],
     'heya-uta': ['🎵', 'すいそうの うた', 'まるふわが、すいそうの うたを うたったよ。'],
+    'heya-parade': ['🎺', 'さかなの パレード', 'かざりを 6しゅるい ぜんぶ おいたら、さかなが ぐるっと パレードを したよ。'],
     'hiroba-wish': ['⭐', 'ふんすいの ねがいぼし', 'ふんすいを 3かい さわって、ねがいごとを したよ。'],
     'hiroba-sun': ['☀️', 'おひさまの ぽかぽか', 'おひさまを さわったら、ぽかぽか したよ。'],
     'hiroba-cloud': ['☁️', 'くもの ぽよん', 'くもが ぽよんと はねたよ。'],
@@ -300,6 +404,7 @@
     'hiroba-group': ['📷', 'みんなで しゃしん', 'なかまが ぜんいん あつまって きたよ。'],
     'hiroba-kouji': ['🚧', 'かんばんの うら', 'こうじちゅうの かんばんの うらに、なにか かいて あったよ。'],
     'hiroba-drop': ['🍂', 'きせつの おとしもの', 'きを ゆらしたら、きせつの ものが おちて きたよ。おへやに かざれるよ。'],
+    'hiroba-plush': ['🧸', 'ぬしの ぬいぐるみ', 'ぬしを つった さかなの ぬいぐるみが、ベンチの うえで まって いたよ。'],
     'hiroba-thanks': ['🌟', 'ありがとうの ほしぞら', 'ありがとうの いしを ひらいて、あそんで くれた ひとの ほしを みたよ。'],
     'kotoba-hajimari': ['✨', 'はじめの ことば', 'ひみつの ことばを みつけたよ。ことばは、これから ふえるかも しれないよ。']
   };
@@ -308,9 +413,14 @@
     'tsuri-toudai': () => { tone(110, 1.1, 'triangle', 0, .07, 96); tone(880, .12, 'triangle', .9, .04); },
     'tsuri-marumado': () => { tone(240, 2.4, 'triangle', 0, .06, 88); },
     'tsuri-neko': () => [0, 1].forEach(i => tone(150, .9, 'triangle', i * 1.4, .02, 120)),
-    'tsuri-tsuki': () => { for (let i = 0; i < 4; i++) { tone(130, .1, 'triangle', i * .9, .06, 92); zap(.03, i * .9, .03); } }
+    'tsuri-tsuki': () => { for (let i = 0; i < 4; i++) { tone(130, .1, 'triangle', i * .9, .06, 92); zap(.03, i * .9, .03); } },
+    'tsuri-sasabune': () => { zap(.9, 0, .02, .3); zap(.9, .8, .015, -.3); tone(1319, .05, 'triangle', .3, .02); },
+    'tsuri-nijii': () => chord([523, 659, 784, 1047], .12, 'triangle', .05),
+    'tsuri-yadokari': () => { zap(.04, 0, .03); [0, 1, 2].forEach(i => zap(.03, .12 + i * .1, .03)); }
   };
   const bucket = $('bucket');
+  { const openBucketBtn = $('open-bucket');   // バケツを ひらく たびに かぞえる（つり8 やどかり）。本体の ひらく しごとの あとで 動く（さきに 本体の 取りつけが おわって いる）
+    if (openBucketBtn && bucket) { openBucketBtn.addEventListener('click', () => { crabHide(); bucketOpens++; if (bucketOpens % 5 === 0) crabShow(); }); bucket.addEventListener('close', crabHide); } }
   let noteBtn = null, noteDlg = null;
   function buildNote() {
     noteDlg = make('dialog', '', '<h2 id="hm-title">ひみつノート</h2><p class="hm-sub">みつけた ものが、ここに のこるよ。<br>また なにか みつけたら、ここに のこるよ。</p><div id="hm-list"></div><p id="hm-live" role="status" aria-live="polite"></p><button class="close" type="button">とじる</button>');
@@ -459,6 +569,16 @@
       'ねがいの ほし': 'Wishing Star', 'つりばで ねがった ぶんだけ、よるの ひろばの そらに ほしが ふえるよ。': 'The more wishes you make at the fishing spot, the more stars appear in the plaza sky at night.',
       'みんなで しゃしん': 'Group Photo', 'なかまが ぜんいん あつまって きたよ。': 'All the friends gathered around.',
       'かんばんの うら': 'Back of the Sign', 'こうじちゅうの かんばんの うらに、なにか かいて あったよ。': 'There was something written on the back of the construction sign.',
+      'パンダの ささぶね': 'Panda’s Bamboo Boat', 'かわで パンダと ゆっくり して いたら、ささぶねが ながれて きたよ。おへやに かざれるよ。': 'While relaxing at the river with Panda, a bamboo-leaf boat floated by. You can decorate the room with it.',
+      'あめあがりの にじ': 'Rainbow After the Rain', 'あめの ひに たくさん つったら、あめが やんで にじが でたよ。': 'After catching lots of fish on a rainy day, the rain stopped and a rainbow appeared.',
+      'バケツの やどかり': 'Hermit Crab in the Bucket', 'バケツを なんども のぞいたら、やどかりが でて きたよ。おへやに かざれるよ。': 'After peeking into the bucket many times, a hermit crab came out. You can decorate the room with it.',
+      'ささぶね。ひろう': 'Bamboo-leaf boat. Pick up', 'かわの うえから、ささぶねが ながれて きたよ。ボタンで ひろえるよ。': 'A bamboo-leaf boat came floating down the river. Press the button to pick it up.', 'ささぶねは、かわしもへ ながれて いったよ。': 'The boat floated away downstream.',
+      'ささぶねを ひろったよ。おへやに かざれるよ。': 'You picked up the boat. You can decorate Marufuwa’s Room with it.', 'ささぶねは もう いっぱい もって いるよ。おへやに かざって あげてね。': 'You already have plenty of boats. Why not decorate the room with them?', 'ささぶね、いいね': 'Nice boat!',
+      'あめが やんで きたよ。にじが でてる': 'The rain is stopping. There’s a rainbow!',
+      'バケツの なかに やどかり。さわる': 'A hermit crab in the bucket. Touch it', 'バケツの なかに、やどかりが いたよ。さわると なかよしに なるよ。': 'There was a hermit crab in the bucket. Touch it to make friends.',
+      'やどかりが、すいそうに ひっこしたいって。おへやに かざれるよ。': 'The hermit crab wants to move into the tank. You can decorate the room with it.', 'やどかりは もう いっぱい いるよ。おへやに かざって あげてね。': 'You already have plenty of hermit crabs. Why not decorate the room with them?',
+      'ぬしの ぬいぐるみ': 'Guardian Plush', 'ぬしを つった さかなの ぬいぐるみが、ベンチの うえで まって いたよ。': 'A plush of the fish whose Guardian you caught was waiting on the bench.',
+      'さかなの パレード': 'Fish Parade', 'かざりを 6しゅるい ぜんぶ おいたら、さかなが ぐるっと パレードを したよ。': 'When you placed all six kinds of decorations, the fish paraded around in a big circle.',
       'きせつの おとしもの': 'Seasonal Find', 'きを ゆらしたら、きせつの ものが おちて きたよ。おへやに かざれるよ。': 'When you shook the tree, something from the season fell down. You can decorate the room with it.'
     }, rules: [
       [/^(ひみつのことばがみつかったよ！|このことばはもうみつけているよ。いつでもどうぞ。)(.+)$/, (_, a, b) => { const E = window.TsuriEn, x = E && E.tr ? E.tr(a) : null, y = E && E.tr ? E.tr(b) : null; return x == null || y == null ? null : x + ' ' + y; }],
@@ -472,6 +592,6 @@
   window.TsuriHimitsu = {
     version: 1, found: foundMap, replay, open: () => { if (!noteDlg) buildNote(); drawNote(); noteDlg.showModal(); },
     kotoba: { version: 1, try: tryWord, open: openWord, list: () => WORDS.map(w => ({ id: w.id, title: titleOf(w.id), found: !!foundMap()[w.id] })) },
-    _debug: { kotoba: { sha256hex, norm, hashOf, words: () => WORDS.map(w => ({ id: w.id, keys: Object.keys(w), hashes: w.h.length, hex: w.h.every(x => /^[0-9a-f]{64}$/.test(x)) })), fromUrl, T }, tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy }) }
+    _debug: { kotoba: { sha256hex, norm, hashOf, words: () => WORDS.map(w => ({ id: w.id, keys: Object.keys(w), hashes: w.h.length, hex: w.h.every(x => /^[0-9a-f]{64}$/.test(x)) })), fromUrl, T }, tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy, boat: !!boat, boatDone, rainbow: !!rainbow, crab: !!crabBox, bucketOpens }), gifts: () => { const d = readJSON(HM_KEY); return d && d.gifts && typeof d.gifts === 'object' && !Array.isArray(d.gifts) ? { ...d.gifts } : {}; }, resetTotal: () => { total0 = totalNow(); rainbowLoud = false; }, resetOpens: () => { bucketOpens = 0; } }
   };
 })();

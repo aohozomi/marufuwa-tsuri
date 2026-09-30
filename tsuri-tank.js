@@ -69,7 +69,7 @@
   const readSave = () => { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d.fish === 'object' && d.fish) return d; } catch {} return { fish: {}, total: 0 }; };
   const okPlaced = p => p && typeof p.n === 'string' && Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1;
   // sound / soundMain：すいそうの中で「おと」を切りかえた時の選択と、その時の本体の「おと」の値（本体が あとから かわったら、本体に合わせる）
-  const readTank = () => { try { const d = JSON.parse(localStorage.getItem(TANK_KEY)); if (d && typeof d === 'object') return { seen: d.seen && typeof d.seen === 'object' ? d.seen : {}, placed: Array.isArray(d.placed) ? d.placed.filter(okPlaced) : [], sound: typeof d.sound === 'boolean' ? d.sound : undefined, soundMain: typeof d.soundMain === 'boolean' ? d.soundMain : undefined }; } catch {} return { seen: {}, placed: [] }; };
+  const readTank = () => { try { const d = JSON.parse(localStorage.getItem(TANK_KEY)); if (d && typeof d === 'object') return { seen: d.seen && typeof d.seen === 'object' ? d.seen : {}, placed: Array.isArray(d.placed) ? d.placed.filter(okPlaced) : [], sound: typeof d.sound === 'boolean' ? d.sound : undefined, soundMain: typeof d.soundMain === 'boolean' ? d.soundMain : undefined, parade: typeof d.parade === 'string' ? d.parade : '' }; } catch {} return { seen: {}, placed: [] }; };
   let tank = readTank();
   const saveTank = () => { try { localStorage.setItem(TANK_KEY, JSON.stringify(tank)); } catch {} };
   const residents = () => { const s = readSave(); return kinds().filter(f => s.fish[f.id] && s.fish[f.id].count > 0).map(f => ({ fish: f, count: s.fish[f.id].count, best: Number(s.fish[f.id].best) || f.min, nushi: !!s.fish[f.id].nushi })); };
@@ -526,6 +526,7 @@
   }
   function step(dt) {
     const still = reduced();
+    if (parade && now - parade.t0 > parade.dur) endParade();   // パレードは 11びょうで おわる
     for (let i = 0; i < fishes.length; i++) { // ぶつからないように、そっと はなれる
       const a = fishes[i]; if (a.enter > 0) continue;
       for (let j = i + 1; j < fishes.length; j++) {
@@ -539,6 +540,7 @@
         o.enter -= dt; const k = 1 - clamp(o.enter / 1.5, 0, 1), e = 1 - Math.pow(1 - k, 3);
         o.y = o.enterFrom + (o.ty0 - o.enterFrom) * e; place(o); if (o.enter <= 0) retarget(o); continue;
       }
+      if (o.par && parade) { paradePos(o); place(o); continue; }   // パレード中：だ円の 上を ぎょうれつで
       if (o.pop > 0) o.pop -= dt / 1.4;
       if (o.nibble > 0) o.nibble -= dt;
       if (o.hold > 0) { o.hold -= dt; o.vx += (0 - o.vx) * Math.min(1, dt * 2); }
@@ -1092,7 +1094,7 @@
     d.v = 1;
     try { localStorage.setItem(HM_KEY, JSON.stringify(d)); } catch {}
   }
-  let starry = false, riceTaps = 0, riceGone = false, napping = false, napTimer = 0, napBreath = 0, thanksTimer = 0, utaTimer = 0, comboOn = { bottle: false, forest: false };
+  let starry = false, riceTaps = 0, riceGone = false, napping = false, napTimer = 0, napBreath = 0, thanksTimer = 0, utaTimer = 0, comboOn = { bottle: false, forest: false, parade: false }, parade = null, paradeTimer = 0;
   const STARS = (() => { const r = mulberry(4242), out = []; for (let i = 0; i < 46; i++) out.push({ x: 6 + r() * 348, y: 4 + r() * 600, s: 2.2 + r() * 4.2, c: r() < .68 ? '#fff2a8' : '#d5ecff', d: -r() * 6, p: 3.4 + r() * 3.6 }); return out; })();
   const starPath = (x, y, s) => `M${x} ${y - s} L${x + s * .28} ${y - s * .28} L${x + s} ${y} L${x + s * .28} ${y + s * .28} L${x} ${y + s} L${x - s * .28} ${y + s * .28} L${x - s} ${y} L${x - s * .28} ${y - s * .28}Z`;
   starwall.innerHTML = `<svg viewBox="0 0 360 640" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:100%" aria-hidden="true">${STARS.map(st => `<path class="tk-st" d="${starPath(st.x, st.y, st.s)}" fill="${st.c}" style="animation-delay:${st.d.toFixed(2)}s;animation-duration:${st.p.toFixed(2)}s"/>`).join('')}</svg>`;
@@ -1145,7 +1147,7 @@
   const hasDecor = n => tank.placed.some(pl => pl.n === n);
   const decorEl = n => [...placedBox.children].find(e => e.title === n);
   function applyCombos(mode) {   // mode 0＝えが かわった だけ／1＝かざりを おいた・もどした／2＝ひらいた ところ
-    const cur = { bottle: hasDecor('ちいさな びん') && hasDecor('ほしの かけら'), forest: hasDecor('ながれぎ') && hasDecor('みずくさ') && hasDecor('きれいな いし') };
+    const cur = { bottle: hasDecor('ちいさな びん') && hasDecor('ほしの かけら'), forest: hasDecor('ながれぎ') && hasDecor('みずくさ') && hasDecor('きれいな いし'), parade: hasSix() };
     const night = room.dataset.time === 'yoru', bottle = decorEl('ちいさな びん'), log = decorEl('ながれぎ');
     placedBox.classList.toggle('tk-night', night);
     if (bottle) { bottle.classList.toggle('tk-bottlestar', cur.bottle); if (cur.bottle && !bottle.querySelector('.tk-instar')) { const st = document.createElement('i'); st.className = 'tk-instar'; st.textContent = '✦'; bottle.append(st); } }
@@ -1153,7 +1155,38 @@
     const say2 = (text, id) => { sr.textContent = mode === 2 ? (sr.textContent ? sr.textContent + ' ' : '') + text : text; if (mode === 1) { say(text, true); mood('sparkle', 2600); cueChime(); } if (night) markFound(id); };
     if (cur.bottle && (mode === 2 || !comboOn.bottle) && mode !== 0) say2(night ? 'ほしの びんが ひかって いるよ。' : 'ほしの びんが できたよ。よるに なると ひかるよ。', 'heya-bin');
     if (cur.forest && (mode === 2 || !comboOn.forest) && mode !== 0) say2(night ? 'ちいさな もりで、さかなが やすんで いるよ。' : 'ちいさな もりが できたよ。よるに なると さかなが やすみに くるよ。', 'heya-mori');
+    if (cur.parade && mode === 1 && !comboOn.parade) startParade();   // 6しゅ そろえた しゅんかん
+    else if (cur.parade && mode === 2 && tank.parade !== dayNow()) { clearTimeout(paradeTimer); paradeTimer = setTimeout(() => { if (isOpen() && !deco && !parade && hasSix()) startParade(); }, 7000); }   // ひらいたら そろって いた：1日に 1回 7びょう あとに
+    if (!cur.parade) { comboOn.parade = false; clearTimeout(paradeTimer); if (parade) endParade(true); }
     if (mode !== 0) comboOn = cur;   // えが かわっただけの 時は、まえの じょうたいを のこす（おいた・もどした 時に くらべる）
+  }
+  // へや7：かざり6しゅ（かいがら・いし・ながれぎ・みずくさ・びん・ほしの かけら）を ぜんぶ おくと、さかなが パレード（大きく ぐるっと まわる ぎょうれつ・11びょう）。
+  // 6しゅ そろえた しゅんかんに はじまる。おへやを ひらいた とき すでに そろって いれば、1日に 1回だけ 7びょう あとに はじまる（いつも じゃまに しない）。かざりを 1つ もどしたら すぐ おわる。
+  // うごきを へらす 時・さかなが いない 時は、さかなを うごかさず うたと ひとこと（3びょう）だけ。名前も 数も 言わない
+  const PARADE_SET = ['かいがら', 'きれいな いし', 'ながれぎ', 'みずくさ', 'ちいさな びん', 'ほしの かけら'], PARADE_MS = 11000;
+  const dayNow = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+  function hasSix() { return PARADE_SET.every(hasDecor); }
+  const cueParade = () => { [523, 659, 784, 659, 523, 659, 784, 1047].forEach((f, i) => tone(f, .16, { type: 'triangle', vol: .07, at: i * .2 })); [784, 988, 1175].forEach(f => tone(f, .34, { type: 'triangle', vol: .05, at: 1.7 })); };
+  function startParade() {
+    if (!isOpen() || parade || !hasSix()) return;
+    clearTimeout(paradeTimer); tank.parade = dayNow(); saveTank(); markFound('heya-parade');
+    asKind('fx', cueParade); say('パレード、はじまるよ！', true); mood('sparkle', 4200); sr.textContent = 'さかなたちが パレードを はじめたよ。';
+    const list = fishes.filter(o => !o.leaving && !(o.enter > 0)).sort((a, b) => a.x - b.x);
+    if (reduced() || !list.length) { heart(W * .5, H * .4); parade = { t0: now, dur: 3000, still: true }; return; }
+    parade = { t0: now, dur: PARADE_MS, still: false };
+    list.forEach((o, i) => { o.par = { ang: i / list.length * Math.PI * 2, x0: o.x, y0: o.y }; o.gather = 0; o.hold = 0; });
+  }
+  function endParade(early) {
+    if (!parade) return; parade = null;
+    for (const o of fishes) if (o.par) { o.par = null; o.hold = 0; o.until = 0; retarget(o); }
+    if (!early && isOpen()) { say('たのしかったね。', true); sr.textContent = 'パレードが おわったよ。'; }
+  }
+  function paradePos(o) {   // ガラスの まんなかを 大きな だ円で ぐるっと（右まわり）。はじめの 1.4びょうで いまの ばしょから なめらかに あつまる
+    const tt = (now - parade.t0) / 1000, w = clamp(tt / 1.4, 0, 1), e = 1 - Math.pow(1 - w, 3);
+    const cx = W * .5, cy = H * .4, rx = W * .34, ry = H * .2, om = Math.PI * 2 / (PARADE_MS / 1000), a = o.par.ang + om * tt;
+    o.x = o.par.x0 + (cx + rx * Math.cos(a) - o.par.x0) * e; o.y = o.par.y0 + (cy + ry * Math.sin(a) - o.par.y0) * e;
+    o.vx = -rx * om * Math.sin(a) * e; if (Math.abs(o.vx) > 5) o.face = o.vx > 0 ? 1 : -1;
+    o.y = clamp(o.y, o.size * .5 + 4, floorY); o.x = clamp(o.x, o.size * .5 + 4, W - o.size * .5 - 4);
   }
   // へや6：ごはんの あと 20びょう なにも しないと、さかなが おれいに あつまる
   function armThanks() { clearTimeout(thanksTimer); thanksTimer = setTimeout(thanks, 20000); }
@@ -1192,7 +1225,7 @@
     starry = false; applyStarry(); riceTaps = 0; riceGone = false; rice.classList.remove('tk-gone');
     if (napping) { napping = false; room.classList.remove('tk-nap'); }
     clearInterval(napBreath); napBreath = 0; clearTimeout(thanksTimer); clearTimeout(utaTimer); clearTimeout(napTimer);
-    comboOn = { bottle: false, forest: false };
+    comboOn = { bottle: false, forest: false, parade: false }; clearTimeout(paradeTimer); parade = null; for (const o of fishes) o.par = null;
   }
   // ひみつノート（つりびよりの ページ）から「もういちど きく」ための、おとと ことば
   const REPLAY = {
@@ -1202,7 +1235,8 @@
     'heya-bin': { text: 'ほしの びんが ひかって いるよ。', play: cueChime },
     'heya-mori': { text: 'ちいさな もりで、さかなが やすんで いるよ。', play: cueChime },
     'heya-okaeshi': { text: 'さかなたちが、ありがとう って いってる みたい。', play: cueBubbles },
-    'heya-uta': { text: 'まるふわが、すいそうの うたを うたったよ。', play: () => [523, 659, 784, 659, 523, 784].forEach((f, i) => tone(f, .24, { type: 'triangle', vol: .07, at: i * .3 })) }
+    'heya-uta': { text: 'まるふわが、すいそうの うたを うたったよ。', play: () => [523, 659, 784, 659, 523, 784].forEach((f, i) => tone(f, .24, { type: 'triangle', vol: .07, at: i * .3 })) },
+    'heya-parade': { text: 'さかなたちが パレードを したよ。', play: cueParade }
   };
   function replay(id) { const r = REPLAY[id]; if (!r) return null; refreshSound(); asKind('ui', () => r.play()); return r.text; }
   function secret(id) {   // 検査・ノート用：ひみつを その場で おこす
@@ -1212,6 +1246,7 @@
     if (id === 'nap') { nap(); return napping; }
     if (id === 'thanks') { thanks(); return true; }
     if (id === 'uta') { sing(); return true; }
+    if (id === 'parade') { startParade(); return !!parade; }
     return false;
   }
 
@@ -1280,7 +1315,7 @@
   // ─── English mode（tsuri-en.js が あって 英語の 時だけ）：おくりもの だなの 文と、総司令部の 表に まだ ない 文を 足す ───
   {
     const GIFT_EN = { 'さくらのはなびら': 'Cherry blossom petal', 'あおいは': 'Fresh green leaf', 'どんぐり': 'Acorn', 'ゆきのけっしょう': 'Snow crystal', 'ささぶね': 'Bamboo-leaf boat', 'やどかり': 'Hermit crab' };   // ひみつで もらえる かざりの なまえ（訳表の かけら 表には 入らないので、ここで 訳す）
-    const EN = { ex: { 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
+    const EN = { ex: { 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'パレード、はじまるよ！': "The parade is starting!", 'たのしかったね。': 'That was fun!', 'さかなたちが パレードを はじめたよ。': 'The fish started a parade.', 'パレードが おわったよ。': 'The parade is over.', 'さかなたちが パレードを したよ。': 'The fish had a parade.', 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
       [/^(.+?)×(\d+)$/, (_, n, k) => GIFT_EN[n] ? GIFT_EN[n] + ' ×' + k : null],   // かざりの ふだ（ひみつで もらえる かざり）
       [/^(.+?)をもどす$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] : null],
       [/^(.+?)をもどしたよ。$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] + '.' : null],
@@ -1292,5 +1327,5 @@
     addEventListener('load', regEn);
   }
 
-  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, version: 6 };
+  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, parade: !!parade && !parade.still, paradeStill: !!parade && parade.still, combos: { ...comboOn } }), decor: { list: () => Object.keys(DECOR), markup: (name, size = 30) => DECOR[name] ? decorMarkup(name, size) : '', gifts: { ...GIFT_DECOR }, owned: () => ({ ...owned() }) }, version: 6 };
 })();

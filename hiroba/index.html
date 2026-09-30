@@ -137,6 +137,30 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 @keyframes dropbob{50%{translate:0 -3px}}
 @keyframes dropglow{50%{opacity:.4}}
 @media(prefers-reduced-motion:reduce){.drop,.drop .gl{animation:none}}
+/* ぬしの ぬいぐるみ（ぬしを つった さかなの ぬいぐるみが ベンチに ちょこんと）。魚の 絵に ぬのの ふち・ぬいめ・タグを コードで つける。さわれる（44px）・Tab・Enter で とどく */
+.plush{position:absolute;left:0;top:0;width:48px;height:48px;margin:-42px 0 0 -24px;padding:0;border:0;background:none;box-shadow:none;min-height:0;border-radius:50%;cursor:pointer;pointer-events:auto;display:grid;place-items:end center;-webkit-backdrop-filter:none;backdrop-filter:none;transition:none;transform-origin:50% 100%}
+.plush::before{display:none}
+.plush:active:not(:disabled){transform:none;box-shadow:none}
+.plush:focus-visible{outline:3px solid #286b88;outline-offset:1px;background:#ffffffb3}
+.pl-body{position:relative;display:block;width:34px;height:27px;margin-bottom:6px}
+.pl-body img{display:block;width:100%;height:100%;object-fit:contain;filter:saturate(.92) drop-shadow(1.2px 0 0 #fff5e6) drop-shadow(-1.2px 0 0 #fff5e6) drop-shadow(0 1.2px 0 #fff5e6) drop-shadow(0 -1.2px 0 #fff5e6) drop-shadow(0 2px 1px #0b2a4a40)}
+.pl-body b{display:block;font-size:22px;line-height:24px;text-align:center}
+@supports (width:1cqw){.pl-body{width:max(34px,9.44cqw);height:max(27px,7.5cqw)}.drop svg{width:max(30px,8.4cqw);height:max(30px,8.4cqw)}}   /* ひろい がめんでは ぬいぐるみ・おとしものも ひろばに あわせて おおきく（さわる ばしょは 44px の まま） */
+.pl-seam{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.pl-seam path{fill:none;stroke:#7a4b34;stroke-width:.9;stroke-dasharray:1.5 1.3;stroke-linecap:round;opacity:.6}
+.pl-tag{position:absolute;right:5px;bottom:2px;width:10px;height:12px;background:#fff8e6;border:1px dashed #b98a5a;border-radius:2px;transform:rotate(14deg);display:grid;place-items:center}
+.pl-tag svg{width:6px;height:6px;display:block}
+/* なかまずかん（ひろばで あった なかまが いろつき・まだの こは しるしだけ・かず・わりあいは 出さない） */
+#zukan{padding:14px}
+#zukan-list{list-style:none;padding:0;margin:8px 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+#zukan-list li{display:flex}
+.zk{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;min-height:84px;padding:5px 3px;border-radius:16px;font-size:.72rem;line-height:1.3;text-align:center}
+button.zk{--c1:#ffffffe6;--c2:#e6f6fdcc;border-radius:16px;font-weight:800;min-height:84px;padding:5px 3px}
+button.zk img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 2px 0 #ffd25e)}
+button.zk.on{--c1:#fff4c2;--c2:#ffe27a99}
+.zk.not{border:3px dotted #9cc9e0;background:#f4fbff;color:#506874;font-size:1.3rem;font-weight:900;justify-content:center}
+#zukan-cap{min-height:4.6em;margin:6px 0 10px;text-align:center;font-weight:800;line-height:1.7;color:#244653}
+#zukan-cap small{display:block;font-weight:700;color:#506874}
 /* ほんとうは よるなのに あかるい じかんを えらんだ とき。まぶしく しない */
 #scene[data-dim=true]{--dim:brightness(.7) saturate(.9)}
 
@@ -391,6 +415,7 @@ body.calm .cloud.c2{left:56%}
       <button id="find" type="button">ともだちに あいにいく</button>
       <button id="listen" type="button">まわりを きく</button>
       <button id="snap" type="button">しゃしんを とる</button>
+      <button id="zukan-btn" type="button">なかまずかん</button>
     </div>
     <details id="touch"><summary>さわれる もの</summary>
       <div class="row">
@@ -436,6 +461,13 @@ body.calm .cloud.c2{left:56%}
   <p class="count" id="photo-status" role="status">かってに とうこうは しません。</p>
   <button class="close" type="button" id="close-photo">とじる</button>
 </dialog>
+<dialog id="zukan" aria-labelledby="zukan-title">
+  <h2 id="zukan-title">なかまずかん</h2>
+  <p class="count">ひろばで あった なかまが、いろつきで ならぶよ。まだの こは しるしだけ。いそがなくて だいじょうぶ。</p>
+  <ul id="zukan-list"></ul>
+  <div id="zukan-cap" role="status" aria-live="polite">なかまを さわって みてね。</div>
+  <button class="close" type="button" id="close-zukan">とじる</button>
+</dialog>
 <div id="curtain" aria-hidden="true"><b>✨</b><span></span></div>
 <noscript><p style="text-align:center;padding:16px">JavaScriptを ONに すると あそべるよ。<br><a href="../">つりば</a></p></noscript>
 
@@ -461,7 +493,7 @@ let artLoading = null;
 const loadScript = src => new Promise(res => { const s = document.createElement('script'); s.src = BASE + src; s.onload = () => res(true); s.onerror = () => res(false); document.head.append(s); });
 // つりびよりの 本体と おなじ じゅんばん：ふつうの 絵 → きせつの さかなの かりの 絵（tsuri-art-season.js・ふつうの 絵を 元に つくる）→ 本物の 絵（tsuri-art-real.js・ある 分だけ 差しかえる。
 // 絵の 場所は そのファイルの 場所から 作る ので ひろば（/hiroba/）から 読んでも ずれない。script 要素で 読む こと）。どれか 読めなくても 絵文字・かりの 絵で 出る
-const loadArt = () => artLoading || (artLoading = window.TsuriArt ? Promise.resolve(true) : loadScript('tsuri-art.js').then(ok => ok ? loadScript('tsuri-art-season.js').then(() => loadScript('tsuri-art-real.js')).then(() => true) : false));
+const loadArt = () => artLoading || (artLoading = (window.TsuriArt ? Promise.resolve(true) : loadScript('tsuri-art.js').then(ok => ok ? loadScript('tsuri-art-season.js').then(() => loadScript('tsuri-art-real.js')).then(() => true) : false)).then(ok => { if (ok && typeof renderPlush === 'function') renderPlush(); return ok; }));   // 絵が よめたら ぬしの ぬいぐるみも 絵で
 setTimeout(loadArt, 1800);
 const POND_ART = [0, 1, 2, 3, 8, 11, 12, 23];   // いけの さかな：ちいさくて まるい 子たち（TsuriArt の 番号）
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -608,6 +640,7 @@ const sfx = {
   sit: () => chord([392, 523], .09, 'triangle'),
   drop: () => { tone(1568, .05, 'triangle', 0, .03, 1319); tone(1319, .06, 'triangle', .13, .03, 1047); },
   pick: () => chord([1047, 1319, 1568], .06, 'triangle'),
+  plush: () => tone(294, .09, 'triangle', 0, .05, 247),
   hammer: () => { for (let i = 0; i < 3; i++) { zap(.05, i * .22, .05); tone(150, .07, 'triangle', i * .22, .05, 90); } },
   wish: () => { chord([1047, 1319, 1568, 2093, 2637], .07); tone(3136, .3, 'square', .4, .02); },
   meteor: () => tone(2800, .55, 'square', 0, .025, 500),
@@ -1104,6 +1137,7 @@ function secretTap(kind, el) {
     narrate({ haru: 'はなびらが ひらひら おちて きたよ', natsu: 'はっぱが ひらひら おちて きたよ', aki: 'おちばが ひらひら おちて きたよ', fuyu: 'ゆきが ぱらぱら おちて きたよ' }[SEASON]); seen('tree');
     if (countTaps('tree', 3, 6)) dropItem(el);   // 3かい ゆらすと きせつの おとしものが ひとつ
   } else if (kind === 'drop') { dropTap(el);
+  } else if (kind === 'plush') { plushTap(el);
   } else if (kind === 'bench') { benchGo(el);
   } else if (kind === 'wishstar') {
     const i = Number(el && el.dataset.i) || 0, notes = [784, 988, 1175, 1319, 1568];
@@ -1139,7 +1173,7 @@ function dropItem(from) {
   const el = document.createElement('button'); el.type = 'button'; el.className = 'drop'; el.dataset.secret = 'drop'; el.dataset.x = spot.x.toFixed(1); el.dataset.y = spot.y.toFixed(1);
   el.setAttribute('aria-label', def.name + '。ひろう'); el.innerHTML = '<i class="gl" aria-hidden="true"></i>' + dropArt(def, 30);
   el.style.left = (spot.x / W * 100) + '%'; el.style.top = (spot.y / H * 100) + '%'; el.style.zIndex = String(100 + Math.round(spot.y));
-  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); dropTap(el); } });   // scene の「ちかくの ものと あそぶ」に 二重に ならない
+  addBtnKey(el, () => dropTap(el));
   scene.append(el); dropEl = el;
   if (!reduce()) el.animate([{ transform: 'translateY(-90px)', opacity: 0 }, { transform: 'translateY(-90px)', opacity: 1, offset: .12 }, { transform: 'translateY(0)', opacity: 1, offset: .7, easing: 'ease-in' }, { transform: 'translateY(-10px)', offset: .85 }, { transform: 'translateY(0)' }], { duration: 1100, easing: 'linear' });
   sfx.drop(); narrate('きから ' + def.name + 'が おちて きたよ。さわって ひろってね');
@@ -1153,6 +1187,39 @@ function pickDrop(el) {
   if (!el || el !== dropEl) return; dropEl = null; const def = DROPS[SEASON], r = hmGift(def.id); el.remove();
   sfx.pick(); sparkles(player.x, player.y - 40, 8, 40); setFace('sparkle', 2200); speak(player, 'みつけた！', 1800, true); hop(player);
   narrate(r.full ? def.name + 'は もう いっぱい もって いるよ。おへやに かざって あげてね' : def.name + 'を ひろったよ。おへやに かざれるよ'); seen('drop');
+}
+
+// ─── ぬしの ぬいぐるみ（04 の つなぎ3）───
+// つりびよりで「ぬし」を つった さかな（記録 fish[id].nushi）の ぬいぐるみが、ベンチの うえに ちょこんと すわって いる（さいだい 2つ：ひだりの ベンチ・みぎの ベンチ。どの さかなかは 日づけで かわる）。
+// 魚の 絵（TsuriArt）から コードで つくる：ふちに ぬのの ふち・まんなかに ぬいめ（てんせん）・すみに ちいさな タグ。さわると「ふわふわ」。ぬしを つって いない 人には 出ない（ベンチは すっきり）
+const PLUSH_AT = [{ x: 64, y: 419 }, { x: 296, y: 419 }];
+let plushEls = [];
+const fishNameOf = id => { const f = FISH_MEMO[id] || seasonMemo(id); return f ? f[0] : ''; };
+function addBtnKey(el, fn) { el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); fn(); } }); }   // scene の「ちかくの ものと あそぶ」に 二重に ならない
+function nushiIds() {
+  const fish = main && main.fish && typeof main.fish === 'object' ? main.fish : {}, ids = Object.keys(fish).map(Number).filter(id => Number.isInteger(id) && id >= 0 && id <= 45 && fish[id] && fish[id].nushi === true).sort((a, b) => a - b);
+  const rnd = mulberry((today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 11 + 5);
+  for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+  return ids.slice(0, 2);
+}
+function renderPlush() {
+  try {
+    plushEls.forEach(e => e.remove()); plushEls = [];
+    nushiIds().forEach((id, i) => {
+      const at = PLUSH_AT[i], nm = fishNameOf(id) || 'さかな', art = window.TsuriArt && window.TsuriArt[id], el = document.createElement('button');
+      el.type = 'button'; el.className = 'plush'; el.dataset.secret = 'plush'; el.dataset.id = String(id); el.dataset.x = String(at.x); el.dataset.y = String(at.y);
+      el.setAttribute('aria-label', 'ぬしの ぬいぐるみ。' + nm);
+      el.innerHTML = '<span class="pl-body">' + (art ? '<img alt="" draggable="false" src="' + art + '">' : '<b aria-hidden="true">🐟</b>') + '<svg class="pl-seam" viewBox="0 0 40 30" aria-hidden="true"><path d="M8 15 Q20 11 32 15"/></svg></span><i class="pl-tag" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M5 1l1.2 2.6 2.8.3-2.1 1.9.6 2.8L5 7.1 2.5 8.6l.6-2.8L1 3.9l2.8-.3z" fill="#e0a61c"/></svg></i>';
+      el.style.left = (at.x / W * 100) + '%'; el.style.top = (at.y / H * 100) + '%'; el.style.zIndex = String(100 + 430 + 1);   // ベンチ（あしもと 430）の まえ・まるふわと ともだち（440）の うしろ
+      addBtnKey(el, () => plushTap(el)); scene.append(el); plushEls.push(el);
+    });
+  } catch {}
+}
+function plushTap(el) {
+  lastInput = T; const id = Number(el.dataset.id), nm = fishNameOf(id) || 'さかな';
+  sfx.plush(); sparkles(Number(el.dataset.x), Number(el.dataset.y) - 14, 4, 20);
+  if (!reduce()) el.animate([{ scale: '1 1' }, { scale: '1.14 .84' }, { scale: '.94 1.08' }, { scale: '1 1' }], { duration: 440, easing: 'ease-out' });
+  narrate(nm + 'の ぬしの ぬいぐるみ。ふわふわ！'); seen('plush');
 }
 
 // ─── ねがいの ほし（04 の つなぎ1）───
@@ -1543,8 +1610,18 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   const unit = el => { const r = el.getBoundingClientRect(); return { x: (r.left - sceneBox.left) / k, y: (r.top - sceneBox.top) / k, w: r.width / k, h: r.height / k }; };
   for (const c of scene.querySelectorAll('.cloud')) { const u = unit(c); ctx.save(); ctx.globalAlpha = parseFloat(getComputedStyle(c).opacity) || .9; ctx.drawImage(await svgImg(svgText(c, css, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.restore(); }
   // たてもの・かざり・ひと（ならびは ふだんの がめんと おなじ：あしもとの たかさ じゅん）
-  const items = [...layerProps.querySelectorAll('.prop'), ...layerActors.querySelectorAll('.actor')].sort((a, b) => (Number(a.style.zIndex) || 0) - (Number(b.style.zIndex) || 0));
+  // ぬしの ぬいぐるみ（ベンチの うえ）：ぬのの ふち・ぬいめ・タグも いっしょに 写す（ふだんの がめんと おなじ ならび）
+  const drawPlush = el => {
+    const body = el.querySelector('.pl-body'), im = body && body.querySelector('img'), tg = el.querySelector('.pl-tag'); if (!body) return;
+    const u = unit(body), t = tg && unit(tg), sx = u.w / 40, sy = u.h / 30; ctx.save();
+    if (im && im.complete && im.naturalWidth) { if (hasFilter) { const r = (1.2 * S).toFixed(1) + 'px'; ctx.filter = 'saturate(.92) drop-shadow(' + r + ' 0 0 #fff5e6) drop-shadow(-' + r + ' 0 0 #fff5e6) drop-shadow(0 ' + r + ' 0 #fff5e6) drop-shadow(0 -' + r + ' 0 #fff5e6)'; } ctx.drawImage(im, u.x, u.y, u.w, u.h); ctx.filter = 'none'; }
+    ctx.strokeStyle = 'rgba(122,75,52,.6)'; ctx.lineWidth = .9 * sx; ctx.lineCap = 'round'; ctx.setLineDash([1.5 * sx, 1.3 * sx]); ctx.beginPath(); ctx.moveTo(u.x + 8 * sx, u.y + 15 * sy); ctx.quadraticCurveTo(u.x + 20 * sx, u.y + 11 * sy, u.x + 32 * sx, u.y + 15 * sy); ctx.stroke(); ctx.setLineDash([]);
+    if (t) { ctx.translate(t.x + t.w / 2, t.y + t.h / 2); ctx.rotate(14 * Math.PI / 180); const tw = t.w * .85, th = t.h * .85; ctx.fillStyle = '#fff8e6'; ctx.strokeStyle = '#b98a5a'; ctx.lineWidth = .5; ctx.setLineDash([1, 1]); ctx.fillRect(-tw / 2, -th / 2, tw, th); ctx.strokeRect(-tw / 2, -th / 2, tw, th); ctx.setLineDash([]); ctx.fillStyle = '#e0a61c'; ctx.beginPath(); ctx.arc(0, 0, tw * .22, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  };
+  const items = [...layerProps.querySelectorAll('.prop'), ...layerActors.querySelectorAll('.actor'), ...scene.querySelectorAll('.plush')].sort((a, b) => (Number(a.style.zIndex) || 0) - (Number(b.style.zIndex) || 0));
   for (const el of items) {
+    if (el.classList.contains('plush')) { drawPlush(el); continue; }
     const u = unit(el);
     if (el.classList.contains('prop')) {
       const svg = el.querySelector('svg'); if (!svg) continue;
@@ -1627,8 +1704,38 @@ async function openPhoto() {
 $('snap').addEventListener('click', () => { lastInput = T; openPhoto(); });
 $('close-photo').addEventListener('click', () => photoDlg.close());
 
+// ─── なかまずかん（07 の 小・ひろばで あった なかま）───
+// ひろばで あいさつを した なかま（記録 own.met）が いろつきで ならぶ。まだの こは しるし（てんせんの まるに「？」）だけ。名前・かず・わりあい・ヒントは 出さない（あつめる あつを つくらない）。
+// さわると なまえと ひとこと。よみあげには「あった なかま」だけ（まだの こは よみあげない）。なにも へらない・罰なし
+function drawZukan() {
+  const met = id => Number(own.met && own.met[id]) > 0, ids = Object.keys(PALS);
+  $('zukan-list').replaceChildren(...ids.map(id => {
+    const li = document.createElement('li');
+    if (met(id)) { const b = document.createElement('button'), im = document.createElement('img'); b.type = 'button'; b.className = 'zk'; b.dataset.id = id; im.src = BASE + 'img/friend-' + id + '-s.webp'; im.alt = ''; im.width = im.height = 56; b.append(im, PALS[id].name); b.setAttribute('aria-label', PALS[id].name); li.append(b); }
+    else { const s = document.createElement('span'); s.className = 'zk not'; s.setAttribute('aria-hidden', 'true'); s.textContent = '？'; li.append(s); }
+    return li;
+  }));
+  return ids.some(met);
+}
+function showZukanPal(id) {
+  const p = PALS[id]; if (!p) return;
+  $('zukan-list').querySelectorAll('button.zk').forEach(x => x.classList.toggle('on', x.dataset.id === id));
+  const s = document.createElement('span'), sm = document.createElement('small'); s.textContent = p.name; sm.textContent = p.hello; $('zukan-cap').replaceChildren(s, sm);
+  asKind('fx', () => chord(p.pitch, .08, 'square', 0, .04));
+}
+function openZukan() {
+  lastInput = T; const any = drawZukan();
+  $('zukan-cap').replaceChildren(Object.assign(document.createElement('span'), { textContent: any ? 'なかまを さわって みてね。' : 'ひろばを あるいて、なかまに あいにいこう。いそがなくて だいじょうぶ。' }));
+  const dlg = $('zukan'); if (!dlg.open) dlg.showModal();
+  narrate('なかまずかんを ひらいたよ。' + (any ? 'あった なかまが ならんで いるよ。' : 'まだ だれにも あって いないよ。')); asKind('ui', () => sfx.on());
+}
+$('zukan-btn').addEventListener('click', openZukan);
+$('close-zukan').addEventListener('click', () => { $('zukan').close(); narrate('なかまずかんを とじたよ。'); });   // ボタンで とじた 時は すぐ しらせる（Esc で とじた 時は 下の close の しらせ）
+$('zukan-list').addEventListener('click', e => { const b = e.target.closest('button.zk'); if (b) showZukanPal(b.dataset.id); });
+document.addEventListener('close', e => { if (e.target && e.target.id === 'zukan') narrate('なかまずかんを とじたよ。'); }, true);
+
 // ─── はじまり ───
-buildProps(); applyTime(); drawSound(); drawMotion(); renderPalRow(); loadThanks();
+buildProps(); applyTime(); drawSound(); drawMotion(); renderPalRow(); renderPlush(); loadThanks();
 new ResizeObserver(() => { measure(); render(); }).observe(scene); measure();
 own.visits = (own.visits || 0) + 1;
 // かえって きた とき：さいごに いった ばしょの まえに いる
@@ -1641,7 +1748,10 @@ setTimeout(() => {
 // はじめて きた 日：4びょう たっても だれも さわらない 時だけ、まるふわが 1かい「さわって みてね」（字が よめない 子にも 目で わかる）
 setTimeout(() => { if (own.visits <= 1 && lastInput === 0 && !trip && !document.hidden && !api.paused) speak(player, 'さわって みてね', 3800, true); }, 4200);
 requestAnimationFrame(frame);
-addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag || main.sndAmb === false) stopAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); renderWishStars(); } });
+// おにぎりキャッチから きた 人（リンクの ?from=onigiri・04 の つなぎ4）：さいしょに ともだちが ひとこと。ひらいたら アドレスから 消す（もういちど 読みこんでも くりかえさない）。名前・かずは 言わない・記録に 書かない
+let fromWhere = ''; try { const u = new URL(location.href); fromWhere = u.searchParams.get('from') || ''; if (u.searchParams.has('from')) { u.searchParams.delete('from'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } } catch {}
+if (fromWhere === 'onigiri') setTimeout(() => { const f = nearestFriend(false); if (!f) return; speak(f, 'おにぎりキャッチから きたんだね。いらっしゃい！', 4600); hop(f); setFace('mint', 2600); sfx.greet(f); }, 1200);
+addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag || main.sndAmb === false) stopAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); renderWishStars(); renderPlush(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else { startAmbient(); lastInput = T; } });
 addEventListener('pageshow', e => { if (e.persisted) { curtain.style.display = 'none'; trip = null; player.el.classList.remove('gone'); const house = propEl('house'); if (house) house.classList.remove('open'); measure(); narrate('ひろばに もどったよ'); } });
 
@@ -1651,6 +1761,7 @@ const api = window.Hiroba = {
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), bgm: window.TsuriBgm ? window.TsuriBgm.state() : null, reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
   goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   season: () => SEASON, seasonOf, special: () => SPECIAL, specialOf, renderSeason, SEASON_LINES, SPECIAL_LINES, DROPS, pickDrop: () => dropEl && pickDrop(dropEl), drop: () => dropEl && ({ id: DROPS[SEASON].id, name: DROPS[SEASON].name, x: Number(dropEl.dataset.x), y: Number(dropEl.dataset.y) }),
+  plush: () => plushEls.map(e => ({ id: Number(e.dataset.id), x: Number(e.dataset.x), y: Number(e.dataset.y) })), renderPlush, nushiIds, plushTap: el => plushTap(el), openZukan, drawZukan, showZukanPal, from: () => fromWhere,
   sfx, startAmbient, stopAmbient, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,
   say: () => statusEl.textContent
 };
@@ -1681,7 +1792,11 @@ addEventListener('load', () => {
     'きょうは たなばた だね。ねがいごと、した？': 'It’s Tanabata today. Did you make a wish?', 'ほしに ねがいごと、とどくと いいね': 'I hope our wishes reach the stars.',
     'ことしも おつかれさま。ゆっくり やすんでね': 'Thank you for all your hard work this year. Please rest well.', 'ことしも いろいろ あったね。ここに いて いいんだよ': 'A lot happened this year. You’re welcome to stay here.',
     'はなびらが ひらひら おちて きたよ': 'Petals are fluttering down.', 'おちばが ひらひら おちて きたよ': 'Fallen leaves are fluttering down.', 'ゆきが ぱらぱら おちて きたよ': 'Snow is falling softly.',
-    'ひろいに いくよ': 'Going to pick it up.', 'みつけた！': 'Found it!'
+    'ひろいに いくよ': 'Going to pick it up.', 'みつけた！': 'Found it!',
+    'なかまずかん': 'Friend Book', 'ひろばで あった なかまが、いろつきで ならぶよ。まだの こは しるしだけ。いそがなくて だいじょうぶ。': 'Friends you have met in the plaza appear in color. Friends you haven’t met yet are just a mark. No need to rush.',
+    'なかまを さわって みてね。': 'Touch a friend!', 'ひろばを あるいて、なかまに あいにいこう。いそがなくて だいじょうぶ。': 'Walk around the plaza and meet some friends. No need to rush.',
+    'なかまずかんを ひらいたよ。あった なかまが ならんで いるよ。': 'Opened the Friend Book. The friends you have met are lined up.', 'なかまずかんを ひらいたよ。まだ だれにも あって いないよ。': 'Opened the Friend Book. You haven’t met anyone yet.', 'なかまずかんを とじたよ。': 'Closed the Friend Book.',
+    'おにぎりキャッチから きたんだね。いらっしゃい！': 'You came from Onigiri Catch! Welcome!'
   }, DROP_EN = { 'さくらのはなびら': 'cherry blossom petal', 'あおいは': 'fresh green leaf', 'どんぐり': 'acorn', 'ゆきのけっしょう': 'snow crystal' }, dropEn = n => DROP_EN[n] || null;
   const withA = s => (/^[aeiou]/i.test(s) ? 'an ' : 'a ') + s, capA = s => withA(s).replace(/^./, c => c.toUpperCase());   // a／an（acorn は an）
   if (E.add) E.add({ ex: Object.assign({ 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, window.TsuriMame ? Object.fromEntries(window.TsuriMame.lines.map(l => [l.ja, l.en])) : {}, { 'ベンチ': 'Bench', 'ベンチへ あるいて いくよ': 'Walking to the bench.', 'ベンチに すわったよ。ゆっくり やすもう': 'You sat on the bench. Let’s rest slowly.', 'きょうも きてくれて、うれしいな': 'Thank you for coming again today. I’m happy!', 'いっしょに ひとやすみ、いいね': 'Resting together is nice.', 'ねがいの ほし': 'Wishing Star', 'つりばで ねがった ほしだよ': 'A star from a wish you made at the fishing spot.', 'なかまが あつまって きたよ。「しゃしんを とる」を おしてね': 'Everyone gathered around. Press “Take a photo”!', 'もうすこし まってね': 'Coming soon. Please wait a little!', 'かんばんの うらに、なにか かいて あったよ。「もうすこし まってね」': 'There was something written on the back of the sign: “Coming soon. Please wait a little!”' }, SEASON_EN), rules: [
@@ -1697,6 +1812,9 @@ addEventListener('load', () => {
     [/^(.+?)をひろったよ。おへやにかざれるよ$/, (_, n) => dropEn(n) ? 'You picked up ' + withA(dropEn(n)) + '. You can decorate Marufuwa’s Room with it.' : null],
     [/^(.+?)はもういっぱいもっているよ。おへやにかざってあげてね$/, (_, n) => dropEn(n) ? 'You already have plenty of these. Why not decorate Marufuwa’s Room with them?' : null],
     [/^(.+?)。ひろう$/, (_, n) => dropEn(n) ? dropEn(n).replace(/^./, c => c.toUpperCase()) + '. Pick up' : null],
+    // ぬしの ぬいぐるみ（ぬし＝Guardian）
+    [/^ぬしのぬいぐるみ。(.+)$/, (_, n) => { const f = n === 'さかな' ? 'fish' : (E.h && E.h.nmFish ? E.h.nmFish(n) : n); return f && f !== n || n === 'さかな' ? 'Guardian plush. ' + f.replace(/^./, c => c.toUpperCase()) : null; }],
+    [/^(.+?)のぬしのぬいぐるみ。ふわふわ！$/, (_, n) => { const f = n === 'さかな' ? 'fish' : (E.h && E.h.nmFish ? E.h.nmFish(n) : n); return f && f !== n || n === 'さかな' ? 'A Guardian plush of the ' + f + '. So fluffy!' : null; }],
     [/^(.+)さん、ありがとう$/, (_, n) => n + ', thank you!'], [/^(.+)さん$/, (_, n) => n],
     [/^(\d{1,2})がつ$/, (_, m) => MONTH[Number(m)] || null], [/^(\d{1,2})がつにきてくれたよ$/, (_, m) => MONTH[Number(m)] ? 'Visited in ' + MONTH[Number(m)] + '.' : null]
   ] });
