@@ -11,7 +11,7 @@
     // ---- 時間・あいさつ・ものの なまえ ----
     'おはよう': 'Good morning', 'こんにちは': 'Hello', 'こんばんは': 'Good evening', 'おつきさま': 'Moon', 'おひさま': 'Sun',
     'まるふわ': 'Marufuwa', 'あんないのペンギン': 'Guide Penguin', 'おみせのこぎつね': 'Shop Fox',
-    'つりば': 'Fishing Spot', 'おにぎりキャッチ': 'Onigiri Catch', 'ありがとうのいし': 'Thank-You Stone',
+    'つりば': 'Fishing Spot', 'ありがとうのいし': 'Thank-You Stone',
     'こうじちゅうのばしょ': 'Under construction', 'こうじちゅうのばしょ（ちかぢか）': 'Under construction (coming soon)',
     'ここはまだこうじちゅう。ちかぢかあそべるよ。たのしみにまっててね': "Still under construction. You'll be able to play soon. Look forward to it!",
     'ここもこうじちゅう。ちかぢかあそべるよ。おたのしみに': 'This one is under construction, too. Coming soon. Stay tuned!',
@@ -24,7 +24,6 @@
     'はっぱがひらひらおちてきたよ': 'Leaves are fluttering down.', 'ながれぼしがとんだよ。さわるとねがいごとができるよ': 'A shooting star flew by. Touch it to make a wish.',
     'やめたよ。すきなところへいこう': "Never mind. Let's go wherever you like.", 'こうじちゅうだって': "It's under construction.",
     'まるふわのおへやにはいったよ': "Went into Marufuwa's room.", 'おへやからもどったよ': 'Came back from the room.',
-    'ひだりのおくにつりば。まんなかのおくにおへや。みぎのおくにおにぎりキャッチ。': 'The fishing spot is at the back left. The room is at the back center. Onigiri Catch is at the back right.',
     'ちかくにはだれもいないよ。': 'No one is nearby.', 'まんなかにはふんすいがあるよ。': "There's a fountain in the middle.", '（まだ）': '(not yet)',
     '。きょうあったよ': '. Met today', '。きょうまだあっていないよ': '. Not met yet today',
     'さっきつりばであったね。またあえてうれしいな': 'We met at the fishing spot earlier. Happy to see you again.',
@@ -43,7 +42,7 @@
     'かってにとうこうはしません。「ほぞんする」でのこせるよ。': 'Nothing is posted without you. Use “Save” to keep it.', 'つくれなかったよ。もういちどためしてね。': "Couldn't make it. Please try again.",
     'ひろばへようこそ。ゆびでさわると、まるふわがあるくよ。したのボタンで、いきたいところへいけるよ。': 'Welcome to the plaza. Tap, and Marufuwa will walk there. Use the buttons below to go where you like.',
     // ---- あんないの ペンギン ----
-    'ひろばへようこそ': 'Welcome to the plaza.', 'つりば、おへや、おにぎり。すきなところへどうぞ': 'Fishing spot, the room, onigiri. Go wherever you like.',
+    'ひろばへようこそ': 'Welcome to the plaza.',
     'まだこうじちゅうのばしょもあるよ。たのしみにね': 'Some places are still under construction. Look forward to them.', 'スカーフ、あったかいよ': 'My scarf is warm.',
     'ふんすいをさんかいさわると…ないしょ！': "If you touch the fountain three times… it's a secret!", 'いけをじっとみていると、いいことがあるよ': 'If you watch the pond quietly, something nice happens.',
     'いそがなくてだいじょうぶ': "No rush. It's okay.", 'ここにいていいんだよ': 'You can stay right here.', 'あめのひは、みずたまりがたのしいね': 'Puddles are fun on rainy days.',
@@ -138,7 +137,7 @@
     'たんぽぽ': 'Dandelion', 'こむぎ': 'Komugi', 'あめだま': 'Candy Drop', 'すずらん': 'Lily of the Valley', 'ハート': 'Heart', 'ふわり': 'Fuwari', 'ぽっぽ': 'Poppo', 'マロン': 'Marron', 'ちょこ': 'Choco', 'ゆず': 'Yuzu', 'きなこ': 'Kinako', 'ぱんだ': 'Panda', 'ほたる': 'Hotaru',
     // ---- ページの せつめい・ボタン・かんばん ----
     'やじるしキーでまるふわがあるくよ。スペースキーでちかくのともだちにはなしかけたり、ばしょにはいったりできるよ。エスケープキーでやめるよ。したのボタンでもおなじことができるよ。': 'Use the arrow keys to walk Marufuwa. Press Space to talk to a nearby friend or enter a place. Press Escape to cancel. The buttons below do the same things.',
-    'ひろば。まるふわがあるくばしょ': 'The plaza: where Marufuwa walks', 'おへや': 'Room', 'おにぎり': 'Onigiri', 'キャッチ': 'Catch', 'ありがとう': 'Thanks', 'こうじちゅう': 'Under construction',
+    'ひろば。まるふわがあるくばしょ': 'The plaza: where Marufuwa walks', 'おへや': 'Room', 'ありがとう': 'Thanks', 'こうじちゅう': 'Under construction',
     'いきさき': 'Where to go', 'つりびより': 'Fishing Days', 'すいそう': 'Aquarium', 'まだできていないばしょ': 'Places not ready yet', 'ちかぢかあそべます': 'Coming soon',
     'ともだちにあいにいく': 'Visit friends', 'まわりをきく': 'Listen around', 'さわれるもの': 'Things to touch', 'くも': 'Cloud', 'き': 'Tree', 'あそびかた': 'How to play',
     'ゆびでさわったところへ、まるふわがあるいていくよ。かんばんやたてものをさわると、そこへいって、あそびにいけるよ。ともだちにちかづくと、ひとことはなしかけてくれるよ。': "Tap a spot and Marufuwa will walk there. Touch a sign or building to go and play. Get close to a friend, and they'll say a word to you.",
@@ -150,7 +149,7 @@
   };
 
   const pl = s => { const k = norm(s); return EX.get(k) || nmPal(s); };
-  const place = s => ({ 'つりば': 'the fishing spot', 'まるふわのおへや': "Marufuwa's room", 'おにぎりキャッチ': 'Onigiri Catch', 'ありがとうのいし': 'the thank-you stone', 'ふんすい': 'the fountain' })[norm(s)] || pl(s);
+  const place = s => ({ 'つりば': 'the fishing spot', 'まるふわのおへや': "Marufuwa's room", 'ありがとうのいし': 'the thank-you stone', 'ふんすい': 'the fountain' })[norm(s)] || pl(s);
   const GREET = { 'おはよう': 'Good morning', 'こんにちは': 'Hello', 'こんばんは': 'Good evening' };
   const rules = [
     // なかまの せりふ：「なまえ：「あいさつ！ せりふ」」と、ふきだしの 「あいさつ！ せりふ」
@@ -176,6 +175,6 @@
     [/^(\d+)がつにきてくれたよ$/, (_, m) => `Came in ${['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][+m] || m}`],
   ];
   // かんばん（SVG）は せまい ので みじかく
-  const short = { 'つりば': 'Fishing', 'こうじちゅう': 'Building…', 'おへや': 'Room', 'おにぎり': 'Onigiri', 'キャッチ': 'Catch', 'ありがとう': 'Thanks' };
+  const short = { 'つりば': 'Fishing', 'こうじちゅう': 'Building…', 'おへや': 'Room', 'ありがとう': 'Thanks' };
   window.TsuriEn.add({ ex, rules, short });
 })();
