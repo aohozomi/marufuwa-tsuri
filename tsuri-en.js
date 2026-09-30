@@ -6,6 +6,8 @@
 (() => {
   'use strict';
   if (window.TsuriEn) return;
+  // ブラウザの「翻訳」（Chrome・Safari など）が ゲームの 中身を 勝手に 書きかえて こわす のを ふせぐ（マスター 9/30「日本語ってところ おしたら まっくらに なった」＝英語ページで ブラウザの 翻訳ボタンを 押した 疑い）。ことばは ゲーム自身の「日本語／English」で きりかえる
+  try { document.documentElement.setAttribute('translate', 'no'); const nt = document.createElement('meta'); nt.name = 'google'; nt.content = 'notranslate'; (document.head || document.documentElement).appendChild(nt); } catch (e) {}
   const KEY = 'marufuwa-lang-v1';
   const query = new URLSearchParams(location.search);
   const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:';
