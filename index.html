@@ -824,6 +824,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const TIME_NAME = {a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru'};
 
   const HOME = 'https://aohozomi.github.io/marufuwa-tsuri/';   // あそべる ばしょ。しゃしんと きょうゆうの ぶんに いれる
+  // English mode（外付け tsuri-en.js・総司令部）が よみこまれて いて 英語の とき だけ、えの なかの もじと 共有の ぶんを 英語に する。日本語の ときは ぜんぶ そのまま
+  const EN = () => !!(window.TsuriEn && TsuriEn.lang === 'en');
+  const T = text => window.TsuriEn && TsuriEn.t ? TsuriEn.t(text) : text;   // ひょうに ある ことばは 英語に、ない ものは そのまま
+  const TAG = () => EN() ? '#MarufuwaFishing' : '#まるふわつりびより';
+  const HOME_SHARE = () => EN() ? HOME + 'en/' : HOME;   // 英語の リンクカードを もつ 入口
   const KEY = 'marufuwa-tsuri-v1';
   let save = {fish: {}, total: 0};
   try { const data = JSON.parse(localStorage.getItem(KEY)); if (data && typeof data.fish === 'object' && Number.isInteger(data.total)) save = data; } catch {}
@@ -1590,7 +1595,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (last.fish.legend && 'filter' in ctx) ctx.filter = 'drop-shadow(0 0 18px #fff) drop-shadow(0 0 30px #ffd34d)';
     ctx.translate(480, 300); if (last.nushi) ctx.scale(1.4, 1.4); if (fishArt) ctx.drawImage(fishArt, -130, -130, 260, 260); else ctx.fillText(last.fish.icon, 0, 0); ctx.restore();
     // ぬし・まぼろしの ときは、きねんの わくと おび
-    const special = last.fish.legend ? 'まぼろしに あえました' : last.nushi ? 'ぬしを つりました' : '';
+    const special = T(last.fish.legend ? 'まぼろしに あえました' : last.nushi ? 'ぬしを つりました' : '');
     if (special) {
       const edge = ctx.createLinearGradient(0, 0, 1200, 675); (last.fish.legend ? ['#ff8fa3', '#ffd34d', '#8fe3a8', '#7fd0f2', '#b79cf0'] : ['#ffe27a', '#d39a1c', '#fff1b8', '#d39a1c', '#ffe27a']).forEach((tone, i) => edge.addColorStop(i / 4, tone));
       ctx.strokeStyle = edge; ctx.lineWidth = 22; ctx.strokeRect(11, 11, 1178, 653);
@@ -1600,19 +1605,21 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.fillStyle = '#fffffff0'; roundRect(ctx, 690, 210, 460, 330, 34); ctx.fill(); ctx.strokeStyle = '#bfdce8'; ctx.lineWidth = 5; ctx.stroke();
     ctx.fillStyle = '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = 'bold 54px system-ui,sans-serif'; ctx.fillText(last.fish.name, 920, 295, 420);
-    ctx.font = 'bold 50px system-ui,sans-serif'; ctx.fillText(cm(last.size) + ' センチ', 920, 370, 420);
+    ctx.font = 'bold 50px system-ui,sans-serif'; ctx.fillText(EN() ? cm(last.size) + ' cm' : cm(last.size) + ' センチ', 920, 370, 420);
     ctx.fillStyle = '#e0a61c'; ctx.font = '50px system-ui,sans-serif'; ctx.fillText(starsOf(last.fish, last.nushi), 920, 440, 420);
-    ctx.fillStyle = '#593700'; ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(last.tags.join('・'), 920, 500, 420);
+    ctx.fillStyle = '#593700'; ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(last.tags.map(T).join(EN() ? ' · ' : '・'), 920, 500, 420);
     ctx.fillStyle = color('--star') === '1' ? '#fff' : '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText('まるふわ つりびより', 920, 112, 440);   // ゲームの なまえ。みた ひとが、さがして これる ように
-    ctx.font = '28px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + last.area, 920, 160, 440);
+    ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 920, 112, 440);   // ゲームの なまえ。みた ひとが、さがして これる ように
+    ctx.font = '28px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + T(last.area), 920, 160, 440);
     ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6;
-    ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText('つれた かず ' + save.total + '　シールちょう ' + seenCount() + ' / ' + BASE, 46, 596);
-    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText('#まるふわつりびより', 46, 642);   // えの なかには さくしゃの なまえは いれない
+    ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(EN() ? 'Caught ' + save.total + '  ·  Stickers ' + seenCount() + '/' + BASE : 'つれた かず ' + save.total + '　シールちょう ' + seenCount() + ' / ' + BASE, 46, 596);
+    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText(TAG(), 46, 642);   // えの なかには さくしゃの なまえは いれない
     ctx.textAlign = 'right'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, ''), 1160, 644);   // すみに ちいさく、あそべる ばしょ（この 1まいだけの れいがい・マスター 許可）
     ctx.shadowBlur = 0;
-    const words = 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + '\n#まるふわつりびより\n' + HOME;
-    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', last.fish.name + 'を かかげる まるふわの しゃしん', words);
+    const words = EN()
+      ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + '\n' + TAG() + '\n' + HOME_SHARE()
+      : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + '\n#まるふわつりびより\n' + HOME;
+    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of Marufuwa holding up ' + last.fish.name : last.fish.name + 'を かかげる まるふわの しゃしん', words);
   }
   // シールちょうの 1まい。あつめた シールが ならぶ。30しゅるい そろうと「ぜんぶ あつめた！」
   async function bookPhoto() {
@@ -1623,8 +1630,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.fillStyle = paper; ctx.fillRect(0, 0, 1200, 1350);
     if (full) { ctx.strokeStyle = '#d39a1c'; ctx.lineWidth = 24; ctx.strokeRect(12, 12, 1176, 1326); }
     ctx.fillStyle = '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.font = 'bold 64px system-ui,sans-serif'; ctx.fillText('おさかな シールちょう', 600, 110);
-    ctx.font = 'bold 44px system-ui,sans-serif'; ctx.fillStyle = full ? '#a5481c' : '#17658a'; ctx.fillText(full ? 'ぜんぶ あつめた！　' + seen + ' / ' + BASE : seen + ' / ' + BASE + ' しゅるい', 600, 178);
+    ctx.font = 'bold 64px system-ui,sans-serif'; ctx.fillText(EN() ? 'Fish Sticker Album' : 'おさかな シールちょう', 600, 110);
+    ctx.font = 'bold 44px system-ui,sans-serif'; ctx.fillStyle = full ? '#a5481c' : '#17658a'; ctx.fillText(EN() ? (full ? 'All collected!  ' + seen + '/' + BASE : seen + '/' + BASE + (seen === 1 ? ' kind' : ' kinds')) : full ? 'ぜんぶ あつめた！　' + seen + ' / ' + BASE : seen + ' / ' + BASE + ' しゅるい', 600, 178);
     const cols = 6, cell = 184, left = (1200 - cols * cell) / 2, top = 230;
     const tall = list.length > cols * 5, rowH = tall ? 164 : 176, dy = tall ? 64 : 70, nameDy = tall ? 92 : 96;   // まぼろしで 31しゅ以上 → 6だん。下の「つれた かず」に かさならない よう つめる
     list.forEach((f, i) => {
@@ -1645,10 +1652,12 @@ dialog .close{display:block;margin:auto;min-width:160px}
       ctx.restore();
       ctx.fillStyle = got ? '#244653' : '#9fb3bd'; ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 21px system-ui,sans-serif'; ctx.fillText(got ? f.name : '', cx, cy + nameDy, cell - 10);
     });
-    ctx.fillStyle = '#244653'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText('まるふわ つりびより　つれた かず ' + save.total, 600, 1262);
-    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillStyle = '#3a5a68'; ctx.fillText('#まるふわつりびより', 600, 1310);
-    const words = (full ? 'シールちょう、ぜんぶ あつめた！ ' : 'シールちょう ' + seen + ' / ' + BASE + '。') + '\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
-    await showPhoto(canvas, 'marufuwa-tsuri-seal-' + seen + '.png', 'あつめた シールが ならんだ シールちょうの しゃしん。' + seen + 'しゅるい', words);
+    ctx.fillStyle = '#244653'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days  ·  Caught ' + save.total : 'まるふわ つりびより　つれた かず ' + save.total, 600, 1262);
+    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillStyle = '#3a5a68'; ctx.fillText(TAG(), 600, 1310);
+    const words = EN()
+      ? (full ? 'Sticker album complete! ' : 'Sticker album ' + seen + '/' + BASE + '.') + '\nWent fishing with Marufuwa!\n' + TAG() + '\n' + HOME_SHARE()
+      : (full ? 'シールちょう、ぜんぶ あつめた！ ' : 'シールちょう ' + seen + ' / ' + BASE + '。') + '\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
+    await showPhoto(canvas, 'marufuwa-tsuri-seal-' + seen + '.png', EN() ? 'A photo of the sticker album with ' + seen + (seen === 1 ? ' kind' : ' kinds') + ' of stickers.' : 'あつめた シールが ならんだ シールちょうの しゃしん。' + seen + 'しゅるい', words);
   }
   async function showPhoto(canvas, fileName, alt, words) {
     const status = $('photo-status');
@@ -1763,7 +1772,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   $('give-go').addEventListener('click', async () => {
     if (!giving) return;
     const {f, size} = giving, code = [f.id, Math.min(9999, Math.round(size * 10)), Math.max(0, PALS.indexOf(pals[0])), givingWord, newSeal()].join('.');
-    const url = HOME + '?gift=' + code, text = 'まるふわ つりびよりで ' + f.name + ' ' + cm(size) + 'センチ、つったよ。あげる！ #まるふわつりびより';
+    const url = HOME + '?gift=' + code, text = EN() ? 'I caught a ' + f.name + ' (' + cm(size) + ' cm) in Marufuwa Fishing Days. This one is for you! ' + TAG() : 'まるふわ つりびよりで ' + f.name + ' ' + cm(size) + 'センチ、つったよ。あげる！ #まるふわつりびより';
     if (navigator.share) {
       try { await navigator.share({text, url}); giveSay('きょうゆうの がめんを とじました。'); return; }
       catch (error) { if (error.name === 'AbortError') { giveSay('やめました。'); return; } }
