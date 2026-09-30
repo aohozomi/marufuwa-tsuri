@@ -563,9 +563,11 @@
     h.dataset.en = '1'; h.setAttribute('aria-label', 'Marufuwa Fishing Days');
     const mk = (ch, n) => { const s = document.createElement('span'); s.setAttribute('aria-hidden', 'true'); s.style.setProperty('--n', String(n)); s.textContent = ch === ' ' ? ' ' : ch; return s; };
     const icon = h.querySelector('i'); [...h.querySelectorAll('span')].forEach(s => s.remove());
-    const before = [...'Marufuwa'].map((c, i) => mk(c, i)), after = [...'Fishing Days'].map((c, i) => mk(c, i + 9));
-    before.forEach(s => h.insertBefore(s, icon)); after.forEach(s => h.append(s));
-    h.style.fontSize = 'clamp(1.2rem,6.4vw,2.1rem)'; h.style.flexWrap = 'wrap';
+    // ことばの はしで だけ 折り返す（「Fishing Day / s」のように 1文字だけ 落ちない）。色は 日本語の ロゴと おなじ 4色を 1文字ずつ 書く（ことばごとの まとまりに すると nth-of-type が ふりだしに もどって 色の ならびが かわる ため）
+    const K = ['#4bb3e0', '#46c79a', '#ff9a6b', '#a98be8'], D = ['#2a86b3', '#2a9a72', '#d96f40', '#7c5fc4'];
+    const word = (text, from) => { const w = document.createElement('b'); w.setAttribute('aria-hidden', 'true'); w.style.cssText = 'display:inline-flex;align-items:flex-end;gap:1px;font:inherit;white-space:nowrap'; [...text].forEach((c, i) => { const s = mk(c, from + i); s.style.setProperty('--k', K[(from + i) % 4]); s.style.setProperty('--d', D[(from + i) % 4]); w.append(s); }); return w; };
+    h.insertBefore(word('Marufuwa', 0), icon); h.append(word('Fishing', 8)); h.append(word('Days', 15));
+    h.style.fontSize = 'clamp(1.1rem,5.6vw,2.1rem)'; h.style.flexWrap = 'wrap'; h.style.columnGap = '.3em';
   }
   // データ：魚の なまえを 英語に（あとで つくる ふだ・バケツ・ずかんが 英語で でる）
   function patchData() {
