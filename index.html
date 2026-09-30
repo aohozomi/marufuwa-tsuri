@@ -76,6 +76,7 @@ button::before,.pill::before{content:"";position:absolute;left:10%;right:10%;top
 button:active:not(:disabled),.pill:active{transform:translateY(4px) scale(.98,.93);box-shadow:0 1px 0 var(--side),0 3px 6px #2446532b,inset 0 -3px 6px #00000014,inset 0 3px 5px #ffffffcc}
 button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-shadow:0 2px 0 var(--side),inset 0 -4px 6px #0000000f}
 #main-button[aria-disabled=true]:active{transform:none}
+#main-button[aria-disabled=true]{opacity:.55}   /* おしても なにも おきない あいだ */
 .spot::before,#keeper::before{display:none}
 #scene .spot,#scene #keeper,#scene .friend-hit{box-shadow:none;transition:none;-webkit-backdrop-filter:none;backdrop-filter:none}   /* せきの ボタンは 絵の うえに のる だけ。ガラスの ぼかしを かけると うしろの なかまが しみのように ぼやける */
 #scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
@@ -465,6 +466,8 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 #take-photo,#gaze,#release,#send-gift,#show-pal{flex:1 1 40%;min-height:54px}
 /* つれた あとは 主役の 2つ（もういちど なげる・しゃしんを とる）だけ。ほかは「ほかの こと ▸」に たたむ（読み上げ・キーボードは 主役 → たたみ の じゅん） */
 #more-catch{flex:1 1 40%}
+/* つれた あいだ：主役は「つぎへ」と「しゃしん」。おと・BGM・とおく・ながめる などは「ほかの こと ▸」を ひらくと でる（つぎの 1ぴきを えらぶ とき ごちゃつかない） */
+body[data-phase=caught] .sub-actions:not([data-more=open]) > :not(#take-photo):not(#more-catch){display:none !important}
 #more-catch[open]{flex-basis:100%}
 #more-catch[hidden]{display:none}
 #more-catch>summary{display:flex;align-items:center;justify-content:center;gap:6px;list-style:none;min-height:54px;padding:4px 14px;font-size:.95rem}
@@ -1481,7 +1484,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function offBeat() { let gap = cycleTime() - hitAt; if (gap > period / 2) gap -= period; if (gap < -period / 2) gap += period; return gap; }
   // まどの ひろさ（ミリびょう）。さかなが まんなかに きた とき・いい さお ほど ひろい。いちばん せまくても 0.12びょう
   // 「おしい」が つづく ほど、まどが すこしずつ ひろがる（1かいで 0.03びょう、さいだい 0.24びょう）。「ぴったり」で もとに もどる。きりかえ なしで、だれにでも きく
-  function windowMs() { const lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); return (Math.max(save.slow ? 180 : 120, (.06 + .1 * (1 - away) + save.rod * .025) * period) + Math.min(240, misses * 30)) * (save.total === 0 ? 2 : 1); }   // はじめての 1ぴきだけ、「いまだ」の まどを 2ばい（ばつは ない・さいしょの 1ぴきは かならず つれる）
+  function windowMs() { const lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); return (Math.max(save.slow ? 180 : 120, (.06 + .1 * (1 - away) + save.rod * .025) * period) + Math.min(360, slips * 45)) * (save.total === 0 ? 2 : 1); }   // ぴったりに ならなかった れんぞく（いいね・ちかい）ごとに +45ms（うえ 360ms）。ずれ つづける ひとを またせすぎない（ぴったりで もどる。ものさし _kenpin_tmp/sim_reel.mjs SLIP=1：★3 ±0.3びょう ずれる ひと 5.7→4.8びょう・ぴったり ねらう・れんだは かわらない）   // はじめての 1ぴきだけ、「いまだ」の まどを 2ばい（ばつは ない・さいしょの 1ぴきは かならず つれる）
   function startGuide() {
     // うごきを へらす せっていでも、おとの あんないは とめない（めが みえなくて、うごきも へらしたい ひとの ため）
     stopGuide(); if (!sndOn('guide') || save.easy) return;
@@ -1555,8 +1558,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // あめ。ひに よって ふる（4にちに 1かい くらい）。あめの ひは、めずらしい こが でやすい
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
-  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, reelStartAt = 0, perfectStreak = 0, kickUntil = 0, kickPower = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
-  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, reelStartAt = 0, perfectStreak = 0, slips = 0, lockTimer = 0, waitNoted = false, kickUntil = 0, kickPower = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
+  function setPhase(next) { phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
@@ -1578,7 +1581,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function say(text, mute) { status.textContent = text; if (!mute) speak(text); }
   // つれた けっかの ながい ぶんは 目には 出さない（カードと ペンギンが みせる）。読み上げ（aria-live）にだけ のこす。あとから ほかの ことばが 書かれたら（外付けも）ふつうに 見える
   function sayQuiet(text) { const span = document.createElement('span'); span.className = 'sr-only'; span.textContent = text; status.replaceChildren(span); speak(text); }
-  function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; if (!cardShownAt) cardShownAt = performance.now(); }   // カードが 出た 時刻（つれた 直後は 0）
+  // つれた あと：カードが 出て から 1びょうは おしても なにも おきない。その あいだは ボタンを うすく して、1かいだけ「ちょっと まってね」（おきない ことを かくさない）
+  function lockFor(ms) { lock(true); clearTimeout(lockTimer); lockTimer = setTimeout(() => { if (phase === 'caught') lock(false); }, ms); }
+  function holdNote() { if (waitNoted) return; waitNoted = true; say(L('ちょっと まってね。', 'One moment.')); }
+  function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; if (!cardShownAt) { cardShownAt = performance.now(); if (phase === 'caught') lockFor(1000); } }   // カードが 出た 時刻（つれた 直後は 0）
   function cardWait(ms) { clearTimeout(cardTimer); cardShownAt = 0; $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
   function face(name) { curFace = name; marufuwa.src = wearUrl(name) || 'img/game-' + name + '.webp'; }
@@ -1663,7 +1669,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     hpMax = hp = Math.min(12, 3 + fish.rare * 2 + (nushi ? 5 : 0)); period = 1850 - fish.rare * 250;   // ぬしでも さいだい 12（16だと ながすぎて つかれる）
     if (save.total === 0) { hpMax = hp = 3; period = 1700; }   // さいしょの 1ぴきは、かならず すぐ つれる
     if (fish.legend) { hpMax = hp = 7; period = 1500; }   // まぼろしは、でて きたら つれる。わは ゆっくり
-    swim = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; perfects = 0; perfectStreak = 0; misses = 0; restUntil = 0;
+    swim = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; perfects = 0; perfectStreak = 0; slips = 0; misses = 0; restUntil = 0;
     // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
     hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
     ringStart = reelStartAt = performance.now(); ringSync();
@@ -1688,7 +1694,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const miss = Math.abs(offBeat()), easy = windowMs();
     const blind = save.easy || (reduce() && !sndOn('guide'));   // らくちん、または、わも あんないの おとも ない とき：タイミングを みない
     const power = blind ? 2 : miss <= easy ? 3 : miss <= easy + .12 * period ? 2 : 1;
-    if (power === 3) { perfects++; misses = 0; hp = Math.max(0, hp - 2); } else if (power === 1) misses++;   // 「ぴったり」は 2つ おおく ひける（ぜんぶで 5）
+    if (power === 3) { perfects++; misses = 0; slips = 0; hp = Math.max(0, hp - 2); } else { slips++; if (power === 1) misses++; }   // 「ぴったり」は 2つ おおく ひける（ぜんぶで 5）
     perfectStreak = power === 3 ? perfectStreak + 1 : 0; const surfaced = perfectStreak >= 3; if (surfaced) perfectStreak = 0;   // 「ぴったり」が 3かい つづいたら ごほうび（かぞえない・ひょうじしない）
     const rest = blind ? 320 : Math.min(1000, Math.max(320, period * .8));   // やすみは、どの ひきかたでも おなじ ながさ。わの 1しゅうの 8わり（さいだい 1びょう）＝れんだの はやさが、1しゅうに 1かい ねらう ひとと おなじ くらいに
     restUntil = performance.now() + rest; $('reel').dataset.rest = 'true'; button.dataset.rest = 'true';
@@ -1814,8 +1820,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       [$('friend-a'), $('friend-b')].forEach((pal, i) => pal.animate([{translate: '0 0'}, {translate: '0 -12px'}, {translate: '0 0'}, {translate: '0 -8px'}, {translate: '0 0'}], {duration: 620, delay: 180 + i * 140, easing: 'ease-out'}));
     }
     // れんだ しても、うれしい しゅんかんが きえない ように、すこしだけ まつ
-    button.textContent = resultAck ? 'もういちど なげる' : L('つぎへ', 'Next'); button.dataset.hot = 'false'; lock(true); caughtAt = performance.now();
-    setTimeout(() => { if (phase === 'caught') lock(false); }, 1000);
+    button.textContent = resultAck ? 'もういちど なげる' : L('つぎへ', 'Next'); button.dataset.hot = 'false'; caughtAt = performance.now();
+    waitNoted = false; lock(false);   // カードが 出る まで（1.5びょう）は おすと カードが すぐ 出る＝ちゃんと うごく
     sayQuiet(fish.name + 'が つれた。' + cm(size) + 'センチ。' + (levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).join(' ') + (gift.length ? '　あたらしく ふえたよ：' + gift.join('、') : '') + (PLAIN_WORDS.some(w => guideWord === w[0] || guideWord === w[1]) ? '' : '　ペンギン：' + guideWord) + (hintWord ? '　' + hintWord : ''));   // あんないの ペンギンの ひとこと（ふつうの ものは のぞく）も 読み上げる
   }
 
@@ -1835,17 +1841,17 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     startAmbient();   // おとを ON に して いた ひとは、さいしょに おした ときから なみの おと
     // つれた 直後：カードが まだ なら、さいしょの 1回の おしは カードを すぐ 出す（なげない）。カードが 出て から 1びょうは なげない（れんだ しても 結果が きえない）
     const now = performance.now(), gap = now - lastPressAt; lastPressAt = now;   // まえの おしから どれだけ あいたか（れんだの ながれの みわけ）
-    if (phase === 'caught' && (!cardShownAt || now - cardShownAt < 1000)) { if (!cardShownAt) cardShow(); return; }
-    if (phase === 'caught' && now - caughtAt < 1000) return;
+    if (phase === 'caught' && (!cardShownAt || now - cardShownAt < 1000)) { if (!cardShownAt) cardShow(); else holdNote(); return; }
+    if (phase === 'caught' && now - caughtAt < 1000) { holdNote(); return; }
     // けっかを 見た「1かい」で わける：カードが 出て から さいしょの おしは「つぎへ」＝カードを とじる だけ（なげない）。そのあとの おしで なげる
     // れんだの ながれ（おしと おしの あいだが 0.35びょう より みじかい）は むし。ばつは なく、ゆっくり おした とき、または カードが 出て から とくべつな けっかは 4びょう・ふつうは 1.5びょう たてば すすむ（れんだ しても 4びょう／7びょう ほどで すすむ）
     if (phase === 'caught' && !resultAck) {
-      if (gap < 350 && now - cardShownAt < (resultSpecial ? 4000 : 1500)) return;
-      resultAck = true; ackAt = now; button.textContent = 'もういちど なげる';
+      if (gap < 350 && now - cardShownAt < (resultSpecial ? 4000 : 1500)) { holdNote(); return; }
+      resultAck = true; ackAt = now; button.textContent = 'もういちど なげる'; lockFor(500);
       if ($('go-area').hidden) $('card').hidden = true;   // あたらしい つりばの「いって みる？」が あるときは カードを のこす
       return;
     }
-    if (phase === 'caught' && (now - ackAt < 500 || (gap < 350 && now - ackAt < (resultSpecial ? 1500 : 1000)))) return;
+    if (phase === 'caught' && (now - ackAt < 500 || (gap < 350 && now - ackAt < (resultSpecial ? 1500 : 1000)))) { holdNote(); return; }
     if (phase === 'idle' || phase === 'caught') cast();
     else if (phase === 'bite') startReel();
     else if (phase === 'reel') pull();
@@ -3117,6 +3123,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）。つれた あとだけ「しゃしん・にがす・おくる」が さき（つれる まえは それらが 出ないので、おとが いちばん さき）
     const audio = document.createElement('div'); audio.className = 'audio-row'; audio.append($('sound'), ...(window.TsuriBgm ? [TsuriBgm.button({sound: () => !!save.sound, enableSound: () => $('sound').click(), onToggle: audioChosen})] : []));   // おとと BGM は 1くみ（となりどうし）
     const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('take-photo'), $('more-catch'), audio, $('gaze'), $('sleep'), $('fullscreen'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
+    $('more-catch').addEventListener('toggle', () => { sub.dataset.more = $('more-catch').open ? 'open' : ''; });   // ひらいて いる あいだだけ ほかの ものも 出す
     drawAudioSize();
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('つりばを かえる（いま：', now, '）'); where.append(head, $('areas'));
