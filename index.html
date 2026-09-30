@@ -2197,7 +2197,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     }
     trowel.putImageData(tile, 0, 0);
   }
-  function flow(now) { if (!document.hidden) { drawWater(now); drawSky(now); drawSoil(); } requestAnimationFrame(flow); }
+  function flow(now) { if (!document.hidden && !document.querySelector('dialog[open]')) { if (scene.dataset.tooku !== 'true') drawWater(now); drawSky(now); drawSoil(); } requestAnimationFrame(flow); }   // 窓が ひらいて いる 間と、とおく ON の 間の みずは、みえない ので かかない（CPU を へらす・総司令部の そくてい）
 
   // ながめる。つらなくて いい。みずと そらと なかまを、みて いるだけ
   const GAZE_WORDS = ['なみの おとを、きいて いよう。', 'きょうも、おつかれさま。', 'なにも しなくて、いいよ。', 'ゆっくり、いきを しよう。', 'ここに いて、いいよ。', 'ぼんやり するのも、だいじな じかん。', 'いま できる ことだけで、じゅうぶん。', 'みずが きらきら しているね。', 'くもが ゆっくり ながれて いくね。', 'しんこきゅう、ひとつ。', 'いそがなくて、だいじょうぶ。', 'ここは、ゆっくり して いい ばしょ。'];
