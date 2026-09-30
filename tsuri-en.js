@@ -169,6 +169,7 @@
     'ひらがな・カタカナ・アルファベット・すうじでかいてね。': 'Please use letters and numbers.', 'ひらがな・カタカナでかいてね。': 'Please use letters and numbers.',
     'そのなまえはつかえないよ。べつのなまえをえらんでね。': "That name can't be used. Please choose another one.",
     'もらったよ': 'Received', 'だれか': 'Someone', 'あと': 'Only ', 'ひき': ' left',
+    'てがみがとどいたよ': 'A letter has arrived', 'てがみがとどいているよ': 'A letter is waiting for you',
     'おくりものだな': 'Gift Shelf', 'もらったさかながならんでいるよ。つれたかずには、はいらないよ。': "Fish you received are lined up here. They don't count toward your catches.",
     // なかまの おしゃべり（tsuri-oshaberi.js）
     'あさのみずはすきとおってるね': 'The morning water is so clear.', 'おはよう。きょうものんびりいこう': "Good morning. Let's take it easy today, too.", 'あさはとりがよくなくね': 'Birds sing a lot in the morning.',
