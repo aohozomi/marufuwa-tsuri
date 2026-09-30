@@ -2854,9 +2854,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる。えらんだ ことは おぼえて おく
   function drawEasy() {
     const on = !!save.easy; $('easy').textContent = on ? 'らくちん：ON' : 'らくちん：OFF'; $('easy').setAttribute('aria-pressed', String(on)); scene.dataset.easy = String(on);
-    const parts = []; if (on) parts.push('らくちん'); if (canBuzz && !buzzOn()) parts.push('ふるえ なし'); if (!natureOn()) parts.push('いきもの なし');
-    if (save.sndGuide === false) parts.push('あんないの おと なし'); if (save.sndFx === false) parts.push('こうかおん なし'); if (save.sndAmb === false) parts.push('なみと あめ なし'); if (save.slow) parts.push('ゆったり'); if (save.soft) parts.push('やさしい おと'); if (save.yomi === true && yomiAvail()) parts.push('よみあげ');
-    if ($('assist-now')) $('assist-now').textContent = parts.length ? parts.join('・') : 'ふつう';
+    // 見出しは 3つだけ：らくちん ON の ときは「らくちん」／ほかに なにか かえて いれば「じぶんの せってい」／なにも かえて いなければ「ふつう」（1つ かえる たびに ことばが かわって まぎらわしい ため）。なかみの 一覧は ひらいた なかで 見える
+    const custom = (canBuzz && !buzzOn()) || !natureOn() || save.sndGuide === false || save.sndFx === false || save.sndAmb === false || !!save.slow || !!save.soft || (save.yomi === true && yomiAvail());
+    if ($('assist-now')) $('assist-now').textContent = on ? L('らくちん', 'Easy mode') : custom ? L('じぶんの せってい', 'Custom') : L('ふつう', 'Normal');
   }
   $('easy').addEventListener('click', () => { save.easy = !save.easy; store(); drawEasy(); say(save.easy ? 'らくちんに したよ。おすだけで つれるよ。' : 'らくちんを やめたよ。わが ひかったら おしてね。'); });
   $('buzz') && $('buzz').addEventListener('click', () => {
