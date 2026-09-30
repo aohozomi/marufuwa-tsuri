@@ -1732,6 +1732,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const photo = $('photo');
   let last = null, photoFile = null, photoURL = '';
   function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  function bottomScrim(ctx, top) {   // しゃしんの 下の はしに ほんのり くらい おび：水の 上の 白い もじ（URL・かず・Lv.・タグ）が 読める ように（コントラスト 4.5対1 いじょう）
+    const shade = ctx.createLinearGradient(0, top, 0, 675); shade.addColorStop(0, 'rgba(8,34,56,0)'); shade.addColorStop(.4, 'rgba(8,34,56,.52)'); shade.addColorStop(1, 'rgba(8,34,56,.76)');
+    ctx.fillStyle = shade; ctx.fillRect(0, top, 1200, 675 - top);
+  }
   // ぬし専用の しゃしん：夜空・お月さま・ほし・金の ひかりの すじ（tsuri-nushi.js の 「くらがり→ひかり」と おなじ せかい）。ほしの いちは さかなごとに きまる
   function nushiBackdrop(ctx, seed) {
     const tint = ctx.createLinearGradient(0, 0, 0, 675); tint.addColorStop(0, '#081733f0'); tint.addColorStop(.7, '#12305acc'); tint.addColorStop(1, '#0a1a3aeb');
@@ -1767,6 +1771,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     ctx.fillStyle = color('--ground'); ctx.beginPath(); ctx.moveTo(0, 400); ctx.lineTo(1200, 380); ctx.lineTo(1200, 520); ctx.lineTo(0, 480); ctx.fill();
     const water = ctx.createLinearGradient(0, 480, 0, 675); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2'));
     ctx.fillStyle = water; ctx.beginPath(); ctx.moveTo(0, 480); ctx.lineTo(1200, 520); ctx.lineTo(1200, 675); ctx.lineTo(0, 675); ctx.fill();
+    bottomScrim(ctx, 530);
     if (night) nushiBackdrop(ctx, last.fish.id * 97 + 7);
     const me = await loadImg(marufuwa.src);   // decode() は 見えない タブだと おわらない ことが ある。load で まつ（よめなくても しゃしんは つくる）
     if (me) { const tall = 330, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, (night ? 200 : 230) - wide / 2, 488 - tall, wide, tall); }
@@ -1835,7 +1840,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const ctx = canvas.getContext('2d'), color = name => getComputedStyle(scene).getPropertyValue(name).trim() || '#fff';
     const sky = ctx.createLinearGradient(0, 0, 0, 675); sky.addColorStop(0, color('--sky1')); sky.addColorStop(1, color('--sky2')); ctx.fillStyle = sky; ctx.fillRect(0, 0, 1200, 675);
     ctx.fillStyle = color('--ground'); ctx.beginPath(); ctx.moveTo(0, 470); ctx.lineTo(1200, 450); ctx.lineTo(1200, 560); ctx.lineTo(0, 580); ctx.fill();
-    const water = ctx.createLinearGradient(0, 560, 0, 675); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2')); ctx.fillStyle = water; ctx.beginPath(); ctx.moveTo(0, 580); ctx.lineTo(1200, 560); ctx.lineTo(1200, 675); ctx.lineTo(0, 675); ctx.fill();
+    const water = ctx.createLinearGradient(0, 560, 0, 675); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2')); ctx.fillStyle = water; ctx.beginPath(); ctx.moveTo(0, 580); ctx.lineTo(1200, 560); ctx.lineTo(1200, 675); ctx.lineTo(0, 675); ctx.fill(); bottomScrim(ctx, 545);
     const me = await loadImg(marufuwa.src), friend = await loadImg('img/friend-' + (pals[0] || PALS[0]).id + '-s.webp');
     if (me) { const tall = 300, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, 150 - wide / 2, 590 - tall, wide, tall); }
     if (friend) { const tall = 170, wide = tall * friend.naturalWidth / friend.naturalHeight; ctx.drawImage(friend, 320 - wide / 2, 588 - tall, wide, tall); }
