@@ -347,11 +347,13 @@ body.gazing .assist{display:none}
 #scene[data-tooku=true] #reel{left:30% !important;top:64% !important;width:28%}
 #scene[data-tooku=true] .ripple,#scene[data-tooku=true] .plop,#scene[data-tooku=true] .bubble{display:none}   /* ちかくの ばしょに でる「ぽちゃん」「わ」「えいっ」は、とおくでは だささない */
 /* Xの アプリの なかの ブラウザ：うえの バーと、したの 元の 投稿の おびが かぶさる。ぜんがめんで あそぶ ほうほうを 1ぎょう しらせ、したの おびの ぶんだけ よけて おく */
-.inapp-hint{display:flex;align-items:center;gap:8px;margin:8px 0 0;padding:4px 6px 4px 12px;border:2px solid #f0c060;background:#fff6d8;color:#5a3a10;border-radius:14px;font-size:.85rem;font-weight:800;line-height:1.5}
+.inapp-hint{display:flex;align-items:center;gap:8px;margin:2px 0 0;padding:2px 4px 2px 10px;border:2px solid #f0c060;background:#fff6d8;color:#5a3a10;border-radius:14px;font-size:.8rem;font-weight:800;line-height:1.5}
 .inapp-hint span{flex:1}
 .inapp-hint button{flex:none;min-width:44px;min-height:44px;padding:0 10px;font-size:1.2rem;line-height:1}
-:root[data-inapp=x] .actions{bottom:170px}
-:root[data-inapp=x] main{padding-bottom:190px}
+/* Xの アプリの ブラウザは、みえる まどが みじかい（したの おびが うえに かぶさる）。「なげる」は けしきに かぶさらないよう ふつうに ならべ、せつめいの 2ぎょうめは かくす */
+:root[data-inapp=x] .actions{position:static;bottom:auto;padding:8px 0 6px;background:none}
+:root[data-inapp=x] main{padding-bottom:72px}
+:root[data-inapp=x] .lead small{display:none}
 :root[data-night=true] .inapp-hint{background:#3a3220;border-color:#b98a1a;color:#f6e7c1}
 /* ぬしの 「ぱっ」と ひかる 光（tsuri-nushi.js）：光に びんかんな 人・よるの 画面に やさしく。動きを へらす 人には 白い ひかりを 出さない */
 :root[data-night=true] #nushi-flash{background:#ffe2a0;filter:opacity(.6)}
@@ -1839,10 +1841,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
       if (!save.hintX) {
         const hint = document.createElement('p'), text = document.createElement('span'), close = document.createElement('button');
         hint.className = 'inapp-hint'; hint.id = 'inapp-hint'; hint.setAttribute('role', 'note');
-        text.textContent = 'ぜんがめんで あそぶには、うえの ⋮ から ブラウザ（Safariなど）で ひらいてね。';
+        text.textContent = 'ぜんがめんで あそぶには、⋮ から ブラウザ（Safariなど）で ひらいてね。';
         close.type = 'button'; close.textContent = '×'; close.setAttribute('aria-label', 'とじる（もう だしません）');
         close.addEventListener('click', () => { save.hintX = true; store(); hint.remove(); button.focus(); });
-        hint.append(text, close); scene.after(hint);
+        hint.append(text, close); document.querySelector('.actions').after(hint);   // 「なげる」の すぐ した（けしきの した に おくと「なげる」が おびに かくれる）
       }
     }
   }
@@ -1851,7 +1853,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const rows = document.querySelectorAll('main > .hud'), label = text => { const h = document.createElement('h2'); h.className = 'menu-label'; h.textContent = text; return h; };
     // ばしょは、ふだんは しまって おく。おすと、4つ ぜんぶ でる
     // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）
-    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('release'), $('gaze'), assistBox()); document.querySelector('.actions').after(sub);
+    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('release'), $('gaze'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
     status.after(where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
