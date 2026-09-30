@@ -170,7 +170,7 @@ html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.a
 .times button{min-height:44px;font-size:.78rem}
 #keeper{position:absolute;z-index:2;left:87%;top:50%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
 #keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
-#keeper span{position:absolute;z-index:2;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;font-size:.75rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
+#keeper span{position:absolute;z-index:2;left:50%;top:auto;bottom:100%;margin-bottom:2px;transform:translateX(-50%);white-space:nowrap;font-size:.75rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
 #equip{position:absolute;z-index:4;left:2.5%;bottom:3%;font-size:.8rem;font-weight:800;line-height:1.5;background:#ffffffd9;border:2px solid #b9d1db;border-radius:12px;padding:3px 9px;pointer-events:none}
 #shop-list{display:grid;gap:8px;margin:0 0 12px}
 #shop-list h3{margin:6px 0 0;font-size:1rem}
@@ -1600,11 +1600,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const lfo = audio.createOscillator(), depth = audio.createGain(); lfo.frequency.value = .11; depth.gain.value = .04; lfo.connect(depth).connect(swell.gain);
       const useFile = !!AMB_FILE && !ambientFileFailed; if (!useFile) noise.connect(soft).connect(swell).connect(out);
       const nodes = useFile ? [] : [noise, lfo];
-      if (rainy) { const drops = audio.createBufferSource(), thin = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = buffer; drops.loop = true; drops.loopStart = fade / rate; drops.loopEnd = len / rate; drops.playbackRate.value = 2.2; thin.type = 'highpass'; thin.frequency.value = 2500; quiet.gain.value = .035; drops.connect(thin).connect(quiet).connect(out); nodes.push(drops); }
+      if (rainy) {   // あめ：ざーっと ならさない。ひくい「ぽつ…ぽつ」（700〜1100Hz いかの みずの しずく）を ぱらぱらと。たかい ノイズ（2500Hz～）は つかわない（1200Hz いかの きまり・マスター「ザーって いってる」）
+        const pl = Math.round(rate * 16), pb = audio.createBuffer(1, pl, rate), pd = pb.getChannelData(0);   // 16びょうの しずくの ならび（ループ）
+        for (let t = Math.round(rate * .15); t < pl - Math.round(rate * .3); t += Math.round(rate * (.11 + Math.random() * .75))) {   // しずくは 0.11〜0.86びょう ごと（ときどき ならぶ）
+          const amp = .35 + Math.random() * .65, hz = 420 + Math.random() * 520, dl = Math.round(rate * .085), atk = Math.round(rate * .006);
+          for (let i = 0; i < dl && t + i < pl; i++) pd[t + i] += amp * Math.sin(2 * Math.PI * hz * i / rate) * Math.exp(-i / (rate * .018)) * Math.min(1, i / atk);   // やわらかい ぽつ（すこし ふくらんで すぐ きえる）
+        }
+        const drops = audio.createBufferSource(), soft2 = audio.createBiquadFilter(), quiet = audio.createGain(); drops.buffer = pb; drops.loop = true; soft2.type = 'lowpass'; soft2.frequency.value = 1100; quiet.gain.value = .11; drops.connect(soft2).connect(quiet).connect(out); nodes.push(drops);
+      }
       if (save.area === 'R') {   // かわ：せせらぎ（たかめの ざわざわを ゆっくり ゆらす）
         const brook = audio.createBufferSource(), band = audio.createBiquadFilter(), quiet = audio.createGain(), trem = audio.createOscillator(), tdepth = audio.createGain();
-        brook.buffer = buffer; brook.loop = true; brook.loopStart = fade / rate; brook.loopEnd = len / rate; brook.playbackRate.value = 1.6; band.type = 'bandpass'; band.frequency.value = 2400; band.Q.value = 1.2; quiet.gain.value = .018;
-        trem.frequency.value = 5.3; tdepth.gain.value = .008; trem.connect(tdepth).connect(quiet.gain); brook.connect(band).connect(quiet).connect(out); nodes.push(brook, trem);
+        brook.buffer = buffer; brook.loop = true; brook.loopStart = fade / rate; brook.loopEnd = len / rate; brook.playbackRate.value = 1.2; band.type = 'bandpass'; band.frequency.value = 800; band.Q.value = .9; quiet.gain.value = .03;   // せせらぎも 1200Hz いか（まえは 2400Hz の ざわざわ）
+        const brookLow = audio.createBiquadFilter(); brookLow.type = 'lowpass'; brookLow.frequency.value = 1100;
+        trem.frequency.value = 5.3; tdepth.gain.value = .012; trem.connect(tdepth).connect(quiet.gain); brook.connect(band).connect(brookLow).connect(quiet).connect(out); nodes.push(brook, trem);
       }
       nodes.forEach(node => node.start()); ambient = nodes; if (useFile) startWaveFile(out);
       clearTimeout(areaTimer); areaTimer = setTimeout(areaSound, Number(probe('areasound')) || 9000 + Math.random() * 12000);
