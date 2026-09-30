@@ -1111,6 +1111,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     spots.forEach((spot, i) => { spot.setAttribute('aria-pressed', String(i === mine)); place(spot, {x: SPOT_X[i] + 10, y: shore(SPOT_X[i] + 10) - 6}); });   // バケツは りくの うえ（みずぎわより うえ）
   }
   function moveTo(i) {
+    if (i === mine && (phase === 'idle' || phase === 'caught')) { say(L('いまは ここで つって いるよ。', 'You are fishing here right now.')); return; }   // いまの せきを おしても だまらない
     if (i === mine || !(phase === 'idle' || phase === 'caught')) return;
     if (swapping) finishSwap();
     const there = friends.indexOf(i); if (there >= 0) friends[there] = mine;   // なかまと ばしょを こうかん
