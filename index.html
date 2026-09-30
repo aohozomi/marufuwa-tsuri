@@ -66,6 +66,13 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 .lead{text-align:center;margin:0 0 12px;font-size:.9rem}
 .hud{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:.95rem}
 .hud strong{font-size:1.3rem;font-variant-numeric:tabular-nums}
+/* つりびと レベル：つった さかなで ふえる。へらない・くらべない・じょうげん なし */
+.hud.record{flex-wrap:wrap}
+.level{flex:1 1 100%;display:flex;align-items:center;gap:12px;font-size:.95rem;margin-top:2px}
+.level-bar{flex:1;height:10px;border-radius:6px;background:#d5e6ed;overflow:hidden}
+.level-bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#7fd0f2,#ffd34d);transition:width .6s ease}
+@media(prefers-reduced-motion:reduce){.level-bar i{transition:none}}
+:root[data-night=true] .level-bar{background:#2d4d70}
 
 /* じかんごとの いろ */
 #scene[data-time=asa]{--sky1:#ffd9b8;--sky2:#fff3e2;--orb:#ffb45e;--hill:#b9d8a8;--tree:#7fbf7a;--ground:#e9dcc0;--edge:#c9b58d;--water1:#8fd3ee;--water2:#4aa3cf;--star:0}
@@ -450,10 +457,11 @@ dialog .close{display:block;margin:auto;min-width:160px}
   </svg>
   <h1 class="logo" aria-label="まるふわ つりびより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">つ</span><span aria-hidden="true">り</span><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
   <p class="lead"><ruby>急<rt>いそ</rt></ruby>がなくて、<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>。<ruby>逃<rt>に</rt></ruby>がしても、<ruby>減<rt>へ</rt></ruby>らないよ。<br><small>1ぴき 30<ruby>秒<rt>びょう</rt></ruby>くらい。<ruby>無料<rt>むりょう</rt></ruby>で あそべます。</small></p>
-  <div class="hud">
+  <div class="hud record">
     <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
     <span>つれた かず <strong id="total">0</strong></span>
     <span>ずかん <strong id="seen">0</strong> / <span id="all">30</span></span>
+    <div class="level" id="level-box" role="group" aria-label="つりびと レベル"><span>つりびと レベル <strong id="level">1</strong></span><span class="level-bar" aria-hidden="true"><i id="level-fill"></i></span></div>
   </div>
   <div class="hud">
     <button id="open-bucket" type="button" style="flex:1">バケツ</button>
@@ -707,6 +715,15 @@ dialog .close{display:block;margin:auto;min-width:160px}
     {icon: '✨', name: 'きらきら えさ', note: 'めずらしい こが きやすい', open: s => Object.keys(s.fish).length >= 5, how: 'ずかんが 5しゅるいで もらえる'},
     {icon: '🍙', name: 'おおきい えさ', note: 'おおきい こが きやすい', open: s => s.total >= 20, how: '20ぴき つると もらえる'}
   ];
+  // つりびと レベル：けいけんちは 「つった さかな1ぴき ごと」に たまる。めずらしい・ぬし・はじめての しゅるい・ぴったり で すこし おおく。
+  // へらない・ほかの ひとと くらべない・じょうげん なし。にがしても、はずしても へらない。レベル L に なる のに いる けいけんち＝20×(L×L−1)
+  const XP_RARE = {1: 0, 2: 5, 3: 15, 4: 40, 5: 100};
+  const xpFor = (fish, o) => 10 + (XP_RARE[fish.rare] || 0) + (o.nushi ? 50 : 0) + (o.first ? 20 : 0) + (o.record ? 5 : 0) + (o.big ? 3 : 0) + Math.min(6, o.perfects || 0) * 2;
+  const xpNeed = lv => 20 * (lv * lv - 1);
+  const levelOf = xp => Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, xp) / 20)));
+  function migrateXp(rec) {   // まえから あそんで いる ひとの けいけんちは、いまの きろくから みつもる（へらない ように、すくなめに）
+    let xp = 0; for (const [id, got] of Object.entries(rec.fish || {})) { const f = FISH[id]; if (!f || !got) continue; xp += (got.count || 1) * (10 + (XP_RARE[f.rare] || 0)) + 20 + (got.nushi ? 50 : 0); } return xp;
+  }
   // でやすさ。ジョブズ1の しさんで みなおした（まえは 3=10・4=2 で、ずかんが うまるまで とおすぎた）
   const WEIGHT = {1: 60, 2: 28, 3: 26, 4: 8};
   // 4 は スペシャル（とくべつな しゅるい）。ぬしは しゅるいでは なく、どの さかなにも いる とくだいの 1ぴき
@@ -726,6 +743,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   if (!RODS[save.rod] || !RODS[save.rod].open(save)) save.rod = 0;
   if (!BAITS[save.bait] || !BAITS[save.bait].open(save)) save.bait = 0;
   if (!AREAS.some(a => a.id === save.area && save.total >= a.need)) save.area = 'L';
+  if (!Number.isInteger(save.xp)) save.xp = migrateXp(save);
   // ほかの タブ・ページが きろくを かきかえて いたら、あわせてから かく（ずかんが きえない よう）
   // かず（つった かず・さかなごとの かず）は「じぶんの ふえた ぶん」と「あいての ふえた ぶん」を どちらも たす。おおきさは おおきい ほう
   let stored = '', base = null; try { stored = localStorage.getItem(KEY) || ''; base = JSON.parse(stored); } catch {}   // base＝さいごに あわせた ときの きろく
@@ -751,6 +769,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const mine = (save.decor && save.decor[name]) || 0, more = Number.isInteger(n) ? Math.max(mine, n, mine + n - was(['decor', name])) : mine;
       if (more !== mine) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[name] = more; changed = true; }
     }
+    if (Number.isInteger(other.xp)) { const xp = Math.max(save.xp || 0, other.xp, (save.xp || 0) + other.xp - was(['xp'])); if (xp !== (save.xp || 0)) { save.xp = xp; changed = true; } }
     if (Number.isInteger(other.released)) { const released = Math.max(save.released || 0, other.released, (save.released || 0) + other.released - was(['released'])); if (released !== (save.released || 0)) { save.released = released; changed = true; } }
     if (Number.isInteger(other.wishes)) { const wishes = Math.max(save.wishes || 0, other.wishes, (save.wishes || 0) + other.wishes - was(['wishes'])); if (wishes !== (save.wishes || 0)) { save.wishes = wishes; changed = true; } }
     return changed;
@@ -979,6 +998,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function hud() {
     $('total').textContent = String(save.total);
     $('seen').textContent = $('book-seen').textContent = String(seenCount());
+    const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
+    $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%';
   }
 
   function cast() {
@@ -1115,6 +1136,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const old = save.fish[fish.id], first = !old, record = !first && size > old.best, big = !nushi && size >= fish.min + range * .8, firstNushi = nushi && !(old && old.nushi);
     const had = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))];
     save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
+    const lvBefore = levelOf(save.xp || 0); save.xp = (save.xp || 0) + xpFor(fish, {nushi, first, record, big, perfects}); const lvNow = levelOf(save.xp), leveled = lvNow > lvBefore;
     save.total++; save.streak = first ? 0 : (save.streak || 0) + 1;
     save.bucket = [{id: fish.id, size, at: Date.now(), nushi}, ...(Array.isArray(save.bucket) ? save.bucket : [])].slice(0, 10);
     // ときどき、さかなが かざりを もって いる。すいそうに おける
@@ -1126,6 +1148,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('card-size').replaceChildren(cm(size) + ' センチ　', starEl(fish, nushi));
     if (found) gift.push(found + '（さかなが もって いたよ）');
     const tags = [];
+    if (leveled) tags.push('レベルアップ！');
     if (fish === LUCKY) tags.push('きょうの ラッキー'); if (save.fish[fish.id].count === 10) tags.push('10ぴきめ！ なかよし');
     if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]);
     $('card-tags').replaceChildren(...tags.map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = text; return tag; }));
@@ -1136,8 +1159,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     go.hidden = !opened; if (opened) { go.textContent = opened.name + 'に いって みる？'; go.dataset.area = opened.id; }
     // あんないの ペンギンが、まいかい ひとこと
     const left = BASE - seenCount();
-    const mile = MILES[save.total]; if (mile) party(mile[0]);
-    const guideWord = mile ? mile[1] : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
+    const mile = MILES[save.total]; if (mile) party(mile[0]); else if (leveled && lvNow % 5 === 0) party('🎉');   // 5レベルごとの ふしめ だけ おいわい
+    const guideWord = mile ? mile[1] : leveled ? 'つりびと レベルが ' + lvNow + ' に なったよ！' : fish.legend ? 'まぼろしの こだ…！ ほんとうに いたんだ。' : nushi ? (firstNushi ? 'ぬしだよ！ すごい、すごい。' : 'また ぬしだ！') : fish.rare === 4 ? 'スペシャルな こだよ！' : first && left === 0 ? 'ずかんが ぜんぶ うまったよ！' : first && left <= 5 ? 'ずかん かんせいまで、あと ' + left + 'しゅるい！' : found ? 'なにか もって いたみたい！' : first ? 'はじめまして、だね。' : record ? 'きろくが のびたね！' : 'いい こが つれたね。';
     $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
@@ -1440,9 +1463,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // そっと にがす：つった さかなを みずに かえす。ずかんや きろくは そのまま（へらない）。「にがした こ」の かずを、やさしく のこす
   $('release').addEventListener('click', () => {
     if (phase !== 'caught' || !last || last.released) return;
-    last.released = true; save.released = (save.released || 0) + 1;
+    last.released = true; save.released = (save.released || 0) + 1; save.xp = (save.xp || 0) + 5;   // やさしい ことにも、ちょっとだけ けいけんち
     if (Array.isArray(save.bucket) && save.bucket[0] && save.bucket[0].id === last.fish.id) save.bucket[0].released = true;
-    store(); $('release').hidden = true;
+    store(); hud(); $('release').hidden = true;
     const held = $('held'); tone(660, .07, 'triangle', 0, .06, 990); zap(.1, .08, .04);
     if (!reduce()) { held.animate([{translate: '0 0', opacity: 1}, {translate: '24px -46px', opacity: 1, offset: .45}, {translate: '52px 16px', opacity: 0}], {duration: 850, easing: 'ease-in-out'}).onfinish = () => { held.hidden = true; }; setTimeout(() => { held.hidden = true; }, 1000); } else held.hidden = true;   // 見えない タブでも かならず しまう
     $('guide-word').textContent = 'ばいばい。また あおうね。';
@@ -1739,7 +1762,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   hud(); drawEquip(); setPhase('idle');
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
   setTimeout(chatter, Number(query.get('chat')) || 5000);
-  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id)};
+  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0)};
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
