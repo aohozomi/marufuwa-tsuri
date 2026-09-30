@@ -1302,7 +1302,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   // あめ。ひに よって ふる（4にちに 1かい くらい）。あめの ひは、めずらしい こが でやすい
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
-  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0;
+  let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0;
   function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
@@ -1336,6 +1336,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function cast() {
     scene.dataset.time = TIME_NAME[timeOfDay()];
     fish = pickFish(); face('blue'); $('held').hidden = true;
+    clearTimeout(biteTimer); clearTimeout(nibbleTimer);   // まえの なげるの タイマーが のこって いても、かさならない
     flying = !reduce(); setPhase('waiting'); const flight = flying ? 900 : 0; if (flying) throwRod();   // flight＝ウキが みずに つく まで（ミリびょう）
     tone(220, .28, 'square', .2, .04, 880); tone(330, .1, 'triangle', .9, .06, 110); zap(.14, .9);   // ヒュ〜ッ…ポチャ
     button.textContent = 'まってる…'; lock(true); button.dataset.hot = 'false';
@@ -1352,8 +1353,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
     shadow.style.setProperty('--swim', wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});
     // かかる まえの「ちょんちょん」。ウキが ちいさく ゆれて、もうすぐ くると わかる
-    setTimeout(() => { if (phase === 'waiting') { $('float').dataset.nibble = 'true'; guideTone(660, .04, 'triangle', 0, .04); guideTone(660, .04, 'triangle', .22, .04); say('ちょん、ちょん…。なにか きたかも。'); } }, Math.max(flight ? flight + 150 : 0, wait - 750));   // ちゃくすいの まえに ちょんちょん しない（さいしょの 1ぴきは まちが 1.3びょうと みじかい）
-    setTimeout(() => { delete $('float').dataset.nibble; bite(); }, wait);
+    nibbleTimer = setTimeout(() => { if (phase === 'waiting') { $('float').dataset.nibble = 'true'; guideTone(660, .04, 'triangle', 0, .04); guideTone(660, .04, 'triangle', .22, .04); say('ちょん、ちょん…。なにか きたかも。'); } }, Math.max(flight ? flight + 150 : 0, wait - 750));   // ちゃくすいの まえに ちょんちょん しない（さいしょの 1ぴきは まちが 1.3びょうと みじかい）
+    biteTimer = setTimeout(() => { delete $('float').dataset.nibble; if (phase === 'waiting') bite(); }, wait);   // まって いる 間だけ アタリ（ほかの じょうたいなら なにも しない）
   }
   // なげる うごき：うしろに そって、えいっと ふって、ウキが ゆみなりに とんで、ぽちゃん
   function throwRod() {
