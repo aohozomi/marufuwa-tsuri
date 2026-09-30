@@ -163,6 +163,13 @@
     'べつのブラウザ（Safariなど）であそびたいときは、「リンクをコピー」して、そのブラウザのアドレスらんにはってひらいてね。リンクにはきろくがぜんぶはいっているので、ほかのひとにはおくらないでね。':
       'To play in a different browser (Safari, etc.), tap “Copy link” and paste it into that browser’s address bar. The link contains all of your records, so please don’t send it to anyone else.',
     'リンクをコピー（べつのブラウザへ）': 'Copy link (to another browser)', 'きろくをもどす？': 'Restore your records?',
+    'きろくをもどしたよ。つづきからあそべるよ。': 'Records restored. You can pick up where you left off.',
+    'リンクをコピーしたよ。べつのブラウザのアドレスらんにはってひらいてね。ほかのひとにはおくらないでね。': "Link copied. Paste it into another browser's address bar. Please don't send it to anyone else.",
+    'このもじは、よめなかったよ。「MF1.」からはじまるもじ（か、きろくのリンク）を、ぜんぶはってね。': "Couldn't read that code. Please paste the whole code that starts with “MF1.” (or the records link).",
+    'ひらがな・カタカナ・アルファベット・すうじでかいてね。': 'Please use letters and numbers.', 'ひらがな・カタカナでかいてね。': 'Please use letters and numbers.',
+    'そのなまえはつかえないよ。べつのなまえをえらんでね。': "That name can't be used. Please choose another one.",
+    'もらったよ': 'Received', 'だれか': 'Someone', 'あと': 'Only ', 'ひき': ' left',
+    'おくりものだな': 'Gift Shelf', 'もらったさかながならんでいるよ。つれたかずには、はいらないよ。': "Fish you received are lined up here. They don't count toward your catches.",
     // なかまの おしゃべり（tsuri-oshaberi.js）
     'あさのみずはすきとおってるね': 'The morning water is so clear.', 'おはよう。きょうものんびりいこう': "Good morning. Let's take it easy today, too.", 'あさはとりがよくなくね': 'Birds sing a lot in the morning.',
     'あさごはんたべた？': 'Did you have breakfast?', 'ひかりがきらきらしてる': 'The light is sparkling.', 'おひさまあったかいね': 'The sun feels warm.', 'ひるねしたくなっちゃう': 'Makes me want a nap.',
@@ -222,6 +229,8 @@
   // ---- 2) ルール（すうじ・なまえが はいる 文）----
   const RULES = [
     [/^(.+)をおくる$/, (_, f) => `Send ${nmFish(f)}`],
+    [/^(.*?)🎁\s*(.+?)から(?:「(.+?)」)?$/, (_, pre, p, w) => { const who = p === 'だれか' ? 'Someone' : nmPal(p); const word = w ? (EX.get(norm(w)) || null) : ''; if (w && word == null) return null; return `${pre.replace(/[　\s]+/g, ' ').trim()} 🎁 From ${who}${w ? `: “${word}”` : ''}`.trim(); }],
+    [/^あと(\d+)ひき$/, (_, n) => `${n} to go`],
     [/^(.+?)、げんきそう。$/, (_, f) => `${nmFish(f)} looks lively.`],
     [/^(.+?)がこっちをみたよ。$/, (_, f) => `${nmFish(f)} looked over here.`],
     [/^(.+?)、ゆうゆうおよいでるね。$/, (_, f) => `${nmFish(f)} swims so leisurely.`],
