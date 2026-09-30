@@ -1306,7 +1306,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0;
-  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { phase = next; if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
@@ -1676,6 +1676,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   function drawTimes() {
     const hour = new Date().getHours(), night = hour >= 19 || hour < 5;
     scene.dataset.dim = String(night && timeOfDay() !== 'n');
+    { const st = $('star'); if (st && timeOfDay() !== 'n') st.hidden = true; }   // ひるに なったら ながれぼしを かたづける（ねがいの けんりは けさない）
     $('time-now').textContent = TIME_LABEL[timeOfDay()]; $('time-now').closest('summary').dataset.emoji = {a: '🌅', h: '☀️', y: '🌇', n: '🌙'}[timeOfDay()] || '';   // いまの じかんの え（ことばの 外＝CSS の ::before。よみあげ・English の ひょうに かんけい しない）
     syncTabs($('times'), [['', 'いまの じかん'], ['a', 'あさ'], ['h', 'ひる'], ['y', 'ゆうがた'], ['n', 'よる']].map(([id, name]) => ({k: 't' + id, text: name, disabled: !(phase === 'idle' || phase === 'caught'), pressed: (save.time || '') === id, click: () => {
       save.time = id; store(); scene.dataset.time = TIME_NAME[timeOfDay()]; drawTimes();
@@ -2379,7 +2380,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   $('gaze').addEventListener('click', () => {
     const on = !document.body.classList.contains('gazing');
     if (on && !(phase === 'idle' || phase === 'caught')) { say('つりが おわってから、ながめよう。'); return; }
-    document.body.classList.toggle('gazing', on);
+    document.body.classList.toggle('gazing', on); $('keeper').disabled = on || !(phase === 'idle' || phase === 'caught');   // ながめる 中は きつねを おせない（ゆびが あたっても おみせが ひらかない）
     $('gaze').textContent = on ? 'もどる' : 'ながめる'; $('gaze').setAttribute('aria-pressed', String(on));
     clearInterval(gazeTimer);
     if (on) { startAmbient(); say(save.sound ? gazeLine() : 'おとを つけると、なみの おとが きこえるよ。'); gazeTimer = setInterval(() => say(gazeLine()), 24000); scene.scrollIntoView({block: 'center'}); wakeOn(); gazeReset(); quietBump(); if (window.TsuriBgm) TsuriBgm.enter('gaze', {ctx: () => save.sound ? ready() : null, sound: () => !!save.sound, time: () => timeOfDay()}); }
