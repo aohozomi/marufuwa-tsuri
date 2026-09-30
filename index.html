@@ -2231,7 +2231,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
       const icon = document.createElement('b'); if (got) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
-      cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
+      cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
       return cell;
     }));
     book.showModal();
