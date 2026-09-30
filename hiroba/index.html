@@ -383,6 +383,7 @@ const rainy = q.has('rain') ? q.get('rain') === '1' : (today.getFullYear() * 372
 const dayKey = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
 if (own.day !== dayKey) { own.day = dayKey; own.metToday = {}; }
 let curTime = timeOfDay();
+function setTime(t) { if (!TIME_LABEL[t]) return false; q.set('time', t); applyTime(); return true; }   // 検査・動画の 材料づくり用：じかんを かえる（アドレスは かえない）
 function applyTime() {
   curTime = timeOfDay();
   scene.dataset.time = TIME_NAME[curTime]; scene.dataset.rain = String(rainy);
@@ -1084,13 +1085,16 @@ document.addEventListener('close', e => { if (e.target && e.target.id === 'thank
 
 // ─── しゃしん：きょうの ひろばを 1まいの えに（1080×1920）。なまえ・URLは えに いれない ───
 const svgImage = svg => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+const svgCache = new Map();   // 動画の 材料づくり用：おなじ 絵を くりかえし 読まない（多すぎたら 空に する）
+const svgImageCached = async svg => { let im = svgCache.get(svg); if (!im) { im = await svgImage(svg); if (svgCache.size > 80) svgCache.clear(); svgCache.set(svg, im); } return im; };
 function svgText(svgEl, cs, w, h) {   // いろの へんすう（var(--x)）を その ばで 実際の いろに して、えに できる かたちに する
   const c = svgEl.cloneNode(true); c.setAttribute('width', String(Math.round(w))); c.setAttribute('height', String(Math.round(h)));
   return new XMLSerializer().serializeToString(c).replace(/var\(--([a-z0-9-]+)\s*(?:,\s*([^)]*))?\)/gi, (m, name, fallback) => cs.getPropertyValue('--' + name).trim() || (fallback || '').trim() || 'none');
 }
 function roundPath(ctx, x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); }
-async function makePhoto() {
+async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cache }。ふだんの しゃしんは 引数なし（PNG）。動画の 材料づくりでは JPEG・おびを 時間の 名前に・ぴょん／ながれぼしも 描く
   measure();
+  const svgImg = o.cache ? svgImageCached : svgImage;
   const OW = 1080, OH = 1920, S = 2.9, PX = (OW - W * S) / 2, PY = 104, K3 = 3;
   const cvs = document.createElement('canvas'); cvs.width = OW; cvs.height = OH;
   const ctx = cvs.getContext('2d'), css = getComputedStyle(scene), hasFilter = 'filter' in ctx;
@@ -1106,7 +1110,7 @@ async function makePhoto() {
   roundPath(ctx, PX, PY, W * S, H * S, 38); ctx.clip(); ctx.translate(PX, PY); ctx.scale(S, S);
   const rainy = scene.dataset.rain === 'true', dimF = css.getPropertyValue('--dim').trim() || 'brightness(1)';
   if (hasFilter) ctx.filter = dimF + (rainy ? ' brightness(.85) saturate(.8)' : '');
-  ctx.drawImage(await svgImage(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H);
+  ctx.drawImage(await svgImg(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H);
   ctx.filter = 'none';
   // おひさま・おつきさま・くも
   const orb = css.getPropertyValue('--orb').trim() || '#fff2a8', night = curTime === 'n';
@@ -1115,7 +1119,7 @@ async function makePhoto() {
   ctx.beginPath(); ctx.arc(300, 58, 23, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   const sceneBox = scene.getBoundingClientRect(), k = sceneBox.width / W;
   const unit = el => { const r = el.getBoundingClientRect(); return { x: (r.left - sceneBox.left) / k, y: (r.top - sceneBox.top) / k, w: r.width / k, h: r.height / k }; };
-  for (const c of scene.querySelectorAll('.cloud')) { const u = unit(c); ctx.save(); ctx.globalAlpha = parseFloat(getComputedStyle(c).opacity) || .9; ctx.drawImage(await svgImage(svgText(c, css, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.restore(); }
+  for (const c of scene.querySelectorAll('.cloud')) { const u = unit(c); ctx.save(); ctx.globalAlpha = parseFloat(getComputedStyle(c).opacity) || .9; ctx.drawImage(await svgImg(svgText(c, css, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.restore(); }
   // たてもの・かざり・ひと（ならびは ふだんの がめんと おなじ：あしもとの たかさ じゅん）
   const items = [...layerProps.querySelectorAll('.prop'), ...layerActors.querySelectorAll('.actor')].sort((a, b) => (Number(a.style.zIndex) || 0) - (Number(b.style.zIndex) || 0));
   for (const el of items) {
@@ -1124,7 +1128,7 @@ async function makePhoto() {
       const svg = el.querySelector('svg'); if (!svg) continue;
       const ecs = getComputedStyle(el), lamp = /^lamp/.test(el.dataset.id || '');
       if (hasFilter && !lamp) ctx.filter = ((ecs.getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim();
-      ctx.drawImage(await svgImage(svgText(svg, ecs, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.filter = 'none';
+      ctx.drawImage(await svgImg(svgText(svg, ecs, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.filter = 'none';
     } else {
       if (getComputedStyle(el).opacity === '0') continue;
       ctx.save(); ctx.fillStyle = '#0b2a4a2e'; ctx.beginPath(); ctx.ellipse(u.x + u.w / 2, u.y + u.h * .97, u.w * .36, u.h * .06, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
@@ -1142,9 +1146,30 @@ async function makePhoto() {
     for (const wd of words) { const t = line ? line + ' ' + wd : wd; if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = wd; } else line = t; }
     lines.push(line); const lh = fs * 1.45, y0 = u.y + u.h / 2 - (lines.length - 1) * lh / 2; lines.forEach((ln, i) => ctx.fillText(ln, u.x + u.w / 2, y0 + i * lh)); ctx.restore();
   }
+  // 動画の 材料づくり：いけの ぴょん・ふんすいの ひかり・ながれぼしも 描く
+  if (o.video) {
+    for (const fx of scene.querySelectorAll('.fx')) {
+      const u = unit(fx), im = fx.querySelector('img'); ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, parseFloat(getComputedStyle(fx).opacity)));
+      if (im && im.complete) ctx.drawImage(im, u.x, u.y, u.w, u.h);
+      else { ctx.font = Math.round(Math.max(14, u.h * .8)) + 'px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(fx.textContent, u.x + u.w / 2, u.y + u.h / 2); }
+      ctx.restore();
+    }
+    for (const m of scene.querySelectorAll('.meteor')) {
+      const u = unit(m), cx = u.x + u.w / 2, cy = u.y + u.h / 2, a = Math.max(0, Math.min(1, parseFloat(getComputedStyle(m).opacity))); ctx.save(); ctx.globalAlpha = a;
+      const tail = ctx.createLinearGradient(cx, cy, cx - 34, cy - 16); tail.addColorStop(0, '#fff6a8'); tail.addColorStop(1, '#fff6a800'); ctx.strokeStyle = tail; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx - 34, cy - 16); ctx.stroke();
+      ctx.shadowColor = '#fff6a8'; ctx.shadowBlur = 10; ctx.fillStyle = '#fffbe0'; ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    }
+  }
   // あめ
   if (rainy) { const r = mulberry(31); ctx.save(); ctx.strokeStyle = '#ffffff99'; ctx.lineWidth = 1.2; ctx.beginPath(); for (let i = 0; i < 120; i++) { const x = r() * (W + 30), y = r() * H; ctx.moveTo(x, y); ctx.lineTo(x - 8, y + 24); } ctx.stroke(); ctx.restore(); }
   ctx.restore();
+  if (o.video) {
+    ctx.save(); ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+    if (o.caption) { ctx.font = '900 56px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif'; const cw = ctx.measureText(o.caption).width + 90; ctx.fillStyle = '#ffffffe6'; roundPath(ctx, (OW - cw) / 2, PY + H * S + 42, cw, 96, 48); ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = '#bfdce8'; ctx.stroke(); ctx.fillStyle = '#244653'; ctx.fillText(o.caption, OW / 2, PY + H * S + 92); }
+    ctx.restore();
+    if (o.dataURL) return cvs.toDataURL(o.type || 'image/png', o.quality);   // 裏の 画面でも すぐ 返る（toBlob は 1びょうに 1回に なる）
+    return new Promise((res, rej) => cvs.toBlob(b => b ? res(b) : rej(Error('blob')), o.type || 'image/png', o.quality));
+  }
   // したの おび：きょうの ともだち（あった こは いろつき）と ひづけ
   ctx.save(); ctx.textBaseline = 'middle'; ctx.textAlign = 'center'; ctx.fillStyle = '#244653'; ctx.font = '800 38px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif';
   ctx.fillText('きょうの ともだち', OW / 2, PY + H * S + 46);
@@ -1155,7 +1180,7 @@ async function makePhoto() {
   }
   const d = new Date(); ctx.fillStyle = '#506874'; ctx.font = '700 30px system-ui,"Yu Gothic UI",sans-serif'; ctx.textAlign = 'right'; ctx.fillText(d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(), OW - 40, OH - 34);
   ctx.restore();
-  return new Promise((res, rej) => cvs.toBlob(b => b ? res(b) : rej(Error('png')), 'image/png'));
+  return new Promise((res, rej) => cvs.toBlob(b => b ? res(b) : rej(Error('png')), o.type || 'image/png', o.quality));
 }
 const photoDlg = $('photo'); let photoURL = '', photoFile = null;
 async function openPhoto() {
@@ -1193,7 +1218,7 @@ const api = window.Hiroba = {
   version: 1, paused: false, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
-  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
+  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   say: () => statusEl.textContent
 };
 })();
