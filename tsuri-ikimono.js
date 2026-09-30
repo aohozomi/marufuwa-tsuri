@@ -27,7 +27,7 @@
 #ikimono .wing{transform-box:fill-box;transform-origin:100% 50%;animation:iki-wing .28s ease-in-out infinite alternate}
 #ikimono .wing.r{transform-origin:0 50%}
 #ikimono .hover{animation:iki-hover var(--lap,13s) ease-in-out infinite;animation-delay:var(--d,0s)}
-#ikimono .buzz{transform-box:fill-box;transform-origin:50% 50%;animation:iki-buzz .17s linear infinite alternate}
+#ikimono .buzz{transform-box:fill-box;transform-origin:50% 50%;animation:iki-buzz .2s linear infinite alternate}
 #ikimono .glow{width:var(--w,2.2%);border-radius:50%;background:radial-gradient(circle,#f6ffb0 0 22%,#d8ff7a88 38%,#d8ff7a00 70%);animation:iki-glow var(--lap,5s) ease-in-out infinite,iki-drift var(--lap2,17s) ease-in-out infinite alternate;animation-delay:var(--d,0s),var(--d,0s)}
 #ikimono .fall{animation:iki-fall var(--lap,12s) linear infinite;animation-delay:var(--d,0s)}
 #ikimono .fall svg{animation:iki-spin var(--spin,4s) ease-in-out infinite alternate}
