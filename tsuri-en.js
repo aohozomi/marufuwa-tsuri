@@ -278,6 +278,7 @@
     'ぜんがめんで あそぶには、⋮ から ブラウザ（Safariなど）で ひらいてね。きろくは ブラウザごとに べつだよ。うつす ときは「きろくを のこす」から。': 'To play full screen, open this in a browser (such as Safari) from the ⋮ menu. Your records are separate in each browser. To move them, use “Save your records”.',
     'とじる（もう だしません）': 'Close (won’t show again)',
     'ホームがめんに おく': 'Add to home screen', 'いま ホームがめんに おく': 'Add it now',
+    'まるふわ つりびより': 'Marufuwa Fishing Days',   // おへやの しゃしん（canvas）の ふだ
   }).forEach(([k, v]) => EX.set(k, v));
   for (const [k, v] of [...EX]) { const nk = norm(k); if (nk !== k) { EX.delete(k); EX.set(nk, v); } }   // かぎの すきまを そろえる
   const COLOR = { 'あか': 'Red', 'あお': 'Blue', 'きいろ': 'Yellow', 'もも': 'Pink', 'みどり': 'Green', 'むらさき': 'Purple', 'きん': 'Gold', 'にじ': 'Rainbow', 'ぎん': 'Silver', 'よぞら': 'Night sky', 'しろ': 'White', 'くろ': 'Black', 'オレンジ': 'Orange', 'そのまま': 'As is' };
@@ -308,6 +309,7 @@
     [/^(\d+)ひき$/, (_, n) => `${n} fish`],
     [/^もどすきろく：つれたかず(\d+)ひき・シールちょう(\d+)\s*\/\s*(\d+)・レベル(\d+)$/, (_, a, b, c, d) => `Record to restore: caught ${a} · Fish Book ${b} / ${c} · Lv. ${d}`],
     [/^いまのきろく：つれたかず(\d+)ひき$/, (_, a) => `Current record: caught ${a}`],
+    [/^つれたかず(\d+)シールちょう(\d+)\s*\/\s*(\d+)$/, (_, a, b, c) => `Caught ${a} · Stickers ${b} / ${c}`],   // おへやの しゃしんの ふだ（canvas）
     [/^(.+)をおくる$/, (_, f) => `Send ${nmFish(f)}`],
     [/^(.*?)🎁\s*(.+?)から(?:「(.+?)」)?$/, (_, pre, p, w) => { const who = p === 'だれか' ? 'Someone' : nmPal(p); const word = w ? (EX.get(norm(w)) || null) : ''; if (w && word == null) return null; return `${pre.replace(/[　\s]+/g, ' ').trim()} 🎁 From ${who}${w ? `: “${word}”` : ''}`.trim(); }],
     [/^(.+?)から$/, (_, p) => (p === 'だれか' ? 'From someone' : PAL_MAP.has(p) ? `From ${nmPal(p)}` : null)],   // おくりものの「なかま から」
