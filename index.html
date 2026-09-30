@@ -414,7 +414,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 :root[data-night=true] #card{background:#142a44ee;border-color:#3a5f88}
 :root[data-night=true] #equip{background:#142840e0;border-color:#3a5f88}
 :root[data-night=true] #photo-img{border-color:#2d4d70}
-:root[data-night=true] .bubble{background:#dbe7f1;border-color:#8fb0c8}
+:root[data-night=true] .bubble{background:#dbe7f1;border-color:#8fb0c8;color:#1d3442}   /* ふきだしは うすい 地に くらい 字（よるの 字の 色を ひきついで きえて いた） */
 :root[data-night=true] .stars{color:#f2c14e}
 /* よるの かげは、くらい みずに しずむ ので、うすい あお（つきの ひかりを うけた かげ）。ぬしは もっと あかるく */
 #scene[data-time=yoru] .shadow:not([data-rare="3"]):not([data-rare="4"]):not([data-rare="5"]){mix-blend-mode:normal;background:#a9c8f5a6}
@@ -1606,8 +1606,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('decor-list').textContent = decor.length ? decor.map(([name, count]) => name + ' ×' + count).join('　') : 'まだ ないよ。さかなが ときどき もって くるよ。';
     $('pal-list').replaceChildren(...PALS.map(pal => {
       const met = save.pals && save.pals[pal.id], tag = document.createElement('span'), img = document.createElement('img');
-      tag.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;text-align:center;line-height:1.3;font-size:.7rem;width:76px;' + (met ? '' : 'opacity:.35;filter:grayscale(1)');
-      img.src = 'img/friend-' + pal.id + '-s.webp'; img.width = img.height = 52; img.alt = ''; img.style.objectFit = 'contain';
+      tag.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;text-align:center;line-height:1.3;font-size:.7rem;width:76px;';
+      img.src = 'img/friend-' + pal.id + '-s.webp'; img.width = img.height = 52; img.alt = ''; img.style.objectFit = 'contain'; if (!met) { img.style.opacity = '.35'; img.style.filter = 'grayscale(1)'; }   // まだ あって ない 子は、絵だけ うすく（「？」の 字は はっきり）
       tag.append(img, met ? pal.name : '？'); return tag;
     }));
     bucket.showModal();
@@ -1705,5 +1705,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
 <script defer src="tsuri-tank.js"></script>
 <script defer src="tsuri-himitsu.js"></script>
 <script defer src="tsuri-ikimono.js"></script>
+<script defer src="tsuri-oshaberi.js"></script>
+<script defer src="tsuri-ame.js"></script>
 </body>
 </html>

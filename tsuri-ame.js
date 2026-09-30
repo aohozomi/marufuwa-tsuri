@@ -13,7 +13,7 @@
   const style = document.createElement('style'); style.id = 'ame-style';
   style.textContent = `
 #scene[data-rain=true] #rain{display:none}
-#ame{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden;display:none;container-type:inline-size}
+#ame{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden;display:none;container-type:size}   /* cqh（おちる きょり）を 景色の たかさに するには、たてにも きめる（inline-size だけだと 画面の たかさに なる） */
 #scene[data-rain=true] #ame{display:block}
 #ame .d{position:absolute;top:-4%;width:.55cqw;height:2.2cqw;border-radius:50%;background:linear-gradient(#ffffff10,#ffffffc0);animation:ame-fall var(--t,1.3s) linear infinite;animation-delay:var(--d,0s);opacity:.85}
 #ame .w{position:absolute;width:3.2cqw;height:1.1cqw;border:1.5px solid #ffffffb0;border-radius:50%;translate:-50% -50%;animation:ame-ring var(--t,1.6s) ease-out infinite;animation-delay:var(--d,0s);opacity:0}
