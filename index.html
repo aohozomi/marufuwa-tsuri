@@ -2319,16 +2319,24 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ctx.fillStyle = night ? '#4a2a00' : '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 38px system-ui,sans-serif'; ctx.fillText(special, 250, 71, 390);
     }
     if (last.tags.includes('はじめて！') && !night) { ctx.save(); ctx.translate(560, 236); ctx.rotate(-.12); ctx.fillStyle = '#e0679a'; roundRect(ctx, -104, -30, 208, 60, 30); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(T('はじめて！'), 0, 2, 190); ctx.restore(); }   // はじめて つった さかな：ピンクの リボン
-    ctx.fillStyle = night ? '#0f2447f2' : '#fffffff0'; roundRect(ctx, 690, 210, 460, 330, 34); ctx.fill(); ctx.strokeStyle = night ? '#ffd34d' : '#bfdce8'; ctx.lineWidth = night ? 6 : 5; ctx.stroke();
+    ctx.fillStyle = night ? '#0f2447f2' : '#fffffff0'; roundRect(ctx, 690, 210, 460, 270, 34); ctx.fill(); ctx.strokeStyle = night ? '#ffd34d' : '#bfdce8'; ctx.lineWidth = night ? 6 : 5; ctx.stroke();
     ctx.fillStyle = night ? '#fff4c9' : '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = 'bold 54px system-ui,sans-serif'; ctx.fillText(last.fish.name, 920, 295, 420);
     ctx.fillStyle = night ? '#fff' : '#244653'; ctx.font = 'bold 50px system-ui,sans-serif'; ctx.fillText(EN() ? cm(last.size) + ' cm' : cm(last.size) + ' センチ', 920, 370, 420);
     ctx.fillStyle = night ? '#ffd34d' : '#b07a00'; ctx.font = '50px system-ui,sans-serif'; ctx.fillText(starsOf(last.fish, last.nushi), 920, 440, 420);
-    ctx.fillStyle = night ? '#ffe9a0' : '#593700'; ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(last.tags.map(T).join(EN() ? ' · ' : '・'), 920, 500, 420);
     ctx.fillStyle = night ? '#cfe0ff' : color('--star') === '1' ? '#fff' : '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 920, 112, 440);   // ゲームの なまえ。みた ひとが、さがして これる ように
     ctx.font = '28px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + T(last.area), 920, 160, 440);
     if (save.nameOnCard === true && bucketName()) { ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText(L('バケツ：', 'Bucket: ') + bucketName(), 920, 198, 440); }   // 本人が えらんだ ときだけ（はじめは OFF）。なまえは この 画像の なかだけ。URL・ひとことの もじには いれない
+    {   // けっかの ふだ（3つまで・ふだの じゅんは TAG_FIRST）を しゃしんの したの おびに。なまえ・かずの じゅんいは いれない（じぶんの きろく・おおもの・ぴったり ×2 など）
+      const shown = tagsShown(last.tags).map(T).filter(Boolean);
+      if (shown.length) {
+        let size = 28; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+        const fit = () => { ctx.font = 'bold ' + size + 'px system-ui,sans-serif'; return shown.map(t => ctx.measureText(t).width + 40); };
+        let ws = fit(); while (ws.reduce((a, b) => a + b, 0) + 12 * (ws.length - 1) > 620 && size > 20) { size -= 2; ws = fit(); }
+        let x = 46; shown.forEach((t, i) => { ctx.fillStyle = night ? '#ffe9a0' : '#fffffff0'; roundRect(ctx, x, 500, ws[i], 48, 24); ctx.fill(); ctx.strokeStyle = night ? '#d39a1c' : '#bfdce8'; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = night ? '#4a2a00' : '#244653'; ctx.fillText(t, x + 20, 525); x += ws[i] + 12; });
+      }
+    }
     if (night) {
       nushiSeal(ctx, 1136, 226, T('ぬし'));
       const pal = pals[0] || PALS[0], friend = await loadImg('img/friend-' + pal.id + '-s.webp');   // となりの こも「わっ！」と びっくり（ぴょんと はねて、ふきだしに ！？）
