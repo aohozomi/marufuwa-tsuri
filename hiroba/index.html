@@ -1104,7 +1104,7 @@ function hmMark(id) {   // ひみつノート（つりびよりの バケツの 
 const seen = key => { if (!own.secrets[key]) { own.secrets[key] = 1; saveOwn(); } hmMark('hiroba-' + key); };
 // ひみつで もらえる かざり（おへやの かざりに なる）：ひみつの 鍵の gifts に「名前(英字): 個数」で 足す。さいだい 3こ（いっぱいでも おこらない）。ほかの 記録は そのまま のこす
 function hmGift(id) {
-  const d = readJSON(HM_KEY) || {}; if (!d.gifts || typeof d.gifts !== 'object') d.gifts = {};
+  const d = readJSON(HM_KEY) || {}; if (!d.gifts || typeof d.gifts !== 'object' || Array.isArray(d.gifts)) d.gifts = {};
   const have = Math.max(0, Math.floor(Number(d.gifts[id]) || 0)), full = have >= 3;
   if (!full) d.gifts[id] = have + 1; d.v = 1;
   try { localStorage.setItem(HM_KEY, JSON.stringify(d)); } catch {}
