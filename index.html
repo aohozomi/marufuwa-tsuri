@@ -42,10 +42,12 @@ try { var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('maruf
 try {
   var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {};
   if (early.large === true) document.documentElement.dataset.large = 'true';   // もじを おおきく（つかいやすく する）
+  // ページの うつり（@view-transition）：itch の iframe など 対応していない 場では ViewTransition の promise が「InvalidStateError」で 落ちる → 先に catch を つけて 握りつぶす。「うごきを へらす」（ゲーム内スイッチ）の ときは ふわっと させない（skipTransition）
+  var vtCalm = early.calm === true, vtHandle = function (e) { var v = e.viewTransition; if (!v) return; ['ready', 'finished', 'updateCallbackDone'].forEach(function (k) { try { if (v[k] && v[k].catch) v[k].catch(function () {}); } catch (x) {} }); if (vtCalm) { try { v.skipTransition(); } catch (x) {} } };
+  try { addEventListener('pageswap', vtHandle); addEventListener('pagereveal', vtHandle); } catch (x) {}
   if (early.calm === true) {
     document.documentElement.dataset.calm = 'true';
     var realMM = window.matchMedia.bind(window); window.__realMatchMedia = realMM;
-    var skipVT = function (e) { if (e.viewTransition) e.viewTransition.skipTransition(); }; addEventListener('pageswap', skipVT); addEventListener('pagereveal', skipVT);   // 「うごきを へらす」の ゲーム内スイッチ：ページの うつりも ふわっと させない
     window.matchMedia = function (q) { var m = realMM(q); return /prefers-reduced-motion[ ]*:[ ]*reduce/.test(String(q)) ? new Proxy(m, {get: function (t, k) { if (k === 'matches') return true; var v = t[k]; return typeof v === 'function' ? v.bind(t) : v; }}) : m; };
     document.addEventListener('DOMContentLoaded', function () {
       Array.prototype.forEach.call(document.styleSheets, function (sheet) {
