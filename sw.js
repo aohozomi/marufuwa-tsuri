@@ -1,0 +1,57 @@
+/* まるふわ つりびより：オフライン用（service worker・外付け・総司令部）
+   ・ネットが ある 時は、いつも いちばん あたらしい ものを とる（ふるい 版が のこらない）。ネットが ない 時だけ、ほぞんした ものを 出す
+   ・おなじ サイトの GET だけ あつかう。そとへは 何も 出ない・送らない。ほぞん先は この ブラウザの なかだけ
+   ・?nosw=1 で ひらくと、この しくみを 外す（register 側）
+   ・ばんごうを かえると、ふるい ほぞんは 消える（VER） */
+'use strict';
+const VER = 'marufuwa-tsuri-sw-v1';
+const CORE = ['./', 'index.html', 'manifest.webmanifest', 'og.png', 'hiroba/', 'anshin/', 'tsuri-ame.js', 'tsuri-art.js', 'tsuri-bgm.js', 'tsuri-en.js', 'tsuri-himitsu.js', 'tsuri-ikimono.js', 'tsuri-nushi.js', 'tsuri-oshaberi.js', 'tsuri-tank.js', 'tsuri-tegami.js', 'tsuri-tooku.js', 'img/favicon-32.png', 'img/favicon-48.png', 'img/friend-alpaca-s.webp', 'img/friend-azarashi-s.webp', 'img/friend-gantai-s.webp', 'img/friend-hamster-s.webp', 'img/friend-hiyoko-s.webp', 'img/friend-hoho-s.webp', 'img/friend-kawauso-s.webp', 'img/friend-kogitsune-s.webp', 'img/friend-koinu-s.webp', 'img/friend-kojika-s.webp', 'img/friend-neko-s.webp', 'img/friend-panda-s.webp', 'img/friend-penguin-s.webp', 'img/friend-ribbon-s.webp', 'img/friend-risu-s.webp', 'img/friend-tanuki-s.webp', 'img/friend-usagi-s.webp', 'img/game-apricot.webp', 'img/game-blue.webp', 'img/game-mint.webp', 'img/game-smile.webp', 'img/game-sparkle.webp', 'img/icon-180.png', 'img/icon-192.png', 'img/icon-512.png'];   // ぜんぶ さきに 取っておく（ないものは とばす）。あとから ふえた ものは つかった ときに 取る
+const TIMEOUT = 4000;   // ネットが おそい とき、4びょうで ほぞんした ものに きりかえる
+
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(VER).then(cache => Promise.all(CORE.map(u => cache.add(u).catch(() => {})))).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('marufuwa-tsuri-sw-') && k !== VER).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+});
+
+const isImage = url => /\.(webp|png|jpe?g|gif|svg|ico|mp3)$/i.test(url.pathname);
+// ほぞんは「コピーを さきに とる」（ページが なかみを よみはじめる まえに）。あとから コピーすると しっぱいする
+function keep(request, response) {
+  if (!response || !response.ok || response.type !== 'basic') return;
+  const copy = response.clone();
+  caches.open(VER).then(cache => cache.put(request, copy)).catch(() => {});
+}
+async function fallback(request) {
+  const cache = await caches.open(VER);
+  const hit = await cache.match(request, { ignoreSearch: true });
+  if (hit) return hit;
+  if (request.mode === 'navigate') {
+    // ひろば・おうちの かたへ など、ほぞんが なければ ほんたいの ページを 出す
+    return (await cache.match('index.html', { ignoreSearch: true })) || (await cache.match('./', { ignoreSearch: true })) || Response.error();
+  }
+  return Response.error();
+}
+function networkFirst(request) {
+  return new Promise(resolve => {
+    let done = false;
+    const timer = setTimeout(async () => { if (done) return; const hit = await (await caches.open(VER)).match(request, { ignoreSearch: true }); if (hit) { done = true; resolve(hit); } }, TIMEOUT);
+    // cache:'no-cache' ＝ ブラウザの ちょっとした ほぞん（GitHub Pages は 10ぷん）に たよらず、かならず 確かめる（かわって いなければ すぐ 終わる）
+    fetch(request.mode === 'navigate' ? request.url : request, { cache: 'no-cache' }).then(res => { clearTimeout(timer); keep(request, res); if (!done) { done = true; resolve(res); } })
+      .catch(async () => { clearTimeout(timer); if (!done) { done = true; resolve(await fallback(request)); } });
+  });
+}
+async function cacheFirst(request) {
+  const cache = await caches.open(VER);
+  const hit = await cache.match(request);
+  if (hit) { fetch(request).then(res => keep(request, res)).catch(() => {}); return hit; }   // つかいながら あたらしく しておく
+  try { const res = await fetch(request); keep(request, res); return res; } catch (e) { return Response.error(); }
+}
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;   // そとの ものは さわらない
+  event.respondWith(isImage(url) ? cacheFirst(request) : networkFirst(request));
+});
