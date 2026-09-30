@@ -10,17 +10,18 @@
   const HIRA = /[ぁ-ゖ]/;
   // じしょ：'つれた=釣《つ》れた' の ぎょうを {key, seg:[{b,r}|{t}]} に
   function parse(text) {
-    const map = new Map(), dmap = new Map(), maxLen = {n: 1};
+    const map = new Map(), dmap = new Map(), ends = new Set(), maxLen = {n: 1};
     String(text || '').split('\n').forEach(line => {
       line = line.trim(); if (!line || line[0] === '#') return;
       const i = line.indexOf('='); if (i < 1) return;
       let key = line.slice(0, i).trim(); const mk = line.slice(i + 1).trim(); if (!key || !mk) return;
       const digitOnly = key[0] === '^'; if (digitOnly) key = key.slice(1); if (!key) return;
+      const endOnly = key.endsWith('$'); if (endOnly) key = key.slice(0, -1); if (!key) return;
       const seg = []; const re = /([^《》]+)《([^《》]+)》|([^《》]+)/g; let m;
       while ((m = re.exec(mk))) { if (m[1] !== undefined) seg.push({b: m[1], r: m[2]}); else seg.push({t: m[3]}); }
-      if (seg.length) { (digitOnly ? dmap : map).set(key, seg); maxLen.n = Math.max(maxLen.n, key.length); }
+      if (seg.length) { (digitOnly ? dmap : map).set(key, seg); if (endOnly) ends.add(key); maxLen.n = Math.max(maxLen.n, key.length); }
     });
-    return {map, dmap, maxLen: maxLen.n};
+    return {map, dmap, ends, maxLen: maxLen.n};
   }
   // 1つの 文字れつを [{t}|{b,r}] の ならびに。かわる ところが なければ null
   function convert(text, D) {
@@ -32,7 +33,7 @@
       const c = src[i];
       if (!HIRA.test(c)) { plain += c; i++; allow = /[0-9０-９一二三四五六七八九十百]/.test(c) ? 2 : /[ァ-ヶー]/.test(c) ? 1 : /[ぁ-んぁ-ゖ一-鿿a-zA-Z]/.test(c) ? 0 : 1; continue; }   // カタカナの あとの ひらがなは ことばの あたま（ホームがめん）
       let hit = null;
-      if (allow) for (let n = Math.min(D.maxLen, src.length - i); n >= 1; n--) { const k = src.substr(i, n), seg = allow === 2 ? (D.dmap.get(k) || D.map.get(k)) : D.map.get(k); if (seg) { hit = {n, seg}; break; } }   // すうじの あとは ^ の ことばも
+      if (allow) for (let n = Math.min(D.maxLen, src.length - i); n >= 1; n--) { const k = src.substr(i, n), seg = allow === 2 ? (D.dmap.get(k) || D.map.get(k)) : D.map.get(k); if (seg && D.ends && D.ends.has(k) && HIRA.test(src[i + n] || '')) continue; if (seg) { hit = {n, seg}; break; } }   // $ の ことばは つぎが ひらがなで ない ときだけ   // すうじの あとは ^ の ことばも
       if (hit) { flush(); hit.seg.forEach(s => out.push(s.b !== undefined ? s : {t: s.t})); i += hit.n; changed = true; allow = 0; continue; }   // ことばの あとは しらべない（「つくれなかった」の「なか」を 中に しない）
       plain += c; i++; allow = 0;   // ことばの ちゅうでは しらべない
     }
@@ -113,7 +114,16 @@
     });
     observer.observe(document.body, {childList: true, characterData: true, subtree: true});
   }
+  // 画像（canvas）や きょうゆうの 文のように ふりがなを 付けられない ところ用：漢字だけの 文字れつに する（ひらがなの まま のこす ことばも ある）
+  function kanji(text) {
+    if (!enabled || isEn() || !ensureDict()) return text;
+    const parts = convert(String(text), D); if (!parts) return text;
+    return tighten(parts).map(p => p.b !== undefined ? p.b : p.t).join('');
+  }
+  // canvas の fillText を ひとつに：しゃしん・どうがの もじも 漢字に（English・ふりがな なしの ときは そのまま）
+  try { const proto = root.CanvasRenderingContext2D && root.CanvasRenderingContext2D.prototype; if (proto && !proto.__rubyPatched) { const ft = proto.fillText; proto.fillText = function (t, ...rest) { return ft.call(this, typeof t === 'string' ? kanji(t) : t, ...rest); }; proto.__rubyPatched = true; } } catch {}
   root.TsuriRuby = Object.assign({}, api, {
+    kanji,
     on() { enabled = true; try { localStorage.removeItem('marufuwa-ruby-off'); } catch {} if (!observer) start(); else schedule(document.body); },
     off() { enabled = false; try { localStorage.setItem('marufuwa-ruby-off', '1'); } catch {} },
     active: () => enabled && !isEn() && !!ensureDict() && !!observer

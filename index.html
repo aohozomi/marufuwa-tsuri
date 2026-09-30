@@ -1132,6 +1132,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const EN = () => !!(window.TsuriEn && TsuriEn.lang === 'en');
   const T = text => window.TsuriEn && TsuriEn.t ? TsuriEn.t(text) : text;   // ひょうに ある ことばは 英語に、ない ものは そのまま
   const L = (ja, en) => EN() ? en : ja;   // 日本語と 英語を その場で えらぶ（ここに おくと、どの 書きかたの 前でも つかえる）
+  const KJ = t => (window.TsuriRuby && typeof TsuriRuby.kanji === 'function') ? TsuriRuby.kanji(t) : t;   // ふりがなを つけられない ところ（きょうゆうの 文・画像の もじ）は 漢字だけに（ふりがな なし／English は そのまま）
   const TAG = () => EN() ? '#MarufuwaFishing' : '#まるふわつりびより';
   const HOME_SHARE = () => EN() ? HOME + 'en/' : HOME;   // 英語の リンクカードを もつ 入口
   const KEY = 'marufuwa-tsuri-v1';
@@ -2817,13 +2818,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(Error('png')), 'image/png'));
     if (photoURL) URL.revokeObjectURL(photoURL);
     photoFile = new File([blob], fileName, {type: 'image/png'}); photoURL = URL.createObjectURL(blob);
-    $('photo-img').src = photoURL; $('photo-img').alt = alt;
+    $('photo-img').src = photoURL; $('photo-img').alt = KJ(alt);
     $('photo-save').href = photoURL; $('photo-save').download = photoFile.name;
-    $('photo-x').href = 'https://x.com/intent/tweet?' + new URLSearchParams({text: words});
+    $('photo-x').href = 'https://x.com/intent/tweet?' + new URLSearchParams({text: KJ(words)});
     $('photo-share').hidden = !(navigator.share && navigator.canShare && navigator.canShare({files: [photoFile]}));
     $('photo-copy').hidden = !(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write);   // がぞうを コピー：つかえる たんまつだけ
     if (!$('photo-share').hidden) $('photo-share').parentElement.prepend($('photo-share'));   // スマホは「きょうゆう」（しゃしん つき・1タップ）を いちばん さきに。「ほぞんして から Xに そえる」は うしろ
-    $('photo-share').onclick = async () => { try { await navigator.share({files: [photoFile], text: words}); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (error) { status.textContent = error.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
+    $('photo-share').onclick = async () => { try { await navigator.share({files: [photoFile], text: KJ(words)}); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (error) { status.textContent = error.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
     status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。Xは、おうちの ひと（おとな）と いっしょに つかってね。';
   }
   $('take-photo').addEventListener('click', async () => {
