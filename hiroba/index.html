@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>まるふわの ひろば</title>
-<meta name="description" content="まるふわと ともだちが あるく ひろば。つりばへ、おにぎりキャッチへ、まるふわの おへやへ。いそがなくて だいじょうぶ。">
+<meta name="description" content="ちいさな まちで あそべます。まるふわと ともだちが あるく ひろば。つりばへ、おにぎりキャッチへ、まるふわの おへやへ。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#b9edf5">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23a8dc93'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%F0%9F%8C%B3%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="まるふわの ひろば">
-<meta property="og:description" content="まるふわと ともだちが あるく ひろば。つりばへ、おにぎりキャッチへ、まるふわの おへやへ。むりょう・インストールなし。">
+<meta property="og:description" content="ちいさな まちで あそべます。まるふわと ともだちが あるく ひろば。つりば・おにぎりキャッチ・まるふわの おへやへ いけるよ。むりょう・インストールなし。">
 <meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/">
 <meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="ひろばで、まるふわと ともだちが あつまって いる">
+<meta property="og:image:alt" content="ちいさな まちの ひろばに、まるふわと ともだちが あつまって いる">
 <meta name="twitter:card" content="summary_large_image">
 <style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#244653;background:#edf6fa;color-scheme:light}
@@ -282,8 +282,8 @@ body.calm .cloud.c2{left:56%}
     <button type="button" data-dest="onigiri"><b aria-hidden="true">🍙</b>おにぎり キャッチ<small>&nbsp;</small></button>
   </nav>
   <nav id="places-wait" aria-label="まだ できて いない ばしょ">
-    <button type="button" data-dest="kouji1"><b aria-hidden="true">🚧</b>こうじちゅう<small>なにが できるかな？</small></button>
-    <button type="button" data-dest="kouji2"><b aria-hidden="true">🚧</b>こうじちゅう<small>カードの ひろば？</small></button>
+    <button type="button" data-dest="kouji1"><b aria-hidden="true">🚧</b>こうじちゅう<small>ちかぢか あそべます <span aria-hidden="true">🎈</span></small></button>
+    <button type="button" data-dest="kouji2"><b aria-hidden="true">🚧</b>こうじちゅう<small>ちかぢか あそべます <span aria-hidden="true">✨</span></small></button>
   </nav>
 
   <section id="friends" aria-labelledby="friends-title">
@@ -566,8 +566,8 @@ const DEST = {
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
   onigiri: { name: 'おにぎりキャッチ', at: { x: 296, y: 292 }, kind: 'go', url: () => ONIGIRI_URL, pan: .8, motif: () => { tone(523, .07, 'square', 0, .04); tone(392, .1, 'square', .09, .04); } },
   thanks: { name: 'ありがとうの いし', at: { x: 320, y: 444 }, kind: 'thanks', pan: .8 },
-  kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 62, y: 540 }, kind: 'wait', line: 'ここは まだ こうじちゅう。なにが できるかな？', pan: -.8 },
-  kouji2: { name: 'こうじちゅう（カードの ひろば？）', at: { x: 298, y: 540 }, kind: 'wait', line: 'ここも こうじちゅう。カードの ひろば…かも？ たのしみに まっててね', pan: .8 }
+  kouji1: { name: 'こうじちゅうの ばしょ', at: { x: 62, y: 540 }, kind: 'wait', line: 'ここは まだ こうじちゅう。ちかぢか あそべるよ。たのしみに まっててね', pan: -.8 },
+  kouji2: { name: 'こうじちゅうの ばしょ（ちかぢか）', at: { x: 298, y: 540 }, kind: 'wait', line: 'ここも こうじちゅう。ちかぢか あそべるよ。おたのしみに', pan: .8 }
 };
 
 // ─── あるける ところ（10×10 の ます）と、みちさがし ───
@@ -1221,7 +1221,7 @@ setTimeout(() => {
   narrate(own.visits <= 1 ? 'ひろばへ ようこそ。ゆびで さわると、まるふわが あるくよ。したの ボタンで、いきたい ところへ いけるよ。' : 'ひろばに ついたよ。いまは ' + TIME_LABEL[curTime] + '。きょうは ' + weather + '。ともだちが ' + friends.length + 'にん いるよ。');
 }, 500);
 // はじめて きた 日：4びょう たっても だれも さわらない 時だけ、まるふわが 1かい「さわって みてね」（字が よめない 子にも 目で わかる）
-setTimeout(() => { if (own.visits <= 1 && lastInput === 0 && !trip && !document.hidden) speak(player, 'さわって みてね', 3800, true); }, 4200);
+setTimeout(() => { if (own.visits <= 1 && lastInput === 0 && !trip && !document.hidden && !api.paused) speak(player, 'さわって みてね', 3800, true); }, 4200);
 requestAnimationFrame(frame);
 addEventListener('storage', e => { if (e.key === MAIN_KEY) { main = readJSON(MAIN_KEY) || {}; soundFlag = main.sound === true; drawSound(); if (!soundFlag) stopAmbient(); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopAmbient(); else { startAmbient(); lastInput = T; } });
