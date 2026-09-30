@@ -125,10 +125,10 @@
     'ぜんがめんであそぶには、⋮からブラウザ（Safariなど）でひらいてね。': 'For full screen, open this in your browser (Safari, etc.) from the ⋮ menu.',
     'とじる（もうだしません）': 'Close (won’t show again)',
     // レベル・タグ
-    'レベルアップ！': 'Level up!', 'きょうのラッキー': "Today's Lucky", '10ぴきめ！なかよし': '10th catch! Best friends', 'ぬし': 'Giant', 'はじめて！': 'First time!', 'じぶんのきろく！': 'Personal best!', 'おおもの': 'Big one',
-    'いいこがつれたね。': 'Nice catch!', 'ぬしだよ！すごい、すごい。': "It's a Giant! Amazing, amazing.", 'またぬしだ！': 'Another Giant!', 'スペシャルなこだよ！': "It's a special one!",
+    'レベルアップ！': 'Level up!', 'きょうのラッキー': "Today's Lucky", '10ぴきめ！なかよし': '10th catch! Best friends', 'ぬし': 'Guardian', 'はじめて！': 'First time!', 'じぶんのきろく！': 'Personal best!', 'おおもの': 'Big one',
+    'いいこがつれたね。': 'Nice catch!', 'ぬしだよ！すごい、すごい。': "It's the Guardian! Amazing, amazing.", 'またぬしだ！': 'Another Guardian!', 'スペシャルなこだよ！': "It's a special one!",
     'ずかんがぜんぶうまったよ！': 'Your Fish Book is complete!', 'なにかもっていたみたい！': 'It seems to be carrying something!', 'はじめまして、だね。': 'Nice to meet you.', 'きろくがのびたね！': 'A new personal best!',
-    'まぼろしのこだ…！ほんとうにいたんだ。': 'A mythical one…! They really exist.', 'まぼろしにあえました': 'Met a mythical fish', 'ぬしをつりました': 'Caught a Giant',
+    'まぼろしのこだ…！ほんとうにいたんだ。': 'A mythical one…! They really exist.', 'まぼろしにあえました': 'Met a mythical fish', 'ぬしをつりました': 'Caught the Guardian',
     // まるふわ・ペンギン・ようす
     'なみのおとを、きいていよう。': "Let's listen to the waves.", 'きょうも、おつかれさま。': 'Good work today.', 'なにもしなくて、いいよ。': "You don't have to do anything.", 'ゆっくり、いきをしよう。': "Let's breathe slowly.",
     'ここにいて、いいよ。': 'You can stay right here.', 'ぼんやりするのも、だいじなじかん。': 'Spacing out is important time, too.', 'いまできることだけで、じゅうぶん。': 'What you can do right now is enough.',
@@ -148,7 +148,7 @@
     'ながれぼしにねがいごとをする': 'Make a wish on the shooting star', 'ひだりのばしょでつる': 'Fish at the left spot', 'まんなかのばしょでつる': 'Fish at the middle spot', 'みぎのばしょでつる': 'Fish at the right spot',
     'おみせのきつねにはなしかける': 'Talk to the shop fox', 'あんないのペンギン': 'Guide penguin', 'とうだい': 'Lighthouse', 'まるまど': 'Round window', 'つき': 'Moon', 'ランプ': 'Lamp', 'おにぎり': 'Rice ball',
     'さかなのデータ': 'Fish data', 'つりをするまるふわ': 'Marufuwa fishing', 'とったしゃしん': 'Photo you took', 'すいそうをながめるまるふわ': 'Marufuwa watching the aquarium',
-    'さかなをおくる': 'Send this fish', 'もらったさかな': 'Fish you received', 'ぬしとまぼろしのこは、じぶんでつったひとだけのたからもの。おくれないよ。': 'Giants and mythical fish are treasures only for the one who caught them. They can’t be sent.',
+    'さかなをおくる': 'Send this fish', 'もらったさかな': 'Fish you received', 'ぬしとまぼろしのこは、じぶんでつったひとだけのたからもの。おくれないよ。': 'Guardians and mythical fish are treasures only for the one who caught them. They can’t be sent.',
     'おくっても、じぶんのさかなはへらないよ。もらったひとのバケツにはいるよ。': "Sending a fish doesn't reduce your own. It goes into the other person's bucket.",
     'ひとこと（えらんでね）': 'Add a message (choose one)', 'ひとことなし': 'No message', 'これ、あげる！': 'This is for you!', 'いっしょにつろうね': "Let's fish together.", 'おおきいのつれたよ': 'I caught a big one!',
     'きょうもおつかれさま': 'Good work today.', 'ゆっくりしようね': "Let's take it easy.", 'またあそぼうね': "Let's play again.", 'みてみて！': 'Look, look!', 'いいことがありますように': 'May good things come your way.', 'ありがとう。': 'Thank you.',
@@ -207,7 +207,7 @@
     'つりははじめて？ゆっくりでいいよ': 'First time fishing? Take it slow.', 'ねむれない？いっしょにながめよう': "Can't sleep? Let's watch together.", 'こんなじかんまでおつかれさま': 'Good work, up this late.',
     'よなかのみずうみはぼくたちだけだね': "It's just us at the lake in the middle of the night.",
     // ぬしを つった とき・とおく
-    'わあ！': 'Wow!', 'すごい！': 'Amazing!', 'ぬしだ！': "It's a Giant!", 'おおきい…！': 'So big…!', 'みてみて！': 'Look, look!', 'やったね！': 'You did it!',
+    'わあ！': 'Wow!', 'すごい！': 'Amazing!', 'ぬしだ！': "It's the Guardian!", 'おおきい…！': 'So big…!', 'みてみて！': 'Look, look!', 'やったね！': 'You did it!',
     'とおくからみているよ。ひろいみずうみで、のんびり。': 'Watching from far away. On the wide lake, nice and slow.', 'ちかくにもどったよ。': 'Back to the close view.',
     'ひろば・おへや・ながめるでながれる、しずかなBGM': 'Quiet BGM that plays in the Plaza, the Room, and Just watch',
     // すいそう（おへや）
@@ -247,7 +247,7 @@
     'ゆっくり あいにいこうね。': "Let's go meet them slowly.",
     'ゆったり およいでるね。': 'Swimming so leisurely.', 'ちょっと めずらしい こだよ。': "That's a bit of a rare one.", 'めずらしい こ！ あえて うれしいね。': 'A rare one! So glad to meet it.',
     'スペシャルな こだよ！ きらきら してるね。': "It's a special one! So sparkly.", 'まぼろしの こ…！ ほんとうに いたんだ。': 'A mythical one…! They really exist.',
-    'はじめまして！': 'Nice to meet you!', 'ぬしだよ！ すごいね。': "It's a Giant! Amazing.",
+    'はじめまして！': 'Nice to meet you!', 'ぬしだよ！ すごいね。': "It's the Guardian! Amazing.",
     'めずらしさ': 'Rarity', 'さいだい': 'Largest', 'あつめた': 'Collected',
     'ひるまは ランプが なくても あかるいね。': "It's bright enough in the daytime, even without the lamp.", 'わあ… ほしぞらみたい。': 'Wow… like a starry sky.',
     'ランプを けしたよ。かべが ほしぞらに なったよ。': 'You turned off the lamp. The wall became a starry sky.', 'ぽっと あかるく なったね。': 'It suddenly got bright and cozy.', 'ランプを つけたよ。': 'You turned on the lamp.',
@@ -287,7 +287,7 @@
   const OFTEN = s => s.split('・').map(t => nmTime(t, true)).join(', ');
 
   // ---- 2) ルール（すうじ・なまえが はいる 文）----
-  const REG_EN = { 'ふつう': 'Common', 'ちょっとめずらしい': 'A bit rare', 'めずらしい': 'Rare', 'スペシャル': 'Special', 'まぼろし': 'Mythical', 'ぬし': 'Giant' };
+  const REG_EN = { 'ふつう': 'Common', 'ちょっとめずらしい': 'A bit rare', 'めずらしい': 'Rare', 'スペシャル': 'Special', 'まぼろし': 'Mythical', 'ぬし': 'Guardian' };
   const SIZE_EN = { 'とてもおおきい': 'very large', 'おおきい': 'large', 'ふつうのおおきさ': 'medium-sized', 'ちいさい': 'small' };
   const SIDE_EN = { 'ひだり': 'left', 'みぎ': 'right', 'まんなか': 'middle' };
   const up = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -334,7 +334,7 @@
     [/^「(.+)」$/, (_, q) => { const t = EX.get(norm(q)); return t ? `“${t}”` : null; }],
     [/^(.+?)、さいだい([\d.]+)センチ、(\d+)ひき$/, (_, f, cm, n) => `${nmFish(f)}, largest ${cm} cm, ${n} caught`],
     [/^あたらしいなかまが(\d+)ひききたよ。$/, (_, n) => `${n} new friends have arrived.`],
-    [/^さいだい([\d.]+)センチ（(\d+)ひき）(ぬし)?$/, (_, cm, n, b) => `Largest ${cm} cm (${n} caught)${b ? ' · Giant' : ''}`],
+    [/^さいだい([\d.]+)センチ（(\d+)ひき）(ぬし)?$/, (_, cm, n, b) => `Largest ${cm} cm (${n} caught)${b ? ' · Guardian' : ''}`],
     [/^(みずうみ|かわ|みなとまち|ふねのうえ)・(いつでも)$/, (_, a) => `${nmArea(a)} · any time`],
     [/^(みずうみ|かわ|みなとまち|ふねのうえ)・(.+?)におおい$/, (_, a, t) => `Often at ${nmArea(a, true)} · ${OFTEN(t)}`],
     [/^(.+?)。つかっている$/, (_, c) => (COLOR[c] ? `${COLOR[c]}. In use` : null)],
@@ -359,7 +359,7 @@
     [/^(.+?)がきたよ。$/, (_, p) => (PAL_MAP.has(norm(p)) ? `${nmPal(p)} has arrived.` : null)],
     [/^となりでつりをする(.+)$/, (_, p) => `${nmPal(p)} fishing nearby`],
     [/^きょうのラッキーさかなは「(.+?)」。(.+?)にいるよ。(きょうはあめ。)?(?:きょうのぬしは「(.+?)の(.+?)」にでやすいよ。)?$/, (_, f, a, rain, ba, bt) =>
-      `Today's lucky fish is “${nmFish(f)}”. You'll find it at ${nmArea(a, true)}.${rain ? " It's raining today." : ''}${ba ? ` Today's Giant is likely at “${nmArea(ba)} — ${nmTime(bt, true)}”.` : ''}`],
+      `Today's lucky fish is “${nmFish(f)}”. You'll find it at ${nmArea(a, true)}.${rain ? " It's raining today." : ''}${ba ? ` Today's Guardian is likely at “${nmArea(ba)} — ${nmTime(bt, true)}”.` : ''}`],
     [/^(.+?)がつれた。([\d.]+)センチ。(.*)$/, (_, f, cm, rest) => { const tail = tailEn(rest); return tail == null ? null : `${nmFish(f)} caught! ${cm} cm. ${tail}`.trim(); }],
     [/^([\d.]+)センチ$/, (_, cm) => `${cm} cm`],
     [/^(.+?)をみずにかえしたよ。またあおうね。$/, (_, f) => `${nmFish(f)} went back to the water. See you again.`],
@@ -367,7 +367,7 @@
     [/^ぴったり×(\d+)$/, (_, n) => `Perfect ×${n}`],
     [/^(ぴったり！！|いいね！|おしい！)あとすこし。$/, (_, w) => `${EX.get(norm(w))} Almost there.`],
     [/^(にじいろにひかるかげ…！なんだろう。|とてもおおきなかげ…！ぬしかも。|きんいろのかげ…！スペシャルなこかも。|ひかるかげがきた！|きた！)「ひく！」をおしてね。いそがなくてだいじょうぶ。$/, (_, w) => ({
-      'にじいろにひかるかげ…！なんだろう。': 'A rainbow-colored shadow…! What could it be?', 'とてもおおきなかげ…！ぬしかも。': 'A huge shadow…! Could it be a Giant?',
+      'にじいろにひかるかげ…！なんだろう。': 'A rainbow-colored shadow…! What could it be?', 'とてもおおきなかげ…！ぬしかも。': 'A huge shadow…! Could it be the Guardian?',
       'きんいろのかげ…！スペシャルなこかも。': 'A golden shadow…! Maybe a Special one.', 'ひかるかげがきた！': 'A shining shadow appeared!', 'きた！': 'A bite!' }[w] + ' Press “Reel in!” No rush.')],
     [/^おとをつけたよ。わがちかづくとおとがたかくなって、「ピコン」でおしてね。(きこえないときは、よこのマナースイッチをみてね。)?$/, (_, s) => 'Sound is on. As the ring closes in, the sound gets higher — press at the “ping”.' + (s ? " Can't hear it? Check the silent switch on the side." : '')],
     [/^にがしたこ：(\d+)ひき。またあえるよ。$/, (_, n) => `Released: ${n}. You can meet them again.`],
@@ -387,11 +387,11 @@
   PAL_JA.forEach((j, i) => ph(j, ` ${PAL_EN[i]} `));
   PAL_WORD.forEach(([j, e]) => ph(j, ` ${e} `));
   [['レベルアップ！', 'Level up!'], ['きょうのラッキー', "Today's Lucky"], ['10ぴきめ！なかよし', '10th catch! Best friends'], ['はじめて！', 'First time!'], ['じぶんのきろく！', 'Personal best!'], ['おおもの', 'Big one'],
-    ['ちょっとめずらしい', 'A bit rare'], ['スペシャル', 'Special'], ['まぼろし', 'Mythical'], ['めずらしい', 'Rare'], ['ぬし', 'Giant'],
+    ['ちょっとめずらしい', 'A bit rare'], ['スペシャル', 'Special'], ['まぼろし', 'Mythical'], ['めずらしい', 'Rare'], ['ぬし', 'Guardian'],
     ['あたらしくふえたよ：', ' New: '], ['ペンギン：', ' Penguin: '], ['（さかなが もっていたよ）', '(the fish was carrying it)'], ['（さかながもっていたよ）', ' (the fish was carrying it) '], ['れんぞく', ' streak '],
     ['きのえだのさお', 'Twig Rod'], ['たけのさお', 'Bamboo Rod'], ['ほしのさお', 'Star Rod'], ['ふつうのえさ', 'Regular Bait'], ['きらきらえさ', 'Sparkle Bait'], ['おおきいえさ', 'Big Bait'],
     ['かいがら', 'Seashell'], ['きれいないし', 'Pretty stone'], ['ながれぎ', 'Driftwood'], ['みずくさ', 'Water plant'], ['ちいさなびん', 'Little bottle'], ['ほしのかけら', 'Star fragment'],
-    ['いいこがつれたね。', 'Nice catch!'], ['ぬしだよ！すごい、すごい。', "It's a Giant! Amazing, amazing."], ['またぬしだ！', 'Another Giant!'], ['スペシャルなこだよ！', "It's a special one!"], ['なにかもっていたみたい！', 'It seems to be carrying something!'],
+    ['いいこがつれたね。', 'Nice catch!'], ['ぬしだよ！すごい、すごい。', "It's the Guardian! Amazing, amazing."], ['またぬしだ！', 'Another Guardian!'], ['スペシャルなこだよ！', "It's a special one!"], ['なにかもっていたみたい！', 'It seems to be carrying something!'],
     ['はじめまして、だね。', 'Nice to meet you.'], ['きろくがのびたね！', 'A new personal best!'], ['ずかんがぜんぶうまったよ！', 'Your Fish Book is complete!'], ['まぼろしのこだ…！ほんとうにいたんだ。', 'A mythical one…! They really exist.'],
     ['つりびとレベルが', ' Angler level is now '], ['になったよ！', '!'], ['ずかんかんせいまで、あと', ' Only '], ['しゅるい！', ' kinds left to complete your Fish Book!'],
     ['センチ', ' cm '], ['ぴったり×', ' Perfect ×'], ['、', ', '], ['・', ' · ']].forEach(([j, e]) => ph(j, e));
