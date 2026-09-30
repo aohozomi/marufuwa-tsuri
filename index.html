@@ -474,7 +474,8 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 #take-photo,#gaze,#release,#send-gift,#show-pal{flex:1 1 40%;min-height:54px}
 /* つれた あとは 主役の 2つ（もういちど なげる・しゃしんを とる）だけ。ほかは「ほかの こと ▸」に たたむ（読み上げ・キーボードは 主役 → たたみ の じゅん） */
 #more-catch{flex:1 1 40%}
-body[data-early=true] #open-trophy,body[data-early=true] #open-nakama{display:none}
+/* メニューは レベルで ひらく：はじめは バケツ・ずかん・ひろば だけ。Lv3 で すいそう・Lv5 で なかま・Lv8 で どうぐ・きねん（さいしょの がめんを しずかに） */
+body[data-m-tank=false] #tk-open,body[data-m-nakama=false] #open-nakama,body[data-m-gear=false] #open-gear,body[data-m-gear=false] #open-trophy{display:none}
 /* つれた あいだ：主役は「つぎへ」と「しゃしん」。おと・BGM・とおく・ながめる などは「ほかの こと ▸」を ひらくと でる（つぎの 1ぴきを えらぶ とき ごちゃつかない） */
 body[data-phase=caught] .sub-actions:not([data-more=open]) > :not(#take-photo):not(#more-catch){display:none !important}
 #more-catch[open]{flex-basis:100%}
@@ -1841,8 +1842,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (!f || !Number.isInteger(f.id)) return;
     const av = avatarPal(); save.note = [{at: Date.now(), id: f.id, size: Number.isFinite(size) ? size : 0, spot: save.area, time: timeOfDay(), nushi: !!nushiFlag, party: prefPals().party.map(p => p.id), avatar: av ? av.id : null, kind}, ...(Array.isArray(save.note) ? save.note : [])].slice(0, 200);
   }
+  // メニューの ひらく レベル（つりびと レベル）：すいそう 3・なかま 5・どうぐ／きねん 8
+  const MENU_LV = {tank: 3, nakama: 5, gear: 8};
+  function menuGate() { const lv = levelOf(save.xp || 0), b = document.body; b.dataset.mTank = String(lv >= MENU_LV.tank); b.dataset.mNakama = String(lv >= MENU_LV.nakama); b.dataset.mGear = String(lv >= MENU_LV.gear); }
   function hud() {
-    $('total').textContent = String(save.total); drawPlazaNote(); document.body.dataset.early = String(save.total < 3);   // 3びき つる まで「きねん」「なかま」は かくす（さいしょの がめんを しずかに）
+    $('total').textContent = String(save.total); drawPlazaNote(); menuGate();   // レベルで メニューを ひらく
     drawToday(); drawBadge(); drawSeatHint();
     $('seen').textContent = $('book-seen').textContent = String(seenCount()); $('seen-ring').style.setProperty('--p', Math.round(Math.min(1, seenCount() / BASE) * 100) + '%');
     const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
@@ -2031,6 +2035,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('card-size').replaceChildren(cm(size) + ' センチ　', starEl(fish, nushi));
     if (found) gift.push(found + '（さかなが もって いたよ）');
     if (leveled) unlockNames(lvBefore, lvNow).forEach(name => gift.push(name));
+    if (leveled) { if (lvBefore < MENU_LV.tank && lvNow >= MENU_LV.tank) gift.push(L('「すいそう」ボタン', 'the Tank button')); if (lvBefore < MENU_LV.nakama && lvNow >= MENU_LV.nakama) gift.push(L('「なかま」ボタン', 'the Friends button')); if (lvBefore < MENU_LV.gear && lvNow >= MENU_LV.gear) gift.push(L('「どうぐ」と「きねん」ボタン', 'the Gear and Trophies buttons')); }   // メニューが ひらいた おしらせ（1かいだけ）
     const mile = MILES[save.total], levelInBand = leveled && !mile;   // レベルアップは 1か所だけ：ふつうは ペンギンの おび。10ぴきめ などの おいわいと かさなる ときだけ カードの タグ
     const tags = [];
     if (leveled) tags.push('レベルアップ！');
