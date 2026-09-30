@@ -236,9 +236,9 @@ button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ff
 .meteor{position:absolute;z-index:2;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;cursor:pointer;pointer-events:auto}
 .meteor::before{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:#fffbe0;box-shadow:0 0 10px 4px #fff6a8,-30px -14px 14px 2px #fff6a866,-16px -7px 8px 2px #fff6a8aa}
 /* あめ */
-#rain{position:absolute;inset:-20% 0 0 -20%;z-index:900;pointer-events:none;display:none;background-image:repeating-linear-gradient(105deg,#ffffff00 0 34px,#ffffff52 34px 35.2px,#ffffff00 35.2px 66px);background-size:104px 180px;animation:rain 3.6s linear infinite}   /* 10/1 あめの 見た目を おだやかに（マスター直「雨が 気持ち悪い」）：すじを まばらに・うすく（55%→32%）・ゆっくり（0.55びょう→3.6びょうで 1しゅう）。はやい ちらつきに ならない */
+#rain{position:absolute;inset:-20% 0 0 0;z-index:900;pointer-events:none;display:none;background-image:radial-gradient(circle at 50% 50%,#ffffff70 0 1.6px,#ffffff00 2.6px),radial-gradient(circle at 20% 70%,#ffffff55 0 1.3px,#ffffff00 2.2px),radial-gradient(circle at 80% 30%,#ffffff45 0 1.2px,#ffffff00 2px);background-size:96px 150px,130px 190px,110px 170px;animation:rain 3.2s linear infinite}   /* 10/1 マスター「雨が 気持ち悪い」：ななめの 線を やめ、ぽつぽつの 粒が ゆっくり おちる（つりばの あめと 同じ 考え） */
 #scene[data-rain=true] #rain{display:block}
-@keyframes rain{to{background-position:-48px 180px}}
+@keyframes rain{to{background-position:0 150px,0 190px,0 170px}}
 .tapring{position:absolute;z-index:120;width:38px;height:16px;margin:-8px 0 0 -19px;border:3px solid #ffffffe0;border-radius:50%;pointer-events:none}
 
 #status{min-height:3.4em;margin:10px 4px 6px;text-align:center;font-size:.98rem;line-height:1.6;font-weight:700}
@@ -792,7 +792,10 @@ const CAST_ORDER = Object.keys(PALS), NEWEST = new Set(TOWN_LIST.slice(-5).map(t
 const TOKU = { me: 'めが いいよ', chikara: 'ちからもち だよ', un: 'うんが いいよ', ochi: 'おちついて いるよ' };
 const TOKU_ALIAS = { めがいい: 'me', ちからもち: 'chikara', うんがいい: 'un', おちつき: 'ochi', おちついている: 'ochi' };
 const tokuKey = v => { const s = String(v || '').replace(/\s+/g, ''); return TOKU[s] ? s : TOKU_ALIAS[s] || ''; };
-const tokuOf = id => { try { return tokuKey((window.TsuriToku && window.TsuriToku[id]) || (PALS[id] && PALS[id].toku)); } catch { return ''; } };
+const TOKU_IDS = ['me', 'chikara', 'un', 'ochi'];
+const tokuOf = id => {   // 本体（index.html の tokuOf）と おなじ：きまって いる 子は それ、きまって いない 子は 名前から 1つ（ずっと おなじ）
+  try { const k = tokuKey((window.TsuriToku && window.TsuriToku[id]) || (PALS[id] && PALS[id].toku)); if (k) return k; if (typeof id !== 'string' || !id) return ''; let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return TOKU_IDS[h % 4]; } catch { return ''; }
+};
 const FAV_LINES = ['また あえたね。うれしいな', 'まるふわの となり、おちつくなあ', 'いっしょに いると、たのしいな', 'まるふわが きて くれて、うれしいよ', 'きょうも いっしょ だね', 'ここで あうと、ほっと するよ', 'なかよしって、いいね', 'また あそぼうね'];
 const favLinesOf = id => { const p = PALS[id]; if (p && Array.isArray(p.fav) && p.fav.length) return p.fav; const h = hashOf(id); return [0, 1, 2].map(i => FAV_LINES[(h + i * 3) % FAV_LINES.length]); };   // 1にん 3ほん（なまえから きまる）
 const readMain = () => { main = readJSON(MAIN_KEY) || main; return main; };
@@ -804,7 +807,8 @@ function writeMain(patch) {   // つりびよりの きろくに、♡（fav）�
   } catch {}
   main = readJSON(MAIN_KEY) || main;
 }
-const favList = () => { const l = readMain().fav, out = []; if (Array.isArray(l)) for (const id of l) if (typeof id === 'string' && PALS[id] && !out.includes(id)) out.push(id); return out; };
+const castPool = () => { const av = readMain().avatar; return Object.keys(PALS).filter(id => id !== av); };   // つりびよりの「なかま」で じぶんの キャラに えらんだ 子（save.avatar）は ひろばを あるく なかまから のぞく（じぶんが ふたりに ならない）
+const favList = () => { const l = readMain().fav, av = readMain().avatar, out = []; if (Array.isArray(l)) for (const id of l) if (typeof id === 'string' && PALS[id] && id !== av && !out.includes(id)) out.push(id); return out; };   // じぶんの キャラは ♡の なかまに ふくめない（ひろばに 出ない ため）
 const isFav = id => favList().includes(id);
 const bondOf = id => { const b = readMain().bond, v = b && typeof b === 'object' ? Number(b[id]) : 0; return v >= 1 ? Math.min(3, Math.floor(v)) : 0; };   // なかよし 3だん（かず では 見せない）
 // あった 日時：ひろばの きろく（own.metAt）と、つりびよりの きろく（save.pals[id] が 数字／{at} なら それ・true は「どこかで あった」）
@@ -1036,7 +1040,7 @@ function chooseFriends() {
   if (favs.length) forced.push(castOrder(env, favs)[0]);   // ♡の 子は かならず 1にん あるいて いる（2にん いじょう なら さいきん あって いない 子）
   for (const id of metInFishingToday().slice(0, 2)) if (PALS[id] && !forced.includes(id)) forced.push(id);   // 釣りで あった 子を、ひろばにも（さいだい 2ひき）。すいそうの となりにも 同じ 子が くる
   if (LAYERS.guests.length && forced.length < 3) { const g = castOrder(env, LAYERS.guests.filter(id => !forced.includes(id)))[0]; if (g) forced.push(g); }   // お正月・たなばた・おおみそかの 日は、とくべつな おきゃくが 1にん はじめから いる
-  return castInitial(env, Object.keys(PALS), 5, forced);
+  return castInitial(env, castPool(), 5, forced);
 }
 const SLOTS = [{ x: 84, y: 368 }, { x: 276, y: 368 }, { x: 120, y: 440 }, { x: 240, y: 440 }, { x: 180, y: 336 }, { x: 140, y: 316 }];
 const friends = chooseFriends().map((id, i) => {
@@ -1529,7 +1533,7 @@ function arrive(id) {
 function leave(id) {
   const d = DEST[id]; trip = { id, leaving: true };
   own.last = id; own.leftAt = Date.now(); saveOwn();
-  if (id === 'tsuri') writeMain({ party: partyIds() });   // いっしょに つれて いく 子（つりびよりの きろく save.party）。だれも いなければ から
+  if (id === 'tsuri') writeMain({ party: mergedParty() });   // いっしょに つれて いく 子（つりびよりの きろく save.party）。本体の「なかま」で えらんだ 子は のこし、ひろばで さそった 子を 足す（4にんまで）
   speak(player, 'いってきます！', 1500, true); narrate(d.name + 'へ いってきます！'); sfx.enter();
   const r = player.el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
   curtain.querySelector('span').textContent = d.name + 'へ…'; curtain.style.display = 'flex';
@@ -1663,6 +1667,11 @@ let viaKeyFlag = false;
 const PARTY_MAX = 4, NO_PARTY = new Set(['penguin', 'kogitsune']);   // あんない・おみせの 子は さそわない
 const party = [], trail = [];
 const partyIds = () => party.map(f => f.id);
+function mergedParty() {   // 本体で えらんだ save.party（名簿に いる 子だけ）＋ ひろばで さそった 子。ひろばで「ここで まつ」に した 子は はずす。さいだい 4にん（あたらしい 子を のこす）
+  const base = Array.isArray(readMain().party) ? readMain().party.filter((id, i, a) => typeof id === 'string' && PALS[id] && a.indexOf(id) === i && !partyLeft.has(id)) : [];
+  const out = [...base]; for (const id of partyIds()) if (!out.includes(id)) out.push(id);
+  return out.slice(-PARTY_MAX);
+}
 function trailPush() { const l = trail[trail.length - 1]; if (!l || dist(l, player) >= 6) { trail.push({ x: player.x, y: player.y }); if (trail.length > 120) trail.shift(); } }
 function trailAt(gap) {   // まるふわが あるいた あとを、gap だけ さかのぼった ところ
   let acc = 0, prev = { x: player.x, y: player.y };
@@ -1680,8 +1689,10 @@ function followTick(f, dt) {
   const target = trailAt(30 * (i + 1)) || lineSpot(i);
   if (dist(f, target) > 2.5) { f.path = [target]; f.speed = player.moving ? 104 : 70; stepActor(f, dt); } else { f.path = []; f.moving = false; }
 }
+const partyLeft = new Set();   // ひろばで「ここで まつ」に した 子（本体の save.party から も はずす）
 function joinParty(f) {
   if (!f || party.includes(f)) return;
+  partyLeft.delete(f.id);
   if (party.length >= PARTY_MAX) { const old = party.shift(); old.party = false; old.state = 'idle'; old.timer = 2; old.cool = 20; narrate(old.name + 'は ひろばで まってるね。'); }   // 5にんめは、いちばん まえから いる 子が ひろばで まつ（ことわらない）
   f.party = true; f.state = 'follow'; f.path = []; f.talking = 0; f.cool = 12; f.sit = null; party.push(f);
   speak(f, 'いっしょに いく！', 2400, true); hop(f); sfx.greet(f);
@@ -1689,7 +1700,7 @@ function joinParty(f) {
 }
 function leaveParty(f) {
   const i = party.indexOf(f); if (i < 0) return;
-  party.splice(i, 1); f.party = false; f.state = 'idle'; f.timer = 2; f.path = []; f.cool = 20;
+  party.splice(i, 1); partyLeft.add(f.id); f.party = false; f.state = 'idle'; f.timer = 2; f.path = []; f.cool = 20;
   speak(f, 'ここで まってるね', 2400, true); narrate(f.name + 'は ひろばで まってるよ。');
 }
 let inviteF = null, inviteTimer = 0;
@@ -1727,7 +1738,7 @@ function swapFriend(slot, now, forceId) {
   let id = forceId;
   if (!id && rotate) id = castOrder(env, favs.filter(x => x !== f.id))[0];
   if (!id && favs.length && !favWalkers.length) id = castOrder(env, favs)[0];
-  if (!id) id = castReplace(env, Object.keys(PALS), present, f.id);
+  if (!id) id = castReplace(env, castPool(), present, f.id);
   if (!id || present.includes(id) || !PALS[id]) return false;
   const oldName = f.name, quick = !!now || reduce();
   const change = () => {
@@ -2035,7 +2046,7 @@ const api = window.Hiroba = {
   version: 1, paused: false, hooks, player, friends, PALS, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), bgm: window.TsuriBgm ? window.TsuriBgm.state() : null, reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
-  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, cast: { list: () => CAST_ORDER.slice(), town: () => TOWN_LIST.map(x => x.id), newest: () => [...NEWEST], local: isLocalId, isNew: newFace, lastOf, order: pool => castOrder(castEnv(), pool), initial: (pool, n, forced) => castInitial(castEnv(), pool, n, forced), sim: castSim, homes: LOCAL_HOMES.slice(), gap: swapGap, announce: announceNew, buildLayers: castLayers, layers: () => ({ resident: LAYERS.resident.slice(), daily: LAYERS.daily.slice(), guests: LAYERS.guests.slice() }), weight: id => layerW.get(id) || 1, weights: () => ({ ...LAYER_W }), announceGuest, toku: tokuOf, tokuWords: () => ({ ...TOKU }), favLines: favLinesOf }, fav: { list: favList, is: isFav, toggle: toggleFav, ensure: ensureFav, bond: bondOf }, party: { ids: partyIds, join: joinParty, leave: leaveParty, invite: openInvite, close: closeInvite, max: PARTY_MAX, size: () => party.length }, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
+  goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, cast: { list: () => CAST_ORDER.slice(), town: () => TOWN_LIST.map(x => x.id), newest: () => [...NEWEST], local: isLocalId, isNew: newFace, lastOf, order: pool => castOrder(castEnv(), pool), initial: (pool, n, forced) => castInitial(castEnv(), pool, n, forced), sim: castSim, homes: LOCAL_HOMES.slice(), gap: swapGap, announce: announceNew, buildLayers: castLayers, pool: castPool, layers: () => ({ resident: LAYERS.resident.slice(), daily: LAYERS.daily.slice(), guests: LAYERS.guests.slice() }), weight: id => layerW.get(id) || 1, weights: () => ({ ...LAYER_W }), announceGuest, toku: tokuOf, tokuWords: () => ({ ...TOKU }), favLines: favLinesOf }, fav: { list: favList, is: isFav, toggle: toggleFav, ensure: ensureFav, bond: bondOf }, party: { ids: partyIds, join: joinParty, leave: leaveParty, invite: openInvite, close: closeInvite, max: PARTY_MAX, size: () => party.length }, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   season: () => SEASON, seasonOf, special: () => SPECIAL, specialOf, renderSeason, SEASON_LINES, SPECIAL_LINES, DROPS, pickDrop: () => dropEl && pickDrop(dropEl), drop: () => dropEl && ({ id: DROPS[SEASON].id, name: DROPS[SEASON].name, x: Number(dropEl.dataset.x), y: Number(dropEl.dataset.y) }),
   plush: () => plushEls.map(e => ({ id: Number(e.dataset.id), x: Number(e.dataset.x), y: Number(e.dataset.y) })), renderPlush, nushiIds, plushTap: el => plushTap(el), openZukan, drawZukan, showZukanPal,
   sfx, startAmbient, stopAmbient, audio: { tone, zap, chord }, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,

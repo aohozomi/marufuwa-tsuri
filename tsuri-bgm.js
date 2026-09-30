@@ -42,8 +42,8 @@
   // 曲は「ひくい 旋律 1本」と「下で 支える ひくい 和音」だけ（マスター直・9/30 夜「高い音は いらん。落ち着く音は 低い音。波の音と、流れるような メロディーだけで いい」）。
   //   高い 星・あわ・ベル・きらきらの アルペジオ・オルゴール ふうの 短い 金属音は ぜんぶ 無し。旋律は G3〜G4（ミディ 55〜67）、和音は F2〜A3（41〜57）。
   //   音色の role は 検査が 見分ける ための しるし（mel＝旋律／pad＝和音）。
-  const MEL = (gain, a, r) => ({ role: 'mel', type: 'triangle', gain, a, r, hold: true, lp: 1000 });   // やわらかい 三角波（ローパス 1000Hz）・ゆっくり 立ちあがり ふわっと きえる
-  const PAD = (gain, a, r, pan) => ({ role: 'pad', type: 'triangle', gain, a, r, hold: true, lp: 700, pan });
+  const MEL = (gain, a, r) => ({ role: 'mel', type: 'sine', gain: gain * 1.5, a, r, hold: true, lp: 900 });   // 10/1 マスター「BGM かえよ」：三角波→正弦波（倍音なし・キンが 物理的に 出ない）・ローパス 900   // やわらかい 三角波（ローパス 1000Hz）・ゆっくり 立ちあがり ふわっと きえる
+  const PAD = (gain, a, r, pan) => ({ role: 'pad', type: 'sine', gain: gain * 1.4, a, r, hold: true, lp: 600, pan });
   const PADS = { C: [43, 48, 52, 55], Am: [45, 48, 52, 57], F: [41, 45, 48, 53], G: [43, 47, 50, 55], Dm: [45, 50, 53, 57] };   // 和音は ぜんぶ 白い 鍵ばん（ド レ ミ ファ ソ ラ）だけ
   function barPart(bpm, chords, mel, p) {   // 1小節＝4拍の 曲。mel＝[小節, 拍, 音, 長さ（拍）]・和音は 1小節に 1つ
     const ev = [], beat = 60 / bpm, bar = beat * 4;
@@ -122,7 +122,7 @@
     let off = 0; const ev = [], marks = [];
     for (const n of KEYS[key]) {
       const p = PARTS[n](), k = PART_TRIM[n] / TRIM[key]; marks.push(off);
-      p.ev.forEach(([t, d, m, o]) => ev.push([t + off, d, m, k === 1 ? o : { ...o, gain: o.gain * k }]));
+      p.ev.forEach(([t, d, m, o]) => { if (o && o.role === 'mel') return; ev.push([t + off, d, m, k === 1 ? o : { ...o, gain: o.gain * k }]); });   // 10/1 マスター「おれ これ きらい」：旋律を やめ、ひくい 和音の ゆっくりした ながれ だけに（正弦波・900Hz以下）
       off += p.len;
     }
     ev.sort((x, y) => x[0] - y[0]); return { len: off, ev, marks, parts: KEYS[key].slice() };
