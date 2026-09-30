@@ -395,7 +395,9 @@ const W = 360, H = 560, BASE = '../';
 const TE = s => (window.TsuriEn ? window.TsuriEn.t(s) : s);   // English mode（tsuri-en.js）の 時だけ 訳す。日本語では そのまま かえす（canvas に かく もじ・共有の 文に 使う）
 // 魚の 絵（つりびよりと おなじ tsuri-art.js）。ひろばが ひらいて しばらくしてから、じゃまに ならない ように 読む。水槽（おへや）と いけの さかなが 使う。読めなくても 絵文字で 出る
 let artLoading = null;
-const loadArt = () => artLoading || (artLoading = window.TsuriArt ? Promise.resolve(true) : new Promise(res => { const s = document.createElement('script'); s.src = BASE + 'tsuri-art.js'; s.onload = () => res(true); s.onerror = () => res(false); document.head.append(s); }));
+const loadScript = src => new Promise(res => { const s = document.createElement('script'); s.src = BASE + src; s.onload = () => res(true); s.onerror = () => res(false); document.head.append(s); });
+// きせつの さかな（34〜45ばん）の かりの 絵（tsuri-art-season.js）は、ふつうの 絵を 元に つくる ので あとに 読む。読めなくても 絵文字で 出る
+const loadArt = () => artLoading || (artLoading = window.TsuriArt ? Promise.resolve(true) : loadScript('tsuri-art.js').then(ok => ok ? loadScript('tsuri-art-season.js').then(() => true) : false));
 setTimeout(loadArt, 1800);
 const POND_ART = [0, 1, 2, 3, 8, 11, 12, 23];   // いけの さかな：ちいさくて まるい 子たち（TsuriArt の 番号）
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -691,12 +693,15 @@ function setFace(name, ms) { if (player.face !== name) { player.face = name; pla
 
 // ─── 釣りで あった 子が、ひろばで おぼえて いる ひとこと（読むのは つりびよりの きろく marufuwa-tsuri-v1 の metToday と bucket だけ。そとへは 何も おくらない）───
 const FISH_MEMO = [['まるあじ',10,25],['ふわふぐ',8,20],['もちだい',15,40],['ころいわし',5,15],['ぽてかれい',20,45],['しらたまえび',3,12],['ぷかくらげ',5,30],['こつぶがに',3,10],['わたあめきんぎょ',5,18],['まんまるいか',10,35],['ふくふくたこ',15,50],['にじいろべら',10,30],['あさやけだい',25,60],['ゆうやけさば',20,45],['ほしぞらあなご',30,80],['おもちひらめ',25,70],['さくらます',30,60],['ぽんぽんはりせんぼん',10,35],['ころころかめ',15,40],['ねむりいるか',100,180],['つきみまんぼう',80,200],['ひだまりえい',40,120],['みかづきたちうお',60,130],['しゃぼんだまうお',5,15],['みずいろのこ',12,30],['みんとのこ',12,30],['あぷりこっとのこ',12,30],['らべんだーのこ',12,30],['きんのまるごい',40,90],['まるくじら',200,400],['つきあかりのきんぎょ',20,40],['ほしくずのこい',60,120],['しんじゅのたい',40,90],['にじいろくじら',300,600]];   // つりびよりの 魚の なまえ・ちいさい／おおきい（名前は 本体と そろえる）
+// きせつの さかな（34〜45ばん）の なまえ・ちいさい／おおきい・英語の なまえは、おへや（tsuri-tank.js）の 表を つかう（なまえの 写しを ふやさない）。おへやが よめて いなければ 出さない
+const seasonMemo = id => { try { const T = window.TsuriTank, k = T && typeof T.kindTables === 'function' ? T.kindTables().season.find(f => f.id === id) : null; return k ? [k.name, k.min, k.max, k.en] : null; } catch { return null; } };
 function metInFishingToday() { const m = main && main.metToday; return m && m.d === dayKey && Array.isArray(m.ids) ? m.ids.filter(id => PALS[id]) : []; }
 function memoryLine() {
-  const b = main && Array.isArray(main.bucket) ? main.bucket[0] : null, info = b && FISH_MEMO[b.id];
+  const b = main && Array.isArray(main.bucket) ? main.bucket[0] : null, info = b && (FISH_MEMO[b.id] || seasonMemo(b.id));
   if (!info || !Number.isFinite(b.at) || Date.now() - b.at > 4 * 3600 * 1000) return 'さっき つりばで あったね。また あえて うれしいな';   // さいきんの 魚が なければ、あった ことだけ
   const big = Number.isFinite(b.size) && b.size >= info[1] + (info[2] - info[1]) * .65;
-  return big ? 'さっきの ' + info[0] + '、おおきかったね！' : 'さっき ' + info[0] + 'が つれたんだね。よかったね';
+  const nm = info[3] && window.TsuriEn && window.TsuriEn.lang === 'en' ? info[3] : info[0];   // きせつの さかなは 英語の なまえも もつ
+  return big ? 'さっきの ' + nm + '、おおきかったね！' : 'さっき ' + nm + 'が つれたんだね。よかったね';
 }
 // きょうの ラッキーさかな（日づけだけで きまる＝みんな おなじ。本体と おなじ 共有ファイル tsuri-daily.js）を、ペンギンが 2かいめの おはなしで 1回だけ おしえる。
 // ぬしの ばしょ・じかんは ここでは いわない（釣りの たのしみを うばわない）。日づけが ずれても エラーに ならない（ずれた 日づけの ラッキーが でる だけ）
@@ -719,7 +724,7 @@ const SLOTS = [{ x: 84, y: 368 }, { x: 276, y: 368 }, { x: 120, y: 440 }, { x: 2
 const friends = chooseFriends().map((id, i) => {
   const a = makeActor(id, PALS[id].name, BASE + 'img/friend-' + id + '-s.webp', 68, PALS[id].size, 'friend');
   a.lucky = id === 'penguin';
-  a.home = SLOTS[i]; a.x = a.home.x; a.y = a.home.y; a.speed = 30; a.state = 'idle'; a.timer = 1 + Math.random() * 4; a.cool = 0; a.talking = 0; a.bag = []; a.friend = true; a.mem = metInFishingToday().includes(id) ? memoryLine() : '';
+  a.home = SLOTS[i]; a.x = a.home.x; a.y = a.home.y; a.speed = 30; a.state = 'idle'; a.timer = 1 + Math.random() * 4; a.cool = 0; a.talking = 0; a.bag = []; a.friend = true; a.mem = metInFishingToday().includes(id) ? memoryLine : '';   // ひとことは 話す 時に つくる（おへやの 表 tsuri-tank.js は あとから 読まれる ため）
   a.el.setAttribute('aria-hidden', 'true');
   return a;
 });
@@ -845,7 +850,7 @@ function render() {
 // ─── ともだちの ひとこと ───
 function lineFor(f, first) {
   const p = PALS[f.id];
-  if (f.mem) { const m = f.mem; f.mem = ''; return HELLO[curTime] + '！ ' + m; }   // 釣りで あった 子は、さいしょの ひとことで それを いう（1回だけ）
+  if (f.mem) { const m = typeof f.mem === 'function' ? f.mem() : f.mem; f.mem = ''; return HELLO[curTime] + '！ ' + m; }   // 釣りで あった 子は、さいしょの ひとことで それを いう（1回だけ）
   if (first) return HELLO[curTime] + '！ ' + p.hello;
   if (f.lucky) { f.lucky = false; const l = luckyLine(); if (l) return l; }   // ペンギンの 2かいめの おはなし：きょうの ラッキーさかな
   if (!f.bag.length) {
@@ -1352,6 +1357,8 @@ addEventListener('load', () => {
   const MONTH = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   if (E.add) E.add({ ex: { 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, rules: [
     [/^きょうのラッキーさかなは「(.+)」。みんなおなじだよ$/, (_, f) => "Today's lucky fish is the " + (E.h && E.h.nmFish ? E.h.nmFish(f) : f) + '. Everyone has the same one!'],   // ありがとうの ほしぞら：名前は そのまま（「さん」は 英語に ない）。月は 月の なまえ
+    // 釣りで あった 子の さいしょの ひとこと＝「あいさつ！ さっき ○○が つれたんだね…」。表の あいさつの きまりは 決まった 文だけ 引く ので、あとの 文（さっきの 魚）は E.t で 訳して あいさつを つなぐ
+    [/^(おはよう|こんにちは|こんばんは)！(さっき.+)$/, (_, g, rest) => { const r = E.t(rest); return r === rest ? null : ({ 'おはよう': 'Good morning', 'こんにちは': 'Hello', 'こんばんは': 'Good evening' })[g] + '! ' + r; }],
     [/^(.+)さん、ありがとう$/, (_, n) => n + ', thank you!'], [/^(.+)さん$/, (_, n) => n],
     [/^(\d{1,2})がつ$/, (_, m) => MONTH[Number(m)] || null], [/^(\d{1,2})がつにきてくれたよ$/, (_, m) => MONTH[Number(m)] ? 'Visited in ' + MONTH[Number(m)] + '.' : null]
   ] });

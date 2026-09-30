@@ -10,6 +10,9 @@
 //   ・めずらしさ・ぬし：本体と おなじ いみ。★は しゅるいの めずらしさ（スペシャル＝★4）、その子の ぬしを つった ことが あれば（save.fish[番号].nushi）＋1 で ★5。
 //   ・ほかの ページ（ひろば など）から ひらく時：window.TsuriTank.open()。このファイルより先に window.TsuriTankConfig = {base:'../', noButton:true} を置く
 //     （base：img/ の場所の まえに つける／noButton：「すいそう」ボタンを ページに 足さない）。#scene（data-time・色）と #friend-a・#friend-b の絵が ページに あること。
+//   ・まぼろし（30〜33ばん）・きせつの さかな（34〜45ばん）も、つった ら およぐ・だなの おくりものにも ならぶ。ずかんの かず（シールちょう ○/30）には かぞえない（あえなくても こまらない）。
+//     本体が Tsuri.all・Tsuri.season() を 出す ページでは そちらを つかい、ひろばの ページ（本体が ない）では 下の 写し（LEGEND_COPY・SEASON_COPY）で おぎなう。写しは 検査が 本体の ソースと 突きあわせる。
+//   ・しゃしんの ふだ：ゲームの なまえ・レベル・つれた かず・シールちょう・あそべる ばしょ（URL は しゃしんカードだけの れいがい・マスター 許可。作者の なまえは いれない）。動画の コマ（frame の video）には URL・レベルを いれない。
 (() => {
   'use strict';
   const scene = document.getElementById('scene');
@@ -32,7 +35,31 @@
     ['つきみまんぼう','🐟',80,200,3],['ひだまりえい','🐟',40,120,3],['みかづきたちうお','🐟',60,130,3],['しゃぼんだまうお','🐠',5,15,3],['みずいろのこ','🐟',12,30,3],
     ['みんとのこ','🐟',12,30,3],['あぷりこっとのこ','🐟',12,30,3],['らべんだーのこ','🐟',12,30,3],['きんのまるごい','🐟',40,90,4],['まるくじら','🐳',200,400,4]
   ].map(([name, icon, min, max, rare], id) => ({ id, name, icon, min, max, rare }));
-  const fishList = () => { const t = window.Tsuri && window.Tsuri.all; const l = typeof t === 'function' ? t() : t; return Array.isArray(l) && l.length ? l : FISH_COPY; };
+  // まぼろし（30〜33ばん）と きせつの さかな（34〜45ばん）の 写し。本体の FISH の うしろに たす ならびと おなじ（本体は ならびじゅんを かえない やくそく）
+  const LEGEND_COPY = [['つきあかりのきんぎょ','🐠',20,40],['ほしくずのこい','🐟',60,120],['しんじゅのたい','🐠',40,90],['にじいろくじら','🐳',300,600]]
+    .map(([name, icon, min, max], i) => ({ id: 30 + i, name, icon, min, max, rare: 5, legend: true }));
+  // [名前, 絵文字, 最小cm, 最大cm, English]。月は ならびじゅん（1がつ＝34ばん）
+  const SEASON_COPY = [['ふくだるまうお','🎍',20,45,'Lucky Daruma Fish'],['まめまきふぐ','🐡',10,25,'Bean-Toss Puffer'],['ひなあられうお','🐠',12,30,'Hina Festival Fish'],['さくらふぶきうお','🐟',15,40,'Cherry Blizzard Fish'],
+    ['こいのぼりごい','🐟',30,70,'Carp Streamer Koi'],['あじさいうお','🐟',10,28,'Hydrangea Fish'],['たなばたほしうお','🐟',15,40,'Star Festival Fish'],['かきごおりだこ','🐙',15,45,'Shaved Ice Octopus'],
+    ['おつきみうさぎうお','🐟',15,40,'Moon-Viewing Bunny Fish'],['ハロウィンかぼちゃうお','🐡',15,40,'Pumpkin Lantern Fish'],['もみじがれい','🐟',20,50,'Maple Flounder'],['ゆきだるまうお','🐠',15,40,'Snowman Fish']]
+    .map(([name, icon, min, max, en], i) => ({ id: 34 + i, name, icon, min, max, rare: 3, season: i + 1, en }));
+  // ずかんの さかな（ふつう＋まぼろし）。ひろばの ページには 本体が ないので、まぼろしは 写しで おぎなう
+  const fishList = () => { const t = window.Tsuri && window.Tsuri.all, l0 = typeof t === 'function' ? t() : t, l = Array.isArray(l0) && l0.length ? l0 : FISH_COPY; return l.length >= 34 ? l : l.concat(LEGEND_COPY.filter(f => f.id >= l.length)); };
+  // きせつの さかな。ずかんの かずには いれない。本体が Tsuri.season() で なまえ・絵・大きさを 出して いれば それを つかい、なければ（ひろば など）写しを つかう。英語の 時は 英語の なまえ
+  const seasonList = () => {
+    let api = []; try { const T = window.Tsuri, r = T && typeof T.season === 'function' ? T.season() : []; api = Array.isArray(r) ? r : []; } catch { api = []; }
+    const en = !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+    return SEASON_COPY.map(c => {
+      const f = { ...c }, a = api.find(x => x && x.id === c.id && x.month === c.season);
+      if (a) { if (typeof a.name === 'string' && a.name) f.name = a.name; if (typeof a.icon === 'string' && a.icon) f.icon = a.icon; if (Number.isFinite(a.min) && Number.isFinite(a.max) && a.min > 0 && a.max > a.min) { f.min = a.min; f.max = a.max; } }
+      else if (en) f.name = c.en;
+      return f;
+    });
+  };
+  const kinds = () => fishList().concat(seasonList());   // すいそう・だなに ならぶ ぜんぶ（0〜45ばん）
+  const inBook = r => !r.fish.legend && !r.fish.season;   // ずかん（シールちょう）に かぞえる のは ふつうの 30しゅるいだけ
+  const SHARE_URL = 'aohozomi.github.io/marufuwa-tsuri';   // しゃしんカードに ちいさく（マスター 許可の れいがい。作者の なまえは いれない）
+  const levelOfXp = xp => Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, Number(xp) || 0) / 20)));   // 本体の つりびと レベルと おなじ しき（へらない・くらべない）
   const STAR = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 };   // めずらしさ（本体と おなじ：スペシャル＝★4。その子の「ぬし」を つった ことが あれば ＋1 で ★5）
   const starCount = (f, nushi) => Math.min(5, (STAR[f.rare] || 1) + (nushi ? 1 : 0));
   const starsOf = (f, nushi) => '★'.repeat(starCount(f, nushi)) + '☆'.repeat(5 - starCount(f, nushi));
@@ -45,7 +72,7 @@
   const readTank = () => { try { const d = JSON.parse(localStorage.getItem(TANK_KEY)); if (d && typeof d === 'object') return { seen: d.seen && typeof d.seen === 'object' ? d.seen : {}, placed: Array.isArray(d.placed) ? d.placed.filter(okPlaced) : [], sound: typeof d.sound === 'boolean' ? d.sound : undefined, soundMain: typeof d.soundMain === 'boolean' ? d.soundMain : undefined }; } catch {} return { seen: {}, placed: [] }; };
   let tank = readTank();
   const saveTank = () => { try { localStorage.setItem(TANK_KEY, JSON.stringify(tank)); } catch {} };
-  const residents = () => { const s = readSave(); return fishList().filter(f => s.fish[f.id] && s.fish[f.id].count > 0).map(f => ({ fish: f, count: s.fish[f.id].count, best: Number(s.fish[f.id].best) || f.min, nushi: !!s.fish[f.id].nushi })); };
+  const residents = () => { const s = readSave(); return kinds().filter(f => s.fish[f.id] && s.fish[f.id].count > 0).map(f => ({ fish: f, count: s.fish[f.id].count, best: Number(s.fish[f.id].best) || f.min, nushi: !!s.fish[f.id].nushi })); };
   const newArrivals = () => {
     tank = readTank();   // 別のタブや、記録のリセットで かわっていても、いつも いまの記録から数える
     const res = residents();
@@ -223,10 +250,12 @@
 .tk-card .tk-cardname{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:1.1rem;font-weight:900;line-height:1.4}
 .tk-card .tk-tag{background:#3aa0d8;color:#fff;font-size:.7rem;border-radius:9px;padding:0 8px;line-height:1.7}
 .tk-card .tk-newburst{background:#ffd34d;color:#8a4b00;font-size:.7rem;font-weight:900;padding:1px 8px;border-radius:10px;transform:rotate(-8deg);border:2px solid #fff;box-shadow:0 0 0 2px #f0b400}
-.tk-card dl{margin:4px 0 0;display:grid;grid-template-columns:auto 1fr;gap:1px 10px;align-items:baseline;font-size:.82rem}
-.tk-card dt{color:#506874}.tk-card dd{margin:0;font-weight:800}
+.tk-card dl{margin:4px 0 0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:1px 10px;align-items:baseline;font-size:.82rem}
+.tk-card dt{color:#506874;white-space:nowrap}.tk-card dd{margin:0;font-weight:800;overflow-wrap:anywhere}   /* ラベルは 1行（せまい 画面・もじ おおきくで「さ・い・だ・い」と たてに ならばない） */
 .tk-card .tk-big{font-size:1.3rem;color:#e0407c;line-height:1.3}.tk-card .tk-stars{color:#e0a61c;letter-spacing:.08em}
 .tk-card .tk-cardart{flex:none;font-size:3rem;line-height:1;text-align:center;width:3.6rem}
+#tk.tk-tiny .tk-card .tk-cardart{display:none}   /* ちいさな がめん（およそ 340px いか）は かざりの 絵を はぶいて もじに はばを 使う（絵は 水槽の 魚で 見える） */
+#tk.tk-tiny .tk-card .tk-big{font-size:1.1rem}
 .tk-card .tk-cardclose{margin-top:6px;min-height:40px;width:100%;padding:2px 12px;font-size:.9rem}
 .tk-card[hidden],.tk-empty[hidden],.tk-tray[hidden],.tk-photo[hidden]{display:none}
 .tk-empty{z-index:8;left:0;top:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:#fff;font-weight:800;line-height:1.7;text-shadow:0 1px 4px #0a3a5599;padding:12px;pointer-events:none;white-space:pre-line;font-size:.9rem}
@@ -398,6 +427,7 @@
     water.style.borderRadius = (14 * s).toFixed(1) + 'px'; says.style.fontSize = (13 * s).toFixed(1) + 'px'; says.style.borderRadius = (16 * s).toFixed(1) + 'px';
     const r = water.getBoundingClientRect();
     W = Math.max(160, r.width); H = Math.max(90, r.height);
+    dlg.classList.toggle('tk-tiny', W < 270);   // ちいさな がめん：カードの 絵を はぶく
     unit = clamp(W / 360, .6, 1.5); floorY = H * .82;
     water.style.setProperty('--h', Math.round(H) + 'px');
     water.querySelectorAll('.tk-bub').forEach(b => b.style.setProperty('--h', Math.round(H) + 'px'));
@@ -425,7 +455,7 @@
     if (f.icon === '🐙') return { y0: .72, y1: .9, kind: 'crawl' };
     if (f.icon === '🪼') return { y0: .1, y1: .55, kind: 'float' };
     if (f.icon === '🦑') return { y0: .25, y1: .62, kind: 'jet' };
-    if ([4, 14, 15, 21].includes(f.id)) return { y0: .6, y1: .84, kind: 'swim' };
+    if ([4, 14, 15, 21, 44].includes(f.id)) return { y0: .6, y1: .84, kind: 'swim' };
     if (f.icon === '🐳' || f.icon === '🐬' || f.icon === '🐢') return { y0: .22, y1: .58, kind: 'glide' };
     return { y0: .1, y1: .7, kind: 'swim' };
   };
@@ -656,7 +686,7 @@
     if (napping) { sayTimer = setTimeout(autoSay, 9000); return; }
     const cur = fishes.filter(o => !o.leaving).map(o => o.f), time = scene.dataset.time || 'hiru', roll = Math.random();
     let text;
-    const left = fishList().filter(f => !f.legend).length - residents().filter(r => !r.fish.legend).length;   // ずかんは まぼろしを かぞえない
+    const left = fishList().filter(f => !f.legend).length - residents().filter(inBook).length;   // ずかんは まぼろしを かぞえない
     if (!cur.length) text = pick(SAY.empty);
     else if (roll < .16 && left > 0 && left <= 5) text ='ずかんまで あと ' + left + 'しゅるい。ゆっくり あいにいこうね。';
     else if (roll < .2 && left === 0) text = 'ずかん、ぜんぶ そろったね。ありがとう。';
@@ -685,14 +715,14 @@
     resetZen();
   }
   // さかなの データ（さわると出る）。ひとことは、まるふわから。くらべない：出るのは自分の記録だけ
-  const CARD_SAY = { 1: 'ゆったり およいでるね。', 2: 'ちょっと めずらしい こだよ。', 3: 'めずらしい こ！ あえて うれしいね。', 4: 'スペシャルな こだよ！ きらきら してるね。', 5: 'まぼろしの こ…！ ほんとうに いたんだ。' };
+  const CARD_SAY = { 1: 'ゆったり およいでるね。', 2: 'ちょっと めずらしい こだよ。', 3: 'めずらしい こ！ あえて うれしいね。', 4: 'スペシャルな こだよ！ きらきら してるね。', 5: 'まぼろしの こ…！ ほんとうに いたんだ。', season: 'きせつの さかなだよ。また らいねんも あえるね。' };
   const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
   function touchFish(o, viaKey) {
     o.pop = 1; o.hold = 4; o.vx *= .2;
-    const left = fishList().filter(f => !f.legend).length - residents().filter(r => !r.fish.legend).length;
-    const line = o.fresh ? (left > 0 && left <= 5 ? 'はじめまして！ ずかんまで あと ' + left + 'しゅるい。' : 'はじめまして！') : (o.nushi ? 'ぬしだよ！ すごいね。' : CARD_SAY[o.f.rare] || CARD_SAY[1]);   // 「あと○」は 5しゅるい以下の時だけ（遠い時は重荷になる）
+    const left = fishList().filter(f => !f.legend).length - residents().filter(inBook).length;
+    const line = o.fresh ? (o.f.season ? 'はじめまして！ きせつの さかなだよ。' : left > 0 && left <= 5 ? 'はじめまして！ ずかんまで あと ' + left + 'しゅるい。' : 'はじめまして！') : (o.nushi ? 'ぬしだよ！ すごいね。' : o.f.season ? CARD_SAY.season : CARD_SAY[o.f.rare] || CARD_SAY[1]);   // 「あと○」は 5しゅるい以下の時だけ（遠い時は重荷になる）
     const name = mk('div', 'tk-cardname'); name.append(mk('span', '', o.f.name));
-    if (o.nushi) name.append(mk('span', 'tk-tag', 'ぬし')); else if (o.f.rare === 5) name.append(mk('span', 'tk-tag tk-myth', 'まぼろし')); else if (o.f.rare === 4) name.append(mk('span', 'tk-tag', 'スペシャル'));
+    if (o.nushi) name.append(mk('span', 'tk-tag', 'ぬし')); else if (o.f.rare === 5) name.append(mk('span', 'tk-tag tk-myth', 'まぼろし')); else if (o.f.rare === 4) name.append(mk('span', 'tk-tag', 'スペシャル')); else if (o.f.season) name.append(mk('span', 'tk-tag', 'きせつ'));
     if (o.fresh) name.append(mk('span', 'tk-newburst', 'NEW'));
     const dl = mk('dl'), big = mk('span', 'tk-big', o.best.toFixed(2) + 'cm'), stars = mk('span', 'tk-stars', starsOf(o.f, o.nushi)); stars.setAttribute('aria-label', 'めずらしさ ' + starCount(o.f, o.nushi) + ' / 5');
     const row = (k, v) => { const dt = mk('dt', '', k), dd = mk('dd'); dd.append(v); dl.append(dt, dd); };
@@ -782,8 +812,8 @@
   function giftsNow() {
     let raw = readSave().gifts;   // 記録（本体が すぐ 書く）を 先に 読む＝ひろばの ページでも 同じ。なければ 本体の Tsuri.gifts()
     if (!Array.isArray(raw)) { try { const T = window.Tsuri; raw = T && typeof T.gifts === 'function' ? T.gifts() : []; } catch { raw = []; } }
-    const fl = fishList();
-    return (Array.isArray(raw) ? raw : []).filter(g => g && Number.isInteger(g.id) && g.id >= 0 && g.id < fl.length && Number.isFinite(g.size)).slice(0, SHELF.max).map(g => { const f = fl[g.id]; return { id: g.id, name: f.name, icon: f.icon, size: Math.round(g.size * 10) / 10, from: palName(g.pal), word: giftWord(g.word), at: Number.isFinite(g.at) ? g.at : 0 }; });
+    const fl = new Map(kinds().map(f => [f.id, f]));   // 0〜45ばん（きせつの さかなも おくれる：本体の giftable は まぼろしと ぬしだけ ことわる）
+    return (Array.isArray(raw) ? raw : []).filter(g => g && Number.isInteger(g.id) && fl.has(g.id) && Number.isFinite(g.size)).slice(0, SHELF.max).map(g => { const f = fl.get(g.id); return { id: g.id, name: f.name, icon: f.icon, size: Math.round(g.size * 10) / 10, from: palName(g.pal), word: giftWord(g.word), at: Number.isFinite(g.at) ? g.at : 0 }; });
   }
   const artOf = id => { try { return (window.TsuriArt && window.TsuriArt[id]) || ''; } catch { return ''; } };
   function shelfSlots(n) {   // だなの 場所（へや 360×640 の 中の 位置と 大きさ）。画面の だなと しゃしんで おなじ 計算
@@ -974,11 +1004,34 @@
     // ひづけ（名前は入れない）
     const d = new Date(), stamp = d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate();
     ctx.font = '700 11px system-ui,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#7a6a55'; ctx.fillText(stamp, ROOM.w - 10, ROOM.h - 10);
-    // 記念の ふだ：ゲームの なまえ・つれた かず・シールちょう（作者の なまえと URL は いれない）
-    const sv = readSave(), total = Number(sv.total) || 0, baseN = fishList().filter(f => !f.legend).length, gotN = residents().filter(r => !r.fish.legend).length;
-    ctx.save(); ctx.fillStyle = '#fffdf6ee'; ctx.strokeStyle = '#e3d3b0'; ctx.lineWidth = 2; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(10, ROOM.h - 68, 190, 56, 14); else ctx.rect(10, ROOM.h - 68, 190, 56); ctx.fill(); ctx.stroke();
-    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#7a4b34'; ctx.font = '800 14px system-ui,sans-serif'; ctx.fillText(TE('まるふわ つりびより'), 22, ROOM.h - 47);
-    ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText(TE('つれた かず ' + total + '　シールちょう ' + gotN + ' / ' + baseN), 22, ROOM.h - 27); ctx.restore();
+    // 記念の ふだ：ゲームの なまえ・レベル・つれた かず・シールちょう・あそべる ばしょ（作者の なまえは いれない）。
+    //   URL は「しゃしんカード」だけの れいがい（マスター 許可）。動画の コマ（o.video）には URL・レベルを いれず、まえと おなじ ふだ。レベルは へらない・くらべない
+    //   はばは もじに あわせて ひろげる（英語でも 切れない）。ふだの 右はしは 日づけ（右下）に かからない ところまで
+    const sv = readSave(), total = Number(sv.total) || 0, baseN = fishList().filter(f => !f.legend).length, gotN = residents().filter(inBook).length, full = !o.video;
+    const ttl = TE('まるふわ つりびより'), cnt = TE('つれた かず ' + total + '　シールちょう ' + gotN + ' / ' + baseN), lvTx = full ? 'Lv. ' + levelOfXp(sv.xp) : '';   // 本体の しゃしんカードと おなじ 書きかた「Lv. N」（どの ことばでも おなじ）
+    ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    let cw = 190;
+    if (full) {
+      ctx.font = '800 14px system-ui,sans-serif'; const wT = ctx.measureText(ttl).width;
+      ctx.font = '700 11px system-ui,sans-serif'; const wL = ctx.measureText(lvTx).width;
+      ctx.font = '700 11.5px system-ui,sans-serif'; const wC = ctx.measureText(cnt).width;
+      ctx.font = '700 9.5px system-ui,sans-serif'; const wU = ctx.measureText(SHARE_URL).width;
+      cw = Math.min(ROOM.w - 100, Math.max(190, Math.ceil(Math.max(wT + 14 + wL, wC, wU)) + 24));
+    }
+    ctx.fillStyle = '#fffdf6ee'; ctx.strokeStyle = '#e3d3b0'; ctx.lineWidth = 2; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(10, ROOM.h - 68, cw, 56, 14); else ctx.rect(10, ROOM.h - 68, cw, 56); ctx.fill(); ctx.stroke();
+    const inner = cw - 24;
+    ctx.fillStyle = '#7a4b34'; ctx.font = '800 14px system-ui,sans-serif';
+    if (full) {
+      ctx.font = '700 11px system-ui,sans-serif'; const wL2 = Math.min(ctx.measureText(lvTx).width, inner * .4);
+      ctx.font = '800 14px system-ui,sans-serif'; ctx.fillText(ttl, 22, ROOM.h - 51, Math.max(20, inner - wL2 - 10));
+      ctx.textAlign = 'right'; ctx.fillStyle = '#9a6a52'; ctx.font = '700 11px system-ui,sans-serif'; ctx.fillText(lvTx, 10 + cw - 12, ROOM.h - 51, inner * .4); ctx.textAlign = 'left';
+      ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText(cnt, 22, ROOM.h - 35, inner);
+      ctx.fillStyle = '#7f8f98'; ctx.font = '700 9.5px system-ui,sans-serif'; ctx.fillText(SHARE_URL, 22, ROOM.h - 21, inner);
+    } else {
+      ctx.fillText(ttl, 22, ROOM.h - 47);
+      ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText(cnt, 22, ROOM.h - 27);
+    }
+    ctx.restore();
     if (o.dataURL) return cvs.toDataURL(o.type || 'image/png', o.quality);   // 裏の 画面でも すぐ 返る（toBlob は 1びょうに 1回に なる）
     return new Promise(res => cvs.toBlob(b => res(b), 'image/png'));
   }
@@ -1198,7 +1251,7 @@
 
   // ─── English mode（tsuri-en.js が あって 英語の 時だけ）：おくりもの だなの 文と、総司令部の 表に まだ ない 文を 足す ───
   {
-    const EN = { ex: { 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
+    const EN = { ex: { 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
       [/^おくりものだな。もらったさかなが(\d+)ひき。おすと、ひらくよ。$/, (_, n) => 'Gift Shelf. ' + n + ' fish received. Press to open.'],
       [/^おくりものだなをひらいたよ。もらったさかなが(\d+)ひきいるよ。$/, (_, n) => 'Opened the Gift Shelf. There ' + (n === '1' ? 'is 1 fish' : 'are ' + n + ' fish') + ' you received.']
     ] };
@@ -1206,5 +1259,5 @@
     addEventListener('load', regEn);
   }
 
-  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), version: 4 };
+  window.TsuriTank = { frame: o => snapshot(Object.assign({ video: true, dataURL: true, type: 'image/jpeg', quality: .9 }, o)), open, close, isOpen, residents: () => residents().map(r => ({ id: r.fish.id, count: r.count, best: r.best, nushi: r.nushi })), placed: () => tank.placed.map(p => ({ ...p })), gifts: () => giftsNow(), giftTables: () => ({ pals: [...PAL_NAME], words: [...GIFT_WORD] }), kindTables: () => ({ legend: LEGEND_COPY.map(f => ({ ...f })), season: SEASON_COPY.map(f => ({ ...f })), url: SHARE_URL, levelOf: xp => levelOfXp(xp) }), sound: () => sfx, listening: () => listen, secret, replay, state: () => ({ starry, riceGone, napping, combos: { ...comboOn } }), version: 5 };
 })();
