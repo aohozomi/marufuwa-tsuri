@@ -576,7 +576,7 @@
   document.documentElement.lang = 'en';
   // 英語は 日本語より 文字が ながい：せまい 画面（320〜360px）で ボタンの もじが はみ出さない ように、英語の ときだけ 少し ちいさく・折り返す（本体の CSS は さわらない）
   { const css = document.createElement('style'); css.id = 'tsuri-en-css';
-    css.textContent = '@media (max-width:380px){html[lang=en] .hud>button,html[lang=en] .hud>a{font-size:.8rem;padding-left:4px;padding-right:4px;white-space:normal;line-height:1.15}html[lang=en] #tk-open{white-space:nowrap}html[lang=en] #tk-title{font-size:.8rem}}';
+    css.textContent = '@media (max-width:380px){html[lang=en] .hud>button,html[lang=en] .hud>a{font-size:.8rem;padding-left:4px;padding-right:4px;white-space:normal;line-height:1.15}html[lang=en] #tk-open{white-space:nowrap}html[lang=en] #tk-title{font-size:.8rem}}html[lang=en] #scene .bubble{white-space:normal;width:max-content;max-width:min(230px,84%);text-align:center;line-height:1.2;padding:3px 10px}';
     (document.head || document.documentElement).append(css); }
   // ページの 題と 説明：ふだんは 釣りの もの。ひろば など べつの ページは <html data-en-page> で この 既定を とばして、TsuriEn.page({title, description}) で 自分の 題・説明を きめる
   const meta = document.querySelector('meta[name=description]');
@@ -589,17 +589,19 @@
   function start() {
     logo(); patchData(); walk(document.body);
     let queue = new Set(), scheduled = false;
-    const flush = () => { scheduled = false; const items = [...queue]; queue = new Set(); items.forEach(n => { const el = n.nodeType === 1 ? n : n.parentElement; if (el && el.isConnected) walk(el); }); };
+    // ふきだしは 英語だと ながい：しーんの はしに いる なかまの ふきだしが きれる ので、はみ出した ぶんだけ ずらす（本体の CSS・JS は さわらない）
+    const fitBubble = b => { const sc = b.closest('#scene'); if (!sc) return; const go = () => { if (!b.isConnected || b.offsetParent !== sc) return; b.style.marginLeft = ''; const w = b.offsetWidth, x = b.offsetLeft, W = sc.clientWidth; if (!w) return; const l = x - w / 2, r = x + w / 2; let dx = 0; if (l < 4) dx = 4 - l; else if (r > W - 4) dx = W - 4 - r; if (dx) b.style.marginLeft = Math.round(dx) + 'px'; }; go(); requestAnimationFrame(go); };   // 描く まえに その場で 1回（きれた まま 見えない よう）、つぎの コマで もう1回。あらわれる ときの 拡大（アニメ）に よらない よう、レイアウトの 値（offsetWidth・offsetLeft）で はかる
+    const flush = () => { scheduled = false; const items = [...queue]; queue = new Set(); items.forEach(n => { const el = n.nodeType === 1 ? n : n.parentElement; if (el && el.isConnected) { walk(el); const b = el.closest && el.closest('.bubble'); if (b) fitBubble(b); } }); };
     const mo = new MutationObserver(recs => {
       for (const r of recs) {
-        if (r.type === 'attributes') { translateAttrs(r.target); continue; }
+        if (r.type === 'attributes') { if (r.attributeName === 'hidden') { if (r.target.classList && r.target.classList.contains('bubble')) fitBubble(r.target); continue; } translateAttrs(r.target); continue; }
         if (r.type === 'characterData') { queue.add(r.target); continue; }
         r.addedNodes.forEach(n => { if (n.nodeType === 1 || n.nodeType === 3) queue.add(n); });
         if (r.type === 'childList' && r.target.nodeType === 1) queue.add(r.target);
       }
       if (!scheduled) { scheduled = true; Promise.resolve().then(flush); }
     });
-    mo.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['aria-label', 'alt', 'title', 'placeholder'] });
+    mo.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['aria-label', 'alt', 'title', 'placeholder', 'hidden'] });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
