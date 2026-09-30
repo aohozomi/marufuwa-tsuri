@@ -1446,7 +1446,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function drawPlazaNote() {   // 「ひろば」って なに？：3びき つって なれてから、ひとこと（せかさない・かならず ではない）
     const box = $('plaza-note'); if (!box || document.readyState === 'loading') return;
-    box.hidden = save.total < 3; box.textContent = L('ひろばでは、おにぎりキャッチや まるふわの おへやで あそべるよ。', 'In the plaza, you can play Onigiri Catch and visit Marufuwa' + String.fromCharCode(39) + 's room.');
+    box.hidden = save.total < 3; box.textContent = L('ひろばでは、まるふわの おへやで あそべるよ。', 'In the plaza, you can visit Marufuwa' + String.fromCharCode(39) + 's room.');
   }
   function hud() {
     $('total').textContent = String(save.total); drawPlazaNote();
