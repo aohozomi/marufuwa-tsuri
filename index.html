@@ -329,6 +329,10 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 #scene[data-phase=reel] #shadow{animation:wander 1400ms linear infinite alternate}
 @keyframes wander{from{translate:-120% -14%}to{translate:120% 14%}}
 .puff{position:absolute;z-index:6;width:16px;height:16px;border-radius:50%;background:#fff;pointer-events:none}
+#line-pull{stroke:#e3f3ff;stroke-opacity:.85;stroke-width:2}   /* ひきの てごたえ：糸の はり＝ゆるい（うすい あお）→ふつう（きいろ）→ぴん（だいだい）。いろだけは「うごきを へらす」でも かわる */
+#line-pull[data-t="1"]{stroke:#fff1a0;stroke-opacity:.95;stroke-width:2.8}
+#line-pull[data-t="2"]{stroke:#ffae5a;stroke-opacity:1;stroke-width:3.8}
+.drop{position:absolute;z-index:4;border-radius:50%;background:#fff;border:1px solid #8fd0f2;pointer-events:none}   /* みずしぶき */
 .ripple{position:absolute;z-index:2;width:9%;aspect-ratio:2/1;transform:translate(-50%,-50%);border:3px solid #ffffffd9;border-radius:50%;pointer-events:none}
 .hop{position:absolute;z-index:4;font-size:1.3rem;pointer-events:none;transform:translate(-50%,-50%)}
 .drift{opacity:.55;animation:drift var(--lap,38s) linear infinite}
@@ -685,6 +689,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       <line id="line-a" stroke="#fff" stroke-opacity=".8" stroke-width="2" vector-effect="non-scaling-stroke"/>
       <line id="line-b" stroke="#fff" stroke-opacity=".8" stroke-width="2" vector-effect="non-scaling-stroke"/>
       <line id="line-me" stroke="#fff" stroke-opacity=".95" stroke-width="2" vector-effect="non-scaling-stroke"/>
+      <path id="rod-bend" fill="none" stroke="#8a5a2b" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke" style="visibility:hidden"/>
+      <path id="line-pull" fill="none" stroke-linecap="round" vector-effect="non-scaling-stroke" data-t="0" style="visibility:hidden"/>
     </svg>
 
     <button id="keeper" type="button" aria-label="おみせの きつねに はなしかける"><span aria-hidden="true">おみせ</span><img src="img/friend-kogitsune-s.webp" width="180" height="180" alt=""></button>
@@ -1431,11 +1437,39 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ring.style.transform = '';
   }
   function ringStop() { if (ringAnim) { ringAnim.cancel(); ringAnim = null; } }
+  // ひきの てごたえ：糸の はり（いろ）・さおの しなり・さかなの かげが いとを ひだり みぎに ひく。はり＝わが「いまだ」に ちかい ほど ぴん（ちかづく→ぴん→はなれる）。
+  // はんてい・わは かえない（見た目だけ）。「うごきを へらす」では しなり・ゆれを とめて いろの へんかだけ。1コマに 属性 2つ（rod・line）だけ かきかえる
+  let tLevel = -1, tFrame = 0;
+  function drawTension() {
+    const rp = $('line-pull'), rb = $('rod-bend'); if (!rp || !rb) return;
+    if (!reduce() && (++tFrame & 1)) return;   // 線と さおの かきなおしは 1コマ おき（30fps・おもく しない）
+    const f = feet(mine), base = {x: f.x + 3, y: f.y - 6}, tip0 = {x: f.x + 9, y: f.y - 18}, w = floatAt(mine);
+    const tau = Math.max(0, 1 - Math.abs(offBeat()) / (period * .5)), lv = tau < .3 ? 0 : tau < .72 ? 1 : 2;
+    const still = reduce(), big = fish ? (nushi || fish.legend ? 2 : fish.rare * .3 + .6) : 1;   // おおものほど おおきく しなる・ゆれる
+    const lap = ((performance.now() - wanderStart) / 1400) % 2, sway = still ? 0 : ((lap < 1 ? lap : 2 - lap) - .5) * 2;   // かげ（wander）の ひだり みぎと おなじ うごき
+    const bend = still ? 0 : tau * (2.6 + 1.2 * big), tip = {x: tip0.x + bend * .5, y: tip0.y + bend * 1.1}, mid = {x: (base.x + tip0.x) / 2, y: (base.y + tip0.y) / 2};
+    rb.setAttribute('d', 'M' + base.x.toFixed(2) + ' ' + base.y.toFixed(2) + ' Q' + mid.x.toFixed(2) + ' ' + mid.y.toFixed(2) + ' ' + tip.x.toFixed(2) + ' ' + tip.y.toFixed(2));
+    const cx = (tip.x + w.x) / 2 + sway * (2.2 + 1.3 * big) * (1 - .8 * tau), cy = (tip.y + w.y) / 2 + (still ? 0 : (1 - tau) * 1.8);   // ゆるい ほど たるんで ゆれ、ぴんに なる ほど まっすぐ
+    rp.setAttribute('d', 'M' + tip.x.toFixed(2) + ' ' + tip.y.toFixed(2) + ' Q' + cx.toFixed(2) + ' ' + cy.toFixed(2) + ' ' + w.x.toFixed(2) + ' ' + w.y.toFixed(2));
+    if (lv !== tLevel) { tLevel = lv; rp.dataset.t = String(lv); }
+    if (rp.style.visibility !== 'visible') { rp.style.visibility = rb.style.visibility = 'visible'; $('rod-me').style.visibility = $('line-me').style.visibility = 'hidden'; }
+  }
+  function tensionOff() { const rp = $('line-pull'), rb = $('rod-bend'); if (!rp || rp.style.visibility !== 'visible') return; rp.style.visibility = rb.style.visibility = 'hidden'; $('rod-me').style.visibility = $('line-me').style.visibility = ''; tLevel = -1; }
+  function splash(power) {   // みずしぶき：おおものほど おおきく（うごきを へらす ときは なし）
+    if (reduce() || !fish) return; const w = floatAt(mine), big = nushi || fish.legend ? 2 : fish.rare * .3 + .6, n = Math.round(2 + big * 3 + power);
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('i'), ang = -Math.PI * (.12 + .76 * Math.random()), far = (16 + Math.random() * 20) * (.6 + big * .6), size = 3 + Math.random() * 3 + big * 2.5;
+      d.className = 'drop'; d.setAttribute('aria-hidden', 'true'); d.style.width = d.style.height = size.toFixed(1) + 'px'; place(d, w); scene.append(d);
+      d.animate([{translate: '-50% -50%', opacity: .9, scale: '1'}, {translate: 'calc(-50% + ' + (Math.cos(ang) * far).toFixed(1) + 'px) calc(-50% + ' + (Math.sin(ang) * far).toFixed(1) + 'px)', opacity: 0, scale: '.5'}], {duration: 520, easing: 'ease-out'}).onfinish = () => d.remove();
+    }
+    const r = document.createElement('i'); r.className = 'ripple'; r.setAttribute('aria-hidden', 'true'); place(r, w); scene.append(r);
+    r.animate([{scale: '.3', opacity: .9}, {scale: String(1.5 + big * 1.2), opacity: 0}], {duration: 640, easing: 'ease-out'}).onfinish = () => r.remove();
+  }
   function spin() {
-    if (phase !== 'reel') { spinning = 0; ringStop(); return; }
+    if (phase !== 'reel') { spinning = 0; ringStop(); tensionOff(); return; }
     const ring = document.querySelector('#reel .ring'), hot = Math.abs(offBeat()) <= windowMs();
     if (!ringAnim) ring.style.transform = 'scale(' + ringSize().toFixed(4) + ')';   // animate が ない ふるい ブラウザだけ、いままでの やりかた
-    $('reel').dataset.hot = String(hot);
+    $('reel').dataset.hot = String(hot); drawTension();
     spinning = requestAnimationFrame(spin);
   }
 
@@ -1596,6 +1630,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       marufuwa.animate([{rotate: '-7deg', scale: '1 1'}, {rotate: '-20deg', scale: '.94 1.06', translate: '-8px 0'}, {rotate: '-7deg', scale: '1 1'}], {duration: 260, easing: 'ease-out'});
       judge.animate([{scale: '.6'}, {scale: '1.25'}, {scale: '1'}], {duration: 260, easing: 'ease-out'});
       if (power === 3) sparkle(); else if (power === 1) puff();
+      splash(power);
     }
     if (hp === 0) caught(); else { const stage = hp <= 2 ? 0 : hp <= Math.ceil(hpMax / 2) ? 1 : 2;   // あと 1かい／もうすぐ／もうちょっと（つぎの ひきで さいてい 2つ へるので、のこり 2いかは かならず あと 1かい）
       say(L(word + ' ' + ['あと 1かい！', 'もうすぐ！', 'もうちょっと。'][stage], ({3: 'Perfect!!', 2: 'Nice!', 1: 'So close!'})[power] + ' ' + ['One more!', 'Almost there!', 'Keep going.'][stage]), true); }
