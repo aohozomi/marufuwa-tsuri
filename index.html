@@ -1415,6 +1415,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('photo-save').href = photoURL; $('photo-save').download = photoFile.name;
     $('photo-x').href = 'https://x.com/intent/tweet?' + new URLSearchParams({text: words});
     $('photo-share').hidden = !(navigator.share && navigator.canShare && navigator.canShare({files: [photoFile]}));
+    if (!$('photo-share').hidden) $('photo-share').parentElement.prepend($('photo-share'));   // スマホは「きょうゆう」（しゃしん つき・1タップ）を いちばん さきに。「ほぞんして から Xに そえる」は うしろ
     $('photo-share').onclick = async () => { try { await navigator.share({files: [photoFile], text: words}); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (error) { status.textContent = error.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
     status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。Xは、おうちの ひと（おとな）と いっしょに つかってね。';
   }
