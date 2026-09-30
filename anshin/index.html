@@ -39,6 +39,9 @@ code{font-size:.9em;background:#eef6fa;border-radius:6px;padding:.05em .4em;word
 .pill:active{transform:translateY(4px);box-shadow:0 1px 0 var(--side),0 3px 6px #2446532b}
 a{color:#1f5f80}
 @media(prefers-reduced-motion:reduce){.pill{transition:none}.pill:active{transform:none}}
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}   /* ページを うつる とき ふわっと（本体・ひろばと 同じ。行き先が これを 持たないと ブラウザが 例外を 出す ため・総司令部 10/1） */
 </style>
 </head>
 <body>
