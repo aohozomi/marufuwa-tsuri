@@ -122,7 +122,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 #gaze{--c1:#eee6ff;--c2:#b9a2ee;--side:#8a6bd0;--ink:#33205f;min-height:68px;padding:4px 14px;font-size:.95rem}
 body.gazing main > *:not(#scene):not(.sub-actions):not(#status){display:none !important}
 body.gazing main{background:none;box-shadow:none;padding-top:4vh}
-body.gazing #take-photo,body.gazing #easy,body.gazing #release{display:none}
+body.gazing #take-photo,body.gazing #easy,body.gazing #release,body.gazing #send-gift{display:none}
 body.gazing .actions{justify-content:center;margin-top:14px}
 body.gazing #gaze{min-height:52px;opacity:.85}
 body.gazing #status{color:#244653;background:#ffffffc9;border-radius:14px;padding:4px 10px;display:inline-block}
@@ -137,10 +137,22 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 .pill{--c1:#6cc8ee;--c2:#1f86b8;--side:#125f86;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #0e4a66}
 .pill[hidden]{display:none}
 .pill.quiet{--c1:#ffffffd9;--c2:#bfe6f9b3;--side:#9cc9e0;--ink:#244653;text-shadow:none}   /* ひかえめな リンク（おうちの かたへ）。ふつうの ボタンと おなじ 色 */
-#bucket-list{display:grid;gap:6px}
-#bucket-list div{display:grid;grid-template-columns:2.4rem 1fr;align-items:center;gap:8px;border:2px solid #d5e6ed;border-radius:14px;padding:6px 10px;line-height:1.45;font-size:.9rem;background:#fff}
-#bucket-list b{font-size:1.8rem;text-align:center}
-#bucket-list small{display:block;color:#506874}
+#bucket-list,#gift-list{display:grid;gap:6px}
+#bucket-list div,#gift-list div{display:grid;grid-template-columns:2.4rem 1fr;align-items:center;gap:8px;border:2px solid #d5e6ed;border-radius:14px;padding:6px 10px;line-height:1.45;font-size:.9rem;background:#fff}
+#bucket-list div.giveable{grid-template-columns:2.4rem 1fr auto}
+#bucket-list b,#gift-list b{font-size:1.8rem;text-align:center}
+#bucket-list small,#gift-list small{display:block;color:#506874}
+/* おくりもの（14_…の しよう）：もらった さかなは バケツと べつの いれもの。ピンクの ボタンは「おくる・うけとる」 */
+.give{--c1:#ffe6ef;--c2:#ff9fbd;--side:#d9628a;--ink:#5a1230}
+#bucket-list .give{min-height:44px;padding:4px 14px;font-size:.85rem}
+#give-fish,#gift-fish{display:flex;justify-content:center;margin:6px 0 4px}
+#give-fish .art,#gift-fish .art{width:96px;height:96px}
+#give-fish span,#gift-fish span{font-size:3.4rem;line-height:1.2}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.chips button{min-height:48px;padding:4px 8px;font-size:.82rem;line-height:1.3}
+.chips button[aria-checked=true]{--c1:#ffe6ef;--c2:#ff9fbd;--side:#d9628a;--ink:#5a1230}
+#gift-word{font-weight:800}
+.photo-actions .give{min-width:140px}
 .stars{color:#e0a61c;letter-spacing:.1em;font-size:1.05rem}
 #scene{position:relative;width:100%;aspect-ratio:4/3;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;touch-action:manipulation;background:var(--sky2)}
 #scene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -317,7 +329,7 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 .logo i img.art{width:auto;height:1.15em;aspect-ratio:3/5;margin:0 .1em}
 .held[data-art="1"][data-rare="4"]{filter:drop-shadow(0 0 7px #ffd34d)}
 .held[data-art="1"][data-rare="5"]{animation:none}
-#bucket-list b .art{width:2.6rem;height:2.6rem}
+#bucket-list b .art,#gift-list b .art{width:2.6rem;height:2.6rem}
 #book-grid b .art{width:3rem;height:3rem;margin:0 auto}
 #book-grid div[data-rare="5"][data-seen=true] b[data-art="1"]{animation:none}
 #equip .art{display:inline-block;width:1.7em;height:1.7em;vertical-align:-.5em;margin:0 .1em}
@@ -330,9 +342,9 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions{gap:12px;margin:16px 0 6px;flex-wrap:wrap}
-#take-photo,#gaze,#release{flex:1 1 40%;min-height:54px}
+#take-photo,#gaze,#release,#send-gift{flex:1 1 40%;min-height:54px}
 #release{--c1:#e3fbef;--c2:#8fe0b4;--side:#3fa873;--ink:#0f4a36}
-#release[hidden]{display:none}
+#release[hidden],#send-gift[hidden]{display:none}
 #sound{flex:1 1 100%;min-height:54px}
 body.gazing #sound{flex:0 1 auto}
 /* つかいやすく する（ふだんは とじて いる）。らくちん・ふるえ を、おとなも こどもも えらべる。ひらいた／とじた と えらんだ ものは おぼえて おく */
@@ -430,20 +442,20 @@ dialog .close{display:block;margin:auto;min-width:160px}
 :root[data-night=true]{color:#e8f1f8;background:#0d1a2e}
 :root[data-night=true] #backdrop{filter:brightness(.3) saturate(1.1)}
 :root[data-night=true] main{background:#13253d;box-shadow:0 12px 30px #0007}
-:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear){color-scheme:dark}
+:root[data-night=true] :is(main,#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift){color-scheme:dark}
 :root[data-night=true] .actions{background:linear-gradient(#13253d00,#13253d 28%)}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
-:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear)::backdrop{background:#000000b3}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift){color:#e8f1f8;background:#13253d;border-color:#2d4d70}
+:root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift)::backdrop{background:#000000b3}
 /* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear) button:focus-visible{outline-color:#a9dcff}
-:root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small{color:#a9bfd2}
-:root[data-night=true] #bucket-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not(.give):not([aria-checked=true]):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#give,#gift) button:focus-visible{outline-color:#a9dcff}
+:root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small,:root[data-night=true] #gift-list small{color:#a9bfd2}
+:root[data-night=true] #bucket-list div,:root[data-night=true] #gift-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
 :root[data-night=true] #book-grid div[data-seen=false]{background:#16283f;color:#9db3c6}
 :root[data-night=true] #book-grid div[data-rare="4"][data-seen=true]{background:#2c2a1e;border-color:#b98a1a}
 :root[data-night=true] #book-grid div[data-rare="5"][data-seen=true]{background:linear-gradient(135deg,#3b2a3d,#39351f,#213b2b,#203549,#2f2a4b);border-color:#8c72c9}
@@ -587,6 +599,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <button id="main-button" type="button">なげる</button>
     <button id="take-photo" type="button" hidden>しゃしんを とる</button>
     <button id="release" type="button" hidden>そっと にがす</button>
+    <button id="send-gift" class="give" type="button" hidden>さかなを おくる</button>
     <button id="easy" type="button" aria-pressed="false">らくちん：OFF</button>
     <button id="gaze" type="button" aria-pressed="false">ながめる</button>
   </div>
@@ -627,6 +640,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <p class="count">さいきん つった 10ぴき。つりばを かえても、きえないよ。</p>
     <div id="bucket-list"></div>
     <p id="release-note" class="count" hidden></p>
+    <p id="gift-note" class="count" hidden>ぬしと まぼろしの こは、じぶんで つった ひとだけの たからもの。おくれないよ。</p>
+    <h3 id="gift-head" style="margin:10px 0 4px;font-size:1rem" hidden>もらった さかな</h3>
+    <div id="gift-list" hidden></div>
     <h3 style="margin:10px 0 4px;font-size:1rem">ひろった かざり</h3>
     <p id="decor-list" style="margin:0 0 12px;line-height:1.8"></p>
     <h3 style="margin:10px 0 4px;font-size:1rem">あった なかま</h3>
@@ -655,6 +671,31 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <input id="gear-bucket" type="text" maxlength="8" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done">
     <p class="count" id="gear-note" role="status"></p>
     <button class="close" type="button" id="close-gear">とじる</button>
+  </dialog>
+
+  <dialog id="give" aria-labelledby="give-title">
+    <h2 id="give-title">さかなを おくる</h2>
+    <div id="give-fish" aria-hidden="true"></div>
+    <p class="count" id="give-what"></p>
+    <p class="count" id="give-from"></p>
+    <p class="count">おくっても、じぶんの さかなは へらないよ。もらった ひとの バケツに はいるよ。</p>
+    <h3 id="give-words-label" style="margin:6px 0;font-size:1rem;text-align:center">ひとこと（えらんでね）</h3>
+    <div class="chips" id="give-words" role="radiogroup" aria-labelledby="give-words-label"></div>
+    <div class="photo-actions"><button id="give-go" class="give" type="button">リンクを おくる</button></div>
+    <p class="count" id="give-status" role="status">リンクを おくる ときは、おうちの ひとと いっしょに つかってね。</p>
+    <button class="close" type="button" id="close-give">とじる</button>
+  </dialog>
+
+  <dialog id="gift" aria-labelledby="gift-title">
+    <h2 id="gift-title">おくりものが とどいたよ</h2>
+    <div id="gift-fish" aria-hidden="true"></div>
+    <p class="count" id="gift-what"></p>
+    <p class="count" id="gift-from"></p>
+    <p class="count" id="gift-word"></p>
+    <p class="count" id="gift-say" role="status"></p>
+    <p class="count" id="gift-keep"></p>
+    <p class="count" id="gift-return"></p>
+    <div class="photo-actions" id="gift-actions"></div>
   </dialog>
 
   <dialog id="shop" aria-labelledby="shop-title">
@@ -807,6 +848,13 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (Number.isInteger(other.xp)) { const xp = Math.max(save.xp || 0, other.xp, (save.xp || 0) + other.xp - was(['xp'])); if (xp !== (save.xp || 0)) { save.xp = xp; changed = true; } }
     if (Number.isInteger(other.released)) { const released = Math.max(save.released || 0, other.released, (save.released || 0) + other.released - was(['released'])); if (released !== (save.released || 0)) { save.released = released; changed = true; } }
     if (Number.isInteger(other.wishes)) { const wishes = Math.max(save.wishes || 0, other.wishes, (save.wishes || 0) + other.wishes - was(['wishes'])); if (wishes !== (save.wishes || 0)) { save.wishes = wishes; changed = true; } }
+    if (Array.isArray(other.gifts) || Array.isArray(other.gotGifts)) {   // もらった さかな：あいじるし（code）で あわせる。あたらしい じゅんに 12ひきまで
+      const before = JSON.stringify([save.gifts, save.gotGifts]), theirs = {gifts: other.gifts, gotGifts: other.gotGifts}; tidyGifts(theirs);
+      const have = new Set((Array.isArray(save.gifts) ? save.gifts : []).map(g => g.code));
+      save.gifts = [...(Array.isArray(save.gifts) ? save.gifts : []), ...theirs.gifts.filter(g => !have.has(g.code))].sort((a, b) => b.at - a.at);
+      save.gotGifts = [...new Set([...(Array.isArray(save.gotGifts) ? save.gotGifts : []), ...theirs.gotGifts])];
+      tidyGifts(save); if (JSON.stringify([save.gifts, save.gotGifts]) !== before) changed = true;
+    }
     return changed;
   }
   function store(replace) {
@@ -873,6 +921,17 @@ dialog .close{display:block;margin:auto;min-width:160px}
     {id: 'gantai', name: 'がんたいの くま', word: 'ほしが みえるよ', home: 'B'}
   ];
   let pals = [PALS[0], PALS[1]];
+  // おくりもの（14_…の しよう）。URL に のせるのは すうじだけ：?gift=魚.大きさ×10.なかま.ひとこと.あいじるし（れい 12.194.8.3.48217）。
+  // ならびじゅん（FISH・PALS・GIFT_WORDS）は かえない。おくりものの URL が ばんごうで さす。もらった さかなは バケツと べつの いれもの（save.gifts・12ひきまで）
+  const GIFT_WORDS = ['ひとこと なし', 'これ、あげる！', 'いっしょに つろうね', 'おおきいの つれたよ', 'きょうも おつかれさま', 'ゆっくり しようね', 'また あそぼうね', 'みて みて！', 'いい ことが ありますように', 'ありがとう。'];
+  const GIFT_CODE = /^\d{1,2}\.\d{1,4}\.\d{1,2}\.\d{1,2}\.\d{4,6}$/, GIFT_MAX = 12, GOT_MAX = 50;
+  const giftTenths = (f, tenths) => Math.round(Math.min(Math.max(tenths, f.min * 10), Math.min(9999, f.max * 18)));   // おおきさは その さかなの はんい（ぬしの おおきさまで）に まるめる
+  const giftable = (f, nushi) => !f.legend && !nushi;   // ぬしと まぼろしは、じぶんで つった ひとだけの たからもの
+  function tidyGifts(s) {   // よみこんだ・あわせた・もどした きろくの「もらった さかな」を きれいに する（ばんごうの おかしい ものは すてる）
+    s.gifts = (Array.isArray(s.gifts) ? s.gifts : []).filter(g => g && Number.isInteger(g.id) && FISH[g.id] && Number.isFinite(g.size) && typeof g.code === 'string' && GIFT_CODE.test(g.code)).map(g => ({id: g.id, size: giftTenths(FISH[g.id], g.size * 10) / 10, pal: Number.isInteger(g.pal) && PALS[g.pal] ? g.pal : -1, word: Number.isInteger(g.word) && GIFT_WORDS[g.word] ? g.word : 0, at: Number.isFinite(g.at) ? g.at : 0, code: g.code})).slice(0, GIFT_MAX);
+    s.gotGifts = (Array.isArray(s.gotGifts) ? s.gotGifts : []).filter(code => typeof code === 'string' && GIFT_CODE.test(code)).slice(0, GOT_MAX);
+  }
+  tidyGifts(save);
   function callPals() {
     const now = new Date(), seed = now.getFullYear() * 372 + now.getMonth() * 31 + now.getDate();
     const locals = PALS.filter(p => p.home === save.area), first = locals[seed % locals.length], rest = locals.filter(p => p !== first);
@@ -1027,7 +1086,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false;
-  function setPhase(next) { phase = next; if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { phase = next; if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
   function face(name) { curFace = name; marufuwa.src = wearUrl(name) || 'img/game-' + name + '.webp'; }
@@ -1601,7 +1660,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     if (phase !== 'caught' || !last || last.released) return;
     last.released = true; save.released = (save.released || 0) + 1; save.xp = (save.xp || 0) + 5;   // やさしい ことにも、ちょっとだけ けいけんち
     if (Array.isArray(save.bucket) && save.bucket[0] && save.bucket[0].id === last.fish.id) save.bucket[0].released = true;
-    store(); hud(); $('release').hidden = true;
+    store(); hud(); $('release').hidden = $('send-gift').hidden = true;
     const held = $('held'); tone(660, .07, 'triangle', 0, .06, 990); zap(.1, .08, .04);
     if (!reduce()) { held.animate([{translate: '0 0', opacity: 1}, {translate: '24px -46px', opacity: 1, offset: .45}, {translate: '52px 16px', opacity: 0}], {duration: 850, easing: 'ease-in-out'}).onfinish = () => { held.hidden = true; }; setTimeout(() => { held.hidden = true; }, 1000); } else held.hidden = true;   // 見えない タブでも かならず しまう
     $('guide-word').textContent = 'ばいばい。また あおうね。';
@@ -1632,6 +1691,75 @@ dialog .close{display:block;margin:auto;min-width:160px}
     } catch { keepSay('この もじは、よめなかったよ。「MF1.」から はじまる もじを、ぜんぶ はってね。'); }
   });
   $('close-keep').addEventListener('click', () => keep.close());
+
+  // おくりもの：おくる（ひとことを えらんで リンクを つくる）と、もらう（?gift=… が ついて いたら 1まい）。URL には すうじだけ。じぶんの さかなは へらない
+  // もらった さかなは バケツと べつの いれもの。つれた かず・レベル・ずかん・じぶんの きろくには かぞえない（にせの URL で ずかんが うまらない）
+  const giveBox = $('give'), giftBox = $('gift'), giveWords = $('give-words'), giveSay = text => { $('give-status').textContent = text; };
+  let giving = null, givingWord = 1;
+  GIFT_WORDS.forEach((text, i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.i = String(i); b.textContent = text; giveWords.append(b); });
+  function drawWords() { [...giveWords.children].forEach((b, i) => { b.setAttribute('aria-checked', String(i === givingWord)); b.tabIndex = i === givingWord ? 0 : -1; }); }
+  giveWords.addEventListener('click', event => { const b = event.target.closest('button'); if (!b) return; givingWord = Number(b.dataset.i); drawWords(); });
+  giveWords.addEventListener('keydown', event => {   // ラジオの ならい：やじるしで うごく（Tab では 1かしょ）
+    const step = {ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1}[event.key], to = event.key === 'Home' ? 0 : event.key === 'End' ? GIFT_WORDS.length - 1 : step === undefined ? -1 : (givingWord + step + GIFT_WORDS.length) % GIFT_WORDS.length;
+    if (to < 0) return; event.preventDefault(); givingWord = to; drawWords(); giveWords.children[to].focus();
+  });
+  function openGive(f, size) {
+    giving = {f, size}; givingWord = 1; drawWords();
+    $('give-fish').replaceChildren(fishImg(f)); $('give-what').replaceChildren(ruby(f.kanji), '　' + cm(size) + 'センチ');
+    $('give-from').textContent = (pals[0] || PALS[0]).name + ' から とどくよ。';
+    giveSay('リンクを おくる ときは、おうちの ひとと いっしょに つかってね。');
+    giveBox.showModal(); giveWords.children[givingWord].focus();
+  }
+  const newSeal = () => { const a = new Uint32Array(1); try { crypto.getRandomValues(a); } catch { a[0] = Math.floor(Math.random() * 4294967296); } return String(10000 + a[0] % 90000); };
+  $('give-go').addEventListener('click', async () => {
+    if (!giving) return;
+    const {f, size} = giving, code = [f.id, Math.min(9999, Math.round(size * 10)), Math.max(0, PALS.indexOf(pals[0])), givingWord, newSeal()].join('.');
+    const url = HOME + '?gift=' + code, text = 'まるふわ つりびよりで ' + f.name + ' ' + cm(size) + 'センチ、つったよ。あげる！ #まるふわつりびより';
+    if (navigator.share) {
+      try { await navigator.share({text, url}); giveSay('きょうゆうの がめんを とじました。'); return; }
+      catch (error) { if (error.name === 'AbortError') { giveSay('やめました。'); return; } }
+    }
+    let copied = false;   // きょうゆうが ない・つかえない とき：リンクを コピー
+    try { await navigator.clipboard.writeText(text + '\n' + url); copied = true; } catch {}
+    if (!copied) try { const t = document.createElement('textarea'); t.value = text + '\n' + url; t.readOnly = true; t.style.cssText = 'position:fixed;left:-9999px;top:0'; document.body.append(t); t.select(); copied = document.execCommand('copy'); t.remove(); } catch {}
+    giveSay(copied ? 'リンクを コピー したよ。おくりたい ところに はってね。おうちの ひとと いっしょに つかってね。' : 'コピーが できなかったよ。もういちど ためしてね。');
+  });
+  $('close-give').addEventListener('click', () => giveBox.close());
+  $('send-gift').addEventListener('click', () => { if (phase === 'caught' && last && !last.released && giftable(last.fish, last.nushi)) openGive(last.fish, last.size); });
+
+  // もらった とき。かたちが ちがう ものは なにも おこさない（エラーも みせない）。ばんごうを しらない ときは、やさしく おわる。もじは ぜんぶ じぶんの ひょう（さかな・なかま・ひとこと）から
+  function dropGiftParam() { try { const u = new URL(location.href); u.searchParams.delete('gift'); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch {} }   // こうしんしても ふたたび はいらない
+  const giftBtn = (label, onClick, primary) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; if (primary) b.className = 'give'; b.addEventListener('click', onClick); return b; };
+  const giftOwn = () => (Array.isArray(save.bucket) ? save.bucket : []).some(item => FISH[item.id] && !item.released && giftable(FISH[item.id], item.nushi));
+  function giftScreen(o) {   // まどの なかみを いれかえる（f・size：さかな、from・word：なかまと ひとこと、say・keep・back：ひとこと、actions：ボタン）
+    const text = (id, value) => { $(id).textContent = value || ''; };
+    $('gift-title').textContent = o.title;
+    $('gift-fish').replaceChildren(...(o.f ? [fishImg(o.f)] : [])); $('gift-what').replaceChildren(...(o.f ? [ruby(o.f.kanji), '　' + cm(o.size) + 'センチ'] : []));
+    text('gift-from', o.from); text('gift-word', o.word); text('gift-say', o.say); text('gift-keep', o.keep); text('gift-return', o.back);
+    $('gift-actions').replaceChildren(...o.actions);
+    if (!giftBox.open) giftBox.showModal();
+    o.actions[0].focus();
+  }
+  const giftClose = giftBtn('とじる', () => giftBox.close()), giftShelf = () => giftBtn('バケツを みる', () => { giftBox.close(); $('open-bucket').click(); });
+  function giftTake(g) {
+    save.gifts = [{id: g.id, size: g.size, pal: g.pal, word: g.word, at: Date.now(), code: g.code}, ...(Array.isArray(save.gifts) ? save.gifts : [])];
+    save.gotGifts = [g.code, ...(Array.isArray(save.gotGifts) ? save.gotGifts : [])];
+    tidyGifts(save); store(); dropGiftParam();
+    chord([784, 988, 1175, 1568], .07); buzz(60);
+    const actions = [giftBtn('きろくを のこす', () => { giftBox.close(); $('open-keep').click(); })], back = giftOwn();
+    if (back) actions.push(giftBtn('おかえしを えらぶ', () => { giftBox.close(); $('open-bucket').click(); }));
+    actions.push(giftBtn('とじる', () => giftBox.close()));
+    giftScreen({title: 'うけとったよ！ ありがとう', f: FISH[g.id], size: g.size, say: 'バケツの「もらった さかな」に いれたよ。', keep: 'この ブラウザの なかに ほぞんされるよ。' + (document.documentElement.dataset.inapp === 'x' ? 'Xの なかで ひらいた ときは、Safariなどの ブラウザとは べつに ほぞんされるよ。' : ''), back: back ? 'おかえしに ひとつ おくる？　あとで でも いいよ。' : '', actions});
+  }
+  function giftOpen(raw) {
+    if (raw.length > 24 || location.href.length > 300 || !GIFT_CODE.test(raw)) { dropGiftParam(); return; }
+    const part = raw.split('.'), [id, tenths, palN, wordN] = part.map(Number), f = FISH[id];
+    if (!f) { giftScreen({title: 'おくりものが とどいたよ', say: 'よくわからない さかなが きたよ。', actions: [giftClose]}); dropGiftParam(); return; }
+    const g = {id, size: giftTenths(f, tenths) / 10, pal: PALS[palN] ? palN : -1, word: GIFT_WORDS[wordN] ? wordN : 0, code: [id, tenths, palN, wordN].join('.') + '.' + part[4]};   // 0 で はじまる かたちも おなじ ものに そろえる
+    if ((Array.isArray(save.gotGifts) ? save.gotGifts : []).includes(g.code)) { giftScreen({title: 'もう うけとったよ', f, size: g.size, say: 'バケツの「もらった さかな」に いるよ。', actions: [giftShelf(), giftClose]}); dropGiftParam(); return; }
+    giftScreen({title: 'おくりものが とどいたよ', f, size: g.size, from: (PALS[g.pal] ? PALS[g.pal].name : 'だれか') + ' から', word: g.word ? '「' + GIFT_WORDS[g.word] + '」' : '', say: 'うけとると、バケツの「もらった さかな」に はいるよ。', actions: [giftBtn('うけとる', () => giftTake(g), true), giftBtn('あとで', () => giftBox.close())]});
+  }
+  { const raw = query.get('gift'); if (raw !== null) setTimeout(() => giftOpen(raw), 700); }
 
   // みなも。ちいさい え（200x88）に えがいて、ひきのばす。とおくは こまかい なみ、てまえは おおきい なみ
   const pond = $('pond'), pen = pond.getContext('2d'), sheet = pen.createImageData(pond.width, pond.height);
@@ -1793,9 +1921,23 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const f = FISH[item.id], row = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), when = document.createElement('small');
       icon.replaceChildren(fishImg(f)); icon.setAttribute('aria-hidden', 'true');
       when.append(clock.format(new Date(item.at)) + '　', starEl(f, item.nushi), item.nushi ? '　ぬし' : '', item.released ? '　にがした' : '');
-      text.append(ruby(f.kanji), '　' + cm(item.size) + 'センチ', when); row.append(icon, text); return row;
+      text.append(ruby(f.kanji), '　' + cm(item.size) + 'センチ', when); row.append(icon, text);
+      if (giftable(f, item.nushi) && !item.released) {   // おくる：ぬし・まぼろし・にがした こ には ださない
+        const send = document.createElement('button'); send.type = 'button'; send.className = 'give'; send.textContent = 'おくる'; send.setAttribute('aria-label', f.name + 'を おくる');
+        send.addEventListener('click', () => openGive(f, item.size)); row.classList.add('giveable'); row.append(send);
+      }
+      return row;
     }) : ['まだ からっぽ。のんびり いこう。']));
     $('release-note').hidden = !(save.released > 0); $('release-note').textContent = save.released > 0 ? 'にがした こ：' + save.released + 'ひき。また あえるよ。' : '';
+    $('gift-note').hidden = !list.some(item => item.nushi || FISH[item.id].legend);
+    { const got = (Array.isArray(save.gifts) ? save.gifts : []).filter(g => FISH[g.id]);   // もらった さかな（バケツとは べつ。つれた かず・レベル・ずかんには かぞえない）
+      $('gift-head').hidden = $('gift-list').hidden = !got.length;
+      $('gift-list').replaceChildren(...got.map(g => {
+        const f = FISH[g.id], row = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), when = document.createElement('small');
+        icon.replaceChildren(fishImg(f)); icon.setAttribute('aria-hidden', 'true');
+        when.append((g.at ? clock.format(new Date(g.at)) + '　' : '') + '🎁 ' + (PALS[g.pal] ? PALS[g.pal].name : 'だれか') + ' から' + (g.word ? '　「' + GIFT_WORDS[g.word] + '」' : ''));
+        text.append(ruby(f.kanji), '　' + cm(g.size) + 'センチ', when); row.append(icon, text); return row;
+      })); }
     const decor = save.decor && typeof save.decor === 'object' ? Object.entries(save.decor) : [];
     $('decor-list').textContent = decor.length ? decor.map(([name, count]) => name + ' ×' + count).join('　') : 'まだ ないよ。さかなが ときどき もって くるよ。';
     $('pal-list').replaceChildren(...PALS.map(pal => {
@@ -1816,7 +1958,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       cell.dataset.seen = String(!!got); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
       const icon = document.createElement('b'); if (got) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
-      cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when);
+      cell.append(icon, got ? ruby(f.kanji) : 'まだ あってない', document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
       return cell;
     }));
     book.showModal();
@@ -1898,7 +2040,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   applyMy(); hud(); setPhase('idle');
   if (query.get('ua') === '1') say('つかっている ブラウザの なまえ：' + navigator.userAgent);   // Xの アプリの ブラウザが 見つからない ときに、なまえを 読む ため（画面に 出すだけ。どこにも 送らない）
   setTimeout(chatter, Number(query.get('chat')) || 5000);
-  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }};   // 外付けが「じぶんの どうぐ」の いろを よめる
+  window.Tsuri = {all: FISH, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
