@@ -115,7 +115,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 #gaze{--c1:#eee6ff;--c2:#b9a2ee;--side:#8a6bd0;--ink:#33205f;min-height:68px;padding:4px 14px;font-size:.95rem}
 body.gazing main > *:not(#scene):not(.sub-actions):not(#status){display:none !important}
 body.gazing main{background:none;box-shadow:none;padding-top:4vh}
-body.gazing #take-photo,body.gazing #easy{display:none}
+body.gazing #take-photo,body.gazing #easy,body.gazing #release{display:none}
 body.gazing .actions{justify-content:center;margin-top:14px}
 body.gazing #gaze{min-height:52px;opacity:.85}
 body.gazing #status{color:#244653;background:#ffffffc9;border-radius:14px;padding:4px 10px;display:inline-block}
@@ -323,7 +323,9 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 
 .actions{display:flex;gap:10px;margin-top:12px}
 .actions{gap:12px;margin:16px 0 6px;flex-wrap:wrap}
-#take-photo,#gaze{flex:1 1 40%;min-height:54px}
+#take-photo,#gaze,#release{flex:1 1 40%;min-height:54px}
+#release{--c1:#e3fbef;--c2:#8fe0b4;--side:#3fa873;--ink:#0f4a36}
+#release[hidden]{display:none}
 #sound{flex:1 1 100%;min-height:54px}
 body.gazing #sound{flex:0 1 auto}
 /* つかいやすく する（ふだんは とじて いる）。らくちん・ふるえ を、おとなも こどもも えらべる。ひらいた／とじた と えらんだ ものは おぼえて おく */
@@ -404,9 +406,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
 :root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo)::backdrop{background:#000000b3}
 /* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:focus-visible{outline-color:#a9dcff}
@@ -545,6 +547,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   <div class="actions">
     <button id="main-button" type="button">なげる</button>
     <button id="take-photo" type="button" hidden>しゃしんを とる</button>
+    <button id="release" type="button" hidden>そっと にがす</button>
     <button id="easy" type="button" aria-pressed="false">らくちん：OFF</button>
     <button id="gaze" type="button" aria-pressed="false">ながめる</button>
   </div>
@@ -584,6 +587,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     <h2 id="bucket-title">バケツ</h2>
     <p class="count">さいきん つった 10ぴき。つりばを かえても、きえないよ。</p>
     <div id="bucket-list"></div>
+    <p id="release-note" class="count" hidden></p>
     <h3 style="margin:10px 0 4px;font-size:1rem">ひろった かざり</h3>
     <p id="decor-list" style="margin:0 0 12px;line-height:1.8"></p>
     <h3 style="margin:10px 0 4px;font-size:1rem">あった なかま</h3>
@@ -740,6 +744,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
       const mine = (save.decor && save.decor[name]) || 0, more = Number.isInteger(n) ? Math.max(mine, n, mine + n - was(['decor', name])) : mine;
       if (more !== mine) { save.decor = save.decor && typeof save.decor === 'object' ? save.decor : {}; save.decor[name] = more; changed = true; }
     }
+    if (Number.isInteger(other.released)) { const released = Math.max(save.released || 0, other.released, (save.released || 0) + other.released - was(['released'])); if (released !== (save.released || 0)) { save.released = released; changed = true; } }
     if (Number.isInteger(other.wishes)) { const wishes = Math.max(save.wishes || 0, other.wishes, (save.wishes || 0) + other.wishes - was(['wishes'])); if (wishes !== (save.wishes || 0)) { save.wishes = wishes; changed = true; } }
     return changed;
   }
@@ -961,7 +966,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, period = 1600, ringStart = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false;
-  function setPhase(next) { phase = next; if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { phase = next; if (next === 'idle') lock(false); scene.dataset.phase = next; $('take-photo').hidden = $('card').hidden = $('release').hidden = next !== 'caught'; spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   function say(text) { status.textContent = text; }
   function face(name) { marufuwa.src = 'img/game-' + name + '.webp'; }
   function hud() {
@@ -1425,6 +1430,17 @@ dialog .close{display:block;margin:auto;min-width:160px}
   $('take-photo').addEventListener('click', async () => {
     try { await takePhoto(); photo.showModal(); } catch { say('しゃしんを つくれなかったよ。もういちど ためしてね。'); }
   });
+  // そっと にがす：つった さかなを みずに かえす。ずかんや きろくは そのまま（へらない）。「にがした こ」の かずを、やさしく のこす
+  $('release').addEventListener('click', () => {
+    if (phase !== 'caught' || !last || last.released) return;
+    last.released = true; save.released = (save.released || 0) + 1;
+    if (Array.isArray(save.bucket) && save.bucket[0] && save.bucket[0].id === last.fish.id) save.bucket[0].released = true;
+    store(); $('release').hidden = true;
+    const held = $('held'); tone(660, .07, 'triangle', 0, .06, 990); zap(.1, .08, .04);
+    if (!reduce()) { held.animate([{translate: '0 0', opacity: 1}, {translate: '24px -46px', opacity: 1, offset: .45}, {translate: '52px 16px', opacity: 0}], {duration: 850, easing: 'ease-in-out'}).onfinish = () => { held.hidden = true; }; setTimeout(() => { held.hidden = true; }, 1000); } else held.hidden = true;   // 見えない タブでも かならず しまう
+    $('guide-word').textContent = 'ばいばい。また あおうね。';
+    say(last.fish.name + 'を みずに かえしたよ。また あおうね。');
+  });
   $('close-photo').addEventListener('click', () => photo.close());
   $('book-photo').addEventListener('click', async () => {
     try { await bookPhoto(); $('book').close(); photo.showModal(); } catch { say('しゃしんを つくれなかったよ。もういちど ためしてね。'); }
@@ -1610,9 +1626,10 @@ dialog .close{display:block;margin:auto;min-width:160px}
     $('bucket-list').replaceChildren(...(list.length ? list.map(item => {
       const f = FISH[item.id], row = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), when = document.createElement('small');
       icon.replaceChildren(fishImg(f)); icon.setAttribute('aria-hidden', 'true');
-      when.append(clock.format(new Date(item.at)) + '　', starEl(f, item.nushi), item.nushi ? '　ぬし' : '');
+      when.append(clock.format(new Date(item.at)) + '　', starEl(f, item.nushi), item.nushi ? '　ぬし' : '', item.released ? '　にがした' : '');
       text.append(ruby(f.kanji), '　' + cm(item.size) + 'センチ', when); row.append(icon, text); return row;
     }) : ['まだ からっぽ。のんびり いこう。']));
+    $('release-note').hidden = !(save.released > 0); $('release-note').textContent = save.released > 0 ? 'にがした こ：' + save.released + 'ひき。また あえるよ。' : '';
     const decor = save.decor && typeof save.decor === 'object' ? Object.entries(save.decor) : [];
     $('decor-list').textContent = decor.length ? decor.map(([name, count]) => name + ' ×' + count).join('　') : 'まだ ないよ。さかなが ときどき もって くるよ。';
     $('pal-list').replaceChildren(...PALS.map(pal => {
@@ -1670,7 +1687,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const rows = document.querySelectorAll('main > .hud'), label = text => { const h = document.createElement('h2'); h.className = 'menu-label'; h.textContent = text; return h; };
     // ばしょは、ふだんは しまって おく。おすと、4つ ぜんぶ でる
     // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）
-    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('gaze'), assistBox()); document.querySelector('.actions').after(sub);
+    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('release'), $('gaze'), assistBox()); document.querySelector('.actions').after(sub);
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
     status.after(where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
