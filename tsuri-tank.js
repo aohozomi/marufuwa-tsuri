@@ -1024,9 +1024,9 @@
     if (full) {
       ctx.font = '700 11px system-ui,sans-serif'; const wL2 = Math.min(ctx.measureText(lvTx).width, inner * .4);
       ctx.font = '800 14px system-ui,sans-serif'; ctx.fillText(ttl, 22, ROOM.h - 51, Math.max(20, inner - wL2 - 10));
-      ctx.textAlign = 'right'; ctx.fillStyle = '#9a6a52'; ctx.font = '700 11px system-ui,sans-serif'; ctx.fillText(lvTx, 10 + cw - 12, ROOM.h - 51, inner * .4); ctx.textAlign = 'left';
+      ctx.textAlign = 'right'; ctx.fillStyle = '#8a5a44'; ctx.font = '700 11px system-ui,sans-serif'; ctx.fillText(lvTx, 10 + cw - 12, ROOM.h - 51, inner * .4); ctx.textAlign = 'left';
       ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText(cnt, 22, ROOM.h - 35, inner);
-      ctx.fillStyle = '#7f8f98'; ctx.font = '700 9.5px system-ui,sans-serif'; ctx.fillText(SHARE_URL, 22, ROOM.h - 21, inner);
+      ctx.fillStyle = '#5a6a73'; ctx.font = '700 9.5px system-ui,sans-serif'; ctx.fillText(SHARE_URL, 22, ROOM.h - 21, inner);
     } else {
       ctx.fillText(ttl, 22, ROOM.h - 47);
       ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText(cnt, 22, ROOM.h - 27);
