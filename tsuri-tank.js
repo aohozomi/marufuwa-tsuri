@@ -20,6 +20,7 @@
   const BASE = typeof CFG.base === 'string' ? CFG.base : '';
   const $ = (root, sel) => root.querySelector(sel);
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TE = s => (window.TsuriEn ? window.TsuriEn.t(s) : s);   // English mode（tsuri-en.js）の 時だけ 訳す。日本語では そのまま（canvas の もじ・共有の 題は DOM では ないので）
 
   // ─── 魚の一覧（本体の FISH と同じ並び＝番号）。本体が window.Tsuri.all を出したら、そちらを使う ───
   // [名前, 絵文字, 最小cm, 最大cm, 珍しさ(1〜4)]
@@ -961,8 +962,8 @@
     // 記念の ふだ：ゲームの なまえ・つれた かず・シールちょう（作者の なまえと URL は いれない）
     const sv = readSave(), total = Number(sv.total) || 0, baseN = fishList().filter(f => !f.legend).length, gotN = residents().filter(r => !r.fish.legend).length;
     ctx.save(); ctx.fillStyle = '#fffdf6ee'; ctx.strokeStyle = '#e3d3b0'; ctx.lineWidth = 2; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(10, ROOM.h - 68, 190, 56, 14); else ctx.rect(10, ROOM.h - 68, 190, 56); ctx.fill(); ctx.stroke();
-    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#7a4b34'; ctx.font = '800 14px system-ui,sans-serif'; ctx.fillText('まるふわ つりびより', 22, ROOM.h - 47);
-    ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText('つれた かず ' + total + '　シールちょう ' + gotN + ' / ' + baseN, 22, ROOM.h - 27); ctx.restore();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#7a4b34'; ctx.font = '800 14px system-ui,sans-serif'; ctx.fillText(TE('まるふわ つりびより'), 22, ROOM.h - 47);
+    ctx.fillStyle = '#506874'; ctx.font = '700 11.5px system-ui,sans-serif'; ctx.fillText(TE('つれた かず ' + total + '　シールちょう ' + gotN + ' / ' + baseN), 22, ROOM.h - 27); ctx.restore();
     if (o.dataURL) return cvs.toDataURL(o.type || 'image/png', o.quality);   // 裏の 画面でも すぐ 返る（toBlob は 1びょうに 1回に なる）
     return new Promise(res => cvs.toBlob(b => res(b), 'image/png'));
   }
@@ -976,7 +977,7 @@
       $(photo, 'p').textContent = 'しゃしんが とれたよ。「ほぞん」を おすか、がぞうを ながおしで ほぞんできるよ。';
       const file = new File([blob], 'marufuwa-osuisou.png', { type: 'image/png' }), share = $(photo, '.tk-share');
       share.hidden = !(navigator.canShare && navigator.canShare({ files: [file] }));
-      share.onclick = () => navigator.share({ files: [file], title: 'まるふわの おへや' }).catch(() => {});
+      share.onclick = () => navigator.share({ files: [file], title: TE('まるふわの おへや') }).catch(() => {});
       photo.hidden = false; $(photo, '.tk-photoclose').focus(); sr.textContent = 'しゃしんが とれました。';
     } catch { say('ごめんね、しゃしんが うまく とれなかったよ。', true); } finally { btn.disabled = false; }
   }
