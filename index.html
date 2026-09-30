@@ -2042,7 +2042,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
     const rows = document.querySelectorAll('main > .hud'), label = text => { const h = document.createElement('h2'); h.className = 'menu-label'; h.textContent = text; return h; };
     // ばしょは、ふだんは しまって おく。おすと、4つ ぜんぶ でる
     // おとは、Tab で すぐ とどく ところへ（めが みえない ひとも、キーボードの ひとも）
-    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('release'), $('gaze'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
+    const sub = document.createElement('div'); sub.className = 'sub-actions'; sub.append($('sound'), $('take-photo'), $('release'), $('send-gift'), $('gaze'), assistBox()); (document.getElementById('inapp-hint') || document.querySelector('.actions')).after(sub);
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('ばしょを かえる（いま：', now, '）'); where.append(head, $('areas'));
     status.after(where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
