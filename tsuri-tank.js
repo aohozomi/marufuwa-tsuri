@@ -247,7 +247,7 @@
 .tk-fish:focus-visible{outline:3px solid #fff;outline-offset:1px;border-radius:50%;box-shadow:0 0 0 6px #17658a99}
 .tk-listen .tk-water{box-shadow:inset 0 0 0 3px #ffe27a}
 #tk .tk-actions{display:flex;gap:6px;padding:8px 10px 12px}
-#tk .tk-actions button{flex:1;min-height:52px;padding:6px 6px;font-size:.86rem;line-height:1.25}
+#tk .tk-actions button{flex:1;min-height:52px;padding:6px 6px;font-size:.86rem;line-height:1.25;word-break:keep-all}   /* 「ながめ／る」の ように 1もじ だけ 下へ 落ちない（すきまで 切る） */
 #tk .tk-actions button[aria-pressed=true]{background:#17658a;color:#fff;border-color:#0e4a66}
 .tk-photo{position:absolute;inset:0;z-index:30;background:#0d2a3aee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px}
 .tk-photo img{max-width:100%;max-height:calc(100% - 130px);border-radius:14px;border:3px solid #fff;box-shadow:0 6px 18px #0008;object-fit:contain}
