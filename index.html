@@ -342,6 +342,10 @@ body.gazing #sound{flex:0 1 auto}
 #sound[aria-pressed=true],#buzz[aria-pressed=true],#nature[aria-pressed=true]{--c1:#e3f3ff;--c2:#8fd0f5;--side:#4b9cc9;--ink:#0d3a55}   /* ON の ときは、ほんのり あおく（もじでも ON と かいて ある） */
 body.gazing .assist{display:none}
 #scene[data-ikimono=off] #ikimono{display:none}
+/* とおくの けしき（tsuri-tooku.js）：ちかくの なかまの ウキは かくす。ひく わ（#reel）は、とおくの じぶんの ウキの あたりに ひらく */
+#scene[data-tooku=true] .friend-float{visibility:hidden}
+#scene[data-tooku=true] #reel{left:30% !important;top:64% !important;width:28%}
+#scene[data-tooku=true] .ripple,#scene[data-tooku=true] .plop,#scene[data-tooku=true] .bubble{display:none}   /* ちかくの ばしょに でる「ぽちゃん」「わ」「えいっ」は、とおくでは だささない */
 /* Xの アプリの なかの ブラウザ：うえの バーと、したの 元の 投稿の おびが かぶさる。ぜんがめんで あそぶ ほうほうを 1ぎょう しらせ、したの おびの ぶんだけ よけて おく */
 .inapp-hint{display:flex;align-items:center;gap:8px;margin:8px 0 0;padding:4px 6px 4px 12px;border:2px solid #f0c060;background:#fff6d8;color:#5a3a10;border-radius:14px;font-size:.85rem;font-weight:800;line-height:1.5}
 .inapp-hint span{flex:1}
@@ -413,9 +417,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
 :root[data-night=true] :is(#bucket,#book,#shop,#keep,#photo)::backdrop{background:#000000b3}
 /* ボタン：ふつうの ものは くらい ガラス。いろの ついた もの（なげる・らくちん・しゃしん・ながめる…）は あかるさだけ おとす */
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) :is(button,.pill):not(.spot):not(#keeper):not(#star){filter:brightness(.86)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
-:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]){--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true])::before{background:linear-gradient(#ffffff40,#ffffff00)}
+:root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:not(#main-button):not(#easy):not(#take-photo):not(#release):not(#tooku-toggle):not(#gaze):not(#go-area):not(#star):not(.spot):not(#keeper):not(.plaza):not(.pill):not([aria-pressed=true]):active{box-shadow:0 1px 0 var(--side),0 3px 6px #0006,inset 0 -3px 6px #00000030,inset 0 3px 5px #ffffff33}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo) button:focus-visible{outline-color:#a9dcff}
@@ -1036,7 +1040,7 @@ dialog .close{display:block;margin:auto;min-width:160px}
         const ring = document.createElement('i'); ring.className = 'ripple'; place(ring, w); scene.append(ring);
         ring.animate([{scale: '.3', opacity: .9}, {scale: '2.4', opacity: 0}], {duration: 700, delay: i * 180, easing: 'ease-out', fill: 'backwards'}).onfinish = () => ring.remove();
       }
-      const plop = document.createElement('span'); plop.className = 'hop'; plop.style.fontSize = '.8rem'; plop.style.fontWeight = '900'; plop.style.color = '#fff'; plop.textContent = 'ぽちゃん'; plop.setAttribute('aria-hidden', 'true'); place(plop, {x: w.x, y: w.y - 7}); scene.append(plop);
+      const plop = document.createElement('span'); plop.className = 'hop plop'; plop.style.fontSize = '.8rem'; plop.style.fontWeight = '900'; plop.style.color = '#fff'; plop.textContent = 'ぽちゃん'; plop.setAttribute('aria-hidden', 'true'); place(plop, {x: w.x, y: w.y - 7}); scene.append(plop);
       plop.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -18px'}], {duration: 800}).onfinish = () => plop.remove();
     };
   }
@@ -1771,5 +1775,6 @@ dialog .close{display:block;margin:auto;min-width:160px}
 <script defer src="tsuri-oshaberi.js"></script>
 <script defer src="tsuri-ame.js"></script>
 <script defer src="tsuri-nushi.js"></script>
+<script defer src="tsuri-tooku.js"></script>
 </body>
 </html>
