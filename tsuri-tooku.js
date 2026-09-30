@@ -72,17 +72,27 @@
 
 
   // みず：けいさんで かく（なみ・きらめき・そらと たいようの うつりこみ・とおくほど こまかい）。ほんものの みずうみの ように、ゆっくり うごく
-  let cv = null, raf = 0;
+  let cv = null, raf = 0, poll = 0, tickFn = null;
   const cssVar = (name, fb) => getComputedStyle(scene).getPropertyValue(name).trim() || fb;
+  const stopWater = () => { if (raf) cancelAnimationFrame(raf); raf = 0; clearTimeout(poll); poll = 0; };
   const hex = c => { const m = /^#([0-9a-f]{6})/i.exec(c); if (!m) return [80, 160, 210]; const n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
   const noise = (() => { const P = new Uint8Array(512); for (let i = 0; i < 256; i++) P[i] = P[i + 256] = (i * 131 + 7) % 256 ^ (i * 29 & 255); const g = (h, x, y) => ((h & 1) ? -x : x) + ((h & 2) ? -y : y); const f = t => t * t * (3 - 2 * t); return (x, y) => { const X = Math.floor(x) & 255, Y = Math.floor(y) & 255; x -= Math.floor(x); y -= Math.floor(y); const u = f(x), v = f(y); const a = P[P[X] + Y], b = P[P[X + 1] + Y], c = P[P[X] + Y + 1], d = P[P[X + 1] + Y + 1]; return (g(a, x, y) * (1 - u) + g(b, x - 1, y) * u) * (1 - v) + (g(c, x, y - 1) * (1 - u) + g(d, x - 1, y - 1) * u) * v; }; })();
   function water() {
     cv = document.createElement('canvas'); cv.className = 'water'; cv.width = 240; cv.height = 96; layer.append(cv);
     const ctx = cv.getContext('2d'), W = cv.width, H = cv.height, im = ctx.createImageData(W, H), d = im.data;
-    let t0 = performance.now();
+    let t0 = performance.now(), last = 0, key = '', w1, w2, sky, night, rain;
+    // 軽く する（でんち・古い スマホ）：①色は 時間・雨が かわった 時だけ 読む（毎回 CSS を 読むと スタイルの 再計算を 毎コマ ひきおこす）②20コマ/びょう（ながめる 12・なにも しない 6）③窓が ひらいて いる 間・画面が かくれて いる 間は 描かない ④「動きを へらす」の 人は 1まいだけ 描いて 止める
+    const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const gap = () => document.body.classList.contains('quiet') ? 170 : document.body.classList.contains('gazing') ? 84 : 50;
+    const later = (fn, ms) => { poll = setTimeout(() => { poll = 0; if (on && !document.hidden) raf = requestAnimationFrame(fn); }, ms); };
     const tick = now => {
       raf = 0; if (!on || document.hidden) return;
-      const t = (now - t0) / 1000, w1 = hex(cssVar('--water1', '#7fd0f2')), w2 = hex(cssVar('--water2', '#3b9bd0')), sky = hex(cssVar('--sky2', '#eaf8ff')), night = scene.dataset.time === 'yoru', rain = scene.dataset.rain === 'true';
+      if (document.querySelector('dialog[open]')) { later(tick, 400); return; }
+      const k = scene.dataset.time + '|' + scene.dataset.rain, still = reduced();
+      if (last && k === key) { if (still) { later(tick, 600); return; } if (now - last < gap()) { raf = requestAnimationFrame(tick); return; } }
+      last = now;
+      if (k !== key) { key = k; w1 = hex(cssVar('--water1', '#7fd0f2')); w2 = hex(cssVar('--water2', '#3b9bd0')); sky = hex(cssVar('--sky2', '#eaf8ff')); night = scene.dataset.time === 'yoru'; rain = scene.dataset.rain === 'true'; }
+      const t = still ? 3 : (now - t0) / 1000;
       const sunX = night ? .62 : .78, glitter = night ? .35 : rain ? .15 : .8;
       for (let y = 0; y < H; y++) {
         const fy = y / H, depth = Math.pow(fy, .6);                          // てまえほど ふかい いろ
@@ -100,13 +110,14 @@
         }
       }
       ctx.putImageData(im, 0, 0);
-      raf = requestAnimationFrame(tick);
+      if (still) later(tick, 600); else raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
+    tickFn = tick; raf = requestAnimationFrame(tick);
   }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && on && cv && !raf) water(); });
+  // 画面が もどって きた 時：あたらしい canvas を ふやさず、とまって いた ループだけ 再開（前は もどる たびに canvas と ループが ふえて いた）
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && on && tickFn && !raf && !poll) raf = requestAnimationFrame(tickFn); });
   function build() {
-    if (raf) cancelAnimationFrame(raf); raf = 0;
+    stopWater();
     layer.textContent = '';
     seed = (day.getFullYear() * 400 + day.getMonth() * 31 + day.getDate()) >>> 0;
     html('far', {}); html('far2', {}); water(); html('dock', {}); html('shore', {});
@@ -129,7 +140,7 @@
   }
 
   const toggle = document.createElement('button'); toggle.id = 'tooku-toggle'; toggle.type = 'button';
-  function draw() { scene.dataset.tooku = String(on); if (!on && raf) { cancelAnimationFrame(raf); raf = 0; } toggle.textContent = on ? 'とおく：ON' : 'とおく：OFF'; toggle.setAttribute('aria-pressed', String(on)); if (on) build(); }
+  function draw() { scene.dataset.tooku = String(on); if (!on) stopWater(); toggle.textContent = on ? 'とおく：ON' : 'とおく：OFF'; toggle.setAttribute('aria-pressed', String(on)); if (on) build(); }
   toggle.addEventListener('click', () => { on = !on; try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {} draw(); const s = document.getElementById('status'); if (s) s.textContent = on ? 'とおくから みて いるよ。ひろい みずうみで、のんびり。' : 'ちかくに もどったよ。'; });
   if (sub) { const gaze = document.getElementById('gaze'); gaze ? gaze.before(toggle) : sub.append(toggle); }
   draw();
