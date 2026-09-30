@@ -242,6 +242,8 @@ body.gazing #tegami{display:none}
 .spot{position:absolute;z-index:1;width:11%;min-height:0;aspect-ratio:1/1;padding:0;transform:translate(-50%,-78%);border:0;border-radius:50%;background:none}
 .spot svg{position:static;width:100%;height:100%;display:block;pointer-events:none;animation:nudge 2.4s ease-in-out infinite}
 .spot[aria-pressed=true] svg{animation:none;opacity:.55}
+body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.5s ease-in-out infinite}   /* はじめの すうひきの あいだ だけ：ほかの せきが ゆらゆら（「えらべるよ」の しるし） */
+@keyframes seatbob{50%{translate:0 -9px}}
 .spot:disabled{opacity:1}
 @keyframes nudge{50%{translate:0 -3px}}
 /* かぜ：き・くさ・くも・みず・はたが、ゆっくり なびく */
@@ -1191,7 +1193,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (i === mine || !(phase === 'idle' || phase === 'caught')) return;
     if (swapping) finishSwap();
     const there = friends.indexOf(i); if (there >= 0) friends[there] = mine;   // なかまと ばしょを こうかん
-    mine = i; $('held').hidden = $('held-friend').hidden = true; setPhase('idle'); face('blue');
+    mine = i; $('held').hidden = $('held-friend').hidden = true; if (!save.seatMoved) { save.seatMoved = true; store(); } drawSeatHint(); setPhase('idle'); face('blue');
     button.textContent = 'なげる'; button.dataset.hot = 'false';
     say('ここに しよう。「なげる」を おしてね。');
   }
@@ -1414,6 +1416,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ? 'Everyone has the same lucky fish today: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (luckyLeft ? ' ' + luckyLeft + ' more catches to unlock that spot.' : '') + (boss ? ' Today' + String.fromCharCode(39) + 's Guardian tends to show up at ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ') — same for everyone.' : '')
       : 'きょうは みんな おなじ さかなが ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (luckyLeft ? 'まだ いけないけど、あと ' + luckyLeft + 'ひきで いけるよ。' : '') + (boss ? 'ぬしは「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」に でやすいよ（これも みんな おなじ）。' : ''));
   }
+  function drawSeatHint() { document.body.dataset.seathint = String(!save.seatMoved && save.total >= 1 && save.total < 6); }   // 1〜5ひき つる あいだ、せきを うごかした ことが なければ ゆらゆら
   function drawBadge() {   // ずかんに まだ みて いない あたらしい さかなが いる とき（かず）。ひらいたら きえる。へらす・くらべる ものでは ない
     const b = $('open-book'); if (!b) return; let badge = $('book-badge');
     if (!badge) { badge = document.createElement('b'); badge.id = 'book-badge'; badge.className = 'book-badge'; badge.setAttribute('aria-hidden', 'true'); badge.hidden = true; b.append(badge); }
@@ -1427,7 +1430,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function hud() {
     $('total').textContent = String(save.total); drawPlazaNote();
-    drawToday(); drawBadge();
+    drawToday(); drawBadge(); drawSeatHint();
     $('seen').textContent = $('book-seen').textContent = String(seenCount()); $('seen-ring').style.setProperty('--p', Math.round(Math.min(1, seenCount() / BASE) * 100) + '%');
     const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
     $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%';
