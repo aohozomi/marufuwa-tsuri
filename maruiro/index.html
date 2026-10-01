@@ -78,7 +78,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     <button type="button" id="rst">さいしょから</button>
   </div>
   <p class="msg" id="msg" role="status" aria-live="polite"></p>
-  <p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、したの だんが ふわっと とけて、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめは OFF です。てんめつは しません。</p>
+  <p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの 子が ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめは OFF です。てんめつは しません。</p>
 </main>
 <script>
 // English（tsuri-en.js の E.add）
@@ -95,8 +95,8 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     '◀ ひだり': '◀ Left', 'みぎ ▶': 'Right ▶', 'おとす': 'Drop', 'ひだりへ': 'Move left', 'みぎへ': 'Move right',
     'おと：OFF': 'Sound: OFF', 'おと：ON': 'Sound: ON', 'さいしょから': 'Start over',
     'まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ': 'The Maruiro board. Move with the left and right arrow keys and drop with Space or Enter. With a finger, slide and let go to drop.',
-    'おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、したの だんが ふわっと とけて、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめは OFF です。てんめつは しません。': 'For grown-ups: there is no time limit, no game over and no ranking. If it fills up past the red line, the bottom layer softly melts away and play goes on. The only record is “the biggest circle so far”, kept on this device only (nothing is sent anywhere). Sounds are soft and under 1200 Hz, and start OFF. Nothing flashes.',
-    'いっぱいに なったので、したの だんが ふわっと とけたよ。そのまま つづけて だいじょうぶ。': 'It filled up, so the bottom layer softly melted. Keep going — it’s okay.',
+    'おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの 子が ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめは OFF です。てんめつは しません。': 'For grown-ups: there is no time limit, no game over and no ranking. If it fills up past the red line, the topmost friend floats up to the sky (“See you!”) and play goes on. The only record is “the biggest circle so far”, kept on this device only (nothing is sent anywhere). Sounds are soft and under 1200 Hz, and start OFF. Nothing flashes.',
+    'いっぱいに なったので、いちばん うえの 子が ぷかぷか そらへ とんでいくよ。「またね」。そのまま つづけて だいじょうぶ。': 'It filled up, so the topmost friend floated up to the sky. “See you!” Keep going — it’s okay.',
     'いちばん おおきい まるが ふたつ あわさって、ふわっと きえたよ。また はじめよう。': 'Two of the biggest circles joined and floated away. Let’s begin again.',
     'おおきく なったよ！': 'It got bigger!',
     'ゆびを はなすと おちるよ。': 'Let go to drop.',
@@ -227,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const act = balls.filter(b => b.melt === 0);
     for (const b of balls) {
       b.age += dt; if (b.pop > 0) b.pop = Math.max(0, b.pop - dt * 4);
+      if (b.up) { b.y -= 46 * dt; b.x += Math.sin(b.age * 2.3) * 12 * dt; if (b.y < -b.r * 1.6) b.melt = 1; continue; }   // ぷかぷか うかぶ（ぶつからない）
       if (b.melt > 0) { b.melt += dt / (b.fast ? .5 : 1.3); continue; }
       b.vy += GRAV * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= .999; b.vy *= .999;
     }
@@ -279,10 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const crowded = balls.some(b => b.melt === 0 && b.age > 1.5 && ((b.still > .4 && b.y - b.r < LINE) || b.y < b.r * .5)) || balls.length > 60;   // おしあって うえまで つまった ときも
     over = crowded ? over + dt : Math.max(0, over - dt * 2);
     if (over > 2.2) {
-      over = 0; stats.melts++; const lim = balls.length > 45 ? H - 210 : H - 95;   // とても いっぱい の ときは したの はんぶんが ふわっと とける
-      balls.forEach(b => { if (b.melt === 0 && b.y > lim) b.melt = .001; });
-      if (!balls.some(b => b.melt > 0)) balls.slice().sort((a, c) => c.y - a.y).slice(0, 4).forEach(b => { b.melt = .001; });
-      tone(0, 'melt'); say(L('いっぱいに なったので、したの だんが ふわっと とけたよ。そのまま つづけて だいじょうぶ。', 'It filled up, so the bottom layer softly melted. Keep going — it’s okay.'));
+      over = 0; stats.melts++;   // いっぱい：いちばん うえの 子が ぷかぷか うかんで そらへ「またね」（へらない・ばしょが あくだけ）
+      const top = balls.filter(b => b.melt === 0).sort((x, y) => (x.y - x.r) - (y.y - y.r)), n = balls.length > 45 ? 6 : balls.length > 30 ? 3 : 1;
+      top.slice(0, n).forEach(b => { b.melt = .0001; b.up = true; b.vx = 0; b.vy = 0; });
+      tone(0, 'melt'); say(L('いっぱいに なったので、いちばん うえの 子が ぷかぷか そらへ とんでいくよ。「またね」。そのまま つづけて だいじょうぶ。', 'It filled up, so the topmost friend floated up to the sky. “See you!” Keep going — it’s okay.'));
     }
   }
 
