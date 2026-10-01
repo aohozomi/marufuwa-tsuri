@@ -701,6 +701,9 @@ dialog .close{display:block;margin:auto;min-width:160px}
 #nakama-grid .nk-none{color:#566d79;background:#eef4f7}
 #nakama-grid .nk-none img{opacity:.35;filter:grayscale(1)}
 #marufuwa[data-avatar]{width:17%;aspect-ratio:1/1}
+/* つりの ポーズえ（540×600）：あしもとを そろえ、たかさは いつもの 17%×4/3 と おなじ（ひろげない・かおの いちが かわらない）。えに うごきが ある ので かたむけは かけない */
+#marufuwa[data-pose]{width:20.4%;aspect-ratio:9/10;rotate:0deg !important}
+#scene[data-phase=waiting] #marufuwa[data-pose],#scene[data-phase=bite] #marufuwa[data-pose],#scene[data-phase=reel] #marufuwa[data-pose]{animation:breathe 3.2s ease-in-out infinite}
 .watcher{width:10%;aspect-ratio:1/1;z-index:1;animation-delay:-2s}   /* 3にんめの なかま：きしの うしろで ちいさく */
 .watcher[hidden]{display:none}   /* まるふわ いがいの こを えらんだ とき（なかまと おなじ しかくい え） */
 dialog .close-top{position:sticky;top:0;z-index:3;display:block;margin:0 0 6px auto;min-height:44px;min-width:96px;padding:4px 14px;font-size:.85rem}   /* ながい まどの うえの「とじる」（したまで いかなくても とじられる） */
@@ -2027,10 +2030,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; if (!cardShownAt) { cardShownAt = performance.now(); if (phase === 'caught') lockFor(1000); } }   // カードが 出た 時刻（つれた 直後は 0）
   function cardWait(ms) { clearTimeout(cardTimer); cardShownAt = 0; $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
-  const POSE_FILES = [];   // 天の ポーズえが とどいたら「img/pose/<id>_<pose>.png」の <id>_<pose> を ここへ（例：'marufuwa_mate'）。pose＝nage（なげる）・mate（まつ）・hiki（ひく）・age（もちあげ）。なければ いまの えのまま
+  const POSE_FILES = ['marufuwa_nage', 'marufuwa_mate', 'marufuwa_hiki', 'marufuwa_age'];   // 天の ポーズえが とどいたら「img/pose/<id>_<pose>.png」の <id>_<pose> を ここへ（例：'marufuwa_mate'）。pose＝nage（なげる）・mate（まつ）・hiki（ひく）・age（もちあげ）。なければ いまの えのまま
   let poseNow = '';
-  const poseFile = () => { const k = (marufuwa.dataset.avatar || 'marufuwa') + '_' + poseNow; return poseNow && POSE_FILES.includes(k) && !reduce() ? 'img/pose/' + k + '.png' : ''; };
-  function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.src = pf; return; } const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
+  const poseLoaded = new Set();   // よみこめた ポーズえだけ つかう（オフラインで こわれた えを だささない）
+  POSE_FILES.forEach(k => { const im = new Image(); im.onload = () => poseLoaded.add(k); im.src = 'img/pose/' + k + '.png'; });
+  const poseFile = () => { const k = (marufuwa.dataset.avatar || 'marufuwa') + '_' + poseNow; return poseNow && POSE_FILES.includes(k) && poseLoaded.has(k) && !reduce() ? 'img/pose/' + k + '.png' : ''; };
+  function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.dataset.pose = '1'; marufuwa.src = pf; return; } delete marufuwa.dataset.pose; const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
   function drawToday() {
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
@@ -2101,6 +2106,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // なげる うごき：うしろに そって、えいっと ふって、ウキが ゆみなりに とんで、ぽちゃん
   function throwRod() {
     const box = scene.getBoundingClientRect(), f = feet(mine), w = floatAt(mine);
+    if (POSE_FILES.length) { poseNow = 'nage'; try { face(curFace); } catch {} setTimeout(() => { if (phase === 'waiting' || phase === 'bite') { poseNow = 'mate'; try { face(curFace); } catch {} } }, 900); }
     if (!reduce()) { rodTo(-9, 3, 230); setTimeout(() => rodTo(5, -2, 190), 250); setTimeout(() => { if (phase === 'waiting') rodPose('waiting'); }, 470); }   // さおが うしろから まえへ（0.5びょう）
     const dx = (w.x - (f.x + 9)) / 100 * box.width, dy = (w.y - (f.y - 18)) / 100 * box.height;
     const back = 10 + Math.random() * 2, fore = 10 + Math.random() * 6, lift = 55 + Math.random() * 45, reach = .38 + Math.random() * .17;   // まいかい すこし ちがう ゆみなり（ちゃくすいの 0.9びょうは かえない）
