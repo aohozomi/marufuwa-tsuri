@@ -51,7 +51,11 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
 :root[data-night=true] .big{filter:brightness(.9)}
 :root[data-night=true] .play{filter:none}
 :root[data-night=true] .confirm button{background:#1a3250;color:#e8f1f8;border-color:#4a6b8c}
-.note{margin:16px 0 0;font-size:.82rem;line-height:1.7;color:var(--soft)}
+.sub{margin:0;text-align:center}
+.sub a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;font-size:.9rem;font-weight:700;color:#0b4a6b;text-decoration:underline}
+.sub a:focus-visible{outline:3px solid #0b4a6b;outline-offset:2px}
+:root[data-night=true] .sub a{color:#bfe6f9}
+.note{margin:6px 0 0;font-size:.82rem;line-height:1.7;color:var(--soft)}
 :root[data-calm=true] .big{transition:none}
 :root[data-calm=true] .big:active{transform:none}
 @media(prefers-reduced-motion:reduce){.big{transition:none}.big:active{transform:none}}
@@ -74,6 +78,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
     <button type="button" class="big" id="b-line" data-k="line" aria-expanded="false" aria-controls="c-line"><span class="ic" aria-hidden="true">💬</span><span><span id="t-line">LINE スタンプ</span><small id="s-line">まるふわの スタンプ</small></span></button>
     <div class="confirm" id="c-line" hidden role="group" aria-labelledby="q-line"><p id="q-line">そとの ページ（LINE ストア）を ひらきます。いいですか？</p><div class="row"><a id="a-line" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-line">やめる</button></div></div>
   </div>
+  <p class="sub"><a id="a-stream" href="stream/">はいしん・どうがで つかう かたへ</a></p>
   <p class="note" id="note">そとの ページを ひらく ときは かならず「いいですか？」と きくよ。この ページは なにも ほぞんしないし、どこにも おくらないよ。</p>
   <div class="sr-only" id="live" role="status" aria-live="polite"></div>
 </main>
@@ -99,6 +104,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   set('t-line', 'LINE スタンプ', 'LINE stickers'); set('s-line', 'まるふわの スタンプ', 'Marufuwa stickers');
   set('q-app', 'そとの ページ（App Store）を ひらきます。いいですか？', 'This opens an outside page (the App Store). Is that OK?'); set('q-line', 'そとの ページ（LINE ストア）を ひらきます。いいですか？', 'This opens an outside page (the LINE Store). Is that OK?');
   set('a-app', 'ひらく', 'Open'); set('a-line', 'ひらく', 'Open'); set('n-app', 'やめる', 'Cancel'); set('n-line', 'やめる', 'Cancel');
+  set('a-stream', 'はいしん・どうがで つかう かたへ', 'For streamers and video makers');
   set('note', 'そとの ページを ひらく ときは かならず「いいですか？」と きくよ。この ページは なにも ほぞんしないし、どこにも おくらないよ。', 'We always ask before opening an outside page. This page saves nothing and sends nothing.');
   const say = t => { const l = $('live'); l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); };
   function close(k, focusBack) {
