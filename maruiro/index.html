@@ -27,6 +27,10 @@ try {
 :root[data-time=n]{--sky1:#1f2f5c;--sky2:#4a5d92;--wall:#e6e1f3;--plate:#f6f3fb;--wood2:#7c6f9a;--line:#8e80b0;--field:#33406e;--fieldline:#8e80b0;--guide:#d9d2f0;--lineclr:#ffb4a0}
 :root[data-large=true]{font-size:125%}
 *{box-sizing:border-box}
+.room{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.room .note{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+#cv,#fl,.ctl button,.mutebtn,.fbtns button,.ctl2 button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
+.ctl button,.ctl2 button,.fbtns button,.mutebtn,.back{touch-action:manipulation}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:linear-gradient(var(--sky1),var(--sky2));padding:8px}
 :root[data-inapp=x] body{padding-bottom:84px}
@@ -242,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
   drawZukan();
 
   // ─── せかい ───
-  let dbgNoMerge = false, balls = [], aimX = W / 2, nextL = pickLevel(), canDrop = true, cooldown = 0, over = 0, lastMsg = '';
+  let lastDrop = null, dbgNoMerge = false, balls = [], aimX = W / 2, nextL = pickLevel(), canDrop = true, cooldown = 0, over = 0, lastMsg = '';
   const stats = { drops: 0, merges: 0, melts: 0, top: 0, maxL: -1, t: 0, clears: 0, chain: 0, maxChain: 0 };
   let chainAlive = 0;
   let uid = 0;
@@ -254,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function dropBall(x) {
     if (!canDrop) return false;
     const l = nextL; setAim(x === undefined ? aimX : x);
-    addBall(aimX, rOf(l) + 46, l, 0, 20); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; nextL = pickLevel(); setAim(aimX); tone(0, 'drop');
+    addBall(aimX, rOf(l) + 46, l, 0, 20); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; lastDrop = balls[balls.length - 1]; nextL = pickLevel(); setAim(aimX); tone(0, 'drop');
     return true;
   }
 
@@ -298,7 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── ぶつり：まるどうしの かんたんな しょうとつ ───
   function step(dt) {
     stats.t += dt;
-    if (cooldown > 0) { cooldown -= dt; if (cooldown <= 0) canDrop = true; }
+    if (cooldown > 0) cooldown -= dt;
+    if (!canDrop && cooldown <= 0 && (!lastDrop || lastDrop.touched || lastDrop.melt > 0 || !balls.includes(lastDrop))) canDrop = true;   // 450ms たって「かつ」まえの 子が ぶつかる／おちきる まで（どちらかだけでは 出さない）
     const act = balls.filter(b => b.melt === 0);
     for (const b of balls) {
       b.age += dt; if (b.pop > 0) b.pop = Math.max(0, b.pop - dt * 2.6);
@@ -310,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let i = 0; i < act.length; i++) for (let j = i + 1; j < act.length; j++) {
         const a = act[i], c = act[j], dx = c.x - a.x, dy = c.y - a.y, rr = a.r + c.r, d2 = dx * dx + dy * dy;
         if (d2 >= rr * rr) continue;
-        const d = Math.sqrt(d2) || .001, nx = dx / d, ny = dy / d, ov = rr - d, ia = 1 / a.m, ic = 1 / c.m, s = ia + ic;
+        a.touched = true; c.touched = true; const d = Math.sqrt(d2) || .001, nx = dx / d, ny = dy / d, ov = rr - d, ia = 1 / a.m, ic = 1 / c.m, s = ia + ic;
         a.x -= nx * ov * ia / s; a.y -= ny * ov * ia / s; c.x += nx * ov * ic / s; c.y += ny * ov * ic / s;
         const vn = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
         if (vn < 0) { const j2 = -(1.08) * vn / s; a.vx -= j2 * nx * ia; a.vy -= j2 * ny * ia; c.vx += j2 * nx * ic; c.vy += j2 * ny * ic;
@@ -318,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       for (const b of act) {
         if (b.x < b.r) { b.x = b.r; if (b.vx < 0) b.vx *= -.1; } else if (b.x > W - b.r) { b.x = W - b.r; if (b.vx > 0) b.vx *= -.1; }
+        if (b.y > H - b.r - 1) b.touched = true;
         if (b.y > H - b.r) { b.y = H - b.r; if (b.vy > 0) b.vy *= -.08; b.vx *= 1 - Math.min(.5, 6 * dt / 6); }
       }
     }
@@ -413,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
   cv.addEventListener('pointermove', e => { if (down || e.pointerType === 'mouse') setAim(toX(e)); });
   cv.addEventListener('pointerup', e => { if (!down) return; down = false; setAim(toX(e)); dropBall(); });
   cv.addEventListener('pointercancel', () => { down = false; });
-  const hold = (btn, fn) => { let t = 0; const stop = () => { clearInterval(t); t = 0; }; btn.addEventListener('pointerdown', e => { fn(); stop(); t = setInterval(fn, 60); }); ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(n => btn.addEventListener(n, stop)); btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); };
+  const hold = (btn, fn) => { let t = 0; const stop = () => { clearInterval(t); t = 0; }; btn.addEventListener('pointerdown', e => { if (e.cancelable) e.preventDefault(); fn(); stop(); t = setInterval(fn, 60); }); ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(n => btn.addEventListener(n, stop)); btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); };
   hold($('bl'), () => setAim(aimX - 5)); hold($('br'), () => setAim(aimX + 5));
   $('bd').addEventListener('click', () => dropBall());
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b && ['rst', 'play', 'mode', 'next'].includes(b.id)) tone(0, 'click'); });
@@ -458,6 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
     last = ts; draw(); requestAnimationFrame(frame);
   }
   document.addEventListener('visibilitychange', () => { last = 0; });
+  // ながおしで「もじの せんたく」「コールアウト」「メニュー」が 出ない（ばん・HUD・ボタン・みだし）。ノートの 文は えらべる まま
+  const noSel = e => { if (e.target.closest && e.target.closest('.note')) return; e.preventDefault(); };
+  document.addEventListener('selectstart', noSel); $('room').addEventListener('contextmenu', noSel); $('room').addEventListener('dragstart', e => e.preventDefault());
+  cv.addEventListener('pointerdown', e => { if (e.cancelable) e.preventDefault(); }, { passive: false }); cv.addEventListener('touchstart', e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
   // BGM：ひろば・おへや・カフェと おなじ 曲（snd/bgm/ の あさ・ひる・ゆうがた・よる）。はじめは OFF・「BGM：ON/OFF」ボタン・おとが OFF の まま おすと おとも つく
   const timeKey = () => /^[ahyn]$/.test(document.documentElement.dataset.time || '') ? document.documentElement.dataset.time : 'h';
   let bgmMine = false, bgmPrev = false;
@@ -518,6 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state: () => ({ n: balls.length, canDrop, nextL, best: rec.best, snd: rec.snd, over, ...stats, aimX }),
     step: n => { for (let i = 0; i < (n || 1); i++) step(1 / 60); },
     drop: x => { canDrop = true; return dropBall(x); },
+    tryDrop: x => dropBall(x),
     setPlay: v => { rec.play = v === 1 ? 1 : v === 2 ? 2 : 0; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); },
     reseed: n => { rnd = mul(n); },
     flood: { state: () => ({ n: fl.n, solved: fl.solved, board: fl.b.map(r => r.join('')).join('/'), today: fl.today }), press: floodPress, next: () => floodStart(fl.n + 1), restart: () => floodStart(fl.n), start: n => floodStart(n || 0) },
