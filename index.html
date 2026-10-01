@@ -977,7 +977,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
   <dialog id="book" aria-labelledby="book-title">
     <h2 id="book-title">おさかな シールちょう</h2>
-    <p class="count"><span id="book-seen">0</span> / <span id="book-base">30</span> しゅるい</p>
+    <p class="count" id="book-count"><span id="book-seen">0</span> / <span id="book-base">30</span> しゅるい</p>
+    <p class="count" id="book-fresh" hidden></p>
     <p class="count" id="book-myth"></p>
     <div id="book-grid"></div>
     <p id="book-fact" class="book-fact" role="status" hidden></p>
@@ -3779,8 +3780,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function drawTrophies() {
     const got = TROPHIES.filter(t => save.trophies && save.trophies[t[0]]);
     $('trophy-title').textContent = L('きねん', 'Trophies');
-    $('trophy-lead').textContent = L('あそぶほど もらえるよ。とりにがしは ないよ。' + got.length + ' / ' + TROPHIES.length, 'You earn these as you play. You cannot miss any. ' + got.length + ' / ' + TROPHIES.length);
-    $('trophy-grid').replaceChildren(...TROPHIES.map(t => {
+    const cnt = got.length && save.total > 0 ? ' ' + got.length + ' / ' + TROPHIES.length : '';   // 「N/45」は 1つ もらってから
+    $('trophy-lead').textContent = L('あそぶほど もらえるよ。とりにがしは ないよ。' + cnt, 'You earn these as you play. You cannot miss any.' + cnt);
+    let nextN = 3;   // まだの ものは ちかい 3つだけ みせる（ふえる たびに でる）
+    $('trophy-grid').replaceChildren(...TROPHIES.filter(t => (save.trophies && save.trophies[t[0]]) || nextN-- > 0).map(t => {
       const has = !!(save.trophies && save.trophies[t[0]]), d = document.createElement('div'), icon = document.createElement('b'), text = document.createElement('span'), sm = document.createElement('small');
       d.dataset.got = String(has); d.dataset.tier = String(t[1]); d.setAttribute('role', 'listitem');
       icon.textContent = has ? t[6] : '？'; icon.setAttribute('aria-hidden', 'true');
@@ -3900,6 +3903,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('open-book').addEventListener('click', () => {
     save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); drawBadge();   // ひらいた → みた ことに なる
     { const myth = FISH.filter(f => f.legend && !f.ext), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? L('★5の まぼろしの こ：ぜんいんに あえたよ！', '★5 mythical fish: you have met them all!') : L('★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'), '★5 mythical fish: ' + myth.length + ' exist (met: ' + got + ').' + (seenCount() >= BASE ? '' : ' Collect all ' + BASE + ' kinds and you are more likely to meet them.')); }
+    const fresh = save.total === 0 && seenCount() === 0;   // さいしょの 1ぴきまで かずは かくす（0/30 を みせない）
+    $('book-count').hidden = fresh; $('book-fresh').hidden = !fresh; $('book-fresh').textContent = L('ここに シールが ならぶよ', 'Stickers will line up here.'); if (fresh) $('book-myth').textContent = '';
     $('book-fact').hidden = true; $('book-fact').textContent = '';
     const makeCell = f => {
       const got = save.fish[f.id], cell = document.createElement('div');
@@ -3917,7 +3922,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       for (const a of AREAS) {
         const inArea = list.filter(f => f.area === a.id); if (!inArea.length) continue;
         const head = document.createElement('h3'), got = inArea.filter(f => save.fish[f.id]).length;
-        head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L(a.name + '　' + got + ' / ' + inArea.length, T(a.name) + '  ' + got + ' / ' + inArea.length);
+        head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = fresh ? L(a.name, T(a.name)) : L(a.name + '　' + got + ' / ' + inArea.length, T(a.name) + '  ' + got + ' / ' + inArea.length);
         cells.push(head, ...inArea.map(makeCell));
       }
       $('book-grid').replaceChildren(...cells);
