@@ -25,6 +25,8 @@
   ];
   var cache = {}, pending = {};
   function readSave() { try { var d = JSON.parse(localStorage.getItem(KEY)); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } }
+  function roundTriD(v, t, b) { var n = v.length, f = function (p, q, k) { return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; }, d = '', i; for (i = 0; i < n; i++) { var p = v[i], pr = v[(i + n - 1) % n], nx = v[(i + 1) % n], a = f(p, pr, t), z = f(p, nx, t), q = v[(i + 1) % n], a2 = f(q, p, t), mx = (z[0] + a2[0]) / 2, my = (z[1] + a2[1]) / 2, cx = (v[0][0] + v[1][0] + v[2][0]) / 3, cy = (v[0][1] + v[1][1] + v[2][1]) / 3, ox = mx - cx, oy = my - cy, ol = Math.sqrt(ox * ox + oy * oy) || 1, ex = Math.sqrt(Math.pow(nx[0] - p[0], 2) + Math.pow(nx[1] - p[1], 2)); d += (i ? 'L' : 'M') + a[0].toFixed(2) + ' ' + a[1].toFixed(2) + 'Q' + p[0] + ' ' + p[1] + ' ' + z[0].toFixed(2) + ' ' + z[1].toFixed(2) + 'Q' + (mx + ox / ol * ex * b).toFixed(2) + ' ' + (my + oy / ol * ex * b).toFixed(2) + ' ' + a2[0].toFixed(2) + ' ' + a2[1].toFixed(2); } return d + 'Z'; }
+  var ONIGIRI_D = roundTriD([[96, 188], [128, 240], [64, 240]], .3, .06);
   function levelOf(xp) { return Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, Number(xp) || 0) / 20))); }   // 本体の levelOf と おなじ
   // ひろばの「おみせ」で もらった もの（おさかなコインで ひらく・へらない）。ひろばの 記録 marufuwa-hiroba-v1 の shop.got（wear＝色の なまえの 配列・item＝もちもの 番号の 配列）を 読むだけ（書かない・キーは ふやさない）
   var HIROBA_KEY = 'marufuwa-hiroba-v1';
@@ -62,9 +64,11 @@
       c.beginPath(); c.moveTo(78, 226); c.lineTo(114, 226); c.lineTo(108, 262); c.lineTo(84, 262); c.closePath(); fillStroke(c, '#7fc8ee', 2.8);
       c.strokeStyle = '#ffffffaa'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(82, 236); c.lineTo(110, 236); c.stroke(); c.strokeStyle = '#4fa3d4'; c.lineWidth = 2; c.beginPath(); c.moveTo(81, 244); c.lineTo(111, 244); c.stroke();
     },
-    onigiri: function (c) {
-      c.beginPath(); c.moveTo(96, 190); c.quadraticCurveTo(104, 192, 124, 224); c.quadraticCurveTo(128, 236, 116, 238); c.lineTo(76, 238); c.quadraticCurveTo(64, 236, 68, 224); c.quadraticCurveTo(88, 192, 96, 190); c.closePath(); fillStroke(c, '#ffffff', 3);
-      c.beginPath(); c.moveTo(82, 224); c.lineTo(110, 224); c.lineTo(113, 238); c.lineTo(79, 238); c.closePath(); fillStroke(c, '#3b5a47', 2.6);
+    onigiri: function (c) {   // 角の ない まるい 三角（角の はんけい 30%・辺は 外へ ふくらむ）・のりは 下 1/3 の まるい 帯・白は うすい クリーム・輪郭は ふとい 茶
+      var d = ONIGIRI_D, P = new Path2D(d);
+      c.fillStyle = '#fff7e6'; c.fill(P); c.save(); c.clip(P);
+      c.beginPath(); c.moveTo(70, 224); c.lineTo(122, 224); c.arcTo(126, 224, 126, 232, 6); c.lineTo(126, 240); c.lineTo(66, 240); c.lineTo(66, 232); c.arcTo(66, 224, 74, 224, 6); c.closePath(); c.fillStyle = '#3b5a47'; c.fill(); c.restore();
+      c.lineWidth = 3.4; c.lineJoin = 'round'; c.strokeStyle = '#7a4b34'; c.stroke(P);
       c.fillStyle = INK; c.beginPath(); c.arc(92, 208, 1.6, 0, 6.3); c.arc(100, 208, 1.6, 0, 6.3); c.fill();
     },
     net: function (c) {
@@ -140,6 +144,6 @@
     currentItem: currentItem, compose: compose, drawItem: drawItem,
     list: function () { return LIST.map(function (o) { return { k: o.k, lv: o.lv, h: o.h, s: o.s, v: o.v }; }); },
     current: function () { var o = current(); return { k: o.k, lv: o.lv, h: o.h, s: o.s, v: o.v, active: !!o.h }; },   // build(url, current()) で 色つきの 絵を 作れる
-    levelOf: levelOf, apply: apply, build: build, warm: warm, owns: owns
+    levelOf: levelOf, onigiriD: ONIGIRI_D, apply: apply, build: build, warm: warm, owns: owns
   };
 })();

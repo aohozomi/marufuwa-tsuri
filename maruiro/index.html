@@ -187,6 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // まるふわ世界の まるい もの（かりの え：コードで かく。ほんものの えが とどいたら さしかえる）。まるい 体の なかに しろい 皿と、ものの かたち
   let ringOver = null;   // つみき：耳の 4いろを わの いろに つかう
+  function roundTriD(v, t, b) { var n = v.length, f = function (p, q, k) { return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; }, d = '', i; for (i = 0; i < n; i++) { var p = v[i], pr = v[(i + n - 1) % n], nx = v[(i + 1) % n], a = f(p, pr, t), z = f(p, nx, t), q = v[(i + 1) % n], a2 = f(q, p, t), mx = (z[0] + a2[0]) / 2, my = (z[1] + a2[1]) / 2, cx = (v[0][0] + v[1][0] + v[2][0]) / 3, cy = (v[0][1] + v[1][1] + v[2][1]) / 3, ox = mx - cx, oy = my - cy, ol = Math.sqrt(ox * ox + oy * oy) || 1, ex = Math.sqrt(Math.pow(nx[0] - p[0], 2) + Math.pow(nx[1] - p[1], 2)); d += (i ? 'L' : 'M') + a[0].toFixed(2) + ' ' + a[1].toFixed(2) + 'Q' + p[0] + ' ' + p[1] + ' ' + z[0].toFixed(2) + ' ' + z[1].toFixed(2) + 'Q' + (mx + ox / ol * ex * b).toFixed(2) + ' ' + (my + oy / ol * ex * b).toFixed(2) + ' ' + a2[0].toFixed(2) + ' ' + a2[1].toFixed(2); } return d + 'Z'; }
+  const ONIGIRI_D = roundTriD([[0, -27], [31, 25], [-31, 25]], .3, .06);   // おにぎり：角の ない まるい 三角（角の はんけい＝辺の 30%）
   function moon(c, r) {
     if (ringOver) { c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = ringOver; c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke(); r *= .8; }   // さいごの まる＝おつきさま（まんまるの おつきさまに えがお）
     c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = '#fff1b8'; c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
@@ -206,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (l === 1) { c.beginPath(); c.moveTo(0, 26); c.quadraticCurveTo(-34, 6, -28, -12); c.quadraticCurveTo(0, -30, 28, -12); c.quadraticCurveTo(34, 6, 0, 26); c.closePath(); c.fillStyle = '#ffd1c4'; c.fill(); c.stroke(); c.lineWidth = 2.2; [-14, 0, 14].forEach(k => { c.beginPath(); c.moveTo(0, 24); c.lineTo(k * 1.7, -16 + Math.abs(k) * .5); c.stroke(); }); }
     else if (l === 2) { c.beginPath(); c.moveTo(0, -30); c.lineTo(0, -18); c.stroke(); c.beginPath(); c.arc(0, 4, 20, Math.PI, 0); c.closePath(); c.fillStyle = '#e8543f'; c.fill(); c.stroke(); c.beginPath(); c.arc(0, 4, 20, 0, Math.PI); c.closePath(); c.fillStyle = '#fff'; c.fill(); c.stroke(); }
     else if (l === 3) { for (let k = 0; k < 5; k++) { const t = k / 5 * Math.PI * 2 - Math.PI / 2; el(Math.cos(t) * 17, Math.sin(t) * 17, 11, 11, '#ffb6c9'); } el(0, 0, 9, 9, '#ffd84d'); }
-    else if (l === 4) { c.beginPath(); c.moveTo(0, -26); c.quadraticCurveTo(30, 12, 26, 22); c.quadraticCurveTo(0, 28, -26, 22); c.quadraticCurveTo(-30, 12, 0, -26); c.closePath(); c.fillStyle = '#fff'; c.fill(); c.stroke(); c.beginPath(); c.moveTo(-17, 12); c.lineTo(17, 12); c.lineTo(22, 22); c.quadraticCurveTo(0, 28, -22, 22); c.closePath(); c.fillStyle = '#3f5a4a'; c.fill(); c.stroke(); }
+    else if (l === 4) { c.beginPath(); const P = new Path2D(ONIGIRI_D); c.fillStyle = '#fff7e6'; c.fill(P); c.save(); c.clip(P); c.beginPath(); c.moveTo(-26, 12); c.lineTo(26, 12); c.lineTo(26, 30); c.lineTo(-26, 30); c.closePath(); c.fillStyle = '#3f5a4a'; c.fill(); c.restore(); c.lineWidth = 3.4; c.lineJoin = 'round'; c.strokeStyle = '#7a4b34'; c.stroke(P); }
     else if (l === 5) { el(0, 14, 17, 15, '#fff'); el(0, -10, 12, 12, '#fff'); c.fillStyle = '#402a30'; c.beginPath(); c.arc(-4, -13, 1.8, 0, 7); c.arc(4, -13, 1.8, 0, 7); c.fill(); c.beginPath(); c.moveTo(0, -9); c.lineTo(7, -7); c.lineTo(0, -6); c.closePath(); c.fillStyle = '#ff9a3c'; c.fill(); c.beginPath(); c.moveTo(-12, -20); c.lineTo(12, -20); c.stroke(); }
     c.restore();
   }
@@ -661,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
     flood: { state: () => ({ n: fl.n, solved: fl.solved, board: fl.b.map(r => r.join('')).join('/'), today: fl.today }), press: floodPress, next: () => floodStart(fl.n + 1), restart: () => floodStart(fl.n), start: n => floodStart(n || 0) },
     setMode: v => { rec.mode = v === 2 ? 2 : v === 0 ? 0 : 1; buildLadder(); save(); drawMode(); drawZukan(); drawBest(); },
     fishIds: () => [0, 1, 2, 3, 4, 5, 6].map(fishId), order: n => { reorder(); const o = []; for (let i = 0; i < n; i++) o.push(pickLevel()); reorder(); return o.join(''); },
-    tone: (l, k) => tone(l, k),
+    onigiriD: ONIGIRI_D, tone: (l, k) => tone(l, k),
     ts: { st: () => ({ ...ts.st, chain: ts.chain, resolving: ts.resolving, cur: ts.cur ? { r: ts.cur.r, c: ts.cur.c, o: ts.cur.o, age: ts.cur.age } : null, next: !!ts.next, ghosts: ts.ghosts.length }), grid: () => ts.g.map(r => r.map(c => c ? c.c + '' + c.s : '.').join('')).join('/'),
       setGrid: rows => { ts.g = rows.map(r => r.split('').map(ch => ch === '.' ? null : tsCell(Number(ch), 0))); }, setCell: (r, c, col, sz) => { ts.g[r][c] = col === null ? null : tsCell(col, sz); },
       move: dc => tsMove(dc), rotate: () => tsRotate(), drop: () => tsHardDrop(), canDrop: () => tsCanDrop(), step: n => { for (let i = 0; i < (n || 1); i++) tsStep(1 / 60); }, spawn: () => tsSpawn(), setCur: (r, c, o, a, b) => { ts.cur = { r, c, o, a, b, age: 1, f: 0 }; ts.resolving = false; },
