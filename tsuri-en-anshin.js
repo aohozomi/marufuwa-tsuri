@@ -26,6 +26,7 @@
       "ふうけい・がめんのぶひん": "Scenery and screen parts",
       "プログラムでかいています（しゃしんやほかのひとのえはつかっていません）。": "Drawn by code (no photos and no other people’s artwork).",
       "おととBGM": "Sound and music",
+      "なみのおとは、ほんもののみずうみのろくおん（パブリックドメイン＝だれでもつかえるおと）です。BGMはフリーおんがくそざい「あまちゃのおんがくこうぼう」のきょくです（きやくのとおり、きょくだけをくばりなおすことはしません）。そのほかのこうかおんはブラウザのなかでつくります。たかいおとをいれないきまり（1200Hzよりした）で、きかいではかっています。": "The wave sound is a real lake recording (public domain). The music is from the free music library “Music Atelier Amacha” (used under its terms; the tracks themselves are not redistributed). Other sound effects are generated in the browser. High tones are kept out by rule (below 1200 Hz), and this is measured by machine.",
       "なみのおとは、ほんもののみずうみのろくおん（パブリックドメイン＝だれでもつかえるおと）です。そのほかのおととBGMはブラウザのなかでつくります。たかいおとをいれないきまり（1200Hzよりした）で、きかいではかっています。": "The wave sound is a real lake recording (public domain, free for anyone to use). All other sounds and the music are generated in the browser. High tones are kept out by rule (below 1200 Hz), and this is measured by machine.",
       "ブラウザのなかでつくるおとです。たかいおとをいれないきまり（1200Hzよりした）で、きかいではかっています。": "All sound is generated in the browser. High tones are kept out by rule (below 1200 Hz), and this is measured by machine.",
       "ぶんとえいご": "Text and English",
