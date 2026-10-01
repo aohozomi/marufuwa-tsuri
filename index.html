@@ -3522,6 +3522,20 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       gzBlink(slot);
     }, 4000 + Math.random() * 4000);
   }
+  // ふつうの つり画面でも いきて いる：みんな 4〜8びょうに こくっ（まばたき）・ときどき のび／きょろっ。まるふわは アタリ・ひく 中は すでに うごいて いるので おやすみ。うごきを へらす・ながめる・ダイアログ中は とめる
+  const lifeT = {};
+  function lifeBlink(slot) {
+    clearTimeout(lifeT[slot]); lifeT[slot] = setTimeout(() => {
+      const img = gzImg(slot), me = slot === 'me', calm = reduce() || document.hidden || gazing() || swapping || document.body.classList.contains('sleepy') || document.querySelector('dialog[open]') || (me && (phase === 'bite' || phase === 'reel'));
+      if (img && !calm) {
+        const r = Math.random();
+        if (r < .08) GZ.stretch(slot); else if (r < .14 && !me) GZ.look(slot);
+        else img.animate([{translate: '0 0'}, {translate: '0 1.6px', offset: .5}, {translate: '0 0'}], {duration: 260, easing: 'ease-in-out'});
+      }
+      lifeBlink(slot);
+    }, 4000 + Math.random() * 4000);
+  }
+  [0, 1, 'me'].forEach(lifeBlink);
   function gzCatchTick() {   // 20〜40びょうに 1かい、なかまが つる→となりで 喜ぶ
     clearTimeout(gzCatchT); gzCatchT = 0; if (!gazing()) return;
     gzCatchT = setTimeout(gzCatchTick, 20000 + Math.random() * 20000);
