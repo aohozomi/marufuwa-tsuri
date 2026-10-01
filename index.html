@@ -3238,8 +3238,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const heaven = $('sky'), brush = heaven.getContext('2d'), film = brush.createImageData(heaven.width, heaven.height);
   let lastSky = 0, skyKey = '', skyTint = null;
   let moonCache = null, moonAt = 0;
-  function moonInfo() {   // 本物の 月齢（tsuri-world.js の TsuriWorld.moon()。まだ よみこまれて いない ときは null＝月は かかない）。10ぷんに 1かい よみなおす
-    const t = Date.now(); if (!moonCache || t - moonAt > 600000) { let m = null; try { if (window.TsuriWorld && typeof TsuriWorld.moon === 'function') m = TsuriWorld.moon(); } catch {} if (m) { moonCache = m; moonAt = t; } else if (!moonCache) return null; }
+  function moonLocal() {   // tsuri-world.js（defer）が まだ の ときの おなじ 式（TsuriWorld.moon() と おなじ けっか。よみこみの あいだに 月が ちらつかない ように）
+    const q = probe('moon'); let phase;
+    if (q !== null && q !== '' && Number.isFinite(Number(q)) && Number(q) >= 0 && Number(q) <= 1) phase = Number(q) % 1;
+    else { const SYN = 29.530588853, age = (((Date.now() / 86400000 + 2440587.5 - 2451550.1) % SYN) + SYN) % SYN; phase = age / SYN; }
+    return {phase, illum: (1 - Math.cos(2 * Math.PI * phase)) / 2, waxing: phase < .5};
+  }
+  function moonInfo() {   // 本物の 月齢。TsuriWorld.moon() が あれば それ、まだ なら おなじ 式（moonLocal）。10ぷんに 1かい よみなおす
+    const t = Date.now(); if (!moonCache || t - moonAt > 600000) { let m = null; try { if (window.TsuriWorld && typeof TsuriWorld.moon === 'function') m = TsuriWorld.moon(); } catch {} moonCache = m || moonLocal(); moonAt = m ? t : t - 590000; }   // ローカルの うちは 10びょうで もういちど（TsuriWorld が そろったら きりかえる）
     return moonCache;
   }
   function drawSky(now) {
