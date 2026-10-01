@@ -1620,13 +1620,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     return new Blob([buf], {type: 'audio/wav'});
   }
   function plopOnce() {
-    if (save.total > 0 || save.plopHint === true || save.sound === true || save.sndFx === false || document.hidden) return;   // はじめて あそぶ ひとの さいしょの 1かい だけ
+    if (SFX_OFF || save.total > 0 || save.plopHint === true || save.sound === true || save.sndFx === false || document.hidden) return;   // はじめて あそぶ ひとの さいしょの 1かい だけ
     save.plopHint = true; store(); plopHintDue = true;
     try { const url = URL.createObjectURL(plopWav()), a = new Audio(url); a.volume = .9; a.onended = a.onerror = () => URL.revokeObjectURL(url); const p = a.play(); if (p && p.catch) p.catch(() => URL.revokeObjectURL(url)); } catch {}
   }
   function softenBus() { if (bus && bus.low) bus.low.frequency.value = save.soft ? 1200 : 1400; }   // 「やさしい おと」を きりかえた とき（つくって ある でぐちの ローパスを かえる）
+  const SFX_OFF = true;   // 10/2 マスター直：こうかおん（fx・ui・あんない）は ぜんぶ いったん とめる。のこすのは なみ（amb）と BGM だけ。やりなおしは あとで
   function tone(freq, length = .09, type = 'sine', delay = 0, loud = .05, slideTo = 0, kind = 'fx', attack = 0) {
-    if (!sndOn(kind)) return;
+    if (SFX_OFF || !sndOn(kind)) return;
     try {
       const ctx = ready(), at = ctx.currentTime + delay, osc = ctx.createOscillator(), vol = ctx.createGain();
       // ちょうかくに びんかんな ひとの ために（はじめから この きまり）：きおんは 1200Hz いか（こえた ぶんは 1オクターブ さげる）・かくばった なみ（square）は まるい なみ（triangle）に（おおきさは おなじ）。
@@ -1644,7 +1645,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     } catch {}
   }
   function zap(length = .12, delay = 0, loud = .07, kind = 'fx') {   // みじかい ざっ（みずしぶき、けむり）
-    if (!sndOn(kind)) return;
+    if (SFX_OFF || !sndOn(kind)) return;
     try {
       const ctx = ready(), at = ctx.currentTime + delay;
       if (!hiss) { hiss = ctx.createBuffer(1, ctx.sampleRate * .5, ctx.sampleRate); const d = hiss.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
