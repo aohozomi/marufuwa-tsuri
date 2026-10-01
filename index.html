@@ -2004,12 +2004,16 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // 「ぽちゃん」は ウキが みずに ついた しゅんかんに（とんで いる 間は まだ 言わない。うごきを へらす ときは すぐ）
     if (flight) setTimeout(() => { if (phase === 'waiting') say('ぽちゃん。のんびり まとう。'); if (phase === 'waiting' || phase === 'bite') plopOnce(); }, flight); else { say('ぽちゃん。のんびり まとう。'); plopOnce(); }
     // さいしょの 1ぴきは、すぐに くる（はじめての ひとを またせない）
-    const wait = Number(query.get('wait')) || (save.total === 0 ? 1300 : 2200 + Math.random() * 3300);
+    let wait = Number(query.get('wait')) || (save.total === 0 ? 1300 : 2200 + Math.random() * 3300);
     // かげが みぎから およいで くる。おおきさは さかなの おおきさ、いろは めずらしさ
     const shadow = $('shadow'), w = floatAt(mine);
     nushi = Math.random() < (Number(probe('nushi')) || .04 * (onBossSpot() ? 2.5 : 1) * (save.bait === 2 ? 2 : 1) * (curMode() === 'hard' ? 1.5 : 1) * (save.again === 'nushi' ? 5 : 1));
     if (save.again === 'nushi' && nushi) save.again = null; if (save.again === 'rare4' && fish.rare === 4) save.again = null;   // また きた
     shadow.dataset.rare = String(fish.rare); shadow.dataset.nushi = String(nushi);
+    if (!query.get('wait') && !nushi && !fish.legend && save.total >= 5 && curMode() !== 'easy') {   // 釣れる ペースを ゆったりに（マスター直）：まちじかんを 1.6ばい×★が たかい ほど すこし ながく（はじめの 5ひきと らくちん・ぬし・まぼろしは そのまま）
+      wait = Math.round(wait * 1.6 * (1 + .08 * (fish.rare - 1)));
+      if (!reduce()) setTimeout(() => { if (phase !== 'waiting') return; const w2 = floatAt(mine), r = document.createElement('i'); r.className = 'ripple'; r.setAttribute('aria-hidden', 'true'); place(r, {x: w2.x - 7, y: w2.y + 5}); scene.append(r); r.animate([{scale: '.2', opacity: .8}, {scale: '1.1', opacity: 0}], {duration: 1400, easing: 'ease-out'}).onfinish = () => r.remove(); }, Math.round(wait * .45));   // まって いる あいだの ちいさな へんか（あわの わっか）
+    }
     if (ART && ART.shadow && ART.shadow[fish.id]) { shadow.classList.add('art'); shadow.style.setProperty('--m', ART.shadowMask(fish.id)); shadow.style.setProperty('--ar', String(ART.meta.shadowAspect[fish.id])); } else shadow.classList.remove('art');   // さかなごとの かげの かたち
     shadow.style.setProperty('--w', Math.min(44, Math.max(8, 7 + fish.max / 12) * (nushi ? 1.7 : 1)) + '%');
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
