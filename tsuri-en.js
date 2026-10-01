@@ -220,6 +220,7 @@
     'みなとのふねを、ずっとみまもっているんだって': 'They say it has always watched over the boats in the harbor.', 'まちのひとは「みなとのおじいさん」ってよぶんだって': 'The townsfolk call it “the old one of the harbor.”',
     'ふかいうみのそこから、たまにあそびにくるんだって': 'They say it comes up from the deep sea now and then, just to visit.', 'つきのあかるいよるに、ふねのしたをとおるんだって': 'They say it passes under the boat on bright moonlit nights.',
     'むかし、108のなかまがいたんだって': 'They say there were 108 friends here, long ago.', 'なかまはまだどこかにいるんだって': 'They say the friends are still out there somewhere.',
+    'おはよう。きょうも、ここにいていいよ。': 'Good morning. You are welcome here today, too.', 'ねむれない？ゆっくりながめよう。': "Can't sleep? Let's just watch the water for a while.",
     'わあ！': 'Wow!', 'すごい！': 'Amazing!', 'ぬしだ！': "It's the Guardian!", 'おおきい…！': 'So big…!', 'みてみて！': 'Look, look!', 'やったね！': 'You did it!',
     'とおくからみているよ。ひろいみずうみで、のんびり。': 'Watching from far away. On the wide lake, nice and slow.', 'ちかくにもどったよ。': 'Back to the close view.',
     'ひろば・おへや・ながめるでながれる、しずかなBGM': 'Quiet BGM that plays in the Plaza, the Room, and Just watch',
