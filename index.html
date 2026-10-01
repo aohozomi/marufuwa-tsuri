@@ -2582,17 +2582,21 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const sc = scene.getBoundingClientRect(); if (!sc.width) return;
     const chars = ['keeper', 'friend-a', 'friend-b', 'marufuwa'].map(id => $(id)).filter(e => e && !e.hidden && getComputedStyle(e).display !== 'none').map(e => e.getBoundingClientRect()).filter(r => r.width && r.height);
     const top = (l, r) => Math.min(...chars.filter(c => c.left < r && c.right > l).map(c => c.top), Infinity);   // この はばの うえに ある キャラの いちばん たかい ところ
-    chars.push(...chars.map(c => ({left: c.left - 24, right: c.right + 24, top: c.top - 40, bottom: c.top})));   // ふきだしの でる ところ（あたまの うえ）も さける
+    const real = chars.slice(), zones = chars.map(c => ({left: c.left - 24, right: c.right + 24, top: c.top - 40, bottom: c.top}));
+    chars.push(...zones);   // ふきだしの でる ところ（あたまの うえ）も さける
     const hint = [...scene.querySelectorAll('.next-hint [data-next]')].find(g => getComputedStyle(g).display !== 'none');
     let hr = null;
     if (hint) {
       hint.style.translate = ''; hr = hint.getBoundingClientRect();
-      const m = hint.parentNode.getScreenCTM(), r0 = hr, hit = (dx, dy) => chars.some(c => r0.left + dx < c.right + 4 && r0.right + dx > c.left - 4 && r0.top + dy < c.bottom + 4 && r0.bottom + dy > c.top - 4);
-      if (m && m.a && hit(0, 0)) {   // うごかす：ひだり・みぎ・うえ の うち いちばん ちかい あいている ところへ（シーンの そとへは でない）
+      const m = hint.parentNode.getScreenCTM(), r0 = hr, hit = (dx, dy, set = chars) => set.some(c => r0.left + dx < c.right + 4 && r0.right + dx > c.left - 4 && r0.top + dy < c.bottom + 4 && r0.bottom + dy > c.top - 4);
+      if (m && m.a && hit(0, 0, real)) {   // うごかす：ひだり・みぎ・うえ の うち いちばん ちかい あいている ところへ（シーンの そとへは でない）
         let best = null;
-        for (let dy = 0; dy >= -(r0.top - sc.top - 4); dy -= 4) for (let dx = -sc.width; dx <= sc.width; dx += 4) {
-          if (r0.left + dx < sc.left + 2 || r0.right + dx > sc.right - 2 || hit(dx, dy)) continue;
-          const cost = Math.abs(dx) + Math.abs(dy) * 2; if (!best || cost < best[0]) best = [cost, dx, dy];
+        for (const set of [chars, real]) {   // まず ふきだしの ところも さける。むりなら 人の かおだけ
+          for (let dy = 0; dy >= -(r0.top - sc.top - 4); dy -= 4) for (let dx = -sc.width; dx <= sc.width; dx += 4) {
+            if (r0.left + dx < sc.left + 2 || r0.right + dx > sc.right - 2 || hit(dx, dy, set)) continue;
+            const cost = Math.abs(dx) + Math.abs(dy) * 2; if (!best || cost < best[0]) best = [cost, dx, dy];
+          }
+          if (best) break;
         }
         if (best) { hint.style.translate = (best[1] / m.a) + 'px ' + (best[2] / m.d) + 'px'; hr = hint.getBoundingClientRect(); }
       }
