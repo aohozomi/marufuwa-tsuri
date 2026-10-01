@@ -142,7 +142,7 @@
     'ここにいて、いいよ。': 'You can stay right here.', 'ぼんやりするのも、だいじなじかん。': 'Spacing out is important time, too.', 'いまできることだけで、じゅうぶん。': 'What you can do right now is enough.',
     'みずがきらきらしているね。': 'The water is sparkling.', 'くもがゆっくりながれていくね。': 'The clouds drift by slowly.', 'しんこきゅう、ひとつ。': 'One deep breath.', 'いそがなくて、だいじょうぶ。': "No rush. It's okay.",
     'ここは、ゆっくりしていいばしょ。': 'This is a place to take it slow.', 'よるのみずは、しずかだね。': 'The water is quiet at night.', 'ほしがひとつ、みえるかな。': 'Can you see a star?',
-    'ねむれないよるも、ここにいていいよ。': 'On sleepless nights, you can stay here, too.', 'もうおそいね。むりしないでね。': "It's getting late. Don't push yourself.", 'あめのおとって、おちつくね。': 'The sound of rain is calming.',
+    'ねむれないよるも、ここにいていいよ。': 'On sleepless nights, you can stay here, too.', 'もうおそいね。むりしないでね。': "It's getting late. Don't push yourself.", 'あめのおとって、おちつくね。': 'The sound of rain is calming.', 'あめのひは、おちつくね。': 'Rainy days feel calm.', 'あめ、すずしいね。': 'The rain feels cool.', 'あ、いまなにかいた。': 'Oh, something just swam by.',
     'ここはぬれないよ。ゆっくりしよう。': "You won't get wet here. Let's relax.", 'あさのひかりだね。': 'Morning light.', 'きょうは、きょうのペースでいいよ。': "Go at today's pace.",
     '10ぴきめ！なかまがはくしゅしているよ。': 'Your 10th catch! Your friends are clapping.', '30ぴきめ！はなびらがまってきたよ。': 'Your 30th catch! Petals are drifting in.', '50ぴきめ！ふうせんがあがったよ。': 'Your 50th catch! Balloons are rising.',
     '100ぴきめ！はなびがあがったよ。': 'Your 100th catch! Fireworks are going up.', '300ぴきめ！にじいろのかみふぶきだよ。': 'Your 300th catch! Rainbow confetti!', '500ぴきめ！ほしがふってきたよ。': 'Your 500th catch! Stars are falling.',

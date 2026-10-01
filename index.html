@@ -3250,7 +3250,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // ながめる。つらなくて いい。みずと そらと なかまを、みて いるだけ
   const GAZE_WORDS = ['なみの おとを、きいて いよう。', 'きょうも、おつかれさま。', 'なにも しなくて、いいよ。', 'ゆっくり、いきを しよう。', 'ここに いて、いいよ。', 'ぼんやり するのも、だいじな じかん。', 'いま できる ことだけで、じゅうぶん。', 'みずが きらきら しているね。', 'くもが ゆっくり ながれて いくね。', 'しんこきゅう、ひとつ。', 'いそがなくて、だいじょうぶ。', 'ここは、ゆっくり して いい ばしょ。'];
   const GAZE_NIGHT = ['よるの みずは、しずかだね。', 'ほしが ひとつ、みえるかな。', 'ねむれない よるも、ここに いて いいよ。', 'もう おそいね。むりしないでね。'];
-  const GAZE_RAIN = ['あめの おとって、おちつくね。', 'ここは ぬれないよ。ゆっくり しよう。'];
+  const GAZE_RAIN = ['あめの ひは、おちつくね。', 'ここは ぬれないよ。ゆっくり しよう。', 'あめ、すずしいね。'];
+  GAZE_WORDS.push('あ、いま なにか いた。', '……');   // 間を おく ことば（レビュー15）
   const GAZE_MORNING = ['あさの ひかりだね。', 'きょうは、きょうの ペースで いいよ。'];
   let gazeTimer = 0, gazeLast = '', wake = null;
   // ことばは、じかん・てんき・おとに あわせて えらぶ（おとが ないのに「おとを きいて」とは いわない）
@@ -3340,7 +3341,31 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const paintGazeButtons = () => { drawSleep(); $('fullscreen').textContent = document.fullscreenElement ? L('ぜんがめんを やめる', 'Exit full screen') : L('ぜんがめん', 'Full screen'); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintGazeButtons); else paintGazeButtons();   // 英語の ときは tsuri-en.js が よみこまれて から 書く
   // ながめる＝居場所：なかまが かってに うごく・はなす・つる・いねむりする（景色が いきて いる）。かぞえない・ほぞんしない・見た目だけ。さわる いがいの 手は いらない
-  let gzLifeTimer = 0, gzCapTimer = 0, gzTalkAt = 0, gzFirstDone = false;
+  let gzLifeTimer = 0, gzCapTimer = 0, gzTalkAt = 0, gzFirstDone = false, gzSwayT = 0, gzCatchT = 0, gzBlinkT = {};
+  const gzBusy = () => document.hidden || swapping || document.body.classList.contains('sleepy') || !!document.querySelector('dialog[open]') || !(phase === 'idle' || phase === 'caught');
+  function gzSway() {   // 竿が 風で わずかに ゆれる（さきが 1px ほど・5びょうで 1しゅう・8コマ/秒）。うごきを へらす では しない
+    if (!gazing() || reduce() || document.hidden) return; const t = performance.now() / 1000;
+    [['line-a', friends[0], 9, 'rod-a', 0], ['line-b', friends[1], 9, 'rod-b', 1.7], ['line-me', mine, 12, 'rod-me', 3.1]].forEach(([ln, i, tall, st, ph]) => {
+      const line = $(ln), stick = $(st); if (!line || !stick) return;
+      const f = feet(i), w = floatAt(i), tx = f.x + 9 + Math.sin(t * 2 * Math.PI / 5.2 + ph) * .35, ty = f.y - tall - 6 + Math.sin(t * 2 * Math.PI / 3.7 + ph) * .18;
+      stick.setAttribute('x2', tx); stick.setAttribute('y2', ty); line.setAttribute('x1', tx); line.setAttribute('y1', ty); line.setAttribute('x2', w.x); line.setAttribute('y2', w.y);
+    });
+  }
+  function gzBlink(slot) {   // 4〜8びょうに 1かい、ちいさく こくっと（まばたきの かわり。0.24びょう・1びょうに 3かいを こえない）
+    clearTimeout(gzBlinkT[slot]); gzBlinkT[slot] = setTimeout(() => {
+      if (!gazing()) return; const img = gzImg(slot);
+      if (img && !reduce() && !gzBusy()) img.animate([{translate: '0 0'}, {translate: '0 1.6px', offset: .5}, {translate: '0 0'}], {duration: 240, easing: 'ease-in-out'});
+      gzBlink(slot);
+    }, 4000 + Math.random() * 4000);
+  }
+  function gzCatchTick() {   // 20〜40びょうに 1かい、なかまが つる→となりで 喜ぶ
+    clearTimeout(gzCatchT); gzCatchT = 0; if (!gazing()) return;
+    gzCatchT = setTimeout(gzCatchTick, 20000 + Math.random() * 20000);
+    if (gzBusy()) return;
+    const slot = Math.random() < .5 ? 0 : 1, other = 1 - slot;
+    GZ.catch(slot);
+    setTimeout(() => { if (!gazing() || gzBusy()) return; GZ.hop(other); GZ.hop('me'); if (Math.random() < .6) palSay(other, L('わあ！', 'Wow!')); }, 2800);
+  }
   const gzImg = slot => $(slot === 'me' ? 'marufuwa' : slot ? 'friend-b' : 'friend-a');
   const gzHead = img => { const r = img.getBoundingClientRect(), sr = scene.getBoundingClientRect(); return {x: (r.left + r.width * .72 - sr.left) / sr.width * 100, y: (r.top + r.height * .2 - sr.top) / sr.height * 100}; };   // あたまの あたり（景色の わりあい）
   const gzPop = (text, at, css) => { const el = document.createElement('span'); el.className = 'hop'; el.setAttribute('aria-hidden', 'true'); el.textContent = text; el.style.cssText = 'font-weight:900;color:#fff;text-shadow:0 1px 3px #0b1d2b99;' + (css || ''); place(el, at); scene.append(el); return el; };
@@ -3377,7 +3402,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (document.hidden || swapping || document.body.classList.contains('sleepy') || document.querySelector('dialog[open]') || !(phase === 'idle' || phase === 'caught')) return;
     const night = timeOfDay() === 'n', slot = [0, 1, 'me'][Math.floor(Math.random() * 3)];
     const calmTalk = performance.now() - gzTalkAt > 60000;   // ひとことは 60びょうに 1かい いかに（間を 長く）
-    const first = !gzFirstDone, bag = first ? [['stretch', 2], ['look', 2], ['hop', 1], ['catch', 2]] : slot === 'me' ? [['doze', night ? 4 : 1], ['stretch', 2], ['hop', 1], ['look', 2]] : [['doze', night ? 5 : 2], ['stretch', 2], ['hop', 1], ['look', 2], ['catch', 3], ['talk', calmTalk ? 1 : 0]];   // はじめの 1つは かならず 見える 動き（15びょう いない）
+    const first = !gzFirstDone, bag = first ? [['stretch', 2], ['look', 2], ['hop', 1]] : slot === 'me' ? [['doze', night ? 4 : 1], ['stretch', 2], ['hop', 1], ['look', 2]] : [['doze', night ? 5 : 2], ['stretch', 2], ['hop', 1], ['look', 2], ['talk', calmTalk ? 1 : 0]];   // はじめの 1つは かならず 見える 動き（15びょう いない）
     if (first) gzFirstDone = true;
     let r = Math.random() * bag.reduce((a, b) => a + b[1], 0), pick = bag[0][0]; for (const [k, w] of bag) { r -= w; if (r <= 0) { pick = k; break; } }
     if (pick === 'talk') gzTalkAt = performance.now();
@@ -3392,15 +3417,18 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (on) {
       startAmbient(); wakeOn(); gazeReset(); quietBump(); gazeStartedAt = performance.now(); sleepStart(); drawSleep();
       try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch {}   // ながめるを おした ボタンの フォーカスを はずす（景色だけに）
-      const hint = L('そっと さわると もどるよ。', 'Tap anywhere to come back.'); say(hint); gazeCap(hint, 7000);
-      if (!save.sound) setTimeout(() => { if (gazing()) gazeCap(L('おとを つけると、なみの おとが きこえるよ。', 'Turn the sound on to hear the waves.'), 7000); }, 17000);   // 時間の 1ぎょう（7.5びょう〜）の あと
+      const t0 = timeOfDay(), first = rainy ? L('あめの ひ。', 'A rainy day.') : t0 === 'a' ? L('あさの みずうみ。', 'Morning at the lake.') : t0 === 'h' ? L('ひるさがり。', 'Afternoon.') : t0 === 'y' ? L('そろそろ ゆうがた。', 'Evening is near.') : L('しずかな よる。', 'A quiet night.');
+      say(first); gazeCap(first, 4500);   // はいった しゅんかんの 1ぎょう（ふっと でて スッと きえる）
+      const hint = L('そっと さわると もどるよ。', 'Tap anywhere to come back.'); setTimeout(() => { if (gazing()) { say(hint); gazeCap(hint, 5000); } }, 6000);
+      if (!save.sound) setTimeout(() => { if (gazing()) gazeCap(L('おとを つけると、なみの おとが きこえるよ。', 'Turn the sound on to hear the waves.'), 6000); }, 14000);   // 1ぎょう（0〜4.5びょう）・さわると もどる（6〜11びょう）の あと
       gazeTimer = setInterval(() => { const line = gazeLine(); say(line); setTimeout(() => { if (gazing()) gazeCap($('status').textContent, 8000); }, 80); }, 40000);   // 40びょうに 1かい、ぽつりと ことば
       gzFirstDone = false; gzTalkAt = performance.now(); clearTimeout(gzLifeTimer); gzLifeTimer = setTimeout(gzLifeTick, 2500);
-      setTimeout(() => { if (!gazing()) return; const t = timeOfDay(), line = rainy ? L('あめが ふって いるね。ここは ぬれないよ。', 'It is raining. You will not get wet here.') : t === 'a' ? L('あさの ひかりだね。きょうも ゆっくり。', 'Morning light. Take your time today.') : t === 'h' ? L('ひるの みずが きらきら してるね。', 'The water is sparkling in the daylight.') : t === 'y' ? L('ゆうやけが きれいだね。', 'The sunset is lovely.') : L('よるの みずは しずかだね。ここに いて いいよ。', 'The water is calm tonight. You can stay here.'); say(line); gazeCap(line, 8000); }, 7500);   // はいった しゅんかんの 1ぎょう（そっと さわると もどるよ の つぎ）
+      clearInterval(gzSwayT); gzSwayT = setInterval(gzSway, 130); [0, 1, 'me'].forEach(gzBlink); clearTimeout(gzCatchT); gzCatchT = setTimeout(gzCatchTick, 16000 + Math.random() * 8000);
       try { if (document.fullscreenEnabled && !document.fullscreenElement) { const fr = document.documentElement.requestFullscreen({navigationUI: 'hide'}); if (fr && fr.catch) fr.catch(() => {}); } } catch {}   // つかえる ブラウザでは ぜんがめんに（もどれば 自動で もとに）
       if (window.TsuriBgm) TsuriBgm.enter('gaze', {ctx: () => save.sound ? ready() : null, sound: () => !!save.sound, time: () => timeOfDay()});
     } else {
       clearTimeout(gzLifeTimer); gzLifeTimer = 0; clearTimeout(gzCapTimer); { const cap = $('gaze-cap'); if (cap) cap.dataset.on = 'false'; }
+      clearInterval(gzSwayT); gzSwayT = 0; clearTimeout(gzCatchT); gzCatchT = 0; Object.values(gzBlinkT).forEach(clearTimeout); gzBlinkT = {}; try { layout(); } catch {}   // 竿・糸を もとの いちに
       say('おかえり。「なげる」で、また つりが できるよ。'); wakeOff(); gazeReset(); if (window.TsuriBgm) TsuriBgm.leave('gaze'); syncClock();
     }
   });
