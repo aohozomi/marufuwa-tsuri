@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>カフェ ラテ｜まるふわの ひろば</title>
+<meta name="description" content="ラテの かわうそが ひらいている、ゆっくり できる カフェ。のみものを えらんで、せきに すわって、まどの そとを ながめよう。">
+<meta name="theme-color" content="#b9edf5">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23f3dcc0'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle'%3E%E2%98%95%3C/text%3E%3C/svg%3E">
+<script>
+// つかいやすく する（もじを おおきく・うごきを へらす）と 時間帯に したがう（本体の 記録を よむだけ）
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement, q = new URLSearchParams(location.search);
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+  var tf = q.get('time'), t = /^[ahyn]$/.test(tf || '') ? tf : /^[ahyn]$/.test(early.time || '') ? early.time : null;
+  if (!t) { var h = new Date().getHours(); t = h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n'; }
+  root.dataset.time = t;
+} catch (e) { document.documentElement.dataset.time = 'h'; }
+</script>
+<style>
+:root{--ink:#27424e;--ink2:#3d5a68;--plate:#fffdf7;--wall:#fbf3e6;--wood:#d9b07c;--wood2:#b98a5a;--line:#cfae7e;--btn1:#ffffff;--btn2:#dff1f7;--btn-line:#9bc9da;--link:#14506b;--sky1:#a9defa;--sky2:#eaf8ff;--rw:#f6e7cf;--floor:#d9b988;--dim:0}
+:root[data-time=a]{--sky1:#ffd9b8;--sky2:#fff3e2}
+:root[data-time=y]{--sky1:#ff9e6e;--sky2:#ffd9a8;--wall:#fbeedd;--rw:#f3dcc0}
+:root[data-time=n]{--sky1:#1f2f5c;--sky2:#4a5d92;--wall:#e6e1f3;--plate:#f6f3fb;--wood2:#7c6f9a;--line:#8e80b0;--rw:#d8cfe6;--floor:#a99cc4;--dim:1}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:linear-gradient(var(--sky1),var(--sky2));padding:8px}
+:root[data-inapp=x] body{padding-bottom:84px}
+.room{max-width:640px;margin:0 auto;background:var(--wall);border:3px solid var(--wood2);border-radius:22px;padding:12px 12px 18px;box-shadow:0 8px 24px #0b2a4a33}
+.back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
+h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
+.lead{margin:2px 0 8px;font-size:.95rem;color:var(--ink2)}
+.scene{display:block;width:100%;height:auto;border-radius:18px;border:3px solid var(--wood2);background:var(--rw)}
+.cap{min-height:3.4em;margin:8px 0 4px;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.98rem}
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0;padding:0;list-style:none}
+.menu button,.acts button{width:100%;min-height:48px;padding:6px 12px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;touch-action:manipulation}
+.menu button i{width:20px;height:20px;border-radius:50%;border:2px solid #5a3a2e;flex:none}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.acts button{flex:1 1 140px}
+button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2px}
+h2{margin:10px 0 4px;font-size:1.05rem}
+.note{margin:8px 0 0;font-size:.82rem;color:var(--ink2)}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.steam path{fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round;opacity:.0;animation:rise 4.2s ease-in-out infinite}
+.steam path:nth-child(2){animation-delay:1.4s}.steam path:nth-child(3){animation-delay:2.8s}
+@keyframes rise{0%{transform:translateY(6px);opacity:0}30%{opacity:.7}100%{transform:translateY(-16px);opacity:0}}
+.drift{animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateX(-8px)}to{transform:translateX(10px)}}
+.shade{fill:#0b1a3a;opacity:calc(var(--dim)*.32);pointer-events:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.steam path{opacity:.4}}
+:root[data-calm=true] *{transition:none!important;animation:none!important}
+:root[data-calm=true] .steam path{opacity:.4}
+</style>
+</head>
+<body>
+<main class="room" id="room">
+  <a class="back" id="back" href="../index.html">← ひろばへ</a>
+  <h1>カフェ ラテ</h1>
+  <p class="lead">ラテの かわうそが ひらいている、ゆっくり できる カフェ。のみものを えらんで、せきに すわって、まどの そとを ながめよう。いそがなくて だいじょうぶ。</p>
+  <svg class="scene" id="scene" viewBox="0 0 400 300" role="img" aria-label="カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、なかまが すわって いるよ">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/></linearGradient>
+      <clipPath id="win"><rect x="34" y="26" width="168" height="124" rx="6"/></clipPath>
+    </defs>
+    <rect width="400" height="300" fill="var(--rw)"/>
+    <rect y="228" width="400" height="72" fill="var(--floor)"/>
+    <g id="outside" clip-path="url(#win)">
+      <rect x="34" y="26" width="168" height="124" fill="url(#sky)"/>
+      <g id="stars" opacity="0"><circle cx="60" cy="50" r="1.6" fill="#fff"/><circle cx="96" cy="40" r="1.4" fill="#fff"/><circle cx="150" cy="58" r="1.6" fill="#fff"/><circle cx="184" cy="44" r="1.4" fill="#fff"/><circle cx="120" cy="76" r="1.2" fill="#fff"/></g>
+      <circle id="orb" cx="162" cy="56" r="17" fill="#fff2a8"/>
+      <g class="drift" id="clouds" fill="#fff" opacity=".9"><ellipse cx="80" cy="62" rx="24" ry="8"/><ellipse cx="98" cy="56" rx="14" ry="8"/><ellipse cx="150" cy="88" rx="20" ry="6"/></g>
+      <path d="M34 150 Q80 104 124 134 T202 120 V150Z" fill="#a9d89a"/>
+      <g id="rain" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0"><path d="M50 40 l-4 12 M80 70 l-4 12 M110 46 l-4 12 M140 84 l-4 12 M170 52 l-4 12 M64 104 l-4 12 M124 108 l-4 12 M186 96 l-4 12"/></g>
+    </g>
+    <rect x="34" y="26" width="168" height="124" rx="6" fill="none" stroke="#8a5a2b" stroke-width="6"/>
+    <path d="M118 26 V150 M34 88 H202" stroke="#8a5a2b" stroke-width="4"/>
+    <rect x="228" y="150" width="164" height="50" rx="6" fill="#b98a5a" stroke="#7a5430" stroke-width="3"/>
+    <rect x="228" y="196" width="164" height="32" fill="#9a6f44"/>
+    <image id="otter" href="../../img/friend-kawauso-s.webp" x="300" y="62" width="64" height="100" preserveAspectRatio="xMidYMax meet"/>
+    <rect x="228" y="150" width="164" height="12" rx="4" fill="#d9b07c" stroke="#7a5430" stroke-width="2"/>
+    <g transform="translate(380 142)"><ellipse cx="0" cy="8" rx="11" ry="3" fill="#0003"/><path d="M-9 -2 H9 L7 8 H-7Z" fill="#fff" stroke="#5a3a2e" stroke-width="2"/></g>
+    <g id="guests"></g>
+    <ellipse cx="96" cy="250" rx="62" ry="16" fill="#8a5a2b"/>
+    <rect x="90" y="226" width="12" height="26" fill="#7a5430"/>
+    <ellipse cx="96" cy="226" rx="66" ry="16" fill="#d9b07c" stroke="#7a5430" stroke-width="3"/>
+    <g id="me" opacity="0"><image href="../../img/game-blue.webp" x="18" y="136" width="66" height="88" preserveAspectRatio="xMidYMax meet"/></g>
+    <g id="cup" opacity="0" transform="translate(116 222)">
+      <ellipse cx="0" cy="8" rx="14" ry="4" fill="#0003"/>
+      <path d="M-12 -12 H12 L9 8 H-9Z" fill="#fff" stroke="#5a3a2e" stroke-width="2.5"/>
+      <ellipse id="drink" cx="0" cy="-12" rx="11" ry="3.4" fill="#8a5a44" stroke="#5a3a2e" stroke-width="2"/>
+      <path d="M12 -8 q9 0 8 6 q-1 5 -9 5" fill="none" stroke="#5a3a2e" stroke-width="2.5"/>
+      <g class="steam" id="steam"><path d="M-5 -18 q-5 -7 0 -13"/><path d="M0 -18 q-5 -7 0 -13"/><path d="M5 -18 q-5 -7 0 -13"/></g>
+    </g>
+    <rect class="shade" width="400" height="300"/>
+  </svg>
+  <p class="cap" id="cap" role="status" aria-live="polite">ラテの かわうそ：のみものを えらんでね。</p>
+  <section id="pick" aria-labelledby="h-pick">
+    <h2 id="h-pick">のみものを えらぶ</h2>
+    <ul class="menu" id="menu"></ul>
+  </section>
+  <section id="seated" hidden aria-labelledby="h-seat">
+    <h2 id="h-seat">ゆっくり すわって いるよ</h2>
+    <div class="acts"><button type="button" id="again">べつの のみものに する</button><button type="button" id="leave">かえる</button><span id="bgm-slot"></span></div>
+  </section>
+  <p class="note">おうちの かたへ：おかねも じゅんいも なにも へりません。のみものを えらんで すわる だけの へやです。ことばは「ゆっくり していってね」「また きてね」の ふたつだけで、ひきとめません。なかまの ひとことは 1ぷんに 1かい いかです。きろくも つうしんも ありません。てんめつは しません。</p>
+</main>
+<script>
+// English
+(() => {
+  const EX = {
+    'カフェ ラテ｜まるふわの ひろば': 'Café Latte | Marufuwa Plaza', 'カフェ ラテ': 'Café Latte', '← ひろばへ': '← Back to the Plaza',
+    'ラテの かわうそが ひらいている、ゆっくり できる カフェ。のみものを えらんで、せきに すわって、まどの そとを ながめよう。いそがなくて だいじょうぶ。': 'A calm café run by the Latte Otter. Pick a drink, sit down, and look out the window. No need to hurry.',
+    'カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、なかまが すわって いるよ': 'Inside the café. The window shows the time outside. The Latte Otter is at the counter and friends are sitting.',
+    'ラテの かわうそ：のみものを えらんでね。': 'Latte Otter: Please pick a drink.',
+    'のみものを えらぶ': 'Pick a drink', 'ゆっくり すわって いるよ': 'Sitting back and relaxing',
+    'ココア': 'Hot cocoa', 'ミルクティー': 'Milk tea', 'りんごジュース': 'Apple juice', 'おちゃ': 'Tea', 'ホットミルク': 'Hot milk', 'はちみつレモン': 'Honey lemon',
+    'べつの のみものに する': 'Pick another drink', 'かえる': 'Head home',
+    'ラテの かわうそ：ゆっくり していってね。': 'Latte Otter: Take your time.', 'ラテの かわうそ：また きてね。': 'Latte Otter: Come again.',
+    'おうちの かたへ：おかねも じゅんいも なにも へりません。のみものを えらんで すわる だけの へやです。ことばは「ゆっくり していってね」「また きてね」の ふたつだけで、ひきとめません。なかまの ひとことは 1ぷんに 1かい いかです。きろくも つうしんも ありません。てんめつは しません。': 'For grown-ups: nothing is spent and there is no ranking. You just pick a drink and sit. The otter says only two things — “Take your time” and “Come again” — and never tries to keep you. Friends speak at most once a minute. Nothing is saved or sent. Nothing flashes.',
+    'ラテの かわうそ': 'Latte Otter'
+  };
+  const LINES_EN = { 'ふぅ、あったかい': 'Phew, so warm.', 'いい においだね': 'Smells nice.', 'まどの そと、きれい': 'The view outside is pretty.', 'ぽかぽか するね': 'Feels cozy.', 'ゆっくり のむよ': 'I’ll sip slowly.', 'ここ、おちつくね': 'It’s so calm here.', 'あめの おと、すき': 'I like the sound of rain.', 'あめの ひの カフェ、いいね': 'A café on a rainy day is nice.', 'よるの カフェも いいね': 'Café nights are nice too.', 'おほしさま、きれい': 'The stars are pretty.', 'ゆうやけ、きれいだね': 'The sunset is lovely.', 'あさの カフェ、すてき': 'Morning at the café is lovely.' };
+  Object.assign(EX, LINES_EN);
+  ['ねこ', 'うさぎ', 'パンダ', 'りす', 'ペンギン', 'こぎつね', 'こいぬ', 'ハムスター'].forEach((n, i) => { EX[n] = ['Cat', 'Bunny', 'Panda', 'Squirrel', 'Penguin', 'Little fox', 'Puppy', 'Hamster'][i]; });
+  const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
+  const title = () => { const E = window.TsuriEn; if (E && E.lang === 'en') document.title = 'Café Latte | Marufuwa Plaza'; };
+  document.addEventListener('DOMContentLoaded', () => { reg(); title(); setTimeout(title, 300); setTimeout(title, 1200); });
+  addEventListener('load', () => { reg(); title(); });
+})();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
+  const $ = id => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
+  const q = new URLSearchParams(location.search);
+  const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+  const DRINKS = [
+    { id: 'cocoa', ja: 'ココア', c: '#8a5a44', hot: true }, { id: 'milktea', ja: 'ミルクティー', c: '#d9b48f', hot: true },
+    { id: 'apple', ja: 'りんごジュース', c: '#f0b84a', hot: false }, { id: 'tea', ja: 'おちゃ', c: '#9bbf6a', hot: true },
+    { id: 'milk', ja: 'ホットミルク', c: '#fff3e0', hot: true }, { id: 'honey', ja: 'はちみつレモン', c: '#ffd84d', hot: true }
+  ];
+  const GUESTS = [['neko', 'ねこ', 'friend-neko-s.webp'], ['usagi', 'うさぎ', 'friend-usagi-s.webp'], ['panda', 'パンダ', 'friend-panda-s.webp'], ['risu', 'りす', 'friend-risu-s.webp'], ['penguin', 'ペンギン', 'friend-penguin-s.webp'], ['kogitsune', 'こぎつね', 'friend-kogitsune-s.webp'], ['koinu', 'こいぬ', 'friend-koinu-s.webp'], ['hamster', 'ハムスター', 'friend-hamster-s.webp']];
+  const BASE_LINES = ['ふぅ、あったかい', 'いい においだね', 'まどの そと、きれい', 'ぽかぽか するね', 'ゆっくり のむよ', 'ここ、おちつくね'];
+  const T_LINES = { a: ['あさの カフェ、すてき'], h: [], y: ['ゆうやけ、きれいだね'], n: ['よるの カフェも いいね', 'おほしさま、きれい'] };
+  const RAIN_LINES = ['あめの おと、すき', 'あめの ひの カフェ、いいね'];
+  const W = window.TsuriWorld, ctxW = (() => { try { return W && W.context(); } catch (e) { return null; } })();
+  const time = /^[ahyn]$/.test(document.documentElement.dataset.time || '') ? document.documentElement.dataset.time : (ctxW && ctxW.time) || 'h';
+  const rain = ctxW ? !!ctxW.rain : q.get('rain') === '1';
+  const reduced = () => document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cap = $('cap');
+  let state = { seated: false, drink: '', said: [], left: false };
+  const say = (who, line) => { cap.textContent = who + '：' + line + (line.endsWith('。') || /[てねよ。]$/.test(line) ? '' : ''); state.said.push([who, line]); };
+
+  // まどの そと：いまの じかんと てんき
+  const orb = $('orb'), stars = $('stars'), rainEl = $('rain'), clouds = $('clouds');
+  if (time === 'n') { orb.setAttribute('fill', '#fff6cf'); stars.setAttribute('opacity', '1'); clouds.setAttribute('opacity', '.35'); }
+  else if (time === 'y') orb.setAttribute('fill', '#ff7a3d'); else if (time === 'a') orb.setAttribute('fill', '#ffb45e');
+  if (rain) { rainEl.setAttribute('opacity', '.55'); orb.setAttribute('opacity', '.25'); $('outside').style.filter = 'saturate(.6) brightness(.88)'; clouds.setAttribute('opacity', '1'); }
+
+  // なかま 2〜3にん：まいかい ちがう（日づけと じかんで きまる）
+  const day = Math.floor(Date.now() / 36e5), pick = (n, k) => (day * 7 + k * 5 + n) % GUESTS.length;
+  const idx = [pick(0, 1), pick(0, 2)]; if (idx[1] === idx[0]) idx[1] = (idx[1] + 1) % GUESTS.length;
+  const crowd = (q.get('guests') ? Math.max(2, Math.min(3, Number(q.get('guests')) || 2)) : (day % 2 ? 3 : 2));
+  if (crowd === 3) { let k = (idx[1] + 3) % GUESTS.length; while (idx.includes(k)) k = (k + 1) % GUESTS.length; idx.push(k); }
+  const SPOTS = [[262, 160, 62], [326, 176, 56], [214, 176, 56]];
+  const gEl = $('guests'), guests = idx.slice(0, crowd).map((gi, i) => {
+    const g = GUESTS[gi], [x, y, w] = SPOTS[i], im = document.createElementNS(NS, 'image');
+    im.setAttribute('href', '../../img/' + g[2]); im.setAttribute('x', x); im.setAttribute('y', y + 8); im.setAttribute('width', w); im.setAttribute('height', w * 1.15); im.setAttribute('preserveAspectRatio', 'xMidYMax meet');
+    if (i > 0) { im.setAttribute('y', 214 - w * 1.0 + (i === 1 ? 6 : 0)); }
+    gEl.append(im); return { id: g[0], name: g[1], el: im };
+  });
+  // ならびを せいり：2にんめ・3にんめは ゆかの うえ（カウンターの まえ）
+  if (guests[0]) guests[0].el.setAttribute('y', 100);   // カウンターの きゃくせき（ラテの かわうその よこ）
+  if (guests[1]) { guests[1].el.setAttribute('x', 318); guests[1].el.setAttribute('y', 214 - 56 * 1.15 + 20); }
+  if (guests[2]) { guests[2].el.setAttribute('x', 230); guests[2].el.setAttribute('y', 214 - 56 * 1.15 + 24); }
+  if (guests[0]) { guests[0].el.setAttribute('x', 232); guests[0].el.setAttribute('y', 88); guests[0].el.setAttribute('width', 54); guests[0].el.setAttribute('height', 66); }
+
+  // のみもの
+  const menu = $('menu'), drinkEl = $('drink'), cup = $('cup'), me = $('me'), steam = $('steam');
+  const nm = d => d.ja;
+  DRINKS.forEach(d => { const li = document.createElement('li'), b = document.createElement('button'), dot = document.createElement('i'); b.type = 'button'; b.dataset.id = d.id; dot.style.background = d.c; dot.setAttribute('aria-hidden', 'true'); b.append(dot, document.createTextNode(d.ja)); b.addEventListener('click', () => choose(d.id)); li.append(b); menu.append(li); });
+  function choose(id) {
+    const d = DRINKS.find(x => x.id === id); if (!d) return;
+    const first = !state.seated;
+    state.seated = true; state.drink = id; drinkEl.setAttribute('fill', d.c); steam.style.display = d.hot ? '' : 'none'; cup.setAttribute('opacity', '1'); me.setAttribute('opacity', '1');
+    $('pick').hidden = true; $('seated').hidden = false; $('leave').focus();
+    if (first) say('ラテの かわうそ', 'ゆっくり していってね。'); else cap.textContent = 'ラテの かわうそ：' + d.ja + '、どうぞ。';
+    ensureBgm(); armTalk();
+  }
+  $('again').addEventListener('click', () => { $('pick').hidden = false; $('seated').hidden = true; cap.textContent = 'ラテの かわうそ：のみものを えらんでね。'; const b = menu.querySelector('button'); if (b) b.focus(); });
+  $('leave').addEventListener('click', () => { if (state.left) return; state.left = true; say('ラテの かわうそ', 'また きてね。'); clearTimeout(talkT); if (window.TsuriBgm) window.TsuriBgm.leave('tank'); setTimeout(() => { location.href = $('back').getAttribute('href'); }, state.testNoNav ? 99999999 : 1800); });
+
+  // なかまの ひとこと：60びょうに 1かい いか（さいしょは 30びょうごろ）。うごき・おとは なし
+  let talkT = 0, lastTalk = -1e9, skew = 0, k = 0;
+  const clock = () => performance.now() + skew;
+  const linesFor = () => BASE_LINES.concat(T_LINES[time] || [], rain ? RAIN_LINES : []);
+  function talk() {
+    if (!state.seated || state.left || document.hidden) return;
+    if (clock() - lastTalk < 60000) return;
+    const g = guests[k % guests.length], L = linesFor(), line = L[(day + k * 3) % L.length]; k++;
+    lastTalk = clock(); say(g.name, line);
+  }
+  function armTalk() { if (talkT) return; lastTalk = clock() - 30000; talkT = setInterval(talk, 2000); }   // 30びょうあとに さいしょの ひとこと
+
+  // BGM（ひろば・おへやと おなじ曲 heya）：はじめは OFF。ボタンで ON。おとは さいしょの タップの あとで
+  let ac = null;
+  function ensureBgm() {
+    const B = window.TsuriBgm; if (!B || ensureBgm.done) return; ensureBgm.done = true;
+    const mk = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; };
+    mk();
+    const btn = B.button({ className: 'bgmbtn', sound: () => true, enableSound: () => {}, onToggle: () => { mk(); } });
+    btn.style.cssText = 'min-height:48px;padding:6px 14px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;flex:1 1 140px';
+    $('bgm-slot').replaceWith(btn);
+    B.enter('tank', { ctx: () => ac, sound: () => true, starry: () => false, mute: () => false, time: () => time });
+  }
+  addEventListener('pagehide', () => { if (window.TsuriBgm) window.TsuriBgm.leave('tank'); });
+
+  window.Cafe = { state: () => ({ seated: state.seated, drink: state.drink, left: state.left, said: state.said.slice(), guests: guests.map(g => g.id), time, rain, drinks: DRINKS.length }), choose, skew: ms => { skew += ms; }, noNav: () => { state.testNoNav = true; }, talk, DRINKS: DRINKS.map(d => d.id) };
+});
+</script>
+<script src="../../tsuri-town.js"></script>
+<script defer src="../../tsuri-world.js"></script>
+<script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-en.js"></script>
+<script defer src="../../tsuri-en-hiroba.js"></script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+</body>
+</html>
