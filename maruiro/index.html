@@ -43,6 +43,8 @@ h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
 [hidden]{display:none!important}
 #cv{display:block;width:min(100%,calc((100dvh - 250px)*300/420));min-width:200px;aspect-ratio:300/420;border-radius:18px;border:3px solid var(--fieldline);background:var(--field);touch-action:none;cursor:pointer}
 #cv:focus-visible{outline:4px solid #286b88;outline-offset:3px}
+.watch{display:flex;align-items:center;gap:8px;min-height:38px;margin:2px 0 4px}
+.watch span{padding:2px 10px;border-radius:12px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.85rem}
 .fbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 6px}
 .fbtns button{min-height:60px;min-width:56px;padding:4px 6px;border-radius:20px;border:3px solid #5a3a2e;font:inherit;font-weight:800;color:#27424e;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;touch-action:manipulation}
 .fbtns button b{font-size:1.2rem}
@@ -70,6 +72,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     <div class="zukan" id="zukan" aria-hidden="true"></div>
     <p class="best" id="best-wrap"><canvas id="best-cv" width="88" height="88" style="width:44px;height:44px" aria-hidden="true"></canvas><span id="best-tx">いちばん おおきい まる：まだ ないよ</span></p>
   </div>
+  <div class="watch" id="watch" aria-hidden="true"><img alt="" width="34" height="34" style="object-fit:contain"><span id="watch-tx" hidden></span></div>
   <div class="field" style="position:relative"><div id="cheer" hidden style="position:absolute;left:8px;top:8px;z-index:2;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:22px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.85rem;pointer-events:none"><img alt="" width="36" height="36" style="object-fit:contain"><span></span></div><canvas id="cv" tabindex="0" role="application" aria-label="まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ"></canvas></div>
   <section id="flood" hidden aria-labelledby="h-fl">
     <h2 id="h-fl" class="sr">いろひろげ</h2>
@@ -83,6 +86,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
   </div>
   <div class="ctl2">
     <button type="button" id="snd" aria-pressed="false">おと：OFF</button>
+    <span id="bgm-slot"></span>
     <button type="button" id="play" aria-pressed="false">あそびかた：そだてる</button>
     <button type="button" id="mode" aria-pressed="true">かたち：もの</button>
     <button type="button" id="next" hidden>つぎの ばん</button>
@@ -135,8 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const R = [13, 18, 24, 31, 39, 48, 58];
   const COLORS = ['#ff9fb3', '#ffc27d', '#ffe680', '#9fe0a6', '#8fd3f4', '#a9a6f2', '#e3a6ee'];
   const NAMES = ['ももいろ', 'だいだい', 'きいろ', 'みどり', 'みずいろ', 'あおむらさき', 'うすむらさき'];
-  const ITEMS = ['どんぐり', 'かいがら', 'ウキ', 'おはな', 'おにぎり', 'ゆきだるま', 'まるふわ'];
-  const ITEMS_EN = ['acorn', 'seashell', 'fishing float', 'flower', 'rice ball', 'snowman', 'Marufuwa'];
+  const ITEMS = ['どんぐり', 'かいがら', 'ウキ', 'おはな', 'おにぎり', 'ゆきだるま', 'おつきさま'];
+  const ITEMS_EN = ['acorn', 'seashell', 'fishing float', 'flower', 'rice ball', 'snowman', 'moon'];
   const KEY = 'marufuwa-maruiro-v1';
   const $ = id => document.getElementById(id);
   const cv = $('cv'), ctx = cv.getContext('2d'), msgEl = $('msg');
@@ -175,10 +179,18 @@ document.addEventListener('DOMContentLoaded', () => {
     c.restore();
   }
   // まるふわ世界の まるい もの（かりの え：コードで かく。ほんものの えが とどいたら さしかえる）。まるい 体の なかに しろい 皿と、ものの かたち
+  function moon(c, r) {   // さいごの まる＝おつきさま（まんまるの おつきさまに えがお）
+    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = '#fff1b8'; c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
+    c.fillStyle = '#f0d98a'; [[-.35, -.4, .16], [.4, -.25, .12], [.12, .5, .14], [-.5, .25, .1]].forEach(([dx, dy, k]) => { c.beginPath(); c.arc(dx * r, dy * r, k * r, 0, 7); c.fill(); });
+    c.fillStyle = '#402a30'; c.beginPath(); c.arc(-r * .26, -r * .02, r * .09, 0, 7); c.arc(r * .26, -r * .02, r * .09, 0, 7); c.fill();
+    c.fillStyle = 'rgba(255,140,150,.4)'; c.beginPath(); c.ellipse(-r * .46, r * .2, r * .12, r * .08, 0, 0, 7); c.ellipse(r * .46, r * .2, r * .12, r * .08, 0, 0, 7); c.fill();
+    c.beginPath(); c.moveTo(-r * .17, r * .24); c.quadraticCurveTo(0, r * .42, r * .17, r * .24); c.lineWidth = Math.max(1.6, r * .075); c.strokeStyle = '#402a30'; c.lineCap = 'round'; c.stroke();
+  }
   function item(c, x, y, r, l, a, scale) {
     c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
     c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = COLORS[l]; c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
     c.beginPath(); c.arc(0, 0, r * .74, 0, Math.PI * 2); c.fillStyle = 'rgba(255,253,247,.92)'; c.fill();
+    if (l === 6) { c.restore(); c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale); moon(c, r); c.restore(); return; }
     c.scale(r / 50, r / 50); c.lineWidth = 3; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = '#5a3a2e';
     const el = (cx, cy, rx, ry, f) => { c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); c.fillStyle = f; c.fill(); c.stroke(); };
     if (l === 0) { el(0, 6, 17, 21, '#d9a35f'); c.beginPath(); c.moveTo(-19, -6); c.quadraticCurveTo(0, -30, 19, -6); c.lineTo(19, -2); c.quadraticCurveTo(0, -10, -19, -2); c.closePath(); c.fillStyle = '#8a5a35'; c.fill(); c.stroke(); c.beginPath(); c.moveTo(0, -20); c.lineTo(0, -29); c.stroke(); }
@@ -212,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const id = fishId(l), cur = rec.big, rank = x => ART.indexOf(x);
     if (rank(id) > (cur < 0 ? -1 : rank(cur))) { rec.big = id; save(); }
   }
-  const piece = (c, x, y, r, l, a, scale) => (rec.mode === 2 ? fish : rec.mode === 1 && l < 6 ? item : face)(c, x, y, r, l, a, scale);
+  const piece = (c, x, y, r, l, a, scale) => (rec.mode === 2 ? fish : rec.mode === 1 ? item : face)(c, x, y, r, l, a, scale);
   function miniCanvas(l, px) {
     const c = document.createElement('canvas'), d = 2; c.width = c.height = px * d; c.style.width = c.style.height = px + 'px'; c.setAttribute('aria-hidden', 'true');
     const x = c.getContext('2d'); x.scale(d, d); piece(x, px / 2, px / 2, px / 2 - 1.5, l, 1); return c;
@@ -240,26 +252,40 @@ document.addEventListener('DOMContentLoaded', () => {
   function dropBall(x) {
     if (!canDrop) return false;
     const l = nextL; setAim(x === undefined ? aimX : x);
-    addBall(aimX, rOf(l) + 8, l, 0, 20); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; nextL = pickLevel(); setAim(aimX); tone(0, 'drop');
+    addBall(aimX, rOf(l) + 46, l, 0, 20); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; nextL = pickLevel(); setAim(aimX); tone(0, 'drop');
     return true;
   }
 
-  // ─── おと：1200Hz いか・sine・やわらかく・はじめは OFF ───
+  // ─── おと：ぜんぶ 1200Hz いか・みじかい・三角波＋ローパス＋アタック 15ms（つりびよりの tone と おなじ つくり）・「おと」ボタンで きれる・はじめは OFF ───
   let ac = null;
   const FREQ = [330, 370, 415, 466, 523, 587, 659];
-  function tone(l, kind) {
+  const mkAc = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; };
+  function voice(hz, to, len, vol, at) {   // 三角波・ローパス 1100Hz・アタック 15ms
+    const t = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 1100; o.type = 'triangle';
+    o.frequency.setValueAtTime(hz, t); if (to && to !== hz) o.frequency.linearRampToValueAtTime(to, t + len * .6);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .015); g.gain.exponentialRampToValueAtTime(.0008, t + len);
+    o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + len + .05);
+  }
+  function tone(l, kind) {   // kind：drop ぽとん／merge ぷくっ／poof ふわっ（きえた・またね）／perfect ぴったり！／click ボタン
     if (!rec.snd) return;
     try {
-      ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
-      const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
-      f.type = 'lowpass'; f.frequency.value = 1100; o.type = 'sine';
-      const hz = kind === 'drop' ? 220 : kind === 'melt' ? 262 : FREQ[Math.max(0, Math.min(6, l))];
-      o.frequency.setValueAtTime(hz, t); if (kind !== 'drop') o.frequency.linearRampToValueAtTime(hz * 1.12, t + .18);
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(kind === 'drop' ? .03 : .06, t + .04); g.gain.exponentialRampToValueAtTime(.0008, t + (kind === 'melt' ? .9 : .45));
-      o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 1);
+      if (!mkAc()) return;
+      if (kind === 'drop') voice(220, 165, .2, .07);
+      else if (kind === 'merge') { const hz = FREQ[Math.max(0, Math.min(6, l))]; voice(hz, hz * 1.5, .3, .08); }
+      else if (kind === 'poof' || kind === 'melt') voice(392, 247, .65, .06);
+      else if (kind === 'perfect') [523, 659, 784, 1047].forEach((hz, i) => voice(hz, hz, .32, .06, i * .11));
+      else if (kind === 'click') voice(440, 440, .07, .05);
     } catch (e) {}
   }
 
+  // わきで みている なかま：あわさると ひとこと（6びょうに 1かい いか・ふきだし 1つ）
+  const watchImg = $('watch').querySelector('img'), watchTx = $('watch-tx'); let watchT = 0, watchLast = -1e9;
+  watchImg.src = '../img/friend-' + ['tanuki', 'usagi', 'neko', 'panda', 'risu', 'penguin', 'kogitsune'][dayKey() % 7] + '-s.webp';
+  function watchSay(l) {
+    if (stats.t - watchLast < 6) return; watchLast = stats.t; const L2 = [['もふっ！', 'Fluffy!'], ['おおきく なったね', 'It grew!'], ['いいね！', 'Nice!'], ['わあ、すごい', 'Wow!']][(l + stats.merges) % 4];
+    watchTx.textContent = L(L2[0], L2[1]); watchTx.hidden = false; clearTimeout(watchT); watchT = setTimeout(() => { watchTx.hidden = true; }, 2600);
+  }
   // れんさで なかまが ちいさく よろこぶ（ふきだし 1つ・てんめつなし）
   const cheerEl = $('cheer'), cheerImg = cheerEl.querySelector('img'), cheerTx = cheerEl.querySelector('span'); let cheerT = 0;
   const FRIENDS = ['usagi', 'neko', 'panda', 'risu', 'penguin', 'tanuki', 'koinu'];
@@ -320,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
     for (const n of born) {
       addBall(n.x, n.y, n.l, n.vx * .6, n.vy * .6 - 25, reduced() ? 0 : 1.4); tone(n.l, 'merge');
       if (rec.mode === 2) bigWrite(n.l);
+      watchSay(n.l);
       if (n.l > stats.maxL) stats.maxL = n.l;
       if (n.l > rec.best) { rec.best = n.l; save(); drawBest(); say(L('おおきく なったよ！ ' + nm(n.l), 'It got bigger! ' + nm(n.l))); if (n.l === 6) say(L('ぜんぶの いろを あわせたよ。すごい！', 'You joined every color. Wonderful!')); }
     }
@@ -332,18 +359,41 @@ document.addEventListener('DOMContentLoaded', () => {
       const top = balls.filter(b => b.melt === 0).sort((x, y) => (x.y - x.r) - (y.y - y.r)), n = balls.length > 45 ? 6 : balls.length > 30 ? 3 : 1;
       top.slice(0, n).forEach(b => { b.melt = .0001; b.up = true; b.vx = 0; b.vy = 0; rec.fly |= (1 << Math.max(0, Math.min(6, b.l))); });
       save(); drawZukan();
-      tone(0, 'melt'); say(L('いっぱいに なったので、いちばん うえの 子が ぷかぷか そらへ とんでいくよ。「またね」。そのまま つづけて だいじょうぶ。', 'It filled up, so the topmost friend floated up to the sky. “See you!” Keep going — it’s okay.'));
+      tone(0, 'poof'); say(L('いっぱいに なったので、いちばん うえの 子が ぷかぷか そらへ とんでいくよ。「またね」。そのまま つづけて だいじょうぶ。', 'It filled up, so the topmost friend floated up to the sky. “See you!” Keep going — it’s okay.'));
     }
   }
 
   // ─── えがく ───
+  // ─── ばめん：ひろばの「かご」（時間で かわる そらと おか）・うえで まるふわが あるいて ぽとんと おとす ───
+  const dropper = new Image(); dropper.src = '../img/game-blue.webp';
+  let walkX = W / 2, walkT = 0;
+  function backdrop() {
+    const t = timeKey(), sky1 = cssv('--sky1') || '#a9defa', sky2 = cssv('--sky2') || '#eaf8ff';
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, sky1); g.addColorStop(.7, sky2); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    if (t === 'n') { ctx.fillStyle = 'rgba(255,255,255,.85)'; [[30, 20], [90, 50], [150, 14], [210, 40], [270, 24], [60, 80], [240, 90]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill(); }); ctx.fillStyle = '#fff6cf'; ctx.beginPath(); ctx.arc(250, 38, 13, 0, 7); ctx.fill(); }
+    else { ctx.fillStyle = t === 'y' ? '#ff7a3d' : t === 'a' ? '#ffb45e' : '#fff2a8'; ctx.beginPath(); ctx.arc(250, 40, 14, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.8)'; [[60, 40, 22], [90, 34, 14], [200, 90, 16]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.ellipse(x, y, r, r * .4, 0, 0, 7); ctx.fill(); }); }
+    ctx.fillStyle = t === 'n' ? '#2f5a52' : '#8fcf8e'; ctx.beginPath(); ctx.moveTo(0, 250); ctx.quadraticCurveTo(80, 190, 170, 240); ctx.quadraticCurveTo(240, 200, W, 232); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
+    ctx.fillStyle = t === 'n' ? '#1f3f3a' : '#6fb87a'; [[22, 238, 16], [270, 226, 18]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); });
+    ctx.fillStyle = t === 'n' ? 'rgba(40,50,90,.55)' : 'rgba(255,250,235,.55)'; ctx.fillRect(4, LINE - 20, W - 8, H - LINE + 16);   // かごの なか（すこし あかるく）
+  }
+  function basket() {   // かごの ふち（あみめ）
+    ctx.fillStyle = '#c99a5a'; ctx.fillRect(0, 0, 5, H); ctx.fillRect(W - 5, 0, 5, H); ctx.fillRect(0, H - 6, W, 6);
+    ctx.strokeStyle = 'rgba(90,58,34,.55)'; ctx.lineWidth = 1.2; for (let y = 8; y < H; y += 10) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(5, y + 4); ctx.moveTo(W - 5, y); ctx.lineTo(W, y + 4); ctx.stroke(); }
+    for (let x = 6; x < W; x += 10) { ctx.beginPath(); ctx.moveTo(x, H - 6); ctx.lineTo(x + 4, H); ctx.stroke(); }
+  }
+  function dropperDraw() {   // まるふわが ひだり・みぎへ あるく（あたまの うえに いる）
+    const mv = Math.abs(aimX - walkX) > .8; walkX += (aimX - walkX) * .25; walkT += mv ? .35 : 0;
+    const w = 38, h = 50, bob = mv && !reduced() ? Math.sin(walkT) * 1.6 : 0;
+    if (dropper.complete && dropper.naturalWidth) ctx.drawImage(dropper, walkX - w / 2, 2 + bob, w, h);
+  }
   function draw() {
     const dpr = Math.min(3, window.devicePixelRatio || 1), cw = cv.clientWidth || 300;
     const px = Math.round(cw * dpr); if (cv.width !== px) { cv.width = px; cv.height = Math.round(px * H / W); }
-    ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H);
+    ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H); backdrop(); basket();
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
-    if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 12); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 8, rOf(nextL), nextL, 1); }
-    for (const b of balls) { const m = b.melt; piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .12 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); }
+    if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 52); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 46, rOf(nextL), nextL, 1); }
+    dropperDraw();
+    for (const b of balls) { const m = b.melt; piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); }   // もふっ
   }
   const nm = l => rec.mode === 2 ? (isEn() ? FISH_EN : FISH_JA)[fishId(l)] : rec.mode === 1 ? (isEn() ? ITEMS_EN[l] : ITEMS[l]) : (isEn() ? window.MaruiroEN.names[l] : NAMES[l]);
   const bestCtx = $('best-cv').getContext('2d');
@@ -364,6 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const hold = (btn, fn) => { let t = 0; const stop = () => { clearInterval(t); t = 0; }; btn.addEventListener('pointerdown', e => { fn(); stop(); t = setInterval(fn, 60); }); ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(n => btn.addEventListener(n, stop)); btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); };
   hold($('bl'), () => setAim(aimX - 5)); hold($('br'), () => setAim(aimX + 5));
   $('bd').addEventListener('click', () => dropBall());
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b && ['rst', 'play', 'mode', 'next'].includes(b.id)) tone(0, 'click'); });
   document.addEventListener('keydown', e => {
     const tg = e.target; if (tg && (tg.tagName === 'BUTTON' || tg.tagName === 'A')) return;
     if (rec.play === 2) { if (/^[1-4]$/.test(e.key)) { e.preventDefault(); floodPress(Number(e.key) - 1); } return; }
@@ -372,12 +423,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   function drawSnd() { const b = $('snd'); b.setAttribute('aria-pressed', String(rec.snd)); b.textContent = L(rec.snd ? 'おと：ON' : 'おと：OFF', rec.snd ? 'Sound: ON' : 'Sound: OFF'); }
   $('snd').addEventListener('click', () => { rec.snd = !rec.snd; save(); drawSnd(); say(L(rec.snd ? 'おとを ならすよ。' : 'おとを けしたよ。', rec.snd ? 'Sound is on.' : 'Sound is off.')); if (rec.snd) tone(2, 'merge'); });
-  function reset() { buildLadder(); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
+  function reset() { buildLadder(); if (rec.play !== 2) say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
   const MODE_T = [['かたち：かお', 'Shapes: faces'], ['かたち：もの', 'Shapes: things'], ['かたち：さかな', 'Shapes: fish']];
   function drawMode() { const b = $('mode'); b.setAttribute('aria-pressed', String(rec.mode !== 0)); b.textContent = L(MODE_T[rec.mode][0], MODE_T[rec.mode][1]); }
   $('mode').addEventListener('click', () => { rec.mode = rec.mode === 1 ? 2 : rec.mode === 2 ? 0 : 1; if (rec.mode === 2) buildLadder(); save(); drawMode(); drawZukan(); drawBest(); say(L(rec.mode === 1 ? 'まるふわの せかいの ものに かえたよ。' : rec.mode === 2 ? 'つった さかなに かえたよ。' : 'まるい かおに かえたよ。', rec.mode === 1 ? 'Switched to things from Marufuwa’s world.' : rec.mode === 2 ? 'Switched to the fish you caught.' : 'Switched to round faces.')); });
   const LEADS = [
-    ['うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。おちてくる じゅんばんは、きょうは みんな おなじ。', 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join at your own pace — no time limit, no game over. Today everyone gets the same order of pieces.'],
+    ['うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、さいごは まんまるの おつきさま。のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。おちてくる じゅんばんは、きょうは みんな おなじ。', 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join until you make a full moon, at your own pace — no time limit, no game over. Today everyone gets the same order of pieces.'],
     ['おなじ ものが 3つ いじょう くっつくと、ふわっと きえるよ。きえると うえの まるが おちて、つづけて きえる ことも。じかんぎれも ゲームオーバーも ないよ。', 'When 3 or more of the same piece touch, they softly vanish. The ones above drop down and may vanish too. No time limit, no game over.'],
     ['ひだりうえの まるふわから、えらんだ いろが ひろがるよ。ぜんぶ おなじ いろに なったら ぴったり！ てかずも じかんも かぞえないよ。ばんは きょうの いろ。', 'Colors spread from the top-left Marufuwa as you pick. When everything is one color, it is a perfect fit! No move count and no timer. The board is today’s colors.']
   ], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread']];
@@ -401,7 +452,19 @@ document.addEventListener('DOMContentLoaded', () => {
     last = ts; draw(); requestAnimationFrame(frame);
   }
   document.addEventListener('visibilitychange', () => { last = 0; });
+  // BGM：ひろば・おへや・カフェと おなじ 曲（snd/bgm/ の あさ・ひる・ゆうがた・よる）。はじめは OFF・「BGM：ON/OFF」ボタン・おとが OFF の まま おすと おとも つく
+  const timeKey = () => /^[ahyn]$/.test(document.documentElement.dataset.time || '') ? document.documentElement.dataset.time : 'h';
+  function initBgm() {
+    const B = window.TsuriBgm; if (!B || initBgm.done) return; initBgm.done = true;
+    const btn = B.button({ className: 'bgmbtn', sound: () => rec.snd, enableSound: () => { rec.snd = true; save(); drawSnd(); mkAc(); }, onToggle: () => { mkAc(); } });
+    btn.style.cssText = 'min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer';
+    $('bgm-slot').replaceWith(btn);
+    B.enter('hiroba', { ctx: () => ac, sound: () => rec.snd, time: timeKey, starry: () => false, mute: () => false });
+    addEventListener('pagehide', () => B.leave('hiroba'));
+  }
+  initBgm();
   drawPlay(); drawBest(); drawSnd(); drawMode(); setAim(W / 2); requestAnimationFrame(frame);
+  say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”'));
 
   // ─── いろひろげ（Flood-It）：8×8・耳の 4いろ・ひだりうえから ひろがる。てかず・じかん・てんすう なし。ばんは 日づけで きまる（きょうの いろ）───
   const FC = ['#8fd3f4', '#9fe0a6', '#ffc27d', '#c9a6f2'], FN = ['みずいろ', 'ミント', 'アプリコット', 'ラベンダー'], FN_EN = ['sky blue', 'mint', 'apricot', 'lavender'], FG = ['○', '△', '□', '☆'], N = 8;
@@ -418,8 +481,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const allOne = () => fl.b.every(row => row.every(v => v === fl.b[0][0]));
   function floodPress(c) {
     if (fl.solved || !(c >= 0 && c < 4)) return false; if (fl.b[0][0] === c) { say(L('もう その いろだよ。べつの いろを どうぞ。', 'It is already that color. Try another.')); return false; }
-    region().forEach(k => { const [x, y] = k.split(',').map(Number); fl.b[y][x] = c; }); floodDraw(); tone(Math.min(6, c + 1), 'merge');
-    if (allOne()) { fl.solved = true; floodDraw(); fbtns.querySelectorAll('button').forEach(b => { b.disabled = true; }); cheerImg.src = '../img/friend-' + FRIENDS[fl.n % FRIENDS.length] + '-s.webp'; cheerTx.textContent = L('ぴったり！', 'A perfect fit!'); cheerEl.hidden = false; say(L('ぴったり！ ぜんぶ おなじ いろに なったよ。', 'A perfect fit! Everything is one color.')); $('next').focus(); }
+    region().forEach(k => { const [x, y] = k.split(',').map(Number); fl.b[y][x] = c; }); floodDraw(); tone(Math.min(6, c + 1), 'click');
+    if (allOne()) { fl.solved = true; floodDraw(); fbtns.querySelectorAll('button').forEach(b => { b.disabled = true; }); tone(0, 'perfect'); cheerImg.src = '../img/friend-' + FRIENDS[fl.n % FRIENDS.length] + '-s.webp'; cheerTx.textContent = L('ぴったり！', 'A perfect fit!'); cheerEl.hidden = false; say(L('ぴったり！ ぜんぶ おなじ いろに なったよ。', 'A perfect fit! Everything is one color.')); $('next').focus(); }
     else say(L(FN[c] + 'に ひろがったよ。', 'It spread as ' + FN_EN[c] + '.'));
     return true;
   }
@@ -450,6 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
     flood: { state: () => ({ n: fl.n, solved: fl.solved, board: fl.b.map(r => r.join('')).join('/'), today: fl.today }), press: floodPress, next: () => floodStart(fl.n + 1), restart: () => floodStart(fl.n), start: n => floodStart(n || 0) },
     setMode: v => { rec.mode = v === 2 ? 2 : v === 0 ? 0 : 1; buildLadder(); save(); drawMode(); drawZukan(); drawBest(); },
     fishIds: () => [0, 1, 2, 3, 4, 5, 6].map(fishId), order: n => { reorder(); const o = []; for (let i = 0; i < n; i++) o.push(pickLevel()); reorder(); return o.join(''); },
+    tone: (l, k) => tone(l, k),
     noMerge: v => { dbgNoMerge = !!v; },
     crowd: n => { for (let i = 0; i < n; i++) addBall(50 + (i % 3) * 100, H - 50 - Math.floor(i / 3) * 62, [4, 5, 6][(i + Math.floor(i / 3)) % 3]); },
     dropLevel: (l, x) => { nextL = l; canDrop = true; return dropBall(x); },
@@ -461,6 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script src="../tsuri-town.js"></script>
+<script defer src="../tsuri-bgm.js"></script>
 <script defer src="../tsuri-en.js"></script>
 <script defer src="../tsuri-ruby-dict.js"></script>
 <script defer src="../tsuri-ruby.js"></script>
