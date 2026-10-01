@@ -341,7 +341,7 @@ body.gazing #tegami{display:none}
 .who{position:absolute;width:17%;height:auto;aspect-ratio:3/4;object-fit:contain;transform:translate(-50%,-100%);transform-origin:50% 100%;pointer-events:none;transition:left .7s ease,top .7s ease}
 #marufuwa{z-index:3}
 .friend{z-index:2;width:14%;aspect-ratio:1/1}
-.bubble{position:absolute;z-index:4;transform:translate(-50%,-100%);background:#fff;border:2px solid #b9d1db;border-radius:14px;padding:2px 10px;font-size:.8rem;font-weight:800;white-space:nowrap;pointer-events:none}
+.bubble{position:absolute;z-index:7;transform:translate(-50%,-100%);background:#fff;border:2px solid #b9d1db;border-radius:14px;padding:2px 10px;font-size:.8rem;font-weight:800;white-space:nowrap;pointer-events:none}
 .bubble[hidden]{display:none}
 /* バケツ：じめんに おいて ある、りったいの バケツ。かげが じめんに おちる */
 .spot{position:absolute;z-index:1;width:11%;min-height:0;aspect-ratio:1/1;padding:0;transform:translate(-50%,-78%);border:0;border-radius:50%;background:none}
@@ -2582,6 +2582,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const sc = scene.getBoundingClientRect(); if (!sc.width) return;
     const chars = ['keeper', 'friend-a', 'friend-b', 'marufuwa'].map(id => $(id)).filter(e => e && !e.hidden && getComputedStyle(e).display !== 'none').map(e => e.getBoundingClientRect()).filter(r => r.width && r.height);
     const top = (l, r) => Math.min(...chars.filter(c => c.left < r && c.right > l).map(c => c.top), Infinity);   // この はばの うえに ある キャラの いちばん たかい ところ
+    chars.push(...chars.map(c => ({left: c.left - 24, right: c.right + 24, top: c.top - 40, bottom: c.top})));   // ふきだしの でる ところ（あたまの うえ）も さける
     const hint = [...scene.querySelectorAll('.next-hint [data-next]')].find(g => getComputedStyle(g).display !== 'none');
     let hr = null;
     if (hint) {
