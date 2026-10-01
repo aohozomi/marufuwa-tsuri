@@ -1098,15 +1098,17 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     if (W && W.compose) W.compose(url).then(u => { if (mochiOpen) mochiPrev.src = u; }); else mochiPrev.src = url;
   }
   let mochiOpen = false;
+  // もてる か：レベルが たりる か、ひろばの おみせで ひらいた もの（TsuriWear.owns が あれば。よむだけ・ない ときは レベルだけ）
+  const mochiHave = (W, it, lv) => it.lv <= lv || !!(typeof W.owns === 'function' && W.owns('item', it.n));
   function renderMochi() {
     mochiList.replaceChildren(); const W = window.TsuriWear;
     if (!W || !W.items) { mochiNote.hidden = false; mochiNote.textContent = 'まだ じゅんびちゅう。もうすこし まってね。'; return; }
     mochiNote.hidden = !ownOn; mochiNote.textContent = ownOn ? 'じぶんの こ の ときは、もちものは つかえないよ。' : '';
     const lv = W.levelOf(readSave().xp), cur = (tank && tank.item) || 0;
-    W.items().forEach(it => { const b = document.createElement('button'); b.type = 'button'; b.dataset.n = String(it.n); const locked = it.lv > lv; b.disabled = locked || ownOn; b.setAttribute('aria-pressed', String(cur === it.n)); b.textContent = locked ? it.ja + '（レベル ' + it.lv + ' で ひらくよ）' : it.ja; b.addEventListener('click', () => chooseItem(it.n)); mochiList.append(b); });
+    W.items().forEach(it => { const b = document.createElement('button'); b.type = 'button'; b.dataset.n = String(it.n); const locked = !mochiHave(W, it, lv); b.disabled = locked || ownOn; b.setAttribute('aria-pressed', String(cur === it.n)); b.textContent = locked ? it.ja + '（レベル ' + it.lv + ' で ひらくよ）' : it.ja; b.addEventListener('click', () => chooseItem(it.n)); mochiList.append(b); });
   }
   function chooseItem(n) {
-    if (visit || ownOn) return; const W = window.TsuriWear; if (!W || !W.items) return; const it = W.items()[n]; if (!it || it.lv > W.levelOf(readSave().xp)) return;
+    if (visit || ownOn) return; const W = window.TsuriWear; if (!W || !W.items) return; const it = W.items()[n]; if (!it || !mochiHave(W, it, W.levelOf(readSave().xp))) return;
     tank.item = cleanItem(n); saveTank(); renderMochi(); setMascot('blue'); prevMochi();
     const m = n ? it.ja + 'を もったよ。' : 'もちものを はずしたよ。'; say(m, true); sr.textContent = m; resetZen();
   }
