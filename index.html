@@ -1298,7 +1298,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     return data;
   }
   try { const data = sturdy(JSON.parse(localStorage.getItem(KEY))); if (data) save = data; } catch {}
-  const soundDefault = save.audioSet !== true && save.sound !== true && !reduce();   // きろくが なければ おとは はじめから ON（うごきを へらす の ときは OFF）。きろくが あれば それを ゆうせん
+  const soundDefault = save.audioSet !== true && typeof save.sound !== 'boolean' && save.sndFx !== false && save.sndAmb !== false && save.sndGuide !== false && !reduce();   // きろく（audioSet・おとの ON/OFF・こうかおん／なみ／あんない の どれか）が 1つでも あれば それを ゆうせん   // きろくが なければ おとは はじめから ON（うごきを へらす の ときは OFF）。きろくが あれば それを ゆうせん
   if (soundDefault) save.sound = true;
   if (!RODS[save.rod] || !RODS[save.rod].open(save)) save.rod = 0;
   if (!BAITS[save.bait] || !BAITS[save.bait].open(save)) save.bait = 0;
@@ -1842,7 +1842,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function drawAudioSize() { const row = document.querySelector('.sub-actions'); if (row) row.dataset.audio = audioDecided() ? 'set' : ''; drawSound(); }   // ちいさく するのは ひらき なおした とき／つれた とき（おした ゆびの したで ボタンが うごかない ように）
   function drawMute() { const b = $('mute-top'); if (!b) return; b.setAttribute('aria-pressed', String(!save.sound)); b.textContent = L(save.sound ? '🔇 おとを けす' : '🔊 おとを ならす', save.sound ? '🔇 Mute sound' : '🔊 Turn sound on'); }
   function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
-  $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); drawSound(); if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([523, 784], .09, 'triangle', .05, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
+  $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); try { dispatchEvent(new Event('storage')); } catch {} drawSound();   /* おへや（すいそう）など ほかの ぶひんにも「おとが かわった」と しらせる */ if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([523, 784], .09, 'triangle', .05, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
   const TARGET = .3;
   const SWIMS = {
@@ -4163,11 +4163,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (!reduce()) requestAnimationFrame(flow); else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
   drawSound();
   $('mute-top').addEventListener('click', () => { $('sound').click(); if (window.TsuriBgm && TsuriBgm.set) { try { TsuriBgm.set(!!save.sound); } catch {} } drawMute(); });   // 上の ボタン：こうかおん・なみ・BGM を ぜんぶ いっしょに
-  { const first = () => { removeEventListener('pointerdown', first, true); removeEventListener('keydown', first, true); if (save.sound) { try { ready(); startAmbient(); } catch {} } };   // ブラウザの きまり：さいしょの タップから なる
-    addEventListener('pointerdown', first, true); addEventListener('keydown', first, true); }
+  { const first = () => { removeEventListener('click', first); if (save.sound) { try { ready(); startAmbient(); } catch {} } };   // ブラウザの きまり：さいしょの タップ（click）から なる。🔇で OFF に した その タップでは つくらない（ボタンの あとで しらべる）
+    addEventListener('click', first); }
   { const redraw = () => { drawMute(); if (soundDefault && window.TsuriBgm && TsuriBgm.set && TsuriBgm.on && !TsuriBgm.on()) { let rec = null; try { rec = localStorage.getItem('marufuwa-bgm-v1'); } catch {} if (rec === null) { try { TsuriBgm.set(true); } catch {} } } };   // BGM も はじめから ON（きろくが なければ）
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', redraw); else redraw();
-    if (!save.muteHint) { const h = $('mutehint'); h.textContent = L('ミュートボタンは こちら →', 'Mute button is here →'); h.hidden = false; save.muteHint = 1; store(); setTimeout(() => { h.hidden = true; }, 3000); } }   // はじめての 3びょうだけ（てんめつなし・2回めからは 出さない）
+    if (!save.muteHint) { const h = $('mutehint'), put = () => { h.textContent = L('ミュートボタンは こちら →', 'Mute button is here →'); }; put(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', put); addEventListener('load', put); h.hidden = false; save.muteHint = 1; store(); setTimeout(() => { h.hidden = true; }, 3000); } }   // はじめての 3びょうだけ（てんめつなし・2回めからは 出さない）
   // おかえり／ふかい よる：かぞえない・せめない・アドバイスしない。ひさしぶりに きた ひとには、きろくは そのままだと つたえる。よなかに ひらいた ひとには、ゆっくり ながめよう と だけ
   const away = save.last ? Date.now() - save.last : 0, hourNow = new Date().getHours();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { drawToday(); drawPlazaNote(); drawBadge(); paintBucketLabel(); paintSkip(); });   // 英語の ときは tsuri-en.js が よみこまれて から 書きなおす
