@@ -21,10 +21,10 @@ try {
 } catch (e) { document.documentElement.dataset.time = 'h'; }
 </script>
 <style>
-:root{--ink:#27424e;--ink2:#3d5a68;--plate:#fffdf7;--wall:#fbf3e6;--wood:#d9b07c;--wood2:#b98a5a;--line:#cfae7e;--btn1:#ffffff;--btn2:#dff1f7;--btn-line:#9bc9da;--link:#14506b;--sky1:#a9defa;--sky2:#eaf8ff;--rw:#d9bf9c;--floor:#b98f60;--dim:.16}
+:root{--ink:#27424e;--ink2:#3d5a68;--plate:#fffdf7;--wall:#fbf3e6;--wood:#d9b07c;--wood2:#b98a5a;--line:#cfae7e;--btn1:#ffffff;--btn2:#dff1f7;--btn-line:#9bc9da;--link:#14506b;--sky1:#a9defa;--sky2:#eaf8ff;--rw:#34503f;--floor:#5a3a22;--dim:.2}
 :root[data-time=a]{--sky1:#ffd9b8;--sky2:#fff3e2}
-:root[data-time=y]{--sky1:#ff9e6e;--sky2:#ffd9a8;--wall:#fbeedd;--rw:#d2ab80;--dim:.22}
-:root[data-time=n]{--sky1:#1f2f5c;--sky2:#4a5d92;--wall:#e6e1f3;--plate:#f6f3fb;--wood2:#7c6f9a;--line:#8e80b0;--rw:#bba8b8;--floor:#8a7098;--dim:.5}
+:root[data-time=y]{--sky1:#ff9e6e;--sky2:#ffd9a8;--wall:#fbeedd;--rw:#3d4a36;--floor:#5a3820;--dim:.26}
+:root[data-time=n]{--sky1:#1f2f5c;--sky2:#4a5d92;--wall:#e6e1f3;--plate:#f6f3fb;--wood2:#7c6f9a;--line:#8e80b0;--rw:#25342d;--floor:#3a2518;--dim:.42}
 :root[data-large=true]{font-size:125%}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -75,9 +75,12 @@ h2{margin:10px 0 4px;font-size:1.05rem}
       <radialGradient id="lg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
       <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6d8" stop-opacity=".3"/><stop offset="1" stop-color="#fff6d8" stop-opacity="0"/></linearGradient>
     </defs>
+    <defs><pattern id="scales" width="26" height="18" patternUnits="userSpaceOnUse"><path d="M0 18 A13 13 0 0 1 26 18 M-13 9 A13 13 0 0 1 13 9 M13 9 A13 13 0 0 1 39 9" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="2"/></pattern></defs>
     <rect width="400" height="300" fill="var(--rw)"/>
+    <rect width="400" height="228" fill="url(#scales)"/>
+    <rect y="196" width="400" height="32" fill="#2a1a10" opacity=".55"/>
     <rect y="228" width="400" height="72" fill="var(--floor)"/>
-    <rect y="214" width="400" height="14" fill="#0000001a"/>
+    <g stroke="#00000040" stroke-width="2"><path d="M0 248 H400 M0 268 H400 M0 288 H400"/><path d="M60 228 V248 M180 248 V268 M300 228 V248 M120 268 V288 M260 268 V288 M20 248 V268 M360 248 V268"/></g>
     <g id="outside" clip-path="url(#win)">
       <rect x="24" y="30" width="112" height="104" fill="url(#sky)"/>
       <g id="stars" opacity="0"><circle cx="44" cy="48" r="1.5" fill="#fff"/><circle cx="76" cy="42" r="1.3" fill="#fff"/><circle cx="118" cy="56" r="1.5" fill="#fff"/><circle cx="96" cy="72" r="1.2" fill="#fff"/></g>
@@ -89,23 +92,20 @@ h2{margin:10px 0 4px;font-size:1.05rem}
     <rect x="24" y="30" width="112" height="104" rx="5" fill="none" stroke="#6a4420" stroke-width="6"/>
     <path d="M80 30 V134 M24 82 H136" stroke="#6a4420" stroke-width="4"/>
     <path d="M24 134 L136 134 L196 230 L10 230Z" fill="url(#beam)"/>
-    <g fill="#5a3a22"><rect x="226" y="52" width="86" height="6"/><rect x="226" y="92" width="86" height="6"/></g>
+    <g fill="#2a1a10"><rect x="222" y="52" width="92" height="6"/><rect x="222" y="92" width="92" height="6"/></g><g><path d="M292 36 q-2 -10 6 -10 q8 0 6 10Z M286 40 H310 V52 H286Z" fill="#c9c9d6" stroke="#2a1a10" stroke-width="2"/></g>
     <g><rect x="232" y="36" width="14" height="16" rx="3" fill="#f0d9a8"/><rect x="252" y="40" width="12" height="12" rx="3" fill="#c98a6a"/><rect x="272" y="34" width="14" height="18" rx="3" fill="#a9c9a0"/><rect x="236" y="76" width="16" height="16" rx="3" fill="#d9a35f"/><rect x="262" y="78" width="12" height="14" rx="3" fill="#e8b4b4"/></g>
     <image id="otter" href="../../img/friend-kawauso-s.webp" x="316" y="56" width="64" height="104" preserveAspectRatio="xMidYMax meet"/>
     <rect x="112" y="150" width="288" height="56" fill="#4a2e18"/>
-    <rect x="112" y="150" width="288" height="12" rx="4" fill="#e0b27a" stroke="#2e1a0c" stroke-width="3"/>
-    <rect x="112" y="162" width="288" height="44" fill="#5a3a22" stroke="#2e1a0c" stroke-width="3"/>
+    <rect x="112" y="150" width="288" height="12" rx="4" fill="#c98f52" stroke="#2e1a0c" stroke-width="3"/>
+    <rect x="112" y="162" width="288" height="44" fill="#4a2c18" stroke="#2e1a0c" stroke-width="3"/>
     <g stroke="#3a2412" stroke-width="2" fill="none"><rect x="124" y="170" width="68" height="28" rx="3"/><rect x="204" y="170" width="68" height="28" rx="3"/><rect x="284" y="170" width="68" height="28" rx="3"/></g>
     <g id="coffee-machine"><rect x="344" y="132" width="20" height="18" rx="3" fill="#7a7a86" stroke="#2e1a0c" stroke-width="2"/><rect x="350" y="140" width="8" height="6" fill="#f0e6d0"/></g>
     <g id="vcup" opacity="0"><ellipse cx="0" cy="3" rx="11" ry="3" fill="#0004"/><path d="M-9 -9 H9 L7 3 H-7Z" fill="#fff" stroke="#3a2412" stroke-width="2"/><ellipse cx="0" cy="-9" rx="8" ry="2.6" fill="#4a2e18"/></g>
     <g id="guests"></g>
-    <g id="stools">
-      <g transform="translate(170 0)"><rect x="-3" y="246" width="6" height="30" fill="#3a2412"/><ellipse cx="0" cy="244" rx="26" ry="8" fill="#8a3a2a" stroke="#2e1a0c" stroke-width="2.5"/></g>
-      <g transform="translate(250 0)"><rect x="-3" y="246" width="6" height="30" fill="#3a2412"/><ellipse cx="0" cy="244" rx="26" ry="8" fill="#8a3a2a" stroke="#2e1a0c" stroke-width="2.5"/></g>
-    </g>
-    <g id="wtable"><ellipse cx="60" cy="262" rx="42" ry="9" fill="#00000030"/><rect x="56" y="244" width="8" height="20" fill="#3a2412"/><ellipse cx="60" cy="242" rx="40" ry="9" fill="#a9703c" stroke="#2e1a0c" stroke-width="3"/></g>
-    <g id="me" opacity="0"><image href="../../img/game-blue.webp" x="143" y="176" width="54" height="72" preserveAspectRatio="xMidYMax meet"/></g>
-    <g id="cup" opacity="0" transform="translate(170 150)">
+    <g id="stools"><g transform="translate(150 0)"><rect x="-3" y="246" width="6" height="30" fill="#2a1a10"/><ellipse cx="0" cy="276" rx="14" ry="4" fill="#2a1a10"/><ellipse cx="0" cy="244" rx="26" ry="8" fill="#4f9a5a" stroke="#1f3a26" stroke-width="2.5"/><ellipse cx="0" cy="241" rx="18" ry="4" fill="#6bb874" opacity=".7"/></g><g transform="translate(220 0)"><rect x="-3" y="246" width="6" height="30" fill="#2a1a10"/><ellipse cx="0" cy="276" rx="14" ry="4" fill="#2a1a10"/><ellipse cx="0" cy="244" rx="26" ry="8" fill="#4f9a5a" stroke="#1f3a26" stroke-width="2.5"/><ellipse cx="0" cy="241" rx="18" ry="4" fill="#6bb874" opacity=".7"/></g><g transform="translate(290 0)"><rect x="-3" y="246" width="6" height="30" fill="#2a1a10"/><ellipse cx="0" cy="276" rx="14" ry="4" fill="#2a1a10"/><ellipse cx="0" cy="244" rx="26" ry="8" fill="#4f9a5a" stroke="#1f3a26" stroke-width="2.5"/><ellipse cx="0" cy="241" rx="18" ry="4" fill="#6bb874" opacity=".7"/></g></g>
+    <g id="wtable"><ellipse cx="60" cy="262" rx="42" ry="9" fill="#00000040"/><rect x="56" y="244" width="8" height="20" fill="#2a1a10"/><ellipse cx="60" cy="242" rx="40" ry="9" fill="#8a5a30" stroke="#2e1a0c" stroke-width="3"/></g>
+    <g id="me" opacity="0"><image href="../../img/game-blue.webp" x="123" y="176" width="54" height="72" preserveAspectRatio="xMidYMax meet"/></g>
+    <g id="cup" opacity="0" transform="translate(150 150)">
       <ellipse cx="0" cy="3" rx="12" ry="3" fill="#0004"/>
       <path d="M-10 -10 H10 L8 3 H-8Z" fill="#fff" stroke="#3a2412" stroke-width="2.5"/>
       <ellipse id="drink" cx="0" cy="-10" rx="9" ry="3" fill="#4a2e18" stroke="#3a2412" stroke-width="2"/>
@@ -114,8 +114,8 @@ h2{margin:10px 0 4px;font-size:1.05rem}
     </g>
     <g class="vis" id="visitor" style="transform:translateX(130px)"></g>
     <rect class="shade" width="400" height="300"/>
-    <g class="glow"><circle cx="200" cy="120" r="120" fill="url(#lg)"/><circle cx="330" cy="110" r="100" fill="url(#lg)"/><circle cx="80" cy="150" r="70" fill="url(#lg)" opacity=".5"/></g>
-    <g id="lamps"><path d="M200 0 V40 M330 0 V36" stroke="#2e1a0c" stroke-width="2"/><path d="M182 58 Q200 34 218 58Z M314 54 Q330 30 346 54Z" fill="#c96a3a" stroke="#2e1a0c" stroke-width="2.5"/><ellipse cx="200" cy="60" rx="14" ry="4" fill="#ffe7a8"/><ellipse cx="330" cy="56" rx="13" ry="4" fill="#ffe7a8"/></g>
+    <g class="glow"><circle cx="200" cy="120" r="120" fill="url(#lg)"/><circle cx="330" cy="110" r="100" fill="url(#lg)"/><circle cx="80" cy="150" r="70" fill="url(#lg)" opacity=".5"/><circle cx="132" cy="140" r="38" fill="url(#lg)"/><circle cx="262" cy="140" r="34" fill="url(#lg)" opacity=".8"/></g>
+    <g id="lamps"><path d="M126 150 V142 M256 150 V144" stroke="#2e1a0c" stroke-width="3"/><circle cx="126" cy="138" r="6" fill="#ffe7a8" stroke="#2e1a0c" stroke-width="2"/><circle cx="256" cy="140" r="6" fill="#ffe7a8" stroke="#2e1a0c" stroke-width="2"/><path d="M200 0 V40 M330 0 V36" stroke="#2e1a0c" stroke-width="2"/><path d="M182 58 Q200 34 218 58Z M314 54 Q330 30 346 54Z" fill="#c96a3a" stroke="#2e1a0c" stroke-width="2.5"/><ellipse cx="200" cy="60" rx="14" ry="4" fill="#ffe7a8"/><ellipse cx="330" cy="56" rx="13" ry="4" fill="#ffe7a8"/></g>
   </svg>
   <div id="over"></div>
   </div>
@@ -198,10 +198,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // すわって いる なかま 2にん：カウンターの となりの せき・まどぎわの テーブル（日づけと じかんで かわる）
   const day = Math.floor(Date.now() / 36e5), pickG = k => SEATED[(day * 7 + k * 5) % SEATED.length];
   const g0 = pickG(1); let g1 = pickG(2); if (g1 === g0) g1 = SEATED[(SEATED.indexOf(g1) + 1) % SEATED.length];
-  const SPOTS = [{ id: g0, x: 250, cx: 250, w: 54, h: 66, y: 178, cupx: 250 }, { id: g1, x: 60, cx: 60, w: 52, h: 62, y: 180, cupx: 76 }];
+  const g2 = (() => { let c = pickG(3); while (c === g0 || c === g1) c = SEATED[(SEATED.indexOf(c) + 1) % SEATED.length]; return c; })();
+  const SPOTS = [{ id: g0, x: 220, cx: 220, w: 54, h: 66, y: 178, cupx: 220, cupy: 150 }, { id: g1, x: 34, cx: 34, w: 48, h: 62, y: 182, cupx: 50, cupy: 240 }, { id: g2, x: 90, cx: 90, w: 48, h: 62, y: 182, cupx: 72, cupy: 240, flip: true }];
   const gEl = $('guests'), guests = SPOTS.map((sp, i) => {
-    const im = document.createElementNS(NS, 'image'); im.setAttribute('href', img(sp.id)); im.setAttribute('x', sp.x - sp.w / 2); im.setAttribute('y', sp.y); im.setAttribute('width', sp.w); im.setAttribute('height', sp.h); im.setAttribute('preserveAspectRatio', 'xMidYMax meet'); gEl.append(im);
-    const cup = document.createElementNS(NS, 'g'); cup.setAttribute('transform', 'translate(' + sp.cupx + ' ' + (i === 0 ? 150 : 240) + ')'); cup.innerHTML = '<ellipse cx="0" cy="3" rx="10" ry="3" fill="#0004"/><path d="M-8 -8 H8 L6 3 H-6Z" fill="#fff" stroke="#3a2412" stroke-width="2"/><ellipse cx="0" cy="-8" rx="7" ry="2.4" fill="#4a2e18"/>'; gEl.append(cup);
+    const im = document.createElementNS(NS, 'image'); im.setAttribute('href', img(sp.id)); im.setAttribute('x', sp.x - sp.w / 2); im.setAttribute('y', sp.y); im.setAttribute('width', sp.w); im.setAttribute('height', sp.h); im.setAttribute('preserveAspectRatio', 'xMidYMax meet'); if (sp.flip) { im.setAttribute('transform', 'translate(' + (sp.x * 2) + ' 0) scale(-1 1)'); } gEl.append(im);
+    const cup = document.createElementNS(NS, 'g'); cup.setAttribute('transform', 'translate(' + sp.cupx + ' ' + sp.cupy + ')'); cup.innerHTML = '<ellipse cx="0" cy="3" rx="10" ry="3" fill="#0004"/><path d="M-8 -8 H8 L6 3 H-6Z" fill="#fff" stroke="#3a2412" stroke-width="2"/><ellipse cx="0" cy="-8" rx="7" ry="2.4" fill="#4a2e18"/>'; gEl.append(cup);
     const hit = document.createElement('button'); hit.type = 'button'; hit.className = 'hit'; hit.dataset.id = sp.id; hit.setAttribute('aria-label', NAMES[sp.id] + 'に さわる');
     const [l, t] = pos(sp.cx, sp.y + sp.h / 2); hit.style.left = l; hit.style.top = t; hit.style.width = hit.style.height = Math.max(44, sp.w * 1.05) / 400 * 100 + '%'; hit.style.aspectRatio = '1/1'; hit.style.minWidth = '44px'; hit.style.minHeight = '44px';
     hit.addEventListener('click', () => tap(i)); $('stage').append(hit);
@@ -234,21 +235,21 @@ document.addEventListener('DOMContentLoaded', () => {
   function talk() {
     if (clock() - lastTalk < 60000) return; const g = guests[k % guests.length], L = linesFor(), line = L[(day + k * 3) % L.length]; k++; lastTalk = clock(); say(g.name, line); bubble(g.x, g.y - 2, line, 4200);
   }
-  function sip() { if (clock() - lastSip < 75000) return; lastSip = clock(); state.sips++; bubble(170, 172, 'おいしい', 3200); }
+  function sip() { if (clock() - lastSip < 75000) return; lastSip = clock(); state.sips++; bubble(150, 172, 'おいしい', 3200); }
   const vcup = $('vcup'), vis = $('visitor');
   function visit() {
     if (visiting || !state.seated || state.left) return false;
     const id = VISITORS[(day + state.visits * 3) % VISITORS.length], name = NAMES[id]; state.visits++; state.visitor = id;
-    const im = document.createElementNS(NS, 'image'); im.setAttribute('href', img(id)); im.setAttribute('x', 318); im.setAttribute('y', 188); im.setAttribute('width', 56); im.setAttribute('height', 74); im.setAttribute('preserveAspectRatio', 'xMidYMax meet'); vis.replaceChildren(im);
+    const im = document.createElementNS(NS, 'image'); im.setAttribute('href', img(id)); im.setAttribute('x', 330); im.setAttribute('y', 188); im.setAttribute('width', 56); im.setAttribute('height', 74); im.setAttribute('preserveAspectRatio', 'xMidYMax meet'); vis.replaceChildren(im);
     vis.style.transition = reduced() ? 'none' : ''; vis.style.transform = 'translateX(130px)'; void vis.getBoundingClientRect(); vis.style.transform = 'translateX(0)';
     visiting = { t0: clock(), step: 0, name, id };
     return true;
   }
   function visitStep() {
     if (!visiting) return; const dt = clock() - visiting.t0, v = visiting;
-    if (v.step === 0 && dt >= 2600) { v.step = 1; say(v.name, 'コーヒー ください'); bubble(346, 178, 'コーヒー ください', 3800); }
-    else if (v.step === 1 && dt >= 6500) { v.step = 2; vcup.setAttribute('transform', 'translate(346 152)'); vcup.setAttribute('opacity', '1'); }
-    else if (v.step === 2 && dt >= 8500) { v.step = 3; say(v.name, 'ありがとう'); bubble(346, 178, 'ありがとう', 3200); }
+    if (v.step === 0 && dt >= 2600) { v.step = 1; say(v.name, 'コーヒー ください'); bubble(358, 178, 'コーヒー ください', 3800); }
+    else if (v.step === 1 && dt >= 6500) { v.step = 2; vcup.setAttribute('transform', 'translate(358 152)'); vcup.setAttribute('opacity', '1'); }
+    else if (v.step === 2 && dt >= 8500) { v.step = 3; say(v.name, 'ありがとう'); bubble(358, 178, 'ありがとう', 3200); }
     else if (v.step === 3 && dt >= 12000) { v.step = 4; vcup.setAttribute('opacity', '0'); vis.style.transition = reduced() ? 'none' : ''; vis.style.transform = 'translateX(130px)'; }
     else if (v.step === 4 && dt >= 15000) { vis.replaceChildren(); visiting = null; nextVisit = clock() + 120000 + Math.random() * 180000; }
   }
