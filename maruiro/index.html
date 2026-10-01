@@ -40,6 +40,7 @@ h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
 .zukan i{font-style:normal;color:var(--ink2);font-size:.8rem;align-self:center}
 .best{display:flex;align-items:center;gap:6px;font-size:.9rem;font-weight:800;margin:0}
 .field{display:flex;justify-content:center}
+#cheer[hidden]{display:none!important}
 #cv{display:block;width:min(100%,calc((100dvh - 250px)*300/420));min-width:200px;aspect-ratio:300/420;border-radius:18px;border:3px solid var(--fieldline);background:var(--field);touch-action:none;cursor:pointer}
 #cv:focus-visible{outline:4px solid #286b88;outline-offset:3px}
 .ctl{display:flex;gap:8px;margin:10px 0 6px;justify-content:center}
@@ -64,7 +65,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     <div class="zukan" id="zukan" aria-hidden="true"></div>
     <p class="best" id="best-wrap"><canvas id="best-cv" width="88" height="88" style="width:44px;height:44px" aria-hidden="true"></canvas><span id="best-tx">いちばん おおきい まる：まだ ないよ</span></p>
   </div>
-  <div class="field"><canvas id="cv" tabindex="0" role="application" aria-label="まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ"></canvas></div>
+  <div class="field" style="position:relative"><div id="cheer" hidden style="position:absolute;left:8px;top:8px;z-index:2;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:22px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.85rem;pointer-events:none"><img alt="" width="36" height="36" style="object-fit:contain"><span></span></div><canvas id="cv" tabindex="0" role="application" aria-label="まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ"></canvas></div>
   <div class="ctl">
     <button type="button" id="bl" aria-label="ひだりへ">◀ ひだり</button>
     <button type="button" id="bd" data-noruby>おとす</button>
@@ -72,6 +73,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
   </div>
   <div class="ctl2">
     <button type="button" id="snd" aria-pressed="false">おと：OFF</button>
+    <button type="button" id="play" aria-pressed="false">あそびかた：そだてる</button>
     <button type="button" id="mode" aria-pressed="true">かたち：もの</button>
     <button type="button" id="rst">さいしょから</button>
   </div>
@@ -85,6 +87,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     'まるふわ まるいろ': 'Marufuwa Maruiro',
     '← ひろばへ': '← Back to the Plaza',
     'うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。': 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join at your own pace — no time limit, no game over.',
+    'あそびかた：そだてる': 'How to play: Grow', 'あそびかた：そろえる': 'How to play: Match', 'いちばん ながい れんさ：まだ ないよ': 'Longest chain so far: none yet',
     'かたち：もの': 'Shapes: things', 'かたち：かお': 'Shapes: faces', 'まるふわの せかいの ものに かえたよ。': 'Switched to things from Marufuwa’s world.', 'まるい かおに かえたよ。': 'Switched to round faces.',
     'うえから まるい子を おとして、おなじ いろが ふれあうと、ひとつ おおきい まるに なるよ。じかんぎれも ゲームオーバーも ないから、のんびり どうぞ。': 'Drop round friends from the top. When two of the same color touch, they become one bigger circle. No time limit and no game over — take it easy.',
     'いちばん おおきい まる：まだ ないよ': 'Biggest circle so far: none yet',
@@ -129,15 +132,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   // ─── きろく（数字だけ・この たんまつだけ）───
-  let rec = { v: 1, best: -1, snd: false, mode: 1 };
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; rec.snd = d.snd === true; rec.mode = d.mode === 0 ? 0 : 1; } } catch (e) {}
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 1, best: rec.best, snd: rec.snd, mode: rec.mode })); } catch (e) {} };
+  let rec = { v: 1, best: -1, snd: false, mode: 1, play: 0, chain: 0 };
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; rec.snd = d.snd === true; rec.mode = d.mode === 0 ? 0 : 1; rec.play = d.play === 1 ? 1 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 1, best: rec.best, snd: rec.snd, mode: rec.mode, play: rec.play, chain: rec.chain })); } catch (e) {} };
 
   // ─── 乱数（?seed=数字 で ならべを そろえられる）───
   let seed = Number(q.get('seed')) || (Math.random() * 1e9) | 0;
   const mul = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   let rnd = mul(seed);
-  const pickLevel = () => [0, 0, 0, 1, 1, 2][Math.floor(rnd() * 6)];
+  const rOf = l => rec.play === 1 ? 21 : R[l];
+  const pickLevel = () => rec.play === 1 ? Math.floor(rnd() * 5) : [0, 0, 0, 1, 1, 2][Math.floor(rnd() * 6)];
 
   // ─── かお（まるふわの かおの まる）：1ふで の えがお・ほっぺ・ひとみ ───
   function face(c, x, y, r, l, a, scale) {
@@ -174,21 +178,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const x = c.getContext('2d'); x.scale(d, d); piece(x, px / 2, px / 2, px / 2 - 1.5, l, 1); return c;
   }
   // ずかん（ちいさい じゅんばん）
-  const zk = $('zukan'); function drawZukan() { zk.replaceChildren(); R.forEach((r, l) => { zk.append(miniCanvas(l, 14 + l * 3)); if (l < R.length - 1) { const i = document.createElement('i'); i.textContent = '›'; zk.append(i); } }); } drawZukan();
+  const zk = $('zukan'); function drawZukan() { zk.replaceChildren(); if (rec.play === 1) { for (let l = 0; l < 5; l++) zk.append(miniCanvas(l, 22)); return; } R.forEach((r, l) => { zk.append(miniCanvas(l, 14 + l * 3)); if (l < R.length - 1) { const i = document.createElement('i'); i.textContent = '›'; zk.append(i); } }); } drawZukan();
 
   // ─── せかい ───
   let dbgNoMerge = false, balls = [], aimX = W / 2, nextL = pickLevel(), canDrop = true, cooldown = 0, over = 0, lastMsg = '';
-  const stats = { drops: 0, merges: 0, melts: 0, top: 0, maxL: -1, t: 0 };
+  const stats = { drops: 0, merges: 0, melts: 0, top: 0, maxL: -1, t: 0, clears: 0, chain: 0, maxChain: 0 };
+  let chainAlive = 0;
   let uid = 0;
   const say = s => { if (s === lastMsg) { msgEl.textContent = ''; } lastMsg = s; msgEl.textContent = s; };
-  const aimMin = () => R[nextL] + 3, aimMax = () => W - R[nextL] - 3;
+  const aimMin = () => rOf(nextL) + 3, aimMax = () => W - rOf(nextL) - 3;
   const setAim = x => { aimX = Math.max(aimMin(), Math.min(aimMax(), x)); };
 
-  function addBall(x, y, l, vx = 0, vy = 0, pop = 0) { const b = { id: ++uid, x, y, vx, vy, l, r: R[l], m: R[l] * R[l], age: 0, melt: 0, pop, still: 0 }; balls.push(b); return b; }
+  function addBall(x, y, l, vx = 0, vy = 0, pop = 0) { const b = { id: ++uid, x, y, vx, vy, l, r: rOf(l), m: rOf(l) * rOf(l), age: 0, melt: 0, pop, still: 0 }; balls.push(b); return b; }
   function dropBall(x) {
     if (!canDrop) return false;
     const l = nextL; setAim(x === undefined ? aimX : x);
-    addBall(aimX, R[l] + 8, l, 0, 40); stats.drops++; canDrop = false; cooldown = .45; nextL = pickLevel(); setAim(aimX); tone(0, 'drop');
+    addBall(aimX, rOf(l) + 8, l, 0, 40); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; nextL = pickLevel(); setAim(aimX); tone(0, 'drop');
     return true;
   }
 
@@ -208,6 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
+  // れんさで なかまが ちいさく よろこぶ（ふきだし 1つ・てんめつなし）
+  const cheerEl = $('cheer'), cheerImg = cheerEl.querySelector('img'), cheerTx = cheerEl.querySelector('span'); let cheerT = 0;
+  const FRIENDS = ['usagi', 'neko', 'panda', 'risu', 'penguin', 'tanuki', 'koinu'];
+  function cheer(n) {
+    cheerImg.src = '../img/friend-' + FRIENDS[(n + stats.drops) % FRIENDS.length] + '-s.webp'; cheerTx.textContent = L(n + 'れんさ！ ふわっ', n + ' in a row! Poof!'); cheerEl.hidden = false;
+    clearTimeout(cheerT); cheerT = setTimeout(() => { cheerEl.hidden = true; }, 2400); say(L('なかまが よろこんでいるよ（' + n + 'れんさ）', 'A friend is cheering (' + n + ' in a row)'));
+  }
   // ─── ぶつり：まるどうしの かんたんな しょうとつ ───
   function step(dt) {
     stats.t += dt;
@@ -215,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const act = balls.filter(b => b.melt === 0);
     for (const b of balls) {
       b.age += dt; if (b.pop > 0) b.pop = Math.max(0, b.pop - dt * 4);
-      if (b.melt > 0) { b.melt += dt / 1.3; continue; }
+      if (b.melt > 0) { b.melt += dt / (b.fast ? .5 : 1.3); continue; }
       b.vy += GRAV * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= .999; b.vy *= .999;
     }
     for (let it = 0; it < 6; it++) {
@@ -234,10 +246,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     for (const b of act) { const sp = Math.hypot(b.vx, b.vy); if (sp < 80) { if (sp < 14) { b.vx *= .8; b.vy *= .8; } b.still += dt; } else b.still = 0; }
+    // そろえる：3つ いじょう おなじ いろで ふれあうと ふわっと きえる（きえた あと うえの まるが おちて、つぎの けしが おきれば れんさ）
+    if (rec.play === 1) {
+      chainAlive = Math.max(0, chainAlive - dt); if (chainAlive === 0 && !act.some(b => b.melt > 0)) stats.chain = 0;
+      const ok = act.filter(b => b.melt === 0 && b.age > .6 && Math.hypot(b.vx, b.vy) < 45), seen = new Set(); let cleared = 0;
+      for (const a of ok) { if (seen.has(a)) continue; const comp = [a], stack = [a]; seen.add(a);
+        while (stack.length) { const c = stack.pop(); for (const d of ok) if (!seen.has(d) && d.l === a.l && Math.hypot(d.x - c.x, d.y - c.y) <= d.r + c.r + 2) { seen.add(d); comp.push(d); stack.push(d); } }
+        if (comp.length >= 3) { comp.forEach(b => { b.melt = .001; b.fast = true; }); cleared += comp.length; stats.clears++; } }
+      if (cleared) { stats.chain = chainAlive > 0 ? stats.chain + 1 : 1; chainAlive = 2.6; if (stats.chain > stats.maxChain) stats.maxChain = stats.chain; tone(Math.min(6, stats.chain + 1), 'merge');
+        if (stats.chain >= 2) cheer(stats.chain);
+        if (stats.chain > rec.chain) { rec.chain = Math.min(99, stats.chain); save(); drawBest(); } }
+    }
     // あわさる
     const gone = new Set(), born = [];
+    const mergeOn = rec.play !== 1;
     for (let i = 0; i < act.length; i++) for (let j = i + 1; j < act.length; j++) {
-      const a = act[i], c = act[j]; if (dbgNoMerge || gone.has(a) || gone.has(c) || a.l !== c.l) continue;
+      const a = act[i], c = act[j]; if (!mergeOn || dbgNoMerge || gone.has(a) || gone.has(c) || a.l !== c.l) continue;
       if (Math.hypot(c.x - a.x, c.y - a.y) <= a.r + c.r + .8) {
         gone.add(a); gone.add(c); stats.merges++;
         if (a.l >= 6) { stats.top++; tone(6, 'merge'); say(L('いちばん おおきい まるが ふたつ あわさって、ふわっと きえたよ。また はじめよう。', 'Two of the biggest circles joined and floated away. Let’s begin again.')); }
@@ -252,10 +276,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     balls = balls.filter(b => b.melt < 1);
     // いっぱい：あかい せんの うえで じっと して いる まるが つづく と、したの だんが ふわっと とける（ゲームオーバーは ない）
-    const crowded = balls.some(b => b.melt === 0 && b.age > 1.5 && b.still > .4 && b.y - b.r < LINE);
+    const crowded = balls.some(b => b.melt === 0 && b.age > 1.5 && ((b.still > .4 && b.y - b.r < LINE) || b.y < b.r * .5)) || balls.length > 60;   // おしあって うえまで つまった ときも
     over = crowded ? over + dt : Math.max(0, over - dt * 2);
     if (over > 2.2) {
-      over = 0; stats.melts++; const lim = H - 95;
+      over = 0; stats.melts++; const lim = balls.length > 45 ? H - 210 : H - 95;   // とても いっぱい の ときは したの はんぶんが ふわっと とける
       balls.forEach(b => { if (b.melt === 0 && b.y > lim) b.melt = .001; });
       if (!balls.some(b => b.melt > 0)) balls.slice().sort((a, c) => c.y - a.y).slice(0, 4).forEach(b => { b.melt = .001; });
       tone(0, 'melt'); say(L('いっぱいに なったので、したの だんが ふわっと とけたよ。そのまま つづけて だいじょうぶ。', 'It filled up, so the bottom layer softly melted. Keep going — it’s okay.'));
@@ -268,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const px = Math.round(cw * dpr); if (cv.width !== px) { cv.width = px; cv.height = Math.round(px * H / W); }
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H);
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
-    if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, R[nextL] * 2 + 12); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, R[nextL] + 8, R[nextL], nextL, 1); }
+    if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 12); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 8, rOf(nextL), nextL, 1); }
     for (const b of balls) { const m = b.melt; piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .1 * b.pop); }
   }
   const nm = l => rec.mode === 1 ? (isEn() ? ITEMS_EN[l] : ITEMS[l]) : (isEn() ? window.MaruiroEN.names[l] : NAMES[l]);
@@ -276,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawBest() {
     bestCtx.clearRect(0, 0, 88, 88);
     if (rec.best >= 0) piece(bestCtx, 44, 44, 40, rec.best, 1);
+    if (rec.play === 1) { bestCtx.clearRect(0, 0, 88, 88); $('best-tx').textContent = rec.chain > 0 ? L('いちばん ながい れんさ：' + rec.chain, 'Longest chain so far: ' + rec.chain) : L('いちばん ながい れんさ：まだ ないよ', 'Longest chain so far: none yet'); return; }
     $('best-tx').textContent = rec.best >= 0 ? L('いちばん おおきい まる：', 'Biggest circle so far: ') + nm(rec.best) : L('いちばん おおきい まる：まだ ないよ', 'Biggest circle so far: none yet');
   }
 
@@ -299,6 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function reset() { balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
   function drawMode() { const b = $('mode'); b.setAttribute('aria-pressed', String(rec.mode === 1)); b.textContent = L(rec.mode === 1 ? 'かたち：もの' : 'かたち：かお', rec.mode === 1 ? 'Shapes: things' : 'Shapes: faces'); }
   $('mode').addEventListener('click', () => { rec.mode = rec.mode === 1 ? 0 : 1; save(); drawMode(); drawZukan(); drawBest(); say(L(rec.mode === 1 ? 'まるふわの せかいの ものに かえたよ。' : 'まるい かおに かえたよ。', rec.mode === 1 ? 'Switched to things from Marufuwa’s world.' : 'Switched to round faces.')); });
+  function drawPlay() {
+    const b = $('play'), on = rec.play === 1; b.setAttribute('aria-pressed', String(on)); b.textContent = L(on ? 'あそびかた：そろえる' : 'あそびかた：そだてる', on ? 'How to play: Match' : 'How to play: Grow');
+    document.querySelector('.lead').textContent = L(on ? 'おなじ ものが 3つ いじょう くっつくと、ふわっと きえるよ。きえると うえの まるが おちて、つづけて きえる ことも。じかんぎれも ゲームオーバーも ないよ。' : 'うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。', on ? 'When 3 or more of the same piece touch, they softly vanish. The ones above drop down and may vanish too. No time limit, no game over.' : 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join at your own pace — no time limit, no game over.');
+  }
+  function freshPlay() { balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
+  $('play').addEventListener('click', () => { rec.play = rec.play === 1 ? 0 : 1; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); });
   $('rst').addEventListener('click', reset);
 
   // ─── うごかす（フレームごと・ひらいて いる ときだけ）───
@@ -308,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
     last = ts; draw(); requestAnimationFrame(frame);
   }
   document.addEventListener('visibilitychange', () => { last = 0; });
-  drawBest(); drawSnd(); drawMode(); setAim(W / 2); requestAnimationFrame(frame);
+  drawPlay(); drawBest(); drawSnd(); drawMode(); setAim(W / 2); requestAnimationFrame(frame);
 
   // けんさ用（ゲームの うごきには つかわない）
   window.Maruiro = {
@@ -317,6 +348,8 @@ document.addEventListener('DOMContentLoaded', () => {
     state: () => ({ n: balls.length, canDrop, nextL, best: rec.best, snd: rec.snd, over, ...stats, aimX }),
     step: n => { for (let i = 0; i < (n || 1); i++) step(1 / 60); },
     drop: x => { canDrop = true; return dropBall(x); },
+    setPlay: v => { rec.play = v === 1 ? 1 : 0; drawPlay(); drawZukan(); drawBest(); freshPlay(); },
+    reseed: n => { rnd = mul(n); },
     noMerge: v => { dbgNoMerge = !!v; },
     crowd: n => { for (let i = 0; i < n; i++) addBall(50 + (i % 3) * 100, H - 50 - Math.floor(i / 3) * 62, [4, 5, 6][(i + Math.floor(i / 3)) % 3]); },
     dropLevel: (l, x) => { nextL = l; canDrop = true; return dropBall(x); },
