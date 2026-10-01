@@ -302,6 +302,18 @@ html[data-plaza=false] #plaza-note{display:none}
 #scene .next-hint [data-next]{display:none}
 #scene[data-area=L] [data-next=R],#scene[data-area=R] [data-next=H],#scene[data-area=H] [data-next=B],#scene[data-area=B] [data-next=M],#scene[data-area=M] [data-next=S],#scene[data-area=S] [data-next=T]{display:inline}
 #scene[data-time=yoru] .next-hint{opacity:.7;filter:brightness(.75)}
+/* つりばの いどう：景色の したの ボタン・奥の 気配（おせる）・← → */
+.area-open{display:block;width:100%;min-height:48px;margin:8px 0 4px}
+.next-go{position:absolute;z-index:6;width:64px;height:64px;min-height:0;transform:translate(-50%,-50%);padding:0;border:0;background:transparent;box-shadow:none;border-radius:50%}
+.next-go span{position:absolute;right:2px;bottom:2px;min-width:26px;height:22px;padding:0 6px;border-radius:11px;background:#fff;border:2px solid #286b88;color:#17323d;font-weight:900;font-size:.8rem;line-height:18px}
+.next-go[data-locked=true]{opacity:.7}
+.next-go[data-locked=true] span::after{content:"🔒";font-size:.7rem;margin-left:2px}
+.edge-go{position:absolute;z-index:6;top:42%;width:44px;min-height:0;height:88px;padding:0;border-radius:14px;background:#ffffff66;border:2px solid #ffffffaa;color:#17323d;font-weight:900;font-size:1.3rem;box-shadow:none;opacity:.6}
+#edge-prev{left:4px}#edge-next{right:4px}
+.next-go[hidden],.edge-go[hidden]{display:none}
+#scene:not([data-phase=idle]):not([data-phase=caught]) :is(.next-go,.edge-go),body.gazing :is(.next-go,.edge-go),#scene[data-tooku=true] :is(.next-go,.edge-go){display:none}
+#areago-q{font-weight:800;text-align:center;margin:8px 0 14px}.areago-btns{display:flex;gap:12px}.areago-btns button{flex:1;min-height:48px}
+body.gazing .area-open{display:none}
 #today{margin:2px 0 10px;text-align:center;font-size:.85rem;line-height:1.7;font-weight:700}
 #today[hidden]{display:none}
 /* てがみ（tsuri-tegami.js）：ひさしぶりに もどった ときと よなかに、景色の すみに ✉。おさなくても いい・その日 いちどだけ・ごほうびは なし */
@@ -815,6 +827,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   <div id="scene" data-phase="idle" data-time="hiru" data-area="L">
     <script>try { var a0 = (JSON.parse(localStorage.getItem("marufuwa-tsuri-v1")) || {}).area; if (/^[A-Z]$/.test(a0)) document.getElementById("scene").dataset.area = a0; } catch (e) {}   /* さいごに いた つりばの うしろ・まえを さいしょの 1コマから（本体の script が data-area を いれる まで L の けしきが 一瞬 出ない）。まちがった 値は 本体が もどす */</script>
     <canvas id="sky" width="220" height="110" aria-hidden="true"></canvas>
+      <button id="next-go" class="next-go" type="button" hidden><span aria-hidden="true">→</span></button>
+      <button id="edge-prev" class="edge-go" type="button" hidden><span aria-hidden="true">←</span></button>
+      <button id="edge-next" class="edge-go" type="button" hidden><span aria-hidden="true">→</span></button>
     <!-- かりの はいけい（いろと かたちだけ）。えが とどいたら さしかえる -->
     <svg class="land" viewBox="0 0 600 450" preserveAspectRatio="none" aria-hidden="true">
       <defs>
@@ -914,6 +929,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     </div>
   </div>
 
+  <button id="area-open" type="button" class="area-open">つりばを かえる ▸</button>
   <div class="actions">
     <button id="main-button" type="button">なげる</button>
     <button id="take-photo" type="button" hidden>しゃしんを とる</button>
@@ -1014,6 +1030,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button class="close" type="button" id="close-nakama"></button>
   </dialog>
 
+  <dialog id="areapick" aria-labelledby="areapick-title">
+    <h2 id="areapick-title" tabindex="-1">つりばを かえる</h2>
+    <div id="areapick-list" class="areas" role="group"></div>
+    <button class="close" type="button" id="areapick-close">とじる</button>
+  </dialog>
+  <dialog id="areago" aria-labelledby="areago-q">
+    <p id="areago-q"></p>
+    <div class="areago-btns"><button type="button" id="areago-yes">はい</button><button type="button" id="areago-no">やめる</button></div>
+  </dialog>
   <dialog id="gear" aria-labelledby="gear-title">
     <h2 id="gear-title">じぶんの どうぐ</h2>
     <p class="count">すきな いろに して、じぶんだけの どうぐに しよう。レベルが あがると、いろが ふえるよ。</p>
@@ -2472,7 +2497,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function drawAreas() {
     if ($('area-now')) $('area-now').textContent = areaName(save.area);
-    $('areas').dataset.n = String(areasShown().length); syncTabs($('areas'), areasShown().map(area => ({k: area.id, text: (save.total < area.need ? '🔒' : '') + area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
+    drawAreaNav(); $('areas').dataset.n = String(areasShown().length); syncTabs($('areas'), areasShown().map(area => ({k: area.id, text: (save.total < area.need ? '🔒' : '') + area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
       if (save.total < area.need) { say(L('あと ' + (area.need - save.total) + 'ひきで いけるよ。', (area.need - save.total) + ' more catches to unlock this spot.')); return; }   // まだ いけない：ことばだけ
       if (save.area === area.id) return;
       save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals(); restartAmbient();
@@ -2491,12 +2516,37 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       say(TIME_LABEL[timeOfDay()] + 'に なったよ。' + (id ? '' : '（とけいに あわせて いるよ）'));
     }})));
   }
-  $('go-area').addEventListener('click', event => {
-    event.stopPropagation(); const area = AREAS.find(a => a.id === $('go-area').dataset.area); if (!area || save.total < area.need) return;
-    save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals(); restartAmbient();
+  function switchArea(area) {   // つりばを かえる（タブ・ついたよ・気配・← →・一覧 すべて ここ）
+    if (!area || save.total < area.need || !(phase === 'idle' || phase === 'caught')) return false;
+    if (save.area !== area.id) { save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals(); restartAmbient(); }
     setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false'; lock(false);
-    say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。');
-  });
+    say(area.name + 'に ついたよ。きょうは ' + pals[0].name + 'と ' + pals[1].name + 'が いるよ。'); drawAreaNav(); return true;
+  }
+  $('go-area').addEventListener('click', event => { event.stopPropagation(); switchArea(AREAS.find(a => a.id === $('go-area').dataset.area)); });
+  const areaIdx = () => AREAS.findIndex(a => a.id === save.area), areaOpen = a => !!a && save.total >= a.need;
+  function lockedSay(a) { say(L('あと ' + (a.need - save.total) + 'ひき つったら いけるよ。', (a.need - save.total) + ' more catches and you can go there.')); }
+  const NEXT_POS = {R: [13.8, 36], H: [88.8, 36], B: [13, 37], M: [13.7, 37], S: [91, 37], T: [15.7, 37]};   // 奥の 気配の いち（景色の %）
+  function drawAreaNav() {   // 気配の 入口・← →・したの ボタンの もじ
+    const i = areaIdx(), nx = AREAS[i + 1], pv = AREAS[i - 1], g = $('next-go'), ep = $('edge-prev'), en = $('edge-next');
+    g.hidden = !nx; if (nx) { const pos = NEXT_POS[nx.id] || [15, 36]; g.style.left = pos[0] + '%'; g.style.top = pos[1] + '%'; g.dataset.locked = String(!areaOpen(nx)); g.setAttribute('aria-label', areaOpen(nx) ? L(nx.name + 'へ いく', 'Go to ' + T(nx.name)) : L(nx.name + '。あと ' + (nx.need - save.total) + 'ひきで いけるよ', T(nx.name) + '. ' + (nx.need - save.total) + ' more to unlock')); }
+    ep.hidden = !areaOpen(pv); en.hidden = !areaOpen(nx);
+    if (pv) ep.setAttribute('aria-label', L('まえの つりば：' + pv.name, 'Previous spot: ' + T(pv.name))); if (nx) en.setAttribute('aria-label', L('つぎの つりば：' + nx.name, 'Next spot: ' + T(nx.name)));
+    $('area-open').textContent = L('つりばを かえる ▸', 'Change spot ▸');
+  }
+  let goTarget = null;
+  $('next-go').addEventListener('click', event => { event.stopPropagation(); const nx = AREAS[areaIdx() + 1]; if (!nx) return; if (!areaOpen(nx)) { lockedSay(nx); return; } goTarget = nx; $('areago-q').textContent = L(nx.name + 'へ いく？', 'Go to ' + T(nx.name) + '?'); $('areago').showModal(); $('areago-yes').focus(); });
+  $('areago-yes').addEventListener('click', () => { $('areago').close(); switchArea(goTarget); });
+  $('areago-no').addEventListener('click', () => $('areago').close());
+  $('edge-prev').addEventListener('click', event => { event.stopPropagation(); switchArea(AREAS[areaIdx() - 1]); });
+  $('edge-next').addEventListener('click', event => { event.stopPropagation(); switchArea(AREAS[areaIdx() + 1]); });
+  function drawAreaPick() {
+    const box = $('areapick-list'); box.replaceChildren();
+    AREAS.forEach(a => { const b = document.createElement('button'), open = areaOpen(a); b.type = 'button'; b.setAttribute('aria-pressed', String(save.area === a.id)); if (!open) b.setAttribute('aria-disabled', 'true'); b.textContent = (open ? '' : '🔒') + L(a.name, T(a.name)) + (open ? '' : L('　あと ' + (a.need - save.total) + 'ひき', '  ' + (a.need - save.total) + ' to go'));
+      b.addEventListener('click', () => { if (!open) { lockedSay(a); return; } if (switchArea(a)) $('areapick').close(); }); box.append(b); });
+    $('areapick-title').textContent = L('つりばを かえる', 'Change spot'); $('areapick-close').textContent = L('とじる', 'Close');
+  }
+  $('area-open').addEventListener('click', () => { if (!(phase === 'idle' || phase === 'caught')) { say(L('つりが おわってから かえよう。', 'Change spots after fishing.')); return; } drawAreaPick(); $('areapick').showModal(); });
+  $('areapick-close').addEventListener('click', () => $('areapick').close());
   // じぶんの どうぐ：ウキ・ルアー・さお・まるふわの ふく の いろと、バケツの なまえ。すきな もので あいちゃくを（マスター直命）。いろは レベルで ふえる
   // save.my = {float, lure, rod, wear, bucket}。あいことば（MF1）に そのまま はいる。かならず「そのまま」に もどせる
   const GEAR = {
