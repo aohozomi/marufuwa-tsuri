@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>びじゅつかん｜まるふわの ひろば</title>
+<meta name="description" content="まるふわと なかまたち、さかな、ポスターの えを、がくに いれて ゆっくり みる びじゅつかん。いそがなくて だいじょうぶ。">
+<meta name="theme-color" content="#b9edf5">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23c9b6f0'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%F0%9F%96%BC%3C/text%3E%3C/svg%3E">
+<script>
+// つりびよりの「つかいやすく する」（もじを おおきく・うごきを へらす）と 時間帯（あさ・ひる・ゆうがた・よる）に、この びじゅつかんも したがう（本体と おなじ 記録 marufuwa-tsuri-v1 を よむだけ）。時間帯は ?time=a|h|y|n → 記録の time → 時計。
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement, q = new URLSearchParams(location.search);
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+  var tf = q.get('time'), t = /^[ahyn]$/.test(tf || '') ? tf : /^[ahyn]$/.test(early.time || '') ? early.time : null;
+  if (!t) { var h = new Date().getHours(); t = h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n'; }
+  root.dataset.time = t;
+} catch (e) { document.documentElement.dataset.time = 'h'; }
+</script>
+<style>
+:root{--ink:#27424e;--ink2:#3d5a68;--plate:#fffdf7;--wall:#fbf3e6;--wood:#d9b07c;--wood2:#b98a5a;--line:#cfae7e;--mat:#ffffff;--btn1:#ffffff;--btn2:#dff1f7;--btn-line:#9bc9da;--link:#14506b;--sky1:#a9defa;--sky2:#eaf8ff}
+:root[data-time=a]{--sky1:#ffd9b8;--sky2:#fff3e2}
+:root[data-time=h]{--sky1:#a9defa;--sky2:#eaf8ff}
+:root[data-time=y]{--sky1:#ff9e6e;--sky2:#ffd9a8;--wall:#fbeedd}
+:root[data-time=n]{--sky1:#1f2f5c;--sky2:#4a5d92;--wall:#e6e1f3;--plate:#f6f3fb;--wood:#9c8db8;--wood2:#7c6f9a;--line:#8e80b0;--mat:#f3f0fa}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:linear-gradient(var(--sky1),var(--sky2)) fixed;padding:12px 12px 36px}
+:root[data-inapp=x] body{padding-bottom:84px}
+.room{max-width:820px;margin:0 auto;background:var(--wall);border:3px solid var(--wood2);border-radius:22px;padding:14px 14px 22px;box-shadow:0 8px 24px #0b2a4a33}
+.back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
+h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
+.lead{margin:2px 0 8px;font-size:.95rem;color:var(--ink2)}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px;padding:0;list-style:none}
+.nav a{display:inline-flex;align-items:center;min-height:44px;padding:4px 14px;border-radius:22px;background:var(--plate);border:2px solid var(--line);color:var(--link);font-weight:800;text-decoration:none;font-size:.9rem}
+.wall{margin:18px 0 6px}
+.wall h2{display:inline-block;margin:0 0 4px;padding:3px 14px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:1.05rem;line-height:1.5}
+.wall .sub{margin:0 0 8px;font-size:.85rem;color:var(--ink2)}
+.frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px}
+.frame{display:flex;flex-direction:column;align-items:center;gap:4px;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer;min-width:0;text-align:center}
+.frame .gaku{display:grid;place-items:center;width:100%;aspect-ratio:1/1;padding:8px;border:7px solid var(--wood2);border-radius:6px;background:var(--mat);box-shadow:inset 0 0 0 2px var(--wood),0 3px 0 #0b2a4a22;overflow:hidden}
+.frame .gaku img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.frame.wide{grid-column:span 2}
+.frame .cap{display:block;padding:1px 6px;border-radius:8px;background:var(--plate);border:1px solid var(--line);font-size:.78rem;line-height:1.45;overflow-wrap:anywhere}
+.frame:focus-visible,.nav a:focus-visible,.back:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a;border-radius:8px}
+.empty{margin:0;padding:10px 12px;border-radius:14px;background:var(--plate);border:2px dashed var(--line);font-size:.92rem}
+.note{margin:18px 0 0;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.85rem;color:var(--ink2)}
+button:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a}
+dialog{width:min(560px,calc(100vw - 16px));max-height:calc(100vh - 16px);overflow:auto;border:3px solid var(--wood2);border-radius:20px;padding:14px;background:var(--plate);color:var(--ink)}
+dialog::backdrop{background:#0d2a3add}
+dialog h2{margin:0 0 6px;font-size:1.1rem;line-height:1.5}
+dialog .stage{display:grid;place-items:center;padding:10px;border:8px solid var(--wood2);border-radius:6px;background:var(--mat);box-shadow:inset 0 0 0 2px var(--wood);overflow:auto}
+dialog .stage img{display:block;max-width:100%;height:auto}
+dialog .meta{margin:8px 0;font-size:.85rem;color:var(--ink2)}
+dialog .acts{display:flex;flex-wrap:wrap;gap:8px}
+dialog .acts button{flex:1 1 90px;min-height:44px;min-width:44px;padding:4px 12px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer}
+dialog .acts button[disabled]{opacity:1;color:#5b7480;background:#eef3f5;border-style:dashed;cursor:default}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+:root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+</style>
+</head>
+<body>
+<main class="room" id="room">
+  <a class="back" id="back" href="../index.html">← ひろばへ</a>
+  <h1>びじゅつかん</h1>
+  <p class="lead">まるふわと なかま、さかな、ポスターの えを、がくに いれて ならべました。すきな えを おすと、おおきく みられるよ。いそがなくて だいじょうぶ。</p>
+  <ul class="nav" id="nav" aria-label="かべの いちらん"></ul>
+  <div id="walls"></div>
+  <p class="note" id="note">えは ぜんぶ、この ゲームの なかに ある ものです（そとへ つながりません）。おおきく みる ときは、えの ほんとうの おおきさまで みせます（むりに ひきのばさないので、ぼやけません）。<a href="../../anshin/" style="color:var(--link)">おうちの かたへ</a></p>
+</main>
+<dialog id="viewer" aria-labelledby="v-title">
+  <h2 id="v-title"></h2>
+  <div class="stage"><img id="v-img" alt=""></div>
+  <p class="meta" id="v-meta"></p>
+  <div class="acts"><button type="button" id="v-prev">← まえ</button><button type="button" id="v-next">つぎ →</button><button type="button" id="v-close">とじる</button></div>
+</dialog>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
+<script>
+// English：この びじゅつかんの ことば（tsuri-en.js の E.add）。さくひんの なまえは エンジンの 表（なかま・さかな）か gallery.json の en。
+(() => {
+  const EX = {
+    'びじゅつかん｜まるふわの ひろば': 'Gallery | Marufuwa Plaza',
+    'びじゅつかん': 'Gallery',
+    '← ひろばへ': '← Back to the Plaza',
+    'まるふわと なかま、さかな、ポスターの えを、がくに いれて ならべました。すきな えを おすと、おおきく みられるよ。いそがなくて だいじょうぶ。': 'Marufuwa, her friends, the fish and posters are framed and lined up here. Press a picture you like to see it larger. No need to rush.',
+    'かべの いちらん': 'Walls',
+    'まるふわ': 'Marufuwa', 'まるふわの いろいろな かお': 'Marufuwa’s many faces', 'なかま': 'Friends', 'ひろばに いる なかまたち': 'The friends who live in the plaza', 'さかな': 'Fish', 'つりびよりの さかなの え': 'Fish art from Fishing Days',
+    'ポスター': 'Posters', 'ゲームを しょうかいする え': 'Pictures that introduce the game', 'てんの え': 'New art', 'あたらしく とどいた え': 'Newly delivered art',
+    'じぶんの こ（かりの え）': 'My own friend (provisional art)', 'いろと いきものを くみあわせた「じぶんの こ」の みほん。ほんものの えが とどいたら かわります': 'Samples of “my own friend”, mixing a color and an animal. They will change when the final art arrives',
+    '🎀 まるふわ': '🎀 Marufuwa', '🐾 なかま': '🐾 Friends', '🐟 さかな': '🐟 Fish', '🖼️ ポスター': '🖼️ Posters', '✨ てんの え': '✨ New art', '🌈 じぶんの こ（かりの え）': '🌈 My own friend (provisional art)',
+    'まだ ならんで いないよ。': 'Nothing here yet.', 'おおきく みる': 'View larger',
+    'えは ぜんぶ、この ゲームの なかに ある ものです（そとへ つながりません）。おおきく みる ときは、えの ほんとうの おおきさまで みせます（むりに ひきのばさないので、ぼやけません）。': 'All the pictures are inside this game (nothing connects to the outside). When you view one larger, it is shown at its true size (it is never stretched, so it stays sharp).',
+    'おうちの かたへ': 'For grown-ups',
+    '← まえ': '← Previous', 'つぎ →': 'Next →', 'とじる': 'Close'
+  };
+  const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
+  const title = () => { const E = window.TsuriEn; if (E && E.lang === 'en') document.title = 'Gallery | Marufuwa Plaza'; };
+  document.addEventListener('DOMContentLoaded', () => { reg(); title(); setTimeout(title, 300); setTimeout(title, 1200); });   // 本体の えがく より さきに ことばを 登録（未訳の 記録を のこさない）
+  addEventListener('load', () => { reg(); title(); });
+})();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
+  // ─── かべ（しゅるい）。data/gallery.json に [{src,kind,title,en?}]。src は ゲームの img/ の 中（または hiroba/og.png）だけ・外の 画像は 読まない ───
+  const WALLS = [
+    { k: 'mascot', h: 'まるふわ', sub: 'まるふわの いろいろな かお', ic: '🎀' },
+    { k: 'nakama', h: 'なかま', sub: 'ひろばに いる なかまたち', ic: '🐾' },
+    { k: 'sakana', h: 'さかな', sub: 'つりびよりの さかなの え', ic: '🐟' },
+    { k: 'poster', h: 'ポスター', sub: 'ゲームを しょうかいする え', ic: '🖼️' },
+    { k: 'tennoe', h: 'てんの え', sub: 'あたらしく とどいた え', ic: '✨' },
+    { k: 'jibun', h: 'じぶんの こ（かりの え）', sub: 'いろと いきものを くみあわせた「じぶんの こ」の みほん。ほんものの えが とどいたら かわります', ic: '🌈', live: true }
+  ];
+  const SRC_OK = /^(?:img\/(?:[a-z0-9][a-z0-9_-]{0,40}\/)?[a-z0-9][a-z0-9_.-]{0,60}|hiroba\/og|og(?:[-_][a-z]{1,12})?)\.(?:webp|png|jpg|jpeg)$/i;
+  const DATA = '../../data/gallery.json', BASE = '../../';
+  const walls = document.getElementById('walls'), nav = document.getElementById('nav'), live = document.getElementById('live');
+  const dlg = document.getElementById('viewer'), vTitle = document.getElementById('v-title'), vImg = document.getElementById('v-img'), vMeta = document.getElementById('v-meta'), vPrev = document.getElementById('v-prev'), vNext = document.getElementById('v-next'), vClose = document.getElementById('v-close');
+  const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+  const okText = (s, max) => typeof s === 'string' && s.length > 0 && s.length <= max && !/[\u0000-\u001f\u007f<>]/.test(s);
+  function clean(list) {
+    const out = []; if (!Array.isArray(list)) return out;
+    for (const e of list.slice(0, 400)) {
+      if (!e || typeof e !== 'object' || typeof e.src !== 'string' || e.src.includes('..') || !SRC_OK.test(e.src) || !WALLS.some(w => w.k === e.kind && !w.live) || !okText(e.title, 60)) continue;
+      out.push({ src: e.src, kind: e.kind, title: e.title, en: typeof e.en === 'string' && okText(e.en, 100) ? e.en : '' });
+    }
+    return out;
+  }
+  let shown = [];   // いま ならんで いる 作品（かべの じゅんに）[{src,title,en,kind,url}]
+  const label = it => (isEn() && it.en) ? it.en : it.title;
+  function frame(it, idx, wall) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'frame' + (it.kind === 'poster' ? ' wide' : ''); b.dataset.i = String(idx);
+    const g = document.createElement('span'); g.className = 'gaku';
+    const im = new Image(); im.alt = ''; im.decoding = 'async'; im.referrerPolicy = 'no-referrer'; im.src = it.url; g.append(im);
+    const c = document.createElement('span'); c.className = 'cap'; c.textContent = label(it); if (it.en) c.dataset.en = it.en;
+    const hint = document.createElement('span'); hint.className = 'sr'; hint.textContent = 'おおきく みる'; b.append(g, c, hint);   // よみあげは「なまえ おおきく みる」（aria-label を つかわない＝えいごの ひょうも そのまま きく）
+    b.addEventListener('click', () => view(idx, b)); return b;
+  }
+  function render(items, own) {
+    const data = clean(items).map(e => ({ ...e, url: BASE + e.src }));
+    shown = []; walls.replaceChildren(); nav.replaceChildren();
+    WALLS.forEach(W => {
+      const list = W.live ? (own || []) : data.filter(e => e.kind === W.k);
+      if (!list.length && (W.k === 'tennoe' || W.live)) return;   // てんの え・じぶんの こ は あるときだけ
+      const sec = document.createElement('section'); sec.className = 'wall'; sec.id = 'wall-' + W.k; sec.dataset.kind = W.k;
+      const h = document.createElement('h2'); h.id = 'h-' + W.k; h.textContent = W.h; const sub = document.createElement('p'); sub.className = 'sub'; sub.textContent = W.sub; sec.setAttribute('aria-labelledby', h.id); sec.append(h, sub);
+      if (!list.length) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'まだ ならんで いないよ。'; sec.append(p); }
+      else { const fr = document.createElement('div'); fr.className = 'frames'; list.forEach(it => { const idx = shown.length; shown.push({ ...it, kind: W.k }); fr.append(frame(it, idx, W)); }); sec.append(fr); }
+      walls.append(sec);
+      const li = document.createElement('li'), a = document.createElement('a'); a.href = '#wall-' + W.k; a.textContent = W.ic + ' ' + W.h; a.dataset.kind = W.k; li.append(a); nav.append(li);
+    });
+    applyEn();
+  }
+  // ─── 大きく みる：えの ほんとうの おおきさまで（ひきのばさない）。まえ／つぎ／とじる・やじるしキー・エスケープ ───
+  let cur = -1, from = null;
+  function view(i, btn) {
+    if (i < 0 || i >= shown.length) return; cur = i; if (btn) from = btn;
+    const it = shown[i]; vTitle.textContent = label(it); vImg.alt = label(it); vImg.onload = () => { vMeta.textContent = metaText(it, vImg.naturalWidth, vImg.naturalHeight); };   // おおきさは ほんとうの ピクセルまで（CSS は width:auto・max-width:100% だけ＝ひきのばさない）
+    vImg.src = it.url; vMeta.textContent = metaText(it, 0, 0);
+    vPrev.disabled = i === 0; vNext.disabled = i === shown.length - 1;
+    if (!dlg.open) dlg.showModal(); (vNext.disabled ? vClose : vNext).focus(); live.textContent = label(it);
+    applyEn();
+  }
+  const WALL_NAME = Object.fromEntries(WALLS.map(w => [w.k, w.h]));
+  const metaText = (it, w, h) => {
+    const pos = (cur + 1) + ' / ' + shown.length;
+    return isEn() ? (EN_WALL[it.kind] || it.kind) + (w ? ' · ' + w + '×' + h + ' px (shown at its true size)' : '') + ' · ' + pos
+      : WALL_NAME[it.kind] + (w ? '・えの おおきさ ' + w + '×' + h + ' ピクセル（ほんとうの おおきさで みせて います）' : '') + '・' + pos;
+  };
+  const EN_WALL = { mascot: 'Marufuwa', nakama: 'Friends', sakana: 'Fish', poster: 'Posters', tennoe: 'New art', jibun: 'My own friend (provisional art)' };
+  vPrev.addEventListener('click', () => view(cur - 1)); vNext.addEventListener('click', () => view(cur + 1)); vClose.addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' && !vPrev.disabled) { e.preventDefault(); view(cur - 1); } else if (e.key === 'ArrowRight' && !vNext.disabled) { e.preventDefault(); view(cur + 1); } });
+  dlg.addEventListener('close', () => { vImg.removeAttribute('src'); if (from && from.isConnected) from.focus(); });
+  // ─── English ───
+  function applyEn() {
+    if (!isEn()) return;
+    const W2 = { mascot: ['Marufuwa', 'Marufuwa’s many faces'], nakama: ['Friends', 'The friends who live in the plaza'], sakana: ['Fish', 'Fish art from Fishing Days'], poster: ['Posters', 'Pictures that introduce the game'], tennoe: ['New art', 'Newly delivered art'], jibun: ['My own friend (provisional art)', 'Samples of “my own friend”, mixing a color and an animal. They will change when the final art arrives'] };
+    document.querySelectorAll('.wall').forEach(s => { const e = W2[s.dataset.kind]; if (e) { s.querySelector('h2').textContent = e[0]; s.querySelector('.sub').textContent = e[1]; } });
+    document.querySelectorAll('#nav a').forEach(a => { const W = WALLS.find(x => x.k === a.dataset.kind); if (W) a.textContent = W.ic + ' ' + W2[W.k][0]; });
+    document.querySelectorAll('.frame .cap[data-en]').forEach(c => { c.textContent = c.dataset.en; });
+    if (dlg.open && shown[cur]) { vTitle.textContent = label(shown[cur]); vImg.alt = label(shown[cur]); }
+  }
+  // ─── 「じぶんの こ」の みほん：tsuri-own.js（ジョブズ2）が あれば、色×いきものを いくつか 合成して ならべる（保存しない・通信しない）───
+  async function ownSamples() {
+    const O = window.TsuriOwn; if (!O || typeof O.url !== 'function' || typeof O.valid !== 'function') return [];
+    const pairs = [[0, 10], [6, 1], [10, 3], [13, 5], [14, 7], [7, 0], [3, 8], [11, 2]], out = [];
+    for (const [c, a] of pairs) { const o = { c, a, ear: 0, item: 0 }; let ok = false; try { ok = O.valid(o); } catch (e) {} if (!ok) continue;
+      try { const u = await O.url(o, 0, 200); if (typeof u === 'string' && /^data:image\//.test(u)) out.push({ src: 'data', url: u, title: String(O.name(o)), en: String(O.en ? O.en(o) : ''), kind: 'jibun' }); } catch (e) {} }
+    return out;
+  }
+  let lastItems = [];
+  async function load() {
+    let list = []; try { const r = await fetch(DATA, { cache: 'no-store' }); if (r.ok) list = await r.json(); } catch (e) { list = []; }
+    lastItems = list; render(list, []);
+    const own = await ownSamples(); if (own.length) render(lastItems, own);
+  }
+  window.Bijutsukan = { render, clean, view, shown: () => shown.slice(), reload: load, walls: WALLS.map(w => w.k) };
+  render([], []); load();
+  addEventListener('load', () => { setTimeout(applyEn, 400); setTimeout(() => { ownSamples().then(o => { if (o.length && !document.getElementById('wall-jibun')) render(lastItems, o); }); }, 900); });
+});
+</script>
+<script src="../../tsuri-town.js"></script>   <!-- 街人の なまえ・English（tsuri-en.js が 読む） -->
+<script defer src="../../tsuri-en.js"></script>
+<script defer src="../../tsuri-en-hiroba.js"></script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+<script defer src="../../tsuri-own.js"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+[
+ {
+  "src": "img/game-blue.webp",
+  "kind": "mascot",
+  "title": "まるふわ（ふつう）",
+  "en": "Marufuwa (calm)"
+ },
+ {
+  "src": "img/game-smile.webp",
+  "kind": "mascot",
+  "title": "まるふわ（にこにこ）",
+  "en": "Marufuwa (smiling)"
+ },
+ {
+  "src": "img/game-sparkle.webp",
+  "kind": "mascot",
+  "title": "まるふわ（きらきら）",
+  "en": "Marufuwa (sparkling)"
+ },
+ {
+  "src": "img/game-apricot.webp",
+  "kind": "mascot",
+  "title": "まるふわ（あんず）",
+  "en": "Marufuwa (apricot)"
+ },
+ {
+  "src": "img/game-mint.webp",
+  "kind": "mascot",
+  "title": "まるふわ（ミント）",
+  "en": "Marufuwa (mint)"
+ },
+ {
+  "src": "img/friend-alpaca-s.webp",
+  "kind": "nakama",
+  "title": "わたあめの アルパカ"
+ },
+ {
+  "src": "img/friend-azarashi-s.webp",
+  "kind": "nakama",
+  "title": "さくらの あざらし"
+ },
+ {
+  "src": "img/friend-gantai-s.webp",
+  "kind": "nakama",
+  "title": "がんたいの くま"
+ },
+ {
+  "src": "img/friend-hamster-s.webp",
+  "kind": "nakama",
+  "title": "いちごの ハムスター"
+ },
+ {
+  "src": "img/friend-hiyoko-s.webp",
+  "kind": "nakama",
+  "title": "レモンの ひよこ"
+ },
+ {
+  "src": "img/friend-hoho-s.webp",
+  "kind": "nakama",
+  "title": "ほほきずの ねこ"
+ },
+ {
+  "src": "img/friend-kawauso-s.webp",
+  "kind": "nakama",
+  "title": "ラテの かわうそ"
+ },
+ {
+  "src": "img/friend-kogitsune-s.webp",
+  "kind": "nakama",
+  "title": "おみせの こぎつね"
+ },
+ {
+  "src": "img/friend-koinu-s.webp",
+  "kind": "nakama",
+  "title": "はちみつの こいぬ"
+ },
+ {
+  "src": "img/friend-kojika-s.webp",
+  "kind": "nakama",
+  "title": "おほしさまの こじか"
+ },
+ {
+  "src": "img/friend-komugi-s.webp",
+  "kind": "nakama",
+  "title": "こむぎの モモンガ"
+ },
+ {
+  "src": "img/friend-neko-s.webp",
+  "kind": "nakama",
+  "title": "ももの ねこ"
+ },
+ {
+  "src": "img/friend-panda-s.webp",
+  "kind": "nakama",
+  "title": "おひるね パンダ"
+ },
+ {
+  "src": "img/friend-penguin-s.webp",
+  "kind": "nakama",
+  "title": "あんないの ペンギン"
+ },
+ {
+  "src": "img/friend-ribbon-s.webp",
+  "kind": "nakama",
+  "title": "リボンの うさぎ"
+ },
+ {
+  "src": "img/friend-risu-s.webp",
+  "kind": "nakama",
+  "title": "チョコの りす"
+ },
+ {
+  "src": "img/friend-shirotama-s.webp",
+  "kind": "nakama",
+  "title": "しらたまの ハシビロコウ"
+ },
+ {
+  "src": "img/friend-tanuki-s.webp",
+  "kind": "nakama",
+  "title": "クローバーの たぬき"
+ },
+ {
+  "src": "img/friend-usagi-s.webp",
+  "kind": "nakama",
+  "title": "ミントの うさぎ"
+ },
+ {
+  "src": "img/fish/00.webp",
+  "kind": "sakana",
+  "title": "まるあじ"
+ },
+ {
+  "src": "img/fish/01.webp",
+  "kind": "sakana",
+  "title": "ふわふぐ"
+ },
+ {
+  "src": "img/fish/02.webp",
+  "kind": "sakana",
+  "title": "もちだい"
+ },
+ {
+  "src": "img/fish/03.webp",
+  "kind": "sakana",
+  "title": "ころいわし"
+ },
+ {
+  "src": "img/fish/04.webp",
+  "kind": "sakana",
+  "title": "ぽてかれい"
+ },
+ {
+  "src": "img/fish/05.webp",
+  "kind": "sakana",
+  "title": "しらたまえび"
+ },
+ {
+  "src": "img/fish/06.webp",
+  "kind": "sakana",
+  "title": "ぷかくらげ"
+ },
+ {
+  "src": "img/fish/07.webp",
+  "kind": "sakana",
+  "title": "こつぶがに"
+ },
+ {
+  "src": "img/fish/08.webp",
+  "kind": "sakana",
+  "title": "わたあめきんぎょ"
+ },
+ {
+  "src": "img/fish/09.webp",
+  "kind": "sakana",
+  "title": "まんまるいか"
+ },
+ {
+  "src": "img/fish/10.webp",
+  "kind": "sakana",
+  "title": "ふくふくたこ"
+ },
+ {
+  "src": "img/fish/11.webp",
+  "kind": "sakana",
+  "title": "にじいろべら"
+ },
+ {
+  "src": "img/fish/28.webp",
+  "kind": "sakana",
+  "title": "きんのまるごい"
+ },
+ {
+  "src": "og.png",
+  "kind": "poster",
+  "title": "ポスター：つりびより",
+  "en": "Poster: Marufuwa Fishing Days"
+ },
+ {
+  "src": "og-en.png",
+  "kind": "poster",
+  "title": "ポスター：つりびより（English）",
+  "en": "Poster: Marufuwa Fishing Days (English)"
+ },
+ {
+  "src": "og_lake.png",
+  "kind": "poster",
+  "title": "ポスター：ひるの みずうみ",
+  "en": "Poster: The lake at noon"
+ },
+ {
+  "src": "hiroba/og.png",
+  "kind": "poster",
+  "title": "ポスター：まるふわの ひろば",
+  "en": "Poster: Marufuwa Plaza"
+ }
+]
