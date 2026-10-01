@@ -1523,6 +1523,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const ups = partyGain(0, 5); store(); announceUps(ups, 0);
   }, 60000);
   // さおは てもとから ななめ うえへ。いとは さおの さきから ウキへ
+  let ownPose = 'front';   // じぶんの子の ポーズ：つりば＝front・まつ／アタリ＝sit・つれた＝joy
   const rodK = {x: 0, y: 0}; let rodRaf = 0, rodSway = 0, rodHold = 0;   // 竿の さき の ずれ（ぼくの さお だけ）。うごきを へらす では ポーズ（かくど）だけ
   function rodTo(x, y, ms) {
     cancelAnimationFrame(rodRaf); const x0 = rodK.x, y0 = rodK.y, t0 = performance.now();
@@ -1531,6 +1532,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     rodRaf = requestAnimationFrame(step);
   }
   function rodPose(next) {   // ばめんごとの 竿
+    { const was = ownPose; ownPose = {waiting: 'sit', bite: 'sit', caught: 'joy'}[next] || 'front'; if (was !== ownPose) { const a = avatarPal(); if (a && a.own) try { face(curFace); } catch {} } }
     if (POSE_FILES.length) { poseNow = {waiting: 'mate', bite: 'mate', reel: 'hiki', caught: 'age'}[next] || ''; try { face(curFace); } catch {} }
     clearInterval(rodSway); clearTimeout(rodHold);
     if (next === 'waiting') { rodTo(0, 0, 400); if (!reduce()) rodSway = setInterval(() => { if (phase !== 'waiting' || document.body.classList.contains('gazing') || document.hidden) return; const t = performance.now(); rodK.y = Math.sin(t / 1900) * .7 + (Math.sin(t / 5300) > .93 ? 2.2 : 0); rod($('line-me'), mine, 12, $('rod-me')); }, 140); }
@@ -3870,7 +3872,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   // ---- じぶんの こ（tsuri-own.js）：自由入力なし・数字だけ（save.own＝{c,a,ear,item}）----
   function ownOk(o) { return !!(window.TsuriOwn && window.TsuriOwn.valid(o)); }
-  function ownFaceSrc() { return window.TsuriOwn.src(save.own, levelOf(save.xp || 0), u => { const a = avatarPal(); if (a && a.own) marufuwa.src = u; }); }
+  function ownFaceSrc() { const want = ownPose; return window.TsuriOwn.src(save.own, levelOf(save.xp || 0), u => { const a = avatarPal(); if (a && a.own && ownPose === want) marufuwa.src = u; }, want); }
   function chooseOwn(o) {   // o＝あたらしく つくった こ／null＝つくって ある こで つる
     if (o) save.own = {c: o.c, a: o.a, ear: o.ear, item: o.item};
     if (!ownOk(save.own)) return;
