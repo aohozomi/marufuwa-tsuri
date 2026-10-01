@@ -1625,19 +1625,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     try { const url = URL.createObjectURL(plopWav()), a = new Audio(url); a.volume = .9; a.onended = a.onerror = () => URL.revokeObjectURL(url); const p = a.play(); if (p && p.catch) p.catch(() => URL.revokeObjectURL(url)); } catch {}
   }
   function softenBus() { if (bus && bus.low) bus.low.frequency.value = save.soft ? 1200 : 1400; }   // 「やさしい おと」を きりかえた とき（つくって ある でぐちの ローパスを かえる）
-  function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, kind = 'fx', attack = 0) {
+  function tone(freq, length = .09, type = 'sine', delay = 0, loud = .05, slideTo = 0, kind = 'fx', attack = 0) {
     if (!sndOn(kind)) return;
     try {
       const ctx = ready(), at = ctx.currentTime + delay, osc = ctx.createOscillator(), vol = ctx.createGain();
       // ちょうかくに びんかんな ひとの ために（はじめから この きまり）：きおんは 1200Hz いか（こえた ぶんは 1オクターブ さげる）・かくばった なみ（square）は まるい なみ（triangle）に（おおきさは おなじ）。
       // 「やさしい おと」は さらに sine（まるい・すべすべ）。アタックは 15ms いじょう（ぷつっと した たかい ひびきを つくらない）
-      while (freq > 1200) freq /= 2; while (slideTo > 1200) slideTo /= 2;
-      let rounded = false; if (type === 'square') { type = 'triangle'; rounded = true; }
-      if (save.soft && type === 'triangle') { type = 'sine'; rounded = true; }
+      while (freq > 660) freq /= 2; while (slideTo > 660) slideTo /= 2;   // 660Hz いか（たかい おとは 1オクターブ さげる）
+      let rounded = true; type = 'sine';   // なみは ぜんぶ sine（まるい・かくばった ひびき なし）
       osc.type = type; osc.frequency.setValueAtTime(freq, at);
       if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + length);
+      if (kind === 'fx') loud = Math.min(loud, .035);   // ごほうび・こうかおんは .035 いか
       const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : osc.type === 'sine' ? loud * 1.6 : loud;
-      const rise = attack || Math.min(.02, length * .4), g = vol.gain;   // アタック 20ms（みじかい おとは おとの ながさの 4わり）
+      const rise = attack || (kind === 'fx' ? Math.min(.04, length * .7) : Math.min(.02, length * .4)), g = vol.gain;   // たちあがり 40ms（あんないの おとは タイミングの ために 20ms）   // アタック 20ms（みじかい おとは おとの ながさの 4わり）
       g.setValueAtTime(0, at); g.linearRampToValueAtTime(level, at + rise);
       g.setValueAtTime(level, at + Math.max(rise, length * .4)); g.linearRampToValueAtTime(level * .6, at + length * .65); g.linearRampToValueAtTime(0, at + length);
       osc.connect(vol).connect(fxOut(ctx)); osc.start(at); osc.stop(at + length + .02);
@@ -1655,41 +1655,43 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     } catch {}
   }
   const plop = (delay = 0, loud = .05) => tone(300, .2, 'sine', delay, loud, 140, 'fx', .04);   // ぽちゃん：ひくい sine 300→140Hz・0.2びょう・たちあがり 40ms（ざっ（ノイズ）は つかわない）
-  const chord = (notes, gap = .07, type = 'square', loud = .05, kind = 'fx') => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, kind));
+  const chord = (notes, gap = .09, type = 'sine', loud = .03, kind = 'fx') => { const n = notes.length > 3 ? [notes[0], notes[notes.length >> 1], notes[notes.length - 1]] : notes, g = Math.min(.12, Math.max(.08, gap)); n.forEach((note, i) => tone(note, g * 1.4, 'sine', i * g, loud, 0, kind)); };   // 1おとずつ 80〜120ms ずらして 3おとまで（どうじに ならさない）
   const guideTone = (freq, length, type, delay, loud, slideTo) => tone(freq, length, type, delay, loud, slideTo, 'guide'), guideChord = (notes, gap, type, loud) => chord(notes, gap, type, loud, 'guide'), guideZap = (length, delay, loud) => zap(length, delay, loud, 'guide');
   // こうかおん・あんないの おとの ひょう（ぜんぶ 基音 1200Hz いか・triangle・アタック 15ms いじょう・ピーク −12dBFS いか）。
   // 「ピコン」「ぴったり」「アタリ」は たかさ では なく、おとの かたち（のぼりかた・ながさ・かず）で くべつ する：ピコン＝2おとで のぼる（ながめ）／ぴったり＝4おとの ぼりおり（はやい）／アタリ＝みじかい 2おと＋ながい 1おと
   const SFX = {
-    tick: i => guideTone([392, 494, 587, 740][i], .05, 'sine', 0, [.151, .127, .113, .1][i]),   // ぽ・ぽ・ぽ・ぽ（sine＝たかい ひびきが ない・ひくい おとほど おおきく）
-    pikon: () => guideChord([659, 988], .09, 'triangle', .06),   // いまだ
+    tick: i => guideTone([330, 392, 494, 587][i], .05, 'sine', 0, [.151, .127, .113, .1][i]),   // ぽ・ぽ・ぽ・ぽ（sine＝たかい ひびきが ない・ひくい おとほど おおきく）
+    pikon: () => guideChord([523, 659], .1, 'sine', .06),   // いまだ
     center: () => guideTone(98, .32, 'sine', 0, .1),   // ど真ん中：ひくい ドンッ
-    perfect: () => { guideChord([523, 659, 784, 1047], .06, 'triangle', .045); guideTone(131, .22, 'sine', 0, .09); guideTone(262, .16, 'triangle', 0, .05); },   // ぴったり：4おと＋ひくい ふとい おと（ちかい・いいねより ずっと おおきく ふとい）
+    perfect: () => { guideChord([440, 523, 659], .09, 'sine', .04); guideTone(131, .22, 'sine', 0, .09); },   // ぴったり：4おと＋ひくい ふとい おと（ちかい・いいねより ずっと おおきく ふとい）
     surface: () => plop(0, .05),   // ぽちゃ（さかなが かおを だす）
-    nice: () => { guideTone(523, .06, 'triangle', 0, .04); guideTone(784, .09, 'triangle', .06, .04); },   // いいね
+    nice: () => guideTone(523, .12, 'sine', 0, .04),   // いいね
     close: () => guideTone(196, .09, 'sine', 0, .05, 150),   // ちかい：ちいさな ぷに だけ
-    palup: () => chord([262, 330, 392], .07, 'triangle', .03),
-    trophy: () => chord([262, 330, 392, 523], .08, 'triangle', .03),   // きねん（ひくい おと・1200Hz いか）   // なかまが レベルアップ（ひくい おと）
+    palup: () => chord([262, 330, 392], .07, 'sine', .03),
+    trophy: () => chord([262, 330, 392], .1, 'sine', .03),   // きねん（ひくい おと・1200Hz いか）   // なかまが レベルアップ（ひくい おと）
     snap: () => { tone(196, .24, 'sine', 0, .05, 110); tone(147, .3, 'sine', .06, .04, 98); },   // ぷつん…（ひくくて やわらかい・おどろかせない）
-    rest: () => guideTone(180, .05, 'triangle', 0, .03, 150),   // やすみの ぷ
+    rest: () => guideTone(180, .05, 'sine', 0, .03, 150),   // やすみの ぷ
     nibble: () => guideTone(440, .12, 'sine', 0, .04),   // ちょん（1おと・まるい）   // ちょん、ちょん
-    bite: () => guideTone(700, .26, 'sine', 0, .05, 880),   // アタリ（1おと・まるい。ガランガランに ならない）   // アタリ
-    cast: () => { tone(220, .28, 'triangle', .2, .032, 880); plop(.9, .05); zap(.14, .9, .04); },   // ヒュ〜ッ…ポチャ
-    party: () => chord([392, 523, 659, 784, 1047, 784, 1047, 1175], .1, 'triangle', .026),   // おいわい
-    catchLegend: () => { chord([392, 523, 659, 784, 1047, 784, 1047, 1175, 1047, 1175], .09, 'triangle', .026); tone(1047, .8, 'triangle', .95, .02); [262, 330, 392, 523].forEach((low, i) => tone(low, .2, 'triangle', .2 + i * .2, .032)); },
-    catchBig: () => { chord([392, 523, 659, 784, 659, 784, 1047, 1175], .085, 'triangle', .026); tone(1047, .5, 'triangle', .7, .022); [262, 330, 392].forEach((low, i) => tone(low, .16, 'triangle', .7 + i * .16, .032)); },
-    catchNormal: () => { chord([523, 659, 784, 1047], .075, 'triangle', .026); tone(1047, .22, 'triangle', .3, .022); tone(262, .3, 'triangle', .3, .032); },
-    loved: () => chord([523, 659, 784], .07, 'triangle', .04),   // すきな さかな
-    gift: () => chord([523, 659, 784, 988], .07, 'triangle', .04),   // おくりもの
-    star: () => chord([659, 784, 988], .06, 'triangle', .04),   // ながれぼし
-    wish: () => chord([523, 659, 784, 988, 1175], .07, 'triangle', .04)   // ねがい
+    bite: () => guideTone(560, .26, 'sine', 0, .05, 660),   // アタリ（1おと・まるい。ガランガランに ならない）   // アタリ
+    cast: () => { tone(220, .28, 'sine', .2, .032, 660); plop(.9, .05); zap(.14, .9, .04); },   // ヒュ〜ッ…ポチャ
+    party: () => chord([392, 523, 659], .1, 'sine', .03),   // おいわい
+    catchLegend: () => { chord([392, 523, 659], .12, 'sine', .03); tone(523, .6, 'sine', .5, .03); },
+    catchBig: () => { chord([392, 523, 659], .1, 'sine', .03); tone(330, .3, 'sine', .35, .03); },
+    catchNormal: () => chord([392, 523, 659], .09, 'sine', .03),
+    loved: () => chord([440, 523, 659], .09, 'sine', .03),   // すきな さかな
+    gift: () => chord([440, 523, 659], .09, 'sine', .03),   // おくりもの
+    star: () => chord([440, 523, 659], .09, 'sine', .03),   // ながれぼし
+    wish: () => chord([440, 523, 659], .09, 'sine', .03)   // ねがい
   };
   if (query.has('sfxprobe')) window.__sfx = SFX;   // てもとの そくてい よう（OfflineAudioContext で 書きだす）
+  { const REWARD = ['palup', 'trophy', 'party', 'catchLegend', 'catchBig', 'catchNormal', 'loved', 'gift', 'star', 'wish']; let lastReward = -1e9;   // ごほうびの おとは 2びょうに 1つだけ（かさなって ガランガランに ならない・あとの ものは すてる）
+    REWARD.forEach(k => { const f = SFX[k]; if (typeof f === 'function') SFX[k] = (...a) => { const now = performance.now(); if (now - lastReward < 2000) return; lastReward = now; return f(...a); }; }); }
   const SND_BTN = [   // つかいやすく する の なかの「おとの せってい」。dflt＝はじめから ON。sample＝ONに した とき ちょっと ならす
-    {id: 'snd-guide', key: 'sndGuide', ja: 'あんないの おと', en: 'Guide sounds', hint: ['わの おとと「ピコン」', 'Beeps and “ping”'], dflt: true, sample: () => { guideTone(587, .05, 'triangle', 0, .0825); setTimeout(() => SFX.pikon(), 260); }},
-    {id: 'snd-fx', key: 'sndFx', ja: 'こうかおん', en: 'Sound effects', hint: ['なげる・おいわいの おと', 'Cast and party sounds'], dflt: true, sample: () => { tone(784, .06, 'triangle', 0, .05); tone(1047, .08, 'triangle', .07, .05); }},
+    {id: 'snd-guide', key: 'sndGuide', ja: 'あんないの おと', en: 'Guide sounds', hint: ['わの おとと「ピコン」', 'Beeps and “ping”'], dflt: true, sample: () => { guideTone(587, .05, 'sine', 0, .0825); setTimeout(() => SFX.pikon(), 260); }},
+    {id: 'snd-fx', key: 'sndFx', ja: 'こうかおん', en: 'Sound effects', hint: ['なげる・おいわいの おと', 'Cast and party sounds'], dflt: true, sample: () => { tone(440, .1, 'sine', 0, .03); tone(523, .12, 'sine', .09, .03); }},
     {id: 'snd-amb', key: 'sndAmb', ja: 'なみと あめの おと', en: 'Waves and rain', hint: ['しずかな しぜんの おと', 'Calm nature sounds'], dflt: true, sample: () => {}},
-    {id: 'snd-slow', key: 'slow', ja: 'ゆったり', en: 'Extra time', hint: ['「ピコン」が はやめ・おす はばが ひろい', 'Earlier “ping”, wider press window'], dflt: false, on: ['ゆったりに したよ。「ピコン」が はやく なって、おす まどが ひろく なるよ。', 'Extra time is on. The “ping” comes earlier and the press window is wider.'], off: ['ゆったりを やめたよ。', 'Extra time is off.'], sample: () => { guideTone(587, .05, 'triangle', 0, .0825); setTimeout(() => SFX.pikon(), 260); }},
-    {id: 'snd-soft', key: 'soft', ja: 'やさしい おと', en: 'Soft sounds', hint: ['まるくて ひくい おと', 'Rounder, lower tones'], dflt: false, on: ['やさしい おとに したよ。まるい おとで、たかい おとは ひくく なるよ。', 'Soft sounds are on. Tones are rounder and high notes are lower.'], off: ['やさしい おとを やめたよ。', 'Soft sounds are off.'], both: true, sample: () => { tone(988, .07, 'square', 0, .075, 0, 'ui'); tone(1319, .07, 'square', .07, .075, 0, 'ui'); tone(2093, .12, 'square', .2, .05, 0, 'ui'); }}
+    {id: 'snd-slow', key: 'slow', ja: 'ゆったり', en: 'Extra time', hint: ['「ピコン」が はやめ・おす はばが ひろい', 'Earlier “ping”, wider press window'], dflt: false, on: ['ゆったりに したよ。「ピコン」が はやく なって、おす まどが ひろく なるよ。', 'Extra time is on. The “ping” comes earlier and the press window is wider.'], off: ['ゆったりを やめたよ。', 'Extra time is off.'], sample: () => { guideTone(587, .05, 'sine', 0, .0825); setTimeout(() => SFX.pikon(), 260); }},
+    {id: 'snd-soft', key: 'soft', ja: 'やさしい おと', en: 'Soft sounds', hint: ['まるくて ひくい おと', 'Rounder, lower tones'], dflt: false, on: ['やさしい おとに したよ。まるい おとで、たかい おとは ひくく なるよ。', 'Soft sounds are on. Tones are rounder and high notes are lower.'], off: ['やさしい おとを やめたよ。', 'Soft sounds are off.'], both: true, sample: () => { tone(494, .09, 'sine', 0, .075, 0, 'ui'); tone(587, .09, 'sine', .09, .075, 0, 'ui'); tone(659, .14, 'sine', .2, .05, 0, 'ui'); }}
   ];
   const FANFARE = .032;   // おいわいの おとは ひかえめに（あんないの おとが きこえる ように。ジョブズ1の そくてい）
   // ふるえ：かかった ときと つれた とき。さわりに びんかんな こも いるので、いれきり できる。「うごきを へらす」の 人は はじめから なし
@@ -1842,7 +1844,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function drawAudioSize() { const row = document.querySelector('.sub-actions'); if (row) row.dataset.audio = audioDecided() ? 'set' : ''; drawSound(); }   // ちいさく するのは ひらき なおした とき／つれた とき（おした ゆびの したで ボタンが うごかない ように）
   function drawMute() { const b = $('mute-top'); if (!b) return; b.setAttribute('aria-pressed', String(!save.sound)); b.textContent = L(save.sound ? '🔇 おとを けす' : '🔊 おとを ならす', save.sound ? '🔇 Mute sound' : '🔊 Turn sound on'); }
   function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
-  $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); try { dispatchEvent(new Event('storage')); } catch {} drawSound();   /* おへや（すいそう）など ほかの ぶひんにも「おとが かわった」と しらせる */ if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([523, 784], .09, 'triangle', .05, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
+  $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); try { dispatchEvent(new Event('storage')); } catch {} drawSound();   /* おへや（すいそう）など ほかの ぶひんにも「おとが かわった」と しらせる */ if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([440, 523], .09, 'sine', .035, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
   const TARGET = .3;
   const SWIMS = {
