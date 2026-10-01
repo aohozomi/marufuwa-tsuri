@@ -223,7 +223,7 @@
     'おはよう。きょうも、ここにいていいよ。': 'Good morning. You are welcome here today, too.', 'ねむれない？ゆっくりながめよう。': "Can't sleep? Let's just watch the water for a while.",
     'つりばをかえる': 'Change spot', 'はい': 'Yes', 'やめる': 'Cancel', 'つりばをかえる▸': 'Change spot ▸',
     'まるいろでそだてた': 'Raised in Maruiro', 'まるいろでそだてたさかな': 'A fish raised in Maruiro',
-    'まるいろ（ゲーム）へいく': 'Go to Maruiro (game)', 'まるいろ': 'Maruiro', 'アプリ版まるふわまるいろ': 'Marufuwa Maruiro app', 'まるいろでそだてたさかなだよ。': 'This fish was raised in Maruiro.', 'iPhoneであそべるよ': 'Available on iPhone',
+    'まるいろ（ゲーム）へいく': 'Go to Maruiro (game)', 'まるいろ': 'Maruiro', 'アプリ版まるふわまるいろ': 'Marufuwa Maruiro app', 'アプリばんまるふわまるいろ': 'Marufuwa Maruiro app', 'まるいろでそだてたさかなだよ。': 'This fish was raised in Maruiro.', 'iPhoneであそべるよ': 'Available on iPhone',
     'わあ！': 'Wow!', 'すごい！': 'Amazing!', 'ぬしだ！': "It's the Guardian!", 'おおきい…！': 'So big…!', 'みてみて！': 'Look, look!', 'やったね！': 'You did it!',
     'とおくからみているよ。ひろいみずうみで、のんびり。': 'Watching from far away. On the wide lake, nice and slow.', 'ちかくにもどったよ。': 'Back to the close view.',
     'ひろば・おへや・ながめるでながれる、しずかなBGM': 'Quiet BGM that plays in the Plaza, the Room, and Just watch',
