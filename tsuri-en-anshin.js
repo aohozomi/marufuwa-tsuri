@@ -35,6 +35,7 @@
       "こうしんのきろく": "Update history",
       "2026-10-01：こうかおんとBGMをひくく（ちょうかくがびんかんなひとのため）。とちゅうでやめるボタン。じぶんのキャラをえらぶ・つくる（じゆうなにゅうりょくはなし）。いっしょにいくなかまは3にんまで。あそびかた3つ。きねん。つりびとノート。もじはかんじ＋ふりがなかひらがなだけをえらべる。ひろばのなかまがいれかわる。": "2026-10-01: Lower sound effects and music (for people sensitive to sound). A Stop button while fishing. Choose or create your own character (no free text). Up to 3 friends come along. Three play styles. Trophies. A fishing notebook. Text can be kanji with furigana or hiragana only. Plaza friends rotate.",
       "2026-09-30：こうかい。English。オフラインでもあそべる。ひろば・おへや・ひみつ。BGMをおだやかに。": "2026-09-30: Released. English mode. Works offline. Plaza, Room and secrets. Calmer music.",
+      "アプリ「まるふわまるいろ」のApp Storeのページ": "App Store page of the “Marufuwa Maruiro” app",
       "ひとこと": "In short",
       "「まるふわつりびより」は、いそがなくてもだいじょうぶな、のんびりつりのゲームです。にがしても、なにもへりません。": "“Marufuwa Fishing Days” is a relaxed fishing game where there is no need to hurry. Even if you let a fish go, nothing is lost.",
       "ちいさなおこさんもあんしんしてあそべるように、おかね・こうこく・ログイン・ほかのひととのやりとりを、さいしょからいれていません。": "So that even small children can play with peace of mind, we did not include money, ads, logins, or interaction with other people from the start.",
