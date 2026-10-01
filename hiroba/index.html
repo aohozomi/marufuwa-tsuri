@@ -488,9 +488,10 @@ body.calm .cloud.c2{left:56%}
   </div>
   <p id="keys-help" class="sr">やじるしキーで まるふわが あるくよ。スペースキーで ちかくの ともだちに はなしかけたり、ばしょに はいったり できるよ。エスケープキーで やめるよ。したの ボタンでも おなじ ことが できるよ。</p>
 
+  <script src="../tsuri-world.js"></script>   <!-- 世界の まど：scene の まえに（はじめの 一瞬の 雨も TsuriWorld.daily() で きめる） -->
   <div class="stage">
   <div id="scene" data-time="hiru" data-rain="false" data-dim="false" tabindex="0" role="group" aria-label="ひろば。まるふわが あるく ばしょ" aria-describedby="keys-help">
-  <script>/* はじめの 一瞬 昼の 素の 画面が 見えない よう、時間・季節・雨を ここで 先に 入れる（あとの 本体の script が おなじ 値を もういちど 入れる） */(function () { try { var s = document.currentScript.parentNode, q = new URLSearchParams(location.search), m = {}; try { m = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}; } catch (e) {} var L = { a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru' }, d = new Date(), h = d.getHours(), mo = d.getMonth() + 1, f = q.get('time'), t = f && L[f] ? f : (m.time && L[m.time] ? m.time : (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n')), S = ['haru', 'natsu', 'aki', 'fuyu']; s.dataset.time = L[t]; s.dataset.season = S.indexOf(q.get('season')) >= 0 ? q.get('season') : (mo >= 3 && mo <= 5 ? 'haru' : mo >= 6 && mo <= 8 ? 'natsu' : mo >= 9 && mo <= 11 ? 'aki' : 'fuyu'); s.dataset.rain = String(q.has('rain') ? q.get('rain') === '1' : (d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) * 7 % 4 === 0); s.dataset.dim = String((h >= 19 || h < 5) && t !== 'n'); } catch (e) {} })();</script>
+  <script>/* はじめの 一瞬 昼の 素の 画面が 見えない よう、時間・季節・雨を ここで 先に 入れる（あとの 本体の script が おなじ 値を もういちど 入れる） */(function () { try { var s = document.currentScript.parentNode, q = new URLSearchParams(location.search), m = {}; try { m = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}; } catch (e) {} var L = { a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru' }, d = new Date(), h = d.getHours(), mo = d.getMonth() + 1, f = q.get('time'), t = f && L[f] ? f : (m.time && L[m.time] ? m.time : (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n')), S = ['haru', 'natsu', 'aki', 'fuyu']; s.dataset.time = L[t]; s.dataset.season = S.indexOf(q.get('season')) >= 0 ? q.get('season') : (mo >= 3 && mo <= 5 ? 'haru' : mo >= 6 && mo <= 8 ? 'natsu' : mo >= 9 && mo <= 11 ? 'aki' : 'fuyu'); s.dataset.rain = String(q.has('rain') ? q.get('rain') === '1' : (window.TsuriWorld && window.TsuriWorld.daily ? window.TsuriWorld.daily().weather === 'rain' : (d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) * 7 % 4 === 0)); s.dataset.dim = String((h >= 19 || h < 5) && t !== 'n'); } catch (e) {} })();</script>
     <svg id="bg" viewBox="0 0 360 560" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/></linearGradient>
@@ -678,7 +679,6 @@ body.calm .cloud.c2{left:56%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script src="../tsuri-world.js"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -745,7 +745,8 @@ function timeOfDay() {
   return hour >= 5 && hour < 10 ? 'a' : hour >= 10 && hour < 16 ? 'h' : hour >= 16 && hour < 19 ? 'y' : 'n';
 }
 const today = new Date();
-const rainy = q.has('rain') ? q.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
+const dailyW = (() => { try { return window.TsuriWorld && window.TsuriWorld.daily ? window.TsuriWorld.daily().weather : ''; } catch { return ''; } })();   // きょうの てんき（つりば・アプリと おなじ 日は おなじ：TsuriWorld.daily()＝晴れ・くもり・雨・雪）
+const rainy = q.has('rain') ? q.get('rain') === '1' : dailyW ? dailyW === 'rain' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;   // ?rain=0／1 は 検査用の うわがき
 const dayKey = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
 if (own.day !== dayKey) { own.day = dayKey; own.metToday = {}; }
 // ─── 戻った 時の 小さな 変化（B-1）：べつの 日に また 来ると、はなだんの 花が ひとつ ふえる（2本→さいだい 5本）・あたらしい 子が すこし はやく あそびに くる。
@@ -1410,7 +1411,7 @@ function narrate(text, soft) { if (soft && T - lastHard < 10) return; if (!soft)
 let factsKey = '';
 function paintFacts() {   // いま・てんき・ともだち を 1ぎょうずつ（あとから ふえる ともだちも narrate の たびに なおる）
   const ul = document.getElementById('facts'); if (!ul) return; let rows;
-  try { const en = { a: 'Morning', h: 'Day', y: 'Evening', n: 'Night' }; rows = [[S('いま', 'Time'), S(TIME_LABEL[curTime], en[curTime])], [S('てんき', 'Weather'), rainy ? S('あめ', 'Rainy') : S('はれ', 'Clear')], [S('ともだち', 'Friends'), S(friends.length + 'にん', String(friends.length))]]; } catch { return; }
+  try { const en = { a: 'Morning', h: 'Day', y: 'Evening', n: 'Night' }; rows = [[S('いま', 'Time'), S(TIME_LABEL[curTime], en[curTime])], [S('てんき', 'Weather'), q.has('rain') || !dailyW ? (rainy ? S('あめ', 'Rainy') : S('はれ', 'Clear')) : ({ clear: S('はれ', 'Clear'), cloudy: S('くもり', 'Cloudy'), rain: S('あめ', 'Rainy'), snow: S('ゆき', 'Snowy') })[dailyW]], [S('ともだち', 'Friends'), S(friends.length + 'にん', String(friends.length))]]; } catch { return; }
   const key = rows.map(r => r.join('：')).join('|'); if (key === factsKey) return; factsKey = key;
   ul.textContent = ''; rows.forEach(r => { const li = document.createElement('li'); li.textContent = r[0] + '：' + r[1]; ul.append(li); });
 }
