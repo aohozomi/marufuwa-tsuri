@@ -864,7 +864,7 @@ function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が �
 }
 const lowerTo = (freq, slideTo) => { const hi = Math.max(freq, slideTo || 0); if (!(hi > GENTLE.top)) return [freq, slideTo || 0]; const k = 2 ** Math.ceil(Math.log2(hi / GENTLE.top)); return [freq / k, slideTo ? slideTo / k : 0]; };
 function route(c, node, pan) { const bus = gentleBus(c); if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); node.connect(p); p.connect(bus); } else node.connect(bus); }
-function tone(freq, len = .09, type = 'round', delay = 0, loud = .05, slideTo = 0, pan = 0) {
+function tone(freq, len = .09, type = 'round', delay = 0, loud = .05, slideTo = 0, pan = 0, atk = 0) {   // atk＝立ち上がりの さいていの 長さ（ふだんより ゆっくり したい 音だけ）
   if (!sndOk()) return;
   try {
     const c = ready(), at = c.currentTime + delay, osc = c.createOscillator(), vol = c.createGain();
@@ -873,7 +873,7 @@ function tone(freq, len = .09, type = 'round', delay = 0, loud = .05, slideTo = 
     [freq, slideTo] = lowerTo(freq, slideTo);
     osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
     if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + len);
-    const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud, A = GENTLE.attack, mid = Math.max(A + .002, len * .5), end = Math.max(mid + .002, len);
+    const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud, A = Math.max(GENTLE.attack, atk), mid = Math.max(A + .002, len * .5), end = Math.max(mid + .002, len);
     vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(level, at + A); vol.gain.linearRampToValueAtTime(level * .6, at + mid); vol.gain.linearRampToValueAtTime(0, at + end);
     osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + end + .02);
   } catch {}
@@ -911,11 +911,11 @@ const sfx = {
   meteor: () => tone(2800, .55, 'round', 0, .025, 500),
   boing: () => tone(300, .14, 'triangle', 0, .05, 620),
   leaf: () => { tone(1568, .05, 'round', 0, .025); tone(1319, .05, 'round', .07, .02); tone(1047, .06, 'round', .14, .02); },
-  splash: pan => { zap(.09, 0, .05, pan); tone(880, .05, 'round', .02, .03, 1320, pan); },
+  splash: pan => { tone(300, .2, 'sine', 0, .04, 140, pan); },   // ぽちゃん：ひくい sine 300→140Hz・ゆっくり 立ち上がり（ノイズの「ぱちっ」を やめた・10/1 マスター「バケツが はじける 音」）
   spin: () => chord([523, 659, 784, 1047, 784, 1047, 1319], .05),
   water: pan => tone(1568, .04, 'triangle', 0, .04, 2093, pan),
   well: pan => { tone(392, .1, 'triangle', 0, .04, 294, pan); tone(587, .07, 'triangle', .13, .03, 440, pan); },
-  bird: pan => asKind('amb', () => { tone(2400, .045, 'round', 0, .012, 3000, pan); tone(3000, .045, 'round', .07, .012, 2500, pan); }),
+  bird: pan => asKind('amb', () => { tone(2400, .06, 'round', 0, .012, 3000, pan, .03); tone(3000, .06, 'round', .08, .012, 2500, pan, .03); }),
   cricket: pan => asKind('amb', () => { for (let i = 0; i < 3; i++) tone(4200, .02, 'round', i * .05, .006, 0, pan); })
 };
 // おとの ずっと ながれる ぶぶん：ふんすいの みず（ちかづくと おおきく）、あめの ひは あめの おと
