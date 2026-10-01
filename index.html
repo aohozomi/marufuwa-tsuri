@@ -788,6 +788,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   </details>
 
   <div id="scene" data-phase="idle" data-time="hiru" data-area="L">
+    <script>try { var a0 = (JSON.parse(localStorage.getItem("marufuwa-tsuri-v1")) || {}).area; if (/^[A-Z]$/.test(a0)) document.getElementById("scene").dataset.area = a0; } catch (e) {}   /* さいごに いた つりばの うしろ・まえを さいしょの 1コマから（本体の script が data-area を いれる まで L の けしきが 一瞬 出ない）。まちがった 値は 本体が もどす */</script>
     <canvas id="sky" width="220" height="110" aria-hidden="true"></canvas>
     <!-- かりの はいけい（いろと かたちだけ）。えが とどいたら さしかえる -->
     <svg class="land" viewBox="0 0 600 450" preserveAspectRatio="none" aria-hidden="true">
