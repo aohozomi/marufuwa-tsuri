@@ -37,7 +37,13 @@
   const WHITE_NAMES = ['わたあめ', 'ゆき', 'しお'], KINAKO = COLORS.findIndex(c => c[0] === 'きなこ');
   const banned = (c, a) => !!(COLORS[c] && ANIMALS[a] && ANIMALS[a][0] === 'momonga' && WHITE_NAMES.includes(COLORS[c][0]));
   const ITEM_LV = [0, 3, 6, 10];   // レベルが あがると 1つずつ ふえる（さがらない）
-  const api = { PROVISIONAL: true, COLORS, ANIMALS, EARS, ITEMS, ITEM_LV };
+  // 本物の 絵（天の 納品・img/own/<いきもの>_<ポーズ>.png と _body_mask・_ear_mask）が 入った いきもの。検品に 通った ものだけ ここに 足す（ほかは 仮の まま）
+  const REAL_ART = ['koinu', 'kuma', 'penguin'], POSES = ['front', 'sit', 'joy'];
+  const isReal = a => !!(ANIMALS[a] && REAL_ART.includes(ANIMALS[a][0]));
+  // 検品で 直しが 出た ポーズは 直るまで「front」で 出す（くま joy：服マスクが うでの そでを とりこぼし＝灰色の すじが 見える。天に 直しを 依頼ずみ）
+  const POSE_HOLD = {kuma: ['joy']};
+  const poseFor = (a, pose) => { const id = ANIMALS[a] && ANIMALS[a][0], p = POSES.includes(pose) ? pose : 'front'; return POSE_HOLD[id] && POSE_HOLD[id].includes(p) ? 'front' : p; };
+  const api = { PROVISIONAL: true, COLORS, ANIMALS, EARS, ITEMS, ITEM_LV, REAL_ART, POSES };
 
   const isInt = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
   const valid = o => !!o && typeof o === 'object' && isInt(o.c, 0, COLORS.length - 1) && isInt(o.a, 0, ANIMALS.length - 1) && isInt(o.ear, 0, 2) && isInt(o.item, 0, 3) && !!ANIMALS[o.a][3] && !banned(o.c, o.a);
@@ -46,7 +52,7 @@
   const hasEars = a => !!(ANIMALS[a] && ANIMALS[a][4]);
   const itemOpen = (item, lv) => isInt(item, 0, 3) && ITEM_LV[item] <= (Number(lv) || 1);
   const eff = (o, lv) => ({c: o.c, a: o.a, ear: hasEars(o.a) ? o.ear : 0, item: itemOpen(o.item, lv) ? o.item : 0});   // ひらいて いない こもの・耳の ない こは 0 に して 出す（ほぞんは けさない）
-  const keyOf = (o, lv) => { const e = eff(o, lv); return [e.c, e.a, e.ear, e.item].join('.'); };
+  const keyOf = (o, lv, pose) => { const e = eff(o, lv); return [e.c, e.a, e.ear, e.item, isReal(e.a) ? poseFor(e.a, pose) : 'front'].join('.'); };
   const pals = new Map();
   const pal = o => { if (!valid(o)) return null; const k = [o.c, o.a].join('.'); let p = pals.get(k); if (!p) { p = {id: 'own', name: name(o), en: en(o), own: true, home: 'L', word: ''}; pals.set(k, p); } return p; };
   Object.assign(api, {
@@ -54,7 +60,8 @@
     name: o => valid(o) ? name(o) : '', en: o => valid(o) ? en(o) : '',
     label: o => valid(o) ? T('じぶんの こ、' + name(o), 'Your own friend, ' + en(o)) : '',
     available: () => ANIMALS.some(x => x[3]),
-    faceUrl: o => valid(o) ? BASE + 'img/friend-' + ANIMALS[o.a][3] + '-s.webp' : ''
+    hasReal: o => valid(o) && isReal(o.a),
+    faceUrl: (o, pose) => !valid(o) ? '' : isReal(o.a) ? BASE + 'img/own/' + ANIMALS[o.a][0] + '_' + poseFor(o.a, pose) + '.png' : BASE + 'img/friend-' + ANIMALS[o.a][3] + '-s.webp'
   });
 
   // ---- すがたの 合成（かりの え：既存の なかまの え ＋ 色 ＋ 耳の なか ＋ こもの）-------------------
@@ -99,22 +106,46 @@
     ctx.restore();
   }
   const cache = new Map(), building = new Map();
-  async function compose(o, lv) {
+  const loadMask = async url => { const im = await loadImg(url); if (!im) return null; const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const x = cv.getContext('2d', {willReadFrequently: true}); x.drawImage(im, 0, 0); return {w: cv.width, h: cv.height, d: x.getImageData(0, 0, cv.width, cv.height).data}; };
+  // 本物の 絵：服マスクに 色を 乗算で のせる（いちばん 明るい ところが 見本の 色に なる ように ゲイン）・耳マスクの なかは 耳の 色に・足元と 中心を そろえる（ポーズ・いきものが かわっても 足が ういたり しずまない）
+  async function composeReal(o, lv, pose) {
+    const e = eff(o, lv), id = ANIMALS[o.a][0], base = BASE + 'img/own/' + id + '_' + poseFor(o.a, pose);
+    const [im, bm, em] = await Promise.all([loadImg(base + '.png'), loadMask(base + '_body_mask.png'), hasEars(o.a) ? loadMask(base + '_ear_mask.png') : Promise.resolve(null)]);
+    if (!im || !bm) return '';
+    const w = im.naturalWidth, h = im.naturalHeight, pad = Math.round(h * .07);
+    if (bm.w !== w || bm.h !== h) return '';
+    const tc = document.createElement('canvas'); tc.width = w; tc.height = h; const tx = tc.getContext('2d', {willReadFrequently: true}); tx.drawImage(im, 0, 0);
+    const img = tx.getImageData(0, 0, w, h), d = img.data;
+    let x0 = w, x1 = 0, y0 = h, y1 = 0; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 127) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    let p95 = 0; { const hist = new Uint32Array(256); let n = 0; for (let i = 0; i < d.length; i += 4) if (bm.d[i] > 127 && d[i + 3] > 0) { hist[Math.round(.2126 * d[i] + .7152 * d[i + 1] + .0722 * d[i + 2])]++; n++; } let acc = 0; for (let v = 255; v >= 0; v--) { acc += hist[v]; if (n && acc >= n * .05) { p95 = v; break; } } }
+    const gain = Math.min(1.3, 255 / Math.max(120, p95)), hex = COLORS[e.c][5], tint = [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16) / 255), ear = EARS[e.ear][2];
+    for (let i = 0; i < d.length; i += 4) {
+      if (bm.d[i] > 127 && d[i + 3] > 0) { for (let c = 0; c < 3; c++) d[i + c] = Math.min(255, d[i + c] * tint[c] * gain); }
+      else if (em && ear && em.d[i] > 127 && d[i + 3] > 0) { const [H, S, V] = rgb2hsv(d[i], d[i + 1], d[i + 2]), [r, g, b] = hsv2rgb(ear[0], ear[1], Math.min(1, V + .03)); d[i] = r; d[i + 1] = g; d[i + 2] = b; }
+    }
+    tx.putImageData(img, 0, 0);
+    const dx = Math.round(w / 2 - (x0 + x1 + 1) / 2), dy = y1 >= y0 ? Math.round(h * .94 - (y1 + 1)) : 0;
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h + pad; const ctx = cv.getContext('2d', {willReadFrequently: true}); ctx.drawImage(tc, dx, pad + dy);
+    try { if (e.item) drawItem(ctx, e.item, w, {top: y0 + dy + pad, bot: y1 + dy + pad}); return cv.toDataURL('image/png'); }
+    catch (err) { return api.faceUrl(o, pose); }
+  }
+  async function compose(o, lv, pose) {
+    if (isReal(o.a)) return composeReal(o, lv, pose);
     const e = eff(o, lv), im = await loadImg(api.faceUrl(o)); if (!im) return '';
     const w = im.naturalWidth, h = im.naturalHeight, pad = Math.round(h * .07), cv = document.createElement('canvas'); cv.width = w; cv.height = h + pad;
     const ctx = cv.getContext('2d', {willReadFrequently: true}); ctx.drawImage(im, 0, pad);
     try { const bb = recolor(ctx, w, h, pad, e); if (e.item) drawItem(ctx, e.item, w, bb); return cv.toDataURL('image/png'); }
     catch (err) { return api.faceUrl(o); }   // 読めない 時（file:// など）は 色なしの まま
   }
-  function build(o, lv) {
-    const k = keyOf(o, lv); if (cache.has(k)) return Promise.resolve(cache.get(k));
-    if (!building.has(k)) building.set(k, compose(o, lv).then(u => { building.delete(k); if (u) cache.set(k, u); return u; }));
+  function build(o, lv, pose) {
+    const k = keyOf(o, lv, pose); if (cache.has(k)) return Promise.resolve(cache.get(k));
+    if (!building.has(k)) building.set(k, compose(o, lv, pose).then(u => { building.delete(k); if (u) cache.set(k, u); return u; }));
     return building.get(k);
   }
-  api.url = (o, lv) => valid(o) ? build(o, lv) : Promise.resolve('');
-  api.src = (o, lv, cb) => {   // すぐ 返す：できて いれば 合成ずみ／まだなら かりの 顔（できたら cb に わたす）
-    if (!valid(o)) return ''; const k = keyOf(o, lv); if (cache.has(k)) return cache.get(k);
-    build(o, lv).then(u => { if (u && typeof cb === 'function') cb(u); }); return api.faceUrl(o);
+  api.url = (o, lv, pose) => valid(o) ? build(o, lv, pose) : Promise.resolve('');
+  api.src = (o, lv, cb, pose) => {   // すぐ 返す：できて いれば 合成ずみ／まだなら かりの 顔（できたら cb に わたす）。pose＝'front'（はじめ）／'sit'／'joy'（本物の 絵が ある いきものだけ）
+    if (!valid(o)) return ''; const k = keyOf(o, lv, pose); if (cache.has(k)) return cache.get(k);
+    build(o, lv, pose).then(u => { if (u && typeof cb === 'function') cb(u); }); return api.faceUrl(o, pose);
   };
 
   // ---- 「つくる」がめん --------------------------------------------------------
@@ -181,7 +212,7 @@
       const nm = T(name(d), en(d)); pname.firstChild.textContent = nm; pimg.alt = '';
       const s = api.src(d, lv, u => { if (host.isConnected && root.isConnected) pimg.src = u; }); if (s) pimg.src = s;
       go.textContent = T('これに きめる', 'Choose this'); cancel.textContent = T('やめる', 'Cancel');
-      note.textContent = api.PROVISIONAL ? T('えは じゅんばんに ほんものに いれかえちゅう。', 'The pictures are being swapped for the real thing, one by one.') : ''; note.hidden = !api.PROVISIONAL;
+      const prov = api.PROVISIONAL && !isReal(d.a); note.textContent = prov ? T('えは じゅんばんに ほんものに いれかえちゅう。', 'The pictures are being swapped for the real thing, one by one.') : ''; note.hidden = !prov;
     }
     function pick(k, v, b) {
       if (k === 'item' && ITEM_LV[v] > lv) { speak(T('こもの「' + ITEMS[v][0] + '」は レベル ' + ITEM_LV[v] + ' で ひらくよ。', 'The accessory “' + ITEMS[v][1] + '” unlocks at level ' + ITEM_LV[v] + '.')); return; }
