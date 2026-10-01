@@ -230,7 +230,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 #tk[open]{display:flex;flex-direction:column}
 :root[data-inapp=x] #tk{max-height:calc(100dvh - 64px);height:min(96dvh,900px,calc(100dvh - 64px));margin:8px auto auto}   /* Xの アプリ：下 47px の おびに ボタンが かくれない ように、おびの うえで おわる */
 #tk::backdrop{background:#0d2a3acc}
-#tk .tk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 6px}
+#tk .tk-head{position:relative;z-index:5;flex:none;background:#f3fafd;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 6px}
 #tk .tk-head h2{margin:0;font-size:1.1rem;text-align:left;white-space:nowrap}
 #tk .tk-headbtns{display:flex;gap:6px;flex:none}
 #tk .tk-headbtns button{min-height:44px;min-width:44px;padding:6px 12px;white-space:nowrap}
@@ -246,7 +246,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 #tk.tk-narrow .tk-cam{min-width:46px}
 #tk .tk-chrome{transition:opacity 1.4s ease}
 #tk.tk-zen .tk-chrome{opacity:.12}
-.tk-stage{position:relative;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;background:#fff8ea}
+.tk-stage{position:relative;z-index:0;flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;background:#fff8ea}
 .tk-room{position:relative;flex:none;overflow:hidden;--s:1}
 .tk-room>svg,.tk-room>img,.tk-room>div,.tk-room>p{position:absolute;display:block}
 .tk-roomsvg,.tk-lamp,.tk-frame,.tk-dim,.tk-shelf{left:0;top:0;width:100%;height:100%;pointer-events:none}
@@ -483,9 +483,12 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 
   function layoutRoom() {
     dlg.style.width = '';
-    const cs = getComputedStyle(stage), aw = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ah = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-    const s = Math.max(.3, Math.min(aw / ROOM.w, ah / ROOM.h));
-    if (aw > ROOM.w * s + 40) dlg.style.width = Math.max(300, Math.ceil(ROOM.w * s) + 28) + 'px';   // 背の高さで きまる時は、ダイアログを部屋のはばに合わせる
+    const cs = getComputedStyle(stage), measure = () => ({ aw: stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ah: stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) });
+    let { aw, ah } = measure(), s = Math.max(.3, Math.min(aw / ROOM.w, ah / ROOM.h));
+    if (aw > ROOM.w * s + 40) {
+      dlg.style.width = Math.max(300, Math.ceil(ROOM.w * s) + 28) + 'px';   // 背の高さで きまる時は、ダイアログを部屋のはばに合わせる
+      ({ aw, ah } = measure()); s = Math.max(.55, Math.min(aw / ROOM.w, ah / ROOM.h));   // 大きい もじで ひくく なりすぎる 時は 絵を 小さく しすぎない（カードが はいらなく なる）   // はばを せばめると ボタンが 2だんに なって ステージが ひくく なる＝はかり なおす（上の 列に かぶらない）
+    }
     dlg.classList.toggle('tk-narrow', dlg.getBoundingClientRect().width < 400);   // へやの はばが せまい 時は、上の ボタンを 小さく まとめる
     room.style.width = (ROOM.w * s).toFixed(1) + 'px'; room.style.height = (ROOM.h * s).toFixed(1) + 'px'; room.style.setProperty('--s', String(s));
     water.style.borderRadius = (14 * s).toFixed(1) + 'px'; says.style.fontSize = (13 * s).toFixed(1) + 'px'; says.style.borderRadius = (16 * s).toFixed(1) + 'px';
@@ -1512,6 +1515,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     // となりに いる なかまが かわって いたら、へやの なかまも かえる（つりばを かえた あと）
     friendsEls.forEach(el => { const src2 = friendSrc(el.dataset.who === 'a' ? 'friend-a' : 'friend-b'); if (src2 && el.getAttribute('src') !== src2) el.setAttribute('src', src2); });
     layoutRoom(); paintWater(); layoutRoom(); ownSync();
+    requestAnimationFrame(() => { if (isOpen()) layoutRoom(); }); setTimeout(() => { if (isOpen()) layoutRoom(); }, 400);   // ひらいた 直後は ボタンの おりかえしが きまって いない＝はかり なおす（上の 列に かぶらない）
     if (visit && visit.starry) { starry = true; applyStarry(); }   // おくった 人の へやが ほしぞらの とき
     const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
     if (arrivals.length) {
