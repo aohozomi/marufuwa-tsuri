@@ -241,6 +241,7 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 @keyframes wave{from{transform:translateX(-4px)}to{transform:translateX(4px)}}
 .orb{position:absolute;z-index:1;left:76.9%;top:6.25%;width:12.8%;aspect-ratio:1/1;border-radius:50%;background:var(--orb);box-shadow:0 0 0 5px #ffffff3d,0 0 22px #fff6c0a0;cursor:pointer}
 #scene[data-time=yoru] .orb{background:radial-gradient(circle at 34% 32%,#fff,#fff6cf 60%,#f0e4b0);box-shadow:0 0 0 5px #ffffff26,0 0 26px #fff6cf90}
+#scene[data-time=yoru] .orb[data-moon]{background:var(--moon-img) center/100% 100% no-repeat}   /* 本物の 月齢（TsuriWorld.moon）：ひかる がわと わりあいで かたちが かわる */
 .orb::before{content:"";position:absolute;inset:-14px}
 .cloud{position:absolute;z-index:1;left:0;width:28%;height:auto;aspect-ratio:100/40;opacity:calc(.92 - var(--star)*.6);cursor:pointer;animation:cloud 80s linear infinite}
 .cloud.c1{top:5%}
@@ -615,6 +616,7 @@ body.calm .cloud.c2{left:56%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
+<script src="../tsuri-world.js"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -726,8 +728,35 @@ function applyTime() {
   scene.dataset.dim = String(night && curTime !== 'n');
   const orb = $('touch-orb'); if (orb) orb.textContent = curTime === 'n' ? 'おつきさま' : 'おひさま';
   renderWishStars(); renderSeason(); if (typeof applyArt === 'function') applyArt();
-  paintRainHole(); paintTouchExtras();
+  paintRainHole(); paintTouchExtras(); paintMoon();
 }
+// ─── よるの 月（総司令部 10/1：本物の 月齢）───
+//   TsuriWorld.moon()（tsuri-world.js・日づけの けいさんだけ・位置情報なし）の phase／illum／waxing で かたちを きめる：ひかる がわ＝みちて いく ときは 右・かけて いく ときは 左／しんげつ＝うっすら わっかだけ。
+//   ?moon=0〜1 は 手もとの けんさ用（localhost だけ）。tsuri-world.js が まだ・ない ときは おなじ しきで けいさん。ひるの おひさまは そのまま。
+const moonNowRaw = () => {
+  try { if (window.TsuriWorld && typeof window.TsuriWorld.moon === 'function') { const m = window.TsuriWorld.moon(); if (m && Number.isFinite(m.illum)) return m; } } catch {}
+  const ask = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) ? new URLSearchParams(location.search).get('moon') : null; let phase;
+  if (ask !== null && ask !== '' && Number.isFinite(Number(ask)) && Number(ask) >= 0 && Number(ask) <= 1) phase = Number(ask) % 1;
+  else { const SYN = 29.530588853, age = (((Date.now() / 86400000 + 2440587.5 - 2451550.1) % SYN) + SYN) % SYN; phase = age / SYN; }
+  return { phase, illum: (1 - Math.cos(2 * Math.PI * phase)) / 2, waxing: phase < .5 };
+};
+function moonPath(m, R) {   // ひかる ぶぶんの かたち（うえ→した の 半円＋ だえんの だんかい）。しんげつは ''
+  const k = m.illum; if (!(k >= .08)) return ''; const rx = Math.abs(1 - 2 * k) * R, w = !!m.waxing, outer = w ? 1 : 0, term = w ? (k < .5 ? 0 : 1) : (k < .5 ? 1 : 0);
+  return 'M0 ' + (-R) + ' A' + R + ' ' + R + ' 0 0 ' + outer + ' 0 ' + R + ' A' + rx.toFixed(2) + ' ' + R + ' 0 0 ' + term + ' 0 ' + (-R) + 'Z';
+}
+function moonSvg(m) {
+  const d = moonPath(m, 46), g = '<defs><radialGradient id="mg" cx=".34" cy=".32" r=".7"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#fff6cf"/><stop offset="1" stop-color="#f0e4b0"/></radialGradient></defs>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100">' + g + '<circle r="46" fill="#9fb0d8" opacity=".26"/>' + (d ? '<path d="' + d + '" fill="url(#mg)"/>' : '<circle r="45" fill="none" stroke="#dfe6ff" stroke-width="2.4" opacity=".6"/>') + '</svg>';
+}
+function paintMoon() {
+  const orb = scene.querySelector('.orb'); if (!orb) return;
+  if (curTime !== 'n') { orb.removeAttribute('data-moon'); orb.style.removeProperty('--moon-img'); orb.style.boxShadow = ''; return; }
+  const m = moonNowRaw(), k = Math.min(1, Math.max(0, m.illum));
+  orb.style.setProperty('--moon-img', 'url("data:image/svg+xml,' + encodeURIComponent(moonSvg(m)) + '")'); orb.dataset.moon = k < .08 ? 'new' : m.waxing ? 'right' : 'left';
+  orb.style.boxShadow = '0 0 0 5px rgba(255,255,255,' + (.08 + .12 * k).toFixed(2) + '),0 0 ' + Math.round(10 + 16 * k) + 'px rgba(255,246,207,' + (.25 + .65 * k).toFixed(2) + ')';   // みちるほど ひかりも つよく（しんげつは ほとんど ひからない）
+}
+const MOON_API = { info: moonNowRaw, path: moonPath, svg: moonSvg, paint: paintMoon };
+setInterval(() => { if (curTime === 'n') paintMoon(); }, 600000);
 function paintRainHole() {   // #rain は 場面より 上に 20% はみ出す（inset:-20% 0 0 0）ので、場面の 座標を その はこの わりあいに なおす
   const r = $('rain'); if (!r) return;
   if (!rainy || !propEl('shelter')) { r.removeAttribute('data-hole'); r.style.removeProperty('--hole'); return; }
@@ -2374,8 +2403,14 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   // おひさま・おつきさま・くも
   const orb = css.getPropertyValue('--orb').trim() || '#fff2a8', night = curTime === 'n';
   ctx.save(); ctx.shadowColor = '#fff6c0'; ctx.shadowBlur = 26; const og = ctx.createRadialGradient(295, 52, 2, 300, 58, 24);
-  if (night) { og.addColorStop(0, '#fff'); og.addColorStop(.6, '#fff6cf'); og.addColorStop(1, '#f0e4b0'); ctx.fillStyle = og; } else ctx.fillStyle = orb;
-  ctx.beginPath(); ctx.arc(300, 58, 23, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  if (night) {   // よるの 月：本物の 月齢（ひかる がわ・わりあい）
+    const m = moonNowRaw(), k = Math.min(1, Math.max(0, m.illum)); og.addColorStop(0, '#fff'); og.addColorStop(.6, '#fff6cf'); og.addColorStop(1, '#f0e4b0'); ctx.shadowBlur = 8 + 18 * k;
+    ctx.save(); ctx.fillStyle = 'rgba(159,176,216,.26)'; ctx.beginPath(); ctx.arc(300, 58, 23, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    const d = moonPath(m, 23);
+    if (d) { const p = new Path2D(); p.addPath(new Path2D(d), new DOMMatrix([1, 0, 0, 1, 300, 58])); ctx.fillStyle = og; ctx.fill(p); }
+    else { ctx.strokeStyle = 'rgba(223,230,255,.6)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(300, 58, 22.5, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.restore();
+  } else { ctx.fillStyle = orb; ctx.beginPath(); ctx.arc(300, 58, 23, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
   const sceneBox = scene.getBoundingClientRect(), k = sceneBox.width / W;
   const unit = el => { const r = el.getBoundingClientRect(); return { x: (r.left - sceneBox.left) / k, y: (r.top - sceneBox.top) / k, w: r.width / k, h: r.height / k }; };
   for (const c of scene.querySelectorAll('.cloud')) { const u = unit(c); ctx.save(); ctx.globalAlpha = parseFloat(getComputedStyle(c).opacity) || .9; ctx.drawImage(await svgImg(svgText(c, css, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.restore(); }
@@ -2797,7 +2832,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) stopA
 addEventListener('pageshow', e => { if (e.persisted) { curtain.style.display = 'none'; trip = null; player.el.classList.remove('gone'); const house = propEl('house'); if (house) house.classList.remove('open'); measure(); narrate('ひろばに もどったよ'); } });
 
 const api = window.Hiroba = {
-  version: 1, paused: false, shop: SHOP_API, hooks, player, friends, PALS, SEASON_LINES, SPECIAL_LINES, DEST, isFree, findPath, blockedCells,
+  version: 1, paused: false, shop: SHOP_API, moon: MOON_API, hooks, player, friends, PALS, SEASON_LINES, SPECIAL_LINES, DEST, isFree, findPath, blockedCells,
   step(ms) { const n = Math.max(1, Math.round(ms / 16)); for (let i = 0; i < n; i++) update(.016); render(); },
   state: () => ({ x: player.x, y: player.y, moving: player.moving, T, time: curTime, rain: rainy, sound: soundOn(), bgm: window.TsuriBgm ? window.TsuriBgm.state() : null, reduce: reduce(), trip: trip && trip.id, leaving: !!(trip && trip.leaving), face: player.face, bubbles: bubbles.map(b => b.el.textContent), friends: friends.map(f => ({ id: f.id, x: f.x, y: f.y, state: f.state, talking: f.talking, cool: f.cool })), own: JSON.parse(JSON.stringify(own)) }),
   goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, cast: { season: { show: () => seasonShow(), label: () => SEASON_SHOW.btn, running: () => showUntil > T, endsSoon: () => seasonEndsSoon(), again: AGAIN }, ret: { bloom: () => own.bloom, shown: () => BLOOM_SHOWN, returning: () => RETURNING, bloomed: () => BLOOMED, lastDay: () => own.lastDay, today: () => TODAY_NO }, traces: { who: k => traceWho(k), line: k => traceLine(k), today: () => TRACES.slice(), of: day => tracesOf(day), kinds: () => TRACE_KINDS.slice(), side: () => TRACE_SIDE }, tend: { litter: () => LITTER_SPOTS.map((s, i) => ({ ...s, i: i + 1, swept: sweptToday(i + 1), on: !!propEl('litter-' + (i + 1)) })), sweep: el => sweepPile(el), lamp: sd => lightLamp(propEl('lamp-' + sd)), lit: () => ({ l: own.lampDay.l === LAYER_DAY, r: own.lampDay.r === LAYER_DAY }), kind: () => LITTER && SEASON, paint: () => { paintLitter(); paintLamps(); paintTouchExtras(); } }, care: { active: () => careActive().map(n => ({ ...n })), needsFor: (day, ids, tm, season, rn) => careNeeds(day, ids, tm, season, rn), types: (tm, season, rn) => careTypes(tm, season, rn), give: id => giveCare(byId(id)), to: id => careTo(byId(id)), done: () => ({ ...own.careDay }), paint: paintCare }, shelter: { on: () => !!propEl('shelter'), zone: () => ({ ...SHELTER }), under: o => inShelter(o || player), slots: () => slotsNow().map(s => ({ ...s })), timeSlots: tm => (SLOTS_BY_TIME[tm] || []).map(s => ({ ...s })), isFree, rehome }, list: () => CAST_ORDER.slice(), town: () => TOWN_LIST.map(x => x.id), newest: () => [...NEWEST], local: isLocalId, isNew: newFace, lastOf, order: pool => castOrder(castEnv(), pool), initial: (pool, n, forced) => castInitial(castEnv(), pool, n, forced), sim: castSim, homes: LOCAL_HOMES.slice(), gap: swapGap, announce: announceNew, buildLayers: castLayers, letters: () => LETTERS.slice(), letterOf, openPost, skipStone, waterFlowers, art: { state: () => ({ key: artState.key, on: scene.dataset.art === 'on', ready: !!artState.man }), dir: ART_DIR }, pool: castPool, touch: () => { lastInput = T; }, spawnPasser, passers: () => friends.filter(f => f.passer).map(f => f.id), companions: companionIds, isCompanion, lv: palLv, xp: palXpOf, avatar: avatarId, ownOn: () => !!player.avatar && player.avatar.startsWith('own:'), mainParty, spawn: summonFriend, remove: removeFriend, gainXp, together: () => ({ ...own.together }), partyToggle: togglePartyById, drawAll: drawZukanAll, layers: () => ({ resident: LAYERS.resident.slice(), daily: LAYERS.daily.slice(), guests: LAYERS.guests.slice() }), weight: id => layerW.get(id) || 1, weights: () => ({ ...LAYER_W }), announceGuest, toku: tokuOf, tokuWords: () => ({ ...TOKU }), favLines: favLinesOf }, fav: { list: favList, is: isFav, toggle: toggleFav, ensure: ensureFav, bond: bondOf }, party: { ids: partyIds, join: joinParty, leave: leaveParty, invite: openInvite, close: closeInvite, max: PARTY_MAX, size: () => party.length }, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
