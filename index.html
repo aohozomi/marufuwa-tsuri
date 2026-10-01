@@ -1625,7 +1625,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     try { const url = URL.createObjectURL(plopWav()), a = new Audio(url); a.volume = .9; a.onended = a.onerror = () => URL.revokeObjectURL(url); const p = a.play(); if (p && p.catch) p.catch(() => URL.revokeObjectURL(url)); } catch {}
   }
   function softenBus() { if (bus && bus.low) bus.low.frequency.value = save.soft ? 1200 : 1400; }   // 「やさしい おと」を きりかえた とき（つくって ある でぐちの ローパスを かえる）
-  const SFX_OFF = true;   // 10/2 マスター直：こうかおん（fx・ui・あんない）は ぜんぶ いったん とめる。のこすのは なみ（amb）と BGM だけ。やりなおしは あとで
+  const SFX_OFF = true;   // 10/2 マスター直：こうかおん（fx・ui・あんない）と かんきょうおん（なみ・あめ・かぜ）は ぜんぶ いったん とめる。のこすのは BGM だけ。やりなおしは あとで
   function tone(freq, length = .09, type = 'sine', delay = 0, loud = .05, slideTo = 0, kind = 'fx', attack = 0) {
     if (SFX_OFF || !sndOn(kind)) return;
     try {
@@ -1754,7 +1754,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const pr = el.play(); if (pr && pr.catch) pr.catch(fallback);
   }
   function startAmbient() {
-    if (!sndOn('amb') || ambient || sleepMuted) return;
+    if (SFX_OFF || !sndOn('amb') || ambient || sleepMuted) return;   // 10/2 マスター直：なみ・あめ・かぜ・ばしょの おとも ぜんぶ とめる（BGM だけ）
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       if (audio.state === 'suspended') audio.resume();
@@ -4167,7 +4167,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (!reduce()) requestAnimationFrame(flow); else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
   drawSound();
   $('mute-top').addEventListener('click', () => { $('sound').click(); if (window.TsuriBgm && TsuriBgm.set) { try { TsuriBgm.set(!!save.sound); } catch {} } drawMute(); });   // 上の ボタン：こうかおん・なみ・BGM を ぜんぶ いっしょに
-  { const first = () => { removeEventListener('click', first); if (save.sound) { try { ready(); startAmbient(); } catch {} } };   // ブラウザの きまり：さいしょの タップ（click）から なる。🔇で OFF に した その タップでは つくらない（ボタンの あとで しらべる）
+  { const first = () => { removeEventListener('click', first); if (save.sound) { try { startAmbient(); } catch {} } };   // AudioContext は BGM の ためだけ（ここでは つくらない）   // ブラウザの きまり：さいしょの タップ（click）から なる。🔇で OFF に した その タップでは つくらない（ボタンの あとで しらべる）
     addEventListener('click', first); }
   { const redraw = () => { drawMute(); if (soundDefault && window.TsuriBgm && TsuriBgm.set && TsuriBgm.on && !TsuriBgm.on()) { let rec = null; try { rec = localStorage.getItem('marufuwa-bgm-v1'); } catch {} if (rec === null) { try { TsuriBgm.set(true); } catch {} } } };   // BGM も はじめから ON（きろくが なければ）
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', redraw); else redraw();
