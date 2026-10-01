@@ -2486,7 +2486,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       {k: 'kuro', n: 'くろ', lv: 40, c: '#4a5060', h: 220, s: .25, v: .5}]}
   };
   const myLv = () => levelOf(save.xp || 0);
-  const gearOpt = kind => { const list = GEAR[kind].list, want = save.my && save.my[kind]; const o = list.find(x => x.k === want); return o && o.lv <= myLv() ? o : list[0]; };   // まだ ひらいて いない いろは つかえない（そのままに もどる）
+  const ownedGear = (kind, k) => kind === 'wear' && !!(window.TsuriWear && typeof window.TsuriWear.owns === 'function' && window.TsuriWear.owns('wear', k));   // ひろばの おみせで もらった 色（レベルが たりなくても つかえる）
+  const gearOpt = kind => { const list = GEAR[kind].list, want = save.my && save.my[kind]; const o = list.find(x => x.k === want); return o && (o.lv <= myLv() || ownedGear(kind, o.k)) ? o : list[0]; };   // まだ ひらいて いない いろは つかえない（そのままに もどる）
   const swap = (svg, from, to) => from.reduce((t, c, i) => t.split(c).join(to[i]), svg);
   const floatSvg = () => { const o = gearOpt('float'); if (!ART || !ART.float || !o.pal) return ART && ART.float || ''; let t = swap(ART.float, GEAR.float.from, o.pal); if (o.k === 'niji') t = t.split('<stop offset="0" stop-color="' + o.pal[0] + '"/><stop offset="0.5" stop-color="' + o.pal[1] + '"/>').join('<stop offset="0" stop-color="#ff8fa3"/><stop offset="0.17" stop-color="#ffd34d"/><stop offset="0.34" stop-color="#8fe3a8"/><stop offset="0.5" stop-color="#7fd0f2"/>'); return t; };
   const lureSvg = () => { const o = gearOpt('lure'), svg = ART && ART.bait && ART.bait[1]; return svg && o.pal ? swap(svg, GEAR.lure.from, o.pal) : svg || ''; };
@@ -2540,7 +2541,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const head = document.createElement('h3'); head.textContent = g.title; const box = document.createElement('div'); box.className = 'swatches'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', g.title);
       const cur = gearOpt(kind);
       for (const o of g.list) {
-        const b = document.createElement('button'), sw = document.createElement('i'), open = o.lv <= lv;
+        const b = document.createElement('button'), sw = document.createElement('i'), open = o.lv <= lv || ownedGear(kind, o.k);
         b.type = 'button'; b.dataset.k = kind + ':' + o.k; sw.style.background = o.c; b.append(sw, open ? o.n : 'レベル ' + o.lv);
         b.setAttribute('aria-pressed', String(open && cur.k === o.k)); if (!open) b.setAttribute('aria-disabled', 'true');
         b.setAttribute('aria-label', o.n + (open ? (cur.k === o.k ? '。つかって いる' : '') : '。レベル ' + o.lv + ' で もらえるよ'));
