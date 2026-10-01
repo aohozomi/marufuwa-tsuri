@@ -29,6 +29,10 @@
 <link rel="preload" as="image" href="img/game-blue.webp" fetchpriority="high">
 <link rel="preload" as="script" href="tsuri-wear.js"><link rel="preload" as="script" href="tsuri-daily.js"><link rel="preload" as="script" href="tsuri-mame.js"><link rel="preload" as="script" href="tsuri-art.js"><link rel="preload" as="script" href="tsuri-art-season.js"><link rel="preload" as="script" href="tsuri-art-real.js"><link rel="preload" as="script" href="tsuri-town.js"><link rel="preload" as="script" href="tsuri-koe.js"><link rel="preload" as="script" href="tsuri-bgm.js">   <!-- ほんたいの まえに ならぶ script は じゅんばんに よむと おそい。さきに ならんで よむ -->
 <script>
+// ?clip=1（見せ場クリップの 録画用）：がめんを 景色＋まるふわ＋輪 だけに。保存は しない（localStorage の かきこみを ぜんぶ むこうに・かぎは ふえない）。ボットは いれない
+try { if (new URLSearchParams(location.search).get('clip') === '1') { document.documentElement.dataset.clip = '1'; Storage.prototype.setItem = function () {}; Storage.prototype.removeItem = function () {}; Storage.prototype.clear = function () {}; } } catch (e) {}
+</script>
+<script>
 // よるは ページも くらく（まぶしく ない ように）。さいしょの 1コマから。あとで 本体が がめんの じかんに あわせて なおす
 // けしきの じかん（あさ・ひる・ゆうがた・よる）も ここで きめる（本体の timeOfDay と おなじ きまり）。よみこみの 一瞬に ひるの そらが みえない ように <html data-time> を 先に つける
 try { var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, mp = {asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n', a: 'a', h: 'h', y: 'y', n: 'n'}, q = new URLSearchParams(location.search).get('time');
@@ -314,6 +318,14 @@ html[data-plaza=false] #plaza-note{display:none}
 #scene:not([data-phase=idle]):not([data-phase=caught]) :is(.next-go,.edge-go),body.gazing :is(.next-go,.edge-go),#scene[data-tooku=true] :is(.next-go,.edge-go){display:none}
 #areago-q{font-weight:800;text-align:center;margin:8px 0 14px}.areago-btns{display:flex;gap:12px}.areago-btns button{flex:1;min-height:48px}
 body.gazing .area-open{display:none}
+/* ?clip=1：録画用（景色＋まるふわ＋輪 だけ。9:16 でも きれない ぜんがめん） */
+html[data-clip] body{overflow:hidden;background:#000}
+html[data-clip] body > :not(main):not(script):not(style):not(dialog),html[data-clip] main > :not(#scene):not(#backdrop):not(script){display:none !important}
+html[data-clip] main{background:transparent !important;box-shadow:none !important;padding:0 !important;margin:0 !important}
+html[data-clip] #scene{position:fixed;inset:0;z-index:20;width:auto;height:auto;aspect-ratio:auto;max-width:none;margin:0;border:0;border-radius:0;box-shadow:none}
+@media (min-aspect-ratio:4/3){html[data-clip] #scene{inset:auto;left:50%;top:50%;translate:-50% -50%;width:min(100vw,133.333dvh);height:min(100dvh,75vw)}}
+html[data-clip] #scene :is(#quit,.plop,#keeper,.friend,.friend-float,.friend-hit,.bubble,.spot,#next-go,.edge-go,#hp,#hp-label,#tension,#combo,#swim-tag,#judge,#bang,#equip,#gaze-cap,#rod-a,#rod-b,#line-a,#line-b,#ibasho),html[data-clip] rt,html[data-clip] dialog:not([open]){display:none !important}
+html[data-clip] #main-button{display:block !important;position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;overflow:hidden}
 /* いちばん うえの 🔇 おとを けす（まるいろと おなじ しき。おとは はじめから ON） */
 .topmute{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:6px 12px 0;max-width:640px;margin:0 auto}
 .mutebtn{min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid #286b88;background:#fff;color:#17323d;font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation}
