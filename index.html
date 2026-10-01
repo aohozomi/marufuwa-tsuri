@@ -1191,7 +1191,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     {id: 'M', name: 'もりの いけ', need: 45, late: true}, {id: 'S', name: 'ゆきの みずうみ', need: 65, late: true},
     {id: 'T', name: 'にじの たき', need: 90, late: 65}
   ];
-  const areasShown = () => AREAS.filter(a => !a.late || save.total >= (a.late === true ? 30 : a.late));   // もりの いけ・ゆきの みずうみの タブは「ふねの うえ」に ついた ひとだけ（はじめての ひとの がめんは 4つの まま）
+  const areasShown = () => AREAS;   // つりばは さいしょから ぜんぶ 見せる（いけない ところは 鍵の 見た目と「あと ○ひき」。マスター直 10/1）   // もりの いけ・ゆきの みずうみの タブは「ふねの うえ」に ついた ひとだけ（はじめての ひとの がめんは 4つの まま）
   // ひろがる つりばは「その つりばの さかな」＋「ほかの つりばの さかなが あそびに くる（ゲスト）」。ゲストの area は かえない（もとの つりばの でかたと ずかんは そのまま）。
   // その つりばの さかなは 2ばい でやすい（じっさいの わりあい：その つりばの さかな 約6わり・ゲスト 約4わり）。ひょうじには かかない。ばんごうは FISH の ばんごう
   const GUEST = {M: [2, 7, 8, 18], S: [5, 15, 23, 21], T: [28, 21, 18, 19]}, HOME_BONUS = 2, TF_BONUS = 2;   // T（にじの たき）＝しっかり むけ：★3 いじょうは さらに ×2（どの あそびかたでも ぜんぶの さかなに あえる）
@@ -2455,7 +2455,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function drawAreas() {
     if ($('area-now')) $('area-now').textContent = areaName(save.area);
-    $('areas').dataset.n = String(areasShown().length); syncTabs($('areas'), areasShown().map(area => ({k: area.id, text: area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
+    $('areas').dataset.n = String(areasShown().length); syncTabs($('areas'), areasShown().map(area => ({k: area.id, text: (save.total < area.need ? '🔒' : '') + area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
       if (save.total < area.need) { say(L('あと ' + (area.need - save.total) + 'ひきで いけるよ。', (area.need - save.total) + ' more catches to unlock this spot.')); return; }   // まだ いけない：ことばだけ
       if (save.area === area.id) return;
       save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals(); restartAmbient();
