@@ -222,6 +222,7 @@
     'むかし、108のなかまがいたんだって': 'They say there were 108 friends here, long ago.', 'なかまはまだどこかにいるんだって': 'They say the friends are still out there somewhere.',
     'おはよう。きょうも、ここにいていいよ。': 'Good morning. You are welcome here today, too.', 'ねむれない？ゆっくりながめよう。': "Can't sleep? Let's just watch the water for a while.",
     'つりばをかえる': 'Change spot', 'はい': 'Yes', 'やめる': 'Cancel', 'つりばをかえる▸': 'Change spot ▸',
+    'つくえのうえのもの': 'Thing on the table', 'つくえのうえのおにぎり': 'Rice ball on the table', 'つくえのうえのどんぐり': 'Acorn on the table', 'つくえのうえのかいがら': 'Seashell on the table', 'つくえのうえのおはな': 'Flower on the table',   // 10/2 おへやの ちゃぶ台は 日がわり（ゲーム開発2）
     'まるいろでそだてた': 'Raised in Maruiro', 'まるいろでそだてたさかな': 'A fish raised in Maruiro',
     'まるいろ（ゲーム）へいく': 'Go to Maruiro (game)', 'まるいろ': 'Maruiro', 'アプリ版まるふわまるいろ': 'Marufuwa Maruiro app', 'アプリばんまるふわまるいろ': 'Marufuwa Maruiro app', 'まるいろでそだてたさかなだよ。': 'This fish was raised in Maruiro.', 'iPhoneであそべるよ': 'Available on iPhone',
     'わあ！': 'Wow!', 'すごい！': 'Amazing!', 'ぬしだ！': "It's the Guardian!", 'おおきい…！': 'So big…!', 'みてみて！': 'Look, look!', 'やったね！': 'You did it!',
