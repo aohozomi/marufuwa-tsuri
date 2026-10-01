@@ -360,6 +360,19 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-maru img{display:block;width:60%;height:auto;margin:0 auto;filter:drop-shadow(0 2px 2px #0004)}
 .tk-maru span{display:block;font-size:calc(9px * var(--s,1));line-height:1.2;color:#244653;font-weight:800;background:#fffdf6cc;border-radius:6px;padding:0 3px}
 .tk-maru[hidden]{display:none}
+.tk-app{position:absolute;left:3%;top:52%;z-index:7;display:flex;align-items:center;gap:6px;min-height:44px;max-width:52%;padding:3px 10px 3px 6px;border-radius:22px;border:2px solid #5a3a2e;background:#fffdf6f2;color:#244653;font:inherit;text-align:left;cursor:pointer;box-shadow:0 2px 6px #0003}
+.tk-app::before{display:none}
+.tk-app svg{flex:none}
+.tk-apptx{display:flex;flex-direction:column;line-height:1.25}
+.tk-apptx b{font-size:max(.7rem,calc(10.5px * var(--s,1)))}
+.tk-apptx small{font-size:max(.62rem,calc(9px * var(--s,1)));font-weight:800;color:#3d5a68}
+.tk-app.tk-app-off{opacity:.78}
+.tk-appc{position:absolute;left:3%;top:52%;z-index:8;width:62%;padding:8px 10px;border-radius:14px;border:2px solid #5a3a2e;background:#fffdf6;color:#244653;box-shadow:0 4px 12px #0004}
+.tk-appc p{margin:0 0 6px;font-weight:800;font-size:max(.8rem,calc(12px * var(--s,1)))}
+.tk-appc div{display:flex;gap:8px}
+.tk-appc a,.tk-appc button{flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:4px 10px;border-radius:22px;border:2px solid #9bc9da;background:linear-gradient(#fff,#dff1f7);color:#14506b;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}
+.tk-appc[hidden]{display:none}
+#tk.tk-visit .tk-app,#tk.tk-visit .tk-appc{display:none}
 .tk-shelf[hidden],.tk-shelfbtn[hidden],.tk-giftlist[hidden]{display:none}
 .tk-shelf .tk-gf{position:absolute;object-fit:contain;display:flex;align-items:center;justify-content:center;line-height:1;filter:drop-shadow(0 1px 1px #0003)}
 .tk-giftlist{position:absolute;left:8px;right:8px;top:8px;max-height:calc(100% - 16px);overflow:auto;z-index:30;background:#fffdf6;border:2px solid #b9d1db;border-radius:18px;padding:12px 14px 14px;box-shadow:0 8px 24px #0004;color:#244653;word-break:keep-all;overflow-wrap:break-word}
@@ -418,6 +431,8 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
       <div class="tk-roomsvg" style="left:0;top:0;width:100%;height:100%"></div>
       <div class="tk-shelf" aria-hidden="true" hidden></div>
       <div class="tk-maru" hidden role="img"><img alt="" decoding="async"><span>まるいろで そだてた</span></div>
+      <button type="button" class="tk-app" aria-expanded="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#ffc27d" stroke="#5a3a2e" stroke-width="1.6"/><circle cx="8.6" cy="11" r="1.5" fill="#402a30"/><circle cx="15.4" cy="11" r="1.5" fill="#402a30"/><path d="M8.5 15 Q12 18 15.5 15" fill="none" stroke="#402a30" stroke-width="1.6" stroke-linecap="round"/></svg><span class="tk-apptx"><b>アプリ版 まるふわ まるいろ</b><small>iPhone で あそべるよ</small></span></button>
+      <div class="tk-appc" hidden role="group" aria-label="アプリ版 まるふわ まるいろ"><p>そとへ ひらきます。いいですか？</p><div><a class="tk-appgo" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" class="tk-appno">やめる</button></div></div>
       <div class="tk-dim"></div>
       <div class="tk-starwall" aria-hidden="true" style="left:0;top:0;width:100%;height:100%"></div>
       ${fa ? '<img class="tk-friend" data-who="a" src="' + fa + '" alt="" draggable="false">' : ''}
@@ -1107,6 +1122,18 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     if (n < 0) { maruEl.hidden = true; return; }
     const im = maruEl.querySelector('img'); im.src = BASE + 'img/fish/' + String(n).padStart(2, '0') + '.webp'; maruEl.setAttribute('aria-label', 'まるいろで そだてた さかなの おきもの'); maruEl.hidden = false;
   }
+  // アプリ版 まるふわ まるいろ への 入口（そとへ ひらく：「いいですか？」→ひらく。https の App Store だけ・新しい タブ・rel=noopener）。iPhone いがいは うすく「iPhone で あそべるよ」
+  const APP_URL = 'https://apps.apple.com/app/id6816003504';
+  const appBtn = $(dlg, '.tk-app'), appC = $(dlg, '.tk-appc');
+  const isIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent || '') || (/Macintosh/.test(navigator.userAgent || '') && (navigator.maxTouchPoints || 0) > 1);
+  function renderApp() { const on = isIos(); appBtn.classList.toggle('tk-app-off', !on); const sm = appBtn.querySelector('small'); if (sm) sm.textContent = on ? 'タッチで ひらく' : 'iPhone で あそべるよ'; appC.hidden = true; appBtn.setAttribute('aria-expanded', 'false'); }
+  appBtn.addEventListener('click', () => {
+    if (visit) return;
+    if (!isIos()) { say('アプリは iPhone で あそべるよ。', true); sr.textContent = 'アプリは iPhone で あそべるよ。'; return; }
+    appC.hidden = !appC.hidden; appBtn.setAttribute('aria-expanded', String(!appC.hidden)); const go = appC.querySelector('.tk-appgo'); if (appC.hidden) go.removeAttribute('href'); else { go.setAttribute('href', APP_URL); appC.querySelector('.tk-appno').focus(); }   // ひらく まで リンクは つけない（おしても いいと こたえた 時だけ）
+  });
+  appC.querySelector('.tk-appno').addEventListener('click', () => { appC.hidden = true; appC.querySelector('.tk-appgo').removeAttribute('href'); appBtn.setAttribute('aria-expanded', 'false'); appBtn.focus(); });
+  appC.querySelector('.tk-appgo').addEventListener('click', () => { setTimeout(() => { appC.hidden = true; appC.querySelector('.tk-appgo').removeAttribute('href'); appBtn.setAttribute('aria-expanded', 'false'); }, 50); });
   const mochiBtn = $(dlg, '.tk-mochi-btn'), mochi = $(dlg, '.tk-mochi'), mochiList = $(dlg, '.tk-mochilist'), mochiNote = $(dlg, '.tk-mochinote'), mochiPrev = $(dlg, '.tk-mochiprev');
   function prevMochi() {   // トレーが 部屋の まるふわを かくす ので、小さな みほんを 出す（いまの 色・もちもの）
     const W = window.TsuriWear, url = BASE + 'img/game-blue.webp';
@@ -1530,7 +1557,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     layoutRoom(); paintWater(); layoutRoom(); ownSync();
     requestAnimationFrame(() => { if (isOpen()) layoutRoom(); }); setTimeout(() => { if (isOpen()) layoutRoom(); }, 400);   // ひらいた 直後は ボタンの おりかえしが きまって いない＝はかり なおす（上の 列に かぶらない）
     if (visit && visit.starry) { starry = true; applyStarry(); }   // おくった 人の へやが ほしぞらの とき
-    renderMaru(); const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
+    renderMaru(); renderApp(); const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
     if (arrivals.length) {
       const first = arrivals[0].fish;
       const text = arrivals.length === 1 && arrivals[0].n === 1 ? first.name + 'が すいそうに ようこそ。' : 'あたらしい なかまが ' + arrivals.reduce((s, r) => s + r.n, 0) + 'ひき きたよ。';
@@ -1599,7 +1626,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   {
     const HEYA_EN = { 'もちもの': 'Items', 'もちものを おわる': 'Close Items', 'もちもの：まるふわの てに もたせて あげよう': 'Items: let Marufuwa hold something', 'なし': 'None', 'ランタン': 'Lantern', 'バケツ': 'Bucket', 'おにぎり': 'Rice ball', 'あみ': 'Net', 'おはな': 'Flower', 'かさ': 'Umbrella', 'もちものを はずしたよ。': 'Put the item down.', 'まだ じゅんびちゅう。もうすこし まってね。': 'Not ready yet. Please wait a little.', 'じぶんの こ の ときは、もちものは つかえないよ。': 'Items can’t be used while your own friend is shown.', 'みずくさが すこし のびたよ。': 'The water plants have grown a little.', 'おきにいりに する': 'Make favorite', 'おきにいり（はずす）': 'Favorite (remove)', '♡ を つけたよ。': 'Marked with a ♡.', 'おきにいりを はずしたよ。': 'Removed the favorite mark.', 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to play.', 'ともだちが あそびに きて いるよ。': 'A friend has come to visit.', 'さかなが すこし おおきく なったよ。': 'A fish has grown a little bigger.', 'さかなが おおきく そだったよ！': 'A fish has grown bigger!', 'さかなが すこし おおきく なって いるよ。': 'Some fish have grown a little bigger.', 'おおきく そだった さかなが いるよ。': 'Some fish have grown bigger.', 'そだち': 'Growth', 'すこし おおきく そだったよ': 'A little bigger', 'おおきく そだったよ': 'Bigger', 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to visit.', 'つくえの うえの おにぎり': 'Rice ball on the table', 'つくえの うえの おにぎりを、なかまと はんぶんこ したよ。': 'You shared the rice ball on the table with a friend.', 'だれかの おへや': "Someone's Room", 'だれかの おへやを みせて もらって いるよ。みるだけ。あなたの きろくには、なにも のこらないよ。': "You're visiting someone's room. Just looking. Nothing is saved to your own records.", 'じぶんの おへやに もどる': 'Back to my room', 'じぶんの おへやに もどったよ。': 'Back in your own room.', 'ようこそ。ゆっくり みていってね。': 'Welcome. Take your time looking around.', 'この おへやには、まだ さかなが いないよ。': 'There are no fish in this room yet.', 'おへやを おくる': 'Send my room', 'おへやの リンク': 'Room link', 'コピーする': 'Copy', 'リンクを コピーしたよ。ともだちに はりつけて おくってね。': 'Link copied. Paste it to send it to a friend.', 'したの リンクを コピーして、ともだちに おくってね。': 'Copy the link below and send it to a friend.', 'コピーできなかったよ。したの リンクを おして えらんで コピーしてね。': "Couldn't copy. Please select the link below and copy it.", 'リンクに はいって いるのは、さかなの ばんごうと、かざりの ばんごうと いち、いまの じかん、あそびに きて いる なかまの ばんごうだけ。なまえや ひとこと、たんまつの しるしは はいって いないよ。みる ひとの きろくには、なにも のこらないよ。': 'The link contains only numbers: fish numbers, decoration numbers and positions, the time of day, and a visiting friend’s number. No names, messages or device marks. Nothing is saved to the viewer’s records.', 'まだ おくれる おへやが ないよ。さかなを つると おくれるよ。': 'There is no room to send yet. Catch a fish and you can send it.', 'おへやの リンクを おくったよ。': 'Sent the room link.', 'おへやの リンクを コピーしました。': 'Room link copied.', 'おへやの リンクが できました。': 'Room link is ready.', 'まだ おくれる おへやが ありません。': 'There is no room to send yet.', 'おへやの リンクを おくりました。': 'Sent the room link.' };
     const GIFT_EN = { 'さくらのはなびら': 'Cherry blossom petal', 'あおいは': 'Fresh green leaf', 'どんぐり': 'Acorn', 'ゆきのけっしょう': 'Snow crystal', 'ささぶね': 'Bamboo-leaf boat', 'やどかり': 'Hermit crab' };   // ひみつで もらえる かざりの なまえ（訳表の かけら 表には 入らないので、ここで 訳す）
-    const EN = { ex: { ...HEYA_EN, 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'パレード、はじまるよ！': "The parade is starting!", 'たのしかったね。': 'That was fun!', 'さかなたちが パレードを はじめたよ。': 'The fish started a parade.', 'パレードが おわったよ。': 'The parade is over.', 'さかなたちが パレードを したよ。': 'The fish had a parade.', 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
+    const EN = { ex: { ...HEYA_EN, 'アプリ版 まるふわ まるいろ': 'App: Marufuwa Maruiro', 'タッチで ひらく': 'Tap to open', 'iPhone で あそべるよ': 'Playable on iPhone', 'アプリは iPhone で あそべるよ。': 'The app is playable on iPhone.', 'そとへ ひらきます。いいですか？': 'This opens outside the game. Is that okay?', 'ひらく': 'Open', 'やめる': 'Cancel', 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'パレード、はじまるよ！': "The parade is starting!", 'たのしかったね。': 'That was fun!', 'さかなたちが パレードを はじめたよ。': 'The fish started a parade.', 'パレードが おわったよ。': 'The parade is over.', 'さかなたちが パレードを したよ。': 'The fish had a parade.', 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
       [/^(.+?)×(\d+)$/, (_, n, k) => GIFT_EN[n] ? GIFT_EN[n] + ' ×' + k : null],   // かざりの ふだ（ひみつで もらえる かざり）
       [/^(.+?)をもどす$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] : null],
       [/^(.+?)をもどしたよ。$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] + '.' : null],
