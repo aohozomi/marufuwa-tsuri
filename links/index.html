@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<title>まるふわの いりぐち｜まるふわ つりびより</title>
+<meta name="description" content="まるふわに あえる ところ：ブラウザで つり（むりょう・ログインなし）・iPhone アプリ・LINE スタンプ。">
+<meta name="theme-color" content="#b9edf5">
+<link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/icon-180.png">
+<script>
+/* さいしょの 1コマから：よるは くらく／もじを おおきく／うごきを へらす（つりびより本体の ほぞんは よむだけ） */
+try {
+  var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d = document.documentElement, qs = new URLSearchParams(location.search);
+  var mp = {asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n', a: 'a', h: 'h', y: 'y', n: 'n'}, tt = mp[qs.get('time')] || (typeof sv.time === 'string' && mp[sv.time]) || (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n');
+  if (matchMedia('(prefers-color-scheme: dark)').matches || tt === 'n') { d.dataset.night = 'true'; var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = '#0f1c33'; }
+  if (sv.large === true) d.dataset.large = 'true';
+  if (sv.calm === true) d.dataset.calm = 'true';
+  if ((qs.get('lang') || localStorage.getItem('marufuwa-lang-v1')) === 'en') { d.lang = 'en'; window.TsuriEn = {lang: 'en'}; }
+} catch (e) {}
+</script>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:#244653;background:#edf6fa;color-scheme:light;touch-action:manipulation;--ink:#244653;--soft:#506874;--line:#b9cbd4;--card:#ffffffe6}
+:root[data-night=true]{color:#e8f1f8;background:#0f1c33;color-scheme:dark;--ink:#e8f1f8;--soft:#a9bfd2;--line:#4a6b8c;--card:#1a3250f2}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+.skip{position:absolute;left:8px;top:-80px;z-index:200;padding:12px 16px;border-radius:14px;background:#fff;color:#0b4a6b;font-weight:800;text-decoration:none;border:3px solid #0b4a6b}
+.skip:focus{top:8px}
+main{max-width:480px;margin:0 auto;padding:22px 16px calc(40px + env(safe-area-inset-bottom));word-break:keep-all;overflow-wrap:break-word;text-align:center}
+.face{display:block;width:120px;height:120px;margin:0 auto 8px;border-radius:50%;border:4px solid #fff;box-shadow:0 6px 16px #2446532b;object-fit:cover}
+h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
+.lead{margin:0 0 20px;font-size:.98rem;line-height:1.8;text-wrap:balance}
+.go{display:flex;flex-direction:column;gap:14px;margin:0 0 18px}
+.big{--c1:#ffffffd9;--c2:#bfe6f9b3;--side:#9cc9e0;--ink2:#244653;display:flex;align-items:center;justify-content:center;gap:10px;min-height:76px;padding:10px 18px;font:inherit;font-size:1.15rem;font-weight:800;line-height:1.35;color:var(--ink2);text-decoration:none;text-align:center;cursor:pointer;
+  border:3px solid #fff;border-radius:999px;background:linear-gradient(180deg,var(--c1) 0%,var(--c2) 100%);box-shadow:0 5px 0 var(--side),0 10px 14px #2446532b,inset 0 -7px 10px #00000014,inset 0 5px 7px #ffffffcc;transition:transform .09s ease-out,box-shadow .09s ease-out}
+.big:active{transform:translateY(4px);box-shadow:0 1px 0 var(--side),0 3px 6px #2446532b,inset 0 -3px 6px #00000014,inset 0 3px 5px #ffffffcc}
+.big:focus-visible,.confirm a:focus-visible,.confirm button:focus-visible{outline:3px solid #0b4a6b;outline-offset:0;box-shadow:0 0 0 6px #fff}
+.big .ic{font-size:1.5rem;line-height:1}
+.big small{display:block;font-size:.8rem;font-weight:700;opacity:.95}
+.play{--c1:#2a7fb0;--c2:#0d4d72;--side:#0b425f;--ink2:#fff;text-shadow:0 2px 0 #083a55}
+.confirm{margin:-6px 0 0;padding:14px 14px 12px;border-radius:20px;background:var(--card);border:3px solid var(--line);text-align:center}
+.confirm[hidden]{display:none}
+.confirm p{margin:0 0 10px;font-size:1rem;font-weight:800;line-height:1.6}
+.confirm .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.confirm a,.confirm button{min-height:52px;min-width:120px;padding:8px 18px;display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:800;border-radius:999px;cursor:pointer;text-decoration:none}
+.confirm a{background:#a83a63;color:#fff;border:3px solid #fff;box-shadow:0 4px 0 #6f2040}
+.confirm button{background:#fff;color:#244653;border:3px solid #b9cbd4}
+:root[data-night=true] .big{filter:brightness(.9)}
+:root[data-night=true] .play{filter:none}
+:root[data-night=true] .confirm button{background:#1a3250;color:#e8f1f8;border-color:#4a6b8c}
+.note{margin:16px 0 0;font-size:.82rem;line-height:1.7;color:var(--soft)}
+:root[data-calm=true] .big{transition:none}
+:root[data-calm=true] .big:active{transform:none}
+@media(prefers-reduced-motion:reduce){.big{transition:none}.big:active{transform:none}}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+</style>
+</head>
+<body>
+<a class="skip" id="skip" href="#play">いりぐちへ とぶ</a>
+<main id="main">
+  <img class="face" src="../img/icon-192.png" width="120" height="120" alt="">
+  <h1 id="title" tabindex="-1">まるふわの いりぐち</h1>
+  <p class="lead" id="lead">まるふわに あえる ところは みっつ。すきな ところから どうぞ。</p>
+  <div class="go">
+    <a class="big play" id="play" href="../"><span class="ic" aria-hidden="true">🎣</span><span><span id="t-play">ブラウザで あそぶ</span><small id="s-play">つりびより・むりょう・ログインなし</small></span></a>
+    <button type="button" class="big" id="b-app" data-k="app" aria-expanded="false" aria-controls="c-app"><span class="ic" aria-hidden="true">🍃</span><span><span id="t-app">iPhone アプリ</span><small id="s-app">まるふわまるいろ・むりょう</small></span></button>
+    <div class="confirm" id="c-app" hidden role="group" aria-labelledby="q-app"><p id="q-app">そとの ページ（App Store）を ひらきます。いいですか？</p><div class="row"><a id="a-app" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-app">やめる</button></div></div>
+    <button type="button" class="big" id="b-line" data-k="line" aria-expanded="false" aria-controls="c-line"><span class="ic" aria-hidden="true">💬</span><span><span id="t-line">LINE スタンプ</span><small id="s-line">まるふわの スタンプ</small></span></button>
+    <div class="confirm" id="c-line" hidden role="group" aria-labelledby="q-line"><p id="q-line">そとの ページ（LINE ストア）を ひらきます。いいですか？</p><div class="row"><a id="a-line" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-line">やめる</button></div></div>
+  </div>
+  <p class="note" id="note">そとの ページを ひらく ときは かならず「いいですか？」と きくよ。この ページは なにも ほぞんしないし、どこにも おくらないよ。</p>
+  <div class="sr-only" id="live" role="status" aria-live="polite"></div>
+</main>
+<script defer src="../tsuri-ruby-dict.js"></script>
+<script defer src="../tsuri-ruby.js"></script>
+<script>
+/* まるふわの いりぐち（ジョブズ2・2026-10-02）。ブラウザの つり・iPhone アプリ・LINE スタンプへの 入口。
+   ・通信なし・ほぞんなし（つりびより本体の せっていは よむだけ）。外へ ひらく 2つは「いいですか？」を 出して から（リンクは その とき はじめて つく）。 */
+(function () {
+  'use strict';
+  const LINKS = {
+    app: 'https://apps.apple.com/app/apple-store/id6816003504?pt=129401810&ct=web_links&mt=8',
+    line: 'https://line.me/S/sticker/36906448'
+  };
+  const EN = new URLSearchParams(location.search).get('lang') === 'en' || (() => { try { return localStorage.getItem('marufuwa-lang-v1') === 'en'; } catch (e) { return false; } })();
+  const T = (ja, en) => EN ? en : ja;
+  const $ = id => document.getElementById(id);
+  const set = (id, ja, en) => { const e = $(id); if (e) e.textContent = T(ja, en); };
+  document.title = T('まるふわの いりぐち｜まるふわ つりびより', 'Marufuwa’s Doorway | Marufuwa Fishing Days');
+  set('skip', 'いりぐちへ とぶ', 'Skip to the links'); set('title', 'まるふわの いりぐち', 'Meet Marufuwa'); set('lead', 'まるふわに あえる ところは みっつ。すきな ところから どうぞ。', 'There are three places to meet Marufuwa. Pick any one.');
+  set('t-play', 'ブラウザで あそぶ', 'Play in your browser'); set('s-play', 'つりびより・むりょう・ログインなし', 'Fishing Days · free · no login');
+  set('t-app', 'iPhone アプリ', 'iPhone app'); set('s-app', 'まるふわまるいろ・むりょう', 'Marufuwa Maruiro · free');
+  set('t-line', 'LINE スタンプ', 'LINE stickers'); set('s-line', 'まるふわの スタンプ', 'Marufuwa stickers');
+  set('q-app', 'そとの ページ（App Store）を ひらきます。いいですか？', 'This opens an outside page (the App Store). Is that OK?'); set('q-line', 'そとの ページ（LINE ストア）を ひらきます。いいですか？', 'This opens an outside page (the LINE Store). Is that OK?');
+  set('a-app', 'ひらく', 'Open'); set('a-line', 'ひらく', 'Open'); set('n-app', 'やめる', 'Cancel'); set('n-line', 'やめる', 'Cancel');
+  set('note', 'そとの ページを ひらく ときは かならず「いいですか？」と きくよ。この ページは なにも ほぞんしないし、どこにも おくらないよ。', 'We always ask before opening an outside page. This page saves nothing and sends nothing.');
+  const say = t => { const l = $('live'); l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); };
+  function close(k, focusBack) {
+    const box = $('c-' + k), a = $('a-' + k), b = $('b-' + k); box.hidden = true; a.removeAttribute('href'); b.setAttribute('aria-expanded', 'false'); if (focusBack) b.focus();
+  }
+  function open(k) {
+    ['app', 'line'].forEach(x => { if (x !== k) close(x, false); });
+    const box = $('c-' + k), a = $('a-' + k), b = $('b-' + k); a.href = LINKS[k]; box.hidden = false; b.setAttribute('aria-expanded', 'true');   // リンクは「いいですか？」を 出した とき はじめて つく
+    a.focus({preventScroll: false}); say($('q-' + k).textContent);
+  }
+  ['app', 'line'].forEach(k => {
+    $('b-' + k).addEventListener('click', () => { if ($('c-' + k).hidden) open(k); else close(k, false); });
+    $('n-' + k).addEventListener('click', () => close(k, true));
+    $('a-' + k).addEventListener('click', () => { setTimeout(() => close(k, false), 50); });   // ひらいたら もとに もどす
+    $('c-' + k).addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); close(k, true); } });
+  });
+})();
+</script>
+</body>
+</html>
