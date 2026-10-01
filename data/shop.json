@@ -1,0 +1,149 @@
+{
+ "shelves": [
+  {
+   "id": "wear",
+   "kind": "wear",
+   "ja": "ふくの いろ",
+   "en": "Colors",
+   "items": [
+    {
+     "k": "ao",
+     "ja": "みずいろ",
+     "en": "Sky blue",
+     "lv": 1,
+     "coin": 0,
+     "c": "#8fd0f5"
+    },
+    {
+     "k": "momo",
+     "ja": "もも",
+     "en": "Pink",
+     "lv": 1,
+     "coin": 5,
+     "c": "#f48fb8"
+    },
+    {
+     "k": "midori",
+     "ja": "みどり",
+     "en": "Green",
+     "lv": 1,
+     "coin": 5,
+     "c": "#7fd6a4"
+    },
+    {
+     "k": "kiiro",
+     "ja": "きいろ",
+     "en": "Yellow",
+     "lv": 8,
+     "coin": 40,
+     "c": "#ffd25e"
+    },
+    {
+     "k": "murasaki",
+     "ja": "むらさき",
+     "en": "Purple",
+     "lv": 15,
+     "coin": 80,
+     "c": "#b79cf0"
+    },
+    {
+     "k": "aka",
+     "ja": "あか",
+     "en": "Red",
+     "lv": 20,
+     "coin": 130,
+     "c": "#ff8a80"
+    },
+    {
+     "k": "orenji",
+     "ja": "オレンジ",
+     "en": "Orange",
+     "lv": 25,
+     "coin": 190,
+     "c": "#ffb366"
+    },
+    {
+     "k": "shiro",
+     "ja": "しろ",
+     "en": "White",
+     "lv": 30,
+     "coin": 260,
+     "c": "#f4f4f8"
+    },
+    {
+     "k": "kuro",
+     "ja": "くろ",
+     "en": "Black",
+     "lv": 40,
+     "coin": 360,
+     "c": "#4a4a58"
+    }
+   ]
+  },
+  {
+   "id": "item",
+   "kind": "item",
+   "ja": "もちもの",
+   "en": "Things to hold",
+   "items": [
+    {
+     "n": 1,
+     "ja": "ランタン",
+     "en": "Lantern",
+     "lv": 1,
+     "coin": 10,
+     "c": "🏮"
+    },
+    {
+     "n": 2,
+     "ja": "バケツ",
+     "en": "Bucket",
+     "lv": 1,
+     "coin": 10,
+     "c": "🪣"
+    },
+    {
+     "n": 3,
+     "ja": "おにぎり",
+     "en": "Rice ball",
+     "lv": 1,
+     "coin": 10,
+     "c": "🍙"
+    },
+    {
+     "n": 4,
+     "ja": "あみ",
+     "en": "Net",
+     "lv": 3,
+     "coin": 40,
+     "c": "🥅"
+    },
+    {
+     "n": 5,
+     "ja": "おはな",
+     "en": "Flower",
+     "lv": 5,
+     "coin": 80,
+     "c": "🌷"
+    },
+    {
+     "n": 6,
+     "ja": "かさ",
+     "en": "Umbrella",
+     "lv": 8,
+     "coin": 130,
+     "c": "☂️"
+    }
+   ]
+  },
+  {
+   "id": "kazari",
+   "kind": "deco",
+   "ja": "かざり",
+   "en": "Accessories",
+   "soon": true,
+   "items": []
+  }
+ ],
+ "v": 1
+}

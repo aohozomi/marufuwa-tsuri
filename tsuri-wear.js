@@ -26,14 +26,24 @@
   var cache = {}, pending = {};
   function readSave() { try { var d = JSON.parse(localStorage.getItem(KEY)); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } }
   function levelOf(xp) { return Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, Number(xp) || 0) / 20))); }   // 本体の levelOf と おなじ
+  // ひろばの「おみせ」で もらった もの（おさかなコインで ひらく・へらない）。ひろばの 記録 marufuwa-hiroba-v1 の shop.got（wear＝色の なまえの 配列・item＝もちもの 番号の 配列）を 読むだけ（書かない・キーは ふやさない）
+  var HIROBA_KEY = 'marufuwa-hiroba-v1';
+  function owns(kind, key) {
+    try {
+      var d = JSON.parse(localStorage.getItem(HIROBA_KEY)), g = d && d.shop && d.shop.got; if (!g || typeof g !== 'object') return false;
+      if (kind === 'wear') { var known = false; for (var i = 0; i < LIST.length; i++) if (LIST[i].k === String(key)) known = true; return known && Array.isArray(g.wear) && g.wear.indexOf(String(key)) >= 0; }   // きまった 色の なまえだけ
+      if (kind === 'item') { var n = Math.floor(Number(key)); return n >= 1 && n < ITEMS.length && Array.isArray(g.item) && g.item.indexOf(n) >= 0; }   // 1〜もちものの かず だけ
+    } catch (e) {}
+    return false;
+  }
   function readTankItem() { try { var d = JSON.parse(localStorage.getItem(TANK_KEY)), n = Math.floor(Number(d && d.item)); return Number.isFinite(n) && n >= 0 && n < ITEMS.length ? n : 0; } catch (e) { return 0; } }
   // いま 持つ もの。レベルが たりない・しらない 番号は なし
-  function currentItem() { var n = readTankItem(), o = ITEMS[n]; return o && o.lv <= levelOf(readSave().xp) && n > 0 ? { n: n, k: o.k, lv: o.lv, active: true } : { n: 0, k: 'none', lv: 0, active: false }; }
+  function currentItem() { var n = readTankItem(), o = ITEMS[n]; return o && (o.lv <= levelOf(readSave().xp) || owns('item', n)) && n > 0 ? { n: n, k: o.k, lv: o.lv, active: true } : { n: 0, k: 'none', lv: 0, active: false }; }
   // いま つかう 色。まだ ひらいて いない（レベルが たりない）色・しらない 名前は 水色（そのまま）
   function current() {
     var s = readSave(), want = s.my && s.my.wear, lv = levelOf(s.xp), o = null;
     for (var i = 0; i < LIST.length; i++) if (LIST[i].k === want) o = LIST[i];
-    return o && o.lv <= lv ? o : LIST[0];
+    return o && (o.lv <= lv || owns('wear', o.k)) ? o : LIST[0];
   }
   // ─── もちもの の 絵：元の 絵（240×320）の ざひょうで 描く（左手＝(96,198)。顔（y<180）には かぶせない）───
   var INK = '#6b3a22';
@@ -130,6 +140,6 @@
     currentItem: currentItem, compose: compose, drawItem: drawItem,
     list: function () { return LIST.map(function (o) { return { k: o.k, lv: o.lv, h: o.h, s: o.s, v: o.v }; }); },
     current: function () { var o = current(); return { k: o.k, lv: o.lv, h: o.h, s: o.s, v: o.v, active: !!o.h }; },   // build(url, current()) で 色つきの 絵を 作れる
-    levelOf: levelOf, apply: apply, build: build, warm: warm
+    levelOf: levelOf, apply: apply, build: build, warm: warm, owns: owns
   };
 })();
