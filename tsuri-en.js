@@ -342,6 +342,7 @@
     [/^(.+?)、ゆうゆうおよいでるね。$/, (_, f) => `${nmFish(f)} swims so leisurely.`],
     [/^(とうだい|まるまど|つき)をさわったよ。$/, (_, o) => `You touched the ${({ 'とうだい': 'lighthouse', 'まるまど': 'round window', 'つき': 'moon' })[o]}.`],
     [/^(\d+)がつ(\d+)にち$/, (_, m, d) => `${['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m] || m} ${d}`],
+    [/^🔒\s*(.+)$/, (_, n) => { const t = EX.get(norm(n)); return t ? '🔒' + t : null; }],   // つりばの タブ（鍵つき）10/1
     [/^(.+?)。もういちどきく$/, (_, n) => { const t = EX.get(norm(n)); return t ? `${t}. Listen again` : null; }],
     [/^(.+?)からとどくよ。$/, (_, p) => `From ${nmPal(p)}.`],
     [/^めずらしさ(\d)\s*\/\s*(\d)$/, (_, a, b) => `Rarity ${a} / ${b}`],
