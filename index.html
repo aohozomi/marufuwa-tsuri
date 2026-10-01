@@ -1520,8 +1520,23 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const ups = partyGain(0, 5); store(); announceUps(ups, 0);
   }, 60000);
   // さおは てもとから ななめ うえへ。いとは さおの さきから ウキへ
+  const rodK = {x: 0, y: 0}; let rodRaf = 0, rodSway = 0, rodHold = 0;   // 竿の さき の ずれ（ぼくの さお だけ）。うごきを へらす では ポーズ（かくど）だけ
+  function rodTo(x, y, ms) {
+    cancelAnimationFrame(rodRaf); const x0 = rodK.x, y0 = rodK.y, t0 = performance.now();
+    if (reduce() || !ms) { rodK.x = 0; rodK.y = y; rod($('line-me'), mine, 12, $('rod-me')); return; }
+    const step = now => { const k = Math.min(1, (now - t0) / ms), e = k * k * (3 - 2 * k); rodK.x = x0 + (x - x0) * e; rodK.y = y0 + (y - y0) * e; rod($('line-me'), mine, 12, $('rod-me')); if (k < 1) rodRaf = requestAnimationFrame(step); };
+    rodRaf = requestAnimationFrame(step);
+  }
+  function rodPose(next) {   // ばめんごとの 竿
+    clearInterval(rodSway); clearTimeout(rodHold);
+    if (next === 'waiting') { rodTo(0, 0, 400); if (!reduce()) rodSway = setInterval(() => { if (phase !== 'waiting' || document.body.classList.contains('gazing') || document.hidden) return; const t = performance.now(); rodK.y = Math.sin(t / 1900) * .7 + (Math.sin(t / 5300) > .93 ? 2.2 : 0); rod($('line-me'), mine, 12, $('rod-me')); }, 140); }
+    else if (next === 'bite') rodTo(0, 6, 140);
+    else if (next === 'reel') rodTo(-1, 3, 300);
+    else if (next === 'caught') { rodTo(-3, -11, 380); rodHold = setTimeout(() => rodTo(0, -4, 600), 1200); }
+    else rodTo(0, 0, 300);
+  }
   function rod(line, i, tall, stick) {
-    const f = feet(i), w = floatAt(i), tip = {x: f.x + 9, y: f.y - tall - 6};
+    const f = feet(i), w = floatAt(i), kk = stick.id === 'rod-me' ? rodK : {x: 0, y: 0}, tip = {x: f.x + 9 + kk.x, y: f.y - tall - 6 + kk.y};
     stick.setAttribute('x1', f.x + 3); stick.setAttribute('y1', f.y - tall * .5);
     stick.setAttribute('x2', tip.x); stick.setAttribute('y2', tip.y);
     line.setAttribute('x1', tip.x); line.setAttribute('y1', tip.y);
@@ -1951,7 +1966,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, precise = false, periodBase = 1100, period = 1600, ringStart = 0, reelStartAt = 0, perfectStreak = 0, slips = 0, tension = 0, tensionAt = 0, closeStreak = 0, tStage = 0, escapeRun = 0, escapeHinted = false, lockTimer = 0, waitNoted = false, kickUntil = 0, kickPower = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
-  function setPhase(next) { phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { if (next !== phase) rodPose(next); phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
@@ -2051,6 +2066,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // なげる うごき：うしろに そって、えいっと ふって、ウキが ゆみなりに とんで、ぽちゃん
   function throwRod() {
     const box = scene.getBoundingClientRect(), f = feet(mine), w = floatAt(mine);
+    if (!reduce()) { rodTo(-9, 3, 230); setTimeout(() => rodTo(5, -2, 190), 250); setTimeout(() => { if (phase === 'waiting') rodPose('waiting'); }, 470); }   // さおが うしろから まえへ（0.5びょう）
     const dx = (w.x - (f.x + 9)) / 100 * box.width, dy = (w.y - (f.y - 18)) / 100 * box.height;
     const back = 13 + Math.random() * 6, fore = 10 + Math.random() * 6, lift = 55 + Math.random() * 45, reach = .38 + Math.random() * .17;   // まいかい すこし ちがう ゆみなり（ちゃくすいの 0.9びょうは かえない）
     marufuwa.animate([{rotate: '0deg', scale: '1 1'}, {rotate: -back + 'deg', scale: '.93 1.07', offset: .35}, {rotate: fore + 'deg', scale: '1.07 .93', translate: '0 -8px', offset: .62}, {rotate: '0deg', scale: '1 1'}], {duration: 640, easing: 'ease-in-out'});
@@ -2143,7 +2159,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const big3 = power === 3, small1 = power === 1;   // ぴったり＝おおきく・ちかい＝ちいさく（さが ひとめで わかる）
       marufuwa.animate(big3 ? [{rotate: '-7deg', scale: '1 1'}, {rotate: '-27deg', scale: '.9 1.1', translate: '-12px -4px'}, {rotate: '-7deg', scale: '1 1'}] : small1 ? [{rotate: '-7deg', scale: '1 1'}, {rotate: '-11deg', scale: '.98 1.02'}, {rotate: '-7deg', scale: '1 1'}] : [{rotate: '-7deg', scale: '1 1'}, {rotate: '-20deg', scale: '.94 1.06', translate: '-8px 0'}, {rotate: '-7deg', scale: '1 1'}], {duration: big3 ? 320 : 260, easing: 'ease-out'});
       judge.animate(big3 ? [{scale: '.5'}, {scale: '1.7', offset: .6}, {scale: '1.25'}] : small1 ? [{scale: '.8'}, {scale: '1'}] : [{scale: '.6'}, {scale: '1.25'}, {scale: '1'}], {duration: big3 ? 300 : 260, easing: 'ease-out'});
-      kickUntil = performance.now() + 380; kickPower = power;   // さおの しなり（ぴったり＝おおきく）
+      kickUntil = performance.now() + 380; kickPower = power; rodK.y = power === 3 ? 9 : power === 2 ? 6 : 4.5; rodTo(-1, 3, 340);   // さおの さきが ぐっと さがって もどる
+         // さおの しなり（ぴったり＝おおきく）
       if (power === 3) sparkle(center ? 14 : 8); else if (power === 1) puff();
       splash(power, center);
     }
