@@ -581,6 +581,7 @@ body.gazing #sound,body.gazing .bgm-btn{flex:0 1 auto}
 /* おとと BGM：一度 えらんだ あとは、ちいさな 1ぎょうに（つれた あとの しゅやくは「もういちど なげる」と「しゃしんを とる」。「そっと にがす」は そのまま めだつ）。ながめる中は いままで どおり */
 body:not(.gazing) .sub-actions[data-audio=set] .audio-row{display:flex;flex:1 1 100%;gap:12px}
 body:not(.gazing) .sub-actions[data-audio=set] #sound,body:not(.gazing) .sub-actions[data-audio=set] .bgm-btn{flex:1 1 40%;min-height:44px;padding:4px 10px;font-size:.85rem}
+.renshu-go{display:flex;align-items:center;justify-content:center;flex:1 1 100%;min-height:44px;padding:6px 14px;border:2px solid #286b88;border-radius:14px;background:#fff;color:#17323d;font-weight:800;text-decoration:none}
 /* つかいやすく する（ふだんは とじて いる）。らくちん・ふるえ を、おとなも こどもも えらべる。ひらいた／とじた と えらんだ ものは おぼえて おく */
 .assist{flex:1 1 100%;margin-bottom:0}
 .assist-body{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
@@ -1697,6 +1698,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       { const y = document.createElement('button'); y.id = 'snd-yomi'; y.type = 'button'; y.hidden = true; y.setAttribute('aria-pressed', 'false'); g.append(y); }
       body.append(g); }
     { const kb = document.createElement('p'); kb.id = 'kbd-note'; kb.className = 'note'; kb.style.flex = '1 1 100%'; kb.style.textAlign = 'left'; body.append(kb); }   // キーボードの つかいかた
+    { const r = document.createElement('a'); r.id = 'renshu-go'; r.href = 'renshu/'; r.className = 'renshu-go'; r.textContent = L('つりの れんしゅうじょ ▸', 'Practice pond ▸'); body.append(r); }   // れんしゅうじょ（ジョブズ2）への 入口
     box.append(head, body);
     box.open = typeof save.assistOpen === 'boolean' ? save.assistOpen : !!save.easy;
     head.addEventListener('click', () => setTimeout(() => { save.assistOpen = box.open; store(); }, 0));   // ひらく／とじる を おぼえる
@@ -4083,6 +4085,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function drawRuby() { const b = $('ruby'); if (!b) return; b.hidden = EN(); const hira = save.hira === true; b.textContent = L('もじ：' + (hira ? 'ひらがなだけ' : 'かんじ＋ふりがな'), 'Text: ' + (hira ? 'Hiragana only' : 'Kanji + furigana')); b.setAttribute('aria-pressed', String(hira)); }
   $('ruby') && $('ruby').addEventListener('click', () => { save.hira = !(save.hira === true); store(); drawRuby(); say(L('もじを かえるよ。よみこみ なおすね。', 'Changing the text style. Reloading.')); setTimeout(() => location.reload(), 900); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawRuby); else drawRuby();
+  { const dr = () => { const r = $('renshu-go'); if (r) r.textContent = L('つりの れんしゅうじょ ▸', 'Practice pond ▸'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dr); else dr(); }
   drawBuzz(); drawNature(); drawEasy();
   scene.dataset.area = save.area; scene.dataset.rain = String(rainy); callPals();
   spots.forEach(spot => spot.append($('bucket-art').content.cloneNode(true)));
