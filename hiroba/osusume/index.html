@@ -169,6 +169,8 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
   window.addEventListener('load', () => setTimeout(applyEn, 400));
 })();
 </script>
+<script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-pagesound.js"></script>
 <script defer src="../../tsuri-en.js"></script>
 <script defer src="../../tsuri-ruby-dict.js"></script>
 <script defer src="../../tsuri-ruby.js"></script>
@@ -196,5 +198,6 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
   addEventListener('load', () => { reg(); title(); setTimeout(() => { reg(); title(); }, 300); setTimeout(title, 1200); });
 })();
 </script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ mount: document.getElementById('back'), bgm: 'hiroba', time: () => document.documentElement.dataset.time }); });</script>
 </body>
 </html>

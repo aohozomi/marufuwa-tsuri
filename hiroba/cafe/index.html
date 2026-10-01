@@ -127,7 +127,7 @@ h2{margin:10px 0 4px;font-size:1.05rem}
   </section>
   <section id="seated" hidden aria-labelledby="h-seat">
     <h2 id="h-seat">ゆっくり すわって いるよ</h2>
-    <div class="acts"><button type="button" id="again">べつの のみものに する</button><button type="button" id="leave">かえる</button><span id="bgm-slot"></span></div>
+    <div class="acts"><button type="button" id="again">べつの のみものに する</button><button type="button" id="leave">かえる</button></div>
   </section>
   <p class="note">おうちの かたへ：おかねも じゅんいも なにも へりません。のみものを えらんで すわる だけの へやです。ことばは「ゆっくり していってね」「また きてね」の ふたつだけで、ひきとめません。なかまの ひとことは 1ぷんに 1かい いかです。きろくも つうしんも ありません。てんめつは しません。</p>
 </main>
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.seated = true; state.drink = id; drinkEl.setAttribute('fill', d.c); steam.style.display = d.hot ? '' : 'none'; cup.setAttribute('opacity', '1'); me.setAttribute('opacity', '1');
     $('pick').hidden = true; $('seated').hidden = false; $('leave').focus();
     if (first) say('ラテの かわうそ', 'ゆっくり していってね。'); else cap.textContent = 'ラテの かわうそ：' + d.ja + '、どうぞ。';
-    ensureBgm(); arm();
+    arm();
   }
   $('again').addEventListener('click', () => { $('pick').hidden = false; $('seated').hidden = true; cap.textContent = 'ラテの かわうそ：のみものを えらんでね。'; const b = menu.querySelector('button'); if (b) b.focus(); });
   $('leave').addEventListener('click', () => { if (state.left) return; state.left = true; say('ラテの かわうそ', 'また きてね。'); clearInterval(timer); if (window.TsuriBgm) window.TsuriBgm.leave('tank'); setTimeout(() => { location.href = $('back').getAttribute('href'); }, state.testNoNav ? 99999999 : 1800); });
@@ -258,18 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function tickAll() { if (!state.seated || state.left || document.hidden) return; talk(); if (clock() - lastSip > 75000 && clock() - lastTalk > 6000) sip(); visitStep(); if (!visiting && clock() >= nextVisit) visit(); }
   function arm() { if (timer) return; const n = clock(); lastTalk = n - 30000; lastSip = n - 40000; nextVisit = n + 120000 + Math.random() * 180000; timer = setInterval(tickAll, 1000); }
 
-  // BGM（ひろば・おへやと おなじ曲 heya）：はじめは OFF
-  let ac = null;
-  function ensureBgm() {
-    const B = window.TsuriBgm; if (!B || ensureBgm.done) return; ensureBgm.done = true;
-    const mk = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; };
-    mk();
-    const btn = B.button({ className: 'bgmbtn', sound: () => true, enableSound: () => {}, onToggle: () => { mk(); } });
-    btn.style.cssText = 'min-height:48px;padding:6px 14px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;flex:1 1 140px';
-    $('bgm-slot').replaceWith(btn);
-    B.enter('tank', { ctx: () => ac, sound: () => true, starry: () => false, mute: () => false, time: () => time });
-  }
-  addEventListener('pagehide', () => { if (window.TsuriBgm) window.TsuriBgm.leave('tank'); });
+  // おと：はじめから ON・うえに 🔇 1つ・BGM（heya）・かんきょうおん（カップの ひくい おと）＝tsuri-pagesound.js
+  if (window.PageSound) PageSound.init({ mount: $('back'), bgm: 'tank', time: () => time, ambient: api => { api.voice(262, 220, .24, .05); api.voice(330, 330, .14, .03, .1); } });
 
   window.Cafe = { state: () => ({ seated: state.seated, drink: state.drink, left: state.left, said: state.said.slice(), guests: guests.map(g => g.id), time, rain, drinks: DRINKS.length, visits: state.visits, sips: state.sips, taps: state.taps, visiting: !!visiting, bubbles: over.children.length }), choose, tap, visit, skew: ms => { skew += ms; }, noNav: () => { state.testNoNav = true; }, talk, DRINKS: DRINKS.map(d => d.id) };
 });
@@ -277,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="../../tsuri-town.js"></script>
 <script defer src="../../tsuri-world.js"></script>
 <script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-pagesound.js"></script>
 <script defer src="../../tsuri-en.js"></script>
 <script defer src="../../tsuri-en-hiroba.js"></script>
 <script defer src="../../tsuri-ruby-dict.js"></script>
