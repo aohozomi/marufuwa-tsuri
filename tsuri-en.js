@@ -61,7 +61,7 @@
     ['うみ、きもちいい', 'The sea feels nice.'], ['かぜが ふわふわ', 'The breeze is so fluffy.'], ['ほしが みえるよ', 'I can see the stars.'],
     // 9/30 15:27 ジョブズ1 が ひろばと ことばを そろえた（ひよこ・ほほきずの ねこ・がんたいの くま〔ひるの ひとこと〕）。ひろばの 英訳（tsuri-en-hiroba.js）と おなじ ひびき
     ['ぴよ！ きょうも いい ひ', "Peep! It's a good day again."], ['ぼーっと するね', 'Just zoning out.'], ['いっしょに いようね', "Let's be together."], ['ほしが みえるよ。ひるでも ね', 'I can see stars. Even in the daytime.']];
-  const AREA = { 'みずうみ': ['Lake', 'the Lake'], 'かわ': ['River', 'the River'], 'みなとまち': ['Harbor Town', 'Harbor Town'], 'ふねのうえ': ['On the Boat', 'the Boat'] };
+  const AREA = { 'みずうみ': ['Lake', 'the Lake'], 'かわ': ['River', 'the River'], 'みなとまち': ['Harbor Town', 'Harbor Town'], 'ふねのうえ': ['On the Boat', 'the Boat'], 'もりのいけ': ['Forest Pond', 'the Forest Pond'], 'ゆきのみずうみ': ['Snowy Lake', 'the Snowy Lake'] };
   const TIME = { 'あさ': ['Morning', 'morning'], 'ひる': ['Day', 'daytime'], 'ゆうがた': ['Evening', 'evening'], 'よる': ['Night', 'night'] };
   const FISH_MAP = new Map(FISH_JA.map((j, i) => [j, FISH_EN[i]]));
   const PAL_MAP = new Map(PAL_JA.map((j, i) => [norm(j), PAL_EN[i]]));
@@ -84,7 +84,7 @@
     'けしきのいきもの：ON': 'Wildlife: ON', 'けしきのいきもの：OFF': 'Wildlife: OFF',
     'みる・いく': 'Look & Visit', 'バケツ': 'Bucket', 'ずかん': 'Fish Book', 'どうぐ': 'Gear', 'ひろば': 'Plaza', 'きろく': 'Records',
     'いまのじかん': 'Current time', 'あさ': 'Morning', 'ひる': 'Day', 'ゆうがた': 'Evening', 'よる': 'Night',
-    'みずうみ': 'Lake', 'かわ': 'River', 'みなとまち': 'Harbor Town', 'ふねのうえ': 'On the Boat',
+    'みずうみ': 'Lake', 'かわ': 'River', 'みなとまち': 'Harbor Town', 'ふねのうえ': 'On the Boat', 'もりのいけ': 'Forest Pond', 'ゆきのみずうみ': 'Snowy Lake',
     'じかんででやすいさかながかわるよ（あさ・ひる・ゆうがた・よる）。きろくはこのたんまつのなかだけにのこります。ログインもインストールもいりません。はいけいとさかなのえは、いまはかりのものです。':
       'Which fish appear changes with the time (morning, day, evening, night). Your records stay only on this device. No login or install needed. The backgrounds and fish art are placeholders for now.',
     'きろくをのこす・もどす': 'Save / Restore records', 'おうちのかたへ': 'For grown-ups',
@@ -209,7 +209,7 @@
     'みずうみ、ひろいね': 'The lake is so wide.', 'むこうぎしまでみえるね': 'You can see all the way to the far shore.', 'みずうみのそこにはなにがいるんだろう': "I wonder what's at the bottom of the lake.",
     'かわのおとがきこえる': 'I can hear the river.', 'ながれがはやいところ、きをつけてね': 'Careful where the current is fast.', 'かわのさかなはすばしっこいよ': 'River fish are quick.',
     'ふねがとおってく': 'A boat is passing by.', 'うみのにおいがするね': 'It smells like the sea.', 'かもめがないてる': 'The seagulls are calling.', 'ゆれてるね': "We're rocking.",
-    'ふねのうえはかぜがつよいね': 'The wind is strong on the boat.', 'ここはおおきいのがいるよ': 'There are big ones here.', 'ここにいるとおちつくね': "It's calming to be here.", 'かぜがきもちいいね': 'The breeze feels nice.',
+    'ふねのうえはかぜがつよいね': 'The wind is strong on the boat.', 'きのいいにおいがするね': 'It smells like nice trees.', 'ことりのこえがきこえる': 'I can hear little birds.', 'もりのいけはしずかだね': 'The forest pond is so quiet.', 'ゆきのみずうみ、しずかだね': 'The snowy lake is so quiet.', 'ほっぺがひんやりするね': 'My cheeks feel nice and cool.', 'しろいけしきだね': 'Everything looks white.', 'ここはおおきいのがいるよ': 'There are big ones here.', 'ここにいるとおちつくね': "It's calming to be here.", 'かぜがきもちいいね': 'The breeze feels nice.',
     'さかな、いまどこにいるのかな': "I wonder where the fish are now.", 'いそがなくてだいじょうぶ': "No rush. It's okay.", 'にがしても、またあえるよ': "Even if you let one go, you'll meet again.",
     'つれなくても、たのしいね': "Even if we don't catch anything, it's fun.", 'はじめまして。ここ、いいところだよ': 'Nice to meet you. This is a good place.', 'となりにいてもいい？': 'Mind if I sit next to you?',
     'つりははじめて？ゆっくりでいいよ': 'First time fishing? Take it slow.', 'ねむれない？いっしょにながめよう': "Can't sleep? Let's watch together.", 'こんなじかんまでおつかれさま': 'Good work, up this late.',
@@ -352,8 +352,8 @@
     [/^(.+?)、さいだい([\d.]+)センチ、(\d+)ひき$/, (_, f, cm, n) => `${nmFish(f)}, largest ${cm} cm, ${n} caught`],
     [/^あたらしいなかまが(\d+)ひききたよ。$/, (_, n) => `${n} new friends have arrived.`],
     [/^さいだい([\d.]+)センチ（(\d+)ひき）(ぬし)?$/, (_, cm, n, b) => `Largest ${cm} cm (${n} caught)${b ? ' · Guardian' : ''}`],
-    [/^(みずうみ|かわ|みなとまち|ふねのうえ)・(いつでも)$/, (_, a) => `${nmArea(a)} · any time`],
-    [/^(みずうみ|かわ|みなとまち|ふねのうえ)・(.+?)におおい$/, (_, a, t) => `Often at ${nmArea(a, true)} · ${OFTEN(t)}`],
+    [/^(みずうみ|かわ|みなとまち|ふねのうえ|もりのいけ|ゆきのみずうみ)・(いつでも)$/, (_, a) => `${nmArea(a)} · any time`],
+    [/^(みずうみ|かわ|みなとまち|ふねのうえ|もりのいけ|ゆきのみずうみ)・(.+?)におおい$/, (_, a, t) => `Often at ${nmArea(a, true)} · ${OFTEN(t)}`],
     [/^(.+?)。つかっている$/, (_, c) => (COLOR[c] ? `${COLOR[c]}. In use` : null)],
     [/^(.+?)。レベル(\d+)でもらえるよ$/, (_, c, n) => (COLOR[c] ? `${COLOR[c]}. Unlocks at level ${n}` : null)],
     [/^レベル(\d+)$/, (_, n) => `Lv. ${n}`],
