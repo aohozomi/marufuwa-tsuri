@@ -88,15 +88,20 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 
 /* うえの おび：だいめい と、おと・うごきの ボタン */
 .top{display:flex;align-items:center;justify-content:space-between;gap:6px 8px;flex-wrap:wrap;margin:0 0 8px}
-.logo{display:flex;align-items:flex-end;gap:1px;font-size:clamp(1.2rem,5.4vw,1.75rem);font-weight:900;margin:0;line-height:1.15}
+.logo{display:flex;align-items:flex-end;gap:1px;font-size:clamp(1.1rem,4.7vw,1.75rem);font-weight:900;margin:0;line-height:1.15}
 .logo span{display:inline-block;color:#fff;-webkit-text-stroke:5px var(--k);paint-order:stroke fill;text-shadow:0 3px 0 var(--d),0 6px 7px #24465340;animation:bounce 2.6s ease-in-out infinite;animation-delay:calc(var(--n)*-.26s)}
 .logo i{display:inline-block;width:.45em}
 .logo span:nth-of-type(4n+1){--k:#4bb3e0;--d:#2a86b3}.logo span:nth-of-type(4n+2){--k:#46c79a;--d:#2a9a72}.logo span:nth-of-type(4n+3){--k:#ff9a6b;--d:#d96f40}.logo span:nth-of-type(4n){--k:#a98be8;--d:#7c5fc4}
 @keyframes bounce{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -4px;rotate:3deg}}
 .hud{display:flex;gap:8px;flex-wrap:wrap}
 /* せってい（⚙）：さいしょは ⚙ だけ（世界を ぜんめんに）。ひらくと おと・BGM・くみたてる・うごきが ならぶ。がめんの 上に かぶせる だけ（そとの ものが ずれない） */
-.hud-wrap{position:relative;margin-left:auto}
-.hud-gear{min-height:46px;min-width:46px;padding:4px 14px;font-size:.82rem;display:inline-flex;align-items:center;justify-content:center;gap:6px;--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
+.hud-wrap{position:static}   /* ⚙の パネルは 上の 列（.top）の みぎはしに そろえる（列が 2行に おれても がめんの そとへ 出ない） */
+.top{position:relative}
+.mutegrp{position:relative;display:flex;align-items:center;gap:6px;margin-left:auto}
+.mutehint{position:absolute;right:0;top:calc(100% + 6px);z-index:70;pointer-events:none;padding:3px 10px;border-radius:12px;background:#fffffff2;border:2px solid #bfdce8;font-weight:800;font-size:.8rem;color:#244653;white-space:nowrap}
+#mute{white-space:nowrap;min-height:44px;min-width:44px;padding:4px 9px;font-size:.8rem;border-width:2px;box-shadow:0 3px 0 var(--side),inset 0 -4px 6px #00000012,inset 0 3px 5px #ffffffcc}   /* おとを けす／ならす（いちばん 上・44px いじょう） */
+#mute::before{display:none}
+.hud-gear{min-height:46px;min-width:46px;padding:4px 9px;font-size:.8rem;display:inline-flex;align-items:center;justify-content:center;gap:6px;--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
 .hud-gear b{font-size:1.15rem;line-height:1}
 .hud-gear[aria-expanded=true]{--c1:#fff4c2;--c2:#ffe27a99;--side:#d9a520}
 .hud-wrap > .hud{position:absolute;right:0;top:calc(100% + 8px);z-index:60;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px;width:max-content;max-width:min(78vw,260px);padding:10px;background:#ffffffee;border:3px solid #fff;border-radius:24px;box-shadow:0 8px 20px #24465340}
@@ -472,6 +477,7 @@ body.calm .cloud.c2{left:56%}
 
   <div class="top">
     <h1 class="logo" data-noruby data-en="1" aria-label="まるふわの ひろば"><span style="--n:0" aria-hidden="true">ま</span><span style="--n:1" aria-hidden="true">る</span><span style="--n:2" aria-hidden="true">ふ</span><span style="--n:3" aria-hidden="true">わ</span><span style="--n:4" aria-hidden="true">の</span><i aria-hidden="true"></i><span style="--n:5" aria-hidden="true">ひ</span><span style="--n:6" aria-hidden="true">ろ</span><span style="--n:7" aria-hidden="true">ば</span></h1>
+    <span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">ミュートボタンは こちら →</span><button type="button" id="mute" class="mutebtn" aria-pressed="false">🔇 おとを けす</button></span>
     <div class="hud-wrap">
       <button id="hud-gear" class="hud-gear" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="hud-panel"><b aria-hidden="true">⚙</b><span>せってい</span></button>
       <div class="hud" id="hud-panel" role="group" aria-label="おと・BGM・うごきの せってい" hidden>
@@ -707,7 +713,7 @@ let main = readJSON(MAIN_KEY) || {};
 const own = Object.assign({ motion: 'auto', met: {}, day: '', metToday: {}, secrets: {}, last: '', leftAt: 0, visits: 0, metAt: {}, seenAt: {}, told: {}, firstAt: {}, guestDay: {}, companion: {}, together: {}, careDay: {}, sweepDay: {}, lampDay: {}, traceSaid: {}, lastDay: 0, bloom: 0, welcomeDay: 0 }, readJSON(OWN_KEY) || {});
 for (const k of ['metAt', 'seenAt', 'told', 'firstAt', 'guestDay', 'companion', 'together', 'careDay', 'sweepDay', 'lampDay', 'traceSaid']) if (!own[k] || typeof own[k] !== 'object' || Array.isArray(own[k])) own[k] = {};   // なかまの「あった 日時」「きた 日時」「あたらしい なかまが きたよ を 言った 子」（じぶんの きろく）
 const saveOwn = () => { try { localStorage.setItem(OWN_KEY, JSON.stringify(own)); } catch {} };
-let soundFlag = main.sound === true;
+let soundFlag = main.sound === true || (main.sound === undefined && !(main.calm === true || own.motion === 'less' || matchMedia('(prefers-reduced-motion: reduce)').matches));   // 10/1 マスター「全部の場所で 音は ならす」：きろくが なければ ON（さいしょの タップで 目ざめる）／うごきを へらす なら はじめ OFF
 function writeSound(on) {
   soundFlag = on;
   try {
@@ -722,7 +728,8 @@ const soundOn = () => soundFlag;
 //   あんない＝「まわりを きく」の ばしょの おと／なみと あめ＝ふんすいの みず・あめ・とり・こおろぎ／のこりは こうかおん。「おとを つけたよ」の かくにんの おと（sfx.on）は いつも ならす（'ui'）。
 //   やさしい おと（soft）：かくばった なみは まるい なみに・1.8kHz より たかい おとは 1オクターブ さげる。「おと」ぜんたいが OFF なら 今までどおり ならさない
 let sndKind = 'fx';
-const sndOk = () => soundOn() && (sndKind === 'ui' || !main || main[sndKind === 'guide' ? 'sndGuide' : sndKind === 'amb' ? 'sndAmb' : 'sndFx'] !== false);
+const FX_QUIET = true;   // 10/2 マスター直「効果音 一旦 ぜんぶ とめてくれ・ザー（ずっと ながれる 環境音）と BGM だけで いい」：tone／zap（こうかおん・ui・あんない・とり・むし）は ぜんぶ ならさない。もどす ときは false に
+const sndOk = () => !FX_QUIET && soundOn() && (sndKind === 'ui' || !main || main[sndKind === 'guide' ? 'sndGuide' : sndKind === 'amb' ? 'sndAmb' : 'sndFx'] !== false);
 const asKind = (k, fn) => { const p = sndKind; sndKind = k; try { return fn(); } finally { sndKind = p; } };
 const soft = () => !!(main && main.soft === true);
 const reduceOS = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -878,13 +885,13 @@ function tone(freq, len = .09, type = 'round', delay = 0, loud = .05, slideTo = 
     osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + end + .02);
   } catch {}
 }
-function zap(len = .1, delay = 0, loud = .06, pan = 0) {
+function zap(len = .1, delay = 0, loud = .06, pan = 0, atk = 0) {   // atk＝立ち上がりの さいていの 長さ（そうさの ときの ざっ だけ ゆっくりに）
   if (!sndOk()) return;
   try {
     const c = ready(), at = c.currentTime + delay;
     if (!noiseBuf) { noiseBuf = c.createBuffer(1, c.sampleRate * .5, c.sampleRate); const d = noiseBuf.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
     const src = c.createBufferSource(), lp = c.createBiquadFilter(), vol = c.createGain(); src.buffer = noiseBuf; lp.type = 'lowpass'; lp.frequency.value = GENTLE.noiseLp; if (lp.Q) lp.Q.value = .5;
-    const A = GENTLE.attack, end = Math.max(A + .005, len);
+    const A = Math.max(GENTLE.attack, atk), end = Math.max(A + .005, len);
     vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud * GENTLE.noiseGain, at + A); vol.gain.linearRampToValueAtTime(0, at + end);
     src.connect(lp); lp.connect(vol); route(c, vol, pan); src.start(at); src.stop(at + end + .02);
   } catch {}
@@ -896,31 +903,31 @@ const sfx = {
   on: () => chord([988, 1319], .08),
   step: a => tone(a.stepFlip ? 196 : 165, .035, 'triangle', 0, .014),
   tap: () => tone(880, .04, 'triangle', 0, .04, 1175),
-  arrive: () => chord([784, 988], .07),
+  arrive: () => chord([523, 659], .07, 'sine'),
   enter: () => chord([523, 659, 784, 1047, 1319], .06),
   door: () => { tone(220, .12, 'triangle', 0, .05, 330); tone(660, .06, 'round', .1, .03); },
   greet: f => chord(PALS[f.id].pitch, .08, 'round', panRel(f.x), .04),
-  kouji: () => { zap(.05, 0, .05); tone(150, .07, 'triangle', 0, .05, 90); tone(392, .07, 'round', .2, .04); tone(523, .07, 'round', .3, .04); tone(784, .14, 'triangle', .4, .05); },
-  group: () => { chord([659, 784, 988, 1319], .08); zap(.06, .5, .05); tone(1568, .05, 'round', .52, .03); },
+  kouji: () => { tone(150, .07, 'sine', 0, .04, 90, 0, .03); tone(392, .07, 'sine', .2, .04); tone(523, .07, 'sine', .3, .04); tone(660, .14, 'sine', .4, .04); },   // 10/1：ノイズ（ぱちっ）を やめ、ぜんぶ やわらかい sine に
+  group: () => { [392, 494, 587].forEach((n, i) => tone(n, .14, 'sine', i * .12, .03, 0, 0, .04)); },   // 10/2：鐘の「ガランガラン」を やめ、ひくい sine 3つを ゆっくり（ざっ・1568 も なし）
   sit: () => chord([392, 523], .09, 'triangle'),
   drop: () => { tone(1568, .05, 'triangle', 0, .03, 1319); tone(1319, .06, 'triangle', .13, .03, 1047); },
   pick: () => chord([1047, 1319, 1568], .06, 'triangle'),
   plush: () => tone(294, .09, 'triangle', 0, .05, 247),
-  hammer: () => { for (let i = 0; i < 3; i++) { zap(.05, i * .22, .05); tone(150, .07, 'triangle', i * .22, .05, 90); } },
+  hammer: () => { for (let i = 0; i < 3; i++) tone(110, .12, 'sine', i * .22, .035, 70, 0, .03); },   // 10/1：「とん」3回（ノイズなし・ひくい sine）
   wish: () => { chord([1047, 1319, 1568, 2093, 2637], .07); tone(3136, .3, 'round', .4, .02); },
-  meteor: () => tone(2800, .55, 'round', 0, .025, 500),
+  meteor: () => tone(660, .5, 'sine', 0, .02, 330, 0, .04),   // 10/1：ながれぼし＝ひくい sine（高い 音を やめた）
   boing: () => tone(300, .14, 'triangle', 0, .05, 620),
   leaf: () => { tone(1568, .05, 'round', 0, .025); tone(1319, .05, 'round', .07, .02); tone(1047, .06, 'round', .14, .02); },
   splash: pan => { tone(300, .2, 'sine', 0, .04, 140, pan); },   // ぽちゃん：ひくい sine 300→140Hz・ゆっくり 立ち上がり（ノイズの「ぱちっ」を やめた・10/1 マスター「バケツが はじける 音」）
   spin: () => chord([523, 659, 784, 1047, 784, 1047, 1319], .05),
   water: pan => tone(1568, .04, 'triangle', 0, .04, 2093, pan),
   well: pan => { tone(392, .1, 'triangle', 0, .04, 294, pan); tone(587, .07, 'triangle', .13, .03, 440, pan); },
-  bird: pan => asKind('amb', () => { tone(2400, .06, 'round', 0, .012, 3000, pan, .03); tone(3000, .06, 'round', .08, .012, 2500, pan, .03); }),
-  cricket: pan => asKind('amb', () => { for (let i = 0; i < 3; i++) tone(4200, .02, 'round', i * .05, .006, 0, pan); })
+  bird: pan => asKind('amb', () => { tone(587, .09, 'sine', 0, .008, 0, pan, .04); }),   // 10/2：ひくい sine 1おと（ピッ を やめた）
+  cricket: pan => asKind('amb', () => { tone(523, .08, 'sine', 0, .008, 0, pan, .04); })
 };
 // おとの ずっと ながれる ぶぶん：ふんすいの みず（ちかづくと おおきく）、あめの ひは あめの おと
 function startAmbient() {
-  if (!soundOn() || (main && main.sndAmb === false) || amb || document.hidden) return;
+  if (FX_QUIET || !soundOn() || (main && main.sndAmb === false) || amb || document.hidden) return;
   try {
     const c = ready(), len = c.sampleRate * 3, buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
     let v = 0; for (let i = 0; i < len; i++) { v = v * .9 + (Math.random() * 2 - 1) * .1; d[i] = v * 3.2; }
@@ -1183,7 +1190,7 @@ const PROPS = [
   ...(rainy ? [{ id: 'shelter', x: 84, y: 546, w: 120, h: 122, svg: SVG.shelter, block: { rect: [78, 532, 90, 547] } }] : [])   // 雨の 日だけ：おおきな かさ（あまやどり）
 ];
 const DEST = {
-  tsuri: { name: 'つりば', at: { x: 90, y: 296 }, kind: 'go', url: () => new URL('../', location.href).href, pan: -.8, motif: () => { tone(660, .08, 'triangle', 0, .05, 990); zap(.06, .08, .04); } },
+  tsuri: { name: 'つりば', at: { x: 90, y: 296 }, kind: 'go', url: () => new URL('../', location.href).href, pan: -.8, motif: () => { tone(660, .08, 'sine', 0, .04, 880, 0, .04); } },
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
   thanks: { name: 'ありがとうの いし', at: { x: 320, y: 444 }, kind: 'thanks', pan: .8 },
   maruiro: { name: 'まるいろ', at: { x: 306, y: 314 }, kind: 'go', url: () => new URL('../maruiro/', location.href).href, pan: .8, motif: () => { chord([523, 659, 880], .08, 'triangle'); } },
@@ -1499,12 +1506,17 @@ function render() {
 }
 
 // ─── ともだちの ひとこと ───
-function lineFor(f, first) {
+// 10/2 マスター「みんなが 同じ ことばで あいさつ するのは 違和感」：①つりばの おもいでは 1にんだけ ②「こんばんは」の あたまづけは 10びょうに 1かいだけ ③直近 10びょうに 出た 文は 候補から はずす
+let helloAt = -99, memSpoken = false; const recentLines = new Map();
+const helloHead = () => { if (T - helloAt < 10) return ''; helloAt = T; return HELLO[curTime] + '！ '; };
+const recentSaid = l => recentLines.has(l) && T - recentLines.get(l) < 10;
+function lineFor(f, first) { const l = lineFor0(f, first); recentLines.set(l, T); return l; }
+function lineFor0(f, first) {
   const p = PALS[f.id];
-  if (f.mem) { const m = typeof f.mem === 'function' ? f.mem() : f.mem; f.mem = ''; return HELLO[curTime] + '！ ' + m; }   // 釣りで あった 子は、さいしょの ひとことで それを いう（1回だけ）
-  if (isFav(f.id) && (!f.favUsed || Math.random() < .5)) { f.favUsed = true; f.favN = (f.favN || 0) + 1; const fl = favLinesOf(f.id), fline = fl[(f.favN - 1) % fl.length]; return f.lastLine = first ? HELLO[curTime] + '！ ' + fline : fline; }   // ♡の 子：なかよしの ひとこと（1にん 3ほん）
+  if (f.mem) { const m = typeof f.mem === 'function' ? f.mem() : f.mem; f.mem = ''; if (!memSpoken) { memSpoken = true; return helloHead() + m; } }   // 釣りで あった 子の おもいでは いちばん さいしょに 話した 1にんだけ（ほかの 子は 自分の ことばで）   // 釣りで あった 子は、さいしょの ひとことで それを いう（1回だけ）
+  if (isFav(f.id) && (!f.favUsed || Math.random() < .5)) { f.favUsed = true; f.favN = (f.favN || 0) + 1; const fl = favLinesOf(f.id), fline = fl[(f.favN - 1) % fl.length]; return f.lastLine = first ? helloHead() + fline : fline; }   // ♡の 子：なかよしの ひとこと（1にん 3ほん）
   { const nd = careNeedOf(f.id); if (nd && f.needSaid !== LAYER_DAY) { f.needSaid = LAYER_DAY; return f.lastLine = pick(CARE[nd.type].said); } }   // おせわが ひつような 子の ひとりごと（その 日 1かい・たのまない）
-  if (first) return HELLO[curTime] + '！ ' + p.hello;
+  if (first) return helloHead() + p.hello;
   if (f.lucky) { f.lucky = false; const l = luckyLine(); if (l) return l; }   // ペンギンの 2かいめの おはなし：きょうの ラッキーさかな
   if (f.id === 'penguin') { f.n = (f.n || 0) + 1; if (f.n % 3 === 0) { const m = mameLine(); if (m) return f.lastLine = m; } }   // ペンギンの おはなしの 3かいに 1回は さかなの まめちしき
   if (!f.bag.length) {
@@ -1517,7 +1529,8 @@ function lineFor(f, first) {
     if (f.lastLine && pool[pool.length - 1] === f.lastLine) pool.unshift(pool.pop());
     f.bag = pool;
   }
-  return f.lastLine = f.bag.pop();
+  let l = f.bag.pop(); for (let n = 0; n < 8 && recentSaid(l) && f.bag.length; n++) { f.bag.unshift(l); l = f.bag.pop(); }   // いま だれかが 言った 文は さける
+  return f.lastLine = l;
 }
 function greet(f, forced) {
   if (!forced && (f.cool > 0 || f.talking > 0)) return;
@@ -1645,7 +1658,7 @@ function cheerNear(x, y, lines) {   // ちかくの ともだちが ひとこと
 function sweepPile(el) {
   if (!el || !LITTER) return; const i = Number(el.dataset.id.slice(-1)), s = LITTER_SPOTS[i - 1]; if (sweptToday(i)) { narrate('もう きれいに なって いるね'); return; }
   own.sweepDay[i] = LAYER_DAY; saveOwn(); lastInput = T; hop(player, 2); setFace('smile', 1800); speak(player, 'さっ さっ', 1800, true);
-  if (soundOn() && !reduce()) { asKind('fx', () => { zap(.14, 0, .05, panRel(s.x)); zap(.14, .2, .05, panRel(s.x)); }); }
+  if (soundOn() && !reduce()) { asKind('fx', () => { zap(.14, 0, .025, panRel(s.x), .04); zap(.14, .2, .025, panRel(s.x), .04); }); }
   if (!reduce()) { for (let n = 0; n < 6; n++) fxAt(s.x + (Math.random() - .5) * 14, s.y - 8, LITTER.ico, [{ translate: '-50% -50%', opacity: 1, rotate: '0deg' }, { translate: 'calc(-50% + ' + ((n % 2 ? 1 : -1) * (14 + n * 5) * k) + 'px) calc(-50% - ' + (8 + Math.random() * 14) * k + 'px)', opacity: 0, rotate: ((Math.random() * 2 - 1) * 200) + 'deg' }], { duration: 800 + n * 60, easing: 'ease-out' }); el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 520, easing: 'ease-out' }); setTimeout(paintLitter, 560); } else paintLitter();   // うごきが とまって いても かならず きえる
   narrate(LITTER.done); seen('sweep'); cheerNear(s.x, s.y, ['きれいに なったね、ありがとう', 'さっぱり した！']);
   if (LITTER_SPOTS.every((_, j) => sweptToday(j + 1))) { setTimeout(() => { sparkles(180, 440, 8, 52); narrate('ひろばが きれいに なったね'); }, reduce() ? 0 : 900); }
@@ -1698,7 +1711,7 @@ function seasonShow() {
     const n = reduce() ? 2 : 6;
     for (let i = 0; i < n; i++) setTimeout(() => {
       const s = spots[i];
-      if (soundOn() && !reduce()) asKind('fx', () => { tone(330, .14, 'round', 0, .04, 247, panRel(s[0])); zap(.22, .12, .025, panRel(s[0])); });
+      if (soundOn() && !reduce()) asKind('fx', () => { tone(330, .14, 'round', 0, .04, 247, panRel(s[0])); zap(.22, .12, .025, panRel(s[0]), .04); });
       const big = fxAt(s[0], s[1], '', reduce() ? [{ translate: '-50% -50%', scale: '1', opacity: 0 }, { translate: '-50% -50%', scale: '1', opacity: .9, offset: .4 }, { translate: '-50% -50%', scale: '1', opacity: 0 }] : [{ translate: '-50% -50%', scale: '.4', opacity: 0 }, { translate: '-50% -50%', scale: '1', opacity: .9, offset: .35 }, { translate: '-50% -50%', scale: '1.3', opacity: 0 }], { duration: reduce() ? 2200 : 2300, easing: 'ease-out' });
       big.style.width = big.style.height = Math.round(92 * k) + 'px'; big.innerHTML = burstSvg(cols[i]);   // さいしょから 大きさの ある 絵（ひろげるのは 1.3ばいまで）
       if (!reduce()) sparkles(s[0], s[1], 6, 34);
@@ -2136,7 +2149,7 @@ function findFriend() {
 
 // ─── がめんの ぶひん ───
 function renderPalRow() { drawNow(); drawPartySlots(); if (typeof paintCare === 'function') paintCare(); }   // いま ひろばに いる なかま・いっしょに いく なかまの 一覧（なかまの がめんの 中）
-function drawSound() { const on = soundOn(); $('sound').textContent = on ? 'おと：ON' : 'おと：OFF'; $('sound').setAttribute('aria-pressed', String(on)); }
+function drawSound() { const on = soundOn(); $('sound').textContent = on ? 'おと：ON' : 'おと：OFF'; $('sound').setAttribute('aria-pressed', String(on)); const m = $('mute'); if (m) { m.textContent = on ? '🔇 おとを けす' : '🔊 おとを ならす'; m.setAttribute('aria-pressed', String(!on)); } }
 function drawMotion() {
   const os = reduceOS(), less = reduce(); document.body.classList.toggle('calm', own.motion === 'less'); renderSeason();
   const b = $('calm'); b.textContent = less ? 'うごき：すくない' : 'うごき：ふつう'; b.setAttribute('aria-pressed', String(less)); b.disabled = os;
@@ -2148,6 +2161,12 @@ function setSoundOn(on) {
   if (window.TsuriBgm) window.TsuriBgm.refresh();
 }
 $('sound').addEventListener('click', () => setSoundOn(!soundOn()));
+$('mute').addEventListener('click', () => setSoundOn(!soundOn()));   // いちばん 上の ボタン＝「おと」と おなじ（効果音・環境音・BGM が ぜんぶ いっしょに とまる／もどる）
+drawSound();
+// さいしょの タップ・キーで 音が 目ざめる（ブラウザは さわる まで 音を ならせない）
+{ const wake = () => { if (soundOn()) { startAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); } }; ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, wake, { once: true, passive: true })); }
+// はじめて ひらいた ときだけ、🔇の よこに「ミュートボタンは こちら →」を 3びょう（まるいろと おなじ）
+if (!own.muteHint) { const h = $('mutehint'); h.hidden = false; own.muteHint = 1; saveOwn(); setTimeout(() => { h.hidden = true; }, 3000); }
 // ─── BGM（外付け tsuri-bgm.js。はじめは OFF。「おと」が ON の 時だけ ながれる。ひろばの 曲：あさ・ひる・ゆうがた＝A、よる＝C）───
 //   「BGM」ボタンは おとの となり。おとが OFF の まま おしたら、おとも つける。ながす 音の 部品（AudioContext）は、ひろばの ものを かりる
 if (window.TsuriBgm) {
@@ -2159,6 +2178,7 @@ if (window.TsuriBgm) {
   };
   $('sound').after(window.TsuriBgm.button({ id: 'bgm', ...bgmHost }));
   if (window.TsuriBgm.mixButton) $('bgm').after(window.TsuriBgm.mixButton({ id: 'bgm-mix', ...bgmHost }));   // 「くみたてる」（ひくい おと・うた・こだま を えらぶ）
+  try { if (localStorage.getItem('marufuwa-bgm-v1') === null && soundOn()) window.TsuriBgm.set(true); } catch {}   // きろくが なければ BGM も はじめから ON
   window.TsuriBgm.enter('hiroba', { ctx: ready, sound: soundOn, time: () => curTime });
 }
 const hudGear = $('hud-gear'), hudPanel = $('hud-panel'), hudWrap = hudGear.parentElement;
@@ -2985,7 +3005,8 @@ const api = window.Hiroba = {
   goDest, secretTap, tapMascot, greet, talkTo, photo: makePhoto, letterCard: makeCard, openCard, thanks, openThanks, loadThanks, loadArt, pondJump, setTime, swapFriend, cast: { season: { show: () => seasonShow(), label: () => SEASON_SHOW.btn, running: () => showUntil > T, endsSoon: () => seasonEndsSoon(), again: AGAIN }, ret: { bloom: () => own.bloom, shown: () => BLOOM_SHOWN, returning: () => RETURNING, bloomed: () => BLOOMED, lastDay: () => own.lastDay, today: () => TODAY_NO }, traces: { who: k => traceWho(k), line: k => traceLine(k), today: () => TRACES.slice(), of: day => tracesOf(day), kinds: () => TRACE_KINDS.slice(), side: () => TRACE_SIDE }, tend: { litter: () => LITTER_SPOTS.map((s, i) => ({ ...s, i: i + 1, swept: sweptToday(i + 1), on: !!propEl('litter-' + (i + 1)) })), sweep: el => sweepPile(el), lamp: sd => lightLamp(propEl('lamp-' + sd)), lit: () => ({ l: own.lampDay.l === LAYER_DAY, r: own.lampDay.r === LAYER_DAY }), kind: () => LITTER && SEASON, paint: () => { paintLitter(); paintLamps(); paintTouchExtras(); } }, care: { active: () => careActive().map(n => ({ ...n })), needsFor: (day, ids, tm, season, rn) => careNeeds(day, ids, tm, season, rn), types: (tm, season, rn) => careTypes(tm, season, rn), give: id => giveCare(byId(id)), to: id => careTo(byId(id)), done: () => ({ ...own.careDay }), paint: paintCare }, shelter: { on: () => !!propEl('shelter'), zone: () => ({ ...SHELTER }), under: o => inShelter(o || player), slots: () => slotsNow().map(s => ({ ...s })), timeSlots: tm => (SLOTS_BY_TIME[tm] || []).map(s => ({ ...s })), isFree, rehome }, list: () => CAST_ORDER.slice(), town: () => TOWN_LIST.map(x => x.id), newest: () => [...NEWEST], local: isLocalId, isNew: newFace, lastOf, order: pool => castOrder(castEnv(), pool), initial: (pool, n, forced) => castInitial(castEnv(), pool, n, forced), sim: castSim, homes: LOCAL_HOMES.slice(), gap: swapGap, announce: announceNew, buildLayers: castLayers, letters: () => LETTERS.slice(), letterOf, openPost, skipStone, waterFlowers, art: { state: () => ({ key: artState.key, on: scene.dataset.art === 'on', ready: !!artState.man }), dir: ART_DIR }, pool: castPool, touch: () => { lastInput = T; }, spawnPasser, passers: () => friends.filter(f => f.passer).map(f => f.id), companions: companionIds, isCompanion, lv: palLv, xp: palXpOf, avatar: avatarId, ownOn: () => !!player.avatar && player.avatar.startsWith('own:'), mainParty, spawn: summonFriend, remove: removeFriend, gainXp, together: () => ({ ...own.together }), partyToggle: togglePartyById, drawAll: drawZukanAll, layers: () => ({ resident: LAYERS.resident.slice(), daily: LAYERS.daily.slice(), guests: LAYERS.guests.slice() }), weight: id => layerW.get(id) || 1, weights: () => ({ ...LAYER_W }), announceGuest, toku: tokuOf, tokuWords: () => ({ ...TOKU }), favLines: favLinesOf }, fav: { list: favList, is: isFav, toggle: toggleFav, ensure: ensureFav, bond: bondOf }, party: { ids: partyIds, join: joinParty, leave: leaveParty, invite: openInvite, close: closeInvite, max: PARTY_MAX, size: () => party.length }, walkTo, listenAround, findFriend, interactNearest, applyTime, meteorTap, shootingStar,
   season: () => SEASON, seasonOf, special: () => SPECIAL, specialOf, renderSeason, SEASON_LINES, SPECIAL_LINES, DROPS, pickDrop: () => dropEl && pickDrop(dropEl), drop: () => dropEl && ({ id: DROPS[SEASON].id, name: DROPS[SEASON].name, x: Number(dropEl.dataset.x), y: Number(dropEl.dataset.y) }),
   plush: () => plushEls.map(e => ({ id: Number(e.dataset.id), x: Number(e.dataset.x), y: Number(e.dataset.y) })), renderPlush, nushiIds, plushTap: el => plushTap(el), openZukan, drawZukan, showZukanPal,
-  sfx, startAmbient, stopAmbient, audio: { tone, zap, chord }, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,
+  sfx, startAmbient, stopAmbient, audioReset: () => { ac = null; noiseBuf = null; amb = null; },   // 検査用：おとの 部品を まっさらに もどす
+  audio: { tone, zap, chord }, group: () => ({ active: groupUntil > T, seen: groupSeen.size, pulse: $('snap').classList.contains('pulse') }), groupEnd, sit: () => sit && ({ id: sit.id, comers: sit.comers.map(f => f.id), since: sit.since }), sitEnd,
   say: () => statusEl.textContent
 };
 // ─── English mode（tsuri-en.js と 総司令部の 表 tsuri-en-hiroba.js が ある 英語の 時だけ）：ひろばの 題・ロゴと、表に ない 文を 足す ───
@@ -3025,7 +3046,7 @@ addEventListener('load', () => {
   }, DROP_EN = { 'さくらのはなびら': 'cherry blossom petal', 'あおいは': 'fresh green leaf', 'どんぐり': 'acorn', 'ゆきのけっしょう': 'snow crystal' }, dropEn = n => DROP_EN[n] || null;
   if (E.add) {   // なかま名簿（街人の なまえ・ひとこと）と、♡・いっしょに つりに いく の ことば
     const N = s => { try { const r = E.t(s); return r || s; } catch { return s; } }, TOKU_EN = { めがいいよ: 'sharp-eyed', ちからもちだよ: 'strong', うんがいいよ: 'lucky', おちついているよ: 'calm' };
-    const ex = { 'さくらの ふぶき': 'Cherry blossom blizzard', 'はなび': 'Fireworks', 'もみじの あめ': 'Maple leaf rain', 'ゆきの ふぶき': 'Snow flurry', 'さくらの はなびらが、ふぶきみたいに まって いるよ': 'The cherry petals are dancing like a blizzard.', 'はなびが ぽん、ぽんって あがって いるよ': 'Fireworks are going pop, pop.', 'もみじが あめみたいに ふって いるよ': 'Maple leaves are falling like rain.', 'ゆきが ふわふわ ふって いるよ': 'Snow is drifting down softly.', 'はなびは よるに あがるよ': 'The fireworks go up at night.', 'きれい…': 'So pretty…', 'わあ…': 'Wow…', 'きれいだったね。また らいねん あえるよ': 'That was beautiful. We can meet again next year.', 'この きせつも もうすぐ おわり。また らいねん あえるよ': 'This season is almost over. We can meet again next year.', 'おかえり。おはなが ひとつ さいたよ': 'Welcome back. A flower has bloomed.', 'おかえり。ひろばは いつも ここに あるよ': 'Welcome back. The plaza is always here.', 'あ、コイン！': 'Oh, a coin!', 'さっ さっ': 'Swish, swish', 'ぽっ': 'Pop!', 'もう きれいに なって いるね': 'It’s already neat and tidy.', 'おちばを はいたよ。さっぱり したね': 'You swept the leaves. So neat!', 'はなびらを あつめたよ。いい におい': 'You gathered the petals. They smell nice.', 'ゆきを はらったよ。あったかく なったね': 'You brushed off the snow. It feels warmer.', 'ひろばが きれいに なったね': 'The plaza looks tidy now.', 'きれいに なったね、ありがとう': 'It looks so clean. Thank you!', 'さっぱり した！': 'Fresh and neat!', 'おちばを はく': 'Sweep the leaves', 'はなびらを あつめる': 'Gather the petals', 'ゆきを はらう': 'Brush off the snow', 'あかりを ともす': 'Light the lamps', 'あかりを ともしたよ。ぽわっと あったかいね': 'You lit the lamp. It glows warmly.', 'ふたつとも あかりが ついたね': 'Both lamps are lit now.', 'いまは おひさまが あかるいね。あかりは よるに ともるよ': 'The sun is bright now. The lamps glow at night.', 'もう あかりが ついて いるね': 'The lamp is already lit.', 'あかりが ついたね': 'The light is on!', 'あったかい ひかりだね': 'What a warm light.', 'ともだちの ようす': 'How friends are doing', 'おなか、くう…って なったよ': 'My tummy went rumble…', 'ちょっと さむいね…': 'It’s a little chilly…', 'ふぁ…ねむい ねむい': 'Yaaawn… so sleepy.', 'もぐもぐ…おいしいな。ありがとう': 'Munch munch… yummy. Thank you.', 'おなか いっぱい。ありがとう': 'My tummy’s full. Thank you.', 'あったかい。ありがとう': 'So warm. Thank you.', 'ぽかぽか するよ。ありがとう': 'Nice and toasty. Thank you.', 'ふわふわ…ぐっすり ねむれそう。ありがとう': 'So fluffy… I can sleep soundly. Thank you.', 'ぬくぬく…ありがとう': 'Snug as can be… thank you.', 'ごはんを あげる': 'Give some food', 'うわぎを かける': 'Put a jacket on', 'もうふを かける': 'Cover with a blanket', 'ごはんを あげたよ。よろこんで いるよ': 'You gave some food. They look happy.', 'うわぎを かけて あげたよ。よろこんで いるよ': 'You put a jacket on them. They look happy.', 'もうふを かけて あげたよ。よろこんで いるよ': 'You covered them with a blanket. They look happy.', 'いま：おなかが すいて いるみたい': 'Right now: seems hungry', 'いま：さむそうに して いるみたい': 'Right now: seems chilly', 'いま：ねむそうに して いるみたい': 'Right now: seems sleepy', 'おおきな かさの した。ここだけ あめが ふらないよ': 'Under the big umbrella. No rain falls right here.', 'かさの した、ぽかぽかだね': 'Nice and cozy under the umbrella.', 'ここなら ぬれないね': 'We won’t get wet here.', 'いっしょに あまやどり、いいね': 'Sheltering together feels nice.', 'あめを ながめて いよう': 'Let’s watch the rain.', 'せまいけど、なかよく しようね': 'It’s snug, but let’s get along.', "つらい ときは": "If it’s hard right now", "きょうの おてがみ": "Today’s letter", "ありがとう": "Thank you", "おてがみを しまったよ。": "Put the letter away.", "いけ": "Pond", "はな": "Flowers", "ポスト": "Mailbox", "ぴょん ぴょん": "Hop, hop", "みずきり、ぴょん ぴょん。いけに わっかが ひろがったよ": "Stone skipping: hop, hop. Ripples spread across the pond.", "ふゆは はなが ねて いるよ。はるを まって いるね": "The flowers are sleeping in winter. They’re waiting for spring.", "ふゆだね": "It’s winter.", "ごくごく": "Glug glug", "おみず ごくごく。はなが うれしそうだよ": "Glug glug. The flowers look happy.", "きょうも きて くれて ありがとう。いるだけで うれしいよ。": "Thank you for coming today. I’m happy just because you’re here.", "がんばらなくて いいよ。ここは ゆっくりで いい ばしょ。": "You don’t have to try hard. This is a place to take it slowly.", "つかれた ときは、やすんで いいんだよ。": "When you’re tired, it’s okay to rest.", "きのうの ことは わすれても いいよ。きょうの ひろばは やさしいよ。": "It’s okay to forget yesterday. The plaza is gentle today.", "ふんすいの おと、すきだよ。いっしょに きこうね。": "I love the sound of the fountain. Let’s listen together.", "あめの ひも、はれの ひも、あなたが いると たのしいよ。": "Rainy days or sunny days, it’s fun when you’re here.", "なにも しなくても だいじょうぶ。そばに いるね。": "You don’t have to do anything. I’ll be right beside you.", "きょうは おふとんで ごろごろ する ひでも いいんだよ。": "It’s okay to spend today snuggled up in bed.", "いけの おみずは、きょうも きれいだね。": "The pond water is clear again today.", "ねむれない よるは、ひろばで ぼーっと しよう。": "On nights you can’t sleep, let’s spend time quietly in the plaza.", "できない ひも、やすむ ひも、ぜんぶ あなたの ひだよ。": "Days you can’t do things, days you rest—they’re all your days.", "あなたの ペースで いいよ。いそがなくて いいよ。": "Your pace is just fine. No need to hurry.", "ないても いいよ。ここには だれも おこらないよ。": "It’s okay to cry. No one here will be angry.", "こころが おもい ひは、そっと ベンチに すわろう。": "On heavy-hearted days, let’s sit quietly on the bench.", "きょうの くもは ふわふわ。みて みて。": "Today’s clouds are fluffy. Look, look!", "はなが さいて いたよ。あなたに みせたかったんだ。": "The flowers are blooming. I wanted to show you.", "ありがとう って いわれると、うれしいね。いつも ありがとう。": "It feels nice to be thanked. Thank you, always.", "あしたの ことは、あした かんがえよう。": "Let’s think about tomorrow tomorrow.", "となりに すわるね。なにも はなさなくて いいよ。": "I’ll sit next to you. You don’t have to say anything.", "きょうは いちにち、ゆるく いこうね。": "Let’s take it easy all day today.", "きょうは どんな きもちでも、ここに いて いいよ。": "Whatever you feel today, you can be here.", "ひとりじゃ ないよ。ここに なかまたちが いるよ。": "You’re not alone. Your pals are here.", "くるしい ときは、ひとりで がまんしなくて いいよ。ここに いるよ。": "When it hurts, you don’t have to bear it alone. I’m right here.", "ほしが きれいな よるだよ。みあげて みよう。": "It’s a night with beautiful stars. Let’s look up.", "あったかい ひざしが きもち いいね。": "The warm sunshine feels nice.", "うまく いかない ひも あるよね。みんな そういう ひが あるよ。": "Some days things don’t go well. Everyone has those days.", "わたしは あなたが すきだよ。そのままで いいよ。": "I like you. You’re fine just as you are.", "きょう ひろばに きた。それだけで すごい ことだよ。": "You came to the plaza today. That alone is wonderful.", "きょうの そらは、ひろいね。いっしょに ながめよう。": "The sky is wide today. Let’s look at it together.", "しんどい ときは、たすけてって いって いいんだよ。": "When it’s hard, it’s okay to ask for help.", "ひろばの なかまたちは、あなたが くると うれしいよ。": "The pals in the plaza are happy when you come.", "きょうの おはなし、はなしても だまって いても いいよ。": "You can tell me about your day, or stay quiet. Either is fine.", "あくびが でたら、ねむい って こと。おふとんで ゆっくり してね。": "If you yawn, you’re sleepy. Please rest well in your bed.", "ちいさい ことでも、ほめて いいんだよ。えらいね。": "Even small things deserve praise. Well done.", "ときどき、なにも かんがえない じかんを つくろうね。": "Sometimes, let’s make time to think about nothing.", "かぜが きもち いいよ。まどを あけて みると いいかも。": "The breeze feels nice. Maybe try opening a window.", "あなたの いろんな かお、ぜんぶ すてきだよ。": "All of your many faces are lovely.", "きょうも ここに いて くれて ありがとう。": "Thank you for being here today.", "つらい ことが つづく ときは、だれかに はなして みよう。": "When hard things keep happening, try talking to someone.", "いつでも ひろばは ここに あるよ。また おいでね。": "The plaza is always here. Please come again.", 'なかま': 'Friends', 'ひろばに いる なかまと、いっしょに いく なかまが ここに ならぶよ。すうじは じぶんの ぶんだけ。いそがなくて だいじょうぶ。': 'Friends in the plaza and friends coming along are here. Numbers are only yours. No need to rush.', 'いっしょに いく なかま（3にんまで）': 'Coming along (up to 3)', 'ぜんいん': 'Everyone', 'あき': 'Empty', 'いっしょ': 'Together', 'せってい': 'Settings', 'おと・BGM・うごきの せってい': 'Sound, BGM and motion settings', 'せっていを ひらいたよ。おと・BGM・くみたてる・うごき。': 'Settings are open: sound, BGM, build and motion.', 'せっていを とじたよ。': 'Settings are closed.', 'まちかど': 'Town Corner', 'つりば': 'Fishing Spots', 'おてがみカード': 'Letter card', 'カードに する': 'Make a card', 'かってに とうこうは しません。': 'Nothing is posted by itself.', 'まるいろ': 'Maruiro', 'まるい こを おとして あそぼう': 'Drop round friends and play', 'おみせ・まるいろ・いど': 'Shop, Maruiro, Well', 'まるいろで、まるい こを おとして あそべるよ': 'At Maruiro you can drop round friends and play', 'カフェ': 'Cafe', 'ひとやすみ': 'Take a break', 'ひろばに ついたよ。': 'You are at the plaza.', 'いまの ひろばの ようす': 'Plaza status', 'どこへ いく？': 'Where to?', 'どこへ いく？ いそがなくて だいじょうぶ。': 'Where to? No rush at all.', 'おみせ': 'Shop', 'びじゅつかん': 'Art Gallery', 'おすすめの へや': 'Recommended Room', 'ふくの いろや もちものを もらえるよ': 'Get colors and things to hold', 'えを ながめよう': 'Look at pictures', 'すてきな ひとを しょうかい': 'Meet lovely people', 'おみせ・びじゅつかん': 'Shop & Gallery', 'かぞえてみる': 'Count', 'もとの ふくに もどす': 'Back to usual look', 'あき。おして から、なかまを えらんでね。': 'Empty. Press it, then pick a friend.', 'あき。いま えらんで いるよ。もういちど おすと やめるよ。': 'Empty. Choosing now. Press again to cancel.', 'だれを つれていく？': 'Who should come along?', 'えらんで ね。もういちど「あき」を おすと やめるよ。': 'Pick one. Press “Empty” again to cancel.', 'だれを つれていく？ なかまを えらんでね。もういちど あきを おすと やめるよ。': 'Who should come along? Pick a friend. Press Empty again to cancel.', 'やめたよ。': 'Cancelled.', 'おるすばんに する': 'Stay behind',
+    const ex = { 'さくらの ふぶき': 'Cherry blossom blizzard', 'はなび': 'Fireworks', 'もみじの あめ': 'Maple leaf rain', 'ゆきの ふぶき': 'Snow flurry', 'さくらの はなびらが、ふぶきみたいに まって いるよ': 'The cherry petals are dancing like a blizzard.', 'はなびが ぽん、ぽんって あがって いるよ': 'Fireworks are going pop, pop.', 'もみじが あめみたいに ふって いるよ': 'Maple leaves are falling like rain.', 'ゆきが ふわふわ ふって いるよ': 'Snow is drifting down softly.', 'はなびは よるに あがるよ': 'The fireworks go up at night.', 'きれい…': 'So pretty…', 'わあ…': 'Wow…', 'きれいだったね。また らいねん あえるよ': 'That was beautiful. We can meet again next year.', 'この きせつも もうすぐ おわり。また らいねん あえるよ': 'This season is almost over. We can meet again next year.', 'おかえり。おはなが ひとつ さいたよ': 'Welcome back. A flower has bloomed.', 'おかえり。ひろばは いつも ここに あるよ': 'Welcome back. The plaza is always here.', 'あ、コイン！': 'Oh, a coin!', 'さっ さっ': 'Swish, swish', 'ぽっ': 'Pop!', 'もう きれいに なって いるね': 'It’s already neat and tidy.', 'おちばを はいたよ。さっぱり したね': 'You swept the leaves. So neat!', 'はなびらを あつめたよ。いい におい': 'You gathered the petals. They smell nice.', 'ゆきを はらったよ。あったかく なったね': 'You brushed off the snow. It feels warmer.', 'ひろばが きれいに なったね': 'The plaza looks tidy now.', 'きれいに なったね、ありがとう': 'It looks so clean. Thank you!', 'さっぱり した！': 'Fresh and neat!', 'おちばを はく': 'Sweep the leaves', 'はなびらを あつめる': 'Gather the petals', 'ゆきを はらう': 'Brush off the snow', 'あかりを ともす': 'Light the lamps', 'あかりを ともしたよ。ぽわっと あったかいね': 'You lit the lamp. It glows warmly.', 'ふたつとも あかりが ついたね': 'Both lamps are lit now.', 'いまは おひさまが あかるいね。あかりは よるに ともるよ': 'The sun is bright now. The lamps glow at night.', 'もう あかりが ついて いるね': 'The lamp is already lit.', 'あかりが ついたね': 'The light is on!', 'あったかい ひかりだね': 'What a warm light.', 'ともだちの ようす': 'How friends are doing', 'おなか、くう…って なったよ': 'My tummy went rumble…', 'ちょっと さむいね…': 'It’s a little chilly…', 'ふぁ…ねむい ねむい': 'Yaaawn… so sleepy.', 'もぐもぐ…おいしいな。ありがとう': 'Munch munch… yummy. Thank you.', 'おなか いっぱい。ありがとう': 'My tummy’s full. Thank you.', 'あったかい。ありがとう': 'So warm. Thank you.', 'ぽかぽか するよ。ありがとう': 'Nice and toasty. Thank you.', 'ふわふわ…ぐっすり ねむれそう。ありがとう': 'So fluffy… I can sleep soundly. Thank you.', 'ぬくぬく…ありがとう': 'Snug as can be… thank you.', 'ごはんを あげる': 'Give some food', 'うわぎを かける': 'Put a jacket on', 'もうふを かける': 'Cover with a blanket', 'ごはんを あげたよ。よろこんで いるよ': 'You gave some food. They look happy.', 'うわぎを かけて あげたよ。よろこんで いるよ': 'You put a jacket on them. They look happy.', 'もうふを かけて あげたよ。よろこんで いるよ': 'You covered them with a blanket. They look happy.', 'いま：おなかが すいて いるみたい': 'Right now: seems hungry', 'いま：さむそうに して いるみたい': 'Right now: seems chilly', 'いま：ねむそうに して いるみたい': 'Right now: seems sleepy', 'おおきな かさの した。ここだけ あめが ふらないよ': 'Under the big umbrella. No rain falls right here.', 'かさの した、ぽかぽかだね': 'Nice and cozy under the umbrella.', 'ここなら ぬれないね': 'We won’t get wet here.', 'いっしょに あまやどり、いいね': 'Sheltering together feels nice.', 'あめを ながめて いよう': 'Let’s watch the rain.', 'せまいけど、なかよく しようね': 'It’s snug, but let’s get along.', "つらい ときは": "If it’s hard right now", "きょうの おてがみ": "Today’s letter", "ありがとう": "Thank you", "おてがみを しまったよ。": "Put the letter away.", "いけ": "Pond", "はな": "Flowers", "ポスト": "Mailbox", "ぴょん ぴょん": "Hop, hop", "みずきり、ぴょん ぴょん。いけに わっかが ひろがったよ": "Stone skipping: hop, hop. Ripples spread across the pond.", "ふゆは はなが ねて いるよ。はるを まって いるね": "The flowers are sleeping in winter. They’re waiting for spring.", "ふゆだね": "It’s winter.", "ごくごく": "Glug glug", "おみず ごくごく。はなが うれしそうだよ": "Glug glug. The flowers look happy.", "きょうも きて くれて ありがとう。いるだけで うれしいよ。": "Thank you for coming today. I’m happy just because you’re here.", "がんばらなくて いいよ。ここは ゆっくりで いい ばしょ。": "You don’t have to try hard. This is a place to take it slowly.", "つかれた ときは、やすんで いいんだよ。": "When you’re tired, it’s okay to rest.", "きのうの ことは わすれても いいよ。きょうの ひろばは やさしいよ。": "It’s okay to forget yesterday. The plaza is gentle today.", "ふんすいの おと、すきだよ。いっしょに きこうね。": "I love the sound of the fountain. Let’s listen together.", "あめの ひも、はれの ひも、あなたが いると たのしいよ。": "Rainy days or sunny days, it’s fun when you’re here.", "なにも しなくても だいじょうぶ。そばに いるね。": "You don’t have to do anything. I’ll be right beside you.", "きょうは おふとんで ごろごろ する ひでも いいんだよ。": "It’s okay to spend today snuggled up in bed.", "いけの おみずは、きょうも きれいだね。": "The pond water is clear again today.", "ねむれない よるは、ひろばで ぼーっと しよう。": "On nights you can’t sleep, let’s spend time quietly in the plaza.", "できない ひも、やすむ ひも、ぜんぶ あなたの ひだよ。": "Days you can’t do things, days you rest—they’re all your days.", "あなたの ペースで いいよ。いそがなくて いいよ。": "Your pace is just fine. No need to hurry.", "ないても いいよ。ここには だれも おこらないよ。": "It’s okay to cry. No one here will be angry.", "こころが おもい ひは、そっと ベンチに すわろう。": "On heavy-hearted days, let’s sit quietly on the bench.", "きょうの くもは ふわふわ。みて みて。": "Today’s clouds are fluffy. Look, look!", "はなが さいて いたよ。あなたに みせたかったんだ。": "The flowers are blooming. I wanted to show you.", "ありがとう って いわれると、うれしいね。いつも ありがとう。": "It feels nice to be thanked. Thank you, always.", "あしたの ことは、あした かんがえよう。": "Let’s think about tomorrow tomorrow.", "となりに すわるね。なにも はなさなくて いいよ。": "I’ll sit next to you. You don’t have to say anything.", "きょうは いちにち、ゆるく いこうね。": "Let’s take it easy all day today.", "きょうは どんな きもちでも、ここに いて いいよ。": "Whatever you feel today, you can be here.", "ひとりじゃ ないよ。ここに なかまたちが いるよ。": "You’re not alone. Your pals are here.", "くるしい ときは、ひとりで がまんしなくて いいよ。ここに いるよ。": "When it hurts, you don’t have to bear it alone. I’m right here.", "ほしが きれいな よるだよ。みあげて みよう。": "It’s a night with beautiful stars. Let’s look up.", "あったかい ひざしが きもち いいね。": "The warm sunshine feels nice.", "うまく いかない ひも あるよね。みんな そういう ひが あるよ。": "Some days things don’t go well. Everyone has those days.", "わたしは あなたが すきだよ。そのままで いいよ。": "I like you. You’re fine just as you are.", "きょう ひろばに きた。それだけで すごい ことだよ。": "You came to the plaza today. That alone is wonderful.", "きょうの そらは、ひろいね。いっしょに ながめよう。": "The sky is wide today. Let’s look at it together.", "しんどい ときは、たすけてって いって いいんだよ。": "When it’s hard, it’s okay to ask for help.", "ひろばの なかまたちは、あなたが くると うれしいよ。": "The pals in the plaza are happy when you come.", "きょうの おはなし、はなしても だまって いても いいよ。": "You can tell me about your day, or stay quiet. Either is fine.", "あくびが でたら、ねむい って こと。おふとんで ゆっくり してね。": "If you yawn, you’re sleepy. Please rest well in your bed.", "ちいさい ことでも、ほめて いいんだよ。えらいね。": "Even small things deserve praise. Well done.", "ときどき、なにも かんがえない じかんを つくろうね。": "Sometimes, let’s make time to think about nothing.", "かぜが きもち いいよ。まどを あけて みると いいかも。": "The breeze feels nice. Maybe try opening a window.", "あなたの いろんな かお、ぜんぶ すてきだよ。": "All of your many faces are lovely.", "きょうも ここに いて くれて ありがとう。": "Thank you for being here today.", "つらい ことが つづく ときは、だれかに はなして みよう。": "When hard things keep happening, try talking to someone.", "いつでも ひろばは ここに あるよ。また おいでね。": "The plaza is always here. Please come again.", 'なかま': 'Friends', 'ひろばに いる なかまと、いっしょに いく なかまが ここに ならぶよ。すうじは じぶんの ぶんだけ。いそがなくて だいじょうぶ。': 'Friends in the plaza and friends coming along are here. Numbers are only yours. No need to rush.', 'いっしょに いく なかま（3にんまで）': 'Coming along (up to 3)', 'ぜんいん': 'Everyone', 'あき': 'Empty', 'いっしょ': 'Together', 'せってい': 'Settings', 'おと・BGM・うごきの せってい': 'Sound, BGM and motion settings', 'せっていを ひらいたよ。おと・BGM・くみたてる・うごき。': 'Settings are open: sound, BGM, build and motion.', 'せっていを とじたよ。': 'Settings are closed.', 'まちかど': 'Town Corner', 'つりば': 'Fishing Spots', '🔇 おとを けす': '🔇 Mute sound', '🔊 おとを ならす': '🔊 Turn sound on', 'ミュートボタンは こちら →': 'Mute button is here →', 'おてがみカード': 'Letter card', 'カードに する': 'Make a card', 'かってに とうこうは しません。': 'Nothing is posted by itself.', 'まるいろ': 'Maruiro', 'まるい こを おとして あそぼう': 'Drop round friends and play', 'おみせ・まるいろ・いど': 'Shop, Maruiro, Well', 'まるいろで、まるい こを おとして あそべるよ': 'At Maruiro you can drop round friends and play', 'カフェ': 'Cafe', 'ひとやすみ': 'Take a break', 'ひろばに ついたよ。': 'You are at the plaza.', 'いまの ひろばの ようす': 'Plaza status', 'どこへ いく？': 'Where to?', 'どこへ いく？ いそがなくて だいじょうぶ。': 'Where to? No rush at all.', 'おみせ': 'Shop', 'びじゅつかん': 'Art Gallery', 'おすすめの へや': 'Recommended Room', 'ふくの いろや もちものを もらえるよ': 'Get colors and things to hold', 'えを ながめよう': 'Look at pictures', 'すてきな ひとを しょうかい': 'Meet lovely people', 'おみせ・びじゅつかん': 'Shop & Gallery', 'かぞえてみる': 'Count', 'もとの ふくに もどす': 'Back to usual look', 'あき。おして から、なかまを えらんでね。': 'Empty. Press it, then pick a friend.', 'あき。いま えらんで いるよ。もういちど おすと やめるよ。': 'Empty. Choosing now. Press again to cancel.', 'だれを つれていく？': 'Who should come along?', 'えらんで ね。もういちど「あき」を おすと やめるよ。': 'Pick one. Press “Empty” again to cancel.', 'だれを つれていく？ なかまを えらんでね。もういちど あきを おすと やめるよ。': 'Who should come along? Pick a friend. Press Empty again to cancel.', 'やめたよ。': 'Cancelled.', 'おるすばんに する': 'Stay behind',
       'なかまの がめんを ひらいたよ。いま ひろばに いる なかまと、いっしょに いく なかまが ならんで いるよ。': 'Opened the Friends screen. Friends in the plaza and friends coming along are lined up.', 'なかまの がめんを とじたよ。': 'Closed the Friends screen.',
       'うん、また こんど。いつでも はなしかけてね。': 'Okay, maybe next time. Talk to me anytime.', 'だれか とおりかかったよ。はなしかけて みてね。': 'Someone is passing by. Try talking to them!', 'やった！ なかまだね': 'Yay! We’re friends now.',
       'まるふわ、きたね': 'Marufuwa, you’re here!', 'つりで あったよ。': 'We met while fishing.', 'はい': 'Yes', 'また こんど': 'Maybe later', 'ここで まつ': 'Wait here', 'いっしょに いく': 'Come along', 'いっしょに いく！': 'Let’s go together!', 'ここで まってるね': 'I’ll wait here.', 'うん、また こんど。いつでも さそってね。': 'Okay, maybe next time. Ask me anytime.',
