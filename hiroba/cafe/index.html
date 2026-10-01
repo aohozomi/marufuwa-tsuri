@@ -199,15 +199,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const day = Math.floor(Date.now() / 36e5), pickG = k => SEATED[(day * 7 + k * 5) % SEATED.length];
   const g0 = pickG(1); let g1 = pickG(2); if (g1 === g0) g1 = SEATED[(SEATED.indexOf(g1) + 1) % SEATED.length];
   const g2 = (() => { let c = pickG(3); while (c === g0 || c === g1) c = SEATED[(SEATED.indexOf(c) + 1) % SEATED.length]; return c; })();
-  const SPOTS = [{ id: g0, x: 220, cx: 220, w: 54, h: 66, y: 178, cupx: 220, cupy: 150 }, { id: g1, x: 34, cx: 34, w: 48, h: 62, y: 182, cupx: 50, cupy: 240 }, { id: g2, x: 90, cx: 90, w: 48, h: 62, y: 182, cupx: 72, cupy: 240, flip: true }];
-  const gEl = $('guests'), guests = SPOTS.map((sp, i) => {
+  const SPOTS = [{ id: g0, x: 220, cx: 220, w: 54, h: 66, y: 178, cupx: 220, cupy: 150 }, { id: g1, x: 34, cx: 34, w: 48, h: 62, y: 182, cupx: 42, cupy: 233 }, { id: g2, x: 90, cx: 90, w: 48, h: 62, y: 182, cupx: 78, cupy: 233, flip: true }];
+  const gEl = $('guests'), cupG = document.createElementNS(NS, 'g'), guests = SPOTS.map((sp, i) => {
     const im = document.createElementNS(NS, 'image'); im.setAttribute('href', img(sp.id)); im.setAttribute('x', sp.x - sp.w / 2); im.setAttribute('y', sp.y); im.setAttribute('width', sp.w); im.setAttribute('height', sp.h); im.setAttribute('preserveAspectRatio', 'xMidYMax meet'); if (sp.flip) { im.setAttribute('transform', 'translate(' + (sp.x * 2) + ' 0) scale(-1 1)'); } gEl.append(im);
-    const cup = document.createElementNS(NS, 'g'); cup.setAttribute('transform', 'translate(' + sp.cupx + ' ' + sp.cupy + ')'); cup.innerHTML = '<ellipse cx="0" cy="3" rx="10" ry="3" fill="#0004"/><path d="M-8 -8 H8 L6 3 H-6Z" fill="#fff" stroke="#3a2412" stroke-width="2"/><ellipse cx="0" cy="-8" rx="7" ry="2.4" fill="#4a2e18"/>'; gEl.append(cup);
+    const cup = document.createElementNS(NS, 'g'); cup.setAttribute('transform', 'translate(' + sp.cupx + ' ' + sp.cupy + ')'); cup.innerHTML = '<ellipse cx="0" cy="3" rx="10" ry="3" fill="#0004"/><path d="M-8 -8 H8 L6 3 H-6Z" fill="#fff" stroke="#3a2412" stroke-width="2"/><ellipse cx="0" cy="-8" rx="7" ry="2.4" fill="#4a2e18"/>'; cupG.append(cup);
     const hit = document.createElement('button'); hit.type = 'button'; hit.className = 'hit'; hit.dataset.id = sp.id; hit.setAttribute('aria-label', NAMES[sp.id] + 'に さわる');
     const [l, t] = pos(sp.cx, sp.y + sp.h / 2); hit.style.left = l; hit.style.top = t; hit.style.width = hit.style.height = Math.max(44, sp.w * 1.05) / 400 * 100 + '%'; hit.style.aspectRatio = '1/1'; hit.style.minWidth = '44px'; hit.style.minHeight = '44px';
     hit.addEventListener('click', () => tap(i)); $('stage').append(hit);
     return { id: sp.id, name: NAMES[sp.id], el: im, x: sp.cx, y: sp.y, last: -1e9 };
   });
+  gEl.append(cupG);   // カップは ぜんぶの なかまの まえに（からだに かくれない）
   function tap(i) {
     const g = guests[i]; if (!g || state.left || clock() - g.last < 1500) return; g.last = clock(); state.taps++;
     const L = TAP_LINES.concat(rain ? ['あめの おと、すき'] : [], time === 'n' ? ['よるの カフェも いいね'] : []), line = L[(day + state.taps * 3 + i) % L.length];
