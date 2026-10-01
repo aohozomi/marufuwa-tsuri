@@ -37,6 +37,15 @@ try { var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('maruf
   if (matchMedia('(prefers-color-scheme: dark)').matches || tt === 'n') { document.documentElement.dataset.night = 'true'; document.querySelector('meta[name=theme-color]').content = '#0f1c33'; } } catch (e) {}
 </script>
 <script>
+// メニューの かいほう・居場所の ひとことを「さいしょの 1コマ」から きめる（本体の script が はしる まで まつと、ボタンが どっと でて ひっこむ・カードが あとから でて 景色が ずれる＝読みこみ中の 一瞬）。きまりは 本体（menuGate／ibashoKind）と おなじ
+try { var sv0 = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d0 = new Date(), q0 = new URLSearchParams(location.search), loc0 = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:', hq0 = loc0 ? q0.get('hour') : null,
+    hr0 = hq0 !== null && hq0 !== '' && isFinite(Number(hq0)) ? Number(hq0) : d0.getHours(), lv0 = Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, Number(sv0.xp) || 0) / 20))), de0 = document.documentElement.dataset;
+  de0.mTank = String(lv0 >= 3); de0.mNakama = String(lv0 >= 5); de0.mGear = String(lv0 >= 8);
+  de0.ib = hr0 >= 22 || hr0 < 4 ? 'night' : hr0 < 12 && sv0.hello !== d0.getFullYear() + '-' + (d0.getMonth() + 1) + '-' + d0.getDate() ? 'morning' : '';
+  de0.plaza = String((Number(sv0.total) || 0) >= 3); } catch (e) {}
+setTimeout(function () { document.documentElement.dataset.arranged = document.documentElement.dataset.arranged || '1'; }, 8000);   // ほけん：本体の script が とまっても 8びょうで かくす ものを 出す
+</script>
+<script>
 // うごきを へらす（ゲームの 中の スイッチ）：スマホの せっていに くわえて、ここでも えらべる（せっていを しらない おうちの ひとや こどもの ために）。
 // matchMedia を さしかえて、外付けの ぶひんも ふくめて ぜんぶ おなじ せっていに したがう。CSS の「うごきを へらす」の きまりは、よみこみが おわって から :root[data-calm] つきで うつす
 try {
@@ -255,13 +264,19 @@ body.sleepy #scene{filter:brightness(.2);transition:filter 20s ease-in}   /* お
 body.sleepy #scene,body.sleepy #scene *,body.sleepy #scene *::before,body.sleepy #scene *::after{animation-play-state:paused !important}   /* ほとんど くらい あいだは 景色の CSS の 動きも とめる（電池・熱。さわれば つづきから） */
 /* 居場所の ひとこと（ぎしき）：朝 はじめて ひらいた とき「おはよう」・よる（22〜4じ）は「ねむれない？ ゆっくり ながめよう」＋ながめる／おやすみタイマー。ひきとめ・れんぞく・ばつは ない（とじれば その日は でない） */
 #ibasho{position:relative;margin:6px 0 10px;padding:12px 52px 12px 14px;border-radius:20px;background:linear-gradient(#f5f0ff,#e4f2fb);border:2px solid #cfc3f2;text-align:center;color:#33205f}
-#ibasho[hidden],#ibasho .ibasho-actions[hidden]{display:none}
+#ibasho{display:none}
+html[data-ib=morning] #ibasho,html[data-ib=night] #ibasho{display:block}
+html[data-ib=morning] #ibasho .ib-night,html[data-ib=night] #ibasho .ib-morning,html[data-ib=morning] #ibasho .ibasho-actions{display:none}   /* head の script が html[data-ib] を さいしょの 1コマから きめる＝あとから 出て 景色が ずれない */
 #ibasho p{margin:0;font-weight:800;line-height:1.8;font-size:1rem}
 #ibasho .ibasho-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px}
 #ibasho .ibasho-actions button{flex:1 1 40%;min-height:48px;white-space:normal;line-height:1.3;text-wrap:balance;word-break:auto-phrase}
 @media (max-width:480px){#ibasho .ibasho-actions button{flex:1 1 100%}}   /* せまい がめんは 1ぎょうずつ（「タイマ／ー」と ならない） */
 #ibasho-close{position:absolute;right:4px;top:4px;width:44px;height:44px;min-height:0;padding:0;font-size:1.4rem;line-height:1;border-radius:50%}
 :root[data-night=true] #ibasho{background:linear-gradient(#26375f,#1b2c4c);border-color:#4a5d92;color:#eaf0ff}
+/* 読みこみ中：本体の script が ならびを かえる（きろく・みる・いく・つりばを かえる を 景色の したへ）まで、これらは 景色の うえで ばしょを とらない（absolute＋見えない）＝景色が ずれない */
+html:not([data-arranged]) main > :is(.hud.record,.hud.menu,.areas,.time-box){position:absolute;left:0;right:0;visibility:hidden;pointer-events:none}
+html:not([data-arranged]) main > .actions > :is(#easy,#gaze,#sleep,#fullscreen),html:not([data-arranged]) main > :is(#status,#today,#nosave,#about-note,.hud.keep){position:absolute;visibility:hidden;pointer-events:none}   /* 「なげる」の したに あとから ならぶ ボタン（ならびが おわる まで）*/
+html[data-plaza=false] #plaza-note{display:none}
 #today{margin:2px 0 10px;text-align:center;font-size:.85rem;line-height:1.7;font-weight:700}
 #today[hidden]{display:none}
 /* てがみ（tsuri-tegami.js）：ひさしぶりに もどった ときと よなかに、景色の すみに ✉。おさなくても いい・その日 いちどだけ・ごほうびは なし */
@@ -509,7 +524,7 @@ img.art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 /* つれた あとは 主役の 2つ（もういちど なげる・しゃしんを とる）だけ。ほかは「ほかの こと ▸」に たたむ（読み上げ・キーボードは 主役 → たたみ の じゅん） */
 #more-catch{flex:1 1 40%}
 /* メニューは レベルで ひらく：はじめは バケツ・ずかん・ひろば だけ。Lv3 で すいそう・Lv5 で なかま・Lv8 で どうぐ・きねん（さいしょの がめんを しずかに） */
-body[data-m-tank=false] #tk-open,body[data-m-nakama=false] #open-nakama,body[data-m-gear=false] #open-gear,body[data-m-gear=false] #open-trophy{display:none}
+html[data-m-tank=false] #tk-open,html[data-m-nakama=false] #open-nakama,html[data-m-gear=false] #open-gear,html[data-m-gear=false] #open-trophy{display:none}
 /* つれた あいだ：主役は「つぎへ」と「しゃしん」。おと・BGM・とおく・ながめる などは「ほかの こと ▸」を ひらくと でる（つぎの 1ぴきを えらぶ とき ごちゃつかない） */
 body[data-phase=caught] .sub-actions:not([data-more=open]) > :not(#take-photo):not(#more-catch){display:none !important}
 #more-catch[open]{flex-basis:100%}
@@ -743,11 +758,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   </svg>
   <h1 class="logo" aria-label="まるふわ つりびより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">つ</span><span aria-hidden="true">り</span><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
   <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <ruby>急<rt aria-hidden="true">いそ</rt></ruby>がなくて <ruby>大丈夫<rt aria-hidden="true">だいじょうぶ</rt></ruby>・<ruby>逃<rt aria-hidden="true">に</rt></ruby>がしても <ruby>減<rt aria-hidden="true">へ</rt></ruby>らない<br><small><span class="ic" aria-hidden="true">⏱</span> 1ぴき 10〜20<ruby>秒<rt aria-hidden="true">びょう</rt></ruby>・<ruby>無料<rt aria-hidden="true">むりょう</rt></ruby></small></p>
-  <div id="ibasho" role="region" hidden>
-    <p id="ibasho-text"></p>
-    <div class="ibasho-actions" hidden>
-      <button id="ibasho-gaze" type="button"></button>
-      <button id="ibasho-sleep" type="button"></button>
+  <div id="ibasho" role="region">
+    <p id="ibasho-text"><span class="ib-morning">おはよう。きょうも、ここに いて いいよ。</span><span class="ib-night">ねむれない？　ゆっくり ながめよう。</span></p>
+    <div class="ibasho-actions">
+      <button id="ibasho-gaze" type="button">ながめる</button>
+      <button id="ibasho-sleep" type="button">おやすみタイマー：なし</button>
     </div>
     <button id="ibasho-close" type="button" aria-label="とじる">×</button>
   </div>
@@ -765,7 +780,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="open-nakama" type="button" style="flex:1"></button>
     <a class="pill plaza" href="hiroba/" style="flex:1">ひろば</a>
   </div>
-  <p class="note" id="plaza-note" hidden></p>
+  <p class="note" id="plaza-note">ひろばでは、まるふわの おへやで あそべるよ。</p>
 
   <div class="areas" id="areas" role="group" aria-label="つりばを えらぶ"></div>
   <details class="time-box"><summary>じかんを かえる（いま：<span id="time-now"></span>）</summary>
@@ -1885,7 +1900,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function drawPlazaNote() {   // 「ひろば」って なに？：3びき つって なれてから、ひとこと（せかさない・かならず ではない）
     const box = $('plaza-note'); if (!box || document.readyState === 'loading') return;
-    box.hidden = save.total < 3; box.textContent = L('ひろばでは、まるふわの おへやで あそべるよ。', 'In the plaza, you can visit Marufuwa' + String.fromCharCode(39) + 's room.');
+    document.documentElement.dataset.plaza = String(save.total >= 3); box.textContent = L('ひろばでは、まるふわの おへやで あそべるよ。', 'In the plaza, you can visit Marufuwa' + String.fromCharCode(39) + 's room.');
   }
   // つりびと ノート（外付け tsuri-note.js が よむ）：save.note＝あたらしい ものが さき・200こまで。{at,id,size,spot,time,nushi,party[],avatar,kind:'catch'|'release'|'gift'}。じぶんの キャラは party に いれない
   function noteAdd(kind, f, size, nushiFlag) {
@@ -1894,7 +1909,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   // メニューの ひらく レベル（つりびと レベル）：すいそう 3・なかま 5・どうぐ／きねん 8
   const MENU_LV = {tank: 3, nakama: 5, gear: 8};
-  function menuGate() { const lv = levelOf(save.xp || 0), b = document.body; b.dataset.mTank = String(lv >= MENU_LV.tank); b.dataset.mNakama = String(lv >= MENU_LV.nakama); b.dataset.mGear = String(lv >= MENU_LV.gear); }
+  function menuGate() { const lv = levelOf(save.xp || 0), b = document.documentElement; b.dataset.mTank = String(lv >= MENU_LV.tank); b.dataset.mNakama = String(lv >= MENU_LV.nakama); b.dataset.mGear = String(lv >= MENU_LV.gear); }   // さいしょの 値は head の script が いれる（ちらつき なし）
   function hud() {
     $('total').textContent = String(save.total); drawPlazaNote(); menuGate();   // レベルで メニューを ひらく
     drawToday(); drawBadge(); drawSeatHint();
@@ -3290,27 +3305,21 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   document.addEventListener('fullscreenchange', () => { $('fullscreen').textContent = document.fullscreenElement ? L('ぜんがめんを やめる', 'Exit full screen') : L('ぜんがめん', 'Full screen'); });
   // 居場所の ひとこと（ぎしき）：朝（4〜12じ）その日 はじめて ひらいた ときだけ「おはよう」／よる（22〜4じ）は ひらく たびに「ねむれない？ ゆっくり ながめよう」＋ながめる・おやすみタイマー。
   // ひきとめない（もう おそいよ・やめよう は 言わない）・れんぞく ほうしゅう なし・つかわなくても ばつ なし。×で とじれば その まま（?hour= は けんさよう）
-  let ibashoClosed = false;
-  function ibashoKind() {
-    const q = probe('hour'), hour = q !== null && q !== '' && Number.isFinite(Number(q)) ? Number(q) : new Date().getHours();
-    return hour >= 22 || hour < 4 ? 'night' : hour < 12 && save.hello !== dayKey() ? 'morning' : '';
-  }
-  function drawIbasho() {
-    const box = $('ibasho'); if (!box || document.readyState === 'loading') return;
-    if (ibashoClosed || gazing()) return;
-    if (!box.hidden && box.dataset.kind === 'morning') return;   // 朝の ひとことは そのまま（あとから きえない・1日 1かい）
-    const kind = ibashoKind(); box.dataset.kind = kind;
-    if (!kind) { box.hidden = true; return; }
-    $('ibasho-text').textContent = kind === 'morning' ? L('おはよう。きょうも、ここに いて いいよ。', 'Good morning. You are welcome here today, too.') : L('ねむれない？　ゆっくり ながめよう。', 'Cannot sleep? Let us gaze slowly together.');
-    box.setAttribute('aria-label', L('ここに いて いいよ', 'You are welcome here')); box.querySelector('.ibasho-actions').hidden = kind !== 'night';
+  const ibashoKind = () => document.documentElement.dataset.ib || '';   // head の script が きめた（朝／よる／なし）
+  function drawIbasho() {   // ことばを いれる（English は tsuri-en.js が よみこまれて から もういちど）。かたちは はじめから あるので 景色は ずれない
+    const box = $('ibasho'), kind = ibashoKind(); if (!box || !kind) return;
+    box.dataset.kind = kind;
+    box.querySelector('.ib-morning').textContent = L('おはよう。きょうも、ここに いて いいよ。', 'Good morning. You are welcome here today, too.');
+    box.querySelector('.ib-night').textContent = L('ねむれない？　ゆっくり ながめよう。', 'Cannot sleep? Let us gaze slowly together.');
+    box.setAttribute('aria-label', L('ここに いて いいよ', 'You are welcome here'));
     $('ibasho-gaze').textContent = L('ながめる', 'Gaze'); $('ibasho-close').setAttribute('aria-label', L('とじる', 'Close'));
-    if (kind === 'morning' && box.hidden) { save.hello = dayKey(); store(); }
-    box.hidden = false; drawSleep();
+    if (kind === 'morning' && save.hello !== dayKey()) { save.hello = dayKey(); store(); }   // その日 1かいだけ（つぎに ひらいた ときは head の script が だまる）
+    drawSleep();
   }
   $('ibasho-gaze').addEventListener('click', () => $('gaze').click());
   $('ibasho-sleep').addEventListener('click', () => $('sleep').click());
-  $('ibasho-close').addEventListener('click', () => { ibashoClosed = true; $('ibasho').hidden = true; });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawIbasho); else drawIbasho();   // 英語の ときは tsuri-en.js が よみこまれて から
+  $('ibasho-close').addEventListener('click', () => { document.documentElement.dataset.ib = ''; });
+  drawIbasho(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawIbasho);   // ひらいた とき すぐ（朝の きろく）・English は tsuri-en.js が よみこまれて から もういちど
   function syncClock() {   // ながめて いる うちに ゆうがた・よるに なる。じぶんで えらんだ じかんは そのまま（timeOfDay が きめる）
     if (document.hidden || !(phase === 'idle' || phase === 'caught')) return;
     const want = TIME_NAME[timeOfDay()]; if (scene.dataset.time === want) return;
@@ -3318,7 +3327,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (gazing() && !reduce() && scene.animate) { scene.animate([{filter: 'brightness(1)'}, {filter: 'brightness(.55)', offset: .5}, {filter: 'brightness(1)'}], {duration: 3200, easing: 'ease-in-out'}); setTimeout(change, 1600); } else change();
     if (gazing()) say(L('いつのまにか、' + TIME_LABEL[timeOfDay()] + 'に なったよ。', 'Before you know it, it is ' + T(TIME_LABEL[timeOfDay()]).toLowerCase() + '.'));
   }
-  setInterval(() => { syncClock(); drawIbasho(); }, 30000);
+  setInterval(syncClock, 30000);
   const paintGazeButtons = () => { drawSleep(); $('fullscreen').textContent = document.fullscreenElement ? L('ぜんがめんを やめる', 'Exit full screen') : L('ぜんがめん', 'Full screen'); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintGazeButtons); else paintGazeButtons();   // 英語の ときは tsuri-en.js が よみこまれて から 書く
   // ながめる＝居場所：なかまが かってに うごく・はなす・つる・いねむりする（景色が いきて いる）。かぞえない・ほぞんしない・見た目だけ。さわる いがいの 手は いらない
@@ -3748,6 +3757,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('つりばを かえる（いま：', now, '）'); where.append(head, $('areas'));
     status.after($('today'), where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
+    document.documentElement.dataset.arranged = '1';   // ならびが おわった（それまで きろく・みる・いく は 景色の うえで ばしょを とらない）
   }
   // つかいやすく する（ふだんは とじて いる 折りたたみ）：らくちん・ふるえ。名前で 年れいを わけない（おとなも えらべる）
   // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる。えらんだ ことは おぼえて おく
