@@ -337,7 +337,7 @@ body.gazing #tegami{display:none}
 .stars{color:#b07a00;letter-spacing:.1em;font-size:1.05rem}   /* 白い カードの 上で 3対1 いじょう（まえは 2.2対1）。よるは 下の きまりで あかるい 金 */
 #scene{position:relative;width:100%;aspect-ratio:4/3;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;touch-action:manipulation;background:var(--sky2)}
 #scene svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-#overlay{pointer-events:none}
+#overlay{pointer-events:none;z-index:4}   /* 竿は からだの まえ（かまえて いるのが みえる） */
 .who{position:absolute;width:17%;height:auto;aspect-ratio:3/4;object-fit:contain;transform:translate(-50%,-100%);transform-origin:50% 100%;pointer-events:none;transition:left .7s ease,top .7s ease}
 #marufuwa{z-index:3}
 .friend{z-index:2;width:14%;aspect-ratio:1/1}
@@ -373,9 +373,10 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 #scene[data-phase=waiting] #marufuwa{animation:waiting 2.6s ease-in-out infinite}
 #scene[data-phase=bite] #marufuwa{animation:startle .5s ease-in-out infinite}
 #scene[data-phase=reel] #marufuwa{animation:tugging .42s ease-in-out infinite}
-@keyframes waiting{0%,100%{rotate:-2.5deg;scale:1 1}50%{rotate:2.5deg;scale:1.02 .98}}
-@keyframes startle{0%,100%{translate:0 0;scale:1 1}30%{translate:0 -7px;scale:.96 1.05}60%{translate:0 0;scale:1.04 .96}}
-@keyframes tugging{0%,100%{rotate:-7deg;translate:-2px 0}50%{rotate:-11deg;translate:-5px 0}}
+@keyframes waiting{0%,100%{rotate:8.5deg;scale:1 1}50%{rotate:11.5deg;scale:1.02 .98}}   /* まつ：からだを 糸の ほうへ 8〜12° かたむけて かまえる */
+@keyframes startle{0%,100%{rotate:12deg;translate:0 0;scale:1 1}30%{rotate:14deg;translate:0 -7px;scale:.96 1.05}60%{rotate:12deg;translate:0 0;scale:1.04 .96}}   /* アタリ：まえのめり */
+@media (prefers-reduced-motion:reduce){#scene[data-phase=waiting] #marufuwa,#scene[data-phase=bite] #marufuwa{rotate:10deg}#scene[data-phase=reel] #marufuwa{rotate:-10deg}}   /* うごきを へらす：かくどだけ（うごかさない） */
+@keyframes tugging{0%,100%{rotate:-10deg;translate:-2px 0}50%{rotate:-14deg;translate:-5px 0}}
 /* あめ */
 /* みず：けいさんで えがく みなも。なみの ゆらぎ、ひかりの きらめき、たいようや つきの うつりこみ */
 /* そら：けいさんで えがく。くもが ながれ、ほしが またたき、たいようや つきが ぼんやり ひかる */
@@ -1530,6 +1531,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     rodRaf = requestAnimationFrame(step);
   }
   function rodPose(next) {   // ばめんごとの 竿
+    if (POSE_FILES.length) { poseNow = {waiting: 'mate', bite: 'mate', reel: 'hiki', caught: 'age'}[next] || ''; try { face(curFace); } catch {} }
     clearInterval(rodSway); clearTimeout(rodHold);
     if (next === 'waiting') { rodTo(0, 0, 400); if (!reduce()) rodSway = setInterval(() => { if (phase !== 'waiting' || document.body.classList.contains('gazing') || document.hidden) return; const t = performance.now(); rodK.y = Math.sin(t / 1900) * .7 + (Math.sin(t / 5300) > .93 ? 2.2 : 0); rod($('line-me'), mine, 12, $('rod-me')); }, 140); }
     else if (next === 'bite') rodTo(0, 6, 140);
@@ -1538,8 +1540,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     else rodTo(0, 0, 300);
   }
   function rod(line, i, tall, stick) {
-    const f = feet(i), w = floatAt(i), kk = stick.id === 'rod-me' ? rodK : {x: 0, y: 0}, tip = {x: f.x + 9 + kk.x, y: f.y - tall - 6 + kk.y};
-    stick.setAttribute('x1', f.x + 3); stick.setAttribute('y1', f.y - tall * .5);
+    const f = feet(i), w = floatAt(i), kk = stick.id === 'rod-me' ? rodK : {x: 0, y: 0}, tip = {x: f.x + 9 + kk.x, y: f.y - tall - 6 + kk.y}, bx = stick.id === 'rod-me' && !reduce() ? (phase === 'waiting' || phase === 'bite' ? 1.3 : phase === 'reel' ? -1.3 : 0) : 0;   // 根もとは 手の いち（からだが かたむく ほうへ）
+    stick.setAttribute('x1', f.x + 5.5 + bx); stick.setAttribute('y1', f.y - tall * .4);
     stick.setAttribute('x2', tip.x); stick.setAttribute('y2', tip.y);
     line.setAttribute('x1', tip.x); line.setAttribute('y1', tip.y);
     line.setAttribute('x2', w.x); line.setAttribute('y2', w.y);
@@ -2013,7 +2015,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function cardShow() { clearTimeout(cardTimer); delete $('card').dataset.wait; if (!cardShownAt) { cardShownAt = performance.now(); if (phase === 'caught') lockFor(1000); } }   // カードが 出た 時刻（つれた 直後は 0）
   function cardWait(ms) { clearTimeout(cardTimer); cardShownAt = 0; $('card').dataset.wait = 'true'; cardTimer = setTimeout(cardShow, ms); }
   let curFace = 'blue'; const wearCache = new Map();   // まるふわの ふくの いろ（じぶんの どうぐ）
-  function face(name) { curFace = name; const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
+  const POSE_FILES = [];   // 天の ポーズえが とどいたら「img/pose/<id>_<pose>.png」の <id>_<pose> を ここへ（例：'marufuwa_mate'）。pose＝nage（なげる）・mate（まつ）・hiki（ひく）・age（もちあげ）。なければ いまの えのまま
+  let poseNow = '';
+  const poseFile = () => { const k = (marufuwa.dataset.avatar || 'marufuwa') + '_' + poseNow; return poseNow && POSE_FILES.includes(k) && !reduce() ? 'img/pose/' + k + '.png' : ''; };
+  function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.src = pf; return; } const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
   function drawToday() {
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
@@ -2086,7 +2091,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const box = scene.getBoundingClientRect(), f = feet(mine), w = floatAt(mine);
     if (!reduce()) { rodTo(-9, 3, 230); setTimeout(() => rodTo(5, -2, 190), 250); setTimeout(() => { if (phase === 'waiting') rodPose('waiting'); }, 470); }   // さおが うしろから まえへ（0.5びょう）
     const dx = (w.x - (f.x + 9)) / 100 * box.width, dy = (w.y - (f.y - 18)) / 100 * box.height;
-    const back = 13 + Math.random() * 6, fore = 10 + Math.random() * 6, lift = 55 + Math.random() * 45, reach = .38 + Math.random() * .17;   // まいかい すこし ちがう ゆみなり（ちゃくすいの 0.9びょうは かえない）
+    const back = 10 + Math.random() * 2, fore = 10 + Math.random() * 6, lift = 55 + Math.random() * 45, reach = .38 + Math.random() * .17;   // まいかい すこし ちがう ゆみなり（ちゃくすいの 0.9びょうは かえない）
     marufuwa.animate([{rotate: '0deg', scale: '1 1'}, {rotate: -back + 'deg', scale: '.93 1.07', offset: .35}, {rotate: fore + 'deg', scale: '1.07 .93', translate: '0 -8px', offset: .62}, {rotate: '0deg', scale: '1 1'}], {duration: 640, easing: 'ease-in-out'});
     const shout = document.createElement('span'); shout.className = 'bubble'; shout.textContent = 'えいっ'; shout.setAttribute('aria-hidden', 'true'); place(shout, {x: f.x, y: f.y - 24}); scene.append(shout);
     shout.animate([{opacity: 0, translate: '0 8px'}, {opacity: 1, translate: '0 0', offset: .3}, {opacity: 1, offset: .7}, {opacity: 0, translate: '0 -8px'}], {duration: 900}).onfinish = () => shout.remove();
