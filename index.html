@@ -355,7 +355,7 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 @keyframes shoot{0%{translate:30vw -8vh;opacity:0}30%{opacity:1}100%{translate:0 0;opacity:1}}
 @media(prefers-reduced-motion:reduce){#scene #star{animation:none}}
 #rain{position:absolute;inset:-20% 0 0 -20%;z-index:4;pointer-events:none;display:none;background-image:repeating-linear-gradient(105deg,#ffffff00 0 14px,#ffffff8c 14px 15.5px,#ffffff00 15.5px 34px);background-size:68px 120px;animation:rain .55s linear infinite}
-#scene[data-rain=true] #rain{display:block}
+#scene[data-rain=true] #rain{display:none}   /* 10/1 ふるい ななめの 雨は もう 出さない（tsuri-ame.js の ぽつぽつが 入るまでの 一瞬も 出さない・マスター「リロードで 古い雨が 一瞬」） */
 #scene[data-rain=true] > svg:first-of-type{filter:brightness(.8) saturate(.75)}
 #scene[data-rain=true][data-dim=true] > svg:first-of-type{filter:brightness(.55) saturate(.7)}
 @keyframes rain{to{background-position:-32px 120px}}
