@@ -73,7 +73,8 @@
   const cleanCare = c => { const n = Math.floor(Number(c && c.n)), l = Math.floor(Number(c && c.l)); return { n: Number.isFinite(n) && n > 0 ? Math.min(n, 9999) : 0, l: Number.isFinite(l) ? l : -1 }; };   // せわの きろく（ごはんを あげた 日の かず・さいごの 日）。へる ことは ない
   const cleanItem = v => { const n = Math.floor(Number(v)); return Number.isFinite(n) && n >= 0 && n <= 20 ? n : 0; };   // もちもの（0＝なし・数字だけ）。tsuri-wear.js が よむ
   const cleanFav = f => { const out = {}; if (f && typeof f === 'object' && !Array.isArray(f)) for (const [id, v] of Object.entries(f).slice(0, 80)) if (/^\d{1,2}$/.test(id) && Number(id) <= 45 && v === 1) out[id] = 1; return out; };   // おきにいり（さかなの ばんごう→1）。かぞえない・ならびは かえない
-  const readTank = () => { try { const d = JSON.parse(localStorage.getItem(TANK_KEY)); if (d && typeof d === 'object') return { seen: d.seen && typeof d.seen === 'object' ? d.seen : {}, placed: Array.isArray(d.placed) ? d.placed.filter(okPlaced) : [], sound: typeof d.sound === 'boolean' ? d.sound : undefined, soundMain: typeof d.soundMain === 'boolean' ? d.soundMain : undefined, parade: typeof d.parade === 'string' ? d.parade : '', grow: cleanGrow(d.grow), care: cleanCare(d.care), fav: cleanFav(d.fav), item: cleanItem(d.item) }; } catch {} return { seen: {}, placed: [], grow: {}, care: { n: 0, l: -1 }, fav: {}, item: 0 }; };
+  const cleanBig = v => { const n = Math.floor(Number(v)); return v !== null && v !== undefined && v !== '' && Number.isFinite(n) && n >= 0 && n <= 33 ? n : -1; };   // まるいろで いちばん おおきく した さかなの ばんごう（0〜33・-1＝なし）。数字だけ・まるいろ（maruiro/）が 書く
+  const readTank = () => { try { const d = JSON.parse(localStorage.getItem(TANK_KEY)); if (d && typeof d === 'object') return { seen: d.seen && typeof d.seen === 'object' ? d.seen : {}, placed: Array.isArray(d.placed) ? d.placed.filter(okPlaced) : [], sound: typeof d.sound === 'boolean' ? d.sound : undefined, soundMain: typeof d.soundMain === 'boolean' ? d.soundMain : undefined, parade: typeof d.parade === 'string' ? d.parade : '', grow: cleanGrow(d.grow), care: cleanCare(d.care), fav: cleanFav(d.fav), item: cleanItem(d.item), maruiroBig: cleanBig(d.maruiroBig) }; } catch {} return { seen: {}, placed: [], grow: {}, care: { n: 0, l: -1 }, fav: {}, item: 0, maruiroBig: -1 }; };
   let tank = readTank();
   let visit = null;   // ほうもん（読み取り専用）の 間だけ { fish:[ばんごう], placed:[{n,x,y}] }。この 間は 見る人の 記録に 何も 書かない・数えない
   const saveTank = () => { if (visit) return; try { localStorage.setItem(TANK_KEY, JSON.stringify(tank)); } catch {} };
@@ -355,6 +356,10 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-lampbtn:focus-visible,.tk-rice:focus-visible,.tk-shelfbtn:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a99}
 .tk-lampbtn,.tk-shelfbtn{border-radius:14px}
 .tk-shelf{position:absolute}
+.tk-maru{position:absolute;left:80%;top:57%;width:16%;text-align:center;pointer-events:none;z-index:3}
+.tk-maru img{display:block;width:60%;height:auto;margin:0 auto;filter:drop-shadow(0 2px 2px #0004)}
+.tk-maru span{display:block;font-size:calc(9px * var(--s,1));line-height:1.2;color:#244653;font-weight:800;background:#fffdf6cc;border-radius:6px;padding:0 3px}
+.tk-maru[hidden]{display:none}
 .tk-shelf[hidden],.tk-shelfbtn[hidden],.tk-giftlist[hidden]{display:none}
 .tk-shelf .tk-gf{position:absolute;object-fit:contain;display:flex;align-items:center;justify-content:center;line-height:1;filter:drop-shadow(0 1px 1px #0003)}
 .tk-giftlist{position:absolute;left:8px;right:8px;top:8px;max-height:calc(100% - 16px);overflow:auto;z-index:30;background:#fffdf6;border:2px solid #b9d1db;border-radius:18px;padding:12px 14px 14px;box-shadow:0 8px 24px #0004;color:#244653;word-break:keep-all;overflow-wrap:break-word}
@@ -412,6 +417,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     <div class="tk-stage"><div class="tk-room" data-time="hiru">
       <div class="tk-roomsvg" style="left:0;top:0;width:100%;height:100%"></div>
       <div class="tk-shelf" aria-hidden="true" hidden></div>
+      <div class="tk-maru" hidden role="img"><img alt="" decoding="async"><span>まるいろで そだてた</span></div>
       <div class="tk-dim"></div>
       <div class="tk-starwall" aria-hidden="true" style="left:0;top:0;width:100%;height:100%"></div>
       ${fa ? '<img class="tk-friend" data-who="a" src="' + fa + '" alt="" draggable="false">' : ''}
@@ -1094,6 +1100,13 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   }
 
   // ─── もちもの（総司令部 ③）：まるふわの 手に 小物を もたせる。番号（0＝なし）は tank.item（数字だけ）。絵は tsuri-wear.js が 描く（ひろば・おへやの まるふわに でる）。レベルが たりない 物は えらべない・じぶんの こ の ときは つかえない ───
+  // まるいろで そだてた さかなの 置物（水槽の すみ・ひとつ・数えない・へらない）。訪問リンクには のせない
+  const maruEl = $(dlg, '.tk-maru');
+  function renderMaru() {
+    const n = visit ? -1 : (tank.maruiroBig === undefined ? -1 : tank.maruiroBig);
+    if (n < 0) { maruEl.hidden = true; return; }
+    const im = maruEl.querySelector('img'); im.src = BASE + 'img/fish/' + String(n).padStart(2, '0') + '.webp'; maruEl.setAttribute('aria-label', 'まるいろで そだてた さかなの おきもの'); maruEl.hidden = false;
+  }
   const mochiBtn = $(dlg, '.tk-mochi-btn'), mochi = $(dlg, '.tk-mochi'), mochiList = $(dlg, '.tk-mochilist'), mochiNote = $(dlg, '.tk-mochinote'), mochiPrev = $(dlg, '.tk-mochiprev');
   function prevMochi() {   // トレーが 部屋の まるふわを かくす ので、小さな みほんを 出す（いまの 色・もちもの）
     const W = window.TsuriWear, url = BASE + 'img/game-blue.webp';
@@ -1517,7 +1530,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     layoutRoom(); paintWater(); layoutRoom(); ownSync();
     requestAnimationFrame(() => { if (isOpen()) layoutRoom(); }); setTimeout(() => { if (isOpen()) layoutRoom(); }, 400);   // ひらいた 直後は ボタンの おりかえしが きまって いない＝はかり なおす（上の 列に かぶらない）
     if (visit && visit.starry) { starry = true; applyStarry(); }   // おくった 人の へやが ほしぞらの とき
-    const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
+    renderMaru(); const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
     if (arrivals.length) {
       const first = arrivals[0].fish;
       const text = arrivals.length === 1 && arrivals[0].n === 1 ? first.name + 'が すいそうに ようこそ。' : 'あたらしい なかまが ' + arrivals.reduce((s, r) => s + r.n, 0) + 'ひき きたよ。';

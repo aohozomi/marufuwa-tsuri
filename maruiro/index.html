@@ -204,6 +204,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const im = fishArt(fishId(l)); if (im.complete && im.naturalWidth) { const k = Math.min(r * 1.3 / im.naturalWidth, r * 1.3 / im.naturalHeight); c.drawImage(im, -im.naturalWidth * k / 2, -im.naturalHeight * k / 2, im.naturalWidth * k, im.naturalHeight * k); }
     c.restore();
   }
+  // いちばん おおきく した さかな（水槽の すみの 置物）：おへやの 記録に 数字を 1つ（maruiroBig＝さかなの ばんごう）だけ 足す。ほかの 項目は そのまま・へらさない・かぞえない
+  function bigWrite(l) {
+    try {
+      const K = 'marufuwa-tsuri-tank-v1'; let d = null; try { d = JSON.parse(localStorage.getItem(K)); } catch (e) {}
+      if (!d || typeof d !== 'object' || Array.isArray(d)) d = {};
+      const cur = Number.isInteger(d.maruiroBig) ? d.maruiroBig : -1, curL = cur < 0 ? -1 : FISH_GROUPS.findIndex(g => g.includes(cur));
+      if (l > curL) { d.maruiroBig = fishId(l); localStorage.setItem(K, JSON.stringify(d)); }
+    } catch (e) {}
+  }
   const piece = (c, x, y, r, l, a, scale) => (rec.mode === 2 ? fish : rec.mode === 1 && l < 6 ? item : face)(c, x, y, r, l, a, scale);
   function miniCanvas(l, px) {
     const c = document.createElement('canvas'), d = 2; c.width = c.height = px * d; c.style.width = c.style.height = px + 'px'; c.setAttribute('aria-hidden', 'true');
@@ -311,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (gone.size) balls = balls.filter(b => !gone.has(b));
     for (const n of born) {
       addBall(n.x, n.y, n.l, n.vx, n.vy, reduced() ? 0 : 1); tone(n.l, 'merge');
+      if (rec.mode === 2) bigWrite(n.l);
       if (n.l > stats.maxL) stats.maxL = n.l;
       if (n.l > rec.best) { rec.best = n.l; save(); drawBest(); say(L('おおきく なったよ！ ' + nm(n.l), 'It got bigger! ' + nm(n.l))); if (n.l === 6) say(L('ぜんぶの いろを あわせたよ。すごい！', 'You joined every color. Wonderful!')); }
     }
