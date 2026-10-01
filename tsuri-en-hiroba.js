@@ -12,9 +12,9 @@
     'おはよう': 'Good morning', 'こんにちは': 'Hello', 'こんばんは': 'Good evening', 'おつきさま': 'Moon', 'おひさま': 'Sun',
     'まるふわ': 'Marufuwa', 'あんないのペンギン': 'Guide Penguin', 'おみせのこぎつね': 'Shop Fox',
     'つりば': 'Fishing Spot', 'ありがとうのいし': 'Thank-You Stone',
-    'こうじちゅうのばしょ': 'Under construction', 'こうじちゅうのばしょ（ちかぢか）': 'Under construction (coming soon)',
-    'ここはまだこうじちゅう。ちかぢかあそべるよ。たのしみにまっててね': "Still under construction. You'll be able to play soon. Look forward to it!",
-    'ここもこうじちゅう。ちかぢかあそべるよ。おたのしみに': 'This one is under construction, too. Coming soon. Stay tuned!',
+    'じゅんびちゅうのばしょ': 'Getting ready', 'じゅんびちゅうのばしょ（ちかぢか）': 'Getting ready (coming soon)',
+    'ここはまだじゅんびちゅう。ちかぢかあそべるよ。たのしみにまっててね': "Still getting ready. You'll be able to play soon. Look forward to it!",
+    'ここもじゅんびちゅう。ちかぢかあそべるよ。おたのしみに': 'This one is getting ready, too. Coming soon. Stay tuned!',
     'あめ': 'Rain', 'はれ': 'Sunny', 'ふんすい': 'Fountain', 'ちかく': 'Nearby', 'ひだり': 'Left', 'みぎ': 'Right',
     'まるふわのひろば': "Marufuwa's Plaza", 'きょうのともだち': "Today's friends", 'さわってみてね': 'Try touching it',
     'ひろばにもどったよ': 'Back in the plaza.', 'いってきます！': 'See you later!', 'ただいま！': "I'm back!", 'またね！': 'See you!',
@@ -22,7 +22,7 @@
     'かなうといいね': 'I hope it comes true.', 'ねがいごとをしたよ。かなうといいね。': 'You made a wish. I hope it comes true.',
     'ふんすいがちゃぷちゃぷしているよ': 'The fountain is splashing.', 'おひさまがぽかぽかしているよ': 'The sun is warm and cozy.', 'くもがぽよんとはねたよ': 'The cloud bounced with a boing.',
     'はっぱがひらひらおちてきたよ': 'Leaves are fluttering down.', 'ながれぼしがとんだよ。さわるとねがいごとができるよ': 'A shooting star flew by. Touch it to make a wish.',
-    'やめたよ。すきなところへいこう': "Never mind. Let's go wherever you like.", 'こうじちゅうだって': "It's under construction.",
+    'やめたよ。すきなところへいこう': "Never mind. Let's go wherever you like.", 'じゅんびちゅうだって': "It's getting ready.",
     'まるふわのおへやにはいったよ': "Went into Marufuwa's room.", 'おへやからもどったよ': 'Came back from the room.',
     'ちかくにはだれもいないよ。': 'No one is nearby.', 'まんなかにはふんすいがあるよ。': "There's a fountain in the middle.", '（まだ）': '(not yet)',
     '。きょうあったよ': '. Met today', '。きょうまだあっていないよ': '. Not met yet today',
@@ -43,7 +43,7 @@
     'ひろばへようこそ。ゆびでさわると、まるふわがあるくよ。したのボタンで、いきたいところへいけるよ。': 'Welcome to the plaza. Tap, and Marufuwa will walk there. Use the buttons below to go where you like.',
     // ---- あんないの ペンギン ----
     'ひろばへようこそ': 'Welcome to the plaza.',
-    'まだこうじちゅうのばしょもあるよ。たのしみにね': 'Some places are still under construction. Look forward to them.', 'スカーフ、あったかいよ': 'My scarf is warm.',
+    'まだじゅんびちゅうのばしょもあるよ。たのしみにね': 'Some places are still getting ready. Look forward to them.', 'スカーフ、あったかいよ': 'My scarf is warm.',
     'ふんすいをさんかいさわると…ないしょ！': "If you touch the fountain three times… it's a secret!", 'いけをじっとみていると、いいことがあるよ': 'If you watch the pond quietly, something nice happens.',
     'いそがなくてだいじょうぶ': "No rush. It's okay.", 'ここにいていいんだよ': 'You can stay right here.', 'あめのひは、みずたまりがたのしいね': 'Puddles are fun on rainy days.',
     'ぼく、ぬれるのへいき': "I don't mind getting wet.", 'よるはほしがきれいにみえるよ': 'The stars look beautiful at night.', 'つきをさわると…どうなるかな': 'What happens if you touch the moon…?',
@@ -137,7 +137,7 @@
     'たんぽぽ': 'Dandelion', 'こむぎ': 'Komugi', 'あめだま': 'Candy Drop', 'すずらん': 'Lily of the Valley', 'ハート': 'Heart', 'ふわり': 'Fuwari', 'ぽっぽ': 'Poppo', 'マロン': 'Marron', 'ちょこ': 'Choco', 'ゆず': 'Yuzu', 'きなこ': 'Kinako', 'ぱんだ': 'Panda', 'ほたる': 'Hotaru',
     // ---- ページの せつめい・ボタン・かんばん ----
     'やじるしキーでまるふわがあるくよ。スペースキーでちかくのともだちにはなしかけたり、ばしょにはいったりできるよ。エスケープキーでやめるよ。したのボタンでもおなじことができるよ。': 'Use the arrow keys to walk Marufuwa. Press Space to talk to a nearby friend or enter a place. Press Escape to cancel. The buttons below do the same things.',
-    'ひろば。まるふわがあるくばしょ': 'The plaza: where Marufuwa walks', 'おへや': 'Room', 'ありがとう': 'Thanks', 'こうじちゅう': 'Under construction',
+    'ひろば。まるふわがあるくばしょ': 'The plaza: where Marufuwa walks', 'おへや': 'Room', 'ありがとう': 'Thanks', 'じゅんびちゅう': 'Getting ready',
     'いきさき': 'Where to go', 'つりびより': 'Fishing Days', 'すいそう': 'Aquarium', 'まだできていないばしょ': 'Places not ready yet', 'ちかぢかあそべます': 'Coming soon',
     'ともだちにあいにいく': 'Visit friends', 'まわりをきく': 'Listen around', 'さわれるもの': 'Things to touch', 'くも': 'Cloud', 'き': 'Tree', 'あそびかた': 'How to play',
     'ゆびでさわったところへ、まるふわがあるいていくよ。かんばんやたてものをさわると、そこへいって、あそびにいけるよ。ともだちにちかづくと、ひとことはなしかけてくれるよ。': "Tap a spot and Marufuwa will walk there. Touch a sign or building to go and play. Get close to a friend, and they'll say a word to you.",
@@ -175,6 +175,6 @@
     [/^(\d+)がつにきてくれたよ$/, (_, m) => `Came in ${['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][+m] || m}`],
   ];
   // かんばん（SVG）は せまい ので みじかく
-  const short = { 'つりば': 'Fishing', 'こうじちゅう': 'Building…', 'おへや': 'Room', 'ありがとう': 'Thanks' };
+  const short = { 'つりば': 'Fishing', 'じゅんびちゅう': 'Getting ready…', 'おへや': 'Room', 'ありがとう': 'Thanks' };
   window.TsuriEn.add({ ex, rules, short });
 })();
