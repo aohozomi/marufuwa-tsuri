@@ -66,6 +66,7 @@
       "おこさんにやさしいくふう": "Kid-friendly features",
       "にがしても、へりません。ゲームオーバー・せいげんじかん・しっぱいのばつはありません。": "Letting a fish go loses nothing. There is no game over, no time limit, and no penalty for failing.",
       "「らくちん」…おすだけでつれます。タイミングをあわせなくてもだいじょうぶです。": "“Easy mode”… Just press to catch a fish. You do not need to match the timing.",
+      "おとは、はじめはOFFです。ONにするまで、おとはなりません。「まるいろ」だけははじめからなります（がめんのうえの「おとをけす」ですぐとめられます）。": "Sound is OFF at first. Nothing plays until you turn it ON. Only Maruiro starts with sound on (the “mute” button at the top stops it right away).",
       "おとは、はじめはOFFです。ONにするまで、おとはなりません。": "Sound is OFF at first. Nothing plays until you turn it ON.",
       "BGM（しずかなきょく）…ひろば・おへや・ながめるで、ながすことができます。はじめはOFFです。「おと」がONのときに「BGM」もONにしたときだけながれます。きょくはあさ・ひる・ゆうがた・よるでかわります。「おと」をけせば、BGMもきえます。つりのがめんではながれません。": "BGM (quiet music)… It can play in the Plaza, the Room, and Just watch. It is OFF at first. It plays only when you turn “BGM” ON while “Sound” is ON. The music changes with the time of day: morning, noon, evening, and night. If you turn “Sound” off, the BGM stops too. It does not play on the fishing screen.",
       "しんどう（ふるえ）…さかながかかったときやつれたときに、みじかいしんどうがでることがあります（Androidなど、しんどうにたいおうしたたんまつだけ）。「つかいやすくする」のなかの「ふるえ」できれます。「うごきをへらす」せっていのひとは、はじめからきれています。": "Vibration… A short vibration may occur when a fish bites or is caught (only on devices that support vibration, such as Android). You can turn it off with “Vibration” inside “Comfort options.” For people who use the “Reduce motion” setting, it is off from the start.",
