@@ -151,11 +151,15 @@ html[data-ready=fresh] #scene > *{animation:sceneIn .4s ease-out}
 #scene[data-area=S][data-time]{--ground:#f4f8fb;--edge:#b9d3e4;--hill:#e3eef4;--tree:#cfe3ee;--water1:#cfeaf5;--water2:#86c3df}
 #scene[data-area=S][data-time=yuu]{--hill:#f0dfe4;--tree:#d9cfe0;--water1:#e0d2e6;--water2:#9a8fc0}
 #scene[data-area=S][data-time=yoru]{--hill:#46597e;--tree:#34507a;--water1:#4a6fa0;--water2:#233f66}
+/* にじの たき（T）：しめった みどり・あおみどりの みず。夜は くらい */
+#scene[data-area=T][data-time]{--ground:#b9b08a;--edge:#6e8f7a;--hill:#8fb59a;--tree:#4f9a72;--water1:#9fe0e8;--water2:#3fa0c0}
+#scene[data-area=T][data-time=yuu]{--hill:#c9a09a;--tree:#7a8f6a;--water1:#e0c4cf;--water2:#7f7fb0}
+#scene[data-area=T][data-time=yoru]{--hill:#2a4a58;--tree:#1f5058;--water1:#2f6a86;--water2:#173f5a}
 #scene[data-time=yoru][data-area] svg g[data-for],#scene[data-time=yoru] svg polygon[style*=ground]{filter:brightness(.62)}
-#scene:not([data-area=L]) [data-for=L],#scene:not([data-area=R]) [data-for=R],#scene:not([data-area=H]) [data-for=H],#scene:not([data-area=B]) [data-for=B],#scene:not([data-area=M]) [data-for=M],#scene:not([data-area=S]) [data-for=S]{display:none}
+#scene:not([data-area=L]) [data-for=L],#scene:not([data-area=R]) [data-for=R],#scene:not([data-area=H]) [data-for=H],#scene:not([data-area=B]) [data-for=B],#scene:not([data-area=M]) [data-for=M],#scene:not([data-area=S]) [data-for=S],#scene:not([data-area=T]) [data-for=T]{display:none}
 .areas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
 .areas{margin-bottom:14px}
-.areas[data-n="5"],.areas[data-n="6"]{grid-template-columns:repeat(3,1fr)}   /* つりばが 5〜6こ：3れつに（320px でも はみ出さない） */
+.areas[data-n="5"],.areas[data-n="6"],.areas[data-n="7"]{grid-template-columns:repeat(3,1fr)}   /* つりばが 5〜6こ：3れつに（320px でも はみ出さない） */
 .areas button{min-height:48px;padding:4px 2px;font-size:.82rem;line-height:1.25;border-radius:22px}
 .areas button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36}
 .times button[aria-pressed=true]{--c1:#e6dcff;--c2:#b79cf0;--side:#8a6bd0;--ink:#33205f}
@@ -824,6 +828,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       <g data-for="B"><rect x="0" y="150" width="600" height="130" style="fill:var(--water1)"/><rect x="0" y="150" width="600" height="6" fill="#ffffff55"/></g>
       <g data-for="M"><g fill="#6b4a2f"><rect x="29" y="176" width="10" height="30"/><rect x="95" y="182" width="11" height="26"/><rect x="167" y="184" width="9" height="20"/><rect x="448" y="184" width="9" height="20"/><rect x="514" y="180" width="11" height="26"/><rect x="583" y="182" width="10" height="24"/></g><g style="fill:var(--tree)"><ellipse cx="34" cy="150" rx="42" ry="62"/><ellipse cx="100" cy="138" rx="48" ry="72"/><ellipse cx="172" cy="160" rx="38" ry="50"/><ellipse cx="452" cy="156" rx="40" ry="54"/><ellipse cx="520" cy="140" rx="50" ry="72"/><ellipse cx="588" cy="156" rx="40" ry="58"/></g><rect x="0" y="168" width="600" height="24" fill="#ffffff" opacity=".2"/></g>
       <g data-for="S"><polygon points="120,194 238,96 352,194" fill="#e4eef5"/><polygon points="238,96 262,126 240,120 222,136 214,124" fill="#ffffff"/><polygon points="300,196 408,120 506,196" fill="#d6e5ef"/><polygon points="408,120 428,142 410,138 394,148" fill="#ffffff"/><g fill="#8a6a52"><rect x="33" y="196" width="6" height="12"/><rect x="82" y="196" width="6" height="12"/><rect x="147" y="196" width="6" height="12"/><rect x="467" y="196" width="6" height="12"/><rect x="527" y="196" width="6" height="12"/><rect x="579" y="196" width="6" height="12"/></g><polygon points="10,200 36,134 62,200" fill="#e9f2f7"/><polygon points="10,200 36,134 36,200" fill="#c4d9e6"/><polygon points="15.2,172.28 36,127.39999999999999 56.8,172.28" fill="#f6fafc"/><polygon points="56,200 86,120 116,200" fill="#e9f2f7"/><polygon points="56,200 86,120 86,200" fill="#c4d9e6"/><polygon points="62,166.4 86,112 110,166.4" fill="#f6fafc"/><polygon points="126,200 150,142 174,200" fill="#e9f2f7"/><polygon points="126,200 150,142 150,200" fill="#c4d9e6"/><polygon points="130.8,175.64 150,136.2 169.2,175.64" fill="#f6fafc"/><polygon points="444,200 470,138 496,200" fill="#e9f2f7"/><polygon points="444,200 470,138 470,200" fill="#c4d9e6"/><polygon points="449.2,173.96 470,131.8 490.8,173.96" fill="#f6fafc"/><polygon points="498,200 530,116 562,200" fill="#e9f2f7"/><polygon points="498,200 530,116 530,200" fill="#c4d9e6"/><polygon points="504.4,164.72 530,107.6 555.6,164.72" fill="#f6fafc"/><polygon points="558,200 582,140 606,200" fill="#e9f2f7"/><polygon points="558,200 582,140 582,200" fill="#c4d9e6"/><polygon points="562.8,174.8 582,134 601.2,174.8" fill="#f6fafc"/></g>
+      <g data-for="T"><polygon points="0,198 0,96 54,78 104,124 150,198" fill="#8fa39a"/><polygon points="600,198 600,84 548,70 500,122 450,198" fill="#8fa39a"/><polygon points="0,198 0,120 40,110 80,150 110,198" fill="#6f8c82"/><polygon points="600,198 600,110 560,100 520,146 490,198" fill="#6f8c82"/><g fill="none" stroke-width="5" opacity=".5" stroke-linecap="round"><path d="M200 196 A110 110 0 0 1 420 196" stroke="#ff8a8a"/><path d="M208 196 A102 102 0 0 1 412 196" stroke="#ffb066"/><path d="M216 196 A94 94 0 0 1 404 196" stroke="#ffe27a"/><path d="M224 196 A86 86 0 0 1 396 196" stroke="#8fe3a8"/><path d="M232 196 A78 78 0 0 1 388 196" stroke="#7fd0f2"/><path d="M240 196 A70 70 0 0 1 380 196" stroke="#a79cf0"/></g><rect x="262" y="60" width="52" height="140" rx="8" fill="#ffffff" opacity=".93"/><path d="M272 66 v130M286 62 v134M300 66 v130" stroke="#bfe6f5" stroke-width="3" fill="none" opacity=".8"/><ellipse cx="288" cy="198" rx="44" ry="8" fill="#ffffff" opacity=".85"/><ellipse cx="256" cy="202" rx="16" ry="5" fill="#ffffff" opacity=".7"/><ellipse cx="322" cy="202" rx="18" ry="5" fill="#ffffff" opacity=".7"/></g>
       <polygon points="0,200 600,186 600,333 0,261" style="fill:var(--ground)"/>
       <!-- つりばごとの まえの けしき -->
       <g data-for="L"><polygon points="250,150 330,138 380,160 300,174" fill="#8a6a4a"/><polygon points="258,166 300,174 300,226 258,216" fill="#fff6e6"/><polygon points="300,174 372,160 372,210 300,226" fill="#f3e2c4"/><polygon points="322,188 346,184 346,214 322,220" fill="#9a7450"/></g>
@@ -832,11 +837,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       <g data-for="B"><g stroke="#a87b49" stroke-width="2"><line x1="0" y1="215" x2="600" y2="204"/><line x1="0" y1="232" x2="600" y2="226"/><line x1="0" y1="248" x2="600" y2="252"/><line x1="0" y1="258" x2="600" y2="290"/></g><polygon points="230,110 420,104 420,210 230,216" fill="#fbfbfb"/><rect x="230" y="104" width="190" height="12" fill="#3a6ea5"/><circle cx="280" cy="160" r="16" fill="#bfe3f5" stroke="#c9a23a" stroke-width="5"/><circle cx="370" cy="164" r="17" fill="none" stroke="#e8543f" stroke-width="9"/><circle cx="370" cy="164" r="17" fill="none" stroke="#fff" stroke-width="9" stroke-dasharray="13 14"/></g>
       <g data-for="M"><ellipse cx="190" cy="236" rx="30" ry="9" fill="#5e4430"/><rect x="164" y="212" width="52" height="24" fill="#8a6a4a"/><ellipse cx="190" cy="212" rx="26" ry="8" fill="#c9a679"/><ellipse cx="190" cy="212" rx="14" ry="4" fill="none" stroke="#8a6a4a" stroke-width="2"/><ellipse cx="548" cy="244" rx="38" ry="20" fill="#8d8d93"/><path d="M514 242 q34 -34 68 0 q-34 -14 -68 0z" fill="#6fae66"/><rect x="404" y="238" width="5" height="12" fill="#f6ecd8"/><ellipse cx="406" cy="238" rx="13" ry="8" fill="#e8543f"/><circle cx="402" cy="236" r="2.2" fill="#fff"/><circle cx="410" cy="240" r="1.8" fill="#fff"/><rect x="432" y="244" width="4" height="9" fill="#f6ecd8"/><ellipse cx="434" cy="244" rx="9" ry="6" fill="#f2a93c"/><circle cx="431" cy="242" r="1.6" fill="#fff"/></g>
       <g data-for="S"><circle cx="185" cy="214" r="26" fill="#fff" stroke="#c4d9e6" stroke-width="2"/><circle cx="185" cy="178" r="19" fill="#fff" stroke="#c4d9e6" stroke-width="2"/><circle cx="179" cy="175" r="2.4" fill="#3b2a2d"/><circle cx="191" cy="175" r="2.4" fill="#3b2a2d"/><polygon points="185,180 201,184 185,187" fill="#ff9a45"/><path d="M169 193 q16 8 32 0" stroke="#ef6a6a" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="185" cy="210" r="2.2" fill="#3b2a2d"/><circle cx="185" cy="222" r="2.2" fill="#3b2a2d"/><ellipse cx="90" cy="246" rx="44" ry="12" fill="#ffffff"/><ellipse cx="470" cy="240" rx="52" ry="13" fill="#ffffff"/><polygon points="500,250 520,214 546,250" fill="#cfe9f6" stroke="#9fc8de" stroke-width="2"/></g>
+      <g data-for="T"><ellipse cx="120" cy="238" rx="40" ry="16" fill="#7f9a92" stroke="#5e7a72" stroke-width="2"/><ellipse cx="112" cy="230" rx="22" ry="7" fill="#a9c2ba" opacity=".7"/><ellipse cx="500" cy="244" rx="46" ry="18" fill="#7f9a92" stroke="#5e7a72" stroke-width="2"/><ellipse cx="492" cy="235" rx="24" ry="7" fill="#a9c2ba" opacity=".7"/><ellipse cx="236" cy="256" rx="22" ry="8" fill="#8ba69e" stroke="#5e7a72" stroke-width="2"/><ellipse cx="372" cy="262" rx="26" ry="9" fill="#8ba69e" stroke="#5e7a72" stroke-width="2"/><g fill="#ffffff" opacity=".8"><circle cx="150" cy="226" r="3"/><circle cx="162" cy="232" r="2.2"/><circle cx="466" cy="230" r="3"/><circle cx="478" cy="224" r="2.2"/><circle cx="262" cy="244" r="2.4"/></g></g>
       <!-- かぜに なびく くさ と、おみせの はた -->
       <g class="grass" data-for="L" stroke="#5aa85a" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M200 262 q-4 -16 -10 -22"/><path d="M208 264 q2 -18 8 -26"/><path d="M440 292 q-4 -16 -10 -22"/><path d="M448 294 q2 -18 8 -26"/><path d="M560 300 q2 -18 8 -26"/></g>
       <g class="grass" data-for="R" stroke="#4f9650" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M150 258 q-4 -16 -10 -22"/><path d="M158 260 q2 -18 8 -26"/><path d="M410 288 q-4 -16 -10 -22"/><path d="M418 290 q2 -18 8 -26"/><path d="M570 304 q2 -18 8 -26"/></g>
       <g class="grass" data-for="M" stroke="#3f8a4f" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M170 258 q-4 -16 -10 -22"/><path d="M178 260 q2 -18 8 -26"/><path d="M330 270 q-4 -16 -10 -22"/><path d="M338 272 q2 -18 8 -26"/><path d="M440 292 q-4 -16 -10 -22"/><path d="M448 294 q2 -18 8 -26"/><path d="M560 300 q-4 -16 -10 -22"/><path d="M568 302 q2 -18 8 -26"/></g>
       <g class="grass" data-for="S" stroke="#a89a78" stroke-width="4" stroke-linecap="round" fill="none"><path d="M60 254 q-4 -16 -10 -22"/><path d="M68 256 q2 -18 8 -26"/><path d="M210 262 q-4 -16 -10 -22"/><path d="M218 264 q2 -18 8 -26"/><path d="M380 272 q-4 -16 -10 -22"/><path d="M388 274 q2 -18 8 -26"/><path d="M520 296 q-4 -16 -10 -22"/><path d="M528 298 q2 -18 8 -26"/></g>
+      <g class="grass" data-for="T" stroke="#3f9a6a" stroke-width="4" stroke-linecap="round" fill="none"><path d="M40 254 q-4 -16 -10 -22"/><path d="M48 256 q2 -18 8 -26"/><path d="M56 257 q6 -12 12 -16"/><path d="M190 262 q-4 -16 -10 -22"/><path d="M198 264 q2 -18 8 -26"/><path d="M206 265 q6 -12 12 -16"/><path d="M340 272 q-4 -16 -10 -22"/><path d="M348 274 q2 -18 8 -26"/><path d="M356 275 q6 -12 12 -16"/><path d="M450 292 q-4 -16 -10 -22"/><path d="M458 294 q2 -18 8 -26"/><path d="M466 295 q6 -12 12 -16"/><path d="M556 302 q-4 -16 -10 -22"/><path d="M564 304 q2 -18 8 -26"/><path d="M572 305 q6 -12 12 -16"/></g>
       <line x1="566" y1="236" x2="566" y2="154" stroke="#8a5a2b" stroke-width="4" stroke-linecap="round"/>
       <polygon class="flag" points="564,156 528,164 564,180" fill="#ff8f6b" stroke="#fff" stroke-width="2"/>
       <!-- みずぎわ と みず -->
@@ -1143,6 +1150,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ['こおりわかさぎ', '🐟', 5, 15, 1, '', 'S', '{氷|こおり}{公魚|わかさぎ}', 'Ice Smelt'], ['ゆきだまはぜ', '🐟', 4, 12, 2, 'ah', 'S', '{雪玉|ゆきだま}はぜ', 'Snowball Goby'],
     ['おんせんがめ', '🐢', 15, 40, 2, 'h', 'S', '{温泉|おんせん}{亀|かめ}', 'Hot Spring Turtle'], ['おーろらうお', '🐠', 30, 70, 3, 'n', 'S', 'オーロラ{魚|うお}', 'Aurora Fish']
   ].forEach(([name, icon, min, max, rare, time, area, kanji, en]) => FISH.push({id: FISH.length, name, icon, min, max, rare, time, area, kanji, en, ext: true}));
+  // にじの たき（T）の さかな：id 54〜57。57 は まぼろし（legend＋ext＝ずかんの 30にも まぼろし4にも かぞえない・あうまで ずかんに ならばない）。えは かり（tsuri-art-ext.js）
+  [['にじますの こ', '🐟', 30, 60, 3, 'ah', 'T', 'にじ{鱒|ます}の{子|こ}', 'Rainbow Trout Kid', false], ['たきのぼりごい', '🐟', 60, 120, 4, 'h', 'T', '{滝登|たきのぼ}り{鯉|ごい}', 'Waterfall Climber Koi', false],
+    ['しぶきうなぎ', '🐟', 50, 110, 3, 'yn', 'T', 'しぶき{鰻|うなぎ}', 'Spray Eel', false], ['にじのりゅうぎょ', '🐉', 150, 300, 5, '', 'T', 'にじの{竜魚|りゅうぎょ}', 'Rainbow Dragonfish', true]
+  ].forEach(([name, icon, min, max, rare, time, area, kanji, en, myth]) => FISH.push({id: FISH.length, name, icon, min, max, rare, time, area, kanji, en, ext: true, ...(myth ? {legend: true} : {})}));
   // まぼろしの ひ：つきに 1にち だけ、まぼろしが でやすい（60かいに 1かい）。ひづけで きまるので、みんな おなじ ひ
   // きょうの ラッキー・ぬし・まぼろしの ひ は、ひづけだけで きまる。ひろばと おなじ ファイル（tsuri-daily.js）を つかう。DAILY_FALLBACK は、よみこめ なかった ときの 同じ しき（かえる ときは 2か所 おなじに）
   const DAILY_FALLBACK = (() => { const valid = t => (t instanceof Date && !isNaN(t) ? t : new Date()), day = t => { t = valid(t); return t.getFullYear() * 372 + t.getMonth() * 31 + t.getDate(); };
@@ -1177,14 +1188,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const AREAS = [
     {id: 'L', name: 'みずうみ', need: 0}, {id: 'R', name: 'かわ', need: 5},
     {id: 'H', name: 'みなとまち', need: 15}, {id: 'B', name: 'ふねの うえ', need: 30},
-    {id: 'M', name: 'もりの いけ', need: 45, late: true}, {id: 'S', name: 'ゆきの みずうみ', need: 65, late: true}
+    {id: 'M', name: 'もりの いけ', need: 45, late: true}, {id: 'S', name: 'ゆきの みずうみ', need: 65, late: true},
+    {id: 'T', name: 'にじの たき', need: 90, late: 65}
   ];
-  const areasShown = () => AREAS.filter(a => !a.late || save.total >= 30);   // もりの いけ・ゆきの みずうみの タブは「ふねの うえ」に ついた ひとだけ（はじめての ひとの がめんは 4つの まま）
+  const areasShown = () => AREAS.filter(a => !a.late || save.total >= (a.late === true ? 30 : a.late));   // もりの いけ・ゆきの みずうみの タブは「ふねの うえ」に ついた ひとだけ（はじめての ひとの がめんは 4つの まま）
   // ひろがる つりばは「その つりばの さかな」＋「ほかの つりばの さかなが あそびに くる（ゲスト）」。ゲストの area は かえない（もとの つりばの でかたと ずかんは そのまま）。
   // その つりばの さかなは 2ばい でやすい（じっさいの わりあい：その つりばの さかな 約6わり・ゲスト 約4わり）。ひょうじには かかない。ばんごうは FISH の ばんごう
-  const GUEST = {M: [2, 7, 8, 18], S: [5, 15, 23, 21]}, HOME_BONUS = 2;
+  const GUEST = {M: [2, 7, 8, 18], S: [5, 15, 23, 21], T: [28, 21, 18, 19]}, HOME_BONUS = 2, TF_BONUS = 2;   // T（にじの たき）＝しっかり むけ：★3 いじょうは さらに ×2（どの あそびかたでも ぜんぶの さかなに あえる）
   const poolOf = area => FISH.filter(f => !f.legend && !f.season && (f.area === area || (GUEST[area] || []).includes(f.id)));
-  const homeBonus = f => GUEST[save.area] && f.area === save.area ? HOME_BONUS : 1;
+  const homeBonus = f => GUEST[save.area] && f.area === save.area ? HOME_BONUS * (save.area === 'T' && f.rare >= 3 ? TF_BONUS : 1) : 1;
   // どうぐ。おかねは つかわない。あそぶと ふえる
   const RODS = [
     {icon: '🌿', name: 'きのえだの さお', note: 'さいしょの さお', open: () => true, how: ''},
@@ -1710,8 +1722,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function areaSound() {
     clearTimeout(areaTimer); areaTimer = 0;
     if (!ambient || !ambientOut || !audio || !sndOn('amb')) return;
-    if (phase !== 'reel' && !document.hidden) { try { if (save.area === 'H') (Math.random() < .5 ? horn : gull)(); else if (save.area === 'B') creak(); else if (save.area === 'M') bird(); else if (save.area === 'S') wind(); } catch {} }
-    const fixed = Number(probe('areasound')); areaTimer = setTimeout(areaSound, fixed || (save.area === 'H' ? 25000 + Math.random() * 45000 : save.area === 'B' ? 14000 + Math.random() * 26000 : save.area === 'M' ? 25000 + Math.random() * 35000 : save.area === 'S' ? 30000 + Math.random() * 30000 : 60000));
+    if (phase !== 'reel' && !document.hidden) { try { if (save.area === 'H') (Math.random() < .5 ? horn : gull)(); else if (save.area === 'B') creak(); else if (save.area === 'M') bird(); else if (save.area === 'S') wind(); else if (save.area === 'T') falls(); } catch {} }
+    const fixed = Number(probe('areasound')); areaTimer = setTimeout(areaSound, fixed || (save.area === 'H' ? 25000 + Math.random() * 45000 : save.area === 'B' ? 14000 + Math.random() * 26000 : save.area === 'M' ? 25000 + Math.random() * 35000 : save.area === 'S' ? 30000 + Math.random() * 30000 : save.area === 'T' ? 25000 + Math.random() * 25000 : 60000));
   }
   function horn() {   // とおくの きてき（ひくく ゆっくり ふくらんで きえる）
     const ctx = audio, at = ctx.currentTime + .05, g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 520;
@@ -1741,6 +1753,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     for (let i = 0; i < len; i++) { v = v * .97 + (Math.random() * 2 - 1) * .03; d[i] = v * 5; }
     const src = ctx.createBufferSource(), lp = ctx.createBiquadFilter(), g = ctx.createGain(); src.buffer = buf; lp.type = 'lowpass'; lp.frequency.value = 480;
     g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.012, t0 + 1.4); g.gain.linearRampToValueAtTime(0, t0 + 3.3); src.connect(lp); lp.connect(g); g.connect(ambientOut); src.start(t0); src.stop(t0 + 3.4);
+  }
+  function falls() {   // たきの おと：ひくい うなり（90〜260Hz の ゆれ・ざーっと した 広帯域ノイズは つかわない）＋ときどき ぽちゃ（400→180Hz・みじかい）
+    const ctx = audio, t0 = ctx.currentTime + .05, lp = ctx.createBiquadFilter(), g = ctx.createGain(); lp.type = 'lowpass'; lp.frequency.value = 420;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.012, t0 + 1.4); g.gain.linearRampToValueAtTime(0, t0 + 3.3); lp.connect(g); g.connect(ambientOut);
+    [[110, 164], [165, 247]].forEach(([a, b]) => { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(a, t0); o.frequency.linearRampToValueAtTime(b, t0 + 3.2); o.connect(lp); o.start(t0); o.stop(t0 + 3.4); });
+    const p = ctx.createOscillator(), pe = ctx.createGain(); p.type = 'sine'; p.frequency.setValueAtTime(400, t0 + 1.2); p.frequency.linearRampToValueAtTime(180, t0 + 1.38); pe.gain.setValueAtTime(0, t0 + 1.2); pe.gain.linearRampToValueAtTime(.01, t0 + 1.24); pe.gain.linearRampToValueAtTime(0, t0 + 1.4); p.connect(pe); pe.connect(ambientOut); p.start(t0 + 1.2); p.stop(t0 + 1.45);
   }
   function duckAmbient(on) {   // あんないの おと（ポ・ピコン）が なって いる 間だけ、なみを はんぶんに（−6dB）。おわると ゆっくり もどる
     if (!ambientDuck || !audio) return;
@@ -2848,7 +2866,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // シールちょうの 1まい。あつめた シールが ならぶ。30しゅるい そろうと「ぜんぶ あつめた！」
   async function bookPhoto() {
     const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1350;
-    const ctx = canvas.getContext('2d'), seen = seenCount(), full = seen >= BASE, list = FISH.filter(f => isBase(f) || (f.legend && save.fish[f.id])), arts = {};
+    const ctx = canvas.getContext('2d'), seen = seenCount(), full = seen >= BASE, list = FISH.filter(f => isBase(f) || (f.legend && !f.ext && save.fish[f.id])), arts = {};
     await Promise.all(list.filter(f => save.fish[f.id] && artOf(f)).map(async f => { arts[f.id] = await loadImg(artOf(f)); }));
     const paper = ctx.createLinearGradient(0, 0, 0, 1350); paper.addColorStop(0, full ? '#fff6cf' : '#eaf6fd'); paper.addColorStop(1, full ? '#ffe9a8' : '#d3eefb');
     ctx.fillStyle = paper; ctx.fillRect(0, 0, 1200, 1350);
@@ -3298,7 +3316,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       else if (kind === 'S') { shade = .95 + puffy(x * .04, y * .1) * .08 - (dot(x, y) > .994 ? .05 : 0); }
       else { shade = .78 + puffy(x * .045, y * .11) * .4 + grain(x * .9, y * .9) * .08; if (dot(x, y) > .992) shade -= .2; }
       const near = .9 + (y / H) * .14, level = Math.max(0, Math.min(1, shade * near)) * 255;
-      const green = kind === 'L' || kind === 'R' || kind === 'M' ? puffy(x * .03 + 7, y * .07) : 0;
+      const green = kind === 'L' || kind === 'R' || kind === 'M' || kind === 'T' ? puffy(x * .03 + 7, y * .07) : 0;
       px[i] = level * (1 - green * .25); px[i + 1] = level * (1 - green * .02); px[i + 2] = level * (1 - green * .3); px[i + 3] = 255;
     }
     trowel.putImageData(tile, 0, 0);
@@ -3767,7 +3785,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const book = $('book');
   $('open-book').addEventListener('click', () => {
     save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); drawBadge();   // ひらいた → みた ことに なる
-    { const myth = FISH.filter(f => f.legend), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? L('★5の まぼろしの こ：ぜんいんに あえたよ！', '★5 mythical fish: you have met them all!') : L('★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'), '★5 mythical fish: ' + myth.length + ' exist (met: ' + got + ').' + (seenCount() >= BASE ? '' : ' Collect all ' + BASE + ' kinds and you are more likely to meet them.')); }
+    { const myth = FISH.filter(f => f.legend && !f.ext), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? L('★5の まぼろしの こ：ぜんいんに あえたよ！', '★5 mythical fish: you have met them all!') : L('★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'), '★5 mythical fish: ' + myth.length + ' exist (met: ' + got + ').' + (seenCount() >= BASE ? '' : ' Collect all ' + BASE + ' kinds and you are more likely to meet them.')); }
     $('book-fact').hidden = true; $('book-fact').textContent = '';
     const makeCell = f => {
       const got = save.fish[f.id], cell = document.createElement('div');
@@ -3781,7 +3799,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       return cell;
     };
     {   // つりばごとに ならべる（みずうみ・かわ・みなとまち・ふねの うえ）。「くらべる」では なく、じぶんの あつめぐあいが わかる
-      const list = FISH.filter(f => isBase(f) || (f.legend && save.fish[f.id])), cells = [];
+      const list = FISH.filter(f => isBase(f) || (f.legend && !f.ext && save.fish[f.id])), cells = [];
       for (const a of AREAS) {
         const inArea = list.filter(f => f.area === a.id); if (!inArea.length) continue;
         const head = document.createElement('h3'), got = inArea.filter(f => save.fish[f.id]).length;
@@ -3805,7 +3823,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     {   // ひろがる ずかん：もりの いけ・ゆきの みずうみの さかな（ずかんの 30しゅるいには かぞえない）。その つりばに いける ひとだけに みせる（せかさない・くらべない）
       for (const a of AREAS.filter(x => x.late && save.total >= x.need)) {
-        const inArea = FISH.filter(f => f.ext && f.area === a.id); if (!inArea.length) continue;
+        const inArea = FISH.filter(f => f.ext && f.area === a.id && (!f.legend || save.fish[f.id])); if (!inArea.length) continue;
         const head = document.createElement('h3'), note = document.createElement('p'), got = inArea.filter(f => save.fish[f.id]).length;
         head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L('ひろがる ずかん　' + a.name + '　' + got + ' / ' + inArea.length, 'Extra book  ' + T(a.name) + '  ' + got + ' / ' + inArea.length);
         note.style.cssText = 'grid-column:1/-1;margin:0;text-align:center;font-size:.82rem;line-height:1.7'; note.textContent = L('ずかんの 30しゅるいには かぞえないよ。ゆっくり あえたら いいね。', 'These are not part of the 30 kinds. Meet them whenever you like.');

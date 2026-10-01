@@ -14,7 +14,7 @@
   const EN = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
   const T = (ja, en) => EN() ? en : ja;
   const tr = s => { try { return EN() && window.TsuriEn && typeof window.TsuriEn.t === 'function' ? (window.TsuriEn.t(s) || s) : s; } catch { return s; } };
-  const SPOT = { L: ['みずうみ', 'the lake'], R: ['かわ', 'the river'], H: ['みなとまち', 'the harbor town'], B: ['ふねの うえ', 'the boat'], M: ['もりの いけ', 'the forest pond'], S: ['ゆきの みずうみ', 'the snowy lake'] };
+  const SPOT = { L: ['みずうみ', 'the lake'], R: ['かわ', 'the river'], H: ['みなとまち', 'the harbor town'], B: ['ふねの うえ', 'the boat'], M: ['もりの いけ', 'the forest pond'], S: ['ゆきの みずうみ', 'the snowy lake'], T: ['にじの たき', 'the rainbow falls'] };
   const TIME = { a: ['あさ', 'morning'], h: ['ひる', 'noon'], y: ['ゆうがた', 'evening'], n: ['よる', 'night'] };
   const PAL = { usagi: ['ミントの うさぎ', 'Mint Bunny'], kawauso: ['ラテの かわうそ', 'Latte Otter'], hiyoko: ['レモンの ひよこ', 'Lemon Chick'], ribbon: ['リボンの うさぎ', 'Ribbon Bunny'],
     panda: ['おひるね パンダ', 'Nap Panda'], kojika: ['おほしさまの こじか', 'Little Star Fawn'], tanuki: ['クローバーの たぬき', 'Clover Tanuki'], risu: ['チョコの りす', 'Chocolate Squirrel'],
