@@ -304,11 +304,11 @@ html[data-plaza=false] #plaza-note{display:none}
 #scene[data-time=yoru] .next-hint{opacity:.7;filter:brightness(.75)}
 /* つりばの いどう：景色の したの ボタン・奥の 気配（おせる）・← → */
 .area-open{display:block;width:100%;min-height:48px;margin:8px 0 4px}
-.next-go{position:absolute;z-index:6;width:64px;height:64px;min-height:0;transform:translate(-50%,-50%);padding:0;border:0;background:transparent;box-shadow:none;border-radius:50%}
+.next-go{position:absolute;z-index:6;width:48px;height:48px;min-height:0;transform:translate(-50%,-50%);padding:0;border:0;background:transparent;box-shadow:none;border-radius:50%}
 .next-go span{position:absolute;right:2px;bottom:2px;min-width:26px;height:22px;padding:0 6px;border-radius:11px;background:#fff;border:2px solid #286b88;color:#17323d;font-weight:900;font-size:.8rem;line-height:18px}
 .next-go[data-locked=true]{opacity:.7}
 .next-go[data-locked=true] span::after{content:"🔒";font-size:.7rem;margin-left:2px}
-.edge-go{position:absolute;z-index:6;top:42%;width:44px;min-height:0;height:88px;padding:0;border-radius:14px;background:#ffffff66;border:2px solid #ffffffaa;color:#17323d;font-weight:900;font-size:1.3rem;box-shadow:none;opacity:.6}
+.edge-go{position:absolute;z-index:6;top:7%;width:44px;min-height:0;height:56px;padding:0;border-radius:14px;background:#ffffff66;border:2px solid #ffffffaa;color:#17323d;font-weight:900;font-size:1.3rem;box-shadow:none;opacity:.6}
 #edge-prev{left:4px}#edge-next{right:4px}
 .next-go[hidden],.edge-go[hidden]{display:none}
 #scene:not([data-phase=idle]):not([data-phase=caught]) :is(.next-go,.edge-go),body.gazing :is(.next-go,.edge-go),#scene[data-tooku=true] :is(.next-go,.edge-go){display:none}
@@ -1555,6 +1555,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     rod($('line-me'), mine, 12, $('rod-me'));
     $('line-me').style.display = casting && !flying ? '' : 'none';
     spots.forEach((spot, i) => { spot.setAttribute('aria-pressed', String(i === mine)); place(spot, {x: SPOT_X[i] + 10, y: shore(SPOT_X[i] + 10) - 6}); });   // バケツは りくの うえ（みずぎわより うえ）
+    if ((phase === 'idle' || phase === 'caught') && typeof placeNav === 'function') { try { placeNav(); } catch {} }
   }
   function moveTo(i) {
     if (i === mine && (phase === 'idle' || phase === 'caught')) { say(L('いまは ここで つって いるよ。', 'You are fishing here right now.')); return; }   // いまの せきを おしても だまらない
@@ -2565,8 +2566,37 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     g.hidden = !nx; if (nx) { const pos = NEXT_POS[nx.id] || [15, 36]; g.style.left = pos[0] + '%'; g.style.top = pos[1] + '%'; g.dataset.locked = String(!areaOpen(nx)); g.setAttribute('aria-label', areaOpen(nx) ? L(nx.name + 'へ いく', 'Go to ' + T(nx.name)) : L(nx.name + '。あと ' + (nx.need - save.total) + 'ひきで いけるよ', T(nx.name) + '. ' + (nx.need - save.total) + ' more to unlock')); }
     ep.hidden = !areaOpen(pv); en.hidden = !areaOpen(nx);
     if (pv) ep.setAttribute('aria-label', L('まえの つりば：' + pv.name, 'Previous spot: ' + T(pv.name))); if (nx) en.setAttribute('aria-label', L('つぎの つりば：' + nx.name, 'Next spot: ' + T(nx.name)));
-    $('area-open').textContent = L('つりばを かえる ▸', 'Change spot ▸');
+    $('area-open').textContent = L('つりばを かえる ▸', 'Change spot ▸'); placeNav(); clearTimeout(placeT); placeT = setTimeout(() => { try { placeNav(); } catch {} }, 900);   // キャラが いちに つく（0.7びょう）まで まって もういちど
   }
+  // 気配・→札・← →は キャラ（お店の子・となりの子・うしろの子・まるふわ）の 矩形と かさならない：気配は うえへ（丘の うえ）・札は その うえ・← → は キャラの れつより うえ（空の たかさ）
+  let placeT = 0;
+  function placeNav() {
+    const sc = scene.getBoundingClientRect(); if (!sc.width) return;
+    const chars = ['keeper', 'friend-a', 'friend-b', 'marufuwa'].map(id => $(id)).filter(e => e && !e.hidden && getComputedStyle(e).display !== 'none').map(e => e.getBoundingClientRect()).filter(r => r.width && r.height);
+    const top = (l, r) => Math.min(...chars.filter(c => c.left < r && c.right > l).map(c => c.top), Infinity);   // この はばの うえに ある キャラの いちばん たかい ところ
+    const hint = [...scene.querySelectorAll('.next-hint [data-next]')].find(g => getComputedStyle(g).display !== 'none');
+    let hr = null;
+    if (hint) {
+      hint.style.translate = ''; hr = hint.getBoundingClientRect();
+      const m = hint.parentNode.getScreenCTM(), r0 = hr, hit = (dx, dy) => chars.some(c => r0.left + dx < c.right + 4 && r0.right + dx > c.left - 4 && r0.top + dy < c.bottom + 4 && r0.bottom + dy > c.top - 4);
+      if (m && m.a && hit(0, 0)) {   // うごかす：ひだり・みぎ・うえ の うち いちばん ちかい あいている ところへ（シーンの そとへは でない）
+        let best = null;
+        for (let dy = 0; dy >= -(r0.top - sc.top - 4); dy -= 4) for (let dx = -sc.width; dx <= sc.width; dx += 4) {
+          if (r0.left + dx < sc.left + 2 || r0.right + dx > sc.right - 2 || hit(dx, dy)) continue;
+          const cost = Math.abs(dx) + Math.abs(dy) * 2; if (!best || cost < best[0]) best = [cost, dx, dy];
+        }
+        if (best) { hint.style.translate = (best[1] / m.a) + 'px ' + (best[2] / m.d) + 'px'; hr = hint.getBoundingClientRect(); }
+      }
+    }
+    const g = $('next-go');
+    if (!g.hidden && hr) {
+      const sz = g.getBoundingClientRect().height || 48, cx = Math.min(sc.right - sz / 2 - 2, Math.max(sc.left + sz / 2 + 2, (hr.left + hr.right) / 2)), t = top(cx - sz / 2, cx + sz / 2);
+      const cy = Math.max(sc.top + sz / 2 + 2, Math.min((hr.top + hr.bottom) / 2, t - sz / 2 - 5));
+      g.style.left = ((cx - sc.left) / sc.width * 100) + '%'; g.style.top = ((cy - sc.top) / sc.height * 100) + '%';
+    }
+    [$('edge-prev'), $('edge-next')].forEach(b => { if (b.hidden) return; const r = b.getBoundingClientRect(), t = top(r.left, r.right); const y = Math.max(sc.top + 4, Math.min(sc.top + sc.height * .07, t - r.height - 4)); b.style.top = (y - sc.top) / sc.height * 100 + '%'; });
+  }
+  addEventListener('resize', () => { try { placeNav(); } catch {} }); addEventListener('load', () => setTimeout(() => { try { placeNav(); } catch {} }, 1100));
   let goTarget = null;
   $('next-go').addEventListener('click', event => { event.stopPropagation(); const nx = AREAS[areaIdx() + 1]; if (!nx) return; if (!areaOpen(nx)) { lockedSay(nx); return; } goTarget = nx; $('areago-q').textContent = L(nx.name + 'へ いく？', 'Go to ' + T(nx.name) + '?'); $('areago').showModal(); $('areago-yes').focus(); });
   $('areago-yes').addEventListener('click', () => { $('areago').close(); switchArea(goTarget); });
