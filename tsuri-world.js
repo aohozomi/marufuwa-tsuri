@@ -57,6 +57,22 @@
     const i = illum < .08 ? 0 : illum < .4 ? 1 : illum < .88 ? 2 : 3, m = MOONS[i];   // しんげつ(±2.7日)・みかづき・はんつき・まんげつ(±3.4日)
     return {phase, age: phase * SYNODIC, illum, waxing, lit: i === 0 ? 'none' : waxing ? 'right' : 'left', shape: MOON_SHAPES[Math.floor(((phase + 1 / 16) % 1) * 8)], key: m[0], name: m[1], en: m[2], label: T(m[1], m[2])};
   }
+  // ---- きょうの てんき・おやつ（アプリ「まるふわまるいろ」と おなじ 日づけ計算。表示用＝釣りの 雨 rainOf() とは べつ） ----
+  // 日の種：FNV-1a 64bit を "yyyy-MM-dd/" + 塩 の UTF-8 に かける（アプリ CareEngine.daySeed と おなじ）。日づけは たんまつの 今日。通信なし・ログインなし
+  const FNV_OFFSET = 1469598103934665603n, FNV_PRIME = 1099511628211n, MASK64 = (1n << 64n) - 1n;
+  const daySeed = (key, salt) => { let h = FNV_OFFSET; for (const byte of new TextEncoder().encode(key + '/' + salt)) h = ((h ^ BigInt(byte)) * FNV_PRIME) & MASK64; return h; };
+  const pad2 = n => (n < 10 ? '0' : '') + n;
+  const TREATS = [['milk', 'ミルク', 'Milk'], ['pudding', 'プリン', 'Pudding'], ['jerky', 'ほしにく', 'Jerky'], ['fish', '小魚', 'Small fish'], ['berry', '木の実', 'Nuts']];
+  const WEATHERS = {clear: ['晴れ', 'Clear'], cloudy: ['くもり', 'Cloudy'], rain: ['雨', 'Rain'], snow: ['雪', 'Snow']};
+  function daily(date) {   // {key, weather, weatherLabel, treat:{id,title}}。アプリの Weather.of・treatOfTheDay と おなじ けっか
+    const d = date instanceof Date && !isNaN(date) ? date : new Date(), key = d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()), m = d.getMonth() + 1;
+    const roll = Number(daySeed(key, 'weather-marufuwa') % 100n), season = m >= 3 && m <= 5 ? 'haru' : m >= 6 && m <= 8 ? 'natsu' : m >= 9 && m <= 11 ? 'aki' : 'fuyu';   // ?season= の 検査用の 上書きは うけない（アプリと そろえる）
+    let w;
+    if (season === 'haru') w = roll < 22 ? 'rain' : roll < 45 ? 'cloudy' : 'clear';
+    else { const chance = season === 'natsu' ? 28 : season === 'aki' ? 20 : 12; w = roll < chance ? (season === 'fuyu' ? 'snow' : 'rain') : roll < chance + 25 ? 'cloudy' : 'clear'; }
+    const t = TREATS[Number(daySeed(key, 'treat-marufuwa') % 5n)];
+    return {key, weather: w, weatherLabel: T(WEATHERS[w][0], WEATHERS[w][1]), treat: {id: t[0], title: T(t[1], t[2])}};
+  }
   const levelOf = xp => Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, num(Number(xp), 0)) / 20)));
 
   // ---- つりばの ひょう（本体の AREAS と おなじ。「かならず 通る 順」＝みずうみ→かわ→みなとまち→ふねの うえ） ----
@@ -120,5 +136,5 @@
     return false;
   }
 
-  window.TsuriWorld = Object.freeze({VERSION: 1, BASE, AREAS: AREAS.map(a => ({...a})), timeOf, rainOf, seasonOf, moon, levelOf, context, places, route, go});
+  window.TsuriWorld = Object.freeze({VERSION: 1, BASE, AREAS: AREAS.map(a => ({...a})), timeOf, rainOf, seasonOf, moon, daily, levelOf, context, places, route, go});
 })();
