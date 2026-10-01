@@ -1614,7 +1614,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     try { const url = URL.createObjectURL(plopWav()), a = new Audio(url); a.volume = .9; a.onended = a.onerror = () => URL.revokeObjectURL(url); const p = a.play(); if (p && p.catch) p.catch(() => URL.revokeObjectURL(url)); } catch {}
   }
   function softenBus() { if (bus && bus.low) bus.low.frequency.value = save.soft ? 1200 : 1400; }   // 「やさしい おと」を きりかえた とき（つくって ある でぐちの ローパスを かえる）
-  function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, kind = 'fx') {
+  function tone(freq, length = .09, type = 'square', delay = 0, loud = .05, slideTo = 0, kind = 'fx', attack = 0) {
     if (!sndOn(kind)) return;
     try {
       const ctx = ready(), at = ctx.currentTime + delay, osc = ctx.createOscillator(), vol = ctx.createGain();
@@ -1626,7 +1626,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       osc.type = type; osc.frequency.setValueAtTime(freq, at);
       if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + length);
       const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : osc.type === 'sine' ? loud * 1.6 : loud;
-      const rise = Math.min(.02, length * .4), g = vol.gain;   // アタック 20ms（みじかい おとは おとの ながさの 4わり）
+      const rise = attack || Math.min(.02, length * .4), g = vol.gain;   // アタック 20ms（みじかい おとは おとの ながさの 4わり）
       g.setValueAtTime(0, at); g.linearRampToValueAtTime(level, at + rise);
       g.setValueAtTime(level, at + Math.max(rise, length * .4)); g.linearRampToValueAtTime(level * .6, at + length * .65); g.linearRampToValueAtTime(0, at + length);
       osc.connect(vol).connect(fxOut(ctx)); osc.start(at); osc.stop(at + length + .02);
@@ -1639,10 +1639,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (!hiss) { hiss = ctx.createBuffer(1, ctx.sampleRate * .5, ctx.sampleRate); const d = hiss.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
       const src = ctx.createBufferSource(), vol = ctx.createGain(), lp = ctx.createBiquadFilter ? ctx.createBiquadFilter() : null; src.buffer = hiss;   // ざっ（ノイズ）は 1500Hz より うえを きる（ザーッと した たかい ひびきを のこさない）
       if (lp) { lp.type = 'lowpass'; lp.frequency.value = 1500; lp.Q.value = .5; }
-      vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud, at + Math.min(.02, length * .4)); vol.gain.linearRampToValueAtTime(0, at + length);
+      vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud, at + Math.min(.04, length * .5));   // たちあがり 40ms（ぱちっと はじけない） vol.gain.linearRampToValueAtTime(0, at + length);
       (lp ? src.connect(lp).connect(vol) : src.connect(vol)).connect(fxOut(ctx)); src.start(at); src.stop(at + length + .02);
     } catch {}
   }
+  const plop = (delay = 0, loud = .05) => tone(300, .2, 'sine', delay, loud, 140, 'fx', .04);   // ぽちゃん：ひくい sine 300→140Hz・0.2びょう・たちあがり 40ms（ざっ（ノイズ）は つかわない）
   const chord = (notes, gap = .07, type = 'square', loud = .05, kind = 'fx') => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, kind));
   const guideTone = (freq, length, type, delay, loud, slideTo) => tone(freq, length, type, delay, loud, slideTo, 'guide'), guideChord = (notes, gap, type, loud) => chord(notes, gap, type, loud, 'guide'), guideZap = (length, delay, loud) => zap(length, delay, loud, 'guide');
   // こうかおん・あんないの おとの ひょう（ぜんぶ 基音 1200Hz いか・triangle・アタック 15ms いじょう・ピーク −12dBFS いか）。
@@ -1652,16 +1653,16 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     pikon: () => guideChord([659, 988], .09, 'triangle', .06),   // いまだ
     center: () => guideTone(98, .32, 'sine', 0, .1),   // ど真ん中：ひくい ドンッ
     perfect: () => { guideChord([523, 659, 784, 1047], .06, 'triangle', .045); guideTone(131, .22, 'sine', 0, .09); guideTone(262, .16, 'triangle', 0, .05); },   // ぴったり：4おと＋ひくい ふとい おと（ちかい・いいねより ずっと おおきく ふとい）
-    surface: () => { tone(260, .14, 'sine', 0, .05, 150); zap(.08, .02, .03); },   // ぽちゃ（さかなが かおを だす）
+    surface: () => plop(0, .05),   // ぽちゃ（さかなが かおを だす）
     nice: () => { guideTone(523, .06, 'triangle', 0, .04); guideTone(784, .09, 'triangle', .06, .04); },   // いいね
     close: () => guideTone(196, .09, 'sine', 0, .05, 150),   // ちかい：ちいさな ぷに だけ
     palup: () => chord([262, 330, 392], .07, 'triangle', .03),
     trophy: () => chord([262, 330, 392, 523], .08, 'triangle', .03),   // きねん（ひくい おと・1200Hz いか）   // なかまが レベルアップ（ひくい おと）
     snap: () => { tone(196, .24, 'sine', 0, .05, 110); tone(147, .3, 'sine', .06, .04, 98); },   // ぷつん…（ひくくて やわらかい・おどろかせない）
     rest: () => guideTone(180, .05, 'triangle', 0, .03, 150),   // やすみの ぷ
-    nibble: () => { guideTone(660, .05, 'triangle', 0, .04); guideTone(660, .05, 'triangle', .22, .04); },   // ちょん、ちょん
-    bite: () => { guideTone(784, .06, 'triangle', 0, .04); guideTone(784, .06, 'triangle', .1, .04); guideTone(1047, .16, 'triangle', .2, .04); },   // アタリ
-    cast: () => { tone(220, .28, 'triangle', .2, .032, 880); tone(330, .1, 'triangle', .9, .06, 110); zap(.14, .9); },   // ヒュ〜ッ…ポチャ
+    nibble: () => guideTone(440, .12, 'sine', 0, .04),   // ちょん（1おと・まるい）   // ちょん、ちょん
+    bite: () => guideTone(700, .26, 'sine', 0, .05, 880),   // アタリ（1おと・まるい。ガランガランに ならない）   // アタリ
+    cast: () => { tone(220, .28, 'triangle', .2, .032, 880); plop(.9, .05); zap(.14, .9, .04); },   // ヒュ〜ッ…ポチャ
     party: () => chord([392, 523, 659, 784, 1047, 784, 1047, 1175], .1, 'triangle', .026),   // おいわい
     catchLegend: () => { chord([392, 523, 659, 784, 1047, 784, 1047, 1175, 1047, 1175], .09, 'triangle', .026); tone(1047, .8, 'triangle', .95, .02); [262, 330, 392, 523].forEach((low, i) => tone(low, .2, 'triangle', .2 + i * .2, .032)); },
     catchBig: () => { chord([392, 523, 659, 784, 659, 784, 1047, 1175], .085, 'triangle', .026); tone(1047, .5, 'triangle', .7, .022); [262, 330, 392].forEach((low, i) => tone(low, .16, 'triangle', .7 + i * .16, .032)); },
@@ -3120,7 +3121,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     last.released = true; save.released = (save.released || 0) + 1; save.xp = (save.xp || 0) + 5; noteAdd('release', last.fish, last.size, last.nushi);   // やさしい ことにも、ちょっとだけ けいけんち
     if (Array.isArray(save.bucket) && save.bucket[0] && save.bucket[0].id === last.fish.id) save.bucket[0].released = true;
     store(); hud(); $('release').hidden = $('send-gift').hidden = true;
-    const held = $('held'); tone(660, .07, 'triangle', 0, .06, 990); zap(.1, .08, .04);
+    const held = $('held'); plop(0, .05);
     if (!reduce()) { held.animate([{translate: '0 0', opacity: 1}, {translate: '24px -46px', opacity: 1, offset: .45}, {translate: '52px 16px', opacity: 0}], {duration: 850, easing: 'ease-in-out'}).onfinish = () => { held.hidden = true; }; setTimeout(() => { held.hidden = true; }, 1000); } else held.hidden = true;   // 見えない タブでも かならず しまう
     $('guide-word').textContent = 'ばいばい。また あおうね。';
     say(last.fish.name + 'を みずに かえしたよ。また あおうね。');
@@ -3673,7 +3674,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const box = scene.getBoundingClientRect(), far = box.width * .09 * way, high = box.height * .13;
       jump.animate([{translate: '0 0', rotate: -35 * way + 'deg', opacity: 0}, {translate: far * .2 + 'px ' + -high * .6 + 'px', rotate: -25 * way + 'deg', opacity: 1, offset: .2}, {translate: far * .5 + 'px ' + -high + 'px', rotate: '0deg', offset: .5}, {translate: far * .8 + 'px ' + -high * .6 + 'px', rotate: 25 * way + 'deg', opacity: 1, offset: .8}, {translate: far + 'px 0', rotate: 40 * way + 'deg', opacity: 0}], {duration: 900, easing: 'ease-in-out'}).onfinish = () => jump.remove();
       [[0, 0], [far, 820]].forEach(([dx, wait]) => { const ring = document.createElement('i'); ring.className = 'ripple'; place(ring, {x, y}); ring.style.translate = dx + 'px 0'; scene.append(ring); ring.animate([{scale: '.2', opacity: .9}, {scale: '1.8', opacity: 0}], {duration: 800, delay: wait, fill: 'backwards', easing: 'ease-out'}).onfinish = () => ring.remove(); });
-      zap(.08, .05, .03); tone(520, .06, 'triangle', .85, .03, 260); zap(.1, .86, .04);
+      plop(.05, .03); plop(.86, .04);
     }
     setTimeout(leapingFish, Number(query.get('leap')) || (11000 + Math.random() * 16000));
   }
