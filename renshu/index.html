@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<title>つりの れんしゅうじょ｜まるふわ つりびより</title>
+<meta name="description" content="まるふわ つりびよりの、わあわせの れんしゅうじょ。さかなは へらないし、ばつも ないよ。なんども れんしゅう できるよ。">
+<meta name="theme-color" content="#b9edf5">
+<link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/icon-180.png">
+<script>
+/* さいしょの 1コマから：よるは くらく／もじを おおきく／うごきを へらす。つりびより本体の ほぞん（marufuwa-tsuri-v1）は よむだけ（かきかえない） */
+try {
+  var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d = document.documentElement, tq = new URLSearchParams(location.search).get('time');
+  var mp = {asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n', a: 'a', h: 'h', y: 'y', n: 'n'}, tt = mp[tq] || (typeof sv.time === 'string' && mp[sv.time]) || (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n');
+  if (matchMedia('(prefers-color-scheme: dark)').matches || tt === 'n') { d.dataset.night = 'true'; var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = '#0f1c33'; }
+  if (sv.large === true) d.dataset.large = 'true';
+  if (sv.calm === true) d.dataset.calm = 'true';
+  var en = (new URLSearchParams(location.search).get('lang') || localStorage.getItem('marufuwa-lang-v1')) === 'en';
+  if (en) { d.lang = 'en'; window.TsuriEn = {lang: 'en'}; }
+} catch (e) {}
+</script>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:#244653;background:#edf6fa;color-scheme:light;touch-action:manipulation;--ink:#244653;--soft:#506874;--line:#b9cbd4;--card:#ffffffd9;--gold:#e0a61c}
+:root[data-night=true]{color:#e8f1f8;background:#0f1c33;color-scheme:dark;--ink:#e8f1f8;--soft:#a9bfd2;--line:#4a6b8c;--card:#1a3250e6}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+.skip{position:absolute;left:8px;top:-80px;z-index:200;padding:12px 16px;border-radius:14px;background:#fff;color:#0b4a6b;font-weight:800;text-decoration:none;border:3px solid #0b4a6b}
+.skip:focus{top:8px}
+main{max-width:560px;margin:10px auto calc(48px + env(safe-area-inset-bottom));padding:12px 14px 18px;word-break:keep-all;overflow-wrap:break-word}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 6px}
+h1{margin:0;font-size:1.3rem;line-height:1.4;flex:1 1 12em}
+h2{margin:0 0 6px;font-size:1rem}
+p{margin:0}
+.lead{font-size:.95rem;line-height:1.7;margin:4px 0 12px;text-wrap:balance}
+/* ぷにぷにシールの ボタン（本体と おなじ つくり） */
+button,.btn{--c1:#ffffffd9;--c2:#bfe6f9b3;--side:#9cc9e0;--bd:#fff;font:inherit;font-weight:800;cursor:pointer;color:#244653;position:relative;min-height:48px;min-width:44px;padding:6px 14px;display:inline-flex;align-items:center;justify-content:center;gap:4px;text-align:center;text-decoration:none;line-height:1.3;
+  border:3px solid var(--bd);border-radius:999px;background:linear-gradient(180deg,var(--c1) 0%,var(--c2) 100%);
+  box-shadow:0 4px 0 var(--side),0 8px 12px #2446532b,inset 0 -6px 9px #00000014,inset 0 4px 6px #ffffffcc;transition:transform .09s ease-out,box-shadow .09s ease-out}
+button:active:not([aria-disabled=true]),.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--side),0 3px 6px #2446532b,inset 0 -3px 6px #00000014,inset 0 3px 5px #ffffffcc}
+button:focus-visible,.btn:focus-visible,summary:focus-visible{outline:3px solid #0b4a6b;outline-offset:0;box-shadow:0 0 0 6px #fff}
+button[aria-pressed=true]{--c1:#ffe3ee;--c2:#ffc2d9;--side:#c9557f;--bd:#c9557f;color:#5a0f2a}
+.btn.quiet{--c1:#ffffffd9;--c2:#bfe6f9b3}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.row>button{flex:1 1 7em}
+.lv{flex-direction:column;gap:0;min-height:60px}
+.lv small{display:block;font-size:.72rem;font-weight:700;color:inherit;opacity:.95}
+/* わの ぶたい */
+.stage{position:relative;width:min(100%,300px);aspect-ratio:1/1;margin:6px auto 10px;pointer-events:none}
+.stage .back{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#ffffff66 0%,#3d8bab55 70%,#3d8bab33 100%);box-shadow:inset 0 0 0 2px #ffffff88}
+.stage .shadow{position:absolute;left:50%;top:50%;width:15%;height:9%;margin:-4.5% 0 0 -7.5%;border-radius:50%;background:#17323d66}
+.stage .target{position:absolute;left:50%;top:50%;width:30%;height:30%;transform:translate(-50%,-50%);border-radius:50%;background:#fff6c94d;border:4px solid var(--gold);transition:background .08s,box-shadow .08s,scale .08s}
+.stage .ring{position:absolute;inset:0;border-radius:50%;border:7px solid #fff;box-shadow:0 0 0 2px #286b88,inset 0 0 0 2px #286b88,0 0 14px #ffffffb0;will-change:transform}
+.stage[data-hot=true] .target{background:#ffe14dd9;box-shadow:0 0 0 5px #fff6a8,0 0 22px 8px #ffd34d;scale:1.1}
+.stage[data-hot=true] .ring{border-color:#ffe14d;box-shadow:0 0 0 2px #a56c19,inset 0 0 0 2px #a56c19,0 0 18px #ffd34d}
+.stage[data-rest=true] .ring{opacity:.45}
+:root[data-night=true] .stage .back{background:radial-gradient(circle,#ffffff22 0%,#9fc8e233 70%,#9fc8e222 100%)}
+:root[data-night=true] .stage .shadow{background:#000000aa}
+:root[data-calm=true] .stage .ring,:root[data-calm=true] .stage .shadow{display:none}
+.tag{text-align:center;font-size:.9rem;font-weight:800;margin:0 0 2px}
+.tip{text-align:center;font-size:.82rem;color:var(--soft);margin:0 0 8px;min-height:1.2em}
+#hit{width:100%;min-height:76px;font-size:1.5rem;--c1:#4ab0e0;--c2:#10587e;--side:#0b425f;color:#fff;text-shadow:0 2px 0 #083a55;margin:2px 0 10px}
+#hit[data-hot=true]{--c1:#e4583a;--c2:#ad2c0e;--side:#7e1c06;text-shadow:0 2px 0 #9a2f18}
+#hit[data-rest=true]{opacity:.6}
+/* けっか */
+.result{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:118px;padding:8px 10px;border-radius:20px;background:var(--card);border:2px solid var(--line);text-align:center}
+.result .word{font-size:1.9rem;font-weight:900;line-height:1.2}
+.result .gap{font-size:1.15rem;font-weight:800}
+.result .coach{font-size:.88rem;color:var(--soft);line-height:1.5}
+.result[data-power="3"] .word{color:#8a5a00}
+:root[data-night=true] .result[data-power="3"] .word{color:#ffd86b}
+.result[data-center="1"] .word{text-shadow:0 0 12px #ffd34d88}
+.meter{position:relative;height:44px;margin:10px 0 2px;border-radius:12px;background:var(--card);border:2px solid var(--line);overflow:hidden}
+.meter .mid{position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--soft)}
+.meter .band{position:absolute;left:calc(50% - 5%);width:10%;top:0;bottom:0;background:#ffe14d55}
+.meter i{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #286b88}
+.meter i[data-p="3"]{background:#e0a61c}.meter i[data-p="2"]{background:#3fae8a}.meter i[data-p="1"]{background:#8a9aa6}
+.meter i.new{width:20px;height:20px;margin:-10px 0 0 -10px}
+.meter-cap{display:flex;justify-content:space-between;font-size:.78rem;color:var(--soft);margin:0 2px 10px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}
+.stats div{padding:8px 10px;border-radius:14px;background:var(--card);border:2px solid var(--line)}
+.stats b{display:block;font-size:1.25rem}
+.stats span{font-size:.78rem;color:var(--soft)}
+.avg{font-size:.88rem;line-height:1.6;margin:0 0 10px;color:var(--ink)}
+details{margin:0 0 10px;border-radius:16px;background:var(--card);border:2px solid var(--line);padding:0 10px}
+summary{min-height:48px;display:flex;align-items:center;font-weight:800;cursor:pointer}
+details[open]{padding-bottom:6px}
+.grp{margin:0 0 8px}
+.grp h3{margin:6px 0 4px;font-size:.9rem}
+.grp .row{margin:0}
+.grp button{min-height:44px;font-size:.88rem;padding:4px 10px}
+.note{font-size:.8rem;line-height:1.6;color:var(--soft);margin:6px 0}
+footer{margin-top:14px;font-size:.8rem;line-height:1.7;color:var(--soft)}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+:root[data-night=true] button,:root[data-night=true] .btn{filter:brightness(.88)}
+:root[data-night=true] button[aria-pressed=true]{--c1:#5a2a44;--c2:#3a2a44;--side:#ff9fc4;--bd:#ff9fc4;color:#ffe3ee;filter:none}
+:root[data-night=true] #hit{filter:none}
+:root[data-calm=true] button,:root[data-calm=true] .btn{transition:none}
+:root[data-calm=true] button:active:not([aria-disabled=true]),:root[data-calm=true] .btn:active{transform:none}
+@media(prefers-reduced-motion:reduce){button,.btn{transition:none}button:active:not([aria-disabled=true]),.btn:active{transform:none}.stage .ring,.stage .shadow{display:none}}
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+</style>
+</head>
+<body>
+<a class="skip" id="skip" href="#hit">「いまだ！」へ とぶ</a>
+<main id="main">
+  <header>
+    <a class="btn quiet" id="back" href="../">つりに もどる</a>
+    <h1 id="title" tabindex="-1">つりの れんしゅうじょ</h1>
+  </header>
+  <p class="lead" id="lead">わあわせの れんしゅうを しよう。さかなは へらないし、ばつも ないよ。なんども できるよ。</p>
+
+  <div class="row" id="levels" role="group" aria-labelledby="title-lv">
+    <h2 id="title-lv" class="sr-only">あそびかた</h2>
+    <button type="button" class="lv" data-mode="easy"><span>らくちん</span><small>ゆっくり・まどが ひろい</small></button>
+    <button type="button" class="lv" data-mode="normal"><span>ふつう</span><small>ほんとうの つりと おなじ</small></button>
+    <button type="button" class="lv" data-mode="hard"><span>しっかり</span><small>まどが せまい</small></button>
+  </div>
+
+  <p class="tag" id="tag"></p>
+  <p class="tip" id="tip"></p>
+  <div class="stage" id="stage" data-hot="false" aria-hidden="true">
+    <div class="back"></div><div class="shadow" id="shadow"></div><div class="target"></div><div class="ring" id="ring"></div>
+  </div>
+  <button type="button" id="hit">いまだ！</button>
+
+  <div class="result" id="result" aria-hidden="true" data-power="" data-center="">
+    <div class="word" id="word">わが ちいさく なったら おしてね</div>
+    <div class="gap" id="gap"></div>
+    <div class="coach" id="coach"></div>
+  </div>
+  <div class="meter" id="meter" role="img" aria-label="ずれの ものさし"><span class="band"></span><span class="mid"></span></div>
+  <div class="meter-cap" aria-hidden="true"><span id="cap-early">← はやい</span><span id="cap-late">おそい →</span></div>
+
+  <div class="stats" id="stats">
+    <div><b id="st-streak">0</b><span id="st-streak-l">ぴったり れんぞく</span></div>
+    <div><b id="st-best">0</b><span id="st-best-l">いちばん つづいた かず</span></div>
+    <div><b id="st-tries">0</b><span id="st-tries-l">ぜんぶで れんしゅう した かず</span></div>
+    <div><b id="st-avg">–</b><span id="st-avg-l">さいきん 10かいの ずれ</span></div>
+  </div>
+  <p class="avg" id="avg"></p>
+
+  <div class="row">
+    <button type="button" id="guide" aria-pressed="false">おとの あんない：OFF</button>
+  </div>
+  <details id="more">
+    <summary id="more-sum">もっと くわしく えらぶ</summary>
+    <div class="grp"><h3 id="g-swim">およぎ</h3><div class="row" id="swims" role="group" aria-labelledby="g-swim"></div></div>
+    <div class="grp"><h3 id="g-quirk">くせ</h3><div class="row" id="quirks" role="group" aria-labelledby="g-quirk"></div></div>
+    <div class="grp"><h3 id="g-speed">わの はやさ</h3><div class="row" id="speeds" role="group" aria-labelledby="g-speed"></div></div>
+    <div class="grp"><h3 id="g-slow">ゆったり</h3><div class="row"><button type="button" id="slow" aria-pressed="false">ゆったり：OFF</button></div>
+      <p class="note" id="slow-note">「ピコン」が はやめに なって、おす まどが ひろく なるよ。</p></div>
+    <p class="note" id="calm-note" hidden>「うごきを へらす」の ときは、わを だしません。まとが ひかった ときと、おとで しらせます。</p>
+    <p class="note" id="shadow-note">さかなの かげが まんなかに いる ときは、「いまだ」の まどが ひろいよ（ほんとうの つりと おなじ）。</p>
+  </details>
+  <div class="row"><button type="button" id="reset">れんぞくの きろくを けす</button></div>
+  <div class="sr-only" id="live" role="status" aria-live="polite"></div>
+  <footer id="foot">きろくは この たんまつの なかだけ。ほかの ひとには みえないし、じゅんいも ないよ。つりびよりの きろくは かえないよ。</footer>
+</main>
+<script defer src="../tsuri-world.js"></script>
+<script defer src="../tsuri-ruby-dict.js"></script>
+<script defer src="../tsuri-ruby.js"></script>
+<script>
+/* つりの れんしゅうじょ（ジョブズ2・2026-10-01）。つりびより本体の「わあわせ」と おなじ ものさし（hitAt・offBeat・windowMs・くせ・およぎ・ど真ん中±40ms）を 本体から うつした。
+   ・さかなは へらない・なんども・ばつなし。ずれを「±ms と ことば」で みせる。記録は この ページ専用の キー（marufuwa-renshu-v1）だけに 書く。本体の ほぞんは よむだけ。
+   ・通信なし。数字と きまった ことばだけ ほぞんする（じゆうな もじは ない）。
+   ・本体との おなじさは 門の renshu_check_j2.mjs が 毎回 測る（hitAt・まどの はば・はんてい）。 */
+(function () {
+  'use strict';
+  const MAIN_KEY = 'marufuwa-tsuri-v1', OWN_KEY = 'marufuwa-renshu-v1';
+  const q = new URLSearchParams(location.search);
+  const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:';
+  const probe = k => LOCAL ? q.get(k) : null;
+  const $ = id => document.getElementById(id);
+  const readJSON = k => { try { const d = JSON.parse(localStorage.getItem(k) || 'null'); return d && typeof d === 'object' && !Array.isArray(d) ? d : {}; } catch (e) { return {}; } };
+  const main = readJSON(MAIN_KEY);   // よむだけ
+  const EN = (q.get('lang') || (() => { try { return localStorage.getItem('marufuwa-lang-v1'); } catch (e) { return ''; } })()) === 'en';
+  const T = (ja, en) => EN ? en : ja;
+  const int = (x, lo, hi, d) => Number.isInteger(x) && x >= lo && x <= hi ? x : d;
+  const pick = (x, arr, d) => arr.includes(x) ? x : d;
+  const calm = () => main.calm === true || matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- 本体の ものさし（index.html から うつし） ----
+  const TARGET = .3;
+  const SWIMS = {
+    yuttari: {ja: 'ゆったり', en: 'Easy glide', tip: ['まんなかで、ゆっくりに なるよ', 'Slows down in the middle'], f: p => p < .7 ? TARGET + .7 * Math.pow(1 - p / .7, 3) : TARGET * (1 - Math.pow((p - .7) / .3, 2))},
+    yurari: {ja: 'ゆらり', en: 'Steady', tip: ['おなじ はやさで、ちぢむよ', 'Shrinks at an even pace'], f: p => 1 - p},
+    guigui: {ja: 'ぐいぐい', en: 'Speeding up', tip: ['だんだん、はやく なるよ', 'Gets faster'], f: p => 1 - p * p},
+    furafura: {ja: 'ふらふら', en: 'Wobbly', tip: ['いったり きたり するよ', 'Drifts back and forth'], f: p => Math.max(0, 1 - p + .08 * Math.sin(p * Math.PI * 6))},
+    pitatto: {ja: 'ぴたっと', en: 'Pause', tip: ['とちゅうで、いちど とまるよ', 'Stops once on the way'], f: p => p < .34 ? 1 - p * 1.18 : p < .58 ? .6 : .6 * (1 - (p - .58) / .42)}
+  };
+  const SWIM_IDS = ['yurari', 'guigui', 'furafura', 'pitatto', 'yuttari'];
+  const QUIRKS = {hasty: {ja: 'せっかち', en: 'Hasty', tip: ['はじめが はやい', 'quick at the start']}, calm: {ja: 'のんびり', en: 'Laid-back', tip: ['はじめが ゆっくり', 'slow at the start']}, hold: {ja: 'ためる', en: 'Holds', tip: ['まとの まえで ちょっと とまる', 'pauses just before the target']}};
+  function withQuirk(base, qk) {
+    if (!qk || !QUIRKS[qk]) return base;
+    let warp = p => p;
+    if (qk === 'hasty') warp = p => Math.pow(p, .78);
+    else if (qk === 'calm') warp = p => Math.pow(p, 1.3);
+    else if (qk === 'hold') {
+      let hitP = 1; for (let i = 0; i <= 400; i++) if (base.f(i / 400) <= TARGET) { hitP = i / 400; break; }
+      const a = Math.max(.05, hitP - .12), hold = .08;
+      if (hitP + .12 > .93) return base;   // よゆうが ない およぎは くせなし
+      warp = p => p <= a ? p : p <= a + hold ? a : a + (p - a - hold) * (1 - a) / (1 - a - hold);
+    }
+    return {ja: base.ja, en: base.en, tip: base.tip, quirk: qk, f: p => base.f(warp(Math.min(1, Math.max(0, p))))};
+  }
+  // 3つの あそびかた：ふつう・しっかり は 本体と おなじ（まど 1ばい／.7ばい・ぴったりに ならなかった れんぞくごとに +45ms／+15ms）。らくちん は れんしゅう用の やさしさ（まど 1.5ばい・わが ゆっくり）＝ジョブズ2の きめ
+  const LEVELS = {
+    easy: {ja: 'らくちん', en: 'Easy', win: 1.5, per: 1850, step: 45, cap: 360, hard: false},
+    normal: {ja: 'ふつう', en: 'Normal', win: 1, per: 1350, step: 45, cap: 360, hard: false},
+    hard: {ja: 'しっかり', en: 'Steady', win: 1, per: 1100, step: 15, cap: 150, hard: true}
+  };
+  const SPEEDS = {slow: {ja: 'ゆっくり', en: 'Slow', per: 1850}, mid: {ja: 'ふつう', en: 'Medium', per: 1350}, fast: {ja: 'はやい', en: 'Fast', per: 1100}};
+  const rodLevel = () => (int(main.rod, 0, 2, 0) === 2 && main.fish && Object.keys(main.fish).length >= 15) ? 2 : (int(main.rod, 0, 2, 0) >= 1 && int(main.total, 0, 1e9, 0) >= 10) ? 1 : 0;   // 本体と おなじ：さおは あそんで ひらく
+
+  // ---- 設定と 記録（この ページ専用の キーだけに かく） ----
+  const own = readJSON(OWN_KEY);
+  const S = {
+    mode: pick(own.mode, ['easy', 'normal', 'hard'], pick(main.mode, ['easy', 'normal', 'hard'], main.easy === true ? 'easy' : 'normal')),
+    swim: pick(own.swim, ['random', ...SWIM_IDS], 'yurari'), quirk: pick(own.quirk, ['', 'hasty', 'calm', 'hold'], ''), speed: pick(own.speed, ['auto', 'slow', 'mid', 'fast'], 'auto'),
+    guide: own.guide === true, slow: typeof own.slow === 'boolean' ? own.slow : main.slow === true,
+    best: int(own.best, 0, 1e6, 0), tries: int(own.tries, 0, 1e9, 0), perfects: int(own.perfects, 0, 1e9, 0),
+    hist: (Array.isArray(own.hist) ? own.hist : []).filter(h => Array.isArray(h) && Number.isInteger(h[0]) && Math.abs(h[0]) <= 5000 && [1, 2, 3].includes(h[1])).slice(-10).map(h => [h[0], h[1]])
+  };
+  const save = () => { try { localStorage.setItem(OWN_KEY, JSON.stringify({v: 1, mode: S.mode, swim: S.swim, quirk: S.quirk, speed: S.speed, guide: S.guide, slow: S.slow, best: S.best, tries: S.tries, perfects: S.perfects, hist: S.hist})); } catch (e) {} };
+
+  // ---- ようす ----
+  let period = 1350, swimKey = 'yurari', swim = SWIMS.yurari, swimBase = SWIMS.yurari, qk = '', hitAt = 0, ringStart = 0, wanderStart = 0, slips = 0, streak = 0, restUntil = 0, ringAnim = null, shadowAnim = null, spinId = 0, guideTimer = 0, last = null, sessionTries = 0;
+  const basePeriod = () => { const p = Number(probe('period')); if (Number.isInteger(p) && p >= 400 && p <= 4000) return p; return S.speed === 'auto' ? LEVELS[S.mode].per : SPEEDS[S.speed].per; };
+  const cycleTime = () => (performance.now() - ringStart) % period;
+  const ringSize = () => swim.f(cycleTime() / period);
+  function offBeat() { let gap = cycleTime() - hitAt; if (gap > period / 2) gap -= period; if (gap < -period / 2) gap += period; return gap; }
+  const wanderAway = () => { const lap = ((performance.now() - wanderStart) / 1400) % 2; return Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); };
+  function windowMs() {
+    const lv = LEVELS[S.mode], k = (lv.hard && !S.slow ? .7 : 1) * lv.win, away = calm() ? .5 : wanderAway();   // うごきを へらす：かげが うごかない ので まどは へいきんで 固定
+    return Math.max((S.slow ? 180 : 120) * k, (.06 + .1 * (1 - away) + rodLevel() * .025) * period * k) + Math.min(lv.cap, slips * lv.step);
+  }
+  const ringAlpha = p => { const th = hitAt / period; return p < th ? Math.min(1, p / .08) : Math.max(0, 1 - (p - th) / .06); };
+  function ringSync() {
+    const ring = $('ring'); if (!ring || !ring.animate || calm()) return;
+    if (ringAnim) { ringAnim.cancel(); ringAnim = null; }
+    const N = 180, kf = []; for (let i = 0; i <= N; i++) kf.push({transform: 'scale(' + Math.max(0, swim.f(i / N)).toFixed(4) + ')', opacity: ringAlpha(i / N).toFixed(3), easing: 'linear'});
+    ringAnim = ring.animate(kf, {duration: period, iterations: Infinity});
+    try { ringAnim.startTime = ringStart; } catch (e) {}
+  }
+  function shadowSync() {
+    const sh = $('shadow'), st = $('stage'); if (!sh || !sh.animate || calm()) return;
+    if (shadowAnim) { shadowAnim.cancel(); shadowAnim = null; }
+    const amp = st.clientWidth * .22;   // かげは まんなかを ちゅうしんに ひだり みぎへ（1.4びょうで はしから はしへ）
+    shadowAnim = sh.animate([{transform: 'translateX(' + (-amp).toFixed(1) + 'px)'}, {transform: 'translateX(' + amp.toFixed(1) + 'px)'}], {duration: 1400, direction: 'alternate', iterations: Infinity, easing: 'linear'});
+    try { shadowAnim.startTime = wanderStart; } catch (e) {}
+  }
+  // ---- おとの あんない（本体と おなじ：ピコンは おして から とどく ぶん はやめ） ----
+  let actx = null;
+  function ac() { if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; } } if (actx && actx.state === 'suspended') { try { actx.resume(); } catch (e) {} } return actx; }
+  function tone(freq, len, type, delay, loud) {
+    const c = ac(); if (!c) return;
+    const t0 = c.currentTime + .02 + delay, o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(loud, t0 + .01); g.gain.exponentialRampToValueAtTime(.0001, t0 + len);
+    o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0 + len + .03);
+  }
+  const pikon = () => { tone(659, .095, 'triangle', 0, .06); tone(988, .095, 'triangle', .09, .06); };
+  const tick = i => tone([392, 494, 587, 740][i], .05, 'triangle', 0, .0825 * (1 - i * .2));
+  function stopGuide() { clearInterval(guideTimer); guideTimer = 0; }
+  function startGuide() {
+    stopGuide(); if (!S.guide) return;
+    const lead = S.slow ? 600 : 200, pikon0 = (hitAt - 200 + period) % period, gap = pikon0 > 320 ? pikon0 / 5 : 0, pk = (hitAt - lead + period) % period, at = t => (t % period + period) % period;
+    let before = cycleTime();
+    guideTimer = setInterval(() => {
+      if (document.hidden) return;
+      const now = cycleTime(), passed = mark => before <= now ? before < mark && mark <= now : mark > before || mark <= now;
+      if (gap) for (let i = 0; i < 4; i++) if (passed(at(pk - gap * (4 - i)))) tick(i);
+      if (passed(at(pk))) pikon();
+      before = now;
+    }, 10);
+  }
+  // ---- 1ぴきぶんの はじまり（およぎを きめて わを はじめから） ----
+  function newRound() {
+    period = basePeriod();
+    swimKey = S.swim === 'random' ? SWIM_IDS[Math.floor(Math.random() * SWIM_IDS.length)] : S.swim;
+    swimBase = SWIMS[swimKey]; qk = S.quirk; swim = withQuirk(swimBase, qk); qk = swim.quirk || '';
+    hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
+    ringStart = wanderStart = performance.now(); slips = 0;
+    ringSync(); shadowSync(); startGuide(); drawTag();
+  }
+  function drawTag() {
+    $('tag').textContent = T(swimBase.ja, swimBase.en) + (qk ? T('・' + QUIRKS[qk].ja, ' · ' + QUIRKS[qk].en) : '');
+    $('tip').textContent = T(swimBase.tip[0], swimBase.tip[1]) + (qk ? T('。' + QUIRKS[qk].tip[0], '. ' + QUIRKS[qk].tip[1]) : '');
+  }
+  // ---- おす ----
+  const fmtMs = ms => (ms < 0 ? '−' : '+') + Math.abs(Math.round(ms)) + 'ms';
+  function pull() {
+    const now = performance.now();
+    if (now < restUntil) { if (S.guide) tone(220, .04, 'sine', 0, .03); return; }   // やすみの あいだの おしは なにも おきない（れんだは はやく ならない）
+    const off = offBeat(), miss = Math.abs(off), win = windowMs();
+    const power = miss <= win ? 3 : miss <= win + .12 * period ? 2 : 1, center = power === 3 && miss <= 40;
+    if (power === 3) slips = 0; else slips++;
+    streak = power === 3 ? streak + 1 : 0; if (streak > S.best) S.best = streak;
+    S.tries++; sessionTries++; if (power === 3) S.perfects++;
+    S.hist.push([Math.round(off), power]); S.hist = S.hist.slice(-10);
+    last = {off: Math.round(off), miss: Math.round(miss), win: Math.round(win), power, center, period, hitAt: Math.round(hitAt), swim: swimKey, quirk: qk, mode: S.mode};
+    const rest = Math.min(1000, Math.max(320, period * .8));   // ひいた あとの 「ぷにっ」やすみ（本体と おなじ）
+    restUntil = now + rest; $('hit').dataset.rest = 'true'; $('stage').dataset.rest = 'true';
+    setTimeout(() => { delete $('hit').dataset.rest; delete $('stage').dataset.rest; }, rest);
+    drawResult(); drawStats(); drawMeter(); save();
+    if (S.swim === 'random') setTimeout(newRound, rest);   // おまかせ：つぎの 「さかな」は べつの およぎ
+  }
+  const dirWord = (off, miss) => miss <= 40 ? T('ぴったり', 'Spot on') : off < 0 ? T('はやい', 'Early') : T('おそい', 'Late');
+  function drawResult() {
+    const r = last, word = r.center ? T('ぴったり！！！', 'PERFECT!!!') : r.power === 3 ? T('ぴったり！！', 'Perfect!') : r.power === 2 ? T('いいね！', 'Nice!') : T('ちかい！', 'Close!');
+    const res = $('result'); res.dataset.power = String(r.power); res.dataset.center = r.center ? '1' : '';
+    $('word').textContent = word; $('gap').textContent = fmtMs(r.off) + '　' + dirWord(r.off, r.miss);
+    $('coach').textContent = r.center ? T('ど まんなか！ すごい！', 'Right on the mark!') : r.power === 3 ? T('いい タイミング！', 'Good timing!') : r.off < 0 ? T('すこし はやかったよ。もうちょっと まってみよう。', 'A little early. Try waiting a moment.') : T('すこし おそかったよ。ほんの すこし はやく おしてみよう。', 'A little late. Try pressing a touch sooner.');
+    $('live').textContent = '';
+    setTimeout(() => { $('live').textContent = (r.center ? T('ぴったり、ど まんなか。', 'Perfect, dead center. ') : r.power === 3 ? T('ぴったり。', 'Perfect. ') : r.power === 2 ? T('いいね。', 'Nice. ') : T('ちかい。', 'Close. ')) + (r.miss <= 40 ? T('ずれは ほとんど ありません。', 'Almost no gap.') : T(Math.round(r.miss) + 'ミリびょう ' + (r.off < 0 ? 'はやい' : 'おそい') + '。', Math.round(r.miss) + ' milliseconds ' + (r.off < 0 ? 'early' : 'late') + '.')); }, 30);
+  }
+  function drawStats() {
+    $('st-streak').textContent = String(streak); $('st-best').textContent = String(S.best); $('st-tries').textContent = String(S.tries);
+    const h = S.hist; if (h.length) {
+      const mean = h.reduce((a, x) => a + x[0], 0) / h.length, mabs = h.reduce((a, x) => a + Math.abs(x[0]), 0) / h.length;
+      $('st-avg').textContent = Math.round(mabs) + 'ms';
+      $('avg').textContent = Math.abs(mean) < 25 ? T('さいきんは、はやくも おそくも ならず、ちょうど いい ところに おしてるよ。', 'Lately you are pressing right where you should.') : mean < 0 ? T('さいきんは、すこし はやめに おしがち（' + fmtMs(mean) + '）。ほんの ちょっと まってみよう。', 'Lately you press a bit early (' + fmtMs(mean) + '). Try waiting a moment.') : T('さいきんは、すこし おそめに おしがち（' + fmtMs(mean) + '）。ほんの ちょっと はやく おしてみよう。', 'Lately you press a bit late (' + fmtMs(mean) + '). Try pressing a touch sooner.');
+    } else { $('st-avg').textContent = '–'; $('avg').textContent = ''; }
+  }
+  const AX = 400;   // ものさしの はば（±400ms）
+  function drawMeter() {
+    const m = $('meter'); m.querySelectorAll('i').forEach(n => n.remove());
+    S.hist.forEach(([off, p], i) => { const e = document.createElement('i'), c = Math.max(-AX, Math.min(AX, off)); e.dataset.p = String(p); e.style.left = (50 + c / AX * 50) + '%'; e.style.opacity = String(.35 + .65 * (i + 1) / S.hist.length); if (i === S.hist.length - 1) e.className = 'new'; m.append(e); });
+    const lastH = S.hist[S.hist.length - 1];
+    m.setAttribute('aria-label', T('ずれの ものさし。まんなかが ぴったり。', 'Timing meter. The middle is perfect.') + (lastH ? T(' いまの ずれは ' + fmtMs(lastH[0]) + '。', ' Latest gap ' + fmtMs(lastH[0]) + '.') : ''));
+  }
+  // ---- がめんの もじ・ボタン ----
+  function drawStatic() {
+    document.title = T('つりの れんしゅうじょ｜まるふわ つりびより', 'Fishing Practice | Marufuwa Fishing Days');
+    const set = (id, ja, en) => { const e = $(id); if (e) e.textContent = T(ja, en); };
+    set('back', 'つりに もどる', 'Back to fishing'); set('title', 'つりの れんしゅうじょ', 'Fishing Practice');
+    set('lead', 'わあわせの れんしゅうを しよう。さかなは へらないし、ばつも ないよ。なんども できるよ。', 'Practice the ring timing. No fish are used up and nothing bad happens. Try as many times as you like.');
+    set('title-lv', 'あそびかた', 'How to play');
+    const small = {easy: ['ゆっくり・まどが ひろい', 'Slow · wide window'], normal: ['ほんとうの つりと おなじ', 'Same as real fishing'], hard: ['まどが せまい', 'Narrow window']};
+    document.querySelectorAll('#levels button').forEach(b => { const m = b.dataset.mode; b.querySelector('span').textContent = T(LEVELS[m].ja, LEVELS[m].en); b.querySelector('small').textContent = T(small[m][0], small[m][1]); b.setAttribute('aria-pressed', String(S.mode === m)); });
+    set('hit', 'いまだ！', 'Now!'); set('skip', '「いまだ！」へ とぶ', 'Skip to the Now button');
+    if (!last) set('word', 'わが ちいさく なったら おしてね', 'Press when the ring is small');
+    set('cap-early', '← はやい', '← Early'); set('cap-late', 'おそい →', 'Late →');
+    set('st-streak-l', 'ぴったり れんぞく', 'Perfect streak'); set('st-best-l', 'いちばん つづいた かず', 'Best streak'); set('st-tries-l', 'ぜんぶで れんしゅう した かず', 'Total tries'); set('st-avg-l', 'さいきん 10かいの ずれ', 'Gap, last 10');
+    set('more-sum', 'もっと くわしく えらぶ', 'More choices'); set('g-swim', 'およぎ', 'Swim style'); set('g-quirk', 'くせ', 'Quirk'); set('g-speed', 'わの はやさ', 'Ring speed'); set('g-slow', 'ゆったり', 'Extra time');
+    set('slow-note', '「ピコン」が はやめに なって、おす まどが ひろく なるよ。', 'The “ping” comes earlier and the press window is wider.');
+    set('calm-note', '「うごきを へらす」の ときは、わを だしません。まとが ひかった ときと、おとで しらせます。', 'With “Reduce motion” the ring is hidden. The target glows and the sound tells you when.');
+    set('shadow-note', 'さかなの かげが まんなかに いる ときは、「いまだ」の まどが ひろいよ（ほんとうの つりと おなじ）。', 'When the fish shadow is in the middle, the window is wider (same as real fishing).');
+    set('reset', 'れんぞくの きろくを けす', 'Erase my records');
+    set('foot', 'きろくは この たんまつの なかだけ。ほかの ひとには みえないし、じゅんいも ないよ。つりびよりの きろくは かえないよ。', 'Records stay on this device only. Nobody else sees them and there is no ranking. Your real game progress is never changed.');
+    $('guide').textContent = T('おとの あんない：', 'Sound guide: ') + (S.guide ? 'ON' : 'OFF'); $('guide').setAttribute('aria-pressed', String(S.guide));
+    $('slow').textContent = T('ゆったり：', 'Extra time: ') + (S.slow ? 'ON' : 'OFF'); $('slow').setAttribute('aria-pressed', String(S.slow));
+    $('calm-note').hidden = !calm();
+    drawGroups(); drawStats(); drawMeter(); drawTag();
+  }
+  function drawGroups() {
+    const mk = (box, items, cur, on) => { box.replaceChildren(); items.forEach(([v, label]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.setAttribute('aria-pressed', String(cur === v)); b.addEventListener('click', () => on(v)); box.append(b); }); };
+    mk($('swims'), [['random', T('おまかせ', 'Surprise')], ...SWIM_IDS.map(id => [id, T(SWIMS[id].ja, SWIMS[id].en)])], S.swim, v => { S.swim = v; newRound(); drawGroups(); save(); say(T('およぎを かえたよ。', 'Swim style changed.')); });
+    mk($('quirks'), [['', T('なし', 'None')], ...Object.keys(QUIRKS).map(k => [k, T(QUIRKS[k].ja, QUIRKS[k].en)])], S.quirk, v => { S.quirk = v; newRound(); drawGroups(); save(); say(T('くせを かえたよ。', 'Quirk changed.')); });
+    mk($('speeds'), [['auto', T('おまかせ（あそびかたに あわせる）', 'Auto (by level)')], ...Object.keys(SPEEDS).map(k => [k, T(SPEEDS[k].ja, SPEEDS[k].en)])], S.speed, v => { S.speed = v; newRound(); drawGroups(); save(); say(T('わの はやさを かえたよ。', 'Ring speed changed.')); });
+  }
+  const say = t => { const l = $('live'); l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); };
+  // ---- つなぎ ----
+  document.querySelectorAll('#levels button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.mode; document.querySelectorAll('#levels button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); newRound(); save(); say(T(LEVELS[S.mode].ja + 'で れんしゅう するよ。', 'Practicing in ' + LEVELS[S.mode].en + ' mode.')); }));
+  $('hit').addEventListener('click', pull);
+  $('guide').addEventListener('click', () => { S.guide = !S.guide; $('guide').textContent = T('おとの あんない：', 'Sound guide: ') + (S.guide ? 'ON' : 'OFF'); $('guide').setAttribute('aria-pressed', String(S.guide)); if (S.guide) { ac(); pikon(); } startGuide(); save(); say(S.guide ? T('おとの あんないを つけたよ。「ピコン」で おしてね。', 'Sound guide on. Press at the “ping”.') : T('おとの あんないを けしたよ。', 'Sound guide off.')); });
+  $('slow').addEventListener('click', () => { S.slow = !S.slow; $('slow').textContent = T('ゆったり：', 'Extra time: ') + (S.slow ? 'ON' : 'OFF'); $('slow').setAttribute('aria-pressed', String(S.slow)); startGuide(); save(); say(S.slow ? T('ゆったりに したよ。', 'Extra time is on.') : T('ゆったりを けしたよ。', 'Extra time is off.')); });
+  let resetTimer = 0;
+  $('reset').addEventListener('click', () => {
+    const b = $('reset');
+    if (!resetTimer) { b.textContent = T('ほんとうに けす？ もういちど おすと けすよ', 'Really erase? Press again to erase'); resetTimer = setTimeout(() => { resetTimer = 0; b.textContent = T('れんぞくの きろくを けす', 'Erase my records'); }, 4000); return; }
+    clearTimeout(resetTimer); resetTimer = 0; S.best = 0; S.tries = 0; S.perfects = 0; S.hist = []; streak = 0; save(); b.textContent = T('れんぞくの きろくを けす', 'Erase my records'); drawStats(); drawMeter(); $('word').textContent = T('わが ちいさく なったら おしてね', 'Press when the ring is small'); $('gap').textContent = $('coach').textContent = ''; $('result').dataset.power = ''; say(T('きろくを けしたよ。', 'Records erased.'));
+  });
+  function spin() {
+    spinId = requestAnimationFrame(spin);
+    const st = $('stage'), hot = Math.abs(offBeat()) <= windowMs();
+    if (st.dataset.hot !== String(hot)) { st.dataset.hot = String(hot); $('hit').dataset.hot = String(hot); }
+    if (!ringAnim && !calm()) { const rg = $('ring'); rg.style.transform = 'scale(' + Math.max(0, ringSize()).toFixed(4) + ')'; rg.style.opacity = ringAlpha(cycleTime() / period).toFixed(3); }   // animate が ない ふるい ブラウザだけ
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { ringStart = performance.now(); ringSync(); startGuide(); } });
+  let rz = 0; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(shadowSync, 150); });
+  // ひろば・つりびより本体から ひらいた とき、時間・夜は 窓口と そろえる
+  addEventListener('load', () => { try { const W = window.TsuriWorld; if (W && typeof W.timeOf === 'function') { if (W.timeOf() === 'n' || matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.night = 'true'; else delete document.documentElement.dataset.night; } } catch (e) {} });
+  window.Renshu = {
+    beat: () => ({hitAt: Math.round(hitAt), period, swim: swimKey, quirk: qk, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize(), mode: S.mode}),
+    last: () => last ? {...last} : null, stats: () => ({streak, best: S.best, tries: S.tries, perfects: S.perfects, session: sessionTries, hist: S.hist.map(h => h.slice())}),
+    settings: () => ({mode: S.mode, swim: S.swim, quirk: S.quirk, speed: S.speed, guide: S.guide, slow: S.slow}), ready: true
+  };
+  drawStatic(); newRound(); spin();
+})();
+</script>
+</body>
+</html>

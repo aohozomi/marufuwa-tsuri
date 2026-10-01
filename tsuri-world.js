@@ -89,7 +89,7 @@
   function places() {
     const s = save(), total = Math.max(0, Math.floor(num(s.total, 0))), here = page(), tank = !!(window.TsuriTank && typeof window.TsuriTank.open === 'function' && (window.TsuriTank.version || 0) >= 3);
     const c = context();
-    const list = AREAS.filter(a => !a.late || total >= (a.late === true ? 30 : a.late)).map(a => ({id: a.id, kind: 'area', name: T(a.name, a.en), ja: a.name, need: a.need, open: areaOk(a, total), left: Math.max(0, a.need - total), here: here === 'tsuri' && c.area === a.id}));
+    const list = AREAS.map(a => ({id: a.id, kind: 'area', name: T(a.name, a.en), ja: a.name, need: a.need, open: areaOk(a, total), left: Math.max(0, a.need - total), here: here === 'tsuri' && c.area === a.id}));
     list.push({id: 'hiroba', kind: 'page', name: T('ひろば', 'Plaza'), ja: 'ひろば', need: 0, open: true, left: 0, here: here === 'hiroba'});
     list.push({id: 'heya', kind: 'dialog', name: T('まるふわの おへや', "Marufuwa's room"), ja: 'まるふわの おへや', need: 0, open: tank, left: 0, here: false});
     list.push({id: 'shop', kind: 'dialog', name: T('おみせ', 'Shop'), ja: 'おみせ', need: 0, open: here === 'tsuri' && !!document.getElementById('keeper'), left: 0, here: false});
