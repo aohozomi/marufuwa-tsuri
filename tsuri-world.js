@@ -3,7 +3,7 @@
    ・ほぞんは かかない（localStorage は よむだけ）／通信しない／画面を かきかえない（go() は 今ある ボタンを おす か、ページを うつす だけ）
    ・時間・雨・きせつ・レベル・釣り場の ひょうを ここに 1か所。本体・ひろばの 写し（計4か所）は 門（world_check_j2.mjs）で「同じ 値か」を 毎回 測る
    ・どの ページでも 読める（つりば・ひろば・おうちの かたへ）。script タグは 本体・ひろばに 1行（defer）。sw.js の 先どりは 総司令部。
-   つかいかた：TsuriWorld.context()／places()／route(id)／go(id)／timeOf()／rainOf()／seasonOf()／levelOf(xp) */
+   つかいかた：TsuriWorld.context()／places()／route(id)／go(id)／timeOf()／rainOf()／seasonOf()／moon(date?)＝本物の 月齢／levelOf(xp) */
 (function () {
   'use strict';
   if (window.TsuriWorld) return;
@@ -41,6 +41,22 @@
     const m = (date instanceof Date && !isNaN(date) ? date : new Date()).getMonth() + 1;
     return m >= 3 && m <= 5 ? 'haru' : m >= 6 && m <= 8 ? 'natsu' : m >= 9 && m <= 11 ? 'aki' : 'fuyu';
   }
+  // ---- 月（本物の 月齢）：日付の 計算だけ。位置情報も 通信も つかわない。ずれは ±半日くらい＝ゲームの 夜空の 月の 形には じゅうぶん ----
+  const SYNODIC = 29.530588853, NEW_MOON_JD = 2451550.1;   // 2000-01-06 14:24 UTC ごろの 平均の 新月（実際の 新月は 18:14）から 数える
+  const MOONS = [['shingetsu', 'しんげつ', 'New Moon'], ['mikazuki', 'みかづき', 'Crescent Moon'], ['hantsuki', 'はんつき', 'Half Moon'], ['mangetsu', 'まんげつ', 'Full Moon']];
+  const MOON_SHAPES = ['new', 'waxing-crescent', 'first-quarter', 'waxing-gibbous', 'full', 'waning-gibbous', 'last-quarter', 'waning-crescent'];
+  const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:';
+  function moon(date) {   // phase：0＝しんげつ・.25＝上弦・.5＝まんげつ・.75＝下弦。lit：日本（北半球）で 光って 見える がわ。?moon=0〜1 は 手元の 検査用（localhost だけ）
+    const asked = LOCAL ? Q().get('moon') : null; let phase;
+    if (asked !== null && asked !== '' && Number.isFinite(Number(asked)) && Number(asked) >= 0 && Number(asked) <= 1) phase = Number(asked) % 1;
+    else {
+      const d = date instanceof Date ? date.getTime() : typeof date === 'number' ? date : NaN, t = Number.isFinite(d) ? d : Date.now();
+      const age = (((t / 86400000 + 2440587.5 - NEW_MOON_JD) % SYNODIC) + SYNODIC) % SYNODIC; phase = age / SYNODIC;
+    }
+    const illum = (1 - Math.cos(2 * Math.PI * phase)) / 2, waxing = phase < .5;
+    const i = illum < .08 ? 0 : illum < .4 ? 1 : illum < .88 ? 2 : 3, m = MOONS[i];   // しんげつ(±2.7日)・みかづき・はんつき・まんげつ(±3.4日)
+    return {phase, age: phase * SYNODIC, illum, waxing, lit: i === 0 ? 'none' : waxing ? 'right' : 'left', shape: MOON_SHAPES[Math.floor(((phase + 1 / 16) % 1) * 8)], key: m[0], name: m[1], en: m[2], label: T(m[1], m[2])};
+  }
   const levelOf = xp => Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, num(Number(xp), 0)) / 20)));
 
   // ---- つりばの ひょう（本体の AREAS と おなじ。「かならず 通る 順」＝みずうみ→かわ→みなとまち→ふねの うえ） ----
@@ -61,7 +77,7 @@
     const area = AREAS.find(a => a.id === s.area && areaOk(a, total)) || AREAS[0], t = timeOf(date);
     return {
       version: 1, page: page(), lang: EN() ? 'en' : 'ja',
-      time: t, timeName: TIMES[t], timeLabel: T(TIME_LABEL[t][0], TIME_LABEL[t][1]), rain: rainOf(date), season: seasonOf(date),
+      time: t, timeName: TIMES[t], timeLabel: T(TIME_LABEL[t][0], TIME_LABEL[t][1]), rain: rainOf(date), season: seasonOf(date), moon: moon(date),
       area: area.id, areaName: T(area.name, area.en), total, xp, level: levelOf(xp),
       avatar: avatar(s), party: Array.isArray(s.party) ? s.party.filter(x => typeof x === 'string' && /^[a-z0-9_-]{1,24}$/i.test(x)).slice(0, 3) : []
     };
@@ -103,5 +119,5 @@
     return false;
   }
 
-  window.TsuriWorld = Object.freeze({VERSION: 1, BASE, AREAS: AREAS.map(a => ({...a})), timeOf, rainOf, seasonOf, levelOf, context, places, route, go});
+  window.TsuriWorld = Object.freeze({VERSION: 1, BASE, AREAS: AREAS.map(a => ({...a})), timeOf, rainOf, seasonOf, moon, levelOf, context, places, route, go});
 })();
