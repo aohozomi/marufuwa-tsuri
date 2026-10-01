@@ -157,10 +157,8 @@
 #scene .hm-boat{width:14%;min-width:44px;min-height:44px;aspect-ratio:1/1;transform:translate(-50%,-70%)}
 .hm-boat svg{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 2px #0b2a4a55);animation:hm-rock 2.4s ease-in-out infinite alternate}
 @keyframes hm-rock{from{transform:rotate(-4deg) translateY(-1px)}to{transform:rotate(4deg) translateY(2px)}}
-.hm-rainbow{position:absolute;z-index:1;left:6%;top:4%;width:88%;aspect-ratio:2/1;pointer-events:none;opacity:0;transition:opacity 2.6s ease}
-.hm-rainbow.on{opacity:.8}
-.hm-rainbow svg{display:block;width:100%;height:100%;overflow:visible}
-#scene[data-rainbow] #rain{opacity:.35}
+.hm-rainbow{pointer-events:none;opacity:0;transition:opacity 2.6s ease}
+.hm-rainbow.on{opacity:.42}
 .hm-crabbox{display:flex;flex-direction:column;align-items:center;gap:4px;margin:0 0 12px}
 .hm-crabtrack{position:relative;width:100%;height:56px;overflow:hidden}
 .hm-crab{position:absolute;left:0;top:4px;width:56px;height:48px;min-width:0;min-height:0;padding:0;border:0;background:none;box-shadow:none;border-radius:12px;cursor:pointer;-webkit-backdrop-filter:none;backdrop-filter:none;transition:none;animation:hm-scuttle 7s ease-in-out infinite alternate}
@@ -320,24 +318,45 @@
   }
 
   // ─── つり6 あめあがりの にじ（あめの ひ・よる いがい・その 回で 5ひき つる）───
-  //   本体の きろく save.total（つった かず）が ひらいた ときより 5 ふえたら、あめが よわまり、やまの うえに にじが かかる（ド・ミ・ソ・ド）。その 日は ひらき なおしても 出る（ひみつの 鍵に 日づけを のこす）。
-  //   しるし：#scene[data-rainbow="true"]（本体の しゃしんが にじを うつす 口に つかえる）。よるには 出ない。あめの ひだけ
+  //   本体の きろく save.total（つった かず）が ひらいた ときより 5 ふえたら、あめが やんで（#ame が すうっと きえて data-rain が false に なる）、やまの うしろの おおぞらに うすい にじが かかる（ド・ミ・ソ・ド）。
+  //   にじは 「そらの そう」（svg.land の やまより うしろ）に えがく：やまや キャラの うえには のらない。ほそく・ふちを ぼかして・2ふんはん（150びょう）で すうっと きえる
+  //   ひらき なおしても 2ふんはんの あいだだけは しずかに 出る（ひみつの 鍵に 日づけと じこくを のこす）。
+  //   しるし：#scene[data-rainbow="true"]（本体の しゃしんが おなじ ばしょに にじを うつす 口に つかえる）。よるには 出ない。あめの ひだけ
   const isRainy = () => scene.dataset.rain === 'true';
   const totalNow = () => Math.max(0, Math.floor(Number((readJSON(MAIN_KEY) || {}).total) || 0));
   const dayNow = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
-  const RAINBOW = [['#ff9a9a', 90], ['#ffc48a', 85], ['#fff09a', 80], ['#a6e6a0', 75], ['#9ccbff', 70], ['#c9a8f5', 65]].map(([c, r]) => `<path d="M${100 - r} 100 A${r} ${r} 0 0 1 ${100 + r} 100" fill="none" stroke="${c}" stroke-width="5.4"/>`).join('');
-  let rainbow = null, total0 = totalNow(), rainbowLoud = false;
-  function showRainbow(loud) {
+  // 600×450 の けしき（svg.land と おなじ 4:3）で：みぎよせ・はば 65%・いちばん うえの ふちが てっぺんの すぐ した。あしは やまの うしろに かくれる
+  const RB = { cx: 392, cy: 200, r0: 190, step: 7, w: 8, ms: 150000 };
+  const RAINBOW = ['#ff9a9a', '#ffc48a', '#fff09a', '#a6e6a0', '#9ccbff', '#c9a8f5'].map((c, i) => { const r = RB.r0 - i * RB.step; return `<path d="M${RB.cx - r} ${RB.cy} A${r} ${r} 0 0 1 ${RB.cx + r} ${RB.cy}" fill="none" stroke="${c}" stroke-width="${RB.w}"/>`; }).join('');
+  let rainbow = null, rainbowEnd = 0, total0 = totalNow(), rainbowLoud = false;
+  function stopRain(soft) {   // あめを やませる：つぶを すうっと うすくしてから data-rain を false に（ほかの そとづけも この しるしを みて あめあがりに なる）
+    const ame = document.getElementById('ame');
+    const done = () => { if (ame) { ame.style.transition = ''; ame.style.opacity = ''; } scene.dataset.rain = 'false'; };
+    if (soft && ame && !reduced()) { ame.style.transition = 'opacity 2.4s ease'; ame.style.opacity = '0'; later(done, 2500); } else done();
+  }
+  function showRainbow(loud, left) {
     if (rainbow) return;
-    const el = make('div', 'hm-rainbow', `<svg viewBox="0 0 200 100" aria-hidden="true">${RAINBOW}</svg>`); el.setAttribute('aria-hidden', 'true'); scene.append(el); rainbow = el; scene.dataset.rainbow = 'true';
-    setTimeout(() => el.classList.add('on'), 30);
+    const land = scene.querySelector('svg.land'); if (!land) return;
+    const hill = land.querySelector('path[style*="--hill"]'), NS = 'http://www.w3.org/2000/svg', tmp = document.createElementNS(NS, 'svg');
+    tmp.innerHTML = `<g class="hm-rainbow" aria-hidden="true"><defs><filter id="hm-rbblur"><feGaussianBlur stdDeviation="2.4"/></filter></defs><g filter="url(#hm-rbblur)">${RAINBOW}</g></g>`;
+    const el = tmp.firstChild; if (hill) hill.before(el); else land.append(el);   // やまの すぐ うしろ（そらの うえ・やまの した）
+    rainbow = el; rainbowEnd = clock() + (left || RB.ms); scene.dataset.rainbow = 'true';
+    later(() => el.classList.add('on'), loud ? 1500 : 30);
     if (loud) {
       chord([523, 659, 784, 1047], .12, 'triangle', .05); say('あめが やんで きたよ。にじが でてる');
-      const d = readJSON(HM_KEY) || {}; d.rainbow = dayNow(); d.v = 1; try { localStorage.setItem(HM_KEY, JSON.stringify(d)); } catch {}
+      const d = readJSON(HM_KEY) || {}; d.rainbow = dayNow(); d.rainbowAt = Date.now(); d.v = 1; try { localStorage.setItem(HM_KEY, JSON.stringify(d)); } catch {}
       markFound('tsuri-nijii');
     }
   }
-  function hideRainbow() { if (!rainbow) return; rainbow.remove(); rainbow = null; delete scene.dataset.rainbow; }
+  function hideRainbow(now) {
+    if (!rainbow) return; const el = rainbow; rainbow = null; delete scene.dataset.rainbow; el.classList.remove('on');
+    if (now || reduced()) el.remove(); else later(() => el.remove(), 2800);
+  }
+  function rainCheck(s) {   // ひらき なおしても、にじの 2ふんはんの あいだ（あめが やんで いる あいだ）は しずかに 出す
+    if (!isRainy() || rainbow || s.time === 'yoru') return;
+    const d = readJSON(HM_KEY) || {}, left = RB.ms - (Date.now() - Number(d.rainbowAt || 0));
+    if (d.rainbow === dayNow() && left > 3000 && left <= RB.ms) { stopRain(false); showRainbow(false, left); }
+  }
 
   // ─── つり8 バケツの やどかり（バケツを 5かい のぞく）───
   //   バケツを ひらく たびに かぞえて、5かいめ（10・15…）に、なかに やどかりが いる（バケツの まどの なかを かさかさ あるく）。さわると おへやの かざりに なる（gifts.yadokari・さいだい 3こ）。
@@ -364,7 +383,9 @@
     const s = state(), key = s.area + '/' + s.time, moving = s.phase === 'bite' || s.phase === 'reel';
     if (key !== lastKey) { lastKey = key; idleSince = clock(); boatDone = false; if (boat) boatLeave(true); }
     if (boat) boat.el.hidden = moving;
-    if (rainbow && s.time === 'yoru') hideRainbow();
+    if (rainbow && s.time === 'yoru') hideRainbow(true);
+    else if (rainbow && clock() >= rainbowEnd) hideRainbow(false);   // 2ふんはんで すうっと きえる
+    rainCheck(s);
     for (const h of Object.values(HOTS)) { const ok = h.when(s); h.el.hidden = !ok || moving; if (!ok) h.taps = 0; }
     if (!HOTS.toudai.when(s)) toudaiOff();
     if (nap && (s.time !== 'hiru' || !palEl('neko') || nap.pal !== palEl('neko'))) napEnd(false);
@@ -378,12 +399,9 @@
     if (!deerBusy && !deerDone && s.area === 'L' && s.time === 'asa' && waited >= 20000 && !pals().some(el => palOf(el) === 'kojika')) deerEvent();
     if (!nap && s.time === 'hiru' && waited >= 30000 && palEl('neko')) napStart();
     if (!boat && !boatDone && s.area === 'R' && waited >= 25000 && palEl('panda')) boatEvent();
-    if (isRainy() && s.time !== 'yoru' && !rainbow) {
-      if (!rainbowLoud && totalNow() - total0 >= 5) { rainbowLoud = true; showRainbow(true); }   // はじめて かかる ときだけ おと・ことば
-      else if ((readJSON(HM_KEY) || {}).rainbow === dayNow()) showRainbow(false);   // その 日は ひらき なおしても 出る（しずかに）
-    }
+    if (isRainy() && s.time !== 'yoru' && !rainbow && !rainbowLoud && totalNow() - total0 >= 5) { rainbowLoud = true; stopRain(true); showRainbow(true); }   // はじめて かかる ときだけ おと・ことば（あめが やんでから にじ）
   }
-  new MutationObserver(update).observe(scene, { attributes: true, attributeFilter: ['data-phase', 'data-time', 'data-area'] });
+  new MutationObserver(update).observe(scene, { attributes: true, attributeFilter: ['data-phase', 'data-time', 'data-area', 'data-rain'] });
   pals().forEach(el => new MutationObserver(update).observe(el, { attributes: true, attributeFilter: ['src'] }));
   setInterval(tick, 500);
   update();
@@ -625,6 +643,6 @@
   window.TsuriHimitsu = {
     version: 1, found: foundMap, replay, open: () => { if (!noteDlg) buildNote(); drawNote(); noteDlg.showModal(); },
     kotoba: { version: 1, try: tryWord, open: openWord, list: () => WORDS.map(w => ({ id: w.id, title: titleOf(w.id), found: !!foundMap()[w.id] })) },
-    _debug: { audio: { tone, zap, chord, fanfare, ids: () => Object.keys(REPLAY) }, kotoba: { sha256hex, norm, hashOf, words: () => WORDS.map(w => ({ id: w.id, keys: Object.keys(w), hashes: w.h.length, hex: w.h.every(x => /^[0-9a-f]{64}$/.test(x)) })), fromUrl, T }, tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy, boat: !!boat, boatDone, rainbow: !!rainbow, crab: !!crabBox, bucketOpens }), gifts: () => { const d = readJSON(HM_KEY); return d && d.gifts && typeof d.gifts === 'object' && !Array.isArray(d.gifts) ? { ...d.gifts } : {}; }, resetTotal: () => { total0 = totalNow(); rainbowLoud = false; }, resetOpens: () => { bucketOpens = 0; } }
+    _debug: { audio: { tone, zap, chord, fanfare, ids: () => Object.keys(REPLAY) }, kotoba: { sha256hex, norm, hashOf, words: () => WORDS.map(w => ({ id: w.id, keys: Object.keys(w), hashes: w.h.length, hex: w.h.every(x => /^[0-9a-f]{64}$/.test(x)) })), fromUrl, T }, tick, update, skew: ms => { skew += ms; }, speed: v => { speed = v; }, pause: v => { muted = !!v; }, hots: HOTS, state: () => ({ lit: !!lit, deerBusy, deerDone, nap: !!nap, windowBusy, rabbitBusy, boat: !!boat, boatDone, rainbow: !!rainbow, rainbowLeft: rainbow ? Math.max(0, rainbowEnd - clock()) : 0, crab: !!crabBox, bucketOpens }), gifts: () => { const d = readJSON(HM_KEY); return d && d.gifts && typeof d.gifts === 'object' && !Array.isArray(d.gifts) ? { ...d.gifts } : {}; }, resetTotal: () => { total0 = totalNow(); rainbowLoud = false; }, resetOpens: () => { bucketOpens = 0; } }
   };
 })();
