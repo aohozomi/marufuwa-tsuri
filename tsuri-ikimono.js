@@ -101,10 +101,10 @@
 
     if (rain) {
       // あめの ひ：とりも むしも おやすみ。かえるが きしに いる（うみには いない）
-      if (!sea) put('sit hop day', ART.kaeru(), between(20, 30), 60, {w: '7%', d: '-' + between(0, 6).toFixed(1) + 's'});
+      if (!sea && area !== 'S') put('sit hop day', ART.kaeru(), between(20, 30), 60, {w: '7%', d: '-' + between(0, 6).toFixed(1) + 's'});
     } else if (time === 'yoru') {
       // よる：ほたる（うみでは でない）
-      if (!sea && now !== 'fuyu') for (let i = 0; i < 7; i++) put('glow', '', between(6, 94), between(36, 58), {w: between(1.8, 2.8).toFixed(1) + '%', lap: between(3.6, 6.4).toFixed(1) + 's', lap2: between(12, 22).toFixed(0) + 's', d: '-' + between(0, 6).toFixed(1) + 's', dx: between(-6, 6).toFixed(1) + 'cqw', dy: between(-5, 3).toFixed(1) + 'cqw'});
+      if (!sea && now !== 'fuyu' && area !== 'S') for (let i = 0; i < 7; i++) put('glow', '', between(6, 94), between(36, 58), {w: between(1.8, 2.8).toFixed(1) + '%', lap: between(3.6, 6.4).toFixed(1) + 's', lap2: between(12, 22).toFixed(0) + 's', d: '-' + between(0, 6).toFixed(1) + 's', dx: between(-6, 6).toFixed(1) + 'cqw', dy: between(-5, 3).toFixed(1) + 'cqw'});
     } else {
       // そらを とぶ とり：うみは かもめ、ほかは ことり（あさは おおめ）
       const birds = time === 'asa' ? 3 : time === 'hiru' ? 1 : 2;

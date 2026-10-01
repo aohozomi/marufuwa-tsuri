@@ -144,10 +144,18 @@ html[data-ready=fresh] #scene > *{animation:sceneIn .4s ease-out}
 #scene[data-area=H]{--ground:#c4c6c4;--edge:#9a9c9a}
 #scene[data-area=B]{--ground:#d2a56c;--edge:#fbfbfb;--hill:transparent}
 #scene[data-area=R]{--ground:#b89a74;--edge:#8f7350}
+/* ひろがる つりば：もりの いけ（M）・ゆきの みずうみ（S）。いろは [data-time] を つけて とき ごとの パレットより つよく（よるは くらい いろを べつに） */
+#scene[data-area=M][data-time]{--ground:#a79a6a;--edge:#6f7a4e;--hill:#7db08a;--tree:#4d9462;--water1:#8ed3c3;--water2:#3f9d93}
+#scene[data-area=M][data-time=yuu]{--hill:#9aa57a;--tree:#6e8a56;--water1:#a5c4b0;--water2:#4f8479}
+#scene[data-area=M][data-time=yoru]{--hill:#254a47;--tree:#1f5547;--water1:#2f6a6a;--water2:#173f45}
+#scene[data-area=S][data-time]{--ground:#f4f8fb;--edge:#b9d3e4;--hill:#e3eef4;--tree:#cfe3ee;--water1:#cfeaf5;--water2:#86c3df}
+#scene[data-area=S][data-time=yuu]{--hill:#f0dfe4;--tree:#d9cfe0;--water1:#e0d2e6;--water2:#9a8fc0}
+#scene[data-area=S][data-time=yoru]{--hill:#46597e;--tree:#34507a;--water1:#4a6fa0;--water2:#233f66}
 #scene[data-time=yoru][data-area] svg g[data-for],#scene[data-time=yoru] svg polygon[style*=ground]{filter:brightness(.62)}
-#scene:not([data-area=L]) [data-for=L],#scene:not([data-area=R]) [data-for=R],#scene:not([data-area=H]) [data-for=H],#scene:not([data-area=B]) [data-for=B]{display:none}
+#scene:not([data-area=L]) [data-for=L],#scene:not([data-area=R]) [data-for=R],#scene:not([data-area=H]) [data-for=H],#scene:not([data-area=B]) [data-for=B],#scene:not([data-area=M]) [data-for=M],#scene:not([data-area=S]) [data-for=S]{display:none}
 .areas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
 .areas{margin-bottom:14px}
+.areas[data-n="5"],.areas[data-n="6"]{grid-template-columns:repeat(3,1fr)}   /* つりばが 5〜6こ：3れつに（320px でも はみ出さない） */
 .areas button{min-height:48px;padding:4px 2px;font-size:.82rem;line-height:1.25;border-radius:22px}
 .areas button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36}
 .times button[aria-pressed=true]{--c1:#e6dcff;--c2:#b79cf0;--side:#8a6bd0;--ink:#33205f}
@@ -814,15 +822,21 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       <g data-for="R" style="fill:var(--tree)"><circle cx="30" cy="170" r="46"/><circle cx="100" cy="150" r="52"/><circle cx="180" cy="176" r="44"/><circle cx="260" cy="160" r="48"/><circle cx="350" cy="172" r="46"/><circle cx="430" cy="152" r="52"/><circle cx="510" cy="170" r="46"/><circle cx="585" cy="156" r="50"/></g>
       <g data-for="H"><polygon points="0,120 120,110 120,210 0,214" fill="#f4efe6"/><polygon points="0,120 120,110 140,122 18,134" fill="#5d5f6b"/><polygon points="130,140 250,130 250,206 130,210" fill="#ead9bd"/><polygon points="130,140 250,130 268,144 146,154" fill="#8a4a3a"/><rect x="150" y="166" width="34" height="40" fill="#7a5a3a"/><rect x="200" y="160" width="36" height="22" fill="#bfe3f5"/></g>
       <g data-for="B"><rect x="0" y="150" width="600" height="130" style="fill:var(--water1)"/><rect x="0" y="150" width="600" height="6" fill="#ffffff55"/></g>
+      <g data-for="M"><g fill="#6b4a2f"><rect x="29" y="176" width="10" height="30"/><rect x="95" y="182" width="11" height="26"/><rect x="167" y="184" width="9" height="20"/><rect x="448" y="184" width="9" height="20"/><rect x="514" y="180" width="11" height="26"/><rect x="583" y="182" width="10" height="24"/></g><g style="fill:var(--tree)"><ellipse cx="34" cy="150" rx="42" ry="62"/><ellipse cx="100" cy="138" rx="48" ry="72"/><ellipse cx="172" cy="160" rx="38" ry="50"/><ellipse cx="452" cy="156" rx="40" ry="54"/><ellipse cx="520" cy="140" rx="50" ry="72"/><ellipse cx="588" cy="156" rx="40" ry="58"/></g><rect x="0" y="168" width="600" height="24" fill="#ffffff" opacity=".2"/></g>
+      <g data-for="S"><polygon points="120,194 238,96 352,194" fill="#e4eef5"/><polygon points="238,96 262,126 240,120 222,136 214,124" fill="#ffffff"/><polygon points="300,196 408,120 506,196" fill="#d6e5ef"/><polygon points="408,120 428,142 410,138 394,148" fill="#ffffff"/><g fill="#8a6a52"><rect x="33" y="196" width="6" height="12"/><rect x="82" y="196" width="6" height="12"/><rect x="147" y="196" width="6" height="12"/><rect x="467" y="196" width="6" height="12"/><rect x="527" y="196" width="6" height="12"/><rect x="579" y="196" width="6" height="12"/></g><polygon points="10,200 36,134 62,200" fill="#e9f2f7"/><polygon points="10,200 36,134 36,200" fill="#c4d9e6"/><polygon points="15.2,172.28 36,127.39999999999999 56.8,172.28" fill="#f6fafc"/><polygon points="56,200 86,120 116,200" fill="#e9f2f7"/><polygon points="56,200 86,120 86,200" fill="#c4d9e6"/><polygon points="62,166.4 86,112 110,166.4" fill="#f6fafc"/><polygon points="126,200 150,142 174,200" fill="#e9f2f7"/><polygon points="126,200 150,142 150,200" fill="#c4d9e6"/><polygon points="130.8,175.64 150,136.2 169.2,175.64" fill="#f6fafc"/><polygon points="444,200 470,138 496,200" fill="#e9f2f7"/><polygon points="444,200 470,138 470,200" fill="#c4d9e6"/><polygon points="449.2,173.96 470,131.8 490.8,173.96" fill="#f6fafc"/><polygon points="498,200 530,116 562,200" fill="#e9f2f7"/><polygon points="498,200 530,116 530,200" fill="#c4d9e6"/><polygon points="504.4,164.72 530,107.6 555.6,164.72" fill="#f6fafc"/><polygon points="558,200 582,140 606,200" fill="#e9f2f7"/><polygon points="558,200 582,140 582,200" fill="#c4d9e6"/><polygon points="562.8,174.8 582,134 601.2,174.8" fill="#f6fafc"/></g>
       <polygon points="0,200 600,186 600,333 0,261" style="fill:var(--ground)"/>
       <!-- つりばごとの まえの けしき -->
       <g data-for="L"><polygon points="250,150 330,138 380,160 300,174" fill="#8a6a4a"/><polygon points="258,166 300,174 300,226 258,216" fill="#fff6e6"/><polygon points="300,174 372,160 372,210 300,226" fill="#f3e2c4"/><polygon points="322,188 346,184 346,214 322,220" fill="#9a7450"/></g>
       <g data-for="R"><polygon points="250,226 300,150 350,222" fill="#ef8a4c"/><polygon points="300,150 350,222 372,214" fill="#c9652b"/><polygon points="288,226 300,196 312,224" fill="#5a3a22"/><ellipse cx="470" cy="236" rx="30" ry="16" fill="#8d8d93"/><ellipse cx="505" cy="246" rx="20" ry="11" fill="#77777d"/></g>
       <g data-for="H"><rect x="470" y="70" width="64" height="170" rx="8" fill="#fbfbfb"/><rect x="470" y="70" width="64" height="16" fill="#e8543f"/><rect x="480" y="46" width="44" height="26" rx="6" fill="#fff6c9" stroke="#8a8a8a" stroke-width="3"/><path d="M492 240 v-34 a10 10 0 0 1 20 0 v34z" fill="#8fb4c9"/><rect x="300" y="196" width="60" height="30" rx="4" fill="#fff"/><rect x="346" y="204" width="34" height="22" rx="3" fill="#dfe9ee"/><circle cx="314" cy="230" r="7" fill="#444"/><circle cx="366" cy="230" r="7" fill="#444"/></g>
       <g data-for="B"><g stroke="#a87b49" stroke-width="2"><line x1="0" y1="215" x2="600" y2="204"/><line x1="0" y1="232" x2="600" y2="226"/><line x1="0" y1="248" x2="600" y2="252"/><line x1="0" y1="258" x2="600" y2="290"/></g><polygon points="230,110 420,104 420,210 230,216" fill="#fbfbfb"/><rect x="230" y="104" width="190" height="12" fill="#3a6ea5"/><circle cx="280" cy="160" r="16" fill="#bfe3f5" stroke="#c9a23a" stroke-width="5"/><circle cx="370" cy="164" r="17" fill="none" stroke="#e8543f" stroke-width="9"/><circle cx="370" cy="164" r="17" fill="none" stroke="#fff" stroke-width="9" stroke-dasharray="13 14"/></g>
+      <g data-for="M"><ellipse cx="190" cy="236" rx="30" ry="9" fill="#5e4430"/><rect x="164" y="212" width="52" height="24" fill="#8a6a4a"/><ellipse cx="190" cy="212" rx="26" ry="8" fill="#c9a679"/><ellipse cx="190" cy="212" rx="14" ry="4" fill="none" stroke="#8a6a4a" stroke-width="2"/><ellipse cx="548" cy="244" rx="38" ry="20" fill="#8d8d93"/><path d="M514 242 q34 -34 68 0 q-34 -14 -68 0z" fill="#6fae66"/><rect x="404" y="238" width="5" height="12" fill="#f6ecd8"/><ellipse cx="406" cy="238" rx="13" ry="8" fill="#e8543f"/><circle cx="402" cy="236" r="2.2" fill="#fff"/><circle cx="410" cy="240" r="1.8" fill="#fff"/><rect x="432" y="244" width="4" height="9" fill="#f6ecd8"/><ellipse cx="434" cy="244" rx="9" ry="6" fill="#f2a93c"/><circle cx="431" cy="242" r="1.6" fill="#fff"/></g>
+      <g data-for="S"><circle cx="185" cy="214" r="26" fill="#fff" stroke="#c4d9e6" stroke-width="2"/><circle cx="185" cy="178" r="19" fill="#fff" stroke="#c4d9e6" stroke-width="2"/><circle cx="179" cy="175" r="2.4" fill="#3b2a2d"/><circle cx="191" cy="175" r="2.4" fill="#3b2a2d"/><polygon points="185,180 201,184 185,187" fill="#ff9a45"/><path d="M169 193 q16 8 32 0" stroke="#ef6a6a" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="185" cy="210" r="2.2" fill="#3b2a2d"/><circle cx="185" cy="222" r="2.2" fill="#3b2a2d"/><ellipse cx="90" cy="246" rx="44" ry="12" fill="#ffffff"/><ellipse cx="470" cy="240" rx="52" ry="13" fill="#ffffff"/><polygon points="500,250 520,214 546,250" fill="#cfe9f6" stroke="#9fc8de" stroke-width="2"/></g>
       <!-- かぜに なびく くさ と、おみせの はた -->
       <g class="grass" data-for="L" stroke="#5aa85a" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M200 262 q-4 -16 -10 -22"/><path d="M208 264 q2 -18 8 -26"/><path d="M440 292 q-4 -16 -10 -22"/><path d="M448 294 q2 -18 8 -26"/><path d="M560 300 q2 -18 8 -26"/></g>
       <g class="grass" data-for="R" stroke="#4f9650" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M150 258 q-4 -16 -10 -22"/><path d="M158 260 q2 -18 8 -26"/><path d="M410 288 q-4 -16 -10 -22"/><path d="M418 290 q2 -18 8 -26"/><path d="M570 304 q2 -18 8 -26"/></g>
+      <g class="grass" data-for="M" stroke="#3f8a4f" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 252 q-4 -16 -10 -22"/><path d="M38 254 q2 -18 8 -26"/><path d="M170 258 q-4 -16 -10 -22"/><path d="M178 260 q2 -18 8 -26"/><path d="M330 270 q-4 -16 -10 -22"/><path d="M338 272 q2 -18 8 -26"/><path d="M440 292 q-4 -16 -10 -22"/><path d="M448 294 q2 -18 8 -26"/><path d="M560 300 q-4 -16 -10 -22"/><path d="M568 302 q2 -18 8 -26"/></g>
+      <g class="grass" data-for="S" stroke="#a89a78" stroke-width="4" stroke-linecap="round" fill="none"><path d="M60 254 q-4 -16 -10 -22"/><path d="M68 256 q2 -18 8 -26"/><path d="M210 262 q-4 -16 -10 -22"/><path d="M218 264 q2 -18 8 -26"/><path d="M380 272 q-4 -16 -10 -22"/><path d="M388 274 q2 -18 8 -26"/><path d="M520 296 q-4 -16 -10 -22"/><path d="M528 298 q2 -18 8 -26"/></g>
       <line x1="566" y1="236" x2="566" y2="154" stroke="#8a5a2b" stroke-width="4" stroke-linecap="round"/>
       <polygon class="flag" points="564,156 528,164 564,180" fill="#ff8f6b" stroke="#fff" stroke-width="2"/>
       <!-- みずぎわ と みず -->
@@ -1064,6 +1078,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script src="tsuri-mame.js"></script>
 <script src="tsuri-art.js"></script>
 <script src="tsuri-art-season.js"></script>
+<script src="tsuri-art-ext.js"></script>
 <script src="tsuri-art-real.js"></script>
 <script src="tsuri-town.js"></script>
 <script src="tsuri-koe.js"></script>
@@ -1121,17 +1136,24 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ['おつきみうさぎうお', '🐟', 15, 40, 9, '{お月見|おつきみ}うさぎ{魚|うお}', 'Moon-Viewing Bunny Fish'], ['ハロウィンかぼちゃうお', '🐡', 15, 40, 10, 'ハロウィンかぼちゃ{魚|うお}', 'Pumpkin Lantern Fish'],
     ['もみじがれい', '🐟', 20, 50, 11, 'もみじ{鰈|がれい}', 'Maple Flounder'], ['ゆきだるまうお', '🐠', 15, 40, 12, '{雪|ゆき}だるま{魚|うお}', 'Snowman Fish']
   ].forEach(([name, icon, min, max, season, kanji, en]) => FISH.push({id: FISH.length, name, icon, min, max, rare: 3, time: '', area: '*', kanji, season, en}));
+  // ひろがる つりばの さかな：ずかんの 30しゅるいには かぞえない（きせつ・まぼろしと おなじ・ext）。ばんごうは 46ばんから（うしろに たすだけ）。えは かり（tsuri-art-ext.js）
+  // [なまえ, えもじ, さいしょう, さいだい, ★, じかん, つりば, かんじ, English]
+  [['こけむしこい', '🐟', 20, 50, 2, '', 'M', '{苔|こけ}むし{鯉|こい}', 'Mossy Koi'], ['どんぐりめだか', '🐟', 3, 8, 1, 'ah', 'M', 'どんぐり{目高|めだか}', 'Acorn Medaka'],
+    ['ほたるうお', '🐟', 10, 25, 3, 'n', 'M', '{蛍|ほたる}{魚|うお}', 'Firefly Fish'], ['あさぎりいわな', '🐟', 20, 45, 3, 'a', 'M', '{朝霧|あさぎり}{岩魚|いわな}', 'Morning Mist Char'],
+    ['こおりわかさぎ', '🐟', 5, 15, 1, '', 'S', '{氷|こおり}{公魚|わかさぎ}', 'Ice Smelt'], ['ゆきだまはぜ', '🐟', 4, 12, 2, 'ah', 'S', '{雪玉|ゆきだま}はぜ', 'Snowball Goby'],
+    ['おんせんがめ', '🐢', 15, 40, 2, 'h', 'S', '{温泉|おんせん}{亀|かめ}', 'Hot Spring Turtle'], ['おーろらうお', '🐠', 30, 70, 3, 'n', 'S', 'オーロラ{魚|うお}', 'Aurora Fish']
+  ].forEach(([name, icon, min, max, rare, time, area, kanji, en]) => FISH.push({id: FISH.length, name, icon, min, max, rare, time, area, kanji, en, ext: true}));
   // まぼろしの ひ：つきに 1にち だけ、まぼろしが でやすい（60かいに 1かい）。ひづけで きまるので、みんな おなじ ひ
   // きょうの ラッキー・ぬし・まぼろしの ひ は、ひづけだけで きまる。ひろばと おなじ ファイル（tsuri-daily.js）を つかう。DAILY_FALLBACK は、よみこめ なかった ときの 同じ しき（かえる ときは 2か所 おなじに）
   const DAILY_FALLBACK = (() => { const valid = t => (t instanceof Date && !isNaN(t) ? t : new Date()), day = t => { t = valid(t); return t.getFullYear() * 372 + t.getMonth() * 31 + t.getDate(); };
     return {lucky: (base, t) => (day(t) * 11) % (base > 0 ? base : 30), boss: t => { const h = Math.imul(day(t), 2654435761) >>> 0; return {area: 'LRHB'[h % 4], time: 'ahyn'[(h >>> 8) % 4]}; }, myth: t => { t = valid(t); return t.getDate() === (t.getFullYear() * 12 + t.getMonth()) * 5 % 27 + 1; }}; })();
   const DAILY = window.TsuriDaily || DAILY_FALLBACK;
   const calendar = new Date(), mythDay = (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('mythday') === '1') || DAILY.myth(calendar);
-  const BASE = FISH.filter(f => !f.legend && !f.season).length, LEGEND_ODDS = mythDay ? 1 / 60 : 1 / 8000;   // ずかんの 30しゅるい（まぼろし・きせつは かぞえない）
+  const isBase = f => !f.legend && !f.season && !f.ext, BASE = FISH.filter(isBase).length, LEGEND_ODDS = mythDay ? 1 / 60 : 1 / 8000;   // ずかんの 30しゅるい（まぼろし・きせつは かぞえない）
   const SEASON_ODDS = .1, MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const monthNow = () => (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:') && Number(new URLSearchParams(location.search).get('month')) >= 1 ? Number(new URLSearchParams(location.search).get('month')) : new Date().getMonth() + 1;   // たんまつの ひづけが ずれて いても エラーには ならない
   const seasonFish = () => FISH.find(f => f.season === monthNow());
-  document.addEventListener('DOMContentLoaded', () => { if (window.TsuriEn && TsuriEn.lang === 'en') FISH.filter(f => f.season).forEach(f => { f.name = f.en; f.kanji = f.en; }); });   // ひょうの ない さかなは、ここで 英語に
+  document.addEventListener('DOMContentLoaded', () => { if (window.TsuriEn && TsuriEn.lang === 'en') FISH.filter(f => f.season || f.ext).forEach(f => { f.name = f.en; f.kanji = f.en; }); });   // ひょうの ない さかなは、ここで 英語に
   // きりの いい かずの おいわい。かずに よって、おこる ことが ちがう
   const MILES = {10: ['👏', '10ぴきめ！ なかまが はくしゅ して いるよ。'], 30: ['🌸', '30ぴきめ！ はなびらが まって きたよ。'], 50: ['🎈', '50ぴきめ！ ふうせんが あがったよ。'], 100: ['🎆', '100ぴきめ！ はなびが あがったよ。'], 300: ['🌈', '300ぴきめ！ にじいろの かみふぶき だよ。'], 500: ['⭐', '500ぴきめ！ ほしが ふって きたよ。'], 1000: ['👑', '1000びきめ！ もう、つりの めいじんだね。']};
   // きょうの ラッキーさかな：ひづけで きまる（みんな おなじ）。その こが 4ばい でやすい。「きょうは ○○の ひ」と、はなしの たねに なる
@@ -1139,7 +1161,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // きょうの ぬし：日づけで、「この つりばの、この じかん」に ぬしが でやすい（みんな おなじ。ふえるのは 2.5ばい。さがしても さがさなくても ばつは ない）
   const BOSS = DAILY.boss(calendar);
   const onBossSpot = () => save.area === BOSS.area && timeOfDay() === BOSS.time;
-  const seenCount = () => Object.keys(save.fish).filter(id => FISH[id] && !FISH[id].legend && !FISH[id].season).length;
+  const seenCount = () => Object.keys(save.fish).filter(id => FISH[id] && isBase(FISH[id])).length;
   // {かんじ|よみ} を、ふりがなつきの もじに する
   function ruby(text) {
     const out = document.createDocumentFragment();
@@ -1154,8 +1176,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // つりば。need は「ぜんぶで なんびき つったら いけるか」
   const AREAS = [
     {id: 'L', name: 'みずうみ', need: 0}, {id: 'R', name: 'かわ', need: 5},
-    {id: 'H', name: 'みなとまち', need: 15}, {id: 'B', name: 'ふねの うえ', need: 30}
+    {id: 'H', name: 'みなとまち', need: 15}, {id: 'B', name: 'ふねの うえ', need: 30},
+    {id: 'M', name: 'もりの いけ', need: 45, late: true}, {id: 'S', name: 'ゆきの みずうみ', need: 65, late: true}
   ];
+  const areasShown = () => AREAS.filter(a => !a.late || save.total >= 30);   // もりの いけ・ゆきの みずうみの タブは「ふねの うえ」に ついた ひとだけ（はじめての ひとの がめんは 4つの まま）
+  // ひろがる つりばは「その つりばの さかな」＋「ほかの つりばの さかなが あそびに くる（ゲスト）」。ゲストの area は かえない（もとの つりばの でかたと ずかんは そのまま）。
+  // その つりばの さかなは 2ばい でやすい（じっさいの わりあい：その つりばの さかな 約6わり・ゲスト 約4わり）。ひょうじには かかない。ばんごうは FISH の ばんごう
+  const GUEST = {M: [2, 7, 8, 18], S: [5, 15, 23, 21]}, HOME_BONUS = 2;
+  const poolOf = area => FISH.filter(f => !f.legend && !f.season && (f.area === area || (GUEST[area] || []).includes(f.id)));
+  const homeBonus = f => GUEST[save.area] && f.area === save.area ? HOME_BONUS : 1;
   // どうぐ。おかねは つかわない。あそぶと ふえる
   const RODS = [
     {icon: '🌿', name: 'きのえだの さお', note: 'さいしょの さお', open: () => true, how: ''},
@@ -1171,7 +1200,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // つりびと レベル：けいけんちは 「つった さかな1ぴき ごと」に たまる。めずらしい・ぬし・はじめての しゅるい・ぴったり で すこし おおく。
   // へらない・ほかの ひとと くらべない・じょうげん なし。にがしても、はずしても へらない。レベル L に なる のに いる けいけんち＝20×(L×L−1)
   const XP_RARE = {1: 0, 2: 5, 3: 15, 4: 40, 5: 100};
-  const xpFor = (fish, o) => 10 + (XP_RARE[fish.rare] || 0) + (fish.season ? 10 : 0) + (o.nushi ? 50 : 0) + (o.first ? 20 : 0) + (o.record ? 5 : 0) + (o.big ? 3 : 0) + Math.min(6, o.perfects || 0) * 2;
+  const xpFor = (fish, o) => 10 + (XP_RARE[fish.rare] || 0) + ((fish.season || fish.ext) ? 10 : 0) + (o.nushi ? 50 : 0) + (o.first ? 20 : 0) + (o.record ? 5 : 0) + (o.big ? 3 : 0) + Math.min(6, o.perfects || 0) * 2;
   const xpNeed = lv => 20 * (lv * lv - 1);
   const levelOf = xp => Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, xp) / 20)));
   function migrateXp(rec) {   // まえから あそんで いる ひとの けいけんちは、いまの きろくから みつもる（へらない ように、すくなめに）
@@ -1327,13 +1356,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (myth && (probe('legend') === '1' || Math.random() < odds)) { wish = false; return myth; }
     const season = seasonFish();   // この 月の さかな：どの つりばでも 10かいに 1かい くらい。ずかんの かずには はいらない ので、あえなくても こまらない
     if (season && (probe('season') === '1' || Math.random() < SEASON_ODDS)) { wish = false; return season; }
-    const now = timeOfDay(), here = FISH.filter(f => f.area === save.area && !f.legend && !f.season);
+    const now = timeOfDay(), here = poolOf(save.area);
     const wanted = Number(probe('rare')); if (wanted) { const only = here.filter(f => f.rare === wanted); if (only.length) return only[0]; }   // けんさよう
     // やさしい ほしょう：しってる こが 5かい つづいたら、つぎは まだ あってない こ
     const unseen = here.filter(f => !save.fish[f.id]), wished = wish && here.some(f => f.rare >= 3);
     const pool = wished ? here.filter(f => f.rare >= 3) : (save.streak || 0) >= 5 && unseen.length ? unseen : here;
     wish = false;
-    const weight = f => WEIGHT[f.rare] * (save.again === 'rare4' && f.rare === 4 ? 3 : 1) * (f.rare >= 3 ? 1 + .2 * skillMul('un') : 1) * (curMode() === 'hard' && f.rare === 4 ? 1.5 : 1) * (f === LUCKY ? 4 : 1) * (save.bait === 1 && f.rare >= 3 ? 2.5 : 1) * (rainy && f.rare >= 3 ? 1.5 : 1) * (!f.time || f.time.includes(now) ? 1 : 1 / 3);
+    const weight = f => WEIGHT[f.rare] * (save.again === 'rare4' && f.rare === 4 ? 3 : 1) * (f.rare >= 3 ? 1 + .2 * skillMul('un') : 1) * (curMode() === 'hard' && f.rare === 4 ? 1.5 : 1) * (f === LUCKY ? 4 : 1) * (save.bait === 1 && f.rare >= 3 ? 2.5 : 1) * (rainy && f.rare >= 3 ? 1.5 : 1) * (!f.time || f.time.includes(now) ? 1 : 1 / 3) * homeBonus(f);
     let roll = Math.random() * pool.reduce((sum, f) => sum + weight(f), 0);
     for (const f of pool) { roll -= weight(f); if (roll <= 0) return f; }
     return pool[0];
@@ -1363,7 +1392,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // 街人（天の あたらしい なかま）：PALS（15にん）は そのまま。tsuri-town.js（build_town_art.py が 絵の そろった 子だけ ならべる）から あとで 足して、となりに くる・いれかわる なかまに する。
   // ?town=id,id は 手もとの けんさ（すでに ある img/friend-<id>-s.webp の id を ならべる）
   const TOWN = (() => {
-    const list = [], seen = new Set(PALS.map(p => p.id)), homes = AREAS.map(a => a.id);
+    const list = [], seen = new Set(PALS.map(p => p.id)), homes = AREAS.filter(a => !a.late).map(a => a.id);
     const add = t => { if (!t || typeof t.id !== 'string' || !/^[a-z]{2,12}$/.test(t.id) || seen.has(t.id) || typeof t.name !== 'string' || !t.name || t.name.length > 24) return; seen.add(t.id); list.push({id: t.id, name: t.name, en: typeof t.en === 'string' ? t.en.slice(0, 40) : '', word: 'ぼーっと するね', home: homes.includes(t.home) ? t.home : homes[list.length % homes.length], town: true, toku: ['me', 'chikara', 'un', 'ochi'].includes(t.toku) ? t.toku : ''}); };   // すむ ばしょが なければ 4つりばに ばらす
     try { (window.TsuriTown && Array.isArray(window.TsuriTown.list) ? window.TsuriTown.list : []).forEach(add); } catch {}
     (query.get('town') || '').split(',').filter(Boolean).slice(0, 8).forEach((id, i) => add({id, name: id + 'の なかま', en: id + ' the pal', home: homes[i % homes.length]}));   // 手もとの けんさ
@@ -1379,7 +1408,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const GIFT_WORDS = ['ひとこと なし', 'これ、あげる！', 'いっしょに つろうね', 'おおきいの つれたよ', 'きょうも おつかれさま', 'ゆっくり しようね', 'また あそぼうね', 'みて みて！', 'いい ことが ありますように', 'ありがとう。'];
   const GIFT_CODE = /^\d{1,2}\.\d{1,4}\.\d{1,2}\.\d{1,2}\.\d{4,6}$/, GIFT_MAX = 12, GOT_MAX = 50;
   const giftTenths = (f, tenths) => Math.round(Math.min(Math.max(tenths, f.min * 10), Math.min(9999, f.max * 18)));   // おおきさは その さかなの はんい（ぬしの おおきさまで）に まるめる
-  const giftable = (f, nushi) => !f.legend && !nushi;   // ぬしと まぼろしは、じぶんで つった ひとだけの たからもの
+  const giftable = (f, nushi) => !f.legend && !f.ext && !nushi;   // ぬしと まぼろしは、じぶんで つった ひとだけの たからもの
   function tidyGifts(s) {   // よみこんだ・あわせた・もどした きろくの「もらった さかな」を きれいに する（ばんごうの おかしい ものは すてる）
     s.gifts = (Array.isArray(s.gifts) ? s.gifts : []).filter(g => g && Number.isInteger(g.id) && FISH[g.id] && Number.isFinite(g.size) && typeof g.code === 'string' && GIFT_CODE.test(g.code)).map(g => ({id: g.id, size: giftTenths(FISH[g.id], g.size * 10) / 10, pal: Number.isInteger(g.pal) && PALS[g.pal] ? g.pal : -1, word: Number.isInteger(g.word) && GIFT_WORDS[g.word] ? g.word : 0, at: Number.isFinite(g.at) ? g.at : 0, code: g.code})).slice(0, GIFT_MAX);
     s.gotGifts = (Array.isArray(s.gotGifts) ? s.gotGifts : []).filter(code => typeof code === 'string' && GIFT_CODE.test(code)).slice(0, GOT_MAX);
@@ -1681,8 +1710,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function areaSound() {
     clearTimeout(areaTimer); areaTimer = 0;
     if (!ambient || !ambientOut || !audio || !sndOn('amb')) return;
-    if (phase !== 'reel' && !document.hidden) { try { if (save.area === 'H') (Math.random() < .5 ? horn : gull)(); else if (save.area === 'B') creak(); } catch {} }
-    const fixed = Number(probe('areasound')); areaTimer = setTimeout(areaSound, fixed || (save.area === 'H' ? 25000 + Math.random() * 45000 : save.area === 'B' ? 14000 + Math.random() * 26000 : 60000));
+    if (phase !== 'reel' && !document.hidden) { try { if (save.area === 'H') (Math.random() < .5 ? horn : gull)(); else if (save.area === 'B') creak(); else if (save.area === 'M') bird(); else if (save.area === 'S') wind(); } catch {} }
+    const fixed = Number(probe('areasound')); areaTimer = setTimeout(areaSound, fixed || (save.area === 'H' ? 25000 + Math.random() * 45000 : save.area === 'B' ? 14000 + Math.random() * 26000 : save.area === 'M' ? 25000 + Math.random() * 35000 : save.area === 'S' ? 30000 + Math.random() * 30000 : 60000));
   }
   function horn() {   // とおくの きてき（ひくく ゆっくり ふくらんで きえる）
     const ctx = audio, at = ctx.currentTime + .05, g = ctx.createGain(), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 520;
@@ -1699,6 +1728,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function creak() {   // ふねが きしむ（ひくく みじかい「ぎぃ…」）
     const ctx = audio, t0 = ctx.currentTime + .05, o = ctx.createOscillator(), bp = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(95, t0); o.frequency.linearRampToValueAtTime(58, t0 + .9);
     bp.type = 'bandpass'; bp.frequency.value = 320; bp.Q.value = 7; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.013, t0 + .25); g.gain.linearRampToValueAtTime(0, t0 + .95); o.connect(bp); bp.connect(g); g.connect(ambientOut); o.start(t0); o.stop(t0 + 1);
+  }
+  function bird() {   // もりの ことり（ちいさな みっつの ふし・いちばん たかい おとでも 1kHz いか）
+    const ctx = audio, t0 = ctx.currentTime + .05, lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1300; lp.connect(ambientOut);
+    [[740, 920, 0, .16], [880, 700, .22, .18], [700, 960, .46, .2]].forEach(([f0, f1, d, len]) => {
+      const o = ctx.createOscillator(), e = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(f0, t0 + d); o.frequency.linearRampToValueAtTime(f1, t0 + d + len);
+      e.gain.setValueAtTime(0, t0 + d); e.gain.linearRampToValueAtTime(.01, t0 + d + .05); e.gain.linearRampToValueAtTime(0, t0 + d + len); o.connect(e); e.connect(lp); o.start(t0 + d); o.stop(t0 + d + len + .02);
+    });
+  }
+  function wind() {   // ゆきの かぜ（ひくい ふわっと した おと・3びょうで ふくらんで きえる・500Hz いか）
+    const ctx = audio, t0 = ctx.currentTime + .05, rate = ctx.sampleRate, len = Math.round(rate * 3.4), buf = ctx.createBuffer(1, len, rate), d = buf.getChannelData(0); let v = 0;
+    for (let i = 0; i < len; i++) { v = v * .97 + (Math.random() * 2 - 1) * .03; d[i] = v * 5; }
+    const src = ctx.createBufferSource(), lp = ctx.createBiquadFilter(), g = ctx.createGain(); src.buffer = buf; lp.type = 'lowpass'; lp.frequency.value = 480;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.012, t0 + 1.4); g.gain.linearRampToValueAtTime(0, t0 + 3.3); src.connect(lp); lp.connect(g); g.connect(ambientOut); src.start(t0); src.stop(t0 + 3.4);
   }
   function duckAmbient(on) {   // あんないの おと（ポ・ピコン）が なって いる 間だけ、なみを はんぶんに（−6dB）。おわると ゆっくり もどる
     if (!ambientDuck || !audio) return;
@@ -2395,7 +2437,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function drawAreas() {
     if ($('area-now')) $('area-now').textContent = areaName(save.area);
-    syncTabs($('areas'), AREAS.map(area => ({k: area.id, text: area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
+    $('areas').dataset.n = String(areasShown().length); syncTabs($('areas'), areasShown().map(area => ({k: area.id, text: area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
       if (save.total < area.need) { say(L('あと ' + (area.need - save.total) + 'ひきで いけるよ。', (area.need - save.total) + ' more catches to unlock this spot.')); return; }   // まだ いけない：ことばだけ
       if (save.area === area.id) return;
       save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals(); restartAmbient();
@@ -2803,7 +2845,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // シールちょうの 1まい。あつめた シールが ならぶ。30しゅるい そろうと「ぜんぶ あつめた！」
   async function bookPhoto() {
     const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1350;
-    const ctx = canvas.getContext('2d'), seen = seenCount(), full = seen >= BASE, list = FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])), arts = {};
+    const ctx = canvas.getContext('2d'), seen = seenCount(), full = seen >= BASE, list = FISH.filter(f => isBase(f) || (f.legend && save.fish[f.id])), arts = {};
     await Promise.all(list.filter(f => save.fish[f.id] && artOf(f)).map(async f => { arts[f.id] = await loadImg(artOf(f)); }));
     const paper = ctx.createLinearGradient(0, 0, 0, 1350); paper.addColorStop(0, full ? '#fff6cf' : '#eaf6fd'); paper.addColorStop(1, full ? '#ffe9a8' : '#d3eefb');
     ctx.fillStyle = paper; ctx.fillRect(0, 0, 1200, 1350);
@@ -3009,7 +3051,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function restoreOpen() {
     const hit = /^#restore=(MF1[.].+)$/.exec(location.hash); if (!hit) return;
     let got; try { got = readKeep(hit[1]); } catch { dropRestoreHash(); return; }   // よめない：なにも おこさない
-    const {data, fishes} = got, seen = Object.keys(fishes).filter(id => !FISH[id].legend && !FISH[id].season).length, level = levelOf(Number.isInteger(data.xp) ? data.xp : migrateXp({fish: fishes}));
+    const {data, fishes} = got, seen = Object.keys(fishes).filter(id => FISH[id] && isBase(FISH[id])).length, level = levelOf(Number.isInteger(data.xp) ? data.xp : migrateXp({fish: fishes}));
     const empty = save.total === 0 && Object.keys(save.fish).length === 0, less = data.total < save.total;
     $('restore-what').textContent = 'もどす きろく：つれた かず ' + data.total + 'ひき・シールちょう ' + seen + ' / ' + BASE + '・レベル ' + level;
     $('restore-now').textContent = empty ? '' : 'いまの きろく：つれた かず ' + save.total + 'ひき';
@@ -3234,9 +3276,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       let shade;
       if (kind === 'B') { const plank = (y + x * .06) % 17, line = plank < 1.4 ? .55 : 1; shade = (.86 + grain(x * .06, y * 1.9) * .2 + grain(x * .5, y * .5) * .06) * line; }
       else if (kind === 'H') { shade = .88 + puffy(x * .05, y * .09) * .22 + (dot(x, y) > .985 ? -.18 : 0); if (x % 74 < 1.2 || (y + 9) % 46 < 1.1) shade *= .8; }
+      else if (kind === 'S') { shade = .95 + puffy(x * .04, y * .1) * .08 - (dot(x, y) > .994 ? .05 : 0); }
       else { shade = .78 + puffy(x * .045, y * .11) * .4 + grain(x * .9, y * .9) * .08; if (dot(x, y) > .992) shade -= .2; }
       const near = .9 + (y / H) * .14, level = Math.max(0, Math.min(1, shade * near)) * 255;
-      const green = kind === 'L' || kind === 'R' ? puffy(x * .03 + 7, y * .07) : 0;
+      const green = kind === 'L' || kind === 'R' || kind === 'M' ? puffy(x * .03 + 7, y * .07) : 0;
       px[i] = level * (1 - green * .25); px[i + 1] = level * (1 - green * .02); px[i + 2] = level * (1 - green * .3); px[i + 3] = 255;
     }
     trowel.putImageData(tile, 0, 0);
@@ -3719,7 +3762,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       return cell;
     };
     {   // つりばごとに ならべる（みずうみ・かわ・みなとまち・ふねの うえ）。「くらべる」では なく、じぶんの あつめぐあいが わかる
-      const list = FISH.filter(f => (!f.legend && !f.season) || (f.legend && save.fish[f.id])), cells = [];
+      const list = FISH.filter(f => isBase(f) || (f.legend && save.fish[f.id])), cells = [];
       for (const a of AREAS) {
         const inArea = list.filter(f => f.area === a.id); if (!inArea.length) continue;
         const head = document.createElement('h3'), got = inArea.filter(f => save.fish[f.id]).length;
@@ -3740,6 +3783,21 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         cell.append(icon, got ? ruby(f.kanji) : L('まだ あってない', 'Not met yet'), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? L('さいだい ', 'Largest ') + cm(got.best) + L('センチ（', ' cm (') + got.count + L('ひき）', ')') + ' · ' + month : month);
         return cell;
       }));
+    }
+    {   // ひろがる ずかん：もりの いけ・ゆきの みずうみの さかな（ずかんの 30しゅるいには かぞえない）。その つりばに いける ひとだけに みせる（せかさない・くらべない）
+      for (const a of AREAS.filter(x => x.late && save.total >= x.need)) {
+        const inArea = FISH.filter(f => f.ext && f.area === a.id); if (!inArea.length) continue;
+        const head = document.createElement('h3'), note = document.createElement('p'), got = inArea.filter(f => save.fish[f.id]).length;
+        head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L('ひろがる ずかん　' + a.name + '　' + got + ' / ' + inArea.length, 'Extra book  ' + T(a.name) + '  ' + got + ' / ' + inArea.length);
+        note.style.cssText = 'grid-column:1/-1;margin:0;text-align:center;font-size:.82rem;line-height:1.7'; note.textContent = L('ずかんの 30しゅるいには かぞえないよ。ゆっくり あえたら いいね。', 'These are not part of the 30 kinds. Meet them whenever you like.');
+        $('book-grid').append(head, note, ...inArea.map(f => {
+          const g2 = save.fish[f.id], cell = document.createElement('div');
+          cell.dataset.seen = String(!!g2); cell.dataset.rare = String(f.rare); cell.dataset.nushi = 'false';
+          const icon = document.createElement('b'); if (g2) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
+          cell.append(icon, g2 ? ruby(f.kanji) : L('まだ あってない', 'Not met yet'), document.createElement('br'), ...(g2 ? [starEl(f, false), document.createElement('br')] : []), g2 ? L('さいだい ', 'Largest ') + cm(g2.best) + L('センチ（', ' cm (') + g2.count + L('ひき）', ')') : L(a.name, T(a.name)));
+          return cell;
+        }));
+      }
     }
     {   // ぬしの こ：ぬしを つった さかな。「ぬしの ○○」と さいだいの おおきさ
       const guard = FISH.filter(f => save.fish[f.id] && save.fish[f.id].nushi && !f.legend);
@@ -3922,7 +3980,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       html.dataset.ready = 'fresh'; delete html.dataset.time; setTimeout(() => { html.dataset.ready = 'true'; }, 500);   // 早い script の <html data-time> は やくめが おわり（けしきの data-time が うけつぐ）
     });
   }
-  window.Tsuri = {all: FISH.filter(f => !f.season), beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), fishList: () => FISH.map(f => ({id: f.id, name: f.name, kanji: f.kanji})), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
+  window.Tsuri = {all: FISH.filter(f => !f.season && !f.ext), ext: () => FISH.filter(f => f.ext).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, rare: f.rare, time: f.time, area: f.area, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0})), sampleFish: n => { const c = {}; for (let i = 0; i < Math.min(20000, Math.max(0, n | 0)); i++) { const f = pickFish(); if (f) c[f.id] = (c[f.id] || 0) + 1; } return c; }, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), fishList: () => FISH.map(f => ({id: f.id, name: f.name, kanji: f.kanji})), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>

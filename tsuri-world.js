@@ -62,7 +62,8 @@
   // ---- つりばの ひょう（本体の AREAS と おなじ。「かならず 通る 順」＝みずうみ→かわ→みなとまち→ふねの うえ） ----
   const AREAS = [
     {id: 'L', name: 'みずうみ', en: 'Lake', need: 0}, {id: 'R', name: 'かわ', en: 'River', need: 5},
-    {id: 'H', name: 'みなとまち', en: 'Harbor Town', need: 15}, {id: 'B', name: 'ふねの うえ', en: 'On the Boat', need: 30}
+    {id: 'H', name: 'みなとまち', en: 'Harbor Town', need: 15}, {id: 'B', name: 'ふねの うえ', en: 'On the Boat', need: 30},
+    {id: 'M', name: 'もりの いけ', en: 'Forest Pond', need: 45, late: true}, {id: 'S', name: 'ゆきの みずうみ', en: 'Snowy Lake', need: 65, late: true}   // 30ひき（ふねの うえ）に ついた ひとだけ ならぶ
   ];
   const areaOk = (a, total) => total >= a.need;
 
@@ -88,7 +89,7 @@
   function places() {
     const s = save(), total = Math.max(0, Math.floor(num(s.total, 0))), here = page(), tank = !!(window.TsuriTank && typeof window.TsuriTank.open === 'function' && (window.TsuriTank.version || 0) >= 3);
     const c = context();
-    const list = AREAS.map(a => ({id: a.id, kind: 'area', name: T(a.name, a.en), ja: a.name, need: a.need, open: areaOk(a, total), left: Math.max(0, a.need - total), here: here === 'tsuri' && c.area === a.id}));
+    const list = AREAS.filter(a => !a.late || total >= 30).map(a => ({id: a.id, kind: 'area', name: T(a.name, a.en), ja: a.name, need: a.need, open: areaOk(a, total), left: Math.max(0, a.need - total), here: here === 'tsuri' && c.area === a.id}));
     list.push({id: 'hiroba', kind: 'page', name: T('ひろば', 'Plaza'), ja: 'ひろば', need: 0, open: true, left: 0, here: here === 'hiroba'});
     list.push({id: 'heya', kind: 'dialog', name: T('まるふわの おへや', "Marufuwa's room"), ja: 'まるふわの おへや', need: 0, open: tank, left: 0, here: false});
     list.push({id: 'shop', kind: 'dialog', name: T('おみせ', 'Shop'), ja: 'おみせ', need: 0, open: here === 'tsuri' && !!document.getElementById('keeper'), left: 0, here: false});
