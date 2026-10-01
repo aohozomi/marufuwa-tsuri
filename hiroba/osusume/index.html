@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>おすすめの へや｜まるふわの ひろば</title>
+<meta name="description" content="つくった ひとが「いいな」と おもった ひとを しょうかいする へや。えを かく ひと・はいしんする ひと・がんばって いる ひと。いそがなくて だいじょうぶ。">
+<meta name="theme-color" content="#b9edf5">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23ffd86b'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+<script>
+// つりびよりの「つかいやすく する」（もじを おおきく・うごきを へらす）と 時間帯（あさ・ひる・ゆうがた・よる）に、この へやも したがう（本体と おなじ 記録 marufuwa-tsuri-v1 を よむだけ・かきかえない）。
+// 時間帯は ?time=a|h|y|n（手元の 試験用）→ 記録の time → 時計（5〜10時 あさ／10〜16時 ひる／16〜19時 ゆうがた／それ以外 よる）。
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement, q = new URLSearchParams(location.search);
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+  var tf = q.get('time'), t = /^[ahyn]$/.test(tf || '') ? tf : /^[ahyn]$/.test(early.time || '') ? early.time : null;
+  if (!t) { var h = new Date().getHours(); t = h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n'; }
+  root.dataset.time = t;
+} catch (e) { document.documentElement.dataset.time = 'h'; }
+</script>
+<style>
+:root{--ink:#27424e;--ink2:#3d5a68;--plate:#fffdf7;--wall:#fff6e4;--wood:#d9b07c;--wood2:#b98a5a;--line:#cfae7e;--btn1:#ffffff;--btn2:#dff1f7;--btn-line:#9bc9da;--link:#14506b;--sky1:#a9defa;--sky2:#eaf8ff}
+:root[data-time=a]{--sky1:#ffd9b8;--sky2:#fff3e2}
+:root[data-time=h]{--sky1:#a9defa;--sky2:#eaf8ff}
+:root[data-time=y]{--sky1:#ff9e6e;--sky2:#ffd9a8}
+:root[data-time=n]{--sky1:#1f2f5c;--sky2:#4a5d92;--wall:#e8e4f4;--plate:#f6f3fb;--wood:#9c8db8;--wood2:#7c6f9a;--line:#8e80b0}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:linear-gradient(var(--sky1),var(--sky2)) fixed;padding:12px 12px 36px}
+:root[data-inapp=x] body{padding-bottom:84px}
+.room{max-width:620px;margin:0 auto;background:var(--wall);border:3px solid var(--wood2);border-radius:22px;padding:14px 14px 20px;box-shadow:0 8px 24px #0b2a4a33}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;justify-content:space-between}
+.back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
+h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
+.lead{margin:2px 0 10px;font-size:.95rem;color:var(--ink2)}
+.shelf{margin:16px 0 6px}
+.shelf h2{display:inline-block;margin:0 0 8px;padding:3px 14px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:1.05rem;line-height:1.5}
+.shelf .sub{margin:0 0 8px;font-size:.85rem;color:var(--ink2)}
+.row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.plank{height:12px;margin-top:8px;border-radius:8px;background:linear-gradient(var(--wood),var(--wood2));box-shadow:0 3px 0 #0b2a4a1f}
+.card{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:16px;background:var(--plate);border:2px solid var(--line);min-width:0}
+.card .pic{display:grid;place-items:center;width:100%;aspect-ratio:1/1;max-height:140px;border-radius:12px;background:#e9f6fb;overflow:hidden;font-size:2.4rem}
+:root[data-time=n] .card .pic{background:#e0dcf0}
+.card .pic img{display:block;width:100%;height:100%;object-fit:contain}
+.card h3{margin:0;font-size:1rem;line-height:1.4;overflow-wrap:anywhere}
+.card p{margin:0;font-size:.85rem;color:var(--ink2);overflow-wrap:anywhere}
+.card button{margin-top:auto;min-height:44px;padding:4px 10px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer}
+.empty{margin:0;padding:10px 12px;border-radius:14px;background:var(--plate);border:2px dashed var(--line);font-size:.92rem}
+.note{margin:18px 0 0;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.85rem;color:var(--ink2)}
+button:focus-visible,a:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a}
+dialog{max-width:min(420px,calc(100vw - 24px));border:3px solid var(--wood2);border-radius:20px;padding:16px;background:var(--plate);color:var(--ink)}
+dialog::backdrop{background:#0d2a3acc}
+dialog h2{margin:0 0 8px;font-size:1.1rem;line-height:1.5}
+dialog .where{margin:0 0 12px;padding:6px 10px;border-radius:10px;background:#eef6f9;font-size:.9rem;overflow-wrap:anywhere}
+:root[data-time=n] dialog .where{background:#e4e0f2}
+dialog .acts{display:flex;flex-wrap:wrap;gap:8px}
+dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:4px 14px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;text-decoration:none;cursor:pointer}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+:root[data-calm=true] *{transition:none!important;animation:none!important}
+</style>
+</head>
+<body>
+<main class="room" id="room">
+  <div class="top"><a class="back" id="back" href="../index.html">← ひろばへ</a></div>
+  <h1>おすすめの へや</h1>
+  <p class="lead">つくった ひとが「いいな」と おもった ひとを しょうかいする へやです。すきな ところだけ みて いってね。いそがなくて だいじょうぶ。</p>
+  <div id="shelves"></div>
+  <p class="note">そとへ ひらく ボタンは、おして「いいですか？」と かくにんした あとだけ ひらきます。この へやに、もじを いれる ところは ありません。<a href="../../anshin/" style="color:var(--link)">おうちの かたへ</a></p>
+</main>
+<dialog id="go" aria-labelledby="go-title">
+  <h2 id="go-title">そとへ ひらきます。いいですか？</h2>
+  <p class="where" id="go-where"></p>
+  <div class="acts"><a id="go-open" href="#" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="go-cancel">やめる</button></div>
+</dialog>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  'use strict';
+  // ─── 棚の しゅるい（かぎ → ことば）。マスターが data/osusume.json に {kind,name,img,url,hitokoto}（＋あれば hitokoto_en）を 書く。ここに ない kind は 出さない ───
+  const KINDS = [
+    { k: 'illustrator', h: 'イラストレーター', sub: 'えを かく ひと', ic: '🎨' },
+    { k: 'streamer', h: 'はいしんしゃ', sub: 'はいしんを して いる ひと', ic: '📺' },
+    { k: 'follower', h: 'フォロワーを あつめたい ひと', sub: 'これから ひろがって いく ひと', ic: '🌱' },
+    { k: 'ganbaru', h: 'がんばって いる ひと', sub: 'まいにち こつこつ すすんで いる ひと', ic: '🔥' }
+  ];
+  const MAX_PER_SHELF = 12, DATA = '../../data/osusume.json', IMG = '../../img/osusume/';
+  const shelves = document.getElementById('shelves'), live = document.getElementById('live'), dlg = document.getElementById('go'), where = document.getElementById('go-where'), open = document.getElementById('go-open'), cancel = document.getElementById('go-cancel');
+  const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+  // ─── 入ってきた ものを うたがう：しゅるい・長さ・https だけ・絵は この ゲームの img/osusume/ の ファイル名だけ（外の 画像は 読まない）───
+  const okText = (s, max) => typeof s === 'string' && s.length > 0 && s.length <= max && !/[\u0000-\u001f\u007f<>]/.test(s);
+  function cleanUrl(u) {
+    if (typeof u !== 'string' || u.length > 300) return null;
+    let x; try { x = new URL(u); } catch (e) { return null; }
+    if (x.protocol !== 'https:' || x.username || x.password || !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(x.hostname) || x.hostname.length > 120) return null;
+    return x;
+  }
+  function clean(list) {
+    const out = KINDS.map(() => []);
+    if (!Array.isArray(list)) return out;
+    for (const e of list.slice(0, 200)) {
+      if (!e || typeof e !== 'object') continue;
+      const ki = KINDS.findIndex(x => x.k === e.kind); if (ki < 0 || out[ki].length >= MAX_PER_SHELF) continue;
+      const url = cleanUrl(e.url); if (!url || !okText(e.name, 40)) continue;
+      const hito = e.hitokoto === undefined || e.hitokoto === '' ? '' : (okText(e.hitokoto, 80) ? e.hitokoto : null); if (hito === null) continue;
+      const hitoEn = typeof e.hitokoto_en === 'string' && okText(e.hitokoto_en, 160) ? e.hitokoto_en : '';
+      const img = typeof e.img === 'string' && /^[a-z0-9][a-z0-9_-]{0,40}\.(webp|png|jpg|jpeg)$/i.test(e.img) ? e.img : '';
+      out[ki].push({ name: e.name, hito, hitoEn, img, url: url.href, host: url.hostname });
+    }
+    return out;
+  }
+  // ─── 棚を えがく（textContent だけ・innerHTML は つかわない）───
+  const T = (ja, en) => isEn() ? en : ja;
+  const EN_KIND = { illustrator: ['Illustrators', 'People who draw'], streamer: ['Streamers', 'People who stream'], follower: ['Growing creators', 'People who are just getting started'], ganbaru: ['Working hard', 'People who keep going day by day'] };
+  function render(list) {
+    const data = clean(list); shelves.replaceChildren();
+    KINDS.forEach((K, i) => {
+      const sec = document.createElement('section'); sec.className = 'shelf'; sec.dataset.kind = K.k;
+      const h = document.createElement('h2'); h.id = 'h-' + K.k; h.textContent = K.h;
+      const sub = document.createElement('p'); sub.className = 'sub'; sub.textContent = K.sub;
+      sec.setAttribute('aria-labelledby', h.id); sec.append(h, sub);
+      if (!data[i].length) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'まだ だれも いないよ。'; sec.append(p); }
+      else {
+        const row = document.createElement('div'); row.className = 'row'; row.setAttribute('role', 'list');
+        data[i].forEach(it => {
+          const card = document.createElement('div'); card.className = 'card'; card.setAttribute('role', 'listitem');
+          const pic = document.createElement('div'); pic.className = 'pic';
+          if (it.img) { const im = new Image(); im.alt = ''; im.width = 140; im.height = 140; im.decoding = 'async'; im.referrerPolicy = 'no-referrer'; im.onerror = () => { im.remove(); const s = document.createElement('span'); s.textContent = K.ic; s.setAttribute('aria-hidden', 'true'); pic.append(s); }; im.src = IMG + it.img; pic.append(im); }
+          else { const s = document.createElement('span'); s.textContent = K.ic; s.setAttribute('aria-hidden', 'true'); pic.append(s); }
+          const nm = document.createElement('h3'); nm.textContent = it.name; card.append(pic, nm);
+          if (it.hito) { const p = document.createElement('p'); p.textContent = it.hito; if (it.hitoEn) p.dataset.en = it.hitoEn; card.append(p); }
+          const b = document.createElement('button'); b.type = 'button'; b.dataset.url = it.url; b.dataset.host = it.host; b.dataset.name = it.name; b.textContent = 'ひらく（そとへ）'; b.setAttribute('aria-label', isEn() ? 'Open ' + it.name + ' (goes to another site)' : it.name + 'の ページを ひらく（そとの サイトへ いきます）');
+          b.addEventListener('click', () => ask(it, b)); card.append(b); row.append(card);
+        });
+        sec.append(row);
+      }
+      const pl = document.createElement('div'); pl.className = 'plank'; pl.setAttribute('aria-hidden', 'true'); sec.append(pl);
+      shelves.append(sec);
+    });
+    applyEn();
+  }
+  // ─── 外へ ひらく まえの かくにん ───
+  let from = null;
+  function ask(it, btn) {
+    from = btn; where.textContent = 'さき：' + it.host; open.href = it.url; open.setAttribute('aria-label', isEn() ? 'Open ' + it.host : 'ひらく：' + it.host + ' へ');
+    if (!dlg.open) dlg.showModal(); cancel.focus(); applyEn();
+  }
+  cancel.addEventListener('click', () => { dlg.close(); });
+  open.addEventListener('click', () => { setTimeout(() => { if (dlg.open) dlg.close(); }, 0); });
+  dlg.addEventListener('close', () => { open.removeAttribute('href'); open.href = '#'; if (from && from.isConnected) from.focus(); from = null; });
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+  // ─── English（tsuri-en.js が 英語の ときだけ。ひとりひとりの なまえは そのまま・ひとことは hitokoto_en が あれば それ）───
+  function applyEn() {
+    if (!isEn()) return;
+    document.querySelectorAll('.card p[data-en]').forEach(p => { p.textContent = p.dataset.en; });
+    document.querySelectorAll('.shelf').forEach(s => { const e = EN_KIND[s.dataset.kind]; if (e) { s.querySelector('h2').textContent = e[0]; s.querySelector('.sub').textContent = e[1]; } });
+  }
+  const loadData = async () => {
+    let list = [];
+    try { const r = await fetch(DATA, { cache: 'no-store' }); if (r.ok) list = await r.json(); } catch (e) { list = []; }
+    render(list);
+  };
+  window.Osusume = { render, clean, cleanUrl, kinds: KINDS.map(k => k.k), ask: (it) => ask(it, null), reload: loadData };
+  render([]); loadData();
+  window.addEventListener('load', () => setTimeout(applyEn, 400));
+})();
+</script>
+<script defer src="../../tsuri-en.js"></script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+<script>
+// English：この へやの ことば（つくった ひと／ほかの ページと おなじ 仕組み：tsuri-en.js の E.add）。なまえ・ひとことは しょうかいされる ひとの もの なので 訳さない（ひとことは hitokoto_en が あれば それ）。
+(() => {
+  const EX = {
+    'おすすめの へや｜まるふわの ひろば': 'Recommended Room | Marufuwa Plaza',
+    'おすすめの へや': 'Recommended Room',
+    '← ひろばへ': '← Back to the Plaza',
+    'つくった ひとが「いいな」と おもった ひとを しょうかいする へやです。すきな ところだけ みて いってね。いそがなくて だいじょうぶ。': 'This room introduces people the maker thought were wonderful. Look only at what you like. No need to rush.',
+    'イラストレーター': 'Illustrators', 'えを かく ひと': 'People who draw',
+    'はいしんしゃ': 'Streamers', 'はいしんを して いる ひと': 'People who stream',
+    'フォロワーを あつめたい ひと': 'Growing creators', 'これから ひろがって いく ひと': 'People who are just getting started',
+    'がんばって いる ひと': 'Working hard', 'まいにち こつこつ すすんで いる ひと': 'People who keep going day by day',
+    'まだ だれも いないよ。': 'No one here yet.',
+    'ひらく（そとへ）': 'Open (another site)',
+    'そとへ ひらきます。いいですか？': 'This opens another site. Is that okay?',
+    'ひらく': 'Open', 'やめる': 'Cancel',
+    'そとへ ひらく ボタンは、おして「いいですか？」と かくにんした あとだけ ひらきます。この へやに、もじを いれる ところは ありません。': 'The “Open” buttons only open another site after you press them and confirm “Is that okay?”. There is nowhere to type in this room.',
+    'おうちの かたへ': 'For grown-ups'
+  };
+  const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX, rules: [[/^さき：(.+)$/, (_, h) => 'To: ' + h]] }); } };
+  const title = () => { const E = window.TsuriEn; if (E && E.lang === 'en') document.title = 'Recommended Room | Marufuwa Plaza'; };   // tsuri-en.js は ページの タイトルを 本体の 英語に する ので、この へやの 題を 入れなおす
+  addEventListener('load', () => { reg(); title(); setTimeout(() => { reg(); title(); }, 300); setTimeout(title, 1200); });
+})();
+</script>
+</body>
+</html>
