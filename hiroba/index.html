@@ -1590,8 +1590,9 @@ function updateFriend(f, dt) {
 // ─── ともだちの おせわ（C-1）：ようすが ある 子の あたまの うえに ちいさな しるし。さわると ごはん／うわぎ／もうふを あげる。
 //   せかさない（うごかない・おとも 出さない・「おねがい」とは 言わない）／やらなくても なにも おきない（へらない・きらわれない・きえない）／やったら すこし よろこぶ。
 //   ようすは 日づけで きまる（その 日に 1にん 1つ・さいだい 2にん）。かずは 見せない ──────────────────────────────
+const ONIGIRI_SVG = '<svg viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true" focusable="false"><path d="M12 3.4c1.5 0 2.5.9 3.5 2.8l4.4 9.2c.9 1.9-.4 4.4-2.6 4.4H6.7c-2.2 0-3.5-2.5-2.6-4.4l4.4-9.2C9.5 4.3 10.5 3.4 12 3.4z" fill="#fffdf3" stroke="#7a4b34" stroke-width="2.2" stroke-linejoin="round"/><rect x="8.2" y="13.6" width="7.6" height="5.2" rx="2.6" fill="#4b5d4f"/></svg>';
 const CARE = {
-  hungry: { ico: '🍙', ask: 'おなかが すいて いるみたい', btn: 'ごはんを あげる', said: ['おなか、くう…って なったよ'], thanks: ['もぐもぐ…おいしいな。ありがとう', 'おなか いっぱい。ありがとう'], done: 'ごはんを あげたよ。よろこんで いるよ' },
+  hungry: { ico: '🍙', svg: ONIGIRI_SVG, ask: 'おなかが すいて いるみたい', btn: 'ごはんを あげる', said: ['おなか、くう…って なったよ'], thanks: ['もぐもぐ…おいしいな。ありがとう', 'おなか いっぱい。ありがとう'], done: 'ごはんを あげたよ。よろこんで いるよ' },
   cold: { ico: '🧥', ask: 'さむそうに して いるみたい', btn: 'うわぎを かける', said: ['ちょっと さむいね…'], thanks: ['あったかい。ありがとう', 'ぽかぽか するよ。ありがとう'], done: 'うわぎを かけて あげたよ。よろこんで いるよ' },
   sleepy: { ico: '💤', ask: 'ねむそうに して いるみたい', btn: 'もうふを かける', said: ['ふぁ…ねむい ねむい'], thanks: ['ふわふわ…ぐっすり ねむれそう。ありがとう', 'ぬくぬく…ありがとう'], done: 'もうふを かけて あげたよ。よろこんで いるよ' }
 };
@@ -1600,6 +1601,7 @@ const careTypes = (tm, season, rn) => ['hungry', ...((season === 'fuyu' || (rn &
 const careNeeds = (day, ids, tm, season, rn) => {
   const types = careTypes(tm, season, rn), out = [];
   ids.filter(id => PALS[id] && !NO_PARTY.has(id) && id !== avatarId()).map(id => ({ id, h: mix32(hashOf(id + ':' + day)) })).filter(x => x.h % 100 < 30).sort((a, b) => a.h - b.h).slice(0, 2).forEach(x => out.push({ id: x.id, type: types[(x.h >>> 7) % types.length] }));
+  if (out.length > 1 && out[0].type === 'hungry' && out[1].type === 'hungry') { const alt = types.filter(t => t !== 'hungry'); if (alt.length) out[1].type = alt[0]; else out.pop(); }   // 同じ 画面に おにぎりは 1つまで
   return out;
 };
 const careActive = () => careNeeds(LAYER_DAY, friends.filter(f => !f.passer).map(f => f.id), curTime, SEASON, rainy).filter(n => own.careDay[n.id] !== LAYER_DAY);
@@ -1613,7 +1615,7 @@ function paintCare() {
   act.forEach(n => {
     const k = n.id + ':' + n.type; if (have.has(k)) return;
     const b = document.createElement('button'); b.type = 'button'; b.className = 'care-ico'; b.dataset.id = n.id; b.dataset.type = n.type;
-    b.setAttribute('aria-label', careBtnLabel(n.id, n)); const s = document.createElement('span'); s.setAttribute('aria-hidden', 'true'); s.textContent = CARE[n.type].ico; b.append(s);
+    b.setAttribute('aria-label', careBtnLabel(n.id, n)); const s = document.createElement('span'); s.setAttribute('aria-hidden', 'true'); if (CARE[n.type].svg) { s.innerHTML = CARE[n.type].svg; s.style.padding = '4px'; } else s.textContent = CARE[n.type].ico; b.append(s);
     box.append(b); addBtnKey(b, () => careTo(byId(n.id)));
   });
   positionCare();
@@ -2872,7 +2874,7 @@ function paintOmise() {
     for (const it of shelf.items) {
       const st = shopState(shelf, it), b = document.createElement('button'), ic = document.createElement('i'), nm = document.createElement('span'), sm = document.createElement('small');
       b.type = 'button'; b.className = 'omise-it'; b.dataset.st = st; b.dataset.shelf = shelf.id; b.dataset.key = String(shelf.kind === 'wear' ? it.k : it.n); b.setAttribute('aria-pressed', String(st === 'on'));
-      if (shelf.kind === 'wear') ic.style.background = it.c; else ic.textContent = it.c; ic.setAttribute('aria-hidden', 'true');
+      if (shelf.kind === 'wear') ic.style.background = it.c; else if (it.c === '🍙') { ic.innerHTML = ONIGIRI_SVG; ic.style.padding = '3px'; } else ic.textContent = it.c; ic.setAttribute('aria-hidden', 'true');
       nm.textContent = S(it.ja, it.en); sm.textContent = shopLabel(shelf.kind, st);
       b.append(ic, nm, sm); b.setAttribute('aria-label', S(it.ja, it.en) + '。' + shopLabel(shelf.kind, st));
       row.append(b);
