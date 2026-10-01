@@ -38,12 +38,12 @@
   const banned = (c, a) => !!(COLORS[c] && ANIMALS[a] && ANIMALS[a][0] === 'momonga' && WHITE_NAMES.includes(COLORS[c][0]));
   const ITEM_LV = [0, 3, 6, 10];   // レベルが あがると 1つずつ ふえる（さがらない）
   // 本物の 絵（天の 納品・img/own/<いきもの>_<ポーズ>.png と _body_mask・_ear_mask）が 入った いきもの。検品に 通った ものだけ ここに 足す（ほかは 仮の まま）
-  const REAL_ART = ['koinu', 'kuma', 'penguin'], POSES = ['front', 'sit', 'joy'];
+  const REAL_ART = ['neko', 'usagi', 'koinu', 'kuma', 'penguin', 'alpaca', 'hiyoko', 'kawauso', 'kojika', 'panda'], POSES = ['front', 'sit', 'joy'];
   const isReal = a => !!(ANIMALS[a] && REAL_ART.includes(ANIMALS[a][0]));
-  // 検品で 直しが 出た ポーズは 直るまで「front」で 出す（くま joy：服マスクが うでの そでを とりこぼし＝灰色の すじが 見える。天に 直しを 依頼ずみ）
-  const POSE_HOLD = {kuma: ['joy']};
+  // 検品で 直しが 出た ポーズは 直るまで「front」で 出す（ねこ sit＝服の とりこぼし 7.4%／アルパカ sit・joy＝服マスクが 粗くて 綿に 色が まだらに のる／かわうそ joy＝服の 肩が 白く のこる。天に 直しを 依頼ずみ）
+  const POSE_HOLD = {neko: ['sit'], alpaca: ['sit', 'joy'], kawauso: ['joy']};
   const poseFor = (a, pose) => { const id = ANIMALS[a] && ANIMALS[a][0], p = POSES.includes(pose) ? pose : 'front'; return POSE_HOLD[id] && POSE_HOLD[id].includes(p) ? 'front' : p; };
-  const api = { PROVISIONAL: true, COLORS, ANIMALS, EARS, ITEMS, ITEM_LV, REAL_ART, POSES };
+  const api = { PROVISIONAL: true, COLORS, ANIMALS, EARS, ITEMS, ITEM_LV, REAL_ART, POSES, POSE_HOLD };
 
   const isInt = (x, lo, hi) => Number.isInteger(x) && x >= lo && x <= hi;
   const valid = o => !!o && typeof o === 'object' && isInt(o.c, 0, COLORS.length - 1) && isInt(o.a, 0, ANIMALS.length - 1) && isInt(o.ear, 0, 2) && isInt(o.item, 0, 3) && !!ANIMALS[o.a][3] && !banned(o.c, o.a);
