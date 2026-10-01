@@ -1160,7 +1160,7 @@ const PROPS = [
   { id: 'flower-l', x: 30, y: 388, w: 60, h: 44, svg: SVG.flowerbed, secret: 'flower' },   // 木の ねもと（木の 手前に 置く＝かくれない）
   { id: 'flower-r', x: 330, y: 388, w: 60, h: 44, svg: SVG.flowerbed, secret: 'flower' },
   { id: 'post', x: 284, y: 352, w: 34, h: 58, svg: SVG.post, dest: 'post', mark: '✉️', block: { rect: [270, 334, 298, 354] } },
-  { id: 'cafe', x: 300, y: 208, w: 84, h: 76, svg: SVG.cafe, dest: 'cafe', mark: '☕' },   // カフェ：右の おくの 丘（じゅんびちゅうの うしろ）。入口の まえは 地面の 上
+  { id: 'cafe', x: 84, y: 346, w: 68, h: 61, svg: SVG.cafe, dest: 'cafe', mark: '☕', block: { rect: [56, 338, 112, 348] } },   // カフェ：左の 地面（木の となり・ベンチの うえ）。山の上ではなく あるける ひろばに（10/1 マスター）
   { id: 'machi', x: 50, y: 238, w: 92, h: 84, svg: SVG.machi, dest: 'machi', mark: '🛍️' },   // まちかど（おみせ・びじゅつかん・おすすめの へや）：左の 丘の たてもの。ドアの まえは 池の わき
   { id: 'lot1', x: 308, y: 272, w: 88, h: 58, svg: SVG.lot1, dest: 'kouji1', mark: '🚧' },   // じゅんびちゅうは 右上の 地面の上（おへやの右・空に 浮かせない。10/1 マスター「ういてる」・総司令部）
   { id: 'well', x: 298, y: 526, w: 122, h: 80, svg: SVG.well, dest: 'ido', mark: '💧', block: { rect: [234, 452, 360, 528] } },
@@ -1175,7 +1175,7 @@ const DEST = {
   kouji1: { name: 'じゅんびちゅうの ばしょ', at: { x: 306, y: 314 }, kind: 'wait', line: 'ここは まだ じゅんびちゅう。ちかぢか あそべるよ。たのしみに まっててね', pan: .8 },
   ido: { name: 'いど', at: { x: 298, y: 540 }, kind: 'well', pan: .8 },
   post: { name: 'ポスト', at: { x: 284, y: 372 }, kind: 'post', pan: .4 },
-  cafe: { name: 'カフェ', at: { x: 266, y: 298 }, kind: 'go', url: () => new URL('cafe/', location.href).href, pan: .8, motif: () => { chord([523, 622, 784], .08, 'triangle'); } },
+  cafe: { name: 'カフェ', at: { x: 84, y: 372 }, kind: 'go', url: () => new URL('cafe/', location.href).href, pan: .8, motif: () => { chord([523, 622, 784], .08, 'triangle'); } },
   machi: { name: 'まちかど', at: { x: 46, y: 288 }, kind: 'machi', pan: -.8, motif: () => { chord([523, 659, 784], .08, 'triangle'); } },
   bijutsu: { name: 'びじゅつかん', at: { x: 46, y: 288 }, kind: 'go', url: () => new URL('bijutsukan/', location.href).href, pan: -.8, motif: () => { chord([587, 740, 880], .08, 'triangle'); } },
   osusume: { name: 'おすすめの へや', at: { x: 46, y: 288 }, kind: 'go', url: () => new URL('osusume/', location.href).href, pan: -.8, motif: () => { chord([659, 784, 988], .08, 'triangle'); } }
