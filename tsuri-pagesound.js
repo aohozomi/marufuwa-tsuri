@@ -19,8 +19,9 @@
 
   let ac = null, opts = null, btn = null, hintEl = null, bgmMine = false, bgmPrev = false, ambT = 0, log = null;
   const mkAc = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; };
+  const SFX_OFF = true;   // 10/2 マスター「効果音は 一旦 ぜんぶ 止める」：みじかい おと（かんきょうおんの カップなど）は 鳴らさない。BGM と「おとを けす」は そのまま
   function voice(hz, to, len, vol, at) {   // 三角波・ローパス 1100Hz・アタック 15ms
-    if (!soundOn() || !mkAc()) return;
+    if (SFX_OFF || !soundOn() || !mkAc()) return;
     try {
       const t = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
       f.type = 'lowpass'; f.frequency.value = 1100; o.type = 'triangle';

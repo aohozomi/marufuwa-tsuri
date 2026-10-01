@@ -89,6 +89,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
   </section>
   <div class="ctl">
     <button type="button" id="bl" aria-label="ひだりへ">◀ ひだり</button>
+    <button type="button" id="brot" hidden data-noruby>まわす</button>
     <button type="button" id="bd" data-noruby>おとす</button>
     <button type="button" id="br" aria-label="みぎへ">みぎ ▶</button>
   </div>
@@ -157,9 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   // ─── きろく（数字だけ・この たんまつだけ）───
-  let rec = { v: 1, hint: 0, best: -1, snd: !(document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches), mode: 1, play: 0, chain: 0, fly: 0, big: -1 };
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (typeof d.mute === 'boolean') rec.snd = !d.mute; rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.play = d.play === 1 ? 1 : d.play === 2 ? 2 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 1, hint: rec.hint, best: rec.best, mute: !rec.snd, mode: rec.mode, play: rec.play, chain: rec.chain, fly: rec.fly, big: rec.big })); } catch (e) {} };
+  let rec = { v: 2, hint: 0, best: -1, snd: !(document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches), mode: 1, play: 3, chain: 0, fly: 0, big: -1 };
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (typeof d.mute === 'boolean') rec.snd = !d.mute; rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.play = d.v !== 2 ? 3 : d.play === 1 ? 1 : d.play === 2 ? 2 : d.play === 3 ? 3 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 2, hint: rec.hint, best: rec.best, mute: !rec.snd, mode: rec.mode, play: rec.play, chain: rec.chain, fly: rec.fly, big: rec.big })); } catch (e) {} };
 
   // ─── 乱数（?seed=数字 で ならべを そろえられる）───
   const dayKey = () => { const d = new Date(); return d.getFullYear() * 400 + (d.getMonth() + 1) * 32 + d.getDate(); };
@@ -173,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── かお（まるふわの かおの まる）：1ふで の えがお・ほっぺ・ひとみ ───
   function face(c, x, y, r, l, a, scale) {
     c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
-    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = COLORS[l]; c.fill();
+    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = (ringOver || COLORS[l]); c.fill();
     c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
     c.beginPath(); c.arc(-r * .3, -r * .38, r * .22, Math.PI * 1.1, Math.PI * 1.6); c.lineWidth = Math.max(1.5, r * .08); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineCap = 'round'; c.stroke();
     c.fillStyle = '#402a30'; const ex = r * .3, ey = -r * .02, er = Math.max(1.6, r * .09);
@@ -185,7 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
     c.restore();
   }
   // まるふわ世界の まるい もの（かりの え：コードで かく。ほんものの えが とどいたら さしかえる）。まるい 体の なかに しろい 皿と、ものの かたち
-  function moon(c, r) {   // さいごの まる＝おつきさま（まんまるの おつきさまに えがお）
+  let ringOver = null;   // つみき：耳の 4いろを わの いろに つかう
+  function moon(c, r) {
+    if (ringOver) { c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = ringOver; c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke(); r *= .8; }   // さいごの まる＝おつきさま（まんまるの おつきさまに えがお）
     c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = '#fff1b8'; c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
     c.fillStyle = '#f0d98a'; [[-.35, -.4, .16], [.4, -.25, .12], [.12, .5, .14], [-.5, .25, .1]].forEach(([dx, dy, k]) => { c.beginPath(); c.arc(dx * r, dy * r, k * r, 0, 7); c.fill(); });
     c.fillStyle = '#402a30'; c.beginPath(); c.arc(-r * .26, -r * .02, r * .09, 0, 7); c.arc(r * .26, -r * .02, r * .09, 0, 7); c.fill();
@@ -194,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function item(c, x, y, r, l, a, scale) {
     c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
-    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = COLORS[l]; c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
+    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = (ringOver || COLORS[l]); c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
     c.beginPath(); c.arc(0, 0, r * .74, 0, Math.PI * 2); c.fillStyle = 'rgba(255,253,247,.92)'; c.fill();
     if (l === 6) { c.restore(); c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale); moon(c, r); c.restore(); return; }
     c.scale(r / 50, r / 50); c.lineWidth = 3; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = '#5a3a2e';
@@ -220,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fishArt = id => { if (!fishImgs[id]) { const im = new Image(); im.onload = () => { if (typeof drawZukan === 'function') { drawZukan(); drawBest(); } }; im.src = '../img/fish/' + String(id).padStart(2, '0') + '.webp'; fishImgs[id] = im; } return fishImgs[id]; };
   function fish(c, x, y, r, l, a, scale) {
     c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
-    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = COLORS[l]; c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
+    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = (ringOver || COLORS[l]); c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
     c.beginPath(); c.arc(0, 0, r * .78, 0, Math.PI * 2); c.fillStyle = 'rgba(255,253,247,.94)'; c.fill();
     const im = fishArt(fishId(l)); if (im.complete && im.naturalWidth) { const k = Math.min(r * 1.3 / im.naturalWidth, r * 1.3 / im.naturalHeight); c.drawImage(im, -im.naturalWidth * k / 2, -im.naturalHeight * k / 2, im.naturalWidth * k, im.naturalHeight * k); }
     c.restore();
@@ -238,8 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ずかん（ちいさい じゅんばん）
   const zk = $('zukan');
   function drawZukan() {
-    zk.replaceChildren(); const n = rec.play === 1 ? 5 : 7;
-    const wrap = (l, px) => { const w = document.createElement('span'); w.style.cssText = 'position:relative;display:inline-block'; w.append(miniCanvas(l, px)); if (rec.fly & (1 << l)) { const m = document.createElement('s'); m.textContent = '☁'; m.setAttribute('aria-hidden', 'true'); m.style.cssText = 'position:absolute;right:-5px;top:-9px;font-size:.8rem;text-decoration:none;color:#3d7fa0'; w.append(m); } return w; };
+    zk.replaceChildren(); const n = rec.play === 1 ? 5 : rec.play === 3 ? 4 : 7;
+    const wrap = (l0, px) => { const l = rec.play === 3 ? [0, 2, 4, 6][l0] : l0; const w = document.createElement('span'); w.style.cssText = 'position:relative;display:inline-block'; w.append(miniCanvas(l, px)); if (rec.fly & (1 << l)) { const m = document.createElement('s'); m.textContent = '☁'; m.setAttribute('aria-hidden', 'true'); m.style.cssText = 'position:absolute;right:-5px;top:-9px;font-size:.8rem;text-decoration:none;color:#3d7fa0'; w.append(m); } return w; };
     for (let l = 0; l < n; l++) { zk.append(wrap(l, rec.play === 1 ? 22 : 14 + l * 3)); if (rec.play !== 1 && l < n - 1) { const i = document.createElement('i'); i.textContent = '›'; zk.append(i); } }
     if (rec.fly & ((1 << n) - 1)) { const g = document.createElement('i'); g.className = 'lg'; g.textContent = L('☁ ＝ またね した 子（また あえるよ）', '☁ = friends that floated away (you will meet again)'); zk.append(g); }
   }
@@ -268,12 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const mkAc = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; };
   function voice(hz, to, len, vol, at) {   // 三角波・ローパス 1100Hz・アタック 15ms
     const t = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
-    f.type = 'lowpass'; f.frequency.value = 1100; o.type = 'triangle';
+    f.type = 'lowpass'; f.frequency.value = 1100; o.type = 'sine';
     o.frequency.setValueAtTime(hz, t); if (to && to !== hz) o.frequency.linearRampToValueAtTime(to, t + len * .6);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .015); g.gain.exponentialRampToValueAtTime(.0008, t + len);
     o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + len + .05);
   }
-  function tone(l, kind) {   // kind：drop ぽとん／merge ぷくっ／poof ふわっ（きえた・またね）／perfect ぴったり！／click ボタン
+  const SFX_OFF = true;   // 10/2 マスター「効果音は 一旦 ぜんぶ 止める」：こうかおん（ぽとん・ぷくっ・ふわっ・ぴったり・ボタン）は 鳴らさない。BGM と「おとを けす」は そのまま
+  function tone(l, kind) {
+    if (SFX_OFF) return;   // kind：drop ぽとん／merge ぷくっ／poof ふわっ（きえた・またね）／perfect ぴったり！／click ボタン
     if (!rec.snd) return;
     try {
       if (!mkAc()) return;
@@ -299,6 +304,121 @@ document.addEventListener('DOMContentLoaded', () => {
     cheerImg.src = '../img/friend-' + FRIENDS[(n + stats.drops) % FRIENDS.length] + '-s.webp'; cheerTx.textContent = L(n + 'れんさ！ ふわっ', n + ' in a row! Poof!'); cheerEl.hidden = false;
     clearTimeout(cheerT); cheerT = setTimeout(() => { cheerEl.hidden = true; }, 2400); say(L('なかまが よろこんでいるよ（' + n + 'れんさ）', 'A friend is cheering (' + n + ' in a row)'));
   }
+  // ─── つみき（テトリス＋ぷよぷよ＋スイカ）：ふたつ組が おちてくる・まわせる・同じ いろ×おおきさ が ふれると おおきく・よこ1列が そろうと「おさんぽ」・つづけて「なかよし」・ちがう いろは 3びょうで なじむ ───
+  const TC = 7, TR = 8, TW = W / TC, TH = 44, TY0 = H - TR * TH, FALL = .85, EARC = ['#8fd3f4', '#9fe0a6', '#ffc27d', '#c9a6f2'], SIZE_L = [0, 2, 4, 6], OFFS = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+  const ts = { g: [], cur: null, next: null, t: 0, wait: 0, spawnIn: .3, resolving: false, ghosts: [], chain: 0, want: 3, dragged: false, blend: new Map(), uid: 0, st: { pieces: 0, merges: 0, lines: 0, blends: 0, walks: 0, maxChain: 0, rounds: 0 } };
+  const tsCell = (c, s) => ({ id: ++ts.uid, c, s, dy: 0, sq: 0, pop: 0 });
+  const tsPair = () => ({ a: { c: Math.floor(rnd() * 4), s: rnd() < .15 ? 1 : 0 }, b: { c: Math.floor(rnd() * 4), s: rnd() < .15 ? 1 : 0 } });
+  function tsReset() {
+    reorder(); ts.g = Array.from({ length: TR }, () => Array(TC).fill(null)); ts.cur = null; ts.ghosts = []; ts.blend = new Map(); ts.chain = 0; ts.wait = 0; ts.spawnIn = .3; ts.resolving = false; ts.next = tsPair(); ts.want = 3; cheerEl.hidden = true;
+  }
+  const tsEmpty = (r, c) => r >= 0 && r < TR && c >= 0 && c < TC && !ts.g[r][c];
+  const tsCellsOf = p => [[p.r, p.c, p.a], [p.r + OFFS[p.o][0], p.c + OFFS[p.o][1], p.b]];
+  const tsFits = p => tsCellsOf(p).every(([r, c]) => tsEmpty(r, c));
+  function tsSpawn() {
+    const n = ts.next || tsPair(), p = { r: 1, c: 3, o: 0, a: n.a, b: n.b, age: 0, f: 0 };
+    if (!tsFits(p)) { tsWalk(); return false; }   // てんじょうに とどいた：いちばん 下の 1列が じぶんから おさんぽ（ゲームオーバーは ない）
+    ts.cur = p; ts.next = tsPair(); ts.want = p.c; return true;
+  }
+  function tsGhost(cell, r, c) { ts.ghosts.push({ x: (c + .5) * TW, y: TY0 + (r + .5) * TH, c: cell.c, s: cell.s, t: 0 }); rec.fly |= (1 << SIZE_L[cell.s]); }
+  function tsWalk() {
+    for (let c = 0; c < TC; c++) { const cell = ts.g[TR - 1][c]; if (cell) tsGhost(cell, TR - 1, c); }
+    for (let r = TR - 1; r > 0; r--) for (let c = 0; c < TC; c++) { const cell = ts.g[r - 1][c]; ts.g[r][c] = cell; if (cell) cell.dy += TH; }
+    ts.g[0] = Array(TC).fill(null); ts.st.walks++; save(); tone(0, 'poof');
+    say(L('いっぱいに なったので、いちばん したの 列が おさんぽに いったよ。「またね」', 'It filled up, so the bottom row went for a walk. “See you!”'));
+    ts.resolving = true; ts.wait = .5;
+  }
+  function tsMove(dc) { const p = ts.cur; if (!p || ts.resolving) return false; const q = { ...p, c: p.c + dc }; if (!tsFits(q)) return false; ts.cur = q; ts.want = q.c; return true; }
+  function tsRotate() {
+    const p = ts.cur; if (!p || ts.resolving) return false; const o = (p.o + 1) % 4;
+    for (const [dr, dc] of [[0, 0], [0, -1], [0, 1], [-1, 0], [0, -2], [0, 2]]) { const q = { ...p, o, r: p.r + dr, c: p.c + dc }; if (tsFits(q)) { ts.cur = q; ts.want = q.c; tone(0, 'click'); return true; } }
+    return false;
+  }
+  function tsLock() {
+    const p = ts.cur; if (!p) return; ts.cur = null;
+    tsCellsOf(p).forEach(([r, c, x]) => { const cell = tsCell(x.c, x.s); cell.sq = 1; ts.g[r][c] = cell; });
+    ts.st.pieces++; ts.chain = 0; ts.resolving = true; ts.wait = .28; tone(0, 'drop');
+  }
+  const tsCanDrop = () => !!ts.cur && !ts.resolving && ts.cur.age >= .45;   // 450ms たって「かつ」まえの 子が おちきる（かたづく）まで
+  function tsHardDrop() { const p = ts.cur; if (!tsCanDrop()) return false; while (tsFits({ ...p, r: p.r + 1 })) p.r++; tsLock(); return true; }
+  function tsCompact() {
+    let moved = false;
+    for (let c = 0; c < TC; c++) { let w = TR - 1; for (let r = TR - 1; r >= 0; r--) { const cell = ts.g[r][c]; if (!cell) continue; if (r !== w) { ts.g[w][c] = cell; ts.g[r][c] = null; cell.dy += (w - r) * TH; moved = true; } w--; } }
+    return moved;
+  }
+  function tsMerge() {   // 同じ いろ・同じ おおきさ の となりどうし → ひとつ おおきく（おつきさま どうしは ふわっと きえる）
+    const used = new Set(); let n = 0;
+    for (let r = TR - 1; r >= 0; r--) for (let c = 0; c < TC; c++) {
+      const a = ts.g[r][c]; if (!a || used.has(a.id)) continue;
+      for (const [dr, dc] of [[0, 1], [-1, 0], [0, -1], [1, 0]]) {
+        const rr = r + dr, cc = c + dc; if (rr < 0 || rr >= TR || cc < 0 || cc >= TC) continue; const b = ts.g[rr][cc];
+        if (b && !used.has(b.id) && b.c === a.c && b.s === a.s) { used.add(a.id); used.add(b.id); tsJoin(r, c, rr, cc, a, b, a.c); n++; break; }
+      }
+    }
+    return n;
+  }
+  function tsJoin(r1, c1, r2, c2, a, b, color) {
+    const lower = r1 > r2 || (r1 === r2 && c1 <= c2) ? [r1, c1] : [r2, c2], other = lower[0] === r1 && lower[1] === c1 ? [r2, c2] : [r1, c1];
+    if (a.s >= 3) { tsGhost(a, r1, c1); tsGhost(b, r2, c2); ts.g[r1][c1] = null; ts.g[r2][c2] = null; tone(6, 'merge'); }
+    else { const m = tsCell(color, a.s + 1); m.pop = 1; ts.g[lower[0]][lower[1]] = m; ts.g[other[0]][other[1]] = null; tone(SIZE_L[m.s], 'merge'); }
+    ts.st.merges++; watchSay(SIZE_L[Math.min(3, a.s + 1)]);
+  }
+  function tsLines() {   // よこ 7こ ぜんぶ そろった 列が おさんぽ
+    let n = 0;
+    for (let r = TR - 1; r >= 0; r--) if (ts.g[r].every(Boolean)) { for (let c = 0; c < TC; c++) { tsGhost(ts.g[r][c], r, c); ts.g[r][c] = null; } n++; }
+    if (n) { ts.st.lines += n; save(); tone(0, 'poof'); say(L('よこ 1列が そろって、おさんぽに いったよ。「またね」', 'A full row went for a walk. “See you!”')); }
+    return n;
+  }
+  function tsBlend(dt) {   // ちがう いろの 同じ おおきさが 3びょう ふれると なじんで ひとつ おおきく
+    const seen = new Set(); let done = false;
+    for (let r = 0; r < TR && !done; r++) for (let c = 0; c < TC && !done; c++) for (const [dr, dc] of [[0, 1], [1, 0]]) {
+      const a = ts.g[r][c], rr = r + dr, cc = c + dc; if (!a || rr >= TR || cc >= TC) continue; const b = ts.g[rr][cc];
+      if (!b || a.c === b.c || a.s !== b.s) continue;
+      const k = a.id + '|' + b.id; seen.add(k); const t = (ts.blend.get(k) || 0) + dt; ts.blend.set(k, t);
+      if (t >= 3) { tsJoin(r, c, rr, cc, a, b, (a.c + b.c) % 4); ts.st.blends++; ts.blend.delete(k); done = true; break; }
+    }
+    for (const k of [...ts.blend.keys()]) if (!seen.has(k)) ts.blend.delete(k);
+    return done;
+  }
+  function tsResolveStage() {   // 1だんずつ（みて わかる）：つめる→あわさる→列→つづき
+    if (tsCompact()) { ts.wait = .24; return; }
+    if (tsMerge()) { ts.chain++; ts.st.rounds++; ts.wait = .45; return; }
+    if (tsLines()) { ts.chain++; ts.st.rounds++; ts.wait = .6; return; }
+    // おちついた
+    ts.resolving = false; if (ts.chain > ts.st.maxChain) ts.st.maxChain = ts.chain;
+    if (ts.chain >= 2) { cheerImg.src = '../img/friend-' + FRIENDS[(ts.chain + ts.st.pieces) % FRIENDS.length] + '-s.webp'; cheerTx.textContent = L('なかよし ' + ts.chain + '！', 'Best friends ×' + ts.chain + '!'); cheerEl.hidden = false; clearTimeout(cheerT); cheerT = setTimeout(() => { cheerEl.hidden = true; }, 2400); say(L('なかまが よろこんでいるよ（なかよし ' + ts.chain + '）', 'A friend is cheering (best friends ×' + ts.chain + ')')); if (ts.chain > rec.chain) { rec.chain = Math.min(99, ts.chain); save(); } }
+    ts.spawnIn = .3;
+  }
+  function tsStep(dt) {
+    ts.t += dt; stats.t += dt;
+    for (const g of ts.g) for (const cell of g) if (cell) { cell.dy *= Math.pow(.0009, dt); if (Math.abs(cell.dy) < .3) cell.dy = 0; if (cell.sq > 0) cell.sq = Math.max(0, cell.sq - dt * 3); if (cell.pop > 0) cell.pop = Math.max(0, cell.pop - dt * 2.6); }
+    ts.ghosts = ts.ghosts.filter(g => (g.t += dt) < 1.4);
+    if (ts.resolving) { ts.wait -= dt; if (ts.wait <= 0) tsResolveStage(); return; }
+    if (!ts.cur) { ts.spawnIn -= dt; if (ts.spawnIn <= 0) tsSpawn(); if (!ts.resolving && tsBlend(dt)) { ts.resolving = true; ts.wait = .3; } return; }
+    const p = ts.cur; p.age += dt; p.f += dt;
+    // よこいどう：ゆびで きめた れつへ 1こずつ
+    if (p.c !== ts.want && p.f >= 0 && (p.mv = (p.mv || 0) + dt) >= .07) { p.mv = 0; tsMove(ts.want > p.c ? 1 : -1); }
+    if (p.f >= FALL) { p.f = 0; if (tsFits({ ...p, r: p.r + 1 })) p.r++; else tsLock(); }
+    if (tsBlend(dt)) { ts.resolving = true; ts.wait = .3; }
+  }
+  function tsDraw() {
+    const cs = (cell, x, y, sc) => { if (!cell) return; ringOver = EARC[cell.c]; const rad = TW * (.38 + .035 * cell.s); piece(ctx, x, y, rad, SIZE_L[cell.s], 1, sc || 1); ringOver = null; };
+    ctx.strokeStyle = 'rgba(90,58,34,.35)'; ctx.setLineDash([4, 6]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(4, TY0); ctx.lineTo(W - 4, TY0); ctx.stroke(); ctx.setLineDash([]);
+    for (let r = 0; r < TR; r++) for (let c = 0; c < TC; c++) { const cell = ts.g[r][c]; if (cell) { const sq = Math.sin(cell.sq * Math.PI) * .1, pop = Math.sin(Math.min(1, cell.pop) * Math.PI / 1.4 + .2) * .2 * (cell.pop > 0 ? 1 : 0); cs(cell, (c + .5) * TW, TY0 + (r + .5) * TH - cell.dy, 1 + pop - sq * .5 * (cell.sq > 0 ? 1 : 0)); } }
+    for (const g of ts.ghosts) { const k = g.t / 1.4; ctx.globalAlpha = Math.max(0, 1 - k); ringOver = EARC[g.c]; piece(ctx, g.x + Math.sin(g.t * 3) * 6, g.y - g.t * 46, TW * (.38 + .035 * g.s), SIZE_L[g.s], Math.max(0, 1 - k)); ringOver = null; ctx.globalAlpha = 1; }
+    const p = ts.cur;
+    if (p) {
+      const fy = reduced() ? 0 : Math.min(1, p.f / FALL) * TH * (tsFits({ ...p, r: p.r + 1 }) ? 1 : 0);
+      ctx.fillStyle = 'rgba(90,58,34,.08)'; ctx.fillRect(p.c * TW, TY0, TW, H - TY0);   // いま いる れつ（ほんのり）
+      const cells = tsCellsOf(p); cells.forEach(([r, c, x]) => cs(tsCell0(x), (c + .5) * TW, TY0 + (r + .5) * TH + fy));
+      aimX = (p.c + .5) * TW;
+    } else aimX = (ts.want + .5) * TW;
+    // つぎの ふたつ組（みぎうえ・ちいさく）
+    if (ts.next) { const nx = W - 26, ny = 20; ringOver = EARC[ts.next.a.c]; piece(ctx, nx, ny + 12, 9 + ts.next.a.s * 1.5, SIZE_L[ts.next.a.s], 1); ringOver = EARC[ts.next.b.c]; piece(ctx, nx, ny - 8, 9 + ts.next.b.s * 1.5, SIZE_L[ts.next.b.s], 1); ringOver = null; }
+  }
+  const tsCell0 = x => ({ c: x.c, s: x.s });
+  function tsBotStep(mode) { if (tsCanDrop()) { const col = mode === 'stack' ? 3 : Math.floor(rnd() * TC); ts.want = col; for (let i = 0; i < 8 && ts.cur && ts.cur.c !== col; i++) tsMove(col > ts.cur.c ? 1 : -1); if (rnd() < .5) tsRotate(); tsHardDrop(); } }
+
   // ─── ぶつり：まるどうしの かんたんな しょうとつ ───
   function step(dt) {
     stats.t += dt;
@@ -398,6 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dpr = Math.min(3, window.devicePixelRatio || 1), cw = cv.clientWidth || 300;
     const px = Math.round(cw * dpr); if (cv.width !== px) { cv.width = px; cv.height = Math.round(px * H / W); }
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H); backdrop(); basket();
+    if (rec.play === 3) { tsDraw(); dropperDraw(); return; }
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
     if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 52); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 46, rOf(nextL), nextL, 1); }
     dropperDraw();
@@ -415,16 +536,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── そうさ ───
   const toX = e => { const r = cv.getBoundingClientRect(); return (e.clientX - r.left) / r.width * W; };
   let down = false;
-  cv.addEventListener('pointerdown', e => { down = true; try { cv.setPointerCapture(e.pointerId); } catch (x) {} setAim(toX(e)); cv.focus({ preventScroll: true }); if (e.pointerType === 'touch') say(L('ゆびを はなすと おちるよ。', 'Let go to drop.')); });
-  cv.addEventListener('pointermove', e => { if (down || e.pointerType === 'mouse') setAim(toX(e)); });
-  cv.addEventListener('pointerup', e => { if (!down) return; down = false; setAim(toX(e)); dropBall(); });
+  cv.addEventListener('pointerdown', e => { if (rec.play === 3) { down = true; ts.dragged = false; try { cv.setPointerCapture(e.pointerId); } catch (x) {} ts.want = Math.max(0, Math.min(TC - 1, Math.floor(toX(e) / TW))); cv.focus({ preventScroll: true }); return; } down = true; try { cv.setPointerCapture(e.pointerId); } catch (x) {} setAim(toX(e)); cv.focus({ preventScroll: true }); if (e.pointerType === 'touch') say(L('ゆびを はなすと おちるよ。', 'Let go to drop.')); });
+  cv.addEventListener('pointermove', e => { if (rec.play === 3) { if (down) { const c = Math.max(0, Math.min(TC - 1, Math.floor(toX(e) / TW))); if (c !== ts.want) { ts.want = c; ts.dragged = true; } } return; } if (down || e.pointerType === 'mouse') setAim(toX(e)); });
+  cv.addEventListener('pointerup', e => { if (!down) return; down = false; if (rec.play === 3) { if (ts.dragged) tsHardDrop(); else tsRotate(); ts.dragged = false; return; } setAim(toX(e)); dropBall(); });
   cv.addEventListener('pointercancel', () => { down = false; });
-  const hold = (btn, fn) => { let t = 0; const stop = () => { clearInterval(t); t = 0; }; btn.addEventListener('pointerdown', e => { if (e.cancelable) e.preventDefault(); fn(); stop(); t = setInterval(fn, 60); }); ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(n => btn.addEventListener(n, stop)); btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); };
-  hold($('bl'), () => setAim(aimX - 5)); hold($('br'), () => setAim(aimX + 5));
-  $('bd').addEventListener('click', () => dropBall());
+  const hold = (btn, fn) => { let t = 0; const stop = () => { clearInterval(t); t = 0; }; btn.addEventListener('pointerdown', e => { if (e.cancelable) e.preventDefault(); fn(); stop(); t = setInterval(fn, rec.play === 3 ? 160 : 60); }); ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(n => btn.addEventListener(n, stop)); btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); };
+  hold($('bl'), () => { if (rec.play === 3) tsMove(-1); else setAim(aimX - 5); }); hold($('br'), () => { if (rec.play === 3) tsMove(1); else setAim(aimX + 5); });
+  $('brot').addEventListener('click', () => tsRotate());
+  $('bd').addEventListener('click', () => { if (rec.play === 3) tsHardDrop(); else dropBall(); });
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b && ['rst', 'play', 'mode', 'next'].includes(b.id)) tone(0, 'click'); });
   document.addEventListener('keydown', e => {
     const tg = e.target; if (tg && (tg.tagName === 'BUTTON' || tg.tagName === 'A')) return;
+    if (rec.play === 3) { if (e.key === 'ArrowLeft') { e.preventDefault(); tsMove(-1); } else if (e.key === 'ArrowRight') { e.preventDefault(); tsMove(1); } else if (e.key === 'ArrowUp' || e.key === 'z' || e.key === 'x') { e.preventDefault(); tsRotate(); } else if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); tsHardDrop(); } return; }
     if (rec.play === 2) { if (/^[1-4]$/.test(e.key)) { e.preventDefault(); floodPress(Number(e.key) - 1); } return; }
     if (e.key === 'ArrowLeft') { e.preventDefault(); setAim(aimX - 6); } else if (e.key === 'ArrowRight') { e.preventDefault(); setAim(aimX + 6); }
     else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); dropBall(); }
@@ -435,33 +558,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (rec.snd) { mkAc(); }
   }
   $('mute').addEventListener('click', () => { applySound(!rec.snd); say(L(rec.snd ? 'おとを ならすよ。' : 'おとを けしたよ。', rec.snd ? 'Sound is on.' : 'Sound is off.')); if (rec.snd) tone(2, 'merge'); });
-  function reset() { buildLadder(); if (rec.play !== 2) say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
+  function reset() { if (rec.play === 3) { tsReset(); say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); return; } buildLadder(); if (rec.play !== 2) say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
   const MODE_T = [['かたち：かお', 'Shapes: faces'], ['かたち：もの', 'Shapes: things'], ['かたち：さかな', 'Shapes: fish']];
   function drawMode() { const b = $('mode'); b.setAttribute('aria-pressed', String(rec.mode !== 0)); b.textContent = L(MODE_T[rec.mode][0], MODE_T[rec.mode][1]); }
   $('mode').addEventListener('click', () => { rec.mode = rec.mode === 1 ? 2 : rec.mode === 2 ? 0 : 1; if (rec.mode === 2) buildLadder(); save(); drawMode(); drawZukan(); drawBest(); say(L(rec.mode === 1 ? 'まるふわの せかいの ものに かえたよ。' : rec.mode === 2 ? 'つった さかなに かえたよ。' : 'まるい かおに かえたよ。', rec.mode === 1 ? 'Switched to things from Marufuwa’s world.' : rec.mode === 2 ? 'Switched to the fish you caught.' : 'Switched to round faces.')); });
   const LEADS = [
     ['うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、さいごは まんまるの おつきさま。のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。おちてくる じゅんばんは、きょうは みんな おなじ。', 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join until you make a full moon, at your own pace — no time limit, no game over. Today everyone gets the same order of pieces.'],
     ['おなじ ものが 3つ いじょう くっつくと、ふわっと きえるよ。きえると うえの まるが おちて、つづけて きえる ことも。じかんぎれも ゲームオーバーも ないよ。', 'When 3 or more of the same piece touch, they softly vanish. The ones above drop down and may vanish too. No time limit, no game over.'],
-    ['ひだりうえの まるふわから、えらんだ いろが ひろがるよ。ぜんぶ おなじ いろに なったら ぴったり！ てかずも じかんも かぞえないよ。ばんは きょうの いろ。', 'Colors spread from the top-left Marufuwa as you pick. When everything is one color, it is a perfect fit! No move count and no timer. The board is today’s colors.']
-  ], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread']];
+    ['ひだりうえの まるふわから、えらんだ いろが ひろがるよ。ぜんぶ おなじ いろに なったら ぴったり！ てかずも じかんも かぞえないよ。ばんは きょうの いろ。', 'Colors spread from the top-left Marufuwa as you pick. When everything is one color, it is a perfect fit! No move count and no timer. The board is today’s colors.'],
+    ['ふたつ組の まるい子が おちてくるよ。左右に うごかして、まわして、おいてね。同じ いろ・同じ おおきさが ふれると おおきく、よこ 1列が そろうと おさんぽに いって「またね」。つづけて きえたら「なかよし」。ちがう いろも 3びょう ふれると なじむよ。じかんぎれも ゲームオーバーも ないよ。きょうの つみきは みんな おなじ。', 'Round pairs fall down. Move them, rotate them, and set them. Same color and size merge into a bigger one; a full row goes for a walk (“See you!”), and when more vanish in a row, it is “Best friends”. Different colors blend after 3 seconds. No time limit, no game over. Today everyone gets the same order.']
+  ], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread'], ['あそびかた：つみき', 'How to play: Blocks']];
   function drawPlay() {
     const b = $('play'), pl = rec.play; b.setAttribute('aria-pressed', String(pl !== 0)); b.textContent = L(PLAYS[pl][0], PLAYS[pl][1]);
     document.querySelector('.lead').textContent = L(LEADS[pl][0], LEADS[pl][1]);
+    $('brot').hidden = pl !== 3; $('best-wrap').style.display = pl === 3 ? 'none' : '';
     const fl = pl === 2; document.querySelector('.field').parentElement; $('flood').hidden = !fl; document.querySelector('.hud').hidden = fl; document.querySelector('.ctl').hidden = fl; $('mode').hidden = fl; $('next').hidden = !fl;
     document.querySelectorAll('main > .field').forEach(f => { f.hidden = fl; });
     const host = fl ? $('flood').querySelector('.field') : document.querySelector('main > .field'); host.style.position = 'relative'; host.prepend(cheerEl); cheerEl.hidden = true;
     if (fl) floodStart(0);
   }
-  function freshPlay() { reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
-  $('play').addEventListener('click', () => { rec.play = (rec.play + 1) % 3; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); });
+  function freshPlay() { if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
+  $('play').addEventListener('click', () => { rec.play = (rec.play + 1) % 4; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); });
   $('rst').addEventListener('click', reset);
 
   // ─── うごかす（フレームごと・ひらいて いる ときだけ）───
   let acc = 0, last = 0;
-  function frame(ts) {
+  function frame(now) {
     if (rec.play === 2) { last = 0; requestAnimationFrame(frame); return; }
-    if (last) { acc += Math.min(.05, (ts - last) / 1000); while (acc >= 1 / 60) { step(1 / 60); acc -= 1 / 60; } }
-    last = ts; draw(); requestAnimationFrame(frame);
+    if (rec.play === 3) { if (last) { acc += Math.min(.05, (now - last) / 1000); while (acc >= 1 / 60) { tsStep(1 / 60); acc -= 1 / 60; } } last = now; draw(); requestAnimationFrame(frame); return; }
+    if (last) { acc += Math.min(.05, (now - last) / 1000); while (acc >= 1 / 60) { step(1 / 60); acc -= 1 / 60; } }
+    last = now; draw(); requestAnimationFrame(frame);
   }
   document.addEventListener('visibilitychange', () => { last = 0; });
   // ながおしで「もじの せんたく」「コールアウト」「メニュー」が 出ない（ばん・HUD・ボタン・みだし）。ノートの 文は えらべる まま
@@ -483,6 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // はじめて ひらいた ときだけ、🔇の よこに「ミュートボタンは こちら →」を 3びょう（てんめつなし・おさなくても きえる・2回めからは 出さない）
   if (!rec.hint) { const h = $('mutehint'); h.textContent = L('ミュートボタンは こちら →', 'Mute button is here →'); h.hidden = false; rec.hint = 1; save(); setTimeout(() => { h.hidden = true; }, 3000); }
   addEventListener('pointerdown', () => { if (rec.snd) mkAc(); }, { once: true });
+  if (rec.play === 3) tsReset();
   drawPlay(); drawBest(); drawSnd(); drawMode(); setAim(W / 2); requestAnimationFrame(frame);
   say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”'));
 
@@ -529,12 +656,16 @@ document.addEventListener('DOMContentLoaded', () => {
     step: n => { for (let i = 0; i < (n || 1); i++) step(1 / 60); },
     drop: x => { canDrop = true; return dropBall(x); },
     tryDrop: x => dropBall(x),
-    setPlay: v => { rec.play = v === 1 ? 1 : v === 2 ? 2 : 0; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); },
+    setPlay: v => { rec.play = v === 1 ? 1 : v === 2 ? 2 : v === 3 ? 3 : 0; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); },
     reseed: n => { rnd = mul(n); },
     flood: { state: () => ({ n: fl.n, solved: fl.solved, board: fl.b.map(r => r.join('')).join('/'), today: fl.today }), press: floodPress, next: () => floodStart(fl.n + 1), restart: () => floodStart(fl.n), start: n => floodStart(n || 0) },
     setMode: v => { rec.mode = v === 2 ? 2 : v === 0 ? 0 : 1; buildLadder(); save(); drawMode(); drawZukan(); drawBest(); },
     fishIds: () => [0, 1, 2, 3, 4, 5, 6].map(fishId), order: n => { reorder(); const o = []; for (let i = 0; i < n; i++) o.push(pickLevel()); reorder(); return o.join(''); },
     tone: (l, k) => tone(l, k),
+    ts: { st: () => ({ ...ts.st, chain: ts.chain, resolving: ts.resolving, cur: ts.cur ? { r: ts.cur.r, c: ts.cur.c, o: ts.cur.o, age: ts.cur.age } : null, next: !!ts.next, ghosts: ts.ghosts.length }), grid: () => ts.g.map(r => r.map(c => c ? c.c + '' + c.s : '.').join('')).join('/'),
+      setGrid: rows => { ts.g = rows.map(r => r.split('').map(ch => ch === '.' ? null : tsCell(Number(ch), 0))); }, setCell: (r, c, col, sz) => { ts.g[r][c] = col === null ? null : tsCell(col, sz); },
+      move: dc => tsMove(dc), rotate: () => tsRotate(), drop: () => tsHardDrop(), canDrop: () => tsCanDrop(), step: n => { for (let i = 0; i < (n || 1); i++) tsStep(1 / 60); }, spawn: () => tsSpawn(), setCur: (r, c, o, a, b) => { ts.cur = { r, c, o, a, b, age: 1, f: 0 }; ts.resolving = false; },
+      cell: (r, c) => { const x = ts.g[r] && ts.g[r][c]; return x ? { c: x.c, s: x.s } : null; }, kick: () => { ts.resolving = true; ts.wait = 0; }, reset: () => tsReset(), bot: (sec, mode) => { const n = Math.round(sec * 60); for (let i = 0; i < n; i++) { tsStep(1 / 60); if (i % 20 === 0) tsBotStep(mode); } return Object.assign({}, ts.st); }, TC, TR },
     noMerge: v => { dbgNoMerge = !!v; },
     crowd: n => { for (let i = 0; i < n; i++) addBall(50 + (i % 3) * 100, H - 50 - Math.floor(i / 3) * 62, [4, 5, 6][(i + Math.floor(i / 3)) % 3]); },
     dropLevel: (l, x) => { nextL = l; canDrop = true; return dropBall(x); },

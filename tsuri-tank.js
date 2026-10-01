@@ -730,8 +730,9 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   const panner = (c, pan) => { if (!c.createStereoPanner) return master; const p = c.createStereoPanner(); p.pan.value = clamp(pan || 0, -1, 1); p.connect(master); return p; };
   // むかしの ゲームき ふう（つりびよりと おなじ）：かくばった なみは 使わず、まるい さんかくの なみと、みじかい ざつおん だけ。
   // ぷつっと はじまって、すぱっと きれる。たかさは だんだんに うごく（ピロリッ、ヒュ〜）
+  const SFX_OFF = true;   // 10/2 マスター「効果音は 一旦 ぜんぶ 止める。ザーと かだけで いい」＝みじかい 効果音（tone／noise）は 鳴らさない。ながれる 水の おと（startAmbience）と BGM は のこす
   function tone(freq, len, o = {}) {
-    if (!sfx || !kindOk()) return;
+    if (SFX_OFF || !sfx || !kindOk()) return;
     const c = audio(); if (!c) return;
     const t = c.currentTime + (o.at || 0), osc = c.createOscillator(), g = c.createGain(), vol = o.vol === undefined ? .1 : o.vol;
     let type = 'triangle', rounded = !!o.type && o.type !== 'triangle' && o.type !== 'sine';   // かくばった なみは まるい なみに（さんかくの なみだけ）
@@ -745,7 +746,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     osc.connect(g); g.connect(panner(c, o.pan)); osc.start(t); osc.stop(t + end + .02);
   }
   function noise(len, o = {}) {   // みじかい ざっ（ぽちゃん・ぱくぱくの ざつおん）。ローパス 1500Hz で まるく
-    if (!sfx || !kindOk()) return;
+    if (SFX_OFF || !sfx || !kindOk()) return;
     const c = audio(); if (!c) return;
     if (!hissBuf) { hissBuf = c.createBuffer(1, c.sampleRate, c.sampleRate); const d = hissBuf.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
     const t = c.currentTime + (o.at || 0), src = c.createBufferSource(), lp = c.createBiquadFilter(), g = c.createGain(), A = GENTLE.attack, end = Math.max(A + .005, len);
