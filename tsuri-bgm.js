@@ -1,5 +1,8 @@
 /* まるふわ つりびより：BGM（しずかな・おだやかな 曲。外付け・ゲーム開発司令部）
-   ・曲は ファイルでは なく、ブラウザの 中で 音を つくる（サイン波が 中心。メロディは ドレミソラだけ／和音は ハ長調の 白い 鍵ばんだけ）。ダウンロードも 通信も ない。
+   ・（10/1 マスター直「フリー曲を 場面ごとに」）曲ファイル snd/bgm/（asa・hiru・yuu・yoru・heya・gaze の 6曲・ogg と m4a・−24 LUFS・出どころは snd/bgm/00_出どころ.txt）が よめる 時は ファイルを ながす：ひろば＝いまの じかんで asa／hiru／yuu／yoru・おへや＝heya・ながめる＝gaze。
+     ループは 2つの 要素で 3びょう クロスフェード（つなぎ目 なし）・じかんが かわる とき・場所が かわる ときも 3びょうの クロスフェード・大きさは なみ（−28）より 6dB 下の −34 LUFS（曲ごとに 測った ゲイン）。先どり（sw の CORE）には 入れない（BGM が ON の 時だけ 取る）。
+     ファイルが ない・よめない（オフライン・9びょう たっても 鳴らない・形式が 合わない）・音の 部品が 作れない 時は、下の ごうせいの 曲に もどる（くみたてる で えらんだ 時も ごうせい）。
+   ・ごうせいの 曲は ファイルでは なく、ブラウザの 中で 音を つくる（サイン波が 中心。メロディは ドレミソラだけ／和音は ハ長調の 白い 鍵ばんだけ）。ダウンロードも 通信も ない。
    ・「キンキン」しない きまり（9/30 夜・マスター「穏やかな、静かな、流れるような メロディー」「高い音は いらん。落ち着く音は 低い音。波の音と、流れるような メロディーだけで いい」）：曲は「ひくい 旋律 1本」と「下で 支える ひくい 和音」だけ／旋律は G3〜G4（ミディ55〜67）・和音は F2〜A3／星・あわ・ベル・オルゴール ふうの 短い 金属音は 無し／アタックは 旋律 0.18びょう以上・和音 1.1びょう以上／ピッチは しゃくらない／音色は やわらかい 三角波（ローパス 1000Hz・和音は 700Hz）／こだまの ローパスは 1600Hz。いちばん 高い 音は G5（79）を こえない（TOP_MIDI）。
    ・じかんたいの 曲（10/1 マスター「夜は夜の音楽、昼間は昼間、朝は朝。何種類か あればいい。そんな いっぱいじゃ なくても」）：
        a＝あさ／h＝ひる／y＝ゆうがた／n＝よる の 4つ。どれも 2つの 曲（a1 a2・h1 h2・y1 y2・n1 n2）が つづけて ながれ、おわると また はじめから（つなぎ目なし）。ぜんぶで 8曲。
@@ -20,6 +23,7 @@
 (() => {
   'use strict';
   if (window.TsuriBgm) return;
+  const SELF = (() => { try { return (document.currentScript && document.currentScript.src) || ''; } catch { return ''; } })();   // この ファイルの 住所（ひろば・おへや・本体 どこから 読んでも snd/bgm/ を おなじ 場所に さがす）
   const KEY = 'marufuwa-bgm-v1', MAIN = 'marufuwa-tsuri-v1';
   // 大きさ：3曲とも「K重みの LUFS」で −35 に そろえた（なおす 前は −32。本体の「なみ」は おなじ 測りかたで −28 なので、BGM は なみより 7 デシベル 小さい）。
   //   測りかた＝_qa の bgm_probe.js（OfflineAudioContext で 書き出し・K重みの 近似）。耳で 見る 時だけ ?bgmvol=0.5〜2 で 動かせる。
@@ -38,6 +42,14 @@
   //   ・いちばん 高い 音符は G5（ミディ 79）まで（いまの 曲は G4＝67 まで）。アタックは 0.03びょう より みじかく しない（曲の 音は 旋律 0.18〜／和音 1.1〜）。ピッチを しゃくる（bend）は しない。
   //   ・どの 声も ローパス 1800Hz より うえは ぼかす。ゆるい こだま（空気）の ローパスは 1600Hz。
   const TOP_MIDI = 79, MIN_ATTACK = .03, LP = 1800, AIR_LP = 1600;
+  // ── 曲ファイル ──
+  const FILE_DIR = (() => { try { return new URL('snd/bgm/', SELF || location.href).href; } catch { return 'snd/bgm/'; } })();
+  const FILE_OF = { a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru' };   // じかんたい → ファイル（おへやは heya・ながめるは gaze）
+  // 大きさ：ファイルの K重み LUFS（ffmpeg ebur128 で 測った）＝asa −23.4・hiru −23.9・yuu −23.7・yoru −23.7・heya −23.6・gaze −24.0。なみ（−28）より 6dB 下＝−34 に そろえる ゲイン（10^((−34−L)/20)）
+  const FILE_GAIN = { asa: .295, hiru: .313, yuu: .306, yoru: .306, heya: .302, gaze: .316 }, FILE_XF = 3, FILE_GIVEUP = 9000;
+  const FILE_EXT = (() => { try { const a = document.createElement('audio'); return !a.canPlayType ? '' : a.canPlayType('audio/ogg; codecs="vorbis"') ? 'ogg' : a.canPlayType('audio/mp4; codecs="mp4a.40.2"') ? 'm4a' : ''; } catch { return ''; } })();   // iPhone など ogg が よめない ときは m4a
+  const FILE_OFF = (() => { try { return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && new URLSearchParams(location.search).get('bgmfile') === '0'; } catch { return false; } })();   // 手もとの けんさ用：?bgmfile=0 で ごうせいだけ
+  const failed = new Set(), lastPos = {};   // よめなかった ファイル（このページを ひらいている あいだは ごうせいで）／ファイルごとの 止めた 場所（もどった とき つづきから）
 
   // ── 曲：1周ぶんの 音の 一覧 [はじまり(びょう), ながさ(びょう), 音（ミディ）, 音色] と、1周の ながさ ──
   // 曲は「ひくい 旋律 1本」と「下で 支える ひくい 和音」だけ（マスター直・9/30 夜「高い音は いらん。落ち着く音は 低い音。波の音と、流れるような メロディーだけで いい」）。
@@ -151,7 +163,7 @@
   // ── 状態 ──
   const readMix = () => { const v = (readJSON(KEY) || {}).mix; if (Array.isArray(v) && v.length === 3 && v.every(x => typeof x === 'number' && Number.isInteger(x))) { const [p, m, e] = v; if (p >= 1 && p <= 8 && m >= 0 && m <= 8 && (e === 0 || e === 1)) return [p, m, e]; } return null; };   // じぶんで くんだ BGM の ばんごう [ひくい おと 1〜8, うた 0〜8（0＝なし）, こだま 0/1]。なければ null（じかんで かわる）
   let mix = readMix();
-  let on = (readJSON(KEY) || {}).on === true, cur = null, air = null, ownCtx = null, wantGesture = false, ticker = 0;
+  let on = (readJSON(KEY) || {}).on === true, cur = null, air = null, ownCtx = null, wantGesture = false, gestureBlock = false, ticker = 0;
   const stack = [], subs = new Set();
   const notify = () => subs.forEach(f => { try { f(); } catch {} });
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(mix ? { v: 1, on, mix } : { v: 1, on })); } catch {} };
@@ -172,6 +184,7 @@
   const touched = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;   // ゆびで さわった あとか
   function getCtx(top) {
     if (!touched()) { wantGesture = true; return null; }   // さわる まえには、音の 部品を 作らない
+    if (gestureBlock) { wantGesture = true; return null; }   // ファイルが「さわって から」と 止められた：つぎに さわる まで まつ（くりかえし よばない）
     try {
       if (typeof top.o.ctx === 'function') return top.o.ctx() || null;
       if (ownCtx && ownCtx.state !== 'closed') return ownCtx;
@@ -195,6 +208,52 @@
       }
     };
     p.pump(); return p;
+  }
+  // ─── 曲ファイルの プレーヤー（ループは 2つの 要素で 3びょう クロスフェード。ばんごうと 形は ごうせいの プレーヤーと おなじ）───
+  function fileFor(name, key) {   // この ばしょ・じかんで ながす ファイルの なまえ（なければ ''＝ごうせい）
+    if (!FILE_EXT || FILE_OFF) return '';
+    const f = name === 'gaze' ? 'gaze' : name === 'tank' ? 'heya' : FILE_OF[key] || '';
+    return f && !failed.has(f) ? f : '';
+  }
+  const closeEl = o => { try { o.el.pause(); } catch {} try { o.el.removeAttribute('src'); o.el.load(); } catch {} try { o.src.disconnect(); } catch {} try { o.eg.disconnect(); } catch {} o.dead = true; };
+  const closeFile = p => { (p.els || []).forEach(closeEl); p.els = []; };
+  function rememberPos(p) { try { const o = p.els[p.els.length - 1]; if (o && o.el.currentTime > 1) lastPos[p.file] = { t: o.el.currentTime, at: Date.now() }; } catch {} }
+  function startFilePlayer(c, key, file) {
+    if (typeof c.createMediaElementSource !== 'function') throw new Error('no media element source');
+    const g = c.createGain(), now = c.currentTime, vol = (FILE_GAIN[file] || .3) * boost;
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(vol, now + FILE_XF); g.connect(c.destination);
+    const p = { key, sig: 'file:' + file, file, ctx: c, gain: g, startPart: 0, ended: false, made: 0, els: [], looping: false, heard: false, born: Date.now(), vol };
+    const abandon = why => { if (p.ended) return; p.ended = true; closeFile(p); try { g.disconnect(); } catch {} if (cur === p) cur = null; if (why === 'error' || why === 'slow') failed.add(file); if (why === 'gesture') { gestureBlock = true; wantGesture = true; return; } refresh(); };   // 'gesture'＝ゆびで さわる まで 止められた：よめない とは しない・つぎに さわった 時に もういちど（すぐには よびなおさない）
+    p.abandon = abandon;
+    const open = (pos, fade) => {
+      const el = new Audio(), eg = c.createGain(), o = { el, eg, src: null, dead: false }, t = c.currentTime;
+      el.preload = 'auto'; el.loop = false;
+      eg.gain.setValueAtTime(fade ? 0 : 1, t); if (fade) eg.gain.linearRampToValueAtTime(1, t + FILE_XF);
+      o.src = c.createMediaElementSource(el); o.src.connect(eg); eg.connect(g);
+      el.addEventListener('error', () => { if (!o.dead) abandon('error'); }, { once: true });   // よめない・ない：ごうせいに もどる
+      el.addEventListener('ended', () => { if (o.dead || p.ended || p.looping || p.els[p.els.length - 1] !== o) return; p.looping = true; try { open(0, false); } catch { p.looping = false; return; } setTimeout(() => { closeEl(o); p.els = p.els.filter(x => x !== o); p.looping = false; }, 60); });   // ほけん：おわりまで きたら すぐ 0から
+      if (pos > 0) el.addEventListener('loadedmetadata', () => { try { if (Number.isFinite(el.duration) && pos < el.duration - FILE_XF - 2) el.currentTime = pos; } catch {} }, { once: true });
+      el.src = FILE_DIR + file + '.' + FILE_EXT;
+      const pr = el.play(); if (pr && pr.catch) pr.catch(err => { if (!o.dead && !p.ended) abandon(err && err.name === 'NotAllowedError' ? 'gesture' : 'error'); });   // ゆびで さわるまで 止められた：つぎに さわった ときに もういちど
+      p.els.push(o); return o;
+    };
+    const lp = lastPos[file], pos = lp && Date.now() - lp.at < 30 * 60 * 1000 ? lp.t : 0;   // もどって きた とき つづきから（30ぷん いない）
+    open(pos, false);
+    p.pump = () => {
+      if (p.ended) return;
+      const o = p.els[p.els.length - 1]; if (!o) return;
+      const el = o.el, d = el.duration;
+      if (!p.heard && el.readyState >= 3 && !el.paused && el.currentTime > 0) p.heard = true;
+      if (!p.heard && Date.now() - p.born > FILE_GIVEUP) { abandon('slow'); return; }   // 9びょう たっても 鳴らない：ごうせいに もどす
+      if (p.heard && !p.looping && Number.isFinite(d) && d >= 30 && d - el.currentTime < FILE_XF + .6) {   // 長さが わかる（30びょう いじょう）ときだけ。読みこみ中の みかけの 長さで つながない
+         // おわりの 3びょう まえ：2つめを 0から はじめ、1つめを 3びょうで けす
+        p.looping = true; const prev = o, t = c.currentTime;
+        try { prev.eg.gain.cancelScheduledValues(t); prev.eg.gain.setValueAtTime(prev.eg.gain.value, t); prev.eg.gain.linearRampToValueAtTime(0, t + FILE_XF); } catch {}
+        try { open(0, true); } catch { p.looping = false; return; }
+        setTimeout(() => { closeEl(prev); p.els = p.els.filter(x => x !== prev); p.looping = false; }, FILE_XF * 1000 + 300);
+      }
+    };
+    return p;
   }
   // ─── じぶんで くみたてる BGM（層3つ）───
   //   1. ひくい おと＝8曲の 和音の うち 1つ（1〜8）／2. うた＝8曲の 旋律の うち 1つ（0＝なし）／3. こだま＝うたを 1オクターブ ひくく 4.6びょう おくらせて かさねる（0/1）。
@@ -230,7 +289,8 @@
   function stopPlayer(p, sec) {
     if (!p || p.ended) return; p.ended = true;
     try { const n = p.ctx.currentTime; p.gain.gain.cancelScheduledValues(n); p.gain.gain.setValueAtTime(p.gain.gain.value, n); p.gain.gain.linearRampToValueAtTime(0, n + sec); } catch {}
-    setTimeout(() => { try { p.gain.disconnect(); } catch {} }, sec * 1000 + 400);
+    if (p.file) rememberPos(p);
+    setTimeout(() => { if (p.file) closeFile(p); try { p.gain.disconnect(); } catch {} }, sec * 1000 + 400);
   }
   function ensureTimer() {
     const need = on && stack.length > 0;
@@ -243,10 +303,12 @@
       if (!key) { if (cur) { stopPlayer(cur, 1.6); cur = null; } return; }
       const top = stack[stack.length - 1], c = getCtx(top); if (!c) return;
       if (c.state === 'suspended') c.resume().catch(() => {});
-      const sig = key === 'mix' ? 'mix:' + mix.join('-') : key;
+      const file = key === 'mix' ? '' : fileFor(top.name, key);   // ファイルが つかえる ときは ファイル（くみたてる は ごうせい）
+      const sig = file ? 'file:' + file : key === 'mix' ? 'mix:' + mix.join('-') : key;
       if (cur && (cur.sig || cur.key) === sig && cur.ctx === c) return;
       if (cur) stopPlayer(cur, 3);   // ふわっと つなぐ（前の 曲は 3びょうで きえる）
-      cur = key === 'mix' ? startMixPlayer(c, mix) : startPlayer(c, key, top.name === 'tank' ? 1 : 0);
+      let np = null; if (file) { try { np = startFilePlayer(c, key, file); } catch { failed.add(file); np = null; } }   // 音の 部品が 作れない：ごうせいに もどる
+      cur = np || (key === 'mix' ? startMixPlayer(c, mix) : startPlayer(c, key, top.name === 'tank' ? 1 : 0));
     } catch { /* 音が 出せなくても ゲームは 止めない */ } finally { ensureTimer(); }
   }
   // ─── くみたてる まど（かな だけ・ボタンと えらぶ ところだけ。もじを うつ 場所は ない）───
@@ -346,12 +408,12 @@
       });
       subs.add(paint); paint(); b._unsub = () => subs.delete(paint); return b;
     },
-    state: () => ({ on, key: cur ? cur.key : '', playing: !!cur, stack: stack.map(s => s.name), ownCtx: !!ownCtx, volume: VOLUME * boost, trim: { ...TRIM, mix: MIX_TRIM }, part: cur ? cur.startPart : 0, mix: mix ? mix.slice() : null }),
-    _debug: { played: n => { const p = PARTS[n](); return { len: p.len, ev: p.ev.filter(e => PLAY_MELODY || !(e[3] && e[3].role === 'mel')) }; }, PLAY_MELODY, mixLayers, MIX_TRIM, ECHO_DELAY, partName, track, part: n => PARTS[n](), PARTS, KEYS, PART_TRIM, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, TOP_MIDI, MIN_ATTACK, LP, AIR_LP, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get ticker() { return ticker; } }
+    state: () => ({ on, key: cur ? cur.key : '', playing: !!cur, file: cur && cur.file ? cur.file : '', stack: stack.map(s => s.name), ownCtx: !!ownCtx, volume: VOLUME * boost, trim: { ...TRIM, mix: MIX_TRIM }, part: cur ? cur.startPart : 0, mix: mix ? mix.slice() : null }),
+    _debug: { fileFor, FILE_GAIN, FILE_OF, FILE_EXT, FILE_DIR, failed, startFilePlayer, played: n => { const p = PARTS[n](); return { len: p.len, ev: p.ev.filter(e => PLAY_MELODY || !(e[3] && e[3].role === 'mel')) }; }, PLAY_MELODY, mixLayers, MIX_TRIM, ECHO_DELAY, partName, track, part: n => PARTS[n](), PARTS, KEYS, PART_TRIM, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, TOP_MIDI, MIN_ATTACK, LP, AIR_LP, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get gestureBlock() { return gestureBlock; }, get ticker() { return ticker; } }
   };
   window.TsuriBgm = api;
   // ゆびで さわった あとで はじめて 音の 部品を 作る／画面が かくれたら 止める／ほかの タブで「おと」「BGM」が かわったら 取りこむ
-  ['pointerup', 'pointerdown', 'keydown', 'touchend', 'click'].forEach(ev => addEventListener(ev, () => { if (wantGesture) { wantGesture = false; refresh(); } }, { passive: true, capture: true }));
+  ['pointerup', 'pointerdown', 'keydown', 'touchend', 'click'].forEach(ev => addEventListener(ev, () => { if (wantGesture) { wantGesture = false; gestureBlock = false; refresh(); } }, { passive: true, capture: true }));
   document.addEventListener('visibilitychange', refresh);
   addEventListener('pageshow', refresh);
   // 「おと」の ボタンなど、どこかを おした 直後に 見なおす（本体の おとボタンが 記録を かえた あと すぐ 止まる。ほかの ページの 記録の かわりは storage が しらせる）
