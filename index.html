@@ -1663,7 +1663,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     tick: i => guideTone([330, 392, 494, 587][i], .05, 'sine', 0, [.151, .127, .113, .1][i]),   // ぽ・ぽ・ぽ・ぽ（sine＝たかい ひびきが ない・ひくい おとほど おおきく）
     pikon: () => guideChord([523, 659], .1, 'sine', .06),   // いまだ
     center: () => guideTone(98, .32, 'sine', 0, .1),   // ど真ん中：ひくい ドンッ
-    perfect: () => { guideChord([440, 523, 659], .09, 'sine', .04); guideTone(131, .22, 'sine', 0, .09); },   // ぴったり：4おと＋ひくい ふとい おと（ちかい・いいねより ずっと おおきく ふとい）
+    perfect: () => { guideTone(523, .35, 'sine', 0, .045); guideTone(659, .35, 'sine', .06, .045); guideTone(262, .35, 'sine', 0, .06); },   // ぴったり：「ぽろん」＝2おと（523→659・60ms ずらし）＋ひくい ばいおん（262）・たちあがり 20ms・ながい げんすい 0.35びょう   // ぴったり：4おと＋ひくい ふとい おと（ちかい・いいねより ずっと おおきく ふとい）
     surface: () => plop(0, .05),   // ぽちゃ（さかなが かおを だす）
     nice: () => guideTone(523, .12, 'sine', 0, .04),   // いいね
     close: () => guideTone(196, .09, 'sine', 0, .05, 150),   // ちかい：ちいさな ぷに だけ
@@ -1927,7 +1927,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // わを えがく。がめんの かきかえに あわせて、なめらかに
   // わの ちぢみは Web Animations（ブラウザの 描画スレッド）に まかせる：本体の しごとが おもい スマホでも コマ落ちしない（総司令部 9/30 測定：CPU 6倍おそい とき rAF は 25fps・最長 100ms 止まる）。あわせる じかん（hitAt・offBeat）は これまで どおり performance.now() で 決める
   // わは まと（いまだ）を すぎたら 0.06しゅうで きえて、つぎの しゅうの はじめの 0.08しゅうで そとから あらわれる（ちぢみ つづけて ぱっと とぶ のが「なにが おきて いるか わからない」ため）。はんてい（hitAt・offBeat・windowMs）は かえない
-  const ringAlpha = p => { const th = hitAt / period; return p < th ? Math.min(1, p / .08) : Math.max(0, 1 - (p - th) / .06); };
+  const ringAlpha = p => { const th = hitAt / period, fade = Math.max(th + .04, .82); return p < th ? Math.min(1, p / .08) : p < fade ? 1 : Math.max(0, 1 - (p - fade) / (1 - fade)); };   // はずしても とめない：まとを すぎても いちばん ちいさい 円まで なめらかに ちぢんで、さいごに すうっと きえる（じかんが きじゅん）
   function ringSync() {
     const ring = document.querySelector('#reel .ring'); if (!ring || !ring.animate) return;
     if (ringAnim) { ringAnim.cancel(); ringAnim = null; }
@@ -2193,8 +2193,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('hp').firstElementChild.style.width = (precise ? hp / hpMax * 100 : Math.ceil(hp / 2) / Math.ceil(hpMax / 2) * 100) + '%';   // めもりに そろえる（1めもり＝あと 1かい）
     const word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : precise ? 'おしい！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power); judge.dataset.center = center ? '1' : '';
-    if (power === 3) { SFX.perfect(); if (center) SFX.center(); buzz(center ? [40, 40, 90] : 40); }   // ピロリロッ（ど真ん中は ひくい おとを もう ひとつ）
-    else if (power === 2) SFX.nice();   // ピコッ
+    if (power === 3) { const bk = document.querySelector('#reel .back'); if (bk && bk.animate) bk.animate(reduce() ? [{borderColor: '#ffe27a'}, {borderColor: 'transparent'}] : [{boxShadow: 'inset 0 0 0 2px #ffffff55, 0 0 0 0 #fff0'}, {boxShadow: 'inset 0 0 0 2px #ffffffaa, 0 0 22px 10px #fff7c8cc', offset: .35}, {boxShadow: 'inset 0 0 0 2px #ffffff55, 0 0 0 0 #fff0'}], {duration: 520, easing: 'ease-out'});   // ふわっと 1かい ひかる（うごきを へらす では いろ だけ）
+      SFX.perfect(); if (center) SFX.center(); buzz(center ? [40, 40, 90] : 40); }   // ピロリロッ（ど真ん中は ひくい おとを もう ひとつ）
+    else if (power === 2 && !precise) SFX.nice();   // いいね（1おと）。「おしい」は ひくい 1おと（precise では いいね・ちかいも おしい）
     else SFX.close();   // ポフッ
     $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
     if (!reduce()) {
