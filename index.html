@@ -1829,8 +1829,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     yurari: {name: 'ゆらり', tip: 'おなじ はやさで、ちぢむよ', f: p => 1 - p},
     guigui: {name: 'ぐいぐい', tip: 'だんだん、はやく なるよ', f: p => 1 - p * p},
     furafura: {name: 'ふらふら', tip: 'いったり きたり するよ', f: p => Math.max(0, 1 - p + .08 * Math.sin(p * Math.PI * 6))},
-    pitatto: {name: 'ぴたっと', tip: 'とちゅうで、いちど とまるよ', f: p => p < .34 ? 1 - p * 1.18 : p < .58 ? .6 : .6 * (1 - (p - .58) / .42)}
+    pitatto: {name: 'ぴたっと', tip: 'とちゅうで、いちど とまるよ', f: p => p < .34 ? 1 - p * 1.18 : p < .58 ? .6 : .6 * (1 - (p - .58) / .42)},
+    // とくべつな うごき（まぼろし・ぬし・きせつ・ひろがる つりば）
+    boroboro: {name: 'ぴたり→ダッシュ', en: 'Freeze, then dash', tip: 'いっしゅん とまって、いっきに ちぢむよ', f: p => p < .3 ? 1 - p * .15 : .955 * Math.pow(1 - (p - .3) / .7, 1.6)},
+    dosshiri: {name: 'ずしっ', en: 'Heavy', tip: 'おもく とまって、また うごくよ', f: p => p < .2 ? 1 - p * .9 : p < .38 ? .82 : .82 * (1 - (p - .38) / .62)},
+    hirari: {name: 'ひらり', en: 'Fluttery', tip: 'ひらひら、はやさが かわるよ', f: p => 1 - (p + .06 * Math.sin(p * Math.PI * 2))},
+    fuwari: {name: 'ふわっと', en: 'Floaty', tip: 'ふわっと はじまって、ふわっと おわるよ', f: p => 1 - p * p * (3 - 2 * p)},
+    tameru: {name: 'ためて はねる', en: 'Wind up, leap', tip: 'ためてから、ぴょんと ちぢむよ', f: p => p < .5 ? 1 - p * .5 : .75 * Math.pow(1 - (p - .5) / .5, 1.5)},
+    yurayura: {name: 'ゆらゆら', en: 'Swaying', tip: 'ゆっくり ゆれながら ちぢむよ', f: p => Math.max(0, 1 - p + .05 * Math.sin(p * Math.PI * 4))},
+    hayaoso: {name: 'はやい→おそい', en: 'Fast, then slow', tip: 'はじめは はやく、あとは ゆっくり', f: p => Math.pow(1 - p, 1.8)}
   };
+  const SPECIAL_ART = {46: 'tameru', 47: 'tameru', 48: 'fuwari', 49: 'tameru', 50: 'yurayura', 51: 'yurayura', 52: 'yurayura', 53: 'yurayura', 54: 'hayaoso', 55: 'hayaoso', 56: 'hayaoso'};
+  const specialOf = (f, nushiNow) => !f ? '' : f.legend ? 'boroboro' : nushiNow ? 'dosshiri' : SPECIAL_ART[f.id] || (f.season ? (f.id === FISH.findIndex(x => x.season === 9) ? 'fuwari' : 'hirari') : '');
+  const swimText = b => (EN() ? b.en || T(b.name) : b.name);
   const swimOf = f => f.legend ? 'yuttari' : f.rare === 1 ? ['yuttari', 'yurari'][f.id % 2] : f.rare === 2 ? ['yurari', 'guigui', 'yuttari'][f.id % 3] : f.rare === 3 ? ['guigui', 'furafura', 'pitatto'][f.id % 3] : ['furafura', 'pitatto'][f.id % 2];
   // 魚ごとの くせ（おなじ 魚は まいかい おなじ＝おぼえると じょうずに なる）：せっかち＝はじめが はやい／のんびり＝はじめが ゆっくり／ためる＝まとの まえで ちょっと とまる。およぎの かたちだけ かえる（はんていの つくりは そのまま）。ずかんの カードに ひらがな 1ご
   const QUIRKS = {hasty: {ja: 'せっかち', en: 'Hasty', tip: ['はじめが はやい', 'quick at the start']}, calm: {ja: 'のんびり', en: 'Laid-back', tip: ['はじめが ゆっくり', 'slow at the start']}, hold: {ja: 'ためる', en: 'Holds', tip: ['まとの まえで ちょっと とまる', 'pauses just before the target']}};
@@ -1863,7 +1874,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const blindNow = () => curMode() === 'easy' || (reduce() && !sndOn('guide'));   // タイミングを みない（わが みえない・きこえない）人には はりも かけない
   const tensionOn = () => !!fish && curMode() === 'hard' && save.total >= 5 && !blindNow() && (fish.rare >= modeCfg().min || nushi || !!fish.legend);   // はりは「しっかり」だけ（ふつう＝タイミングを あわせて「つれた！」・にげない：マスター直 10/1 夜）。はじめの 1ぴきは かならず つれる
   function windowMs() { const k = (curMode() === 'hard' && !save.slow ? MODE_CFG.hard.win : 1) * (1 + .15 * skillMul('me')), cfg = modeCfg(), lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); return (Math.max((save.slow ? 180 : 120) * k, (.06 + .1 * (1 - away) + save.rod * .025) * 1100 * k) + Math.min(cfg.cap, slips * cfg.step)) * (save.total === 0 ? 2 : 1); }   // しっかりでも ゆったり（save.slow）の ときは まどを せまく しない   // ぴったりに ならなかった れんぞく（いいね・ちかい）ごとに +45ms（うえ 360ms）。ずれ つづける ひとを またせすぎない（ぴったりで もどる。ものさし _kenpin_tmp/sim_reel.mjs SLIP=1：★3 ±0.3びょう ずれる ひと 5.7→4.8びょう・ぴったり ねらう・れんだは かわらない）   // はじめての 1ぴきだけ、「いまだ」の まどを 2ばい（ばつは ない・さいしょの 1ぴきは かならず つれる）
-  const swimTagText = () => EN() ? T(swimBase ? swimBase.name : swim.name) + (qk ? ' · ' + QUIRKS[qk].en : '') : (swimBase ? swimBase.name : swim.name) + (qk ? '・' + QUIRKS[qk].ja : '');
+  const speedOf = f => { const t = f.legend ? 2 : f.rare <= 2 ? 0 : f.rare === 3 ? 1 : 2; return [['ゆっくり', 'Slow'], ['ふつう', 'Medium'], ['はやい', 'Fast']][t]; };
+  const swimOf2 = f => SWIMS[specialOf(f, false) || swimOf(f)];
+  const swimTagText = () => swimText(swimBase || swim) + (qk ? (EN() ? ' · ' + QUIRKS[qk].en : '・' + QUIRKS[qk].ja) : '');
+  const swimTagTextOld = () => EN() ? T(swimBase ? swimBase.name : swim.name) + (qk ? ' · ' + QUIRKS[qk].en : '') : (swimBase ? swimBase.name : swim.name) + (qk ? '・' + QUIRKS[qk].ja : '');
   function nushiRally() {   // ぬしが はんぶん より すくなく なったら「はりきる」：わが すこし はやく なり、くせが かわる／ふえる（はんてい・まどの つくりは そのまま。にげやすさは あそびかたの きまりの まま）
     period = Math.round(period * .86); qk = qk === 'hasty' ? 'hold' : 'hasty'; swim = withQuirk(swimBase, qk);
     qk = swim.quirk || ''; hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
@@ -2098,7 +2112,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (fish.legend) { hpMax = hp = 7; period = periodBase = 770; }   // まぼろしは、でて きたら つれる。わは ゆっくり
     plannedBase = nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + (fish.max - fish.min) * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8);   // おおきさは さきに きめる（おおきい ほど わが すこし はやい・±10%）
     if (save.total > 0 && !fish.legend && !query.get('swim')) { const sn = nushi ? 1 : Math.min(1, Math.max(0, (plannedBase - fish.min) / ((fish.max - fish.min) || 1))); period = Math.round(period * (1 - .1 * (2 * sn - 1))); }
-    swimBase = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : swimOf(fish)]; qk = query.has('quirk') ? (QUIRKS[query.get('quirk')] ? query.get('quirk') : '') : (query.get('swim') || save.total === 0 ? '' : quirkOf(fish)); nushiPhase2 = false;   // ?swim=・さいしょの 1ぴきは くせなし
+    swimBase = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : specialOf(fish, nushi) || swimOf(fish)]; qk = !query.get('swim') && specialOf(fish, nushi) ? '' : query.has('quirk') ? (QUIRKS[query.get('quirk')] ? query.get('quirk') : '') : (query.get('swim') || save.total === 0 ? '' : quirkOf(fish)); nushiPhase2 = false;   // ?swim=・さいしょの 1ぴきは くせなし   // とくべつな うごきの 子は くせ（せっかち・のんびり・ためる）を つけない
     swim = withQuirk(swimBase, qk); qk = swim.quirk || ''; perfects = 0; perfectStreak = 0; slips = 0; misses = 0; restUntil = 0;
     // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
     hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
@@ -3893,7 +3907,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (fact) { cell.tabIndex = 0; cell.setAttribute('role', 'button'); cell.dataset.fact = '1'; const showFact = () => { const box = $('book-fact'); box.hidden = false; box.replaceChildren(L(f.name + '　' + fact.ja, T(f.name) + ' — ' + fact.en)); box.dataset.for = String(f.id); }; cell.addEventListener('click', showFact); cell.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showFact(); } }); }   // おすと まめちしき
       const icon = document.createElement('b'); if (got || met) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
-      cell.append(icon, got || met ? ruby(f.kanji) : 'まだ あってない', ...(met ? [document.createElement('br'), L('あえたよ（まだ つれてない）', 'Met it (not caught yet)')] : []), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(got && quirkOf(f) ? [document.createElement('br'), L('くせ：' + QUIRKS[quirkOf(f)].ja + '（' + QUIRKS[quirkOf(f)].tip[0] + '）', 'Quirk: ' + QUIRKS[quirkOf(f)].en + ' (' + QUIRKS[quirkOf(f)].tip[1] + ')')] : []), ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
+      cell.append(icon, got || met ? ruby(f.kanji) : 'まだ あってない', ...(met ? [document.createElement('br'), L('あえたよ（まだ つれてない）', 'Met it (not caught yet)')] : []), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(got ? [document.createElement('br'), L('はやさ：' + speedOf(f)[0] + '　うごき：' + swimOf2(f).name, 'Speed: ' + speedOf(f)[1] + '  Motion: ' + swimText(swimOf2(f)))] : []), ...(got && quirkOf(f) ? [document.createElement('br'), L('くせ：' + QUIRKS[quirkOf(f)].ja + '（' + QUIRKS[quirkOf(f)].tip[0] + '）', 'Quirk: ' + QUIRKS[quirkOf(f)].en + ' (' + QUIRKS[quirkOf(f)].tip[1] + ')')] : []), ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
       return cell;
     };
     {   // つりばごとに ならべる（みずうみ・かわ・みなとまち・ふねの うえ）。「くらべる」では なく、じぶんの あつめぐあいが わかる
