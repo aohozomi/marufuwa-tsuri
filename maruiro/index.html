@@ -147,9 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   // ─── きろく（数字だけ・この たんまつだけ）───
-  let rec = { v: 1, best: -1, snd: false, mode: 1, play: 0, chain: 0, fly: 0 };
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; rec.snd = d.snd === true; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.play = d.play === 1 ? 1 : d.play === 2 ? 2 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 1, best: rec.best, snd: rec.snd, mode: rec.mode, play: rec.play, chain: rec.chain, fly: rec.fly })); } catch (e) {} };
+  let rec = { v: 1, best: -1, snd: false, mode: 1, play: 0, chain: 0, fly: 0, big: -1 };
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; rec.snd = d.snd === true; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.play = d.play === 1 ? 1 : d.play === 2 ? 2 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 1, best: rec.best, snd: rec.snd, mode: rec.mode, play: rec.play, chain: rec.chain, fly: rec.fly, big: rec.big })); } catch (e) {} };
 
   // ─── 乱数（?seed=数字 で ならべを そろえられる）───
   const dayKey = () => { const d = new Date(); return d.getFullYear() * 400 + (d.getMonth() + 1) * 32 + d.getDate(); };
@@ -190,12 +190,15 @@ document.addEventListener('DOMContentLoaded', () => {
     c.restore();
   }
   // さかな：つりで つった さかなの え（本体の きろく save.fish は よむだけ）。しゅるいごとに 小さい→大きい→ぬし。つったかどうかで ならびは かわらない
-  const FISH_GROUPS = [[7, 5], [3, 8], [1, 0], [6, 11], [9, 2], [4, 10], [28]];
+  // 絵の ある さかな（ちいさい じゅんに）。つった ことの ある さかなだけを つかう（本体の きろく save.fish は よむだけ・つって いない さかなは 出さない）。1ぴきも いない ときは「きほんの さかな」
+  const ART = [7, 5, 3, 8, 1, 0, 6, 11, 9, 2, 4, 10, 28], BASIC = [7, 3, 1, 6, 9, 4, 28];
   const FISH_JA = { 7: 'こつぶがに', 5: 'しらたまえび', 3: 'ころいわし', 8: 'わたあめきんぎょ', 1: 'ふわふぐ', 0: 'まるあじ', 6: 'ぷかくらげ', 11: 'にじいろべら', 9: 'まんまるいか', 2: 'もちだい', 4: 'ぽてかれい', 10: 'ふくふくたこ', 28: 'きんのまるごい' };
   const FISH_EN = { 7: 'Tiny crab', 5: 'Fluffy shrimp', 3: 'Sardine', 8: 'Cotton goldfish', 1: 'Puffer', 0: 'Round mackerel', 6: 'Floaty jellyfish', 11: 'Rainbow wrasse', 9: 'Round squid', 2: 'Mochi bream', 4: 'Flounder', 10: 'Plump octopus', 28: 'Golden carp' };
   const fishImgs = {};
-  const caught = (() => { try { const m = (JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}).fish || {}; return id => Math.floor(Number((m[id] || {}).count) || 0); } catch (e) { return () => 0; } })();
-  const fishId = l => { const g = FISH_GROUPS[Math.max(0, Math.min(6, l))]; let best = g[0], bc = caught(g[0]); g.forEach(id => { if (caught(id) > bc) { best = id; bc = caught(id); } }); return best; };
+  const caught = id => { try { const m = (JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}).fish || {}; return Math.floor(Number((m[id] || {}).count) || 0); } catch (e) { return 0; } };
+  let ladder = BASIC.slice();
+  function buildLadder() { const have = ART.filter(id => caught(id) > 0), n = have.length; ladder = n === 0 ? BASIC.slice() : [0, 1, 2, 3, 4, 5, 6].map(i => have[Math.round(i * (n - 1) / 6)]); }
+  const fishId = l => ladder[Math.max(0, Math.min(6, l))];
   const fishArt = id => { if (!fishImgs[id]) { const im = new Image(); im.onload = () => { if (typeof drawZukan === 'function') { drawZukan(); drawBest(); } }; im.src = '../img/fish/' + String(id).padStart(2, '0') + '.webp'; fishImgs[id] = im; } return fishImgs[id]; };
   function fish(c, x, y, r, l, a, scale) {
     c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
@@ -204,14 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const im = fishArt(fishId(l)); if (im.complete && im.naturalWidth) { const k = Math.min(r * 1.3 / im.naturalWidth, r * 1.3 / im.naturalHeight); c.drawImage(im, -im.naturalWidth * k / 2, -im.naturalHeight * k / 2, im.naturalWidth * k, im.naturalHeight * k); }
     c.restore();
   }
-  // いちばん おおきく した さかな（水槽の すみの 置物）：おへやの 記録に 数字を 1つ（maruiroBig＝さかなの ばんごう）だけ 足す。ほかの 項目は そのまま・へらさない・かぞえない
+  // いちばん おおきく した さかな：まるいろの きろく（big＝さかなの ばんごう）に だけ のこす。水槽は それを よむだけ（水槽の 保存には 書かない）
   function bigWrite(l) {
-    try {
-      const K = 'marufuwa-tsuri-tank-v1'; let d = null; try { d = JSON.parse(localStorage.getItem(K)); } catch (e) {}
-      if (!d || typeof d !== 'object' || Array.isArray(d)) d = {};
-      const cur = Number.isInteger(d.maruiroBig) ? d.maruiroBig : -1, curL = cur < 0 ? -1 : FISH_GROUPS.findIndex(g => g.includes(cur));
-      if (l > curL) { d.maruiroBig = fishId(l); localStorage.setItem(K, JSON.stringify(d)); }
-    } catch (e) {}
+    const id = fishId(l), cur = rec.big, rank = x => ART.indexOf(x);
+    if (rank(id) > (cur < 0 ? -1 : rank(cur))) { rec.big = id; save(); }
   }
   const piece = (c, x, y, r, l, a, scale) => (rec.mode === 2 ? fish : rec.mode === 1 && l < 6 ? item : face)(c, x, y, r, l, a, scale);
   function miniCanvas(l, px) {
@@ -373,10 +372,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   function drawSnd() { const b = $('snd'); b.setAttribute('aria-pressed', String(rec.snd)); b.textContent = L(rec.snd ? 'おと：ON' : 'おと：OFF', rec.snd ? 'Sound: ON' : 'Sound: OFF'); }
   $('snd').addEventListener('click', () => { rec.snd = !rec.snd; save(); drawSnd(); say(L(rec.snd ? 'おとを ならすよ。' : 'おとを けしたよ。', rec.snd ? 'Sound is on.' : 'Sound is off.')); if (rec.snd) tone(2, 'merge'); });
-  function reset() { if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
+  function reset() { buildLadder(); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
   const MODE_T = [['かたち：かお', 'Shapes: faces'], ['かたち：もの', 'Shapes: things'], ['かたち：さかな', 'Shapes: fish']];
   function drawMode() { const b = $('mode'); b.setAttribute('aria-pressed', String(rec.mode !== 0)); b.textContent = L(MODE_T[rec.mode][0], MODE_T[rec.mode][1]); }
-  $('mode').addEventListener('click', () => { rec.mode = rec.mode === 1 ? 2 : rec.mode === 2 ? 0 : 1; save(); drawMode(); drawZukan(); drawBest(); say(L(rec.mode === 1 ? 'まるふわの せかいの ものに かえたよ。' : rec.mode === 2 ? 'つった さかなに かえたよ。' : 'まるい かおに かえたよ。', rec.mode === 1 ? 'Switched to things from Marufuwa’s world.' : rec.mode === 2 ? 'Switched to the fish you caught.' : 'Switched to round faces.')); });
+  $('mode').addEventListener('click', () => { rec.mode = rec.mode === 1 ? 2 : rec.mode === 2 ? 0 : 1; if (rec.mode === 2) buildLadder(); save(); drawMode(); drawZukan(); drawBest(); say(L(rec.mode === 1 ? 'まるふわの せかいの ものに かえたよ。' : rec.mode === 2 ? 'つった さかなに かえたよ。' : 'まるい かおに かえたよ。', rec.mode === 1 ? 'Switched to things from Marufuwa’s world.' : rec.mode === 2 ? 'Switched to the fish you caught.' : 'Switched to round faces.')); });
   const LEADS = [
     ['うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。おちてくる じゅんばんは、きょうは みんな おなじ。', 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join at your own pace — no time limit, no game over. Today everyone gets the same order of pieces.'],
     ['おなじ ものが 3つ いじょう くっつくと、ふわっと きえるよ。きえると うえの まるが おちて、つづけて きえる ことも。じかんぎれも ゲームオーバーも ないよ。', 'When 3 or more of the same piece touch, they softly vanish. The ones above drop down and may vanish too. No time limit, no game over.'],
@@ -449,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setPlay: v => { rec.play = v === 1 ? 1 : v === 2 ? 2 : 0; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); },
     reseed: n => { rnd = mul(n); },
     flood: { state: () => ({ n: fl.n, solved: fl.solved, board: fl.b.map(r => r.join('')).join('/'), today: fl.today }), press: floodPress, next: () => floodStart(fl.n + 1), restart: () => floodStart(fl.n), start: n => floodStart(n || 0) },
-    setMode: v => { rec.mode = v === 2 ? 2 : v === 0 ? 0 : 1; save(); drawMode(); drawZukan(); drawBest(); },
+    setMode: v => { rec.mode = v === 2 ? 2 : v === 0 ? 0 : 1; buildLadder(); save(); drawMode(); drawZukan(); drawBest(); },
     fishIds: () => [0, 1, 2, 3, 4, 5, 6].map(fishId), order: n => { reorder(); const o = []; for (let i = 0; i < n; i++) o.push(pickLevel()); reorder(); return o.join(''); },
     noMerge: v => { dbgNoMerge = !!v; },
     crowd: n => { for (let i = 0; i < n; i++) addBall(50 + (i % 3) * 100, H - 50 - Math.floor(i / 3) * 62, [4, 5, 6][(i + Math.floor(i / 3)) % 3]); },

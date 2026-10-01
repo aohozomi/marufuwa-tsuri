@@ -73,8 +73,7 @@
   const cleanCare = c => { const n = Math.floor(Number(c && c.n)), l = Math.floor(Number(c && c.l)); return { n: Number.isFinite(n) && n > 0 ? Math.min(n, 9999) : 0, l: Number.isFinite(l) ? l : -1 }; };   // せわの きろく（ごはんを あげた 日の かず・さいごの 日）。へる ことは ない
   const cleanItem = v => { const n = Math.floor(Number(v)); return Number.isFinite(n) && n >= 0 && n <= 20 ? n : 0; };   // もちもの（0＝なし・数字だけ）。tsuri-wear.js が よむ
   const cleanFav = f => { const out = {}; if (f && typeof f === 'object' && !Array.isArray(f)) for (const [id, v] of Object.entries(f).slice(0, 80)) if (/^\d{1,2}$/.test(id) && Number(id) <= 45 && v === 1) out[id] = 1; return out; };   // おきにいり（さかなの ばんごう→1）。かぞえない・ならびは かえない
-  const cleanBig = v => { const n = Math.floor(Number(v)); return v !== null && v !== undefined && v !== '' && Number.isFinite(n) && n >= 0 && n <= 33 ? n : -1; };   // まるいろで いちばん おおきく した さかなの ばんごう（0〜33・-1＝なし）。数字だけ・まるいろ（maruiro/）が 書く
-  const readTank = () => { try { const d = JSON.parse(localStorage.getItem(TANK_KEY)); if (d && typeof d === 'object') return { seen: d.seen && typeof d.seen === 'object' ? d.seen : {}, placed: Array.isArray(d.placed) ? d.placed.filter(okPlaced) : [], sound: typeof d.sound === 'boolean' ? d.sound : undefined, soundMain: typeof d.soundMain === 'boolean' ? d.soundMain : undefined, parade: typeof d.parade === 'string' ? d.parade : '', grow: cleanGrow(d.grow), care: cleanCare(d.care), fav: cleanFav(d.fav), item: cleanItem(d.item), maruiroBig: cleanBig(d.maruiroBig) }; } catch {} return { seen: {}, placed: [], grow: {}, care: { n: 0, l: -1 }, fav: {}, item: 0, maruiroBig: -1 }; };
+  const readTank = () => { try { const d = JSON.parse(localStorage.getItem(TANK_KEY)); if (d && typeof d === 'object') return { seen: d.seen && typeof d.seen === 'object' ? d.seen : {}, placed: Array.isArray(d.placed) ? d.placed.filter(okPlaced) : [], sound: typeof d.sound === 'boolean' ? d.sound : undefined, soundMain: typeof d.soundMain === 'boolean' ? d.soundMain : undefined, parade: typeof d.parade === 'string' ? d.parade : '', grow: cleanGrow(d.grow), care: cleanCare(d.care), fav: cleanFav(d.fav), item: cleanItem(d.item) }; } catch {} return { seen: {}, placed: [], grow: {}, care: { n: 0, l: -1 }, fav: {}, item: 0 }; };
   let tank = readTank();
   let visit = null;   // ほうもん（読み取り専用）の 間だけ { fish:[ばんごう], placed:[{n,x,y}] }。この 間は 見る人の 記録に 何も 書かない・数えない
   const saveTank = () => { if (visit) return; try { localStorage.setItem(TANK_KEY, JSON.stringify(tank)); } catch {} };
@@ -356,10 +355,9 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-lampbtn:focus-visible,.tk-rice:focus-visible,.tk-shelfbtn:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a99}
 .tk-lampbtn,.tk-shelfbtn{border-radius:14px}
 .tk-shelf{position:absolute}
-.tk-maru{position:absolute;left:80%;top:57%;width:16%;text-align:center;pointer-events:none;z-index:3}
-.tk-maru img{display:block;width:60%;height:auto;margin:0 auto;filter:drop-shadow(0 2px 2px #0004)}
-.tk-maru span{display:block;font-size:calc(9px * var(--s,1));line-height:1.2;color:#244653;font-weight:800;background:#fffdf6cc;border-radius:6px;padding:0 3px}
-.tk-maru[hidden]{display:none}
+.tk-miro{position:absolute;right:3%;top:52%;z-index:7;display:flex;align-items:center;gap:6px;min-height:44px;min-width:44px;padding:3px 12px 3px 8px;border-radius:22px;border:2px solid #5a3a2e;background:#fffdf6f2;color:#244653;font:inherit;font-weight:800;font-size:max(.72rem,calc(11px * var(--s,1)));cursor:pointer;box-shadow:0 2px 6px #0003}
+.tk-miro::before{display:none}
+#tk.tk-visit .tk-miro{display:none}
 .tk-app{position:absolute;left:3%;top:52%;z-index:7;display:flex;align-items:center;gap:6px;min-height:44px;max-width:52%;padding:3px 10px 3px 6px;border-radius:22px;border:2px solid #5a3a2e;background:#fffdf6f2;color:#244653;font:inherit;text-align:left;cursor:pointer;box-shadow:0 2px 6px #0003}
 .tk-app::before{display:none}
 .tk-app svg{flex:none}
@@ -430,7 +428,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     <div class="tk-stage"><div class="tk-room" data-time="hiru">
       <div class="tk-roomsvg" style="left:0;top:0;width:100%;height:100%"></div>
       <div class="tk-shelf" aria-hidden="true" hidden></div>
-      <div class="tk-maru" hidden role="img"><img alt="" decoding="async"><span>まるいろで そだてた</span></div>
+      <button type="button" class="tk-miro" aria-label="まるいろ（ゲーム）へ いく"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#9fe0a6" stroke="#5a3a2e" stroke-width="1.6"/><circle cx="8.6" cy="11" r="1.5" fill="#402a30"/><circle cx="15.4" cy="11" r="1.5" fill="#402a30"/><path d="M8.5 15 Q12 18 15.5 15" fill="none" stroke="#402a30" stroke-width="1.6" stroke-linecap="round"/></svg><span>まるいろ</span></button>
       <button type="button" class="tk-app" aria-expanded="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#ffc27d" stroke="#5a3a2e" stroke-width="1.6"/><circle cx="8.6" cy="11" r="1.5" fill="#402a30"/><circle cx="15.4" cy="11" r="1.5" fill="#402a30"/><path d="M8.5 15 Q12 18 15.5 15" fill="none" stroke="#402a30" stroke-width="1.6" stroke-linecap="round"/></svg><span class="tk-apptx"><b>アプリ版 まるふわ まるいろ</b><small>iPhone で あそべるよ</small></span></button>
       <div class="tk-appc" hidden role="group" aria-label="アプリ版 まるふわ まるいろ"><p>そとへ ひらきます。いいですか？</p><div><a class="tk-appgo" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" class="tk-appno">やめる</button></div></div>
       <div class="tk-dim"></div>
@@ -884,7 +882,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   function touchFish(o, viaKey) {
     o.pop = 1; o.hold = 4; o.vx *= .2;
     const left = fishList().filter(f => !f.legend).length - residents().filter(inBook).length;
-    const line = o.fresh ? (o.f.season ? 'はじめまして！ きせつの さかなだよ。' : left > 0 && left <= 5 ? 'はじめまして！ ずかんまで あと ' + left + 'しゅるい。' : 'はじめまして！') : (o.nushi ? 'ぬしだよ！ すごいね。' : o.f.season ? CARD_SAY.season : CARD_SAY[o.f.rare] || CARD_SAY[1]);   // 「あと○」は 5しゅるい以下の時だけ（遠い時は重荷になる）
+    const line = o.maru ? 'まるいろで そだてた さかなだよ。' : o.fresh ? (o.f.season ? 'はじめまして！ きせつの さかなだよ。' : left > 0 && left <= 5 ? 'はじめまして！ ずかんまで あと ' + left + 'しゅるい。' : 'はじめまして！') : (o.nushi ? 'ぬしだよ！ すごいね。' : o.f.season ? CARD_SAY.season : CARD_SAY[o.f.rare] || CARD_SAY[1]);   // 「あと○」は 5しゅるい以下の時だけ（遠い時は重荷になる）
     const name = mk('div', 'tk-cardname'); name.append(mk('span', '', o.f.name));
     if (o.nushi) name.append(mk('span', 'tk-tag', 'ぬし')); else if (o.f.rare === 5) name.append(mk('span', 'tk-tag tk-myth', 'まぼろし')); else if (o.f.rare === 4) name.append(mk('span', 'tk-tag', 'スペシャル')); else if (o.f.season) name.append(mk('span', 'tk-tag', 'きせつ'));
     if (o.fresh) name.append(mk('span', 'tk-newburst', 'NEW'));
@@ -1037,7 +1035,9 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
       const n = shown.length <= 4 && r.fish.rare < 4 && !r.nushi ? (r.count >= 8 ? 3 : r.count >= 3 ? 2 : 1) : 1;
       for (let k = 0; k < n && total < cap; k++, total++) fishes.push(makeFish(r, k, arrivals.has(r.fish.id) && k === 0));
     }
-    empty.hidden = all.length > 0;
+    // まるいろで そだてた さかな：1ぴきだけ およぐ（まるいろの きろく big を よむだけ・ほかの さかなの かずに ふくめない・写真カードにも うつる）
+    const mb = maruiroBig(); if (mb >= 0) { const mf = kinds().find(f => f.id === mb); if (mf) { const fm = makeFish({ fish: mf, count: 1, best: mf.max, nushi: false }, 9, false); fm.maru = true; fm.el.dataset.maru = '1'; fishes.push(fm); } }
+    empty.hidden = all.length > 0 || fishes.some(o => o.maru);
     if (!all.length) $(empty, 'span').textContent = visit ? 'この おへやには、まだ さかなが いないよ。' : 'まだ だれも いないよ。\nつりを すると、ここで およぐよ。';
     list.replaceChildren(...all.map(r => { const li = document.createElement('li'); li.textContent = visit ? r.fish.name : r.fish.name + '、さいだい ' + r.best.toFixed(1) + 'センチ、' + r.count + 'ひき' + (isFav(r.fish.id) ? '、おきにいり' : ''); return li; }));
     paintGrowList(all);
@@ -1049,7 +1049,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     rotateTimer = setTimeout(rotate, 38000 + Math.random() * 14000);
     const all = residents(), shownIds = new Set(fishes.map(o => o.f.id)), others = all.filter(r => !shownIds.has(r.fish.id));
     if (!others.length || deco) return;
-    const old = fishes.filter(o => !o.leaving && performance.now() - o.at > 30000);
+    const old = fishes.filter(o => !o.leaving && !o.maru && performance.now() - o.at > 30000);
     if (!old.length) return;
     const notFav = old.filter(o => !isFav(o.f.id)), out = pick(notFav.length ? notFav : old), incoming = pick(others);   // おきにいりは できるだけ そのまま
     out.leaving = true; out.hold = 0;
@@ -1115,13 +1115,11 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   }
 
   // ─── もちもの（総司令部 ③）：まるふわの 手に 小物を もたせる。番号（0＝なし）は tank.item（数字だけ）。絵は tsuri-wear.js が 描く（ひろば・おへやの まるふわに でる）。レベルが たりない 物は えらべない・じぶんの こ の ときは つかえない ───
-  // まるいろで そだてた さかなの 置物（水槽の すみ・ひとつ・数えない・へらない）。訪問リンクには のせない
-  const maruEl = $(dlg, '.tk-maru');
-  function renderMaru() {
-    const n = visit ? -1 : (tank.maruiroBig === undefined ? -1 : tank.maruiroBig);
-    if (n < 0) { maruEl.hidden = true; return; }
-    const im = maruEl.querySelector('img'); im.src = BASE + 'img/fish/' + String(n).padStart(2, '0') + '.webp'; maruEl.setAttribute('aria-label', 'まるいろで そだてた さかなの おきもの'); maruEl.hidden = false;
-  }
+  // まるいろ（maruiro/）：おへやから 行ける 小さな 入口。まるいろの きろく marufuwa-maruiro-v1 の big（いちばん おおきく した さかなの ばんごう）は よむだけ（水槽の 保存には 書かない）
+  const MIRO_KEY = 'marufuwa-maruiro-v1', ART_IDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 28];
+  const maruiroBig = () => { if (visit) return -1; try { const d = JSON.parse(localStorage.getItem(MIRO_KEY)), n = Math.floor(Number(d && d.big)); return d && d.big !== null && Number.isFinite(n) && ART_IDS.includes(n) ? n : -1; } catch { return -1; } };
+  const miroBtn = $(dlg, '.tk-miro');
+  miroBtn.addEventListener('click', () => { if (visit) return; say('まるいろへ いくよ。', true); sr.textContent = 'まるいろへ いくよ。'; setTimeout(() => { location.href = new URL(BASE + 'maruiro/index.html', location.href).href; }, 350); });
   // アプリ版 まるふわ まるいろ への 入口（そとへ ひらく：「いいですか？」→ひらく。https の App Store だけ・新しい タブ・rel=noopener）。iPhone いがいは うすく「iPhone で あそべるよ」
   const APP_URL = 'https://apps.apple.com/app/id6816003504';
   const appBtn = $(dlg, '.tk-app'), appC = $(dlg, '.tk-appc');
@@ -1557,13 +1555,13 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     layoutRoom(); paintWater(); layoutRoom(); ownSync();
     requestAnimationFrame(() => { if (isOpen()) layoutRoom(); }); setTimeout(() => { if (isOpen()) layoutRoom(); }, 400);   // ひらいた 直後は ボタンの おりかえしが きまって いない＝はかり なおす（上の 列に かぶらない）
     if (visit && visit.starry) { starry = true; applyStarry(); }   // おくった 人の へやが ほしぞらの とき
-    renderMaru(); renderApp(); const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
+    renderApp(); const total = populate(true); renderPlaced(); setDeco(false); photo.hidden = true;
     if (arrivals.length) {
       const first = arrivals[0].fish;
       const text = arrivals.length === 1 && arrivals[0].n === 1 ? first.name + 'が すいそうに ようこそ。' : 'あたらしい なかまが ' + arrivals.reduce((s, r) => s + r.n, 0) + 'ひき きたよ。';
       say(text, true); mood(first.rare >= 4 ? 'sparkle' : first.rare === 3 ? 'apricot' : 'mint', 3600); sr.textContent = text;
       const seen = { ...tank.seen }; for (const r of residents()) seen[r.fish.id] = r.count; tank.seen = seen; saveTank();
-    } else say(visit ? 'ようこそ。ゆっくり みていってね。' : total ? pick(SAY.any) : pick(SAY.empty), true);
+    } else say(visit ? 'ようこそ。ゆっくり みていってね。' : (total || fishes.some(o => o.maru)) ? pick(SAY.any) : pick(SAY.empty), true);
     if (grownOnOpen.length) { clearTimeout(growSay); growSay = setTimeout(() => { if (isOpen() && !visit) { const m2 = 'さかなが すこし おおきく なって いるよ。'; say(m2, true); sr.textContent = m2; } }, 3200); }
     refreshBadge(); resetZen();
     setListen(false); refreshSound(); if (sfx) { cueOpen(); startAmbience(); }
@@ -1626,7 +1624,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   {
     const HEYA_EN = { 'もちもの': 'Items', 'もちものを おわる': 'Close Items', 'もちもの：まるふわの てに もたせて あげよう': 'Items: let Marufuwa hold something', 'なし': 'None', 'ランタン': 'Lantern', 'バケツ': 'Bucket', 'おにぎり': 'Rice ball', 'あみ': 'Net', 'おはな': 'Flower', 'かさ': 'Umbrella', 'もちものを はずしたよ。': 'Put the item down.', 'まだ じゅんびちゅう。もうすこし まってね。': 'Not ready yet. Please wait a little.', 'じぶんの こ の ときは、もちものは つかえないよ。': 'Items can’t be used while your own friend is shown.', 'みずくさが すこし のびたよ。': 'The water plants have grown a little.', 'おきにいりに する': 'Make favorite', 'おきにいり（はずす）': 'Favorite (remove)', '♡ を つけたよ。': 'Marked with a ♡.', 'おきにいりを はずしたよ。': 'Removed the favorite mark.', 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to play.', 'ともだちが あそびに きて いるよ。': 'A friend has come to visit.', 'さかなが すこし おおきく なったよ。': 'A fish has grown a little bigger.', 'さかなが おおきく そだったよ！': 'A fish has grown bigger!', 'さかなが すこし おおきく なって いるよ。': 'Some fish have grown a little bigger.', 'おおきく そだった さかなが いるよ。': 'Some fish have grown bigger.', 'そだち': 'Growth', 'すこし おおきく そだったよ': 'A little bigger', 'おおきく そだったよ': 'Bigger', 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to visit.', 'つくえの うえの おにぎり': 'Rice ball on the table', 'つくえの うえの おにぎりを、なかまと はんぶんこ したよ。': 'You shared the rice ball on the table with a friend.', 'だれかの おへや': "Someone's Room", 'だれかの おへやを みせて もらって いるよ。みるだけ。あなたの きろくには、なにも のこらないよ。': "You're visiting someone's room. Just looking. Nothing is saved to your own records.", 'じぶんの おへやに もどる': 'Back to my room', 'じぶんの おへやに もどったよ。': 'Back in your own room.', 'ようこそ。ゆっくり みていってね。': 'Welcome. Take your time looking around.', 'この おへやには、まだ さかなが いないよ。': 'There are no fish in this room yet.', 'おへやを おくる': 'Send my room', 'おへやの リンク': 'Room link', 'コピーする': 'Copy', 'リンクを コピーしたよ。ともだちに はりつけて おくってね。': 'Link copied. Paste it to send it to a friend.', 'したの リンクを コピーして、ともだちに おくってね。': 'Copy the link below and send it to a friend.', 'コピーできなかったよ。したの リンクを おして えらんで コピーしてね。': "Couldn't copy. Please select the link below and copy it.", 'リンクに はいって いるのは、さかなの ばんごうと、かざりの ばんごうと いち、いまの じかん、あそびに きて いる なかまの ばんごうだけ。なまえや ひとこと、たんまつの しるしは はいって いないよ。みる ひとの きろくには、なにも のこらないよ。': 'The link contains only numbers: fish numbers, decoration numbers and positions, the time of day, and a visiting friend’s number. No names, messages or device marks. Nothing is saved to the viewer’s records.', 'まだ おくれる おへやが ないよ。さかなを つると おくれるよ。': 'There is no room to send yet. Catch a fish and you can send it.', 'おへやの リンクを おくったよ。': 'Sent the room link.', 'おへやの リンクを コピーしました。': 'Room link copied.', 'おへやの リンクが できました。': 'Room link is ready.', 'まだ おくれる おへやが ありません。': 'There is no room to send yet.', 'おへやの リンクを おくりました。': 'Sent the room link.' };
     const GIFT_EN = { 'さくらのはなびら': 'Cherry blossom petal', 'あおいは': 'Fresh green leaf', 'どんぐり': 'Acorn', 'ゆきのけっしょう': 'Snow crystal', 'ささぶね': 'Bamboo-leaf boat', 'やどかり': 'Hermit crab' };   // ひみつで もらえる かざりの なまえ（訳表の かけら 表には 入らないので、ここで 訳す）
-    const EN = { ex: { ...HEYA_EN, 'アプリ版 まるふわ まるいろ': 'App: Marufuwa Maruiro', 'タッチで ひらく': 'Tap to open', 'iPhone で あそべるよ': 'Playable on iPhone', 'アプリは iPhone で あそべるよ。': 'The app is playable on iPhone.', 'そとへ ひらきます。いいですか？': 'This opens outside the game. Is that okay?', 'ひらく': 'Open', 'やめる': 'Cancel', 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'パレード、はじまるよ！': "The parade is starting!", 'たのしかったね。': 'That was fun!', 'さかなたちが パレードを はじめたよ。': 'The fish started a parade.', 'パレードが おわったよ。': 'The parade is over.', 'さかなたちが パレードを したよ。': 'The fish had a parade.', 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
+    const EN = { ex: { ...HEYA_EN, 'まるいろで そだてた さかなだよ。': 'A fish raised in Maruiro.', 'まるいろ': 'Maruiro', 'まるいろへ いくよ。': 'Going to Maruiro.', 'アプリ版 まるふわ まるいろ': 'App: Marufuwa Maruiro', 'タッチで ひらく': 'Tap to open', 'iPhone で あそべるよ': 'Playable on iPhone', 'アプリは iPhone で あそべるよ。': 'The app is playable on iPhone.', 'そとへ ひらきます。いいですか？': 'This opens outside the game. Is that okay?', 'ひらく': 'Open', 'やめる': 'Cancel', 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'パレード、はじまるよ！': "The parade is starting!", 'たのしかったね。': 'That was fun!', 'さかなたちが パレードを はじめたよ。': 'The fish started a parade.', 'パレードが おわったよ。': 'The parade is over.', 'さかなたちが パレードを したよ。': 'The fish had a parade.', 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
       [/^(.+?)×(\d+)$/, (_, n, k) => GIFT_EN[n] ? GIFT_EN[n] + ' ×' + k : null],   // かざりの ふだ（ひみつで もらえる かざり）
       [/^(.+?)をもどす$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] : null],
       [/^(.+?)をもどしたよ。$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] + '.' : null],
