@@ -21,10 +21,10 @@ try {
 } catch (e) { document.documentElement.dataset.time = 'h'; }
 </script>
 <style>
-:root{--ink:#27424e;--ink2:#3d5a68;--plate:#fffdf7;--wall:#fbf3e6;--wood:#d9b07c;--wood2:#b98a5a;--line:#cfae7e;--btn1:#ffffff;--btn2:#dff1f7;--btn-line:#9bc9da;--link:#14506b;--sky1:#a9defa;--sky2:#eaf8ff;--rw:#f6e7cf;--floor:#d9b988;--dim:0}
+:root{--ink:#27424e;--ink2:#3d5a68;--plate:#fffdf7;--wall:#fbf3e6;--wood:#d9b07c;--wood2:#b98a5a;--line:#cfae7e;--btn1:#ffffff;--btn2:#dff1f7;--btn-line:#9bc9da;--link:#14506b;--sky1:#a9defa;--sky2:#eaf8ff;--rw:#d9bf9c;--floor:#b98f60;--dim:.16}
 :root[data-time=a]{--sky1:#ffd9b8;--sky2:#fff3e2}
-:root[data-time=y]{--sky1:#ff9e6e;--sky2:#ffd9a8;--wall:#fbeedd;--rw:#f3dcc0}
-:root[data-time=n]{--sky1:#1f2f5c;--sky2:#4a5d92;--wall:#e6e1f3;--plate:#f6f3fb;--wood2:#7c6f9a;--line:#8e80b0;--rw:#d8cfe6;--floor:#a99cc4;--dim:1}
+:root[data-time=y]{--sky1:#ff9e6e;--sky2:#ffd9a8;--wall:#fbeedd;--rw:#d2ab80;--dim:.22}
+:root[data-time=n]{--sky1:#1f2f5c;--sky2:#4a5d92;--wall:#e6e1f3;--plate:#f6f3fb;--wood2:#7c6f9a;--line:#8e80b0;--rw:#bba8b8;--floor:#8a7098;--dim:.5}
 :root[data-large=true]{font-size:125%}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -34,6 +34,11 @@ body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothi
 .back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
 h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
 .lead{margin:2px 0 8px;font-size:.95rem;color:var(--ink2)}
+.stage{position:relative}
+.bub{position:absolute;transform:translate(-50%,-100%);max-width:90%;white-space:nowrap;padding:3px 10px;border-radius:12px;background:var(--plate);border:2px solid var(--line);color:var(--ink);font-size:.8rem;font-weight:800;line-height:1.4;pointer-events:none;text-align:center}
+.hit{position:absolute;min-width:44px;min-height:44px;transform:translate(-50%,-50%);background:transparent;border:0;border-radius:50%;padding:0;cursor:pointer}
+.hit:focus-visible{outline:4px solid #286b88;outline-offset:2px}
+.vis{transition:transform 2.4s ease}
 .scene{display:block;width:100%;height:auto;border-radius:18px;border:3px solid var(--wood2);background:var(--rw)}
 .cap{min-height:3.4em;margin:8px 0 4px;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.98rem}
 .menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0;padding:0;list-style:none}
@@ -50,7 +55,8 @@ h2{margin:10px 0 4px;font-size:1.05rem}
 @keyframes rise{0%{transform:translateY(6px);opacity:0}30%{opacity:.7}100%{transform:translateY(-16px);opacity:0}}
 .drift{animation:drift 26s ease-in-out infinite alternate}
 @keyframes drift{from{transform:translateX(-8px)}to{transform:translateX(10px)}}
-.shade{fill:#0b1a3a;opacity:calc(var(--dim)*.32);pointer-events:none}
+.shade{fill:#1a1030;opacity:calc(var(--dim)*.55);pointer-events:none}
+.glow{pointer-events:none}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.steam path{opacity:.4}}
 :root[data-calm=true] *{transition:none!important;animation:none!important}
 :root[data-calm=true] .steam path{opacity:.4}
@@ -61,42 +67,58 @@ h2{margin:10px 0 4px;font-size:1.05rem}
   <a class="back" id="back" href="../index.html">← ひろばへ</a>
   <h1>カフェ ラテ</h1>
   <p class="lead">ラテの かわうそが ひらいている、ゆっくり できる カフェ。のみものを えらんで、せきに すわって、まどの そとを ながめよう。いそがなくて だいじょうぶ。</p>
-  <svg class="scene" id="scene" viewBox="0 0 400 300" role="img" aria-label="カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、なかまが すわって いるよ">
+  <div class="stage" id="stage">
+  <svg class="scene" id="scene" viewBox="0 0 400 300" role="img" aria-label="カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、カウンターの せきに なかまが すわって いるよ">
     <defs>
       <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/></linearGradient>
-      <clipPath id="win"><rect x="34" y="26" width="168" height="124" rx="6"/></clipPath>
+      <clipPath id="win"><rect x="24" y="30" width="112" height="104" rx="5"/></clipPath>
+      <radialGradient id="lg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+      <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6d8" stop-opacity=".3"/><stop offset="1" stop-color="#fff6d8" stop-opacity="0"/></linearGradient>
     </defs>
     <rect width="400" height="300" fill="var(--rw)"/>
     <rect y="228" width="400" height="72" fill="var(--floor)"/>
+    <rect y="214" width="400" height="14" fill="#0000001a"/>
     <g id="outside" clip-path="url(#win)">
-      <rect x="34" y="26" width="168" height="124" fill="url(#sky)"/>
-      <g id="stars" opacity="0"><circle cx="60" cy="50" r="1.6" fill="#fff"/><circle cx="96" cy="40" r="1.4" fill="#fff"/><circle cx="150" cy="58" r="1.6" fill="#fff"/><circle cx="184" cy="44" r="1.4" fill="#fff"/><circle cx="120" cy="76" r="1.2" fill="#fff"/></g>
-      <circle id="orb" cx="162" cy="56" r="17" fill="#fff2a8"/>
-      <g class="drift" id="clouds" fill="#fff" opacity=".9"><ellipse cx="80" cy="62" rx="24" ry="8"/><ellipse cx="98" cy="56" rx="14" ry="8"/><ellipse cx="150" cy="88" rx="20" ry="6"/></g>
-      <path d="M34 150 Q80 104 124 134 T202 120 V150Z" fill="#a9d89a"/>
-      <g id="rain" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0"><path d="M50 40 l-4 12 M80 70 l-4 12 M110 46 l-4 12 M140 84 l-4 12 M170 52 l-4 12 M64 104 l-4 12 M124 108 l-4 12 M186 96 l-4 12"/></g>
+      <rect x="24" y="30" width="112" height="104" fill="url(#sky)"/>
+      <g id="stars" opacity="0"><circle cx="44" cy="48" r="1.5" fill="#fff"/><circle cx="76" cy="42" r="1.3" fill="#fff"/><circle cx="118" cy="56" r="1.5" fill="#fff"/><circle cx="96" cy="72" r="1.2" fill="#fff"/></g>
+      <circle id="orb" cx="108" cy="56" r="14" fill="#fff2a8"/>
+      <g class="drift" id="clouds" fill="#fff" opacity=".9"><ellipse cx="58" cy="64" rx="20" ry="7"/><ellipse cx="72" cy="58" rx="12" ry="7"/><ellipse cx="104" cy="88" rx="16" ry="5"/></g>
+      <path d="M24 134 Q56 96 86 118 T136 108 V134Z" fill="#a9d89a"/>
+      <g id="rain" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0"><path d="M36 44 l-4 12 M58 70 l-4 12 M82 48 l-4 12 M104 80 l-4 12 M124 52 l-4 12 M48 100 l-4 12 M94 104 l-4 12"/></g>
     </g>
-    <rect x="34" y="26" width="168" height="124" rx="6" fill="none" stroke="#8a5a2b" stroke-width="6"/>
-    <path d="M118 26 V150 M34 88 H202" stroke="#8a5a2b" stroke-width="4"/>
-    <rect x="228" y="150" width="164" height="50" rx="6" fill="#b98a5a" stroke="#7a5430" stroke-width="3"/>
-    <rect x="228" y="196" width="164" height="32" fill="#9a6f44"/>
-    <image id="otter" href="../../img/friend-kawauso-s.webp" x="300" y="62" width="64" height="100" preserveAspectRatio="xMidYMax meet"/>
-    <rect x="228" y="150" width="164" height="12" rx="4" fill="#d9b07c" stroke="#7a5430" stroke-width="2"/>
-    <g transform="translate(380 142)"><ellipse cx="0" cy="8" rx="11" ry="3" fill="#0003"/><path d="M-9 -2 H9 L7 8 H-7Z" fill="#fff" stroke="#5a3a2e" stroke-width="2"/></g>
+    <rect x="24" y="30" width="112" height="104" rx="5" fill="none" stroke="#6a4420" stroke-width="6"/>
+    <path d="M80 30 V134 M24 82 H136" stroke="#6a4420" stroke-width="4"/>
+    <path d="M24 134 L136 134 L196 230 L10 230Z" fill="url(#beam)"/>
+    <g fill="#5a3a22"><rect x="226" y="52" width="86" height="6"/><rect x="226" y="92" width="86" height="6"/></g>
+    <g><rect x="232" y="36" width="14" height="16" rx="3" fill="#f0d9a8"/><rect x="252" y="40" width="12" height="12" rx="3" fill="#c98a6a"/><rect x="272" y="34" width="14" height="18" rx="3" fill="#a9c9a0"/><rect x="236" y="76" width="16" height="16" rx="3" fill="#d9a35f"/><rect x="262" y="78" width="12" height="14" rx="3" fill="#e8b4b4"/></g>
+    <image id="otter" href="../../img/friend-kawauso-s.webp" x="316" y="56" width="64" height="104" preserveAspectRatio="xMidYMax meet"/>
+    <rect x="112" y="150" width="288" height="56" fill="#4a2e18"/>
+    <rect x="112" y="150" width="288" height="12" rx="4" fill="#e0b27a" stroke="#2e1a0c" stroke-width="3"/>
+    <rect x="112" y="162" width="288" height="44" fill="#5a3a22" stroke="#2e1a0c" stroke-width="3"/>
+    <g stroke="#3a2412" stroke-width="2" fill="none"><rect x="124" y="170" width="68" height="28" rx="3"/><rect x="204" y="170" width="68" height="28" rx="3"/><rect x="284" y="170" width="68" height="28" rx="3"/></g>
+    <g id="coffee-machine"><rect x="344" y="132" width="20" height="18" rx="3" fill="#7a7a86" stroke="#2e1a0c" stroke-width="2"/><rect x="350" y="140" width="8" height="6" fill="#f0e6d0"/></g>
+    <g id="vcup" opacity="0"><ellipse cx="0" cy="3" rx="11" ry="3" fill="#0004"/><path d="M-9 -9 H9 L7 3 H-7Z" fill="#fff" stroke="#3a2412" stroke-width="2"/><ellipse cx="0" cy="-9" rx="8" ry="2.6" fill="#4a2e18"/></g>
     <g id="guests"></g>
-    <ellipse cx="96" cy="250" rx="62" ry="16" fill="#8a5a2b"/>
-    <rect x="90" y="226" width="12" height="26" fill="#7a5430"/>
-    <ellipse cx="96" cy="226" rx="66" ry="16" fill="#d9b07c" stroke="#7a5430" stroke-width="3"/>
-    <g id="me" opacity="0"><image href="../../img/game-blue.webp" x="18" y="136" width="66" height="88" preserveAspectRatio="xMidYMax meet"/></g>
-    <g id="cup" opacity="0" transform="translate(116 222)">
-      <ellipse cx="0" cy="8" rx="14" ry="4" fill="#0003"/>
-      <path d="M-12 -12 H12 L9 8 H-9Z" fill="#fff" stroke="#5a3a2e" stroke-width="2.5"/>
-      <ellipse id="drink" cx="0" cy="-12" rx="11" ry="3.4" fill="#8a5a44" stroke="#5a3a2e" stroke-width="2"/>
-      <path d="M12 -8 q9 0 8 6 q-1 5 -9 5" fill="none" stroke="#5a3a2e" stroke-width="2.5"/>
-      <g class="steam" id="steam"><path d="M-5 -18 q-5 -7 0 -13"/><path d="M0 -18 q-5 -7 0 -13"/><path d="M5 -18 q-5 -7 0 -13"/></g>
+    <g id="stools">
+      <g transform="translate(170 0)"><rect x="-3" y="246" width="6" height="30" fill="#3a2412"/><ellipse cx="0" cy="244" rx="26" ry="8" fill="#8a3a2a" stroke="#2e1a0c" stroke-width="2.5"/></g>
+      <g transform="translate(250 0)"><rect x="-3" y="246" width="6" height="30" fill="#3a2412"/><ellipse cx="0" cy="244" rx="26" ry="8" fill="#8a3a2a" stroke="#2e1a0c" stroke-width="2.5"/></g>
     </g>
+    <g id="wtable"><ellipse cx="60" cy="262" rx="42" ry="9" fill="#00000030"/><rect x="56" y="244" width="8" height="20" fill="#3a2412"/><ellipse cx="60" cy="242" rx="40" ry="9" fill="#a9703c" stroke="#2e1a0c" stroke-width="3"/></g>
+    <g id="me" opacity="0"><image href="../../img/game-blue.webp" x="143" y="176" width="54" height="72" preserveAspectRatio="xMidYMax meet"/></g>
+    <g id="cup" opacity="0" transform="translate(170 150)">
+      <ellipse cx="0" cy="3" rx="12" ry="3" fill="#0004"/>
+      <path d="M-10 -10 H10 L8 3 H-8Z" fill="#fff" stroke="#3a2412" stroke-width="2.5"/>
+      <ellipse id="drink" cx="0" cy="-10" rx="9" ry="3" fill="#4a2e18" stroke="#3a2412" stroke-width="2"/>
+      <path d="M10 -6 q8 0 7 5 q-1 4 -8 4" fill="none" stroke="#3a2412" stroke-width="2.5"/>
+      <g class="steam" id="steam"><path d="M-4 -14 q-5 -7 0 -13"/><path d="M0 -14 q-5 -7 0 -13"/><path d="M4 -14 q-5 -7 0 -13"/></g>
+    </g>
+    <g class="vis" id="visitor" style="transform:translateX(130px)"></g>
     <rect class="shade" width="400" height="300"/>
+    <g class="glow"><circle cx="200" cy="120" r="120" fill="url(#lg)"/><circle cx="330" cy="110" r="100" fill="url(#lg)"/><circle cx="80" cy="150" r="70" fill="url(#lg)" opacity=".5"/></g>
+    <g id="lamps"><path d="M200 0 V40 M330 0 V36" stroke="#2e1a0c" stroke-width="2"/><path d="M182 58 Q200 34 218 58Z M314 54 Q330 30 346 54Z" fill="#c96a3a" stroke="#2e1a0c" stroke-width="2.5"/><ellipse cx="200" cy="60" rx="14" ry="4" fill="#ffe7a8"/><ellipse cx="330" cy="56" rx="13" ry="4" fill="#ffe7a8"/></g>
   </svg>
+  <div id="over"></div>
+  </div>
   <p class="cap" id="cap" role="status" aria-live="polite">ラテの かわうそ：のみものを えらんでね。</p>
   <section id="pick" aria-labelledby="h-pick">
     <h2 id="h-pick">のみものを えらぶ</h2>
@@ -117,7 +139,7 @@ h2{margin:10px 0 4px;font-size:1.05rem}
     'カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、なかまが すわって いるよ': 'Inside the café. The window shows the time outside. The Latte Otter is at the counter and friends are sitting.',
     'ラテの かわうそ：のみものを えらんでね。': 'Latte Otter: Please pick a drink.',
     'のみものを えらぶ': 'Pick a drink', 'ゆっくり すわって いるよ': 'Sitting back and relaxing',
-    'ココア': 'Hot cocoa', 'ミルクティー': 'Milk tea', 'りんごジュース': 'Apple juice', 'おちゃ': 'Tea', 'ホットミルク': 'Hot milk', 'はちみつレモン': 'Honey lemon',
+    'ココア': 'Hot cocoa', 'ミルクティー': 'Milk tea', 'りんごジュース': 'Apple juice', 'おちゃ': 'Tea',  'はちみつレモン': 'Honey lemon',
     'べつの のみものに する': 'Pick another drink', 'かえる': 'Head home',
     'ラテの かわうそ：ゆっくり していってね。': 'Latte Otter: Take your time.', 'ラテの かわうそ：また きてね。': 'Latte Otter: Come again.',
     'おうちの かたへ：おかねも じゅんいも なにも へりません。のみものを えらんで すわる だけの へやです。ことばは「ゆっくり していってね」「また きてね」の ふたつだけで、ひきとめません。なかまの ひとことは 1ぷんに 1かい いかです。きろくも つうしんも ありません。てんめつは しません。': 'For grown-ups: nothing is spent and there is no ranking. You just pick a drink and sit. The otter says only two things — “Take your time” and “Come again” — and never tries to keep you. Friends speak at most once a minute. Nothing is saved or sent. Nothing flashes.',
@@ -126,6 +148,10 @@ h2{margin:10px 0 4px;font-size:1.05rem}
   const LINES_EN = { 'ふぅ、あったかい': 'Phew, so warm.', 'いい においだね': 'Smells nice.', 'まどの そと、きれい': 'The view outside is pretty.', 'ぽかぽか するね': 'Feels cozy.', 'ゆっくり のむよ': 'I’ll sip slowly.', 'ここ、おちつくね': 'It’s so calm here.', 'あめの おと、すき': 'I like the sound of rain.', 'あめの ひの カフェ、いいね': 'A café on a rainy day is nice.', 'よるの カフェも いいね': 'Café nights are nice too.', 'おほしさま、きれい': 'The stars are pretty.', 'ゆうやけ、きれいだね': 'The sunset is lovely.', 'あさの カフェ、すてき': 'Morning at the café is lovely.' };
   Object.assign(EX, LINES_EN);
   ['ねこ', 'うさぎ', 'パンダ', 'りす', 'ペンギン', 'こぎつね', 'こいぬ', 'ハムスター'].forEach((n, i) => { EX[n] = ['Cat', 'Bunny', 'Panda', 'Squirrel', 'Penguin', 'Little fox', 'Puppy', 'Hamster'][i]; });
+  Object.assign(EX, { 'コーヒー': 'Coffee', 'コーヒー ください': 'Coffee, please.', 'ありがとう': 'Thank you.', 'おいしい': 'Yummy.', 'こんにちは': 'Hello.', 'ゆっくり してるよ': 'Taking it easy.', 'おいしいね': 'Yummy.', 'ここ、すきなんだ': 'I like it here.',
+    'たぬき': 'Tanuki', 'ひよこ': 'Chick', 'あざらし': 'Seal', 'アルパカ': 'Alpaca', 'こむぎ': 'Komugi',
+    'カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、カウンターの せきに なかまが すわって いるよ': 'Inside the café. The window shows the time outside. The Latte Otter is at the counter and friends are sitting at the counter seats.' });
+  ['ねこ', 'うさぎ', 'パンダ', 'りす', 'ペンギン', 'こぎつね', 'こいぬ', 'ハムスター', 'たぬき', 'ひよこ', 'あざらし', 'アルパカ', 'こむぎ'].forEach(n => { EX[n + 'に さわる'] = 'Tap ' + (EX[n] || n); });
   const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
   const title = () => { const E = window.TsuriEn; if (E && E.lang === 'en') document.title = 'Café Latte | Marufuwa Plaza'; };
   document.addEventListener('DOMContentLoaded', () => { reg(); title(); setTimeout(title, 300); setTimeout(title, 1200); });
@@ -137,51 +163,58 @@ document.addEventListener('DOMContentLoaded', () => {
   'use strict';
   const $ = id => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
   const q = new URLSearchParams(location.search);
-  const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
   const DRINKS = [
-    { id: 'cocoa', ja: 'ココア', c: '#8a5a44', hot: true }, { id: 'milktea', ja: 'ミルクティー', c: '#d9b48f', hot: true },
-    { id: 'apple', ja: 'りんごジュース', c: '#f0b84a', hot: false }, { id: 'tea', ja: 'おちゃ', c: '#9bbf6a', hot: true },
-    { id: 'milk', ja: 'ホットミルク', c: '#fff3e0', hot: true }, { id: 'honey', ja: 'はちみつレモン', c: '#ffd84d', hot: true }
+    { id: 'coffee', ja: 'コーヒー', c: '#4a2e18', hot: true }, { id: 'cocoa', ja: 'ココア', c: '#8a5a44', hot: true },
+    { id: 'milktea', ja: 'ミルクティー', c: '#d9b48f', hot: true }, { id: 'apple', ja: 'りんごジュース', c: '#f0b84a', hot: false },
+    { id: 'tea', ja: 'おちゃ', c: '#9bbf6a', hot: true }, { id: 'honey', ja: 'はちみつレモン', c: '#ffd84d', hot: true }
   ];
-  const GUESTS = [['neko', 'ねこ', 'friend-neko-s.webp'], ['usagi', 'うさぎ', 'friend-usagi-s.webp'], ['panda', 'パンダ', 'friend-panda-s.webp'], ['risu', 'りす', 'friend-risu-s.webp'], ['penguin', 'ペンギン', 'friend-penguin-s.webp'], ['kogitsune', 'こぎつね', 'friend-kogitsune-s.webp'], ['koinu', 'こいぬ', 'friend-koinu-s.webp'], ['hamster', 'ハムスター', 'friend-hamster-s.webp']];
+  const NAMES = { neko: 'ねこ', usagi: 'うさぎ', panda: 'パンダ', risu: 'りす', penguin: 'ペンギン', kogitsune: 'こぎつね', koinu: 'こいぬ', hamster: 'ハムスター', tanuki: 'たぬき', hiyoko: 'ひよこ', azarashi: 'あざらし', alpaca: 'アルパカ', komugi: 'こむぎ' };
+  const img = id => '../../img/friend-' + id + '-s.webp';
+  const SEATED = ['neko', 'usagi', 'panda', 'risu', 'penguin', 'kogitsune', 'koinu', 'hamster'];
+  const VISITORS = ['tanuki', 'hiyoko', 'azarashi', 'alpaca', 'komugi', 'koinu', 'kogitsune'];
   const BASE_LINES = ['ふぅ、あったかい', 'いい においだね', 'まどの そと、きれい', 'ぽかぽか するね', 'ゆっくり のむよ', 'ここ、おちつくね'];
   const T_LINES = { a: ['あさの カフェ、すてき'], h: [], y: ['ゆうやけ、きれいだね'], n: ['よるの カフェも いいね', 'おほしさま、きれい'] };
   const RAIN_LINES = ['あめの おと、すき', 'あめの ひの カフェ、いいね'];
+  const TAP_LINES = ['こんにちは', 'ゆっくり してるよ', 'おいしいね', 'ここ、すきなんだ', 'ありがとう'];
   const W = window.TsuriWorld, ctxW = (() => { try { return W && W.context(); } catch (e) { return null; } })();
   const time = /^[ahyn]$/.test(document.documentElement.dataset.time || '') ? document.documentElement.dataset.time : (ctxW && ctxW.time) || 'h';
   const rain = ctxW ? !!ctxW.rain : q.get('rain') === '1';
   const reduced = () => document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const cap = $('cap');
-  let state = { seated: false, drink: '', said: [], left: false };
-  const say = (who, line) => { cap.textContent = who + '：' + line + (line.endsWith('。') || /[てねよ。]$/.test(line) ? '' : ''); state.said.push([who, line]); };
+  const cap = $('cap'), over = $('over');
+  const state = { seated: false, drink: '', said: [], left: false, visits: 0, sips: 0, taps: 0, visitor: '' };
+  let skew = 0; const clock = () => performance.now() + skew;
+  const say = (who, line) => { cap.textContent = who + '：' + line; state.said.push([who, line]); };
+  const pos = (x, y) => [x / 4 + '%', y / 3 + '%'];   // 400×300 の ざひょう → ％
+  function bubble(x, y, text, ms) {
+    const b = document.createElement('div'); b.className = 'bub'; b.setAttribute('aria-hidden', 'true'); b.textContent = text; const [l, t] = pos(Math.max(80, Math.min(320, x)), y); b.style.left = l; b.style.top = t; over.append(b); setTimeout(() => b.remove(), ms || 4200); return b;
+  }
 
-  // まどの そと：いまの じかんと てんき
+  // まどの そと
   const orb = $('orb'), stars = $('stars'), rainEl = $('rain'), clouds = $('clouds');
   if (time === 'n') { orb.setAttribute('fill', '#fff6cf'); stars.setAttribute('opacity', '1'); clouds.setAttribute('opacity', '.35'); }
   else if (time === 'y') orb.setAttribute('fill', '#ff7a3d'); else if (time === 'a') orb.setAttribute('fill', '#ffb45e');
   if (rain) { rainEl.setAttribute('opacity', '.55'); orb.setAttribute('opacity', '.25'); $('outside').style.filter = 'saturate(.6) brightness(.88)'; clouds.setAttribute('opacity', '1'); }
 
-  // なかま 2〜3にん：まいかい ちがう（日づけと じかんで きまる）
-  const day = Math.floor(Date.now() / 36e5), pick = (n, k) => (day * 7 + k * 5 + n) % GUESTS.length;
-  const idx = [pick(0, 1), pick(0, 2)]; if (idx[1] === idx[0]) idx[1] = (idx[1] + 1) % GUESTS.length;
-  const crowd = (q.get('guests') ? Math.max(2, Math.min(3, Number(q.get('guests')) || 2)) : (day % 2 ? 3 : 2));
-  if (crowd === 3) { let k = (idx[1] + 3) % GUESTS.length; while (idx.includes(k)) k = (k + 1) % GUESTS.length; idx.push(k); }
-  const SPOTS = [[262, 160, 62], [326, 176, 56], [214, 176, 56]];
-  const gEl = $('guests'), guests = idx.slice(0, crowd).map((gi, i) => {
-    const g = GUESTS[gi], [x, y, w] = SPOTS[i], im = document.createElementNS(NS, 'image');
-    im.setAttribute('href', '../../img/' + g[2]); im.setAttribute('x', x); im.setAttribute('y', y + 8); im.setAttribute('width', w); im.setAttribute('height', w * 1.15); im.setAttribute('preserveAspectRatio', 'xMidYMax meet');
-    if (i > 0) { im.setAttribute('y', 214 - w * 1.0 + (i === 1 ? 6 : 0)); }
-    gEl.append(im); return { id: g[0], name: g[1], el: im };
+  // すわって いる なかま 2にん：カウンターの となりの せき・まどぎわの テーブル（日づけと じかんで かわる）
+  const day = Math.floor(Date.now() / 36e5), pickG = k => SEATED[(day * 7 + k * 5) % SEATED.length];
+  const g0 = pickG(1); let g1 = pickG(2); if (g1 === g0) g1 = SEATED[(SEATED.indexOf(g1) + 1) % SEATED.length];
+  const SPOTS = [{ id: g0, x: 250, cx: 250, w: 54, h: 66, y: 178, cupx: 250 }, { id: g1, x: 60, cx: 60, w: 52, h: 62, y: 180, cupx: 76 }];
+  const gEl = $('guests'), guests = SPOTS.map((sp, i) => {
+    const im = document.createElementNS(NS, 'image'); im.setAttribute('href', img(sp.id)); im.setAttribute('x', sp.x - sp.w / 2); im.setAttribute('y', sp.y); im.setAttribute('width', sp.w); im.setAttribute('height', sp.h); im.setAttribute('preserveAspectRatio', 'xMidYMax meet'); gEl.append(im);
+    const cup = document.createElementNS(NS, 'g'); cup.setAttribute('transform', 'translate(' + sp.cupx + ' ' + (i === 0 ? 150 : 240) + ')'); cup.innerHTML = '<ellipse cx="0" cy="3" rx="10" ry="3" fill="#0004"/><path d="M-8 -8 H8 L6 3 H-6Z" fill="#fff" stroke="#3a2412" stroke-width="2"/><ellipse cx="0" cy="-8" rx="7" ry="2.4" fill="#4a2e18"/>'; gEl.append(cup);
+    const hit = document.createElement('button'); hit.type = 'button'; hit.className = 'hit'; hit.dataset.id = sp.id; hit.setAttribute('aria-label', NAMES[sp.id] + 'に さわる');
+    const [l, t] = pos(sp.cx, sp.y + sp.h / 2); hit.style.left = l; hit.style.top = t; hit.style.width = hit.style.height = Math.max(44, sp.w * 1.05) / 400 * 100 + '%'; hit.style.aspectRatio = '1/1'; hit.style.minWidth = '44px'; hit.style.minHeight = '44px';
+    hit.addEventListener('click', () => tap(i)); $('stage').append(hit);
+    return { id: sp.id, name: NAMES[sp.id], el: im, x: sp.cx, y: sp.y, last: -1e9 };
   });
-  // ならびを せいり：2にんめ・3にんめは ゆかの うえ（カウンターの まえ）
-  if (guests[0]) guests[0].el.setAttribute('y', 100);   // カウンターの きゃくせき（ラテの かわうその よこ）
-  if (guests[1]) { guests[1].el.setAttribute('x', 318); guests[1].el.setAttribute('y', 214 - 56 * 1.15 + 20); }
-  if (guests[2]) { guests[2].el.setAttribute('x', 230); guests[2].el.setAttribute('y', 214 - 56 * 1.15 + 24); }
-  if (guests[0]) { guests[0].el.setAttribute('x', 232); guests[0].el.setAttribute('y', 88); guests[0].el.setAttribute('width', 54); guests[0].el.setAttribute('height', 66); }
+  function tap(i) {
+    const g = guests[i]; if (!g || state.left || clock() - g.last < 1500) return; g.last = clock(); state.taps++;
+    const L = TAP_LINES.concat(rain ? ['あめの おと、すき'] : [], time === 'n' ? ['よるの カフェも いいね'] : []), line = L[(day + state.taps * 3 + i) % L.length];
+    say(g.name, line); bubble(g.x, g.y - 2, line, 3600);
+  }
 
   // のみもの
   const menu = $('menu'), drinkEl = $('drink'), cup = $('cup'), me = $('me'), steam = $('steam');
-  const nm = d => d.ja;
   DRINKS.forEach(d => { const li = document.createElement('li'), b = document.createElement('button'), dot = document.createElement('i'); b.type = 'button'; b.dataset.id = d.id; dot.style.background = d.c; dot.setAttribute('aria-hidden', 'true'); b.append(dot, document.createTextNode(d.ja)); b.addEventListener('click', () => choose(d.id)); li.append(b); menu.append(li); });
   function choose(id) {
     const d = DRINKS.find(x => x.id === id); if (!d) return;
@@ -189,24 +222,40 @@ document.addEventListener('DOMContentLoaded', () => {
     state.seated = true; state.drink = id; drinkEl.setAttribute('fill', d.c); steam.style.display = d.hot ? '' : 'none'; cup.setAttribute('opacity', '1'); me.setAttribute('opacity', '1');
     $('pick').hidden = true; $('seated').hidden = false; $('leave').focus();
     if (first) say('ラテの かわうそ', 'ゆっくり していってね。'); else cap.textContent = 'ラテの かわうそ：' + d.ja + '、どうぞ。';
-    ensureBgm(); armTalk();
+    ensureBgm(); arm();
   }
   $('again').addEventListener('click', () => { $('pick').hidden = false; $('seated').hidden = true; cap.textContent = 'ラテの かわうそ：のみものを えらんでね。'; const b = menu.querySelector('button'); if (b) b.focus(); });
-  $('leave').addEventListener('click', () => { if (state.left) return; state.left = true; say('ラテの かわうそ', 'また きてね。'); clearTimeout(talkT); if (window.TsuriBgm) window.TsuriBgm.leave('tank'); setTimeout(() => { location.href = $('back').getAttribute('href'); }, state.testNoNav ? 99999999 : 1800); });
+  $('leave').addEventListener('click', () => { if (state.left) return; state.left = true; say('ラテの かわうそ', 'また きてね。'); clearInterval(timer); if (window.TsuriBgm) window.TsuriBgm.leave('tank'); setTimeout(() => { location.href = $('back').getAttribute('href'); }, state.testNoNav ? 99999999 : 1800); });
 
-  // なかまの ひとこと：60びょうに 1かい いか（さいしょは 30びょうごろ）。うごき・おとは なし
-  let talkT = 0, lastTalk = -1e9, skew = 0, k = 0;
-  const clock = () => performance.now() + skew;
+  // ─── じかんの ながれ（1びょうごとに はかる）───
+  //  なかまの ひとこと：60びょうに 1かい いか／じぶんの「おいしい」：75びょう あき／おきゃくさん：2〜5ふんに 1かい
+  let timer = 0, lastTalk = 0, lastSip = 0, nextVisit = 0, k = 0, visiting = null;
   const linesFor = () => BASE_LINES.concat(T_LINES[time] || [], rain ? RAIN_LINES : []);
   function talk() {
-    if (!state.seated || state.left || document.hidden) return;
-    if (clock() - lastTalk < 60000) return;
-    const g = guests[k % guests.length], L = linesFor(), line = L[(day + k * 3) % L.length]; k++;
-    lastTalk = clock(); say(g.name, line);
+    if (clock() - lastTalk < 60000) return; const g = guests[k % guests.length], L = linesFor(), line = L[(day + k * 3) % L.length]; k++; lastTalk = clock(); say(g.name, line); bubble(g.x, g.y - 2, line, 4200);
   }
-  function armTalk() { if (talkT) return; lastTalk = clock() - 30000; talkT = setInterval(talk, 2000); }   // 30びょうあとに さいしょの ひとこと
+  function sip() { if (clock() - lastSip < 75000) return; lastSip = clock(); state.sips++; bubble(170, 172, 'おいしい', 3200); }
+  const vcup = $('vcup'), vis = $('visitor');
+  function visit() {
+    if (visiting || !state.seated || state.left) return false;
+    const id = VISITORS[(day + state.visits * 3) % VISITORS.length], name = NAMES[id]; state.visits++; state.visitor = id;
+    const im = document.createElementNS(NS, 'image'); im.setAttribute('href', img(id)); im.setAttribute('x', 318); im.setAttribute('y', 188); im.setAttribute('width', 56); im.setAttribute('height', 74); im.setAttribute('preserveAspectRatio', 'xMidYMax meet'); vis.replaceChildren(im);
+    vis.style.transition = reduced() ? 'none' : ''; vis.style.transform = 'translateX(130px)'; void vis.getBoundingClientRect(); vis.style.transform = 'translateX(0)';
+    visiting = { t0: clock(), step: 0, name, id };
+    return true;
+  }
+  function visitStep() {
+    if (!visiting) return; const dt = clock() - visiting.t0, v = visiting;
+    if (v.step === 0 && dt >= 2600) { v.step = 1; say(v.name, 'コーヒー ください'); bubble(346, 178, 'コーヒー ください', 3800); }
+    else if (v.step === 1 && dt >= 6500) { v.step = 2; vcup.setAttribute('transform', 'translate(346 152)'); vcup.setAttribute('opacity', '1'); }
+    else if (v.step === 2 && dt >= 8500) { v.step = 3; say(v.name, 'ありがとう'); bubble(346, 178, 'ありがとう', 3200); }
+    else if (v.step === 3 && dt >= 12000) { v.step = 4; vcup.setAttribute('opacity', '0'); vis.style.transition = reduced() ? 'none' : ''; vis.style.transform = 'translateX(130px)'; }
+    else if (v.step === 4 && dt >= 15000) { vis.replaceChildren(); visiting = null; nextVisit = clock() + 120000 + Math.random() * 180000; }
+  }
+  function tickAll() { if (!state.seated || state.left || document.hidden) return; talk(); if (clock() - lastSip > 75000 && clock() - lastTalk > 6000) sip(); visitStep(); if (!visiting && clock() >= nextVisit) visit(); }
+  function arm() { if (timer) return; const n = clock(); lastTalk = n - 30000; lastSip = n - 40000; nextVisit = n + 120000 + Math.random() * 180000; timer = setInterval(tickAll, 1000); }
 
-  // BGM（ひろば・おへやと おなじ曲 heya）：はじめは OFF。ボタンで ON。おとは さいしょの タップの あとで
+  // BGM（ひろば・おへやと おなじ曲 heya）：はじめは OFF
   let ac = null;
   function ensureBgm() {
     const B = window.TsuriBgm; if (!B || ensureBgm.done) return; ensureBgm.done = true;
@@ -219,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   addEventListener('pagehide', () => { if (window.TsuriBgm) window.TsuriBgm.leave('tank'); });
 
-  window.Cafe = { state: () => ({ seated: state.seated, drink: state.drink, left: state.left, said: state.said.slice(), guests: guests.map(g => g.id), time, rain, drinks: DRINKS.length }), choose, skew: ms => { skew += ms; }, noNav: () => { state.testNoNav = true; }, talk, DRINKS: DRINKS.map(d => d.id) };
+  window.Cafe = { state: () => ({ seated: state.seated, drink: state.drink, left: state.left, said: state.said.slice(), guests: guests.map(g => g.id), time, rain, drinks: DRINKS.length, visits: state.visits, sips: state.sips, taps: state.taps, visiting: !!visiting, bubbles: over.children.length }), choose, tap, visit, skew: ms => { skew += ms; }, noNav: () => { state.testNoNav = true; }, talk, DRINKS: DRINKS.map(d => d.id) };
 });
 </script>
 <script src="../../tsuri-town.js"></script>
