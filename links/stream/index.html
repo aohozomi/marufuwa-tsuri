@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<title>はいしん・どうがで つかう かたへ｜まるふわ つりびより</title>
+<meta name="description" content="まるふわ つりびよりを はいしん・どうがで つかう かたへ：つかって OK です。BGM の きまりも まとめました。">
+<meta name="theme-color" content="#b9edf5">
+<link rel="icon" type="image/png" sizes="32x32" href="../../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../../img/icon-180.png">
+<script>
+try {
+  var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d = document.documentElement, qs = new URLSearchParams(location.search);
+  var mp = {asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n', a: 'a', h: 'h', y: 'y', n: 'n'}, tt = mp[qs.get('time')] || (typeof sv.time === 'string' && mp[sv.time]) || (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n');
+  if (matchMedia('(prefers-color-scheme: dark)').matches || tt === 'n') { d.dataset.night = 'true'; var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = '#0f1c33'; }
+  if (sv.large === true) d.dataset.large = 'true';
+  if (sv.calm === true) d.dataset.calm = 'true';
+  if ((qs.get('lang') || localStorage.getItem('marufuwa-lang-v1')) === 'en') { d.lang = 'en'; window.TsuriEn = {lang: 'en'}; }
+} catch (e) {}
+</script>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:#244653;background:#edf6fa;color-scheme:light;touch-action:manipulation;--ink:#244653;--soft:#506874;--line:#b9cbd4;--card:#ffffffe6;--ok:#1d6b46;--ng:#9b2c2c}
+:root[data-night=true]{color:#e8f1f8;background:#0f1c33;color-scheme:dark;--ink:#e8f1f8;--soft:#a9bfd2;--line:#4a6b8c;--card:#1a3250f2;--ok:#7fe0aa;--ng:#ff9a9a}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+.skip{position:absolute;left:8px;top:-80px;z-index:200;padding:12px 16px;border-radius:14px;background:#fff;color:#0b4a6b;font-weight:800;text-decoration:none;border:3px solid #0b4a6b}
+.skip:focus{top:8px}
+main{max-width:560px;margin:0 auto;padding:18px 16px calc(40px + env(safe-area-inset-bottom));word-break:keep-all;overflow-wrap:break-word}
+.back{display:inline-flex;align-items:center;min-height:48px;min-width:44px;padding:6px 16px;margin:0 0 8px;border-radius:999px;border:3px solid #fff;background:linear-gradient(180deg,#ffffffd9,#bfe6f9b3);box-shadow:0 4px 0 #9cc9e0;color:#244653;font-weight:800;text-decoration:none}
+h1{margin:6px 0 6px;font-size:1.35rem;line-height:1.45}
+.lead{margin:0 0 16px;font-size:.98rem;line-height:1.8;text-wrap:balance}
+section{margin:0 0 12px;padding:12px 14px;border-radius:18px;background:var(--card);border:2px solid var(--line)}
+h2{margin:0 0 6px;font-size:1.05rem;line-height:1.5}
+ul{margin:0;padding-left:1.2em}
+li{margin:4px 0;line-height:1.7;font-size:.95rem}
+.ok{color:var(--ok);font-weight:900}
+.ng{color:var(--ng);font-weight:900}
+.mark{display:inline-block;min-width:1.4em;text-align:center}
+.copybox{margin:8px 0 6px;padding:10px 12px;border-radius:12px;border:2px dashed var(--line);font-size:.92rem;line-height:1.7;user-select:all;-webkit-user-select:all}
+.btn{--side:#9cc9e0;display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:44px;padding:6px 18px;font:inherit;font-weight:800;color:#244653;text-decoration:none;cursor:pointer;border:3px solid #fff;border-radius:999px;background:linear-gradient(180deg,#ffffffd9,#bfe6f9b3);box-shadow:0 4px 0 var(--side),0 8px 12px #2446532b}
+.btn:active{transform:translateY(3px)}
+.btn:focus-visible,a:focus-visible,.confirm a:focus-visible,.confirm button:focus-visible{outline:3px solid #0b4a6b;outline-offset:0;box-shadow:0 0 0 6px #fff}
+:root[data-night=true] .btn,:root[data-night=true] .back{filter:brightness(.9)}
+.confirm{margin:8px 0 0;padding:12px;border-radius:16px;background:var(--card);border:3px solid var(--line);text-align:center}
+.confirm[hidden]{display:none}
+.confirm p{margin:0 0 8px;font-weight:800}
+.confirm .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.confirm a,.confirm button{min-height:48px;min-width:110px;padding:6px 16px;display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:800;border-radius:999px;cursor:pointer;text-decoration:none}
+.confirm a{background:#a83a63;color:#fff;border:3px solid #fff}
+.confirm button{background:#fff;color:#244653;border:3px solid #b9cbd4}
+:root[data-night=true] .confirm button{background:#1a3250;color:#e8f1f8;border-color:#4a6b8c}
+.small{font-size:.82rem;color:var(--soft);line-height:1.7;margin:6px 0 0}
+:root[data-calm=true] .btn{transition:none}
+@media(prefers-reduced-motion:reduce){.btn:active{transform:none}}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+</style>
+</head>
+<body>
+<a class="skip" id="skip" href="#main">ほんぶんへ とぶ</a>
+<main id="main">
+  <a class="back" id="back" href="../">いりぐちに もどる</a>
+  <h1 id="title" tabindex="-1">はいしん・どうがで つかう かたへ</h1>
+  <p class="lead" id="lead">まるふわ つりびよりは、はいしんや どうがで つかって だいじょうぶです。れんらくも いりません。きまりは この ページに まとめました。</p>
+
+  <section aria-labelledby="h-ok"><h2 id="h-ok">つかって OK</h2><ul>
+    <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only" id="sr-ok1">OK：</span><span id="t-ok1">ゲームの がめんと おとを、はいしん・どうが（ゲームじっきょう・つりはいしん・さぎょうはいしん など）で うつして OK。</span></li>
+    <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only" id="sr-ok2">OK：</span><span id="t-ok2">ゲームの しゃしんカードの がぞうは、じゆうに はって OK（ブログ・SNS・どうがの サムネイル など）。</span></li>
+    <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only" id="sr-ok3">OK：</span><span id="t-ok3">なみの おとは ほんものの みずうみの ろくおん（パブリックドメイン）です。</span></li>
+  </ul></section>
+
+  <section aria-labelledby="h-name"><h2 id="h-name">がいようらんに かいて もらえると うれしい（にんい）</h2>
+    <p class="small" id="t-name">かかなくても かまいません。かいて くれる ときは、ゲームの なまえと URL を。</p>
+    <div class="copybox" id="copytext" tabindex="0" data-noruby>まるふわ つりびより（むりょう・ログインなし）https://aohozomi.github.io/marufuwa-tsuri/</div>
+    <button type="button" class="btn" id="copy">コピーする</button>
+    <div class="sr-only" id="live" role="status" aria-live="polite"></div>
+  </section>
+
+  <section aria-labelledby="h-bgm"><h2 id="h-bgm">BGM の きまり</h2>
+    <p class="small" id="t-bgm0" style="margin-top:0">ゲームの BGM は フリーおんがくそざい「OpenTracks（きゅう DOVA-SYNDROME）」の きょくです。</p>
+    <ul>
+      <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only" id="sr-b1">OK：</span><span id="t-b1">はいしん・どうがの はいけいおんがくとして つかう（ゲームを うつして いて きょくが ながれる）。</span></li>
+      <li><span class="ng mark" aria-hidden="true">×</span><span class="sr-only" id="sr-b2">だめ：</span><span id="t-b2">きょくだけを とりだして くばったり、うったり しない。</span></li>
+      <li><span class="ng mark" aria-hidden="true">×</span><span class="sr-only" id="sr-b3">だめ：</span><span id="t-b3">きょくを Content ID（YouTube の ちょさくけんの じどう とうろく）に とうろく しない。</span></li>
+      <li><span class="ng mark" aria-hidden="true">×</span><span class="sr-only" id="sr-b4">だめ：</span><span id="t-b4">「さぎょうよう BGM」「ヒーリング ミュージック」の ように、きょくを おもな なかみに した どうがに しない。</span></li>
+    </ul>
+    <p class="small" id="t-bgm1">くわしくは OpenTracks の ライセンスを みてね。</p>
+    <button type="button" class="btn" id="b-lic" aria-expanded="false" aria-controls="c-lic">ライセンスの ページ（そと）</button>
+    <div class="confirm" id="c-lic" hidden role="group" aria-labelledby="q-lic"><p id="q-lic">そとの ページを ひらきます。いいですか？</p><div class="row"><a id="a-lic" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-lic">やめる</button></div></div>
+  </section>
+
+  <section aria-labelledby="h-se"><h2 id="h-se">こうかおん</h2>
+    <p class="small" id="t-se" style="margin-top:0">こうかおんは いま おやすみちゅう です。つかえる ように なったら、ここに かきます。</p>
+  </section>
+</main>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+<script>
+/* はいしん・どうがで つかう かたへ（ジョブズ2・2026-10-02）。通信なし・ほぞんなし。外へ ひらく 1つは「いいですか？」を 出してから（リンクは その とき はじめて つく）。 */
+(function () {
+  'use strict';
+  const LICENSE = 'https://opentracks.com/help/articles/license/';
+  const GAME = 'まるふわ つりびより（むりょう・ログインなし）https://aohozomi.github.io/marufuwa-tsuri/';
+  const EN = new URLSearchParams(location.search).get('lang') === 'en' || (() => { try { return localStorage.getItem('marufuwa-lang-v1') === 'en'; } catch (e) { return false; } })();
+  const T = (ja, en) => EN ? en : ja;
+  const $ = id => document.getElementById(id);
+  const set = (id, ja, en) => { const e = $(id); if (e) e.textContent = T(ja, en); };
+  document.title = T('はいしん・どうがで つかう かたへ｜まるふわ つりびより', 'For streamers and video makers | Marufuwa Fishing Days');
+  set('skip', 'ほんぶんへ とぶ', 'Skip to the content'); set('back', 'いりぐちに もどる', 'Back'); set('title', 'はいしん・どうがで つかう かたへ', 'For streamers and video makers');
+  set('lead', 'まるふわ つりびよりは、はいしんや どうがで つかって だいじょうぶです。れんらくも いりません。きまりは この ページに まとめました。', 'You are welcome to use Marufuwa Fishing Days in streams and videos. No need to ask. The rules are below.');
+  set('h-ok', 'つかって OK', 'Go ahead'); set('sr-ok1', 'OK：', 'OK: '); set('sr-ok2', 'OK：', 'OK: '); set('sr-ok3', 'OK：', 'OK: ');
+  set('t-ok1', 'ゲームの がめんと おとを、はいしん・どうが（ゲームじっきょう・つりはいしん・さぎょうはいしん など）で うつして OK。', 'Show the game screen and sound in streams and videos (let’s plays, fishing streams, work streams…).');
+  set('t-ok2', 'ゲームの しゃしんカードの がぞうは、じゆうに はって OK（ブログ・SNS・どうがの サムネイル など）。', 'Photo-card images from the game are free to post anywhere (blogs, social media, thumbnails…).');
+  set('t-ok3', 'なみの おとは ほんものの みずうみの ろくおん（パブリックドメイン）です。', 'The wave sound is a real lake recording (public domain).');
+  set('h-name', 'がいようらんに かいて もらえると うれしい（にんい）', 'A credit in the description would be lovely (optional)');
+  set('t-name', 'かかなくても かまいません。かいて くれる ときは、ゲームの なまえと URL を。', 'You don’t have to. If you do, the game’s name and URL are enough.');
+  $('copytext').textContent = T(GAME, 'Marufuwa Fishing Days (free, no login) https://aohozomi.github.io/marufuwa-tsuri/');
+  set('copy', 'コピーする', 'Copy');
+  set('h-bgm', 'BGM の きまり', 'About the music');
+  set('t-bgm0', 'ゲームの BGM は フリーおんがくそざい「OpenTracks（きゅう DOVA-SYNDROME）」の きょくです。', 'The game’s music is from the free music library “OpenTracks (formerly DOVA-SYNDROME)”.');
+  set('sr-b1', 'OK：', 'OK: '); set('sr-b2', 'だめ：', 'Not allowed: '); set('sr-b3', 'だめ：', 'Not allowed: '); set('sr-b4', 'だめ：', 'Not allowed: ');
+  set('t-b1', 'はいしん・どうがの はいけいおんがくとして つかう（ゲームを うつして いて きょくが ながれる）。', 'Using it as background music in streams and videos (the game is on screen and the music plays).');
+  set('t-b2', 'きょくだけを とりだして くばったり、うったり しない。', 'Do not extract the music to share or sell it on its own.');
+  set('t-b3', 'きょくを Content ID（YouTube の ちょさくけんの じどう とうろく）に とうろく しない。', 'Do not register the music with Content ID (YouTube’s automatic copyright system).');
+  set('t-b4', '「さぎょうよう BGM」「ヒーリング ミュージック」の ように、きょくを おもな なかみに した どうがに しない。', 'Do not make “study/work BGM” or “healing music” videos where the music is the main content.');
+  set('t-bgm1', 'くわしくは OpenTracks の ライセンスを みてね。', 'See the OpenTracks license for details.');
+  set('b-lic', 'ライセンスの ページ（そと）', 'License page (outside)');
+  set('q-lic', 'そとの ページを ひらきます。いいですか？', 'This opens an outside page. Is that OK?'); set('a-lic', 'ひらく', 'Open'); set('n-lic', 'やめる', 'Cancel');
+  set('h-se', 'こうかおん', 'Sound effects'); set('t-se', 'こうかおんは いま おやすみちゅう です。つかえる ように なったら、ここに かきます。', 'Sound effects are paused for now. We will write here when they are available.');
+  const say = t => { const l = $('live'); l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); };
+  $('copy').addEventListener('click', async () => {
+    const text = $('copytext').textContent; let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {}
+    if (!ok) { try { const r = document.createRange(); r.selectNodeContents($('copytext')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {} }
+    say(ok ? T('コピー しました。', 'Copied.') : T('もじを えらびました。コピーして ください。', 'Text selected. Please copy it.'));
+  });
+  const b = $('b-lic'), box = $('c-lic'), a = $('a-lic');
+  function close(back) { box.hidden = true; a.removeAttribute('href'); b.setAttribute('aria-expanded', 'false'); if (back) b.focus(); }
+  b.addEventListener('click', () => { if (!box.hidden) { close(false); return; } a.href = LICENSE; box.hidden = false; b.setAttribute('aria-expanded', 'true'); a.focus(); say($('q-lic').textContent); });
+  $('n-lic').addEventListener('click', () => close(true));
+  a.addEventListener('click', () => { setTimeout(() => close(false), 50); });
+  box.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); close(true); } });
+})();
+</script>
+</body>
+</html>
