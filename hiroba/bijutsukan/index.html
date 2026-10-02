@@ -207,11 +207,13 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="../../tsuri-town.js"></script>   <!-- 街人の なまえ・English（tsuri-en.js が 読む） -->
 <script defer src="../../tsuri-bgm.js"></script>
 <script defer src="../../tsuri-pagesound.js"></script>
+<script defer src="../../tsuri-pagebg.js"></script>
 <script defer src="../../tsuri-en.js"></script>
 <script defer src="../../tsuri-en-hiroba.js"></script>
 <script defer src="../../tsuri-ruby-dict.js"></script>
 <script defer src="../../tsuri-ruby.js"></script>
 <script defer src="../../tsuri-own.js"></script>
 <script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ mount: document.getElementById('back'), bgm: 'hiroba', time: () => document.documentElement.dataset.time }); });</script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageBg) PageBg.init('bijutsukan'); });</script>
 </body>
 </html>

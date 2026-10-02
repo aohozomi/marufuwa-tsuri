@@ -171,6 +171,7 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
 </script>
 <script defer src="../../tsuri-bgm.js"></script>
 <script defer src="../../tsuri-pagesound.js"></script>
+<script defer src="../../tsuri-pagebg.js"></script>
 <script defer src="../../tsuri-en.js"></script>
 <script defer src="../../tsuri-ruby-dict.js"></script>
 <script defer src="../../tsuri-ruby.js"></script>
@@ -199,5 +200,6 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
 })();
 </script>
 <script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ mount: document.getElementById('back'), bgm: 'hiroba', time: () => document.documentElement.dataset.time }); });</script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageBg) PageBg.init('osusume'); });</script>
 </body>
 </html>
