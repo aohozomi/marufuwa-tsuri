@@ -99,7 +99,7 @@ button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-s
 #scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
 .skip{position:absolute;left:8px;top:-80px;z-index:200;padding:12px 16px;border-radius:14px;background:#fff;color:#0b4a6b;font-weight:800;text-decoration:none;border:3px solid #0b4a6b}
 .skip:focus{top:8px}   /* Tab の ひとつ めで「なげる」へ とべる（おおくの ボタンを とばせる） */
-.friend-hit{position:absolute;z-index:3;width:13%;height:24%;min-height:0;padding:0;transform:translate(-50%,-100%);background:none;border:0;border-radius:40%;box-shadow:none;cursor:pointer}   /* なかまの うえの みえない ボタン（おすと はなしかける） */
+.friend-hit{position:absolute;z-index:3;width:13%;min-width:44px;height:24%;min-height:44px;padding:0;transform:translate(-50%,-100%);background:none;border:0;border-radius:40%;box-shadow:none;cursor:pointer}   /* なかまの うえの みえない ボタン（おすと はなしかける） */
 .friend-hit::before,.friend-hit::after{display:none}
 #scene:not([data-phase=idle]):not([data-phase=waiting]) .friend-hit,#scene[data-tooku=true] .friend-hit,body.gazing .friend-hit{pointer-events:none}   /* まって いる とき・なにも して いない ときだけ おせる（ひく とき・カードが でて いる ときは けしきを おして「ひく」「カード」が できる） */
 .spot::after{content:"";position:absolute;inset:-7px;border-radius:50%}   /* みえない あたりはんてい。ちいさい こや ゆびが ふるえる ひとが おしやすい */
@@ -327,6 +327,9 @@ html[data-clip] #scene{position:fixed;inset:0;z-index:20;width:auto;height:auto;
 @media (min-aspect-ratio:4/3){html[data-clip] #scene{inset:auto;left:50%;top:50%;translate:-50% -50%;width:min(100vw,133.333dvh);height:min(100dvh,75vw)}}
 html[data-clip] #scene :is(#quit,.plop,#keeper,.friend,.friend-float,.friend-hit,.bubble,.spot,#next-go,.edge-go,#hp,#hp-label,#tension,#combo,#swim-tag,#judge,#bang,#equip,#gaze-cap,#rod-a,#rod-b,#line-a,#line-b,#ibasho),html[data-clip] rt,html[data-clip] dialog:not([open]){display:none !important}
 html[data-clip] #main-button{display:block !important;position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;overflow:hidden}
+#topmute .lang-row{margin:0 auto 0 0 !important;text-align:left !important}   /* English／日本語 の きりかえは うえの ひだりに ちいさく（さいしょの がめんで みえる） */
+#topmute .lang-row button{min-height:44px;padding:4px 12px !important;font-size:.8rem !important;background:#ffffffd9 !important;color:#17323d !important;border-color:#286b88 !important;opacity:1 !important}
+.mini-progress{margin:2px 0 4px;text-align:center;font-size:.85rem;font-weight:800;color:#35566a}   /* なげる の ちかくの ちいさな すすみぐあい（せかさない） */
 /* いちばん うえの 🔇 おとを けす（まるいろと おなじ しき。おとは はじめから ON） */
 .topmute{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:6px 12px 0;max-width:640px;margin:0 auto}
 .mutebtn{min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid #286b88;background:#fff;color:#17323d;font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation}
@@ -362,7 +365,7 @@ body.gazing #tegami{display:none}
 .bubble{position:absolute;z-index:7;transform:translate(-50%,-100%);background:#fff;border:2px solid #b9d1db;border-radius:14px;padding:2px 10px;font-size:.8rem;font-weight:800;white-space:nowrap;pointer-events:none}
 .bubble[hidden]{display:none}
 /* バケツ：じめんに おいて ある、りったいの バケツ。かげが じめんに おちる */
-.spot{position:absolute;z-index:1;width:11%;min-height:0;aspect-ratio:1/1;padding:0;transform:translate(-50%,-78%);border:0;border-radius:50%;background:none}
+.spot{position:absolute;z-index:1;width:11%;min-width:44px;min-height:44px;aspect-ratio:1/1;padding:0;transform:translate(-50%,-78%);border:0;border-radius:50%;background:none}
 .spot svg{position:static;width:100%;height:100%;display:block;pointer-events:none;animation:nudge 2.4s ease-in-out infinite}
 .spot[aria-pressed=true] svg{animation:none;opacity:.55}
 body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.5s ease-in-out infinite}   /* はじめの すうひきの あいだ だけ：ほかの せきが ゆらゆら（「えらべるよ」の しるし） */
@@ -961,6 +964,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   </div>
 
   <button id="area-open" type="button" class="area-open">つりばを かえる ▸</button>
+  <p class="mini-progress" id="mini-progress" hidden></p>
   <div class="actions">
     <button id="main-button" type="button">なげる</button>
     <button id="take-photo" type="button" hidden>しゃしんを とる</button>
@@ -1587,6 +1591,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     held.style.scale = big ? '.72' : '.6'; const sc = scene.getBoundingClientRect(), w = marufuwa.offsetWidth, h = marufuwa.offsetHeight, l0 = marufuwa.offsetLeft - w / 2, t0 = marufuwa.offsetTop - h, hg = POSE_DEF.hang, tx = l0 + hg[0] * w + 3, ty = t0 + hg[1] * h + hg[2];   // とびはねの うごきに よらない もとの いち（レイアウトの ざひょう）
     place(held, {x: Math.min(95, Math.max(5, tx / sc.width * 100)), y: Math.min(95, (ty + held.offsetHeight * ((big ? .72 : .6) / 2 + .5)) / sc.height * 100)});
   }
+  function fixHits() {   // せきの ボタン（44px いじょう）と なかまの はなす ボタン（44px いじょう）が かさならない：かさなる なかまの ボタンを うえへ ずらす（なかまの あたまの ほうへ）
+    const talks = [$('talk-a'), $('talk-b')], spotsEl = [...document.querySelectorAll('#scene .spot')]; if (!talks[0] || !spotsEl.length) return;
+    talks.forEach(t => { t.style.marginTop = ''; });
+    talks.forEach(t => { if (t.hidden) return; let r = t.getBoundingClientRect(), dy = 0; if (!r.width) return;
+      spotsEl.forEach(sp => { const q = sp.getBoundingClientRect(); if (r.left < q.right && r.right > q.left && r.top - dy < q.bottom && r.bottom - dy > q.top) dy = Math.max(dy, r.bottom - q.top + 1); });
+      if (dy > 0) t.style.marginTop = (-dy) + 'px'; });
+  }
   function layout() {
     place(marufuwa, feet(mine)); footFix(); place($('friend-a'), feet(friends[0])); place($('friend-b'), feet(friends[1]));
     place($('talk-a'), {x: feet(friends[0]).x, y: feet(friends[0]).y - 6}); place($('talk-b'), {x: feet(friends[1]).x, y: feet(friends[1]).y - 6});
@@ -1598,6 +1609,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     rod($('line-me'), mine, 12, $('rod-me'));
     $('line-me').style.display = casting && !flying ? '' : 'none';
     spots.forEach((spot, i) => { spot.setAttribute('aria-pressed', String(i === mine)); place(spot, {x: SPOT_X[i] + 10, y: shore(SPOT_X[i] + 10) - 6}); });   // バケツは りくの うえ（みずぎわより うえ）
+    try { fixHits(); } catch {}
     if ((phase === 'idle' || phase === 'caught') && typeof placeNav === 'function') { try { placeNav(); } catch {} }
   }
   function moveTo(i) {
@@ -2104,12 +2116,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // メニューの ひらく レベル（つりびと レベル）：すいそう 3・なかま 5・どうぐ／きねん 8
   const MENU_LV = {tank: 3, nakama: 5, gear: 8};
   function menuGate() { const lv = levelOf(save.xp || 0), b = document.documentElement; b.dataset.mTank = String(lv >= MENU_LV.tank); b.dataset.mNakama = String(lv >= MENU_LV.nakama); b.dataset.mGear = String(lv >= MENU_LV.gear); }   // さいしょの 値は head の script が いれる（ちらつき なし）
+  function drawMini() { const mp = $('mini-progress'); if (!mp) return; mp.hidden = !(save.total > 0); if (save.total > 0) mp.textContent = L('ずかん ' + seenCount() + 'しゅ ・ レベル ' + levelOf(save.xp || 0), 'Book: ' + seenCount() + ' · Level ' + levelOf(save.xp || 0)); }
+  addEventListener('load', () => { try { drawMini(); } catch {} }); setTimeout(() => { try { drawMini(); } catch {} }, 900);   // English の ひょうが そろって から もういちど
   function hud() {
     $('total').textContent = String(save.total); drawPlazaNote(); menuGate();   // レベルで メニューを ひらく
     drawToday(); drawBadge(); drawSeatHint();
     $('seen').textContent = $('book-seen').textContent = String(seenCount()); $('seen-ring').style.setProperty('--p', Math.round(Math.min(1, seenCount() / BASE) * 100) + '%');
     const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
     $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%';
+    drawMini();   // さいしょの 1ぴきまでは 出さない（かずを みせない）
   }
 
   function cast() {
@@ -2666,7 +2681,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     [$('edge-prev'), $('edge-next')].forEach(b => { if (b.hidden) return; const r = b.getBoundingClientRect(), t = top(r.left, r.right); const y = Math.max(sc.top + 4, Math.min(sc.top + sc.height * .07, t - r.height - 4)); b.style.top = (y - sc.top) / sc.height * 100 + '%'; });
   }
-  addEventListener('resize', () => { try { placeNav(); } catch {} }); addEventListener('load', () => setTimeout(() => { try { placeNav(); } catch {} }, 1100));
+  addEventListener('resize', () => { try { fixHits(); placeNav(); } catch {} }); addEventListener('load', () => setTimeout(() => { try { placeNav(); } catch {} }, 1100));
   let goTarget = null;
   $('next-go').addEventListener('click', event => { event.stopPropagation(); const nx = AREAS[areaIdx() + 1]; if (!nx) return; if (!areaOpen(nx)) { lockedSay(nx); return; } goTarget = nx; $('areago-q').textContent = L(nx.name + 'へ いく？', 'Go to ' + T(nx.name) + '?'); $('areago').showModal(); $('areago-yes').focus(); });
   $('areago-yes').addEventListener('click', () => { $('areago').close(); switchArea(goTarget); });
@@ -4204,6 +4219,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   drawWater(performance.now()); drawSky(performance.now()); drawSoil();
   if (!reduce()) requestAnimationFrame(flow); else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
   drawSound();
+  { const moveLang = () => { const row = document.querySelector('.lang-row'), bar = $('topmute'); if (row && bar && row.parentNode !== bar) bar.prepend(row); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(moveLang, 0)); else setTimeout(moveLang, 0);
+    addEventListener('load', moveLang); setTimeout(moveLang, 800); }   // tsuri-en.js が さいごに つくる きりかえボタンを うえの ひだりへ
   $('mute-top').addEventListener('click', () => { $('sound').click(); if (window.TsuriBgm && TsuriBgm.set) { try { TsuriBgm.set(!!save.sound); } catch {} } drawMute(); });   // 上の ボタン：こうかおん・なみ・BGM を ぜんぶ いっしょに
   { const first = () => { removeEventListener('click', first); if (save.sound) { try { startAmbient(); } catch {} } };   // AudioContext は BGM の ためだけ（ここでは つくらない）   // ブラウザの きまり：さいしょの タップ（click）から なる。🔇で OFF に した その タップでは つくらない（ボタンの あとで しらべる）
     addEventListener('click', first); }
