@@ -170,11 +170,13 @@
   const RICE_D = roundTriD([[15, 2.5], [28, 24], [2, 24]], .3, .06);
   const RICE_KINDS = [{ k: 'onigiri', ja: 'おにぎり' }, { k: 'acorn', ja: 'どんぐり' }, { k: 'shell', ja: 'かいがら' }, { k: 'flower', ja: 'おはな' }];
   const riceKind = RICE_KINDS[Math.floor(Date.now() / 864e5) % 4], riceName = riceKind.ja;   // ちゃぶ台の ものは 日づけで こうたい（おにぎりは 4日に 1かい・同じ 画面に 1つまで）
-  const riceSvg = () => {
+  let riceImgOk = null;   // 天の おにぎりの えが よめたか（よめない ときは SVG）
+  const riceSvg = (vec) => {
     const H = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 26" width="30" height="26">', E = '</svg>', ink = '#7a4b34';
     if (riceKind.k === 'acorn') return H + '<ellipse cx="15" cy="16" rx="8" ry="8.5" fill="#d9a35f" stroke="' + ink + '" stroke-width="2"/><path d="M5.5 11 Q15 1 24.5 11 Q15 13 5.5 11Z" fill="#8a5a35" stroke="' + ink + '" stroke-width="2" stroke-linejoin="round"/>' + E;
     if (riceKind.k === 'shell') return H + '<path d="M15 24 Q3 17 5 9 Q15 2 25 9 Q27 17 15 24Z" fill="#ffd1c4" stroke="' + ink + '" stroke-width="2" stroke-linejoin="round"/><path d="M15 23 L9 9 M15 23 L15 6 M15 23 L21 9" stroke="' + ink + '" stroke-width="1.3" fill="none" stroke-linecap="round"/>' + E;
     if (riceKind.k === 'flower') { let p = ''; for (let i = 0; i < 5; i++) { const t = i / 5 * Math.PI * 2 - Math.PI / 2; p += '<circle cx="' + (15 + Math.cos(t) * 6.5).toFixed(1) + '" cy="' + (13 + Math.sin(t) * 6.5).toFixed(1) + '" r="4.4" fill="#ffb6c9" stroke="' + ink + '" stroke-width="1.6"/>'; } return H + p + '<circle cx="15" cy="13" r="3.4" fill="#ffd84d" stroke="' + ink + '" stroke-width="1.6"/>' + E; }
+    if (!vec && riceKind.k === 'onigiri' && riceImgOk !== false) return '<img class="tk-riceimg" alt="" decoding="async" src="' + BASE + 'img/food/onigiri_' + (Math.floor(Date.now() / 864e5) % 3 + 1) + '.webp">';
     return H + '<defs><clipPath id="rcl"><path d="' + RICE_D + '"/></clipPath></defs><path d="' + RICE_D + '" fill="#fff7e6"/><g clip-path="url(#rcl)"><rect x="1" y="17" width="28" height="9" rx="3.5" fill="#3f5a4a"/></g><path d="' + RICE_D + '" fill="none" stroke="' + ink + '" stroke-width="2.4" stroke-linejoin="round"/>' + E;
   };
   function lampSvg(off) { // ランプ（よるは ひかる）。部屋の暗さより上に置く
@@ -400,6 +402,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-giftclose{display:block;margin:0 auto;min-width:160px;min-height:48px}
 .tk-rice{display:flex;align-items:center;justify-content:center;border-radius:14px}
 .tk-rice svg{width:60%;height:auto;display:block;pointer-events:none}
+.tk-rice .tk-riceimg{width:max(48px,86%);height:auto;display:block;pointer-events:none}
 .tk-rice.tk-gone{visibility:hidden}
 .tk-starwall{position:absolute;pointer-events:none;opacity:0;transition:opacity 1.6s}
 .tk-room.tk-starry .tk-starwall{opacity:1}
@@ -1195,7 +1198,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     }
     if (rp.night || rp.dusk) { ctx.save(); ctx.globalAlpha = rp.night ? (starry ? .6 : .5) : .12; ctx.fillStyle = rp.night ? '#0c2048' : '#ff8a3c'; ctx.fillRect(0, 0, ROOM.w, ROOM.h); ctx.restore(); }
     if (starry) { ctx.save(); STARS.forEach((st, i) => { ctx.globalAlpha = .55 + (i % 3) * .15; ctx.fillStyle = st.c; ctx.fill(new Path2D(starPath(st.x, st.y, st.s))); }); ctx.restore(); }
-    if (!riceGone) ctx.drawImage(await svgImage(riceSvg()), RICE.x, RICE.y, RICE.w, RICE.h);
+    if (!riceGone) ctx.drawImage(await svgImage(riceSvg(true)), RICE.x, RICE.y, RICE.w, RICE.h);
     for (const el of [...friendsEls.filter(e => e.dataset.who === 'a'), mascot, ...friendsEls.filter(e => e.dataset.who === 'b')]) {
       const img = await imgReady(el); if (!img) continue;
       const fi = el.dataset.who === 'a' ? 0 : 1, isM = el === mascot, w = isM ? ROOM.mascot.w : ROOM.friend.w, h = isM ? ROOM.mascot.h : ROOM.friend.w, cx = isM ? ROOM.mascot.cx : ROOM.friendX[fi], foot = isM ? ROOM.mascot.foot : ROOM.friend.foot[fi];
@@ -1306,7 +1309,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   const STARS = (() => { const r = mulberry(4242), out = []; for (let i = 0; i < 46; i++) out.push({ x: 6 + r() * 348, y: 4 + r() * 600, s: 2.2 + r() * 4.2, c: r() < .68 ? '#fff2a8' : '#d5ecff', d: -r() * 6, p: 3.4 + r() * 3.6 }); return out; })();
   const starPath = (x, y, s) => `M${x} ${y - s} L${x + s * .28} ${y - s * .28} L${x + s} ${y} L${x + s * .28} ${y + s * .28} L${x} ${y + s} L${x - s * .28} ${y + s * .28} L${x - s} ${y} L${x - s * .28} ${y - s * .28}Z`;
   starwall.innerHTML = `<svg viewBox="0 0 360 640" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:100%;height:100%" aria-hidden="true">${STARS.map(st => `<path class="tk-st" d="${starPath(st.x, st.y, st.s)}" fill="${st.c}" style="animation-delay:${st.d.toFixed(2)}s;animation-duration:${st.p.toFixed(2)}s"/>`).join('')}</svg>`;
-  rice.innerHTML = riceSvg(); rice.setAttribute('aria-label', 'つくえの うえの ' + riceName);
+  rice.innerHTML = riceSvg(); { const im = rice.querySelector('img.tk-riceimg'); if (im) { im.addEventListener('error', () => { riceImgOk = false; rice.innerHTML = riceSvg(); }); } } rice.setAttribute('aria-label', 'つくえの うえの ' + riceName);
   const cueClick = () => { noise(.03, { vol: .05 }); tone(1320, .04, { type: 'round', vol: .03 }); };
   const cueLamp = on => {
     noise(.03, { vol: .06 });

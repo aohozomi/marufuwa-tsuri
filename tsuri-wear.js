@@ -26,6 +26,8 @@
   var cache = {}, pending = {};
   function readSave() { try { var d = JSON.parse(localStorage.getItem(KEY)); return d && typeof d === 'object' ? d : {}; } catch (e) { return {}; } }
   function roundTriD(v, t, b) { var n = v.length, f = function (p, q, k) { return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; }, d = '', i; for (i = 0; i < n; i++) { var p = v[i], pr = v[(i + n - 1) % n], nx = v[(i + 1) % n], a = f(p, pr, t), z = f(p, nx, t), q = v[(i + 1) % n], a2 = f(q, p, t), mx = (z[0] + a2[0]) / 2, my = (z[1] + a2[1]) / 2, cx = (v[0][0] + v[1][0] + v[2][0]) / 3, cy = (v[0][1] + v[1][1] + v[2][1]) / 3, ox = mx - cx, oy = my - cy, ol = Math.sqrt(ox * ox + oy * oy) || 1, ex = Math.sqrt(Math.pow(nx[0] - p[0], 2) + Math.pow(nx[1] - p[1], 2)); d += (i ? 'L' : 'M') + a[0].toFixed(2) + ' ' + a[1].toFixed(2) + 'Q' + p[0] + ' ' + p[1] + ' ' + z[0].toFixed(2) + ' ' + z[1].toFixed(2) + 'Q' + (mx + ox / ol * ex * b).toFixed(2) + ' ' + (my + oy / ol * ex * b).toFixed(2) + ' ' + a2[0].toFixed(2) + ' ' + a2[1].toFixed(2); } return d + 'Z'; }
+  var FOOD_BASE = (function () { try { var s = document.currentScript; return s && s.src ? s.src.replace(/[^\/]*$/, '') : ''; } catch (e) { return ''; } })();
+  var ONI_IMG = null; try { ONI_IMG = new Image(); ONI_IMG.src = FOOD_BASE + 'img/food/onigiri_1.webp'; } catch (e) { ONI_IMG = null; }   // 天の おにぎり（ふっくら）。よみこめない ときは 下の ベクターの まま
   var ONIGIRI_D = roundTriD([[96, 188], [128, 240], [64, 240]], .3, .06);
   function levelOf(xp) { return Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, Number(xp) || 0) / 20))); }   // 本体の levelOf と おなじ
   // ひろばの「おみせ」で もらった もの（おさかなコインで ひらく・へらない）。ひろばの 記録 marufuwa-hiroba-v1 の shop.got（wear＝色の なまえの 配列・item＝もちもの 番号の 配列）を 読むだけ（書かない・キーは ふやさない）
@@ -64,7 +66,9 @@
       c.beginPath(); c.moveTo(78, 226); c.lineTo(114, 226); c.lineTo(108, 262); c.lineTo(84, 262); c.closePath(); fillStroke(c, '#7fc8ee', 2.8);
       c.strokeStyle = '#ffffffaa'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(82, 236); c.lineTo(110, 236); c.stroke(); c.strokeStyle = '#4fa3d4'; c.lineWidth = 2; c.beginPath(); c.moveTo(81, 244); c.lineTo(111, 244); c.stroke();
     },
-    onigiri: function (c) {   // 角の ない まるい 三角（角の はんけい 30%・辺は 外へ ふくらむ）・のりは 下 1/3 の まるい 帯・白は うすい クリーム・輪郭は ふとい 茶
+    onigiri: function (c) {
+      if (ONI_IMG && ONI_IMG.complete && ONI_IMG.naturalWidth > 0) { c.drawImage(ONI_IMG, 62, 182, 68, 68); return; }
+      // （えが よめない ときの ベクター）角の ない まるい 三角（角の はんけい 30%・辺は 外へ ふくらむ）・のりは 下 1/3 の まるい 帯・白は うすい クリーム・輪郭は ふとい 茶
       var d = ONIGIRI_D, P = new Path2D(d);
       c.fillStyle = '#fff7e6'; c.fill(P); c.save(); c.clip(P);
       c.beginPath(); c.moveTo(70, 224); c.lineTo(122, 224); c.arcTo(126, 224, 126, 232, 6); c.lineTo(126, 240); c.lineTo(66, 240); c.lineTo(66, 232); c.arcTo(66, 224, 74, 224, 6); c.closePath(); c.fillStyle = '#3b5a47'; c.fill(); c.restore();
