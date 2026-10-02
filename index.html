@@ -319,6 +319,11 @@ html[data-plaza=false] #plaza-note{display:none}
 #scene:not([data-phase=idle]):not([data-phase=caught]) :is(.next-go,.edge-go),body.gazing :is(.next-go,.edge-go),#scene[data-tooku=true] :is(.next-go,.edge-go){display:none}
 #areago-q{font-weight:800;text-align:center;margin:8px 0 14px}.areago-btns{display:flex;gap:12px}.areago-btns button{flex:1;min-height:48px}
 body.gazing .area-open{display:none}
+/* さいしょの がめんを シンプルに（37_）：「あそびかた」1つに まとめ、ふだんは かくす（おと・BGM・とおく・ながめる・おやすみ・ぜんがめん・つかいやすく する）。ながめる 中は ぜんぶ みえる */
+body:not(.gazing) .sub-actions:not([data-howto=open]) > :not(#take-photo):not(#more-catch):not(#howto-toggle){display:none !important}
+body:not(.gazing):not(.howto-open) details.time-box:has(#areas),body:not(.gazing):not(.howto-open) #plaza-note,body:not(.gazing):not(.howto-open) #lead-text small,body:not(.gazing):not(.howto-open) #today{display:none !important}
+body.gazing #howto-toggle,body[data-phase=waiting] #howto-toggle,body[data-phase=bite] #howto-toggle,body[data-phase=reel] #howto-toggle{display:none !important}
+#howto-toggle{flex:1 1 100%;min-height:48px}
 /* ?clip=1：録画用（景色＋まるふわ＋輪 だけ。9:16 でも きれない ぜんがめん） */
 html[data-clip] body{overflow:hidden;background:#000}
 html[data-clip] body > :not(main):not(script):not(style):not(dialog),html[data-clip] main > :not(#scene):not(#backdrop):not(script){display:none !important}
@@ -1910,6 +1915,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const audioDecided = () => save.audioSet === true || save.sound === true || !!(window.TsuriBgm && TsuriBgm.on && TsuriBgm.on());
   function audioChosen() { if (save.audioSet !== true) { save.audioSet = true; store(); } }
   function drawAudioSize() { const row = document.querySelector('.sub-actions'); if (row) row.dataset.audio = audioDecided() ? 'set' : ''; drawSound(); }   // ちいさく するのは ひらき なおした とき／つれた とき（おした ゆびの したで ボタンが うごかない ように）
+  function drawHowto() { const b = $('howto-toggle'); if (!b) return; const open = document.body.classList.contains('howto-open'); b.setAttribute('aria-expanded', String(open)); b.textContent = L(open ? 'あそびかたを とじる ▴' : 'あそびかた ▾', open ? 'Close options ▴' : 'Options ▾'); }
+  { const mk = () => { const row = document.querySelector('.sub-actions'); if (!row || $('howto-toggle')) return; const b = document.createElement('button'); b.type = 'button'; b.id = 'howto-toggle'; b.className = 'pill'; b.setAttribute('aria-controls', 'sound'); row.append(b);
+      b.addEventListener('click', () => { const open = !document.body.classList.contains('howto-open'); document.body.classList.toggle('howto-open', open); row.dataset.howto = open ? 'open' : ''; drawHowto(); }); drawHowto(); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mk); else mk(); addEventListener('load', () => { mk(); drawHowto(); }); setTimeout(drawHowto, 900); }   // おと・BGM・とおく・ながめる・おやすみ・つかいやすく する を 1つの「あそびかた」に まとめる（ふだんは かくす）
   function drawMute() { const b = $('mute-top'); if (!b) return; b.setAttribute('aria-pressed', String(!save.sound)); b.textContent = L(save.sound ? '🔇 おとを けす' : '🔊 おとを ならす', save.sound ? '🔇 Mute sound' : '🔊 Turn sound on'); }
   function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
   $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); try { dispatchEvent(new Event('storage')); } catch {} drawSound();   /* おへや（すいそう）など ほかの ぶひんにも「おとが かわった」と しらせる */ if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([440, 523], .09, 'sine', .035, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
