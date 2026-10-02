@@ -42,6 +42,7 @@ body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothi
 .back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
 h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
 .lead{margin:2px 0 8px;font-size:.95rem;color:var(--ink2)}
+.plays{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}.plays button{min-height:44px;min-width:44px;padding:4px 12px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font:inherit;font-weight:800;cursor:pointer}.plays button[aria-pressed=true]{background:#14506b;color:#fff;border-color:#14506b}.plays button:focus-visible{outline:4px solid #286b88;outline-offset:2px}
 .hud{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 8px}
 .zukan{display:flex;gap:3px;align-items:flex-end;padding:4px 8px;background:var(--plate);border:2px solid var(--line);border-radius:14px}
 .zukan canvas{display:block}
@@ -77,6 +78,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
   <div class="toprow"><a class="back" id="back" href="../hiroba/index.html">← ひろばへ</a><span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">ミュートボタンは こちら →</span><button type="button" id="mute" class="mutebtn" aria-pressed="false">🔇 おとを けす</button></span></div>
   <h1>まるふわ まるいろ</h1>
   <p class="lead">ふたつ組を まわして、ならべよう。</p>
+  <div id="plays" class="plays" role="group" aria-label="あそびかた"></div>
   <div class="hud">
     <div class="zukan" id="zukan" aria-hidden="true"></div>
     <p class="best" id="best-wrap"><canvas id="best-cv" width="88" height="88" style="width:44px;height:44px" aria-hidden="true"></canvas><span id="best-tx">いちばん おおきい まる：まだ ないよ</span></p>
@@ -162,8 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── きろく（数字だけ・この たんまつだけ）───
   let rec = { v: 2, hint: 0, best: -1, snd: !(document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches), mode: 1, play: 4, chain: 0, fly: 0, big: -1 };
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (typeof d.mute === 'boolean') rec.snd = !d.mute; rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.play = d.v !== 2 ? 3 : d.play === 1 ? 1 : d.play === 2 ? 2 : d.play === 3 ? 3 : d.play === 4 ? 4 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 2, hint: rec.hint, best: rec.best, mute: !rec.snd, mode: rec.mode, play: rec.play, chain: rec.chain, fly: rec.fly, big: rec.big })); } catch (e) {} };
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (typeof d.mute === 'boolean') rec.snd = !d.mute; rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.migrated = d.migrated === 1 ? 1 : 0; rec.play = d.migrated !== 1 ? 4 : d.v !== 2 ? 3 : d.play === 1 ? 1 : d.play === 2 ? 2 : d.play === 3 ? 3 : d.play === 4 ? 4 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 2, hint: rec.hint, best: rec.best, mute: !rec.snd, mode: rec.mode, play: rec.play, migrated: 1, chain: rec.chain, fly: rec.fly, big: rec.big })); } catch (e) {} };
 
   // ─── 乱数（?seed=数字 で ならべを そろえられる）───
   const dayKey = () => { const d = new Date(); return d.getFullYear() * 400 + (d.getMonth() + 1) * 32 + d.getDate(); };
@@ -217,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     [SH('M-19 2 L19 2 L0 38Z', '#e9b36b', [-19, 2, 38, 36]), SH(E(0, -1, 25, 10), '#fff1f6', [-25, -11, 50, 20]), SH(E(0, -13, 19, 9), '#ffd0e2', [-19, -22, 38, 18]), SH(E(0, -24, 12, 8), '#fff1f6', [-12, -32, 24, 16])],   // ソフトクリーム
   ];
   const oyImgs = [];
-  const oyImg = l => { if (!oyImgs[l]) { const im = new Image(); im.src = '../img/oyatsu/oyatsu_' + OY_FILE[l] + '.webp'; oyImgs[l] = im; } return oyImgs[l]; };
+  const oyImg = l => { if (!oyImgs[l]) { const im = new Image(); im.onload = () => { if (typeof drawZukan === 'function') { drawZukan(); drawBest(); } }; im.src = '../img/oyatsu/oyatsu_' + OY_FILE[l] + '.webp'; oyImgs[l] = im; } return oyImgs[l]; };
   const OY_FILE = ['0_ame', '1_cookie', '2_macaron', '3_donut', '4_pudding', '5_cake', '6_softcream'];
   // おやつ：天の ぷにぷにシールの え（よみこめない ときは コードの かたち）。ものの かたち そのものが シール＝まるい わくは かかない
   function oyatsu(c, x, y, r, l, a, scale) {
@@ -669,7 +671,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ['うえから おやつが おちてくるよ。ひだりみぎに うごかして、はなして ね。おなじ おやつが ふれると、ひとつ おおきく なるよ。ぷにぷにの シールだから、ぽよーんと よく はずむよ。つぎの おやつが おちても、まえの子は まだ はずんでるかも。のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。', 'Treats fall from above. Move left and right, then let go. When two of the same treat touch, they become one bigger one. They are bouncy jelly stickers, so they spring about a lot. There is no timer and no game over.']
   ], SHORT = [['つんで、あわせよう。', 'Stack and join.'], ['3つ そろえて、きえよう。', 'Match three.'], ['いろを ひろげよう。', 'Spread the color.'], ['ふたつ組を まわして、ならべよう。', 'Rotate pairs and set them.'], ['おやつを おとして、ぷにっと あわせよう。', 'Drop treats and join them.']], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread'], ['あそびかた：つみき', 'How to play: Blocks'], ['あそびかた：おやつ', 'How to play: Treats']];
 
+  const PLAY_B = [['そだてる', 'Grow'], ['そろえる', 'Match'], ['いろひろげ', 'Spread'], ['つみき', 'Blocks'], ['おやつ', 'Treats']];
+  function renderPlays() { const w = $('plays'); w.replaceChildren(); [4, 3, 0, 1, 2].forEach(n => { const b = document.createElement('button'); b.type = 'button'; b.textContent = L(PLAY_B[n][0], PLAY_B[n][1]); b.setAttribute('aria-pressed', String(rec.play === n)); b.addEventListener('click', () => { if (rec.play !== n) goPlay(n); }); w.append(b); }); }
   function drawPlay() {
+    renderPlays();
     const b = $('play'), pl = rec.play; b.setAttribute('aria-pressed', String(pl !== 0)); b.textContent = L(PLAYS[pl][0], PLAYS[pl][1]);
     document.querySelector('.lead').textContent = L(SHORT[pl][0], SHORT[pl][1]); $('howto-tx').textContent = L(LEADS[pl][0], LEADS[pl][1]);
     $('brot').hidden = pl !== 3; $('best-wrap').style.display = pl === 3 ? 'none' : '';
@@ -679,7 +684,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (fl) floodStart(0);
   }
   function freshPlay() { if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
-  $('play').addEventListener('click', () => { rec.play = (rec.play + 1) % 5; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 4 ? 'あそびかたを「おやつ」に かえたよ。さいしょから。' : rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 4 ? 'Switched to Treats. Starting fresh.' : rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); });
+  const goPlay = n => { rec.play = n; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 4 ? 'あそびかたを「おやつ」に かえたよ。さいしょから。' : rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 4 ? 'Switched to Treats. Starting fresh.' : rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); };
+  $('play').addEventListener('click', () => goPlay((rec.play + 1) % 5));
   $('rst').addEventListener('click', reset);
 
   // ─── うごかす（フレームごと・ひらいて いる ときだけ）───
