@@ -2064,16 +2064,17 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const POSE_FILES = ['marufuwa_nage', 'marufuwa_mate', 'marufuwa_hiki', 'marufuwa_age'];   // 天の ポーズえが とどいたら「img/pose/<id>_<pose>.png」の <id>_<pose> を ここへ（例：'marufuwa_mate'）。pose＝nage（なげる）・mate（まつ）・hiki（ひく）・age（もちあげ）。なければ いまの えのまま
   let poseNow = '', poseHold = 0;
   // ポーズえの セット：A＝さいしょの え（G-2 v2・まえむき・540×600・竿なし＝ゲームの 竿を つかう）／B＝G-3（720×720・みぎむき・えに 竿あり）。きりかえは この 1つだけ（マスターが A を えらんだ 10/2）
-  const POSE_SET = 'A', POSE_DEFS = {
+  const POSE_SET = 'C', POSE_DEFS = {   // C＝G-3C（顔は A の まま・720×720・みぎむき・えに 竿あり・img/pose/c/）。マスターが「やっぱ C」（10/2）
+    C: {dir: 'c/', w: '23%', ar: '1/1', size: [720, 720], foot: {nage: .957, mate: .957, hiki: .957, age: .957}, tip: {nage: [662, 38], mate: [691, 58], hiki: [691, 129], age: [641, 36]}, face: {nage: [.22, .26, .68, .68], mate: [.17, .12, .74, .74], hiki: [.04, .24, .62, .67], age: [.11, .18, .68, .75]}, hang: [.97, .55, 0]},
     A: {w: '20.4%', ar: '9/10', size: [540, 600], foot: {nage: .995, mate: .995, hiki: .995, age: .993}, tip: null, face: [.12, .04, .88, .62], hang: [.97, .56, 0]},
     B: {w: '23%', ar: '1/1', size: [720, 720], foot: {nage: .94, mate: .929, hiki: .912, age: .957}, tip: {nage: [655, 62], mate: [668, 208], hiki: [683, 152], age: [683, 68]}, face: [210 / 720, 110 / 720, 560 / 720, 520 / 720], hang: [683 / 720, 68 / 720, 28]}
-  }, POSE_DEF = POSE_DEFS[POSE_SET], POSE_TIP = POSE_DEF.tip || {}, POSE_FOOT = POSE_DEF.foot;   // tip＝えの 竿の さき（720基準・Bだけ）／foot＝あしもと（したから）／hang＝つれた 魚を ぶらさげる いち（はば・たかさの わりあい・よぶん px）
+  }, POSE_DEF = POSE_DEFS[POSE_SET], POSE_TIP = POSE_DEF.tip || {}, POSE_FOOT = POSE_DEF.foot, POSE_DIR = POSE_DEF.dir || '', poseFaceOf = k => { const f = POSE_DEF.face; return Array.isArray(f) ? f : f[k]; };   // tip＝えの 竿の さき（720基準・Bだけ）／foot＝あしもと（したから）／hang＝つれた 魚を ぶらさげる いち（はば・たかさの わりあい・よぶん px）
   document.documentElement.style.setProperty('--pose-w', POSE_DEF.w); document.documentElement.style.setProperty('--pose-ar', POSE_DEF.ar);
   function footFix() { const k = marufuwa.dataset.poseK; marufuwa.style.marginTop = k && POSE_FOOT[k] ? Math.round((1 - POSE_FOOT[k]) * marufuwa.offsetHeight) + 'px' : ''; }   // あしもとを さんばしの たちいちに そろえる
   const poseLoaded = new Set();   // よみこめた ポーズえだけ つかう（オフラインで こわれた えを だささない）
-  POSE_FILES.forEach(k => { const im = new Image(); im.onload = () => poseLoaded.add(k); im.src = 'img/pose/' + k + '.png'; });
-  const poseFile = () => { const k = (marufuwa.dataset.avatar || 'marufuwa') + '_' + poseNow; return poseNow && POSE_FILES.includes(k) && poseLoaded.has(k) ? 'img/pose/' + k + '.png' : ''; };
-  function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.dataset.pose = '1'; marufuwa.dataset.poseK = poseNow; marufuwa.dataset.poseSet = POSE_SET; marufuwa.src = pf; footFix(); rod($('line-me'), mine, 12, $('rod-me')); return; } delete marufuwa.dataset.pose; delete marufuwa.dataset.poseK; footFix(); const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
+  POSE_FILES.forEach(k => { const im = new Image(); im.onload = () => poseLoaded.add(k); im.src = 'img/pose/' + POSE_DIR + k + '.png'; });
+  const poseFile = () => { const k = (marufuwa.dataset.avatar || 'marufuwa') + '_' + poseNow; return poseNow && POSE_FILES.includes(k) && poseLoaded.has(k) ? 'img/pose/' + POSE_DIR + k + '.png' : ''; };
+  function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.dataset.pose = '1'; marufuwa.dataset.poseK = poseNow; marufuwa.dataset.poseSet = POSE_SET; marufuwa.dataset.poseFace = JSON.stringify(poseFaceOf(poseNow) || []); marufuwa.src = pf; footFix(); rod($('line-me'), mine, 12, $('rod-me')); return; } delete marufuwa.dataset.pose; delete marufuwa.dataset.poseK; footFix(); const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
   function drawToday() {
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
