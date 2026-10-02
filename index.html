@@ -2722,7 +2722,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     [$('edge-prev'), $('edge-next')].forEach(b => { if (b.hidden) return; const r = b.getBoundingClientRect(), t = top(r.left, r.right); const y = Math.max(sc.top + 4, Math.min(sc.top + sc.height * .07, t - r.height - 4)); b.style.top = (y - sc.top) / sc.height * 100 + '%'; });
   }
-  addEventListener('resize', () => { try { fixHits(); placeNav(); } catch {} }); addEventListener('load', () => setTimeout(() => { try { placeNav(); } catch {} }, 1100));
+  addEventListener('resize', () => { try { fixHits(); placeNav(); } catch {} });
   let goTarget = null;
   $('next-go').addEventListener('click', event => { event.stopPropagation(); const nx = AREAS[areaIdx() + 1]; if (!nx) return; if (!areaOpen(nx)) { lockedSay(nx); return; } goTarget = nx; $('areago-q').textContent = L(nx.name + 'へ いく？', 'Go to ' + T(nx.name) + '?'); $('areago').showModal(); $('areago-yes').focus(); });
   $('areago-yes').addEventListener('click', () => { $('areago').close(); switchArea(goTarget); });
@@ -4266,7 +4266,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('mute-top').addEventListener('click', () => { $('sound').click(); if (window.TsuriBgm && TsuriBgm.set) { try { TsuriBgm.set(!!save.sound); } catch {} } drawMute(); });   // 上の ボタン：こうかおん・なみ・BGM を ぜんぶ いっしょに
   { const first = () => { removeEventListener('click', first); if (save.sound) { try { startAmbient(); sfxLoad(); } catch {} } };   // AudioContext は BGM の ためだけ（ここでは つくらない）   // ブラウザの きまり：さいしょの タップ（click）から なる。🔇で OFF に した その タップでは つくらない（ボタンの あとで しらべる）
     addEventListener('click', first); }
-  { const redraw = () => { drawMute(); if (soundDefault && window.TsuriBgm && TsuriBgm.set && TsuriBgm.on && !TsuriBgm.on()) { let rec = null; try { rec = localStorage.getItem('marufuwa-bgm-v1'); } catch {} if (rec === null) { try { TsuriBgm.set(true); } catch {} } } };   // BGM も はじめから ON（きろくが なければ）
+  { const redraw = () => { drawMute(); if (soundDefault && window.TsuriBgm && TsuriBgm.set && TsuriBgm.on && !TsuriBgm.on()) { let rec = null; try { rec = localStorage.getItem('marufuwa-bgm-v1') || localStorage.getItem('marufuwa-bgm-v2'); /* どちらかに きろくが あれば それを ゆうせん（ふるい OFF の むしは 共通部＝tsuri-bgm.js の しごと） */ } catch {} if (rec === null) { try { TsuriBgm.set(true); } catch {} } } };   // BGM も はじめから ON（きろくが なければ）
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', redraw); else redraw();
     if (!save.muteHint) { const h = $('mutehint'), put = () => { h.textContent = L('ミュートボタンは こちら →', 'Mute button is here →'); }; put(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', put); addEventListener('load', put); h.hidden = false; save.muteHint = 1; store(); setTimeout(() => { h.hidden = true; }, 3000); } }   // はじめての 3びょうだけ（てんめつなし・2回めからは 出さない）
   // おかえり／ふかい よる：かぞえない・せめない・アドバイスしない。ひさしぶりに きた ひとには、きろくは そのままだと つたえる。よなかに ひらいた ひとには、ゆっくり ながめよう と だけ
