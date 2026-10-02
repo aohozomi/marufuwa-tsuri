@@ -163,16 +163,18 @@
   // ── 状態 ──
   const readMix = () => { const v = (readJSON(KEY) || {}).mix; if (Array.isArray(v) && v.length === 3 && v.every(x => typeof x === 'number' && Number.isInteger(x))) { const [p, m, e] = v; if (p >= 1 && p <= 8 && m >= 0 && m <= 8 && (e === 0 || e === 1)) return [p, m, e]; } return null; };   // じぶんで くんだ BGM の ばんごう [ひくい おと 1〜8, うた 0〜8（0＝なし）, こだま 0/1]。なければ null（じかんで かわる）
   let mix = readMix();
-  let on = (readJSON(KEY) || {}).on === true, cur = null, air = null, ownCtx = null, wantGesture = false, gestureBlock = false, ticker = 0;
+  // 10/3 マスター「BGM を いちいち オンに しないと いけない 仕様を なおして」：はじめから ON。きろくは migrated:1 の ある ものだけ 信じる（それより まえに のこった on:false は 一度だけ むし）。じぶんで 切った ときだけ OFF を おぼえる
+  const readOn = () => { const r = readJSON(KEY); return r && r.migrated === 1 ? r.on === true : true; };
+  let on = readOn(), cur = null, air = null, ownCtx = null, wantGesture = false, gestureBlock = false, ticker = 0;
   const stack = [], subs = new Set();
   const notify = () => subs.forEach(f => { try { f(); } catch {} });
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(mix ? { v: 1, on, mix } : { v: 1, on })); } catch {} };
-  const mainSound = () => { const m = readJSON(MAIN); return !!(m && m.sound === true); };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(mix ? { v: 1, on, migrated: 1, mix } : { v: 1, on, migrated: 1 })); } catch {} };
+  const mainSound = () => { const m = readJSON(MAIN); return !(m && m.sound === false); };
   const soundOk = fn => { try { return typeof fn === 'function' ? !!fn() : mainSound(); } catch { return false; } };
   const norm = t => ({ asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n' }[t] || t);
   function pickKey(name, o) {   // 曲は「いまの じかん」できまる（a あさ・h ひる・y ゆうがた・n よる）。じかんが わからなければ ひる
     o = o || {};
-    if (name !== 'hiroba' && name !== 'tank' && name !== 'gaze') return null;   // 釣りの 画面など：鳴らさない
+    if (name !== 'hiroba' && name !== 'tank' && name !== 'gaze' && name !== 'tsuri') return null;   // 10/3 マスター「釣りの 最中も BGM」：つりばの 通常画面（'tsuri'）も じかんたいの 曲。ほかは 鳴らさない
     if (mix) return 'mix';   // じぶんで くんだ BGM（ばしょ・じかんに かかわらず）
     if (name === 'tank' && val(o.starry)) return 'n';   // ランプを けして 星空に した へやは よるの 曲
     const t = norm(val(o.time)); return Object.prototype.hasOwnProperty.call(KEYS, t) ? t : 'h';
@@ -218,9 +220,10 @@
   const closeEl = o => { try { o.el.pause(); } catch {} try { o.el.removeAttribute('src'); o.el.load(); } catch {} try { o.src.disconnect(); } catch {} try { o.eg.disconnect(); } catch {} o.dead = true; };
   const closeFile = p => { (p.els || []).forEach(closeEl); p.els = []; };
   function rememberPos(p) { try { const o = p.els[p.els.length - 1]; if (o && o.el.currentTime > 1) lastPos[p.file] = { t: o.el.currentTime, at: Date.now() }; } catch {} }
-  function startFilePlayer(c, key, file) {
+  const QUIET_TSURI = .5;   // つりばの 曲は ひろば・おへやの −6dB（釣りの こうかおんと あんないの おとが きこえる 大きさ）
+  function startFilePlayer(c, key, file, scale = 1) {
     if (typeof c.createMediaElementSource !== 'function') throw new Error('no media element source');
-    const g = c.createGain(), now = c.currentTime, vol = (FILE_GAIN[file] || .3) * boost;
+    const g = c.createGain(), now = c.currentTime, vol = (FILE_GAIN[file] || .3) * boost * scale;
     g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(vol, now + FILE_XF); g.connect(c.destination);
     const p = { key, sig: 'file:' + file, file, ctx: c, gain: g, startPart: 0, ended: false, made: 0, els: [], looping: false, heard: false, born: Date.now(), vol };
     const abandon = why => { if (p.ended) return; p.ended = true; closeFile(p); try { g.disconnect(); } catch {} if (cur === p) cur = null; if (why === 'error' || why === 'slow') failed.add(file); if (why === 'gesture') { gestureBlock = true; wantGesture = true; return; } refresh(); };   // 'gesture'＝ゆびで さわる まで 止められた：よめない とは しない・つぎに さわった 時に もういちど（すぐには よびなおさない）
@@ -307,7 +310,7 @@
       const sig = file ? 'file:' + file : key === 'mix' ? 'mix:' + mix.join('-') : key;
       if (cur && (cur.sig || cur.key) === sig && cur.ctx === c) return;
       if (cur) stopPlayer(cur, 3);   // ふわっと つなぐ（前の 曲は 3びょうで きえる）
-      let np = null; if (file) { try { np = startFilePlayer(c, key, file); } catch { failed.add(file); np = null; } }   // 音の 部品が 作れない：ごうせいに もどる
+      let np = null; if (file) { try { np = startFilePlayer(c, key, file, top.name === 'tsuri' ? QUIET_TSURI : 1); } catch { failed.add(file); np = null; } }   // 音の 部品が 作れない：ごうせいに もどる
       cur = np || (key === 'mix' ? startMixPlayer(c, mix) : startPlayer(c, key, top.name === 'tank' ? 1 : 0));
     } catch { /* 音が 出せなくても ゲームは 止めない */ } finally { ensureTimer(); }
   }
@@ -430,5 +433,5 @@
   ] };
   const regEn = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !regEn.done) { regEn.done = true; E.add(EN); } notify(); };
   addEventListener('load', regEn);
-  addEventListener('storage', e => { if (e.key === KEY) { on = (readJSON(KEY) || {}).on === true; mix = readMix(); refresh(); notify(); } else if (e.key === MAIN) refresh(); });
+  addEventListener('storage', e => { if (e.key === KEY) { on = readOn(); mix = readMix(); refresh(); notify(); } else if (e.key === MAIN) refresh(); });
 })();

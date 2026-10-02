@@ -730,7 +730,7 @@ let main = readJSON(MAIN_KEY) || {};
 const own = Object.assign({ motion: 'auto', met: {}, day: '', metToday: {}, secrets: {}, last: '', leftAt: 0, visits: 0, metAt: {}, seenAt: {}, told: {}, firstAt: {}, guestDay: {}, companion: {}, together: {}, careDay: {}, sweepDay: {}, lampDay: {}, traceSaid: {}, lastDay: 0, bloom: 0, welcomeDay: 0 }, readJSON(OWN_KEY) || {});
 for (const k of ['metAt', 'seenAt', 'told', 'firstAt', 'guestDay', 'companion', 'together', 'careDay', 'sweepDay', 'lampDay', 'traceSaid']) if (!own[k] || typeof own[k] !== 'object' || Array.isArray(own[k])) own[k] = {};   // なかまの「あった 日時」「きた 日時」「あたらしい なかまが きたよ を 言った 子」（じぶんの きろく）
 const saveOwn = () => { try { localStorage.setItem(OWN_KEY, JSON.stringify(own)); } catch {} };
-let soundFlag = main.sound === true || (main.sound === undefined && !(main.calm === true || own.motion === 'less' || matchMedia('(prefers-reduced-motion: reduce)').matches));   // 10/1 マスター「全部の場所で 音は ならす」：きろくが なければ ON（さいしょの タップで 目ざめる）／うごきを へらす なら はじめ OFF
+let soundFlag = main.sound !== false;   // 10/1 マスター「全部の場所で 音は ならす」：きろくが なければ ON（さいしょの タップで 目ざめる）／「うごきを へらす」でも 音は ならす（音は 動きでは ない・10/3）
 function writeSound(on) {
   soundFlag = on;
   try {
@@ -2212,7 +2212,6 @@ if (window.TsuriBgm) {
   };
   $('sound').after(window.TsuriBgm.button({ id: 'bgm', ...bgmHost }));
   if (window.TsuriBgm.mixButton) $('bgm').after(window.TsuriBgm.mixButton({ id: 'bgm-mix', ...bgmHost }));   // 「くみたてる」（ひくい おと・うた・こだま を えらぶ）
-  try { if (localStorage.getItem('marufuwa-bgm-v1') === null && soundOn()) window.TsuriBgm.set(true); } catch {}   // きろくが なければ BGM も はじめから ON
   window.TsuriBgm.enter('hiroba', { ctx: ready, sound: soundOn, time: () => curTime });
 }
 const hudGear = $('hud-gear'), hudPanel = $('hud-panel'), hudWrap = hudGear.parentElement;
