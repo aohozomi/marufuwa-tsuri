@@ -12,7 +12,7 @@
   var BASE = (function () { try { var s = document.currentScript; return s && s.src ? s.src.replace(/[^\/]*$/, '') : ''; } catch (e) { return ''; } })();
   var root = document.documentElement;
   var timeKey = function () { var t = root.dataset.time; return /^[ahyn]$/.test(t || '') ? t : 'h'; };
-  var cur = null, id = '', tok = 0;
+  var cur = null, id = '', tok = 0, opt = {};   // opt＝{tint:'rgba(..)'（絵の うえの かさね色・昼夜 とも）, panel/panelNight:'rgba(..)'（まん中の いた）, border:'#色', glow:'radial-gradient(..)'（ほのかな あかり）}
   function tryLoad(list, i, done) {
     if (i >= list.length) { done(null); return; }
     var im = new Image(); im.onload = function () { done(list[i]); }; im.onerror = function () { tryLoad(list, i + 1, done); }; im.src = list[i].url;
@@ -25,16 +25,18 @@
       var st = document.getElementById('pagebg-style'); if (!st) { st = document.createElement('style'); st.id = 'pagebg-style'; document.head.append(st); }
       if (!hit) { st.textContent = ''; root.classList.remove('pagebg-on'); cur = null; return; }
       cur = hit.url;
-      var over = hit.night ? 'linear-gradient(rgba(16,24,64,.55),rgba(16,24,64,.55)), ' : '';
-      var panel = night ? 'rgba(244,241,252,.84)' : 'rgba(255,255,255,.82)';
+      var tint = opt.tint ? 'linear-gradient(' + opt.tint + ',' + opt.tint + '), ' : '';
+      var navy = hit.night ? (opt.tint ? 'linear-gradient(rgba(16,24,64,.3),rgba(16,24,64,.3)), ' : 'linear-gradient(rgba(16,24,64,.55),rgba(16,24,64,.55)), ') : '';
+      var over = (opt.glow ? opt.glow + ', ' : '') + navy + tint;
+      var panel = night ? (opt.panelNight || 'rgba(244,241,252,.84)') : (opt.panel || 'rgba(255,255,255,.82)');
       st.textContent = 'html.pagebg-on body{background:' + over + 'url("' + hit.url + '") center/cover no-repeat, ' + (night ? '#2b3560' : '#d9c3a0') + '}'
-        + 'html.pagebg-on .room{background:' + panel + '!important;-webkit-backdrop-filter:none;backdrop-filter:none}';
+        + 'html.pagebg-on .room{background:' + panel + '!important;' + (opt.border ? 'border-color:' + opt.border + '!important;' : '') + '-webkit-backdrop-filter:none;backdrop-filter:none}';
       root.classList.add('pagebg-on');
     });
   }
   var rt = 0;
   window.PageBg = {
-    init: function (pageId) { id = String(pageId || '').replace(/[^a-z0-9_-]/gi, ''); if (!id) return; apply(); addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(apply, 250); }); },
-    current: function () { return cur; }, apply: apply
+    init: function (pageId, o) { id = String(pageId || '').replace(/[^a-z0-9_-]/gi, ''); if (!id) return; opt = o && typeof o === 'object' ? o : {}; apply(); addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(apply, 250); }); },
+    current: function () { return cur; }, opts: function () { return opt; }, apply: apply
   };
 })();
