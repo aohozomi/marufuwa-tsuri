@@ -1953,12 +1953,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // まどの ひろさ（ミリびょう）。さかなが まんなかに きた とき・いい さお ほど ひろい。いちばん せまくても 0.12びょう
   // 「おしい」が つづく ほど、まどが すこしずつ ひろがる（1かいで 0.03びょう、さいだい 0.24びょう）。「ぴったり」で もとに もどる。きりかえ なしで、だれにでも きく
   // 3つの あそびかた。らくちん＝おすだけ・にげない・はりなし／ふつう（はじめから）＝タイミングを あわせて「つれた！」（はりも にげるも ない。マスター直 10/1 夜「やっぱり タイミング あわせるのが おもしろい」。まえは ★3いじょうの はり）／しっかり＝まどが せまく（0.7ばい）・はりの あがりが 1.3ばい・★2から にげる・そのかわり ぴったりの ひきが 2ばい・ぬしと ★4が 1.5ばい でやすい
+  // ほんとうの タイミング ゲーム（ふつう・しっかり）：まどの はば（±ms）は 魚の ★で かわる（★1 ひろめ→★5・ぬし せまい）。ぴったり＝まどの なか／いいね＝まどの PNEAR ばい いない／それ いがいは すすまない。らくちん・さいしょの 1ぴきは まえの ゆるさ
+  const PRECISE = {win: [0, 150, 125, 100, 85, 70], boss: 60, near: 1.8, nice: .5, hard: .8, slow: 1.25, giveup: [75000, 150000]};   // giveup＝この じかん たつと さかなが つかれる（ふつう／しっかり）。むやみな れんだでは ほとんど つれない
   const MODE_CFG = {normal: {min: 3, g1: .27, g2: .14, g3: .2, gtap: .105, decay: .12, win: 1, step: 45, cap: 360, take: 2}, hard: {min: 2, g1: .35, g2: .18, g3: .2, gtap: .15, decay: .12, win: .8, step: 15, cap: 150, take: 7}};
   function curMode() { return save.mode === 'hard' || save.mode === 'normal' || save.mode === 'easy' ? save.mode : (save.easy ? 'easy' : 'normal'); }
   const modeCfg = () => MODE_CFG[curMode() === 'hard' ? 'hard' : 'normal'];
   const blindNow = () => curMode() === 'easy' || (reduce() && !sndOn('guide'));   // タイミングを みない（わが みえない・きこえない）人には はりも かけない
   const tensionOn = () => !!fish && curMode() === 'hard' && save.total >= 5 && !blindNow() && (fish.rare >= modeCfg().min || nushi || !!fish.legend);   // はりは「しっかり」だけ（ふつう＝タイミングを あわせて「つれた！」・にげない：マスター直 10/1 夜）。はじめの 1ぴきは かならず つれる
-  function windowMs() { const k = (curMode() === 'hard' && !save.slow ? MODE_CFG.hard.win : 1) * (1 + .15 * skillMul('me')), cfg = modeCfg(), lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); return (Math.max((save.slow ? 180 : 120) * k, (.06 + .1 * (1 - away) + save.rod * .025) * 1100 * k) + Math.min(cfg.cap, slips * cfg.step)) * (save.total === 0 ? 2 : 1); }   // しっかりでも ゆったり（save.slow）の ときは まどを せまく しない   // ぴったりに ならなかった れんぞく（いいね・ちかい）ごとに +45ms（うえ 360ms）。ずれ つづける ひとを またせすぎない（ぴったりで もどる。ものさし _kenpin_tmp/sim_reel.mjs SLIP=1：★3 ±0.3びょう ずれる ひと 5.7→4.8びょう・ぴったり ねらう・れんだは かわらない）   // はじめての 1ぴきだけ、「いまだ」の まどを 2ばい（ばつは ない・さいしょの 1ぴきは かならず つれる）
+  function windowMs() { if (precise && fish) { const w = (nushi || fish.legend ? PRECISE.boss : PRECISE.win[Math.min(5, fish.rare)]) * (curMode() === 'hard' ? PRECISE.hard : 1) * (save.slow ? PRECISE.slow : 1) * (1 + .15 * skillMul('me')); return w; }   // ★ごとの かたい まど（うごく まど・ずれた ぶんの ひろがりは なし）
+    const k = (curMode() === 'hard' && !save.slow ? MODE_CFG.hard.win : 1) * (1 + .15 * skillMul('me')), cfg = modeCfg(), lap = ((performance.now() - wanderStart) / 1400) % 2, away = Math.abs(lap < 1 ? 2 * lap - 1 : 3 - 2 * lap); return (Math.max((save.slow ? 180 : 120) * k, (.06 + .1 * (1 - away) + save.rod * .025) * 1100 * k) + Math.min(cfg.cap, slips * cfg.step)) * (save.total === 0 ? 2 : 1); }   // しっかりでも ゆったり（save.slow）の ときは まどを せまく しない   // ぴったりに ならなかった れんぞく（いいね・ちかい）ごとに +45ms（うえ 360ms）。ずれ つづける ひとを またせすぎない（ぴったりで もどる。ものさし _kenpin_tmp/sim_reel.mjs SLIP=1：★3 ±0.3びょう ずれる ひと 5.7→4.8びょう・ぴったり ねらう・れんだは かわらない）   // はじめての 1ぴきだけ、「いまだ」の まどを 2ばい（ばつは ない・さいしょの 1ぴきは かならず つれる）
   const speedOf = f => { const t = f.legend ? 2 : f.rare <= 2 ? 0 : f.rare === 3 ? 1 : 2; return [['ゆっくり', 'Slow'], ['ふつう', 'Medium'], ['はやい', 'Fast']][t]; };
   const swimOf2 = f => SWIMS[specialOf(f, false) || swimOf(f)];
   const swimTagText = () => swimText(swimBase || swim) + (qk ? (EN() ? ' · ' + QUIRKS[qk].en : '・' + QUIRKS[qk].ja) : '');
@@ -2207,8 +2210,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function startReel() {
     hpMax = hp = Math.min(12, 3 + fish.rare * 2 + (nushi ? 5 : 0)); period = Math.round(1100 * (nushi || fish.legend ? .7 : [1.45, 1.45, 1.25, 1, .85, .7][Math.min(5, fish.rare)]));   // ぬしでも さいだい 12。わの はやさ：★1 ゆっくり（×1.45）〜★4（×.85）・ぬし／まぼろし（×.7）
-    precise = !blindNow() && !nushi && !fish.legend && save.total > 0;   // ぴったり／ど真ん中だけが すすむ しくみ（らくちん・ぬし・まぼろし・さいしょの 1ぴきは まえの まま）
-    if (precise) hpMax = hp = (fish.rare <= 2 ? 2 : fish.rare === 3 ? 4 : 5) + (curMode() === 'hard' ? 1 : 0);   // ふつう ★1〜2＝2かい・★3＝3かい・★4＝4かい（しっかり +1）
+    precise = !blindNow() && save.total > 0;   // ぴったり／ど真ん中だけが すすむ しくみ（らくちん・ぬし・まぼろし・さいしょの 1ぴきは まえの まま）
+    if (precise) hpMax = hp = (nushi || fish.legend ? 6 : fish.rare <= 2 ? 2 : fish.rare === 3 ? 4 : fish.rare === 4 ? 5 : 6) + (curMode() === 'hard' ? 1 : 0);   // ふつう ★1〜2＝2かい・★3＝3かい・★4＝4かい（しっかり +1）
     if (save.total === 0) { hpMax = hp = 3; period = 1700; }   // さいしょの 1ぴきは、かならず すぐ つれる
     periodBase = period;
     if (fish.legend) { hpMax = hp = 7; period = periodBase = 770; }   // まぼろしは、でて きたら つれる。わは ゆっくり
@@ -2240,7 +2243,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     const miss = Math.abs(offBeat()), easy = windowMs();
     const blind = blindNow();   // らくちん、または、わも あんないの おとも ない とき：タイミングを みない
-    const power = blind ? 2 : miss <= easy ? 3 : miss <= easy + .12 * period ? 2 : 1;
+    const power = blind ? 2 : miss <= easy ? 3 : miss <= (precise ? easy * PRECISE.near : easy + .12 * period) ? 2 : 1;
     const center = power === 3 && miss <= 40 && !blind;   // ど真ん中（±40ms）：「ぴったり！！！」・いちばん おおきな しぶき・ふるえ ながめ
     if (power === 3) { perfects++; misses = 0; slips = 0; if (!precise) hp = Math.max(0, hp - modeCfg().take); } else { slips++; if (power === 1) misses++; }   // ふるい しくみ：「ぴったり」は 2つ おおく ひける
     perfectStreak = power === 3 ? perfectStreak + 1 : 0; const surfaced = perfectStreak >= 3; if (surfaced) perfectStreak = 0;   // 「ぴったり」が 3かい つづいたら ごほうび（かぞえない・ひょうじしない）
@@ -2250,7 +2253,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // つづけて うまく いくと、すこし つよく ひける。はずしても へらない（かぞえなおすだけ）
     combo = power >= 2 ? combo + 1 : 0;
     // 「ちかい」は 2つ ひける。ちかいが 3かい つづくと 3つ（さいだい +2）。ずれる ひとの まちが みじかく なる（ものさし _kenpin_tmp/sim_reel.mjs：★3で おおきく ずれる ひと 9.1→4.0びょう・さいだい 17→8びょう。ぴったり ねらう ひと 3.3びょう・れんだ 2.1びょう）。「ぴったり」は 4つ・れんぞくは さらに +1
-    if (precise) { if (power === 3) hp = Math.max(0, hp - (center ? 1.5 : 1)); }   // ふつう／しっかり：すすむのは ぴったり(1)と ど真ん中(1.5)だけ。いいね・ちかいは すすまない（罰なし・にげない・「おしい」と出すだけ）
+    if (precise) { if (power === 3) hp = Math.max(0, hp - (center ? 1.5 : 1)); else if (power === 2) hp = Math.max(0, hp - PRECISE.nice); }   // ふつう／しっかり：すすむのは ぴったり(1)と ど真ん中(1.5)だけ。いいね・ちかいは すすまない（罰なし・にげない・「おしい」と出すだけ）
     else {
       hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0) - (power === 1 && misses >= 3 ? 1 : 0));   // ちかい＝1。3かい つづくと 2（ずれ つづける ひとを またせすぎない）
       if (power === 3 && hp === 1) hp = 0;   // 「ぴったり」で のこりが 1 なら、そのまま つれる
@@ -2262,9 +2265,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (tension >= 1 && hp > 0) snapped = true;
       else if (power === 1) { closeStreak++; if (closeStreak >= 2 && closeStreak % 2 === 0 && hp > 0 && !skillMul('ochi')) { hp = Math.min(hpMax, hp + 1); resistNote(); } } else closeStreak = 0;   // ていこう：ちかいが 2かい つづくと たいりょくが 1 もどる（ぴったり・いいねで とまる）
     }
-    if (performance.now() - reelStartAt >= (precise ? 12000 : 5500)) hp = 0;   // どんな ひきかたでも 5.5びょう たてば つれる（さかなが つかれる。ばつは ない・ずれる ひとの さいだい じかんを のばさない）
+    if (performance.now() - reelStartAt >= (precise ? PRECISE.giveup[curMode() === 'hard' ? 1 : 0] : 5500)) hp = 0;   // どんな ひきかたでも 5.5びょう たてば つれる（さかなが つかれる。ばつは ない・ずれる ひとの さいだい じかんを のばさない）
     $('hp').firstElementChild.style.width = (precise ? hp / hpMax * 100 : Math.ceil(hp / 2) / Math.ceil(hpMax / 2) * 100) + '%';   // めもりに そろえる（1めもり＝あと 1かい）
-    const word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : precise ? 'おしい！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
+    const word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : precise ? '' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
+    if (precise && power === 1 && !reduce()) { const bk = document.querySelector('#reel .back'); if (bk && bk.animate) bk.animate([{scale: '1'}, {scale: '.95'}, {scale: '1'}], {duration: 200, easing: 'ease-out'}); }   // おしい：もじは だした ない ちいさな ぷるん
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power); judge.dataset.center = center ? '1' : '';
     if (power === 3) { const bk = document.querySelector('#reel .back'); if (bk && bk.animate) bk.animate(reduce() ? [{borderColor: '#ffe27a'}, {borderColor: 'transparent'}] : [{boxShadow: 'inset 0 0 0 2px #ffffff55, 0 0 0 0 #fff0'}, {boxShadow: 'inset 0 0 0 2px #ffffffaa, 0 0 22px 10px #fff7c8cc', offset: .35}, {boxShadow: 'inset 0 0 0 2px #ffffff55, 0 0 0 0 #fff0'}], {duration: 520, easing: 'ease-out'});   // ふわっと 1かい ひかる（うごきを へらす では いろ だけ）
       if (hp > 0) SFX.perfect(); if (center) SFX.center(); buzz(center ? [40, 40, 90] : 40); }   // つれる ひきは「つれた」の おとに ゆずる   // ピロリロッ（ど真ん中は ひくい おとを もう ひとつ）
