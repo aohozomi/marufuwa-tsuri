@@ -149,6 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const NAMES = ['ももいろ', 'だいだい', 'きいろ', 'みどり', 'みずいろ', 'あおむらさき', 'うすむらさき'];
   const ITEMS = ['どんぐり', 'かいがら', 'ウキ', 'おはな', 'おにぎり', 'ゆきだるま', 'おつきさま'];
   const ITEMS_EN = ['acorn', 'seashell', 'fishing float', 'flower', 'rice ball', 'snowman', 'moon'];
+  const OY_JA = ['あめ', 'クッキー', 'マカロン', 'ドーナツ', 'プリン', 'ケーキ', 'ソフトクリーム'], OY_EN = ['candy', 'cookie', 'macaron', 'donut', 'pudding', 'cake', 'soft serve'];
+  const BOUNCE = [.9, .74, .86, .95, .66, .7, .82];   // ぷにぷにバウンド：おやつごとの はずみかた（あめ・ドーナツは よく／プリン・ケーキは ぷるん）
   const KEY = 'marufuwa-maruiro-v1';
   const $ = id => document.getElementById(id);
   const cv = $('cv'), ctx = cv.getContext('2d'), msgEl = $('msg');
@@ -159,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   // ─── きろく（数字だけ・この たんまつだけ）───
-  let rec = { v: 2, hint: 0, best: -1, snd: !(document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches), mode: 1, play: 3, chain: 0, fly: 0, big: -1 };
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (typeof d.mute === 'boolean') rec.snd = !d.mute; rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.play = d.v !== 2 ? 3 : d.play === 1 ? 1 : d.play === 2 ? 2 : d.play === 3 ? 3 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
+  let rec = { v: 2, hint: 0, best: -1, snd: !(document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches), mode: 1, play: 4, chain: 0, fly: 0, big: -1 };
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (typeof d.mute === 'boolean') rec.snd = !d.mute; rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.play = d.v !== 2 ? 3 : d.play === 1 ? 1 : d.play === 2 ? 2 : d.play === 3 ? 3 : d.play === 4 ? 4 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 2, hint: rec.hint, best: rec.best, mute: !rec.snd, mode: rec.mode, play: rec.play, chain: rec.chain, fly: rec.fly, big: rec.big })); } catch (e) {} };
 
   // ─── 乱数（?seed=数字 で ならべを そろえられる）───
@@ -201,6 +203,43 @@ document.addEventListener('DOMContentLoaded', () => {
     c.fillStyle = 'rgba(255,140,150,.4)'; c.beginPath(); c.ellipse(-r * .46, r * .2, r * .12, r * .08, 0, 0, 7); c.ellipse(r * .46, r * .2, r * .12, r * .08, 0, 0, 7); c.fill();
     c.beginPath(); c.moveTo(-r * .17, r * .24); c.quadraticCurveTo(0, r * .42, r * .17, r * .24); c.lineWidth = Math.max(1.6, r * .075); c.strokeStyle = '#402a30'; c.lineCap = 'round'; c.stroke();
   }
+  // ぷにぷにシール：ものの かたちが そのまま シール（まるい わくは なし）。しろい ふち・すきとおった いろ・つや。あたりは まるの まま
+  const P2 = d => new Path2D(d);
+  const E = (cx, cy, rx, ry) => 'M' + (cx - rx) + ' ' + cy + ' a' + rx + ' ' + ry + ' 0 1 0 ' + (rx * 2) + ' 0 a' + rx + ' ' + ry + ' 0 1 0 ' + (-rx * 2) + ' 0Z';
+  const SH = (d, c, b) => ({ p: P2(d), c, b });
+  const SHAPES = [
+    [SH('M-12 0 L-34-15 L-34 15Z', '#ffd1e0', [-34, -15, 22, 30]), SH('M12 0 L34-15 L34 15Z', '#ffd1e0', [12, -15, 22, 30]), SH(E(0, 0, 19, 19), '#ff7fa8', [-19, -19, 38, 38])],   // あめ
+    [SH(E(0, 0, 32, 32), '#e9b36b', [-32, -32, 64, 64]), SH(E(-11, -10, 5, 5), '#7a4a30', [-16, -15, 10, 10]), SH(E(12, -6, 5, 5), '#7a4a30', [7, -11, 10, 10]), SH(E(-2, 13, 5, 5), '#7a4a30', [-7, 8, 10, 10]), SH(E(15, 17, 4, 4), '#7a4a30', [11, 13, 8, 8])],   // クッキー
+    [SH('M-30-3 C-30-30 30-30 30-3Z', '#ffb0cf', [-30, -28, 60, 25]), SH('M-31-3 H31 V6 H-31Z', '#fff4df', [-31, -3, 62, 9]), SH('M-30 6 C-30 30 30 30 30 6Z', '#ffb0cf', [-30, 6, 60, 25])],   // マカロン
+    [SH('M-34 0 a34 34 0 1 0 68 0 a34 34 0 1 0-68 0Z M-12 0 a12 12 0 1 1 24 0 a12 12 0 1 1-24 0Z', '#efb36a', [-34, -34, 68, 68]), SH('M-30 0 a30 30 0 1 0 60 0 a30 30 0 1 0-60 0Z M-13 0 a13 13 0 1 1 26 0 a13 13 0 1 1-26 0Z', '#ff9fc4', [-30, -30, 60, 60])],   // ドーナツ
+    [SH('M-24-8 L24-8 L19 28 Q0 35-19 28Z', '#ffe27a', [-24, -8, 48, 40]), SH('M-27-8 Q-27-24 0-24 Q27-24 27-8 Q0-1-27-8Z', '#c47a35', [-27, -24, 54, 22]), SH(E(0, -29, 7, 7), '#e8453c', [-7, -36, 14, 14])],   // プリン
+    [SH('M-32 0 H32 V28 Q32 32 28 32 H-28 Q-32 32-32 28Z', '#ffe9b0', [-32, 0, 64, 32]), SH('M-34-4 Q-34-16-22-14 Q0-24 22-14 Q34-16 34-4 L34 6 H-34Z', '#fffafc', [-34, -22, 68, 28]), SH(E(0, -20, 10, 10), '#ee4048', [-10, -30, 20, 20])],   // ショートケーキ
+    [SH('M-19 2 L19 2 L0 38Z', '#e9b36b', [-19, 2, 38, 36]), SH(E(0, -1, 25, 10), '#fff1f6', [-25, -11, 50, 20]), SH(E(0, -13, 19, 9), '#ffd0e2', [-19, -22, 38, 18]), SH(E(0, -24, 12, 8), '#fff1f6', [-12, -32, 24, 16])],   // ソフトクリーム
+  ];
+  const oyImgs = [];
+  const oyImg = l => { if (!oyImgs[l]) { const im = new Image(); im.src = '../img/oyatsu/oyatsu_' + OY_FILE[l] + '.webp'; oyImgs[l] = im; } return oyImgs[l]; };
+  const OY_FILE = ['0_ame', '1_cookie', '2_macaron', '3_donut', '4_pudding', '5_cake', '6_softcream'];
+  // おやつ：天の ぷにぷにシールの え（よみこめない ときは コードの かたち）。ものの かたち そのものが シール＝まるい わくは かかない
+  function oyatsu(c, x, y, r, l, a, scale) {
+    c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
+    const im = oyImg(l);
+    if (im.complete && im.naturalWidth > 0) { const w = r * 2.3; c.drawImage(im, -w / 2, -w / 2, w, w); c.restore(); return; }
+    const k = r / 36, sh = SHAPES[l];
+    c.scale(k, k);
+    c.save(); c.shadowColor = 'rgba(70,40,90,.3)'; c.shadowBlur = 10; c.shadowOffsetY = 4;
+    c.lineJoin = 'round'; c.lineWidth = 10; c.strokeStyle = 'rgba(255,255,255,.92)'; c.fillStyle = 'rgba(255,255,255,.92)';
+    for (const q of sh) { c.stroke(q.p); c.fill(q.p); } c.restore();
+    const maxA = Math.max(...sh.map(q => q.b[2] * q.b[3]));
+    for (const q of sh) {
+      const big = q.b[2] * q.b[3] >= maxA * .8, [bx, by, bw, bh] = q.b, cx = bx + bw / 2, cy = by + bh / 2, m = Math.max(bw, bh);
+      c.save();
+      const g = c.createRadialGradient(cx - bw * .15, cy - bh * .2, m * .05, cx, cy, m * .75); g.addColorStop(0, 'rgba(255,255,255,.5)'); g.addColorStop(.5, q.c + 'cc'); g.addColorStop(1, q.c);
+      c.fillStyle = g; c.fill(q.p); c.lineWidth = 1.6; c.strokeStyle = 'rgba(255,255,255,.85)'; c.stroke(q.p);
+      if (big) { c.beginPath(); c.ellipse(bx + bw * .3, by + bh * .26, Math.max(2, bw * .17), Math.max(1.4, bh * .09), -.6, 0, Math.PI * 2); c.fillStyle = 'rgba(255,255,255,.93)'; c.fill(); }
+      c.restore();
+    }
+    c.restore();
+  }
   function item(c, x, y, r, l, a, scale) {
     c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
     c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = (ringOver || COLORS[l]); c.fill(); c.lineWidth = Math.max(1.5, r * .07); c.strokeStyle = 'rgba(64,42,48,.55)'; c.stroke();
@@ -240,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const id = fishId(l), cur = rec.big, rank = x => ART.indexOf(x);
     if (rank(id) > (cur < 0 ? -1 : rank(cur))) { rec.big = id; save(); }
   }
-  const piece = (c, x, y, r, l, a, scale) => (rec.mode === 2 ? fish : rec.mode === 1 ? item : face)(c, x, y, r, l, a, scale);
+  const piece = (c, x, y, r, l, a, scale) => (rec.play === 4 ? oyatsu : rec.mode === 2 ? fish : rec.mode === 1 ? item : face)(c, x, y, r, l, a, scale);
   function miniCanvas(l, px) {
     const c = document.createElement('canvas'), d = 2; c.width = c.height = px * d; c.style.width = c.style.height = px + 'px'; c.setAttribute('aria-hidden', 'true');
     const x = c.getContext('2d'); x.scale(d, d); const ds = drawScale; drawScale = 1; piece(x, px / 2, px / 2, px / 2 - 1.5, l, 1); drawScale = ds; return c;
@@ -264,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const aimMin = () => rOf(nextL) + 3, aimMax = () => W - rOf(nextL) - 3;
   const setAim = x => { aimX = Math.max(aimMin(), Math.min(aimMax(), x)); };
 
-  function addBall(x, y, l, vx = 0, vy = 0, pop = 0) { const b = { id: ++uid, x, y, vx, vy, l, r: rOf(l), m: rOf(l) * rOf(l), age: 0, melt: 0, pop, still: 0 }; balls.push(b); return b; }
+  function addBall(x, y, l, vx = 0, vy = 0, pop = 0) { const b = { id: ++uid, x, y, vx, vy, l, r: rOf(l), m: rOf(l) * rOf(l), age: 0, melt: 0, pop, still: 0, sq: -1, amp: 1 }; balls.push(b); return b; }
   function dropBall(x) {
     if (!canDrop) return false;
     const l = nextL; setAim(x === undefined ? aimX : x);
@@ -471,12 +510,13 @@ document.addEventListener('DOMContentLoaded', () => {
     stats.t += dt;
     if (cooldown > 0) cooldown -= dt;
     if (!canDrop && cooldown <= 0 && (!lastDrop || lastDrop.touched || lastDrop.melt > 0 || !balls.includes(lastDrop))) canDrop = true;   // 450ms たって「かつ」まえの 子が ぶつかる／おちきる まで（どちらかだけでは 出さない）
-    const act = balls.filter(b => b.melt === 0);
+    const act = balls.filter(b => b.melt === 0), oyP = rec.play === 4, bn = l => reduced() ? BOUNCE[l] * .5 : BOUNCE[l];
     for (const b of balls) {
       b.age += dt; if (b.pop > 0) b.pop = Math.max(0, b.pop - dt * 2.6);
       if (b.up) { b.y -= 46 * dt; b.x += Math.sin(b.age * 2.3) * 12 * dt; if (b.y < -b.r * 1.6) b.melt = 1; continue; }   // ぷかぷか うかぶ（ぶつからない）
       if (b.melt > 0) { b.melt += dt / (b.fast ? .5 : 1.3); continue; }
-      b.vy = Math.min(VMAX, b.vy + GRAV * dt); b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= .997; b.vy *= .998;
+      if (b.sq >= 0) { b.sq += dt; if (b.sq > .4) b.sq = -1; }
+      b.vy = Math.min(oyP ? 540 : VMAX, b.vy + (oyP ? 720 : GRAV) * dt); b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= .997; b.vy *= .998;
     }
     for (let it = 0; it < 6; it++) {
       for (let i = 0; i < act.length; i++) for (let j = i + 1; j < act.length; j++) {
@@ -485,13 +525,13 @@ document.addEventListener('DOMContentLoaded', () => {
         a.touched = true; c.touched = true; const d = Math.sqrt(d2) || .001, nx = dx / d, ny = dy / d, ov = rr - d, ia = 1 / a.m, ic = 1 / c.m, s = ia + ic;
         a.x -= nx * ov * ia / s; a.y -= ny * ov * ia / s; c.x += nx * ov * ic / s; c.y += ny * ov * ic / s;
         const vn = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
-        if (vn < 0) { const j2 = -(1.08) * vn / s; a.vx -= j2 * nx * ia; a.vy -= j2 * ny * ia; c.vx += j2 * nx * ic; c.vy += j2 * ny * ic;
+        if (vn < 0) { const j2 = -(oyP ? 1 + (bn(a.l) + bn(c.l)) * .5 * .98 : 1.08) * vn / s; if (oyP && -vn > 140) { a.sq = 0; c.sq = 0; a.amp = c.amp = Math.min(1.5, -vn / 380); } a.vx -= j2 * nx * ia; a.vy -= j2 * ny * ia; c.vx += j2 * nx * ic; c.vy += j2 * ny * ic;
           const tx = -ny, ty = nx, vt = (c.vx - a.vx) * tx + (c.vy - a.vy) * ty, f = vt * .08 / s; a.vx += f * tx * ia; a.vy += f * ty * ia; c.vx -= f * tx * ic; c.vy -= f * ty * ic; }
       }
       for (const b of act) {
-        if (b.x < b.r) { b.x = b.r; if (b.vx < 0) b.vx *= -.1; } else if (b.x > W - b.r) { b.x = W - b.r; if (b.vx > 0) b.vx *= -.1; }
+        const wk = oyP ? bn(b.l) * .8 : .1; if (b.x < b.r) { b.x = b.r; if (b.vx < 0) b.vx *= -wk; } else if (b.x > W - b.r) { b.x = W - b.r; if (b.vx > 0) b.vx *= -wk; }
         if (b.y > H - b.r - 1) b.touched = true;
-        if (b.y > H - b.r) { b.y = H - b.r; if (b.vy > 0) b.vy *= -.08; b.vx *= 1 - Math.min(.5, 6 * dt / 6); }
+        if (b.y > H - b.r) { b.y = H - b.r; if (b.vy > 0) { if (oyP && b.vy > 120) { b.sq = 0; b.amp = Math.min(1.5, b.vy / 360); } b.vy *= oyP ? (b.vy < 90 ? -.08 : -bn(b.l)) : -.08; } b.vx *= 1 - Math.min(.5, 6 * dt / 6); }
       }
     }
     for (const b of act) { const sp = Math.hypot(b.vx, b.vy); if (sp < 80) { if (sp < 14) { b.vx *= .8; b.vy *= .8; } b.still += dt; } else b.still = 0; }
@@ -520,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (gone.size) balls = balls.filter(b => !gone.has(b));
     for (const n of born) {
       addBall(n.x, n.y, n.l, n.vx * .6, n.vy * .6 - 25, reduced() ? 0 : 1.4); tone(n.l, 'merge');
-      if (rec.mode === 2) bigWrite(n.l);
+      if (rec.mode === 2 && rec.play !== 4) bigWrite(n.l);
       watchSay(n.l);
       if (n.l > stats.maxL) stats.maxL = n.l;
       if (n.l > rec.best) { rec.best = n.l; save(); drawBest(); say(L('おおきく なったよ！ ' + nm(n.l), 'It got bigger! ' + nm(n.l))); if (n.l === 6) say(L('ぜんぶの いろを あわせたよ。すごい！', 'You joined every color. Wonderful!')); }
@@ -580,15 +620,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
     if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 52); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 46, rOf(nextL), nextL, 1); }
     dropperDraw();
-    for (const b of balls) { const m = b.melt; piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); }   // もふっ
+    for (const b of balls) { const m = b.melt; if (rec.play === 4 && m === 0 && b.sq >= 0 && !reduced()) { const t = b.sq, sy = 1 - .15 * b.amp * Math.exp(-10 * t) * Math.cos(2 * Math.PI * 10 * t); ctx.save(); ctx.translate(b.x, b.y + b.r); ctx.scale(1 / Math.sqrt(sy), sy); piece(ctx, 0, -b.r, b.r, b.l, 1, 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); ctx.restore(); continue; } piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); }   // もふっ
   }
-  const nm = l => rec.mode === 2 ? (isEn() ? FISH_EN : FISH_JA)[fishId(l)] : rec.mode === 1 ? (isEn() ? ITEMS_EN[l] : ITEMS[l]) : (isEn() ? window.MaruiroEN.names[l] : NAMES[l]);
+  const nm = l => rec.play === 4 ? (isEn() ? OY_EN[l] : OY_JA[l]) : rec.mode === 2 ? (isEn() ? FISH_EN : FISH_JA)[fishId(l)] : rec.mode === 1 ? (isEn() ? ITEMS_EN[l] : ITEMS[l]) : (isEn() ? window.MaruiroEN.names[l] : NAMES[l]);
   const bestCtx = $('best-cv').getContext('2d');
   function drawBest() {
     bestCtx.clearRect(0, 0, 88, 88);
     if (rec.best >= 0) { const ds = drawScale; drawScale = .5; piece(bestCtx, 44, 44, 40, rec.best, 1); drawScale = ds; }
     if (rec.play === 1) { bestCtx.clearRect(0, 0, 88, 88); $('best-tx').textContent = rec.chain > 0 ? L('いちばん ながい れんさ：' + rec.chain, 'Longest chain so far: ' + rec.chain) : L('いちばん ながい れんさ：まだ ないよ', 'Longest chain so far: none yet'); return; }
-    $('best-tx').textContent = rec.best >= 0 ? L('いちばん おおきい まる：', 'Biggest circle so far: ') + nm(rec.best) : L('いちばん おおきい まる：まだ ないよ', 'Biggest circle so far: none yet');
+    { const w = rec.play === 4 ? ['おやつ', 'treat'] : ['まる', 'circle']; $('best-tx').textContent = rec.best >= 0 ? L('いちばん おおきい ' + w[0] + '：', 'Biggest ' + w[1] + ' so far: ') + nm(rec.best) : L('いちばん おおきい ' + w[0] + '：まだ ないよ', 'Biggest ' + w[1] + ' so far: none yet'); }
   }
 
   // ─── そうさ ───
@@ -625,18 +665,21 @@ document.addEventListener('DOMContentLoaded', () => {
     ['おなじ ものが 3つ いじょう くっつくと、ふわっと きえるよ。きえると うえの まるが おちて、つづけて きえる ことも。じかんぎれも ゲームオーバーも ないよ。', 'When 3 or more of the same piece touch, they softly vanish. The ones above drop down and may vanish too. No time limit, no game over.'],
     ['ひだりうえの まるふわから、えらんだ いろが ひろがるよ。ぜんぶ おなじ いろに なったら ぴったり！ てかずも じかんも かぞえないよ。ばんは きょうの いろ。', 'Colors spread from the top-left Marufuwa as you pick. When everything is one color, it is a perfect fit! No move count and no timer. The board is today’s colors.'],
     ['ふたつ組の まるい子が おちてくるよ。左右に うごかして、まわして、おいてね。同じ いろ・同じ おおきさが ふれると おおきく、よこ 1列が そろうと おさんぽに いって「またね」。つづけて きえたら「なかよし」。ちがう いろも 3びょう ふれると なじむよ。じかんぎれも ゲームオーバーも ないよ。きょうの つみきは みんな おなじ。', 'Round pairs fall down. Move them, rotate them, and set them. Same color and size merge into a bigger one; a full row goes for a walk (“See you!”), and when more vanish in a row, it is “Best friends”. Different colors blend after 3 seconds. No time limit, no game over. Today everyone gets the same order.']
-  ], SHORT = [['つんで、あわせよう。', 'Stack and join.'], ['3つ そろえて、きえよう。', 'Match three.'], ['いろを ひろげよう。', 'Spread the color.'], ['ふたつ組を まわして、ならべよう。', 'Rotate pairs and set them.']], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread'], ['あそびかた：つみき', 'How to play: Blocks']];
+  ,
+    ['うえから おやつが おちてくるよ。ひだりみぎに うごかして、はなして ね。おなじ おやつが ふれると、ひとつ おおきく なるよ。ぷにぷにの シールだから、ぽよーんと よく はずむよ。つぎの おやつが おちても、まえの子は まだ はずんでるかも。のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。', 'Treats fall from above. Move left and right, then let go. When two of the same treat touch, they become one bigger one. They are bouncy jelly stickers, so they spring about a lot. There is no timer and no game over.']
+  ], SHORT = [['つんで、あわせよう。', 'Stack and join.'], ['3つ そろえて、きえよう。', 'Match three.'], ['いろを ひろげよう。', 'Spread the color.'], ['ふたつ組を まわして、ならべよう。', 'Rotate pairs and set them.'], ['おやつを おとして、ぷにっと あわせよう。', 'Drop treats and join them.']], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread'], ['あそびかた：つみき', 'How to play: Blocks'], ['あそびかた：おやつ', 'How to play: Treats']];
+
   function drawPlay() {
     const b = $('play'), pl = rec.play; b.setAttribute('aria-pressed', String(pl !== 0)); b.textContent = L(PLAYS[pl][0], PLAYS[pl][1]);
     document.querySelector('.lead').textContent = L(SHORT[pl][0], SHORT[pl][1]); $('howto-tx').textContent = L(LEADS[pl][0], LEADS[pl][1]);
     $('brot').hidden = pl !== 3; $('best-wrap').style.display = pl === 3 ? 'none' : '';
-    const fl = pl === 2; document.querySelector('.field').parentElement; $('flood').hidden = !fl; document.querySelector('.hud').hidden = fl; document.querySelector('.ctl').hidden = fl; $('mode').hidden = fl; $('next').hidden = !fl;
+    const fl = pl === 2; document.querySelector('.field').parentElement; $('flood').hidden = !fl; document.querySelector('.hud').hidden = fl; document.querySelector('.ctl').hidden = fl; $('mode').hidden = fl || pl === 4; $('next').hidden = !fl;
     document.querySelectorAll('main > .field').forEach(f => { f.hidden = fl; });
     const host = fl ? $('flood').querySelector('.field') : document.querySelector('main > .field'); host.style.position = 'relative'; host.prepend(cheerEl); cheerEl.hidden = true;
     if (fl) floodStart(0);
   }
   function freshPlay() { if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
-  $('play').addEventListener('click', () => { rec.play = (rec.play + 1) % 4; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); });
+  $('play').addEventListener('click', () => { rec.play = (rec.play + 1) % 5; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 4 ? 'あそびかたを「おやつ」に かえたよ。さいしょから。' : rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 4 ? 'Switched to Treats. Starting fresh.' : rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); });
   $('rst').addEventListener('click', reset);
 
   // ─── うごかす（フレームごと・ひらいて いる ときだけ）───
@@ -711,10 +754,11 @@ document.addEventListener('DOMContentLoaded', () => {
     W, H, LINE, R, version: 1,
     balls: () => balls.map(b => ({ x: b.x, y: b.y, l: b.l, melt: b.melt })),
     state: () => ({ n: balls.length, canDrop, nextL, best: rec.best, snd: rec.snd, over, ...stats, aimX }),
+    ballsInfo: () => balls.map(b => ({ x: b.x, y: b.y, vx: b.vx, vy: b.vy, l: b.l, r: b.r, sq: b.sq })),   // けんさ用（よむだけ）
     step: n => { for (let i = 0; i < (n || 1); i++) step(1 / 60); },
     drop: x => { canDrop = true; return dropBall(x); },
     tryDrop: x => dropBall(x),
-    setPlay: v => { rec.play = v === 1 ? 1 : v === 2 ? 2 : v === 3 ? 3 : 0; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); },
+    setPlay: v => { rec.play = v === 1 ? 1 : v === 2 ? 2 : v === 3 ? 3 : v === 4 ? 4 : 0; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); },
     reseed: n => { rnd = mul(n); },
     flood: { state: () => ({ n: fl.n, solved: fl.solved, board: fl.b.map(r => r.join('')).join('/'), today: fl.today }), press: floodPress, next: () => floodStart(fl.n + 1), restart: () => floodStart(fl.n), start: n => floodStart(n || 0) },
     setMode: v => { rec.mode = v === 2 ? 2 : v === 0 ? 0 : 1; buildLadder(); save(); drawMode(); drawZukan(); drawBest(); },
