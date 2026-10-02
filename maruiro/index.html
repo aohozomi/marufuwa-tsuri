@@ -524,7 +524,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── ばめん：ひろばの「かご」（時間で かわる そらと おか）・うえで まるふわが あるいて ぽとんと おとす ───
   const dropper = new Image(); dropper.src = '../img/game-blue.webp';
   let walkX = W / 2, walkT = 0;
+  // ばんの うしろの え（天）：img/bg/maruiro_field_{asa,hiru,yuu,yoru}.webp を じかんたいで しく。無ければ（よめなければ）いまの コード描き。HAZE＝駒の 輪郭が えに しずまない ための うすい 白の もや（0で なし）
+  const FIELD_KEY = { a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru' }, fieldImgs = {}, HAZE = .08;
+  const fieldImg = () => { const k = FIELD_KEY[timeKey()] || 'hiru'; if (!fieldImgs[k]) { const im = new Image(); im.src = '../img/bg/maruiro_field_' + k + '.webp'; fieldImgs[k] = im; } const im = fieldImgs[k]; return im.complete && im.naturalWidth > 0 ? im : null; };
   function backdrop() {
+    const fi = fieldImg();
+    if (fi) { const k = Math.max(W / fi.naturalWidth, H / fi.naturalHeight), w = fi.naturalWidth * k, h = fi.naturalHeight * k; ctx.drawImage(fi, (W - w) / 2, (H - h) / 2, w, h); if (HAZE > 0) { ctx.fillStyle = 'rgba(255,255,255,' + HAZE + ')'; ctx.fillRect(0, 0, W, H); } return; }
     const t = timeKey(), sky1 = cssv('--sky1') || '#a9defa', sky2 = cssv('--sky2') || '#eaf8ff';
     const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, sky1); g.addColorStop(.7, sky2); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     if (t === 'n') { ctx.fillStyle = 'rgba(255,255,255,.85)'; [[30, 20], [90, 50], [150, 14], [210, 40], [270, 24], [60, 80], [240, 90]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill(); }); ctx.fillStyle = '#fff6cf'; ctx.beginPath(); ctx.arc(250, 38, 13, 0, 7); ctx.fill(); }
@@ -690,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
     flood: { state: () => ({ n: fl.n, solved: fl.solved, board: fl.b.map(r => r.join('')).join('/'), today: fl.today }), press: floodPress, next: () => floodStart(fl.n + 1), restart: () => floodStart(fl.n), start: n => floodStart(n || 0) },
     setMode: v => { rec.mode = v === 2 ? 2 : v === 0 ? 0 : 1; buildLadder(); save(); drawMode(); drawZukan(); drawBest(); },
     fishIds: () => [0, 1, 2, 3, 4, 5, 6].map(fishId), order: n => { reorder(); const o = []; for (let i = 0; i < n; i++) o.push(pickLevel()); reorder(); return o.join(''); },
-    onigiriD: ONIGIRI_D, useOniImg, oniImgOk: () => oniImg.complete && oniImg.naturalWidth > 0, tone: (l, k) => tone(l, k),
+    fieldBgOk: () => !!fieldImg(), fieldBgUrl: () => '../img/bg/maruiro_field_' + (FIELD_KEY[timeKey()] || 'hiru') + '.webp', onigiriD: ONIGIRI_D, useOniImg, oniImgOk: () => oniImg.complete && oniImg.naturalWidth > 0, tone: (l, k) => tone(l, k),
     ts: { st: () => ({ ...ts.st, chain: ts.chain, resolving: ts.resolving, cur: ts.cur ? { r: ts.cur.r, c: ts.cur.c, o: ts.cur.o, age: ts.cur.age } : null, next: !!ts.next, ghosts: ts.ghosts.length }), grid: () => ts.g.map(r => r.map(c => c ? c.c + '' + c.s : '.').join('')).join('/'),
       setGrid: rows => { ts.g = rows.map(r => r.split('').map(ch => ch === '.' ? null : tsCell(Number(ch), 0))); }, setCell: (r, c, col, sz) => { ts.g[r][c] = col === null ? null : tsCell(col, sz); },
       move: dc => tsMove(dc), rotate: () => tsRotate(), drop: () => tsHardDrop(), canDrop: () => tsCanDrop(), step: n => { for (let i = 0; i < (n || 1); i++) tsStep(1 / 60); }, spawn: () => tsSpawn(), setCur: (r, c, o, a, b) => { ts.cur = { r, c, o, a, b, age: 1, f: 0 }; ts.resolving = false; },
