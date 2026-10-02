@@ -331,6 +331,10 @@ html[data-clip] #main-button{display:block !important;position:fixed;left:0;bott
 #topmute .lang-row button{min-height:44px;padding:4px 12px !important;font-size:.8rem !important;background:#ffffffd9 !important;color:#17323d !important;border-color:#286b88 !important;opacity:1 !important}
 .mini-progress{margin:2px 0 4px;text-align:center;font-size:.85rem;font-weight:800;color:#35566a}
 :root[data-night=true] .mini-progress{color:#e8f1f8}   /* よるは くらい じ（13:1）。ひるは こい いろ */   /* なげる の ちかくの ちいさな すすみぐあい（せかさない） */
+/* たまに きらっと する レアな かげ（ふだんは でない）。きんいろに ほんのり・約12びょうで さる */
+.rare-glimpse{position:absolute;z-index:2;pointer-events:none;left:0;width:var(--w,15%);aspect-ratio:var(--ar,2.4);background:linear-gradient(90deg,#ffe58a,#ffd34d);opacity:0;-webkit-mask:var(--m) center/100% 100% no-repeat;mask:var(--m) center/100% 100% no-repeat;filter:drop-shadow(0 0 5px #fff3b0)}
+.rare-glimpse.plain{border-radius:50%;-webkit-mask:none;mask:none;aspect-ratio:2.4}
+.rare-spark{position:absolute;z-index:3;pointer-events:none;font-size:.9rem;color:#fff7c8;text-shadow:0 0 4px #ffd34d;opacity:0}
 /* いちばん うえの 🔇 おとを けす（まるいろと おなじ しき。おとは はじめから ON） */
 .topmute{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:6px 12px 0;max-width:640px;margin:0 auto}
 .mutebtn{min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid #286b88;background:#fff;color:#17323d;font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation}
@@ -1436,6 +1440,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     // シールちょうを 30しゅるい そろえた ひとは、まぼろしに あいやすく なる（25かいに 1かい）。だれも あえない ままに しない
     const odds = seenCount() >= BASE ? Math.max(LEGEND_ODDS, 1 / 25) : LEGEND_ODDS;
     if (myth && (probe('legend') === '1' || Math.random() < odds)) { wish = false; return myth; }
+    if (RARE.hot && performance.now() < RARE.hot.until && Math.random() < .4) { const f = FISH[RARE.hot.id]; RARE.hot = null; if (f) { wish = false; return f; } }   // きらっと した 直後に なげると その 魚が つれやすい
     const season = seasonFish();   // この 月の さかな：どの つりばでも 10かいに 1かい くらい。ずかんの かずには はいらない ので、あえなくても こまらない
     if (season && (probe('season') === '1' || Math.random() < SEASON_ODDS)) { wish = false; return season; }
     const now = timeOfDay(), here = poolOf(save.area);
@@ -1729,12 +1734,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   { const REWARD = ['palup', 'trophy', 'party', 'catchLegend', 'catchBig', 'catchNormal', 'loved', 'gift', 'star', 'wish']; let lastReward = -1e9;   // ごほうびの おとは 2びょうに 1つだけ（かさなって ガランガランに ならない・あとの ものは すてる）
     REWARD.forEach(k => { const f = SFX[k]; if (typeof f === 'function') SFX[k] = (...a) => { const now = performance.now(); if (now - lastReward < 2000) return; lastReward = now; return f(...a); }; }); }
   // ===== あたらしい こうかおん 8つだけ（10/2・マスターの OK・総司令部が えらんだ A/B/C）。ふるい こうかおん（tone/chord/zap）は ぜんぶ とめた まま。ファイルは snd/sfx/*.wav（ためしと おなじ 波形・おおきさ ×1）
-  const SFX_NEW = true, SFX_FILES = {nageru: 'snd/sfx/nageru.wav', chakusui: 'snd/sfx/chakusui.wav', chon: 'snd/sfx/chon.wav', atari: 'snd/sfx/atari.wav', hiku: 'snd/sfx/hiku.wav', pittari: 'snd/sfx/pittari.wav', tsureta: 'snd/sfx/tsureta.wav', nogashita: 'snd/sfx/nogashita.wav'};
+  const SFX_NEW = true, SFX_FILES = {nageru: 'snd/sfx/nageru.wav', chakusui: 'snd/sfx/chakusui.wav', chon: 'snd/sfx/chon.wav', atari: 'snd/sfx/atari.wav', hiku: 'snd/sfx/hiku.wav', pittari: 'snd/sfx/pittari.wav', tsureta: 'snd/sfx/tsureta.wav', nogashita: 'snd/sfx/nogashita.wav', pikon: 'snd/sfx/pikon.wav'};
   const sfxBuf = {}; let sfxLoading = false, sfxLastReward = -1e9;
   function sfxLoad() { if (sfxLoading || !SFX_NEW || !sndOn('fx')) return; sfxLoading = true; try { const ctx = ready(); Object.entries(SFX_FILES).forEach(([k, u]) => { fetch(u).then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b)).then(buf => { sfxBuf[k] = buf; }).catch(() => {}); }); } catch { sfxLoading = false; } }
   addEventListener('load', () => setTimeout(() => { try { if (save.sound) sfxLoad(); } catch {} }, 600));   // おとが ONなら さきに よみこむ（さいしょの 1かい目から なる）
-  function sfxPlay(k, delay = 0) {
-    if (!SFX_NEW || !sndOn('fx')) return;
+  function sfxPlay(k, delay = 0, kind = 'fx') {
+    if (!SFX_NEW || !sndOn(kind)) return;
     try { if (!sfxBuf[k]) { sfxLoad(); return; } const ctx = ready(), src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = sfxBuf[k]; g.gain.value = 1; src.connect(g).connect(fxOut(ctx)); src.start(ctx.currentTime + delay); } catch {}
   }
   const sfxReward = k => { const now = performance.now(); if (now - sfxLastReward < 2000) return; sfxLastReward = now; sfxPlay(k); };   // ごほうび（ぴったり・つれた）は 2びょうに 1つ
@@ -1746,7 +1751,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     nice: () => sfxPlay('hiku'), close: () => sfxPlay('hiku'),   // ひく（てごたえ）
     perfect: () => sfxReward('pittari'),
     catchNormal: () => sfxReward('tsureta'), catchBig: () => sfxReward('tsureta'), catchLegend: () => sfxReward('tsureta'),
-    snap: () => sfxPlay('nogashita')
+    snap: () => sfxPlay('nogashita'),
+    pikon: () => sfxPlay('pikon', 0, 'guide')   // あんない音（ふつう 既定 ON・せっていで きれる）：わが まとに かさなる しゅんかんの ひくい やわらかい 1おと（294Hz・ごく ちいさく）
   });
   const SND_BTN = [   // つかいやすく する の なかの「おとの せってい」。dflt＝はじめから ON。sample＝ONに した とき ちょっと ならす
     {id: 'snd-guide', key: 'sndGuide', ja: 'あんないの おと', en: 'Guide sounds', hint: ['わの おとと「ピコン」', 'Beeps and “ping”'], dflt: true, sample: () => { guideTone(587, .05, 'sine', 0, .0825); setTimeout(() => SFX.pikon(), 260); }},
@@ -2211,7 +2217,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function startReel() {
     hpMax = hp = Math.min(12, 3 + fish.rare * 2 + (nushi ? 5 : 0)); period = Math.round(1100 * (nushi || fish.legend ? .7 : [1.45, 1.45, 1.25, 1, .85, .7][Math.min(5, fish.rare)]));   // ぬしでも さいだい 12。わの はやさ：★1 ゆっくり（×1.45）〜★4（×.85）・ぬし／まぼろし（×.7）
     precise = !blindNow() && save.total > 0;   // ぴったり／ど真ん中だけが すすむ しくみ（らくちん・ぬし・まぼろし・さいしょの 1ぴきは まえの まま）
-    if (precise) hpMax = hp = (nushi || fish.legend ? 6 : fish.rare <= 2 ? 2 : fish.rare === 3 ? 4 : fish.rare === 4 ? 5 : 6) + (curMode() === 'hard' ? 1 : 0);   // ふつう ★1〜2＝2かい・★3＝3かい・★4＝4かい（しっかり +1）
+    if (precise) hpMax = hp = (nushi || fish.legend ? 6 : fish.rare <= 2 ? 3 : fish.rare === 3 ? 4 : fish.rare === 4 ? 5 : 6) + (curMode() === 'hard' ? 1 : 0);   // ふつう ★1〜2＝2かい・★3＝3かい・★4＝4かい（しっかり +1）
     if (save.total === 0) { hpMax = hp = 3; period = 1700; }   // さいしょの 1ぴきは、かならず すぐ つれる
     periodBase = period;
     if (fish.legend) { hpMax = hp = 7; period = periodBase = 770; }   // まぼろしは、でて きたら つれる。わは ゆっくり
@@ -2234,6 +2240,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     say(save.easy || (reduce() && !sndOn('guide')) ? 'おすだけで、つれるよ。' : sndOn('guide') ? '「ピコン」で、おしてね。' : 'ひかったら、おしてね。');
   }
   function pull() {
+    if (precise && performance.now() - reelStartAt >= PRECISE.giveup[curMode() === 'hard' ? 1 : 0]) { escapeNow(); return; }   // ながい あいだ あわない と 糸が きれて にげる（罰は ない・らくちんは つれる）
     // 「いまだ」との じかんの ずれで きめる（えがく しくみに たよらない。わの うごきかたが ちがっても、おなじ ものさし）
     // ひいた あとは、みじかい「ぷにっ」やすみ。れんだ しても はやく ならない（ねらう ひとと、おなじ くらいの はやさ）。やすみの あいだの タップは、なにも おきない だけ
     if (performance.now() < restUntil) {   // やすみの 間の おしは なにも おきない だけ。「ぷ」と ちいさく ならして、おした ことは とどいて いると しらせる（つづけて おしても 0.25びょうに 1かい）
@@ -2265,7 +2272,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (tension >= 1 && hp > 0) snapped = true;
       else if (power === 1) { closeStreak++; if (closeStreak >= 2 && closeStreak % 2 === 0 && hp > 0 && !skillMul('ochi')) { hp = Math.min(hpMax, hp + 1); resistNote(); } } else closeStreak = 0;   // ていこう：ちかいが 2かい つづくと たいりょくが 1 もどる（ぴったり・いいねで とまる）
     }
-    if (performance.now() - reelStartAt >= (precise ? PRECISE.giveup[curMode() === 'hard' ? 1 : 0] : 5500)) hp = 0;   // どんな ひきかたでも 5.5びょう たてば つれる（さかなが つかれる。ばつは ない・ずれる ひとの さいだい じかんを のばさない）
+    if (performance.now() - reelStartAt >= (precise ? 1e12 : 5500)) hp = 0;   // どんな ひきかたでも 5.5びょう たてば つれる（さかなが つかれる。ばつは ない・ずれる ひとの さいだい じかんを のばさない）
     $('hp').firstElementChild.style.width = (precise ? hp / hpMax * 100 : Math.ceil(hp / 2) / Math.ceil(hpMax / 2) * 100) + '%';   // めもりに そろえる（1めもり＝あと 1かい）
     const word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : precise ? '' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     if (precise && power === 1 && !reduce()) { const bk = document.querySelector('#reel .back'); if (bk && bk.animate) bk.animate([{scale: '1'}, {scale: '.95'}, {scale: '1'}], {duration: 200, easing: 'ease-out'}); }   // おしい：もじは だした ない ちいさな ぷるん
@@ -4286,7 +4293,33 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       html.dataset.ready = 'fresh'; delete html.dataset.time; setTimeout(() => { html.dataset.ready = 'true'; }, 500);   // 早い script の <html data-time> は やくめが おわり（けしきの data-time が うけつぐ）
     });
   }
-  window.Tsuri = {all: FISH.filter(f => !f.season && !f.ext), ext: () => FISH.filter(f => f.ext).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, rare: f.rare, time: f.time, area: f.area, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0})), sampleFish: n => { const c = {}; for (let i = 0; i < Math.min(20000, Math.max(0, n | 0)); i++) { const f = pickFish(); if (f) c[f.id] = (c[f.id] || 0) + 1; } return c; }, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), fishList: () => FISH.map(f => ({id: f.id, name: f.name, kanji: f.kanji})), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
+  // ===== たまに「きらっ」と レアな かげ（10/2 マスター：ふだんは ふつうの 魚だけ・レアは 出来事）。ほぞんの かぎは ふやさない。「みんなが」は いわない・急かさない
+  const RARE = {
+    gapMin: 6, gapMax: 14,   // つぎの 出来事までの 分（へいきん 10分・つづけて でない）
+    nextGap: rnd => (RARE.gapMin + (RARE.gapMax - RARE.gapMin) * rnd()) * 60000,
+    sim: (minutes, rnd = Math.random) => { let t = 0, n = 0, last = -1, minGap = 1e9; for (;;) { const g = RARE.nextGap(rnd); t += g; if (t > minutes * 60000) break; n++; if (last >= 0) minGap = Math.min(minGap, t - last); last = t; } return {n, minGap}; },   // けんさよう：minutes ぶんの かいすう
+    hot: null, timer: 0, shown: 0,
+    ids: () => FISH.filter(f => !f.legend && !f.season && (f.rare >= 4) && (f.area === save.area)).map(f => f.id)   // この つりばの ★4〜5（ぬし・まぼろしは ふくめない）
+  };
+  function rareShow(forceId) {
+    const ids = forceId !== undefined ? [forceId] : RARE.ids(); if (!ids.length) return false;
+    if (document.hidden || dlgOpen || document.querySelector('dialog[open]') || scene.dataset.tooku === 'true' || !(phase === 'idle' || phase === 'waiting')) return false;
+    const id = ids[Math.floor(Math.random() * ids.length)], el = document.createElement('div'), box = scene.getBoundingClientRect(), top = 58 + Math.random() * 14;
+    el.className = 'rare-glimpse'; el.setAttribute('aria-hidden', 'true'); el.style.top = top + '%'; el.style.setProperty('--w', '15%');
+    if (ART && ART.shadow && ART.shadowMask && ART.shadow[id]) { el.style.setProperty('--m', ART.shadowMask(id)); el.style.setProperty('--ar', String((ART.meta && ART.meta.shadowAspect && ART.meta.shadowAspect[id]) || 2.4)); } else el.classList.add('plain');
+    scene.append(el); RARE.shown++;
+    const still = reduce(), dur = 12000, W = box.width * .15;
+    if (still) { el.style.left = '40%'; el.animate([{opacity: 0}, {opacity: .55, offset: .2}, {opacity: .55, offset: .8}, {opacity: 0}], {duration: dur}).onfinish = () => el.remove(); }   // うごきを へらす：いろだけ（うごかない）
+    else el.animate([{translate: (box.width + W) + 'px 0', opacity: 0}, {opacity: .55, offset: .12}, {opacity: .55, offset: .88}, {translate: (-W * 1.2) + 'px 0', opacity: 0}], {duration: dur, easing: 'linear'}).onfinish = () => el.remove();
+    if (!still) for (let k = 0; k < 4; k++) { const sp = document.createElement('i'); sp.className = 'rare-spark'; sp.textContent = '✦'; sp.setAttribute('aria-hidden', 'true'); sp.style.left = (22 + Math.random() * 56) + '%'; sp.style.top = (top - 4 + Math.random() * 8) + '%'; scene.append(sp); sp.animate([{opacity: 0, scale: '.6'}, {opacity: .9, scale: '1', offset: .4}, {opacity: 0, scale: '.6'}], {duration: 900, delay: 800 + k * 1700}).onfinish = () => sp.remove(); }
+    say(L('いま なにか きらっと したよ。', 'Something just sparkled.'));
+    RARE.hot = {id, until: performance.now() + 20000};   // この あいだに ちかくへ なげると その 魚が つれやすい（かならず では ない）
+    return true;
+  }
+  function rareSchedule(first) { clearTimeout(RARE.timer); RARE.timer = setTimeout(() => { if (!rareShow()) { RARE.timer = setTimeout(() => rareSchedule(false), 30000); return; } rareSchedule(false); }, first && probe('rare-first') ? Number(probe('rare-first')) : RARE.nextGap(Math.random)); }   // だせない とき（なげて いる 最中・ダイアログ）は 30びょう あとに もういちど
+  RARE.show = rareShow; RARE.start = rareSchedule;
+  if (!(window.TsuriClip || document.documentElement.dataset.clip)) rareSchedule(true);
+  window.Tsuri = {rare: RARE, all: FISH.filter(f => !f.season && !f.ext), ext: () => FISH.filter(f => f.ext).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, rare: f.rare, time: f.time, area: f.area, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0})), sampleFish: n => { const c = {}; for (let i = 0; i < Math.min(20000, Math.max(0, n | 0)); i++) { const f = pickFish(); if (f) c[f.id] = (c[f.id] || 0) + 1; } return c; }, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), fishList: () => FISH.map(f => ({id: f.id, name: f.name, kanji: f.kanji})), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
