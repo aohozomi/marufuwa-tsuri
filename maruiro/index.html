@@ -312,8 +312,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // ─── つみき（テトリス＋ぷよぷよ＋スイカ）：ふたつ組が おちてくる・まわせる・同じ いろ×おおきさ が ふれると おおきく・よこ1列が そろうと「おさんぽ」・つづけて「なかよし」・ちがう いろは 3びょうで なじむ ───
   const TC = 7, TR = 8, TW = W / TC, TH = 44, TY0 = H - TR * TH, FALL = .85, EARC = ['#8fd3f4', '#9fe0a6', '#ffc27d', '#c9a6f2'], EARL = ['#bfe8fb', '#c5f0c9', '#ffdcae', '#e3d3f8'], SIZE_L = [0, 2, 6], OFFS = [[-1, 0], [0, 1], [1, 0], [0, -1]];
-  const ts = { g: [], cur: null, next: null, t: 0, wait: 0, spawnIn: .3, resolving: false, ghosts: [], chain: 0, want: 3, dragged: false, blend: new Map(), uid: 0, st: { pieces: 0, merges: 0, lines: 0, blends: 0, walks: 0, maxChain: 0, rounds: 0 } };
-  const tsCell = (c, s) => ({ id: ++ts.uid, c, s, dy: 0, sq: 0, pop: 0 });
+  let dropJump = 0, dropTint = -1;
+  const ts = { edge: null, g: [], cur: null, next: null, t: 0, wait: 0, spawnIn: .3, resolving: false, ghosts: [], chain: 0, want: 3, dragged: false, blend: new Map(), uid: 0, st: { pieces: 0, merges: 0, lines: 0, blends: 0, walks: 0, maxChain: 0, rounds: 0 } };
+  const tsCell = (c, s) => ({ id: ++ts.uid, c, s, dy: 0, sq: -1, pop: -1, amp: 1, pamp: 1, fall: false });
+  const chainAmp = n => Math.min(1.5, 1 + .1 * Math.max(0, n));   // なかよし ○ に 比例して ゆれが 少しずつ 大きく（上限 1.5ばい）
+  // プニプニ：着地＝scaleY .85 から びよんと もどる（バネ・2〜3かい 小さく ゆれる・約 .25びょう）／合体＝1.25ばい→1.0／「うごきを へらす」では 0
+  function tsScale(cell) {
+    if (reduced()) return { sx: 1, sy: 1 };
+    let syL = 1, g = 1;
+    if (cell.sq >= 0 && cell.sq < .4) { const t = cell.sq; syL = 1 - .15 * cell.amp * Math.exp(-10 * t) * Math.cos(2 * Math.PI * 10 * t); }
+    if (cell.pop >= 0 && cell.pop < .6) { const t = cell.pop; g = 1 + .25 * cell.pamp * Math.exp(-9 * t) * Math.cos(2 * Math.PI * 5 * t); }
+    return { sx: g / Math.sqrt(syL), sy: syL * g };
+  }
   const tsPair = () => ({ a: { c: Math.floor(rnd() * 4), s: rnd() < .15 ? 1 : 0 }, b: { c: Math.floor(rnd() * 4), s: rnd() < .15 ? 1 : 0 } });
   function tsReset() {
     reorder(); ts.g = Array.from({ length: TR }, () => Array(TC).fill(null)); ts.cur = null; ts.ghosts = []; ts.blend = new Map(); ts.chain = 0; ts.wait = 0; ts.spawnIn = .3; ts.resolving = false; ts.next = tsPair(); ts.want = 3; cheerEl.hidden = true; ts.st = { pieces: 0, merges: 0, lines: 0, blends: 0, walks: 0, maxChain: 0, rounds: 0 };
@@ -334,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     say(L('いっぱいに なったので、いちばん したの 列が おさんぽに いったよ。「またね」', 'It filled up, so the bottom row went for a walk. “See you!”'));
     ts.resolving = true; ts.wait = .5;
   }
-  function tsMove(dc) { const p = ts.cur; if (!p || ts.resolving) return false; const q = { ...p, c: p.c + dc }; if (!tsFits(q)) return false; ts.cur = q; ts.want = q.c; return true; }
+  function tsMove(dc) { const p = ts.cur; if (!p || ts.resolving) return false; const q = { ...p, c: p.c + dc }; if (!tsFits(q)) { if (tsCellsOf(q).some(([r, c]) => c < 0 || c >= TC)) { ts.edge = { t: 0, dir: dc }; } return false; } ts.cur = q; ts.want = q.c; return true; }
   function tsRotate() {
     const p = ts.cur; if (!p || ts.resolving) return false; const o = (p.o + 1) % 4;
     for (const [dr, dc] of [[0, 0], [0, -1], [0, 1], [-1, 0], [0, -2], [0, 2]]) { const q = { ...p, o, r: p.r + dr, c: p.c + dc }; if (tsFits(q)) { ts.cur = q; ts.want = q.c; tone(0, 'click'); return true; } }
@@ -342,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function tsLock() {
     const p = ts.cur; if (!p) return; ts.cur = null;
-    tsCellsOf(p).forEach(([r, c, x]) => { const cell = tsCell(x.c, x.s); cell.sq = 1; ts.g[r][c] = cell; });
+    tsCellsOf(p).forEach(([r, c, x]) => { const cell = tsCell(x.c, x.s); cell.sq = 0; cell.amp = chainAmp(0); ts.g[r][c] = cell; });
     ts.st.pieces++; ts.chain = 0; ts.resolving = true; ts.wait = .28; tone(0, 'drop');
   }
   const tsCanDrop = () => !!ts.cur && !ts.resolving && ts.cur.age >= .45;   // 450ms たって「かつ」まえの 子が おちきる（かたづく）まで
@@ -366,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function tsJoin(r1, c1, r2, c2, a, b, color) {
     const lower = r1 > r2 || (r1 === r2 && c1 <= c2) ? [r1, c1] : [r2, c2], other = lower[0] === r1 && lower[1] === c1 ? [r2, c2] : [r1, c1];
     if (a.s >= 2) { tsGhost(a, r1, c1); tsGhost(b, r2, c2); ts.g[r1][c1] = null; ts.g[r2][c2] = null; tone(6, 'merge'); }
-    else { const m = tsCell(color, a.s + 1); m.pop = 1; ts.g[lower[0]][lower[1]] = m; ts.g[other[0]][other[1]] = null; tone(SIZE_L[m.s], 'merge'); }
+    else { const m = tsCell(color, a.s + 1); m.pop = 0; m.pamp = chainAmp(ts.chain + 1); dropJump = 1; dropTint = (ts.chain + 1) % 4; ts.g[lower[0]][lower[1]] = m; ts.g[other[0]][other[1]] = null; tone(SIZE_L[m.s], 'merge'); }
     ts.st.merges++; watchSay(SIZE_L[Math.min(2, a.s + 1)]);
   }
   function tsLines() {   // よこ 7こ ぜんぶ そろった 列が おさんぽ
@@ -399,8 +409,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function tsStep(dt) {
     ts.t += dt; stats.t += dt;
-    for (const g of ts.g) for (const cell of g) if (cell) { cell.dy *= Math.pow(.0009, dt); if (Math.abs(cell.dy) < .3) cell.dy = 0; if (cell.sq > 0) cell.sq = Math.max(0, cell.sq - dt * 3); if (cell.pop > 0) cell.pop = Math.max(0, cell.pop - dt * 2.6); }
-    ts.ghosts = ts.ghosts.filter(g => (g.t += dt) < 1.4);
+    for (const g of ts.g) for (const cell of g) if (cell) { cell.dy *= Math.pow(.0009, dt); if (Math.abs(cell.dy) < .3) cell.dy = 0; if (cell.sq >= 0) { cell.sq += dt; if (cell.sq > .4) cell.sq = -1; } if (cell.pop >= 0) { cell.pop += dt; if (cell.pop > .6) cell.pop = -1; }
+      if (cell.dy > .3) cell.fall = true; else if (cell.fall) { cell.fall = false; cell.sq = 0; cell.amp = chainAmp(ts.chain); } }
+    ts.ghosts = ts.ghosts.filter(g => (g.t += dt) < 1.4); if (ts.edge) { ts.edge.t += dt; if (ts.edge.t > .4) ts.edge = null; }
     if (ts.resolving) { ts.wait -= dt; if (ts.wait <= 0) tsResolveStage(); return; }
     if (!ts.cur) { ts.spawnIn -= dt; if (ts.spawnIn <= 0) tsSpawn(); if (!ts.resolving && tsBlend(dt)) { ts.resolving = true; ts.wait = .3; } return; }
     const p = ts.cur; p.age += dt; p.f += dt;
@@ -410,15 +421,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tsBlend(dt)) { ts.resolving = true; ts.wait = .3; }
   }
   function tsDraw() {
-    const cs = (cell, x, y, sc) => { if (!cell) return; ringOver = EARC[cell.c]; plateOver = EARL[cell.c]; const rad = TW * (.30 + .085 * cell.s); piece(ctx, x, y, rad, SIZE_L[cell.s], 1, sc || 1); ringOver = null; plateOver = null; };
+    const cs = (cell, x, y, sx, sy) => { if (!cell) return; ringOver = EARC[cell.c]; plateOver = EARL[cell.c]; const rad = TW * (.30 + .085 * cell.s); ctx.save(); ctx.translate(x, y + rad); ctx.scale(sx || 1, sy || 1); piece(ctx, 0, -rad, rad, SIZE_L[cell.s], 1, 1); ctx.restore(); ringOver = null; plateOver = null; };
     ctx.strokeStyle = 'rgba(90,58,34,.35)'; ctx.setLineDash([4, 6]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(4, TY0); ctx.lineTo(W - 4, TY0); ctx.stroke(); ctx.setLineDash([]);
-    for (let r = 0; r < TR; r++) for (let c = 0; c < TC; c++) { const cell = ts.g[r][c]; if (cell) { const sq = Math.sin(cell.sq * Math.PI) * .1, pop = Math.sin(Math.min(1, cell.pop) * Math.PI / 1.4 + .2) * .2 * (cell.pop > 0 ? 1 : 0); cs(cell, (c + .5) * TW, TY0 + (r + .5) * TH - cell.dy, 1 + pop - sq * .5 * (cell.sq > 0 ? 1 : 0)); } }
+    for (let r = 0; r < TR; r++) for (let c = 0; c < TC; c++) { const cell = ts.g[r][c]; if (cell) { const k = tsScale(cell); cs(cell, (c + .5) * TW, TY0 + (r + .5) * TH - cell.dy, k.sx, k.sy); } }
     for (const g of ts.ghosts) { const k = g.t / 1.4; ctx.globalAlpha = Math.max(0, 1 - k); ringOver = EARC[g.c]; plateOver = EARL[g.c]; piece(ctx, g.x + Math.sin(g.t * 3) * 6, g.y - g.t * 46, TW * (.30 + .085 * g.s), SIZE_L[g.s], Math.max(0, 1 - k)); ringOver = null; plateOver = null; ctx.globalAlpha = 1; }
     const p = ts.cur;
     if (p) {
       const fy = reduced() ? 0 : Math.min(1, p.f / FALL) * TH * (tsFits({ ...p, r: p.r + 1 }) ? 1 : 0);
       ctx.fillStyle = 'rgba(90,58,34,.08)'; ctx.fillRect(p.c * TW, TY0, TW, H - TY0);   // いま いる れつ（ほんのり）
-      const cells = tsCellsOf(p); cells.forEach(([r, c, x]) => cs(tsCell0(x), (c + .5) * TW, TY0 + (r + .5) * TH + fy));
+      // ねらいの せん：どこに おちるか（うすい たてせん＋おちる ところの わ）
+      const q = { ...p }; while (tsFits({ ...q, r: q.r + 1 })) q.r++;
+      const cells = tsCellsOf(p), land = tsCellsOf(q);
+      ctx.strokeStyle = 'rgba(90,58,34,.28)'; ctx.setLineDash([3, 5]); ctx.lineWidth = 1.4; cells.forEach(([r, c]) => { ctx.beginPath(); ctx.moveTo((c + .5) * TW, TY0 + (r + 1) * TH); ctx.lineTo((c + .5) * TW, TY0 + (land.find(l => l[1] === c) ? land.filter(l => l[1] === c).sort((x, y) => x[0] - y[0])[0][0] : q.r) * TH); ctx.stroke(); });
+      ctx.setLineDash([]); ctx.lineWidth = 1.6; land.forEach(([r, c, x]) => { ctx.beginPath(); ctx.arc((c + .5) * TW, TY0 + (r + .5) * TH, TW * (.30 + .085 * x.s), 0, 7); ctx.stroke(); });
+      let ex = 1, ey = 1; if (ts.edge && !reduced()) { const t = ts.edge.t; ex = 1 - .12 * Math.exp(-12 * t) * Math.abs(Math.cos(2 * Math.PI * 6 * t)); ey = 1 + .06 * (1 - ex) / .12; }
+      cells.forEach(([r, c, x]) => cs(tsCell0(x), (c + .5) * TW + (ts.edge && !reduced() ? ts.edge.dir * (1 - ex) * TW * .3 : 0), TY0 + (r + .5) * TH + fy, ex, ey));
       aimX = (p.c + .5) * TW;
     } else aimX = (ts.want + .5) * TW;
     // つぎの ふたつ組（みぎうえ・ちいさく）
@@ -545,8 +562,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function dropperDraw() {   // まるふわが ひだり・みぎへ あるく（あたまの うえに いる）
     const mv = Math.abs(aimX - walkX) > .8; walkX += (aimX - walkX) * .25; walkT += mv ? .35 : 0;
-    const w = 38, h = 50, bob = mv && !reduced() ? Math.sin(walkT) * 1.6 : 0;
-    if (dropper.complete && dropper.naturalWidth) ctx.drawImage(dropper, walkX - w / 2, 2 + bob, w, h);
+    const w = 38, h = 50; let bob = mv && !reduced() ? Math.sin(walkT) * 1.6 : 0;
+    if (dropJump > 0) { if (!reduced()) bob -= Math.abs(Math.sin((1 - dropJump) * Math.PI * 3)) * 10 * dropJump; dropJump = Math.max(0, dropJump - 1 / 50); if (dropJump === 0) dropTint = -1; }
+    if (dropper.complete && dropper.naturalWidth) {
+      if (dropTint >= 0 && !reduced()) {   // みみの いろが かわる（その いろの なかよし）
+        const oc = dropperDraw.oc || (dropperDraw.oc = document.createElement('canvas')); oc.width = 76; oc.height = 100; const o = oc.getContext('2d'); o.clearRect(0, 0, 76, 100); o.drawImage(dropper, 0, 0, 76, 100); o.globalCompositeOperation = 'source-atop'; o.fillStyle = EARC[dropTint]; o.globalAlpha = .75; o.fillRect(6, 0, 22, 30); o.fillRect(48, 0, 22, 30);
+        ctx.drawImage(oc, walkX - w / 2, 2 + bob, w, h);
+      } else ctx.drawImage(dropper, walkX - w / 2, 2 + bob, w, h);
+    }
   }
   function draw() {
     const dpr = Math.min(3, window.devicePixelRatio || 1), cw = cv.clientWidth || 300; drawScale = cw / W;
@@ -699,7 +722,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ts: { st: () => ({ ...ts.st, chain: ts.chain, resolving: ts.resolving, cur: ts.cur ? { r: ts.cur.r, c: ts.cur.c, o: ts.cur.o, age: ts.cur.age } : null, next: !!ts.next, ghosts: ts.ghosts.length }), grid: () => ts.g.map(r => r.map(c => c ? c.c + '' + c.s : '.').join('')).join('/'),
       setGrid: rows => { ts.g = rows.map(r => r.split('').map(ch => ch === '.' ? null : tsCell(Number(ch), 0))); }, setCell: (r, c, col, sz) => { ts.g[r][c] = col === null ? null : tsCell(col, sz); },
       move: dc => tsMove(dc), rotate: () => tsRotate(), drop: () => tsHardDrop(), canDrop: () => tsCanDrop(), step: n => { for (let i = 0; i < (n || 1); i++) tsStep(1 / 60); }, spawn: () => tsSpawn(), setCur: (r, c, o, a, b) => { ts.cur = { r, c, o, a, b, age: 1, f: 0 }; ts.resolving = false; },
-      cell: (r, c) => { const x = ts.g[r] && ts.g[r][c]; return x ? { c: x.c, s: x.s } : null; }, kick: () => { ts.resolving = true; ts.wait = 0; }, play: (n, mode) => tsPlay(n, mode), reset: () => tsReset(), bot: (sec, mode) => { const n = Math.round(sec * 60); for (let i = 0; i < n; i++) { tsStep(1 / 60); if (i % 20 === 0) tsBotStep(mode); } return Object.assign({}, ts.st); }, TC, TR },
+      cell: (r, c) => { const x = ts.g[r] && ts.g[r][c]; return x ? { c: x.c, s: x.s } : null; }, kick: () => { ts.resolving = true; ts.wait = 0; }, strip: (cvs, kind) => { const x = cvs.getContext('2d'), n = 10; x.clearRect(0, 0, cvs.width, cvs.height); const fw = cvs.width / n; for (let i = 0; i < n; i++) { const t = i * .035, cell = { sq: kind === 'land' ? t : -1, pop: kind === 'pop' ? t : -1, amp: 1, pamp: 1 }, k = tsScale(cell), rad = TW * .39, bx = i * fw + fw / 2, by = cvs.height - 14; x.save(); x.translate(bx, by); x.scale((fw / W) * 2.2 * k.sx, (fw / W) * 2.2 * k.sy); ringOver = EARC[i % 4]; plateOver = EARL[i % 4]; piece(x, 0, -rad, rad, 2, 1, 1); ringOver = null; plateOver = null; x.restore(); x.fillStyle = '#27424e'; x.font = '12px sans-serif'; x.fillText((t * 1000).toFixed(0) + 'ms  sy=' + k.sy.toFixed(2), i * fw + 4, 14); } },
+      scaleOf: (r, c) => { const x = ts.g[r] && ts.g[r][c]; return x ? tsScale(x) : null; }, cellT: (r, c) => { const x = ts.g[r] && ts.g[r][c]; return x ? { sq: x.sq, pop: x.pop, amp: x.amp, pamp: x.pamp } : null; }, chainAmp, setChain: n => { ts.chain = n; }, edge: () => ts.edge, jump: () => ({ j: dropJump, t: dropTint }),
+      play: (n, mode) => tsPlay(n, mode), reset: () => tsReset(), bot: (sec, mode) => { const n = Math.round(sec * 60); for (let i = 0; i < n; i++) { tsStep(1 / 60); if (i % 20 === 0) tsBotStep(mode); } return Object.assign({}, ts.st); }, TC, TR },
     noMerge: v => { dbgNoMerge = !!v; },
     crowd: n => { for (let i = 0; i < n; i++) addBall(50 + (i % 3) * 100, H - 50 - Math.floor(i / 3) * 62, [4, 5, 6][(i + Math.floor(i / 3)) % 3]); },
     dropLevel: (l, x) => { nextL = l; canDrop = true; return dropBall(x); },
