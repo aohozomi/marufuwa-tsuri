@@ -1728,6 +1728,26 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (query.has('sfxprobe')) window.__sfx = SFX;   // てもとの そくてい よう（OfflineAudioContext で 書きだす）
   { const REWARD = ['palup', 'trophy', 'party', 'catchLegend', 'catchBig', 'catchNormal', 'loved', 'gift', 'star', 'wish']; let lastReward = -1e9;   // ごほうびの おとは 2びょうに 1つだけ（かさなって ガランガランに ならない・あとの ものは すてる）
     REWARD.forEach(k => { const f = SFX[k]; if (typeof f === 'function') SFX[k] = (...a) => { const now = performance.now(); if (now - lastReward < 2000) return; lastReward = now; return f(...a); }; }); }
+  // ===== あたらしい こうかおん 8つだけ（10/2・マスターの OK・総司令部が えらんだ A/B/C）。ふるい こうかおん（tone/chord/zap）は ぜんぶ とめた まま。ファイルは snd/sfx/*.wav（ためしと おなじ 波形・おおきさ ×1）
+  const SFX_NEW = true, SFX_FILES = {nageru: 'snd/sfx/nageru.wav', chakusui: 'snd/sfx/chakusui.wav', chon: 'snd/sfx/chon.wav', atari: 'snd/sfx/atari.wav', hiku: 'snd/sfx/hiku.wav', pittari: 'snd/sfx/pittari.wav', tsureta: 'snd/sfx/tsureta.wav', nogashita: 'snd/sfx/nogashita.wav'};
+  const sfxBuf = {}; let sfxLoading = false, sfxLastReward = -1e9;
+  function sfxLoad() { if (sfxLoading || !SFX_NEW || !sndOn('fx')) return; sfxLoading = true; try { const ctx = ready(); Object.entries(SFX_FILES).forEach(([k, u]) => { fetch(u).then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b)).then(buf => { sfxBuf[k] = buf; }).catch(() => {}); }); } catch { sfxLoading = false; } }
+  addEventListener('load', () => setTimeout(() => { try { if (save.sound) sfxLoad(); } catch {} }, 600));   // おとが ONなら さきに よみこむ（さいしょの 1かい目から なる）
+  function sfxPlay(k, delay = 0) {
+    if (!SFX_NEW || !sndOn('fx')) return;
+    try { if (!sfxBuf[k]) { sfxLoad(); return; } const ctx = ready(), src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = sfxBuf[k]; g.gain.value = 1; src.connect(g).connect(fxOut(ctx)); src.start(ctx.currentTime + delay); } catch {}
+  }
+  const sfxReward = k => { const now = performance.now(); if (now - sfxLastReward < 2000) return; sfxLastReward = now; sfxPlay(k); };   // ごほうび（ぴったり・つれた）は 2びょうに 1つ
+  Object.keys(SFX).forEach(k => { SFX[k] = () => {}; });   // ふるい おとは ぜんぶ むおん
+  Object.assign(SFX, {
+    cast: () => { sfxPlay('nageru'); sfxPlay('chakusui', .9); },   // ひゅっ → ぽちゃ
+    nibble: () => sfxPlay('chon'),
+    bite: () => sfxPlay('atari'),
+    nice: () => sfxPlay('hiku'), close: () => sfxPlay('hiku'),   // ひく（てごたえ）
+    perfect: () => sfxReward('pittari'),
+    catchNormal: () => sfxReward('tsureta'), catchBig: () => sfxReward('tsureta'), catchLegend: () => sfxReward('tsureta'),
+    snap: () => sfxPlay('nogashita')
+  });
   const SND_BTN = [   // つかいやすく する の なかの「おとの せってい」。dflt＝はじめから ON。sample＝ONに した とき ちょっと ならす
     {id: 'snd-guide', key: 'sndGuide', ja: 'あんないの おと', en: 'Guide sounds', hint: ['わの おとと「ピコン」', 'Beeps and “ping”'], dflt: true, sample: () => { guideTone(587, .05, 'sine', 0, .0825); setTimeout(() => SFX.pikon(), 260); }},
     {id: 'snd-fx', key: 'sndFx', ja: 'こうかおん', en: 'Sound effects', hint: ['なげる・おいわいの おと', 'Cast and party sounds'], dflt: true, sample: () => { tone(440, .1, 'sine', 0, .03); tone(523, .12, 'sine', .09, .03); }},
@@ -2247,7 +2267,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : precise ? 'おしい！' : power === 2 ? 'いいね！' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power); judge.dataset.center = center ? '1' : '';
     if (power === 3) { const bk = document.querySelector('#reel .back'); if (bk && bk.animate) bk.animate(reduce() ? [{borderColor: '#ffe27a'}, {borderColor: 'transparent'}] : [{boxShadow: 'inset 0 0 0 2px #ffffff55, 0 0 0 0 #fff0'}, {boxShadow: 'inset 0 0 0 2px #ffffffaa, 0 0 22px 10px #fff7c8cc', offset: .35}, {boxShadow: 'inset 0 0 0 2px #ffffff55, 0 0 0 0 #fff0'}], {duration: 520, easing: 'ease-out'});   // ふわっと 1かい ひかる（うごきを へらす では いろ だけ）
-      SFX.perfect(); if (center) SFX.center(); buzz(center ? [40, 40, 90] : 40); }   // ピロリロッ（ど真ん中は ひくい おとを もう ひとつ）
+      if (hp > 0) SFX.perfect(); if (center) SFX.center(); buzz(center ? [40, 40, 90] : 40); }   // つれる ひきは「つれた」の おとに ゆずる   // ピロリロッ（ど真ん中は ひくい おとを もう ひとつ）
     else if (power === 2 && !precise) SFX.nice();   // いいね（1おと）。「おしい」は ひくい 1おと（precise では いいね・ちかいも おしい）
     else SFX.close();   // ポフッ
     $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
@@ -4224,7 +4244,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(moveLang, 0)); else setTimeout(moveLang, 0);
     addEventListener('load', moveLang); setTimeout(moveLang, 800); }   // tsuri-en.js が さいごに つくる きりかえボタンを うえの ひだりへ
   $('mute-top').addEventListener('click', () => { $('sound').click(); if (window.TsuriBgm && TsuriBgm.set) { try { TsuriBgm.set(!!save.sound); } catch {} } drawMute(); });   // 上の ボタン：こうかおん・なみ・BGM を ぜんぶ いっしょに
-  { const first = () => { removeEventListener('click', first); if (save.sound) { try { startAmbient(); } catch {} } };   // AudioContext は BGM の ためだけ（ここでは つくらない）   // ブラウザの きまり：さいしょの タップ（click）から なる。🔇で OFF に した その タップでは つくらない（ボタンの あとで しらべる）
+  { const first = () => { removeEventListener('click', first); if (save.sound) { try { startAmbient(); sfxLoad(); } catch {} } };   // AudioContext は BGM の ためだけ（ここでは つくらない）   // ブラウザの きまり：さいしょの タップ（click）から なる。🔇で OFF に した その タップでは つくらない（ボタンの あとで しらべる）
     addEventListener('click', first); }
   { const redraw = () => { drawMute(); if (soundDefault && window.TsuriBgm && TsuriBgm.set && TsuriBgm.on && !TsuriBgm.on()) { let rec = null; try { rec = localStorage.getItem('marufuwa-bgm-v1'); } catch {} if (rec === null) { try { TsuriBgm.set(true); } catch {} } } };   // BGM も はじめから ON（きろくが なければ）
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', redraw); else redraw();
