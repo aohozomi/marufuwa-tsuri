@@ -329,7 +329,8 @@ html[data-clip] #scene :is(#quit,.plop,#keeper,.friend,.friend-float,.friend-hit
 html[data-clip] #main-button{display:block !important;position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;overflow:hidden}
 #topmute .lang-row{margin:0 auto 0 0 !important;text-align:left !important}   /* English／日本語 の きりかえは うえの ひだりに ちいさく（さいしょの がめんで みえる） */
 #topmute .lang-row button{min-height:44px;padding:4px 12px !important;font-size:.8rem !important;background:#ffffffd9 !important;color:#17323d !important;border-color:#286b88 !important;opacity:1 !important}
-.mini-progress{margin:2px 0 4px;text-align:center;font-size:.85rem;font-weight:800;color:#35566a}   /* なげる の ちかくの ちいさな すすみぐあい（せかさない） */
+.mini-progress{margin:2px 0 4px;text-align:center;font-size:.85rem;font-weight:800;color:#35566a}
+:root[data-night=true] .mini-progress{color:#e8f1f8}   /* よるは くらい じ（13:1）。ひるは こい いろ */   /* なげる の ちかくの ちいさな すすみぐあい（せかさない） */
 /* いちばん うえの 🔇 おとを けす（まるいろと おなじ しき。おとは はじめから ON） */
 .topmute{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:6px 12px 0;max-width:640px;margin:0 auto}
 .mutebtn{min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid #286b88;background:#fff;color:#17323d;font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation}
