@@ -2723,6 +2723,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     [$('edge-prev'), $('edge-next')].forEach(b => { if (b.hidden) return; const r = b.getBoundingClientRect(), t = top(r.left, r.right); const y = Math.max(sc.top + 4, Math.min(sc.top + sc.height * .07, t - r.height - 4)); b.style.top = (y - sc.top) / sc.height * 100 + '%'; });
   }
   addEventListener('resize', () => { try { fixHits(); placeNav(); } catch {} });
+  addEventListener('load', () => { try { if (window.TsuriBgm && TsuriBgm.enter) TsuriBgm.enter('tsuri', {ctx: () => save.sound ? ready() : null, sound: () => !!save.sound, time: () => timeOfDay()}); } catch {} });   /* つりの 通常がめんでも BGM（共通部 tsuri-bgm.js が 'tsuri' を ゆるす ように なると なる。ゆるす まえは なにも しない） */
   let goTarget = null;
   $('next-go').addEventListener('click', event => { event.stopPropagation(); const nx = AREAS[areaIdx() + 1]; if (!nx) return; if (!areaOpen(nx)) { lockedSay(nx); return; } goTarget = nx; $('areago-q').textContent = L(nx.name + 'へ いく？', 'Go to ' + T(nx.name) + '?'); $('areago').showModal(); $('areago-yes').focus(); });
   $('areago-yes').addEventListener('click', () => { $('areago').close(); switchArea(goTarget); });
