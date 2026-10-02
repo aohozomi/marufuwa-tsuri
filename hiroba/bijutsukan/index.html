@@ -62,16 +62,18 @@ dialog .acts button[disabled]{opacity:1;color:#5b7480;background:#eef3f5;border-
 .sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 :root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+.more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}.more[open] summary{margin-bottom:6px}.more summary:focus-visible{outline:4px solid #286b88;outline-offset:2px}
+.nav{display:none}   /* かべの いちらん（5つの ボタン）は かくす：えを タップで おおきく・スクロールで みられる */
 </style>
 </head>
 <body>
 <main class="room" id="room">
   <a class="back" id="back" href="../index.html">← ひろばへ</a>
   <h1>びじゅつかん</h1>
-  <p class="lead">まるふわと なかま、さかな、ポスターの えを、がくに いれて ならべました。すきな えを おすと、おおきく みられるよ。いそがなくて だいじょうぶ。</p>
+  <p class="lead">すきな えを おすと、おおきく みられるよ。</p>
   <ul class="nav" id="nav" aria-label="かべの いちらん"></ul>
   <div id="walls"></div>
-  <p class="note" id="note">えは ぜんぶ、この ゲームの なかに ある ものです（そとへ つながりません）。おおきく みる ときは、えの ほんとうの おおきさまで みせます（むりに ひきのばさないので、ぼやけません）。<a href="../../anshin/" style="color:var(--link)">おうちの かたへ</a></p>
+  <details class="more"><summary>おうちの かたへ</summary><p class="note" id="note">えは ぜんぶ、この ゲームの なかに ある ものです（そとへ つながりません）。おおきく みる ときは、えの ほんとうの おおきさまで みせます（むりに ひきのばさないので、ぼやけません）。<a href="../../anshin/" style="color:var(--link)">おうちの かたへ</a></p></details>
 </main>
 <dialog id="viewer" aria-labelledby="v-title">
   <h2 id="v-title"></h2>
@@ -88,7 +90,7 @@ dialog .acts button[disabled]{opacity:1;color:#5b7480;background:#eef3f5;border-
     'びじゅつかん': 'Gallery',
     '← ひろばへ': '← Back to the Plaza',
     'まるふわと なかま、さかな、ポスターの えを、がくに いれて ならべました。すきな えを おすと、おおきく みられるよ。いそがなくて だいじょうぶ。': 'Marufuwa, her friends, the fish and posters are framed and lined up here. Press a picture you like to see it larger. No need to rush.',
-    'かべの いちらん': 'Walls',
+    'かべの いちらん': 'Walls', 'すきな えを おすと、おおきく みられるよ。': 'Tap a picture to see it larger.', 'おうちの かたへ': 'For grown-ups',
     'まるふわ': 'Marufuwa', 'まるふわの いろいろな かお': 'Marufuwa’s many faces', 'なかま': 'Friends', 'ひろばに いる なかまたち': 'The friends who live in the plaza', 'さかな': 'Fish', 'つりびよりの さかなの え': 'Fish art from Fishing Days',
     'ポスター': 'Posters', 'ゲームを しょうかいする え': 'Pictures that introduce the game', 'てんの え': 'New art', 'あたらしく とどいた え': 'Newly delivered art',
     'じぶんの こ（かりの え）': 'My own friend (provisional art)', 'いろと いきものを くみあわせた「じぶんの こ」の みほん。ほんものの えが とどいたら かわります': 'Samples of “my own friend”, mixing a color and an animal. They will change when the final art arrives',

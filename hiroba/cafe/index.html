@@ -60,13 +60,14 @@ h2{margin:10px 0 4px;font-size:1.05rem}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.steam path{opacity:.4}}
 :root[data-calm=true] *{transition:none!important;animation:none!important}
 :root[data-calm=true] .steam path{opacity:.4}
+.more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}.more[open] summary{margin-bottom:6px}.more summary:focus-visible{outline:4px solid #286b88;outline-offset:2px}
 </style>
 </head>
 <body>
 <main class="room" id="room">
   <a class="back" id="back" href="../index.html">← ひろばへ</a>
   <h1>カフェ ラテ</h1>
-  <p class="lead">ラテの かわうそが ひらいている、ゆっくり できる カフェ。のみものを えらんで、せきに すわって、まどの そとを ながめよう。いそがなくて だいじょうぶ。</p>
+  <p class="lead">のみものを えらんで、ゆっくり すごそう。</p>
   <div class="stage" id="stage">
   <svg class="scene" id="scene" viewBox="0 0 400 300" role="img" aria-label="カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、カウンターの せきに なかまが すわって いるよ">
     <defs>
@@ -129,13 +130,13 @@ h2{margin:10px 0 4px;font-size:1.05rem}
     <h2 id="h-seat">ゆっくり すわって いるよ</h2>
     <div class="acts"><button type="button" id="again">べつの のみものに する</button><button type="button" id="leave">かえる</button></div>
   </section>
-  <p class="note">おうちの かたへ：おかねも じゅんいも なにも へりません。のみものを えらんで すわる だけの へやです。ことばは「ゆっくり していってね」「また きてね」の ふたつだけで、ひきとめません。なかまの ひとことは 1ぷんに 1かい いかです。きろくも つうしんも ありません。てんめつは しません。</p>
+  <details class="more"><summary>おうちの かたへ</summary><p class="note">おかねも じゅんいも なにも へりません。のみものを えらんで すわる だけの へやです。ことばは「ゆっくり していってね」「また きてね」の ふたつだけで、ひきとめません。なかまの ひとことは 1ぷんに 1かい いかです。きろくも つうしんも ありません。てんめつは しません。</p></details>
 </main>
 <script>
 // English
 (() => {
   const EX = {
-    'カフェ ラテ｜まるふわの ひろば': 'Café Latte | Marufuwa Plaza', 'カフェ ラテ': 'Café Latte', '← ひろばへ': '← Back to the Plaza',
+    'カフェ ラテ｜まるふわの ひろば': 'Café Latte | Marufuwa Plaza', 'カフェ ラテ': 'Café Latte', 'のみものを えらんで、ゆっくり すごそう。': 'Pick a drink and take it easy.', 'おうちの かたへ': 'For grown-ups', '← ひろばへ': '← Back to the Plaza',
     'ラテの かわうそが ひらいている、ゆっくり できる カフェ。のみものを えらんで、せきに すわって、まどの そとを ながめよう。いそがなくて だいじょうぶ。': 'A calm café run by the Latte Otter. Pick a drink, sit down, and look out the window. No need to hurry.',
     'カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、なかまが すわって いるよ': 'Inside the café. The window shows the time outside. The Latte Otter is at the counter and friends are sitting.',
     'ラテの かわうそ：のみものを えらんでね。': 'Latte Otter: Please pick a drink.',

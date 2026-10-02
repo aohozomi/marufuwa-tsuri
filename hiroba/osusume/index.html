@@ -62,15 +62,16 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
 .sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 :root[data-calm=true] *{transition:none!important;animation:none!important}
+.more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}.more[open] summary{margin-bottom:6px}.more summary:focus-visible{outline:4px solid #286b88;outline-offset:2px}
 </style>
 </head>
 <body>
 <main class="room" id="room">
   <div class="top"><a class="back" id="back" href="../index.html">← ひろばへ</a></div>
   <h1>おすすめの へや</h1>
-  <p class="lead">つくった ひとが「いいな」と おもった ひとを しょうかいする へやです。すきな ところだけ みて いってね。いそがなくて だいじょうぶ。</p>
+  <p class="lead">すきな ところだけ みて いってね。</p>
   <div id="shelves"></div>
-  <p class="note">そとへ ひらく ボタンは、おして「いいですか？」と かくにんした あとだけ ひらきます。この へやに、もじを いれる ところは ありません。<a href="../../anshin/" style="color:var(--link)">おうちの かたへ</a></p>
+  <details class="more"><summary>おうちの かたへ</summary><p class="note">そとへ ひらく ボタンは、おして「いいですか？」と かくにんした あとだけ ひらきます。この へやに、もじを いれる ところは ありません。<a href="../../anshin/" style="color:var(--link)">おうちの かたへ</a></p></details>
 </main>
 <dialog id="go" aria-labelledby="go-title">
   <h2 id="go-title">そとへ ひらきます。いいですか？</h2>
@@ -118,12 +119,13 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
   const EN_KIND = { illustrator: ['Illustrators', 'People who draw'], streamer: ['Streamers', 'People who stream'], follower: ['Growing creators', 'People who are just getting started'], ganbaru: ['Working hard', 'People who keep going day by day'] };
   function render(list) {
     const data = clean(list); shelves.replaceChildren();
+    if (data.every(d => !d.length)) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'まだ だれも いないよ。'; shelves.append(p); }
     KINDS.forEach((K, i) => {
       const sec = document.createElement('section'); sec.className = 'shelf'; sec.dataset.kind = K.k;
       const h = document.createElement('h2'); h.id = 'h-' + K.k; h.textContent = K.h;
       const sub = document.createElement('p'); sub.className = 'sub'; sub.textContent = K.sub;
       sec.setAttribute('aria-labelledby', h.id); sec.append(h, sub);
-      if (!data[i].length) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'まだ だれも いないよ。'; sec.append(p); }
+      if (!data[i].length) { sec.hidden = true; }   // からの たなは かくす（ぜんぶ からの ときは 下の 1こだけ）
       else {
         const row = document.createElement('div'); row.className = 'row'; row.setAttribute('role', 'list');
         data[i].forEach(it => {
@@ -187,7 +189,7 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
     'はいしんしゃ': 'Streamers', 'はいしんを して いる ひと': 'People who stream',
     'フォロワーを あつめたい ひと': 'Growing creators', 'これから ひろがって いく ひと': 'People who are just getting started',
     'がんばって いる ひと': 'Working hard', 'まいにち こつこつ すすんで いる ひと': 'People who keep going day by day',
-    'まだ だれも いないよ。': 'No one here yet.',
+    'まだ だれも いないよ。': 'No one here yet.', 'すきな ところだけ みて いってね。': 'Look at whatever you like.', 'おうちの かたへ': 'For grown-ups',
     'ひらく（そとへ）': 'Open (another site)',
     'そとへ ひらきます。いいですか？': 'This opens another site. Is that okay?',
     'ひらく': 'Open', 'やめる': 'Cancel',

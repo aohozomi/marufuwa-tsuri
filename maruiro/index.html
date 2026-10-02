@@ -69,13 +69,14 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
 .sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 :root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+.more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}.more[open] summary{margin-bottom:6px}.more summary:focus-visible{outline:4px solid #286b88;outline-offset:2px}
 </style>
 </head>
 <body>
 <main class="room" id="room">
   <div class="toprow"><a class="back" id="back" href="../hiroba/index.html">← ひろばへ</a><span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">ミュートボタンは こちら →</span><button type="button" id="mute" class="mutebtn" aria-pressed="false">🔇 おとを けす</button></span></div>
   <h1>まるふわ まるいろ</h1>
-  <p class="lead">うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。</p>
+  <p class="lead">ふたつ組を まわして、ならべよう。</p>
   <div class="hud">
     <div class="zukan" id="zukan" aria-hidden="true"></div>
     <p class="best" id="best-wrap"><canvas id="best-cv" width="88" height="88" style="width:44px;height:44px" aria-hidden="true"></canvas><span id="best-tx">いちばん おおきい まる：まだ ないよ</span></p>
@@ -100,13 +101,13 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     <button type="button" id="rst">さいしょから</button>
   </div>
   <p class="msg" id="msg" role="status" aria-live="polite"></p>
-  <p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの 子が ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。</p>
+  <details class="more" id="howto"><summary>あそびかた・おうちの かたへ</summary><p class="note" id="howto-tx"></p><p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの 子が ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。</p></details>
 </main>
 <script>
 // English（tsuri-en.js の E.add）
 (() => {
   const EX = {
-    'まるふわ まるいろ': 'Marufuwa Maruiro', 'ミュートボタンは こちら →': 'Mute button is here →',
+    'まるふわ まるいろ': 'Marufuwa Maruiro', 'あそびかた・おうちの かたへ': 'How to play / For grown-ups', 'ミュートボタンは こちら →': 'Mute button is here →',
     '← ひろばへ': '← Back to the Plaza',
     'うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。': 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join at your own pace — no time limit, no game over.',
     'あそびかた：そだてる': 'How to play: Grow', 'あそびかた：そろえる': 'How to play: Match', 'いちばん ながい れんさ：まだ ないよ': 'Longest chain so far: none yet',
@@ -624,10 +625,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ['おなじ ものが 3つ いじょう くっつくと、ふわっと きえるよ。きえると うえの まるが おちて、つづけて きえる ことも。じかんぎれも ゲームオーバーも ないよ。', 'When 3 or more of the same piece touch, they softly vanish. The ones above drop down and may vanish too. No time limit, no game over.'],
     ['ひだりうえの まるふわから、えらんだ いろが ひろがるよ。ぜんぶ おなじ いろに なったら ぴったり！ てかずも じかんも かぞえないよ。ばんは きょうの いろ。', 'Colors spread from the top-left Marufuwa as you pick. When everything is one color, it is a perfect fit! No move count and no timer. The board is today’s colors.'],
     ['ふたつ組の まるい子が おちてくるよ。左右に うごかして、まわして、おいてね。同じ いろ・同じ おおきさが ふれると おおきく、よこ 1列が そろうと おさんぽに いって「またね」。つづけて きえたら「なかよし」。ちがう いろも 3びょう ふれると なじむよ。じかんぎれも ゲームオーバーも ないよ。きょうの つみきは みんな おなじ。', 'Round pairs fall down. Move them, rotate them, and set them. Same color and size merge into a bigger one; a full row goes for a walk (“See you!”), and when more vanish in a row, it is “Best friends”. Different colors blend after 3 seconds. No time limit, no game over. Today everyone gets the same order.']
-  ], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread'], ['あそびかた：つみき', 'How to play: Blocks']];
+  ], SHORT = [['つんで、あわせよう。', 'Stack and join.'], ['3つ そろえて、きえよう。', 'Match three.'], ['いろを ひろげよう。', 'Spread the color.'], ['ふたつ組を まわして、ならべよう。', 'Rotate pairs and set them.']], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread'], ['あそびかた：つみき', 'How to play: Blocks']];
   function drawPlay() {
     const b = $('play'), pl = rec.play; b.setAttribute('aria-pressed', String(pl !== 0)); b.textContent = L(PLAYS[pl][0], PLAYS[pl][1]);
-    document.querySelector('.lead').textContent = L(LEADS[pl][0], LEADS[pl][1]);
+    document.querySelector('.lead').textContent = L(SHORT[pl][0], SHORT[pl][1]); $('howto-tx').textContent = L(LEADS[pl][0], LEADS[pl][1]);
     $('brot').hidden = pl !== 3; $('best-wrap').style.display = pl === 3 ? 'none' : '';
     const fl = pl === 2; document.querySelector('.field').parentElement; $('flood').hidden = !fl; document.querySelector('.hud').hidden = fl; document.querySelector('.ctl').hidden = fl; $('mode').hidden = fl; $('next').hidden = !fl;
     document.querySelectorAll('main > .field').forEach(f => { f.hidden = fl; });

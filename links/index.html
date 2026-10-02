@@ -39,7 +39,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
 .big:active{transform:translateY(4px);box-shadow:0 1px 0 var(--side),0 3px 6px #2446532b,inset 0 -3px 6px #00000014,inset 0 3px 5px #ffffffcc}
 .big:focus-visible,.confirm a:focus-visible,.confirm button:focus-visible{outline:3px solid #0b4a6b;outline-offset:0;box-shadow:0 0 0 6px #fff}
 .big .ic{font-size:1.5rem;line-height:1}
-.big small{display:block;font-size:.8rem;font-weight:700;opacity:.95}
+.big small{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}   /* 小字は 目には 出さない（よみあげには のこす） */
 .play{--c1:#2a7fb0;--c2:#0d4d72;--side:#0b425f;--ink2:#fff;text-shadow:0 2px 0 #083a55}
 .confirm{margin:-6px 0 0;padding:14px 14px 12px;border-radius:20px;background:var(--card);border:3px solid var(--line);text-align:center}
 .confirm[hidden]{display:none}
@@ -79,7 +79,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
     <div class="confirm" id="c-line" hidden role="group" aria-labelledby="q-line"><p id="q-line">そとの ページ（LINE ストア）を ひらきます。いいですか？</p><div class="row"><a id="a-line" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-line">やめる</button></div></div>
   </div>
   <p class="sub"><a id="a-stream" href="stream/">はいしん・どうがで つかう かたへ</a></p>
-  <p class="note" id="note">そとの ページを ひらく ときは かならず「いいですか？」と きくよ。この ページは なにも ほぞんしないし、どこにも おくらないよ。</p>
+  <p class="note" id="note">そとへ ひらく ときは かならず きくよ。</p>
   <div class="sr-only" id="live" role="status" aria-live="polite"></div>
 </main>
 <script defer src="../tsuri-ruby-dict.js"></script>
@@ -105,7 +105,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   set('q-app', 'そとの ページ（App Store）を ひらきます。いいですか？', 'This opens an outside page (the App Store). Is that OK?'); set('q-line', 'そとの ページ（LINE ストア）を ひらきます。いいですか？', 'This opens an outside page (the LINE Store). Is that OK?');
   set('a-app', 'ひらく', 'Open'); set('a-line', 'ひらく', 'Open'); set('n-app', 'やめる', 'Cancel'); set('n-line', 'やめる', 'Cancel');
   set('a-stream', 'はいしん・どうがで つかう かたへ', 'For streamers and video makers');
-  set('note', 'そとの ページを ひらく ときは かならず「いいですか？」と きくよ。この ページは なにも ほぞんしないし、どこにも おくらないよ。', 'We always ask before opening an outside page. This page saves nothing and sends nothing.');
+  set('note', 'そとへ ひらく ときは かならず きくよ。', 'We always ask before opening an outside page.');
   const say = t => { const l = $('live'); l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); };
   function close(k, focusBack) {
     const box = $('c-' + k), a = $('a-' + k), b = $('b-' + k); box.hidden = true; a.removeAttribute('href'); b.setAttribute('aria-expanded', 'false'); if (focusBack) b.focus();

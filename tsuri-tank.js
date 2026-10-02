@@ -338,6 +338,8 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-listen .tk-water{box-shadow:inset 0 0 0 3px #ffe27a}
 #tk .tk-actions{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 12px}   /* せまい がめん・もじを おおきく の 時は 2だんに おりかえす（はみ出さない） */
 #tk .tk-actions button{flex:1;min-height:52px;padding:6px 6px;font-size:.86rem;line-height:1.25;word-break:keep-all}   /* 「ながめ／る」の ように 1もじ だけ 下へ 落ちない（すきまで 切る） */
+#tk .tk-morerow{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 100%}
+#tk .tk-morerow[hidden]{display:none}
 #tk .tk-actions button[aria-pressed=true]{background:#17658a;color:#fff;border-color:#0e4a66}
 .tk-photo{position:absolute;inset:0;z-index:30;background:#0d2a3aee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px}
 .tk-photo img{max-width:100%;max-height:calc(100% - 130px);border-radius:14px;border:3px solid #fff;box-shadow:0 6px 18px #0008;object-fit:contain}
@@ -349,7 +351,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-visitbar[hidden]{display:none}
 .tk-visitbar p{margin:0;flex:1 1 200px}
 .tk-visitbar button{min-height:44px;min-width:44px;padding:4px 14px;font-size:.88rem;flex:0 0 auto}
-#tk.tk-visit .tk-mochi-btn,#tk.tk-visit .tk-mochi,#tk.tk-visit .tk-cam,#tk.tk-visit .tk-deco-btn,#tk.tk-visit .tk-tray,#tk.tk-visit .tk-shelf,#tk.tk-visit .tk-shelfbtn,#tk.tk-visit .tk-giftlist,#tk.tk-visit .tk-bgm,#tk.tk-visit .tk-send,#tk.tk-visit .tk-linkbox,#tk.tk-visit .tk-empty button{display:none !important}   /* ほうもん中は 見るだけ：しゃしん・かざる・だな・BGM・おくる は 出さない */
+#tk.tk-visit .tk-mochi-btn,#tk.tk-visit .tk-mochi,#tk.tk-visit .tk-cam,#tk.tk-visit .tk-deco-btn,#tk.tk-visit .tk-tray,#tk.tk-visit .tk-shelf,#tk.tk-visit .tk-shelfbtn,#tk.tk-visit .tk-giftlist,#tk.tk-visit .tk-bgm,#tk.tk-visit .tk-morebtn,#tk.tk-visit .tk-morerow,#tk.tk-visit .tk-send,#tk.tk-visit .tk-linkbox,#tk.tk-visit .tk-empty button{display:none !important}   /* ほうもん中は 見るだけ：しゃしん・かざる・だな・BGM・おくる は 出さない */
 .tk-linkbox{position:absolute;inset:0;z-index:31;background:#0d2a3aee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;color:#fff;text-align:center}
 .tk-linkbox[hidden]{display:none}
 .tk-linkbox h3{margin:0;font-size:1.05rem}
@@ -444,7 +446,6 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     <div class="tk-stage"><div class="tk-room" data-time="hiru">
       <div class="tk-roomsvg" style="left:0;top:0;width:100%;height:100%"></div>
       <div class="tk-shelf" aria-hidden="true" hidden></div>
-      <button type="button" class="tk-miro" aria-label="まるいろ（ゲーム）へ いく"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#9fe0a6" stroke="#5a3a2e" stroke-width="1.6"/><circle cx="8.6" cy="11" r="1.5" fill="#402a30"/><circle cx="15.4" cy="11" r="1.5" fill="#402a30"/><path d="M8.5 15 Q12 18 15.5 15" fill="none" stroke="#402a30" stroke-width="1.6" stroke-linecap="round"/></svg><span>まるいろ</span></button>
       <button type="button" class="tk-app" aria-expanded="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#ffc27d" stroke="#5a3a2e" stroke-width="1.6"/><circle cx="8.6" cy="11" r="1.5" fill="#402a30"/><circle cx="15.4" cy="11" r="1.5" fill="#402a30"/><path d="M8.5 15 Q12 18 15.5 15" fill="none" stroke="#402a30" stroke-width="1.6" stroke-linecap="round"/></svg><span class="tk-apptx"><b>アプリばん まるふわ まるいろ</b><small>iPhone で あそべるよ</small></span></button>
       <div class="tk-appc" hidden role="group" aria-label="アプリばん まるふわ まるいろ"><p>そとへ ひらきます。いいですか？</p><div><a class="tk-appgo" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" class="tk-appno">やめる</button></div></div>
       <div class="tk-dim"></div>
@@ -471,7 +472,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     <div class="tk-giftlist" hidden role="group" aria-labelledby="tk-gift-title"><h3 id="tk-gift-title">おくりもの だな</h3><p class="tk-giftsub">もらった さかなが ならんで いるよ。つれた かずには、はいらないよ。</p><ul class="tk-giftrows"></ul><button type="button" class="tk-giftclose">とじる</button></div></div>
     <div class="tk-tray" hidden><p></p><div class="tk-items"></div><div class="tk-placedlist"></div><div class="tk-trayrow"><button type="button" class="tk-clear">ぜんぶ もどす</button><button type="button" class="tk-done">おわる</button></div></div>
     <div class="tk-tray tk-mochi" hidden role="group" aria-labelledby="tk-mochi-title"><div class="tk-mochihead"><img class="tk-mochiprev" alt="" width="60" height="80" draggable="false"><p id="tk-mochi-title">もちもの：まるふわの てに もたせて あげよう</p></div><div class="tk-mochilist"></div><p class="tk-mochinote" hidden></p><div class="tk-trayrow"><button type="button" class="tk-mochi-done">おわる</button></div></div>
-    <div class="tk-actions tk-chrome"><button type="button" class="tk-feed">ごはんを あげる</button><button type="button" class="tk-deco-btn" aria-pressed="false">かざる</button><button type="button" class="tk-ear" aria-pressed="false">みみで ながめる</button><button type="button" class="tk-send">おへやを おくる</button><button type="button" class="tk-mochi-btn" aria-expanded="false">もちもの</button></div>
+    <div class="tk-actions tk-chrome"><button type="button" class="tk-feed">ごはんを あげる</button><button type="button" class="tk-deco-btn" aria-pressed="false">かざる</button><button type="button" class="tk-morebtn" aria-expanded="false" aria-controls="tk-morerow">もっと ▸</button><div class="tk-morerow" id="tk-morerow" hidden><button type="button" class="tk-ear" aria-pressed="false">みみで ながめる</button><button type="button" class="tk-send">おへやを おくる</button><button type="button" class="tk-mochi-btn" aria-expanded="false">もちもの</button></div></div>
     <div class="tk-photo" hidden><p></p><img alt="とった しゃしん"><div class="tk-photorow"><a class="tk-save" download="marufuwa-osuisou.png">ほぞん</a><button type="button" class="tk-share" hidden>ひとに みせる</button><button type="button" class="tk-photoclose">とじる</button></div></div>
     <div class="tk-linkbox" hidden role="group" aria-labelledby="tk-linktitle"><h3 id="tk-linktitle">おへやの リンク</h3><p class="tk-linkmsg"></p><p class="tk-linktext" tabindex="0"></p><p class="tk-linknote">リンクに はいって いるのは、さかなの ばんごうと、かざりの ばんごうと いち、いまの じかん、あそびに きて いる なかまの ばんごうだけ。なまえや ひとこと、たんまつの しるしは はいって いないよ。みる ひとの きろくには、なにも のこらないよ。</p><div class="tk-photorow"><button type="button" class="tk-linkcopy">コピーする</button><button type="button" class="tk-linkclose">とじる</button></div></div>
     <p class="tk-sr" role="status" id="tk-sr"></p><ul class="tk-sr" id="tk-list"></ul>`;
@@ -971,7 +972,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     const B = window.TsuriBgm; if (!B) return;
     if (bgmPrev === null) { bgmPrev = !!B.on(); }
     try { B.set(soundNow()); } catch {}   // おへやの おとに あわせる（出る とき もとへ もどす＝つり・ひろばの BGM は そのまま）
-    if (!bgmMixBtn && B.mixButton) { bgmMixBtn = B.mixButton({ className: 'tk-bgm tk-bgmmix', sound: soundNow, enableSound: () => { soundWasOff = true; toggleSound(true); }, onToggle: next => { const msg = next ? 'BGMを つけたよ。' : 'BGMを けしたよ。'; soundWasOff = false; say(msg, true); sr.textContent = msg; } }); $(dlg, '.tk-actions').append(bgmMixBtn); }
+    if (!bgmMixBtn && B.mixButton) { bgmMixBtn = B.mixButton({ className: 'tk-bgm tk-bgmmix', sound: soundNow, enableSound: () => { soundWasOff = true; toggleSound(true); }, onToggle: next => { const msg = next ? 'BGMを つけたよ。' : 'BGMを けしたよ。'; soundWasOff = false; say(msg, true); sr.textContent = msg; } }); $(dlg, '.tk-morerow').append(bgmMixBtn); }
     B.enter('tank', { ctx: audio, sound: soundNow, starry: () => starry, mute: () => listen, time: () => room.dataset.time });   // おへやの じかん（asa・hiru・yuu・yoru）で 曲が かわる
   }
   const bgmOpen = () => { if (visit) return; if (window.TsuriBgm) bgmEnter(); else loadBgm().then(B => { if (B && isOpen()) bgmEnter(); }); };
@@ -1130,7 +1131,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   const MIRO_KEY = 'marufuwa-maruiro-v1', ART_IDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 28];
   const maruiroBig = () => { if (visit) return -1; try { const d = JSON.parse(localStorage.getItem(MIRO_KEY)), n = Math.floor(Number(d && d.big)); return d && d.big !== null && Number.isFinite(n) && ART_IDS.includes(n) ? n : -1; } catch { return -1; } };
   const miroBtn = $(dlg, '.tk-miro');
-  miroBtn.addEventListener('click', () => { if (visit) return; say('まるいろへ いくよ。', true); sr.textContent = 'まるいろへ いくよ。'; setTimeout(() => { location.href = new URL(BASE + 'maruiro/index.html', location.href).href; }, 350); });
+  if (miroBtn) miroBtn.addEventListener('click', () => { if (visit) return; say('まるいろへ いくよ。', true); sr.textContent = 'まるいろへ いくよ。'; setTimeout(() => { location.href = new URL(BASE + 'maruiro/index.html', location.href).href; }, 350); });
   // アプリばん まるふわ まるいろ への 入口（そとへ ひらく：「いいですか？」→ひらく。https の App Store だけ・新しい タブ・rel=noopener）。iPhone いがいは うすく「iPhone で あそべるよ」
   const APP_URL = 'https://apps.apple.com/app/apple-store/id6816003504?pt=129401810&ct=web_heya&mt=8';
   const appBtn = $(dlg, '.tk-app'), appC = $(dlg, '.tk-appc');
@@ -1145,6 +1146,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   appC.querySelector('.tk-appgo').addEventListener('click', () => { setTimeout(() => { appC.hidden = true; appC.querySelector('.tk-appgo').removeAttribute('href'); appBtn.setAttribute('aria-expanded', 'false'); }, 50); });
   // はじめて ひらいた とき 1かい だけ、うえの 🔇 の したに「ミュートボタンは こちら ↑」を 3びょう（てんめつなし・おさなくても きえる）
   const hintEl = document.createElement('div'); hintEl.className = 'tk-muteh'; hintEl.hidden = true; hintEl.setAttribute('aria-hidden', 'true'); hintEl.textContent = 'ミュートボタンは こちら ↑'; $(dlg, '.tk-head').append(hintEl);
+  function welcomeOnce() { try { if (sessionStorage.getItem('marufuwa-welcome')) return false; sessionStorage.setItem('marufuwa-welcome', '1'); } catch { return welcomeOnce.done ? false : (welcomeOnce.done = true); } return true; }   // 「ようこそ」の ふきだしは この タブで さいしょの 1かいだけ（きろくには 書かない）
   function muteHint() {
     if (visit) return; let d = {}; try { d = JSON.parse(localStorage.getItem('marufuwa-sound-v1')) || {}; } catch {} if (d.hint === 1) return;
     d.v = 1; d.hint = 1; try { localStorage.setItem('marufuwa-sound-v1', JSON.stringify(d)); } catch {}
@@ -1164,6 +1166,10 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     const next = i => { if (i >= list.length) { put(null); return; } const im = new Image(); im.onload = () => put(list[i]); im.onerror = () => next(i + 1); im.src = list[i].u; };
     next(0);
   }
+  // 下の ボタンは「ごはん」「かざる」だけ 出し、のこりは「もっと ▸」の なかへ（44px は まもる）
+  const moreBtn = $(dlg, '.tk-morebtn'), moreRow = $(dlg, '.tk-morerow');
+  function showMore(on) { moreRow.hidden = !on; moreBtn.setAttribute('aria-expanded', String(!!on)); moreBtn.textContent = on ? 'たたむ ▴' : 'もっと ▸'; }
+  moreBtn.addEventListener('click', () => showMore(moreRow.hidden));
   const mochiBtn = $(dlg, '.tk-mochi-btn'), mochi = $(dlg, '.tk-mochi'), mochiList = $(dlg, '.tk-mochilist'), mochiNote = $(dlg, '.tk-mochinote'), mochiPrev = $(dlg, '.tk-mochiprev');
   function prevMochi() {   // トレーが 部屋の まるふわを かくす ので、小さな みほんを 出す（いまの 色・もちもの）
     const W = window.TsuriWear, url = BASE + 'img/game-blue.webp';
@@ -1186,7 +1192,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     const m = n ? it.ja + 'を もったよ。' : 'もちものを はずしたよ。'; say(m, true); sr.textContent = m; resetZen();
   }
   function setMochi(on) {
-    on = !!on && !visit; mochiOpen = on; mochi.hidden = !on; mochiBtn.setAttribute('aria-expanded', String(on)); mochiBtn.textContent = on ? 'もちものを おわる' : 'もちもの';
+    on = !!on && !visit; mochiOpen = on; if (on) showMore(true); mochi.hidden = !on; mochiBtn.setAttribute('aria-expanded', String(on)); mochiBtn.textContent = on ? 'もちものを おわる' : 'もちもの';
     if (on) { if (deco) setDeco(false); tip.hidden = true; renderMochi(); prevMochi(); }
     resetZen();
   }
@@ -1593,7 +1599,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
       const text = arrivals.length === 1 && arrivals[0].n === 1 ? first.name + 'が すいそうに ようこそ。' : 'あたらしい なかまが ' + arrivals.reduce((s, r) => s + r.n, 0) + 'ひき きたよ。';
       say(text, true); mood(first.rare >= 4 ? 'sparkle' : first.rare === 3 ? 'apricot' : 'mint', 3600); sr.textContent = text;
       const seen = { ...tank.seen }; for (const r of residents()) seen[r.fish.id] = r.count; tank.seen = seen; saveTank();
-    } else say(visit ? 'ようこそ。ゆっくり みていってね。' : (total || fishes.some(o => o.maru)) ? pick(SAY.any) : pick(SAY.empty), true);
+    } else if (visit) say('ようこそ。ゆっくり みていってね。', true); else if (welcomeOnce()) say((total || fishes.some(o => o.maru)) ? pick(SAY.any) : pick(SAY.empty), true);   // ふきだしは さいしょの 1かいだけ（2かいめから 出さない）
     if (grownOnOpen.length) { clearTimeout(growSay); growSay = setTimeout(() => { if (isOpen() && !visit) { const m2 = 'さかなが すこし おおきく なって いるよ。'; say(m2, true); sr.textContent = m2; } }, 3200); }
     refreshBadge(); resetZen();
     setListen(false); refreshSound(); if (sfx) { cueOpen(); startAmbience(); }
@@ -1656,7 +1662,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   {
     const HEYA_EN = { 'もちもの': 'Items', 'もちものを おわる': 'Close Items', 'もちもの：まるふわの てに もたせて あげよう': 'Items: let Marufuwa hold something', 'なし': 'None', 'ランタン': 'Lantern', 'バケツ': 'Bucket', 'おにぎり': 'Rice ball', 'あみ': 'Net', 'おはな': 'Flower', 'かさ': 'Umbrella', 'もちものを はずしたよ。': 'Put the item down.', 'まだ じゅんびちゅう。もうすこし まってね。': 'Not ready yet. Please wait a little.', 'じぶんの こ の ときは、もちものは つかえないよ。': 'Items can’t be used while your own friend is shown.', 'みずくさが すこし のびたよ。': 'The water plants have grown a little.', 'おきにいりに する': 'Make favorite', 'おきにいり（はずす）': 'Favorite (remove)', '♡ を つけたよ。': 'Marked with a ♡.', 'おきにいりを はずしたよ。': 'Removed the favorite mark.', 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to play.', 'ともだちが あそびに きて いるよ。': 'A friend has come to visit.', 'さかなが すこし おおきく なったよ。': 'A fish has grown a little bigger.', 'さかなが おおきく そだったよ！': 'A fish has grown bigger!', 'さかなが すこし おおきく なって いるよ。': 'Some fish have grown a little bigger.', 'おおきく そだった さかなが いるよ。': 'Some fish have grown bigger.', 'そだち': 'Growth', 'すこし おおきく そだったよ': 'A little bigger', 'おおきく そだったよ': 'Bigger', 'すきな なかまが あそびに きて いるよ。': 'A favorite friend has come to visit.', 'つくえの うえの おにぎり': 'Rice ball on the table', 'つくえの うえの おにぎりを、なかまと はんぶんこ したよ。': 'You shared the rice ball on the table with a friend.', 'だれかの おへや': "Someone's Room", 'だれかの おへやを みせて もらって いるよ。みるだけ。あなたの きろくには、なにも のこらないよ。': "You're visiting someone's room. Just looking. Nothing is saved to your own records.", 'じぶんの おへやに もどる': 'Back to my room', 'じぶんの おへやに もどったよ。': 'Back in your own room.', 'ようこそ。ゆっくり みていってね。': 'Welcome. Take your time looking around.', 'この おへやには、まだ さかなが いないよ。': 'There are no fish in this room yet.', 'おへやを おくる': 'Send my room', 'おへやの リンク': 'Room link', 'コピーする': 'Copy', 'リンクを コピーしたよ。ともだちに はりつけて おくってね。': 'Link copied. Paste it to send it to a friend.', 'したの リンクを コピーして、ともだちに おくってね。': 'Copy the link below and send it to a friend.', 'コピーできなかったよ。したの リンクを おして えらんで コピーしてね。': "Couldn't copy. Please select the link below and copy it.", 'リンクに はいって いるのは、さかなの ばんごうと、かざりの ばんごうと いち、いまの じかん、あそびに きて いる なかまの ばんごうだけ。なまえや ひとこと、たんまつの しるしは はいって いないよ。みる ひとの きろくには、なにも のこらないよ。': 'The link contains only numbers: fish numbers, decoration numbers and positions, the time of day, and a visiting friend’s number. No names, messages or device marks. Nothing is saved to the viewer’s records.', 'まだ おくれる おへやが ないよ。さかなを つると おくれるよ。': 'There is no room to send yet. Catch a fish and you can send it.', 'おへやの リンクを おくったよ。': 'Sent the room link.', 'おへやの リンクを コピーしました。': 'Room link copied.', 'おへやの リンクが できました。': 'Room link is ready.', 'まだ おくれる おへやが ありません。': 'There is no room to send yet.', 'おへやの リンクを おくりました。': 'Sent the room link.' };
     const GIFT_EN = { 'さくらのはなびら': 'Cherry blossom petal', 'あおいは': 'Fresh green leaf', 'どんぐり': 'Acorn', 'ゆきのけっしょう': 'Snow crystal', 'ささぶね': 'Bamboo-leaf boat', 'やどかり': 'Hermit crab' };   // ひみつで もらえる かざりの なまえ（訳表の かけら 表には 入らないので、ここで 訳す）
-    const EN = { ex: { ...HEYA_EN, 'ミュートボタンは こちら ↑': 'Mute button is here ↑', 'まるいろで そだてた さかなだよ。': 'A fish raised in Maruiro.', 'まるいろ': 'Maruiro', 'まるいろへ いくよ。': 'Going to Maruiro.', 'アプリばん まるふわ まるいろ': 'App: Marufuwa Maruiro', 'タッチで ひらく': 'Tap to open', 'iPhone で あそべるよ': 'Playable on iPhone', 'アプリは iPhone で あそべるよ。': 'The app is playable on iPhone.', 'そとへ ひらきます。いいですか？': 'This opens outside the game. Is that okay?', 'ひらく': 'Open', 'やめる': 'Cancel', 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'パレード、はじまるよ！': "The parade is starting!", 'たのしかったね。': 'That was fun!', 'さかなたちが パレードを はじめたよ。': 'The fish started a parade.', 'パレードが おわったよ。': 'The parade is over.', 'さかなたちが パレードを したよ。': 'The fish had a parade.', 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
+    const EN = { ex: { ...HEYA_EN, 'もっと ▸': 'More ▸', 'たたむ ▴': 'Less ▴', 'ミュートボタンは こちら ↑': 'Mute button is here ↑', 'まるいろで そだてた さかなだよ。': 'A fish raised in Maruiro.', 'まるいろ': 'Maruiro', 'まるいろへ いくよ。': 'Going to Maruiro.', 'アプリばん まるふわ まるいろ': 'App: Marufuwa Maruiro', 'タッチで ひらく': 'Tap to open', 'iPhone で あそべるよ': 'Playable on iPhone', 'アプリは iPhone で あそべるよ。': 'The app is playable on iPhone.', 'そとへ ひらきます。いいですか？': 'This opens outside the game. Is that okay?', 'ひらく': 'Open', 'やめる': 'Cancel', 'さくらの はなびら': GIFT_EN['さくらのはなびら'], 'あおい は': GIFT_EN['あおいは'], 'どんぐり': GIFT_EN['どんぐり'], 'ゆきの けっしょう': GIFT_EN['ゆきのけっしょう'], 'ささぶね': GIFT_EN['ささぶね'], 'やどかり': GIFT_EN['やどかり'], 'パレード、はじまるよ！': "The parade is starting!", 'たのしかったね。': 'That was fun!', 'さかなたちが パレードを はじめたよ。': 'The fish started a parade.', 'パレードが おわったよ。': 'The parade is over.', 'さかなたちが パレードを したよ。': 'The fish had a parade.', 'きせつ': 'Seasonal', 'はじめまして！ きせつの さかなだよ。': 'Nice to meet you! A seasonal fish.', 'きせつの さかなだよ。また らいねんも あえるね。': "A seasonal fish. We'll meet again next year.", 'みみで ながめるを おわりました。': 'Listen mode ended.', 'まだ だれも いないよ。つりを すると、ここで およぐよ。': 'Nobody is here yet. Catch a fish and it will swim here.' }, rules: [
       [/^(.+?)×(\d+)$/, (_, n, k) => GIFT_EN[n] ? GIFT_EN[n] + ' ×' + k : null],   // かざりの ふだ（ひみつで もらえる かざり）
       [/^(.+?)をもどす$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] : null],
       [/^(.+?)をもどしたよ。$/, (_, n) => GIFT_EN[n] ? 'Put back ' + GIFT_EN[n] + '.' : null],
