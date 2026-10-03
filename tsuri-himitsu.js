@@ -27,7 +27,7 @@
   // やさしい おと（soft）：かくばった なみは まるい なみに・1.8kHz より たかい おとは 1オクターブ さげる（本体と おなじ かんがえ）
   let sndKind = 'fx';
   const sndSet = () => readJSON(MAIN_KEY) || {};
-  const kindOn = () => { const st = sndSet(); return st.sound === true && (sndKind === 'ui' || st.sndFx !== false); };
+  const kindOn = () => { if (window.TsuriSfxOff) return false; const st = sndSet(); return st.sound === true && (sndKind === 'ui' || st.sndFx !== false); };
   const asKind = (k, fn) => { const p = sndKind; sndKind = k; try { return fn(); } finally { sndKind = p; } };
   let speed = 1, skew = 0, muted = false;        // 検査用：時間を はやめる／すすめる／ひみつの 待ち時間を 止める（ほかの 検査が 仮想の 時計を 進める 間、こじか・ねこが 勝手に 出ないように）
   const dur = ms => ms / speed, later = (fn, ms) => setTimeout(fn, dur(ms)), clock = () => performance.now() + skew;

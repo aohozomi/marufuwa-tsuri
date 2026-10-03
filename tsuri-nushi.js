@@ -14,7 +14,7 @@
   if (local && query.get('nushi-en') === '0') return;
   const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   // 「おと」が ON で、かつ「こうかおん」を きって いない 人だけ（save.sndFx===false の 人には ならさない。ジョブズ1 の 依頼・9/30）
-  const soundOn = () => { try { const s = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1') || '{}'); return !!s.sound && s.sndFx !== false; } catch (e) { return false; } };
+  const soundOn = () => { if (window.TsuriSfxOff) return false; try { const s = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1') || '{}'); return !!s.sound && s.sndFx !== false; } catch (e) { return false; } };
 
   const style = document.createElement('style'); style.id = 'nushi-style';
   style.textContent = `

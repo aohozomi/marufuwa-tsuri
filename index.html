@@ -30,6 +30,7 @@
 <link rel="preload" as="script" href="tsuri-wear.js"><link rel="preload" as="script" href="tsuri-daily.js"><link rel="preload" as="script" href="tsuri-mame.js"><link rel="preload" as="script" href="tsuri-art.js"><link rel="preload" as="script" href="tsuri-art-season.js"><link rel="preload" as="script" href="tsuri-art-real.js"><link rel="preload" as="script" href="tsuri-town.js"><link rel="preload" as="script" href="tsuri-koe.js"><link rel="preload" as="script" href="tsuri-bgm.js">   <!-- ほんたいの まえに ならぶ script は じゅんばんに よむと おそい。さきに ならんで よむ -->
 <script>
 // ?clip=1（見せ場クリップの 録画用）：がめんを 景色＋まるふわ＋輪 だけに。保存は しない（localStorage の かきこみを ぜんぶ むこうに・かぎは ふえない）。ボットは いれない
+window.TsuriSfxOff = true;   // 10/3：ひみつ・ぬしの たいこ（べつの ファイルの おと）も いったん とめる（あたらしい こうかおん 8つだけ）
 try { if (new URLSearchParams(location.search).get('clip') === '1') { document.documentElement.dataset.clip = '1'; Storage.prototype.setItem = function () {}; Storage.prototype.removeItem = function () {}; Storage.prototype.clear = function () {}; } } catch (e) {}
 </script>
 <script>
@@ -1656,7 +1657,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (!ctx.createBiquadFilter || !ctx.createWaveShaper) return ctx.destination;
     const low = ctx.createBiquadFilter(), soft = ctx.createWaveShaper(), curve = new Float32Array(2049);
     for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh(i / 1024 - 1);
-    low.type = 'lowpass'; low.frequency.value = save.soft ? 1200 : 1400; low.Q.value = .5; soft.curve = curve;   // 10/1 2500→1400（三角波の 3倍音の「キン」を 出口で 切る・マスター直・総司令部）
+    low.type = 'lowpass'; low.frequency.value = 1200; low.Q.value = .5; soft.curve = curve;   // 1.2kHz より うえを きる
+    if (ctx.createDynamicsCompressor) { const comp = ctx.createDynamicsCompressor(), post = ctx.createGain(); comp.threshold.value = -24; comp.ratio.value = 6; comp.knee.value = 6; comp.attack.value = .005; comp.release.value = .2; post.gain.value = .35;   // かさなっても ピークが でない（じどうの おおきく なる ぶん −5dB で ちょうせい）
+      low.connect(comp); comp.connect(post); post.connect(soft); soft.connect(ctx.destination); bus = {ctx, in: low, low, soft, post}; if (probe('sfxmeter')) { const an = ctx.createAnalyser(); an.fftSize = 1024; soft.connect(an); bus.an = an; window.__sfxPeak = 0; setInterval(() => { const d = new Float32Array(an.fftSize); an.getFloatTimeDomainData(d); for (const v of d) window.__sfxPeak = Math.max(window.__sfxPeak, Math.abs(v)); }, 15); } return low; }   // 10/1 2500→1400（三角波の 3倍音の「キン」を 出口で 切る・マスター直・総司令部）
     low.connect(soft); soft.connect(ctx.destination); bus = {ctx, in: low, low}; return low;
   }
   // さいしょの「なげる」で だけ、やさしい「ぽちゃん」を 1かい（おとは はじめから OFF の まま。ひくい・みじかい・sine・ちいさい・<audio> で ならす＝おと OFF の あいだ AudioContext は つくらない）。あとで ペンギンが「おとを つけると、もっと きもちいいよ」を 1かい だけ。2かいめ いこうは なし
@@ -1747,9 +1750,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const sfxBuf = {}; let sfxLoading = false, sfxLastReward = -1e9;
   function sfxLoad() { if (sfxLoading || !SFX_NEW || !sndOn('fx')) return; sfxLoading = true; try { const ctx = ready(); Object.entries(SFX_FILES).forEach(([k, u]) => { fetch(u).then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b)).then(buf => { sfxBuf[k] = buf; }).catch(() => {}); }); } catch { sfxLoading = false; } }
   addEventListener('load', () => setTimeout(() => { try { if (save.sound) sfxLoad(); } catch {} }, 600));   // おとが ONなら さきに よみこむ（さいしょの 1かい目から なる）
+  let sfxActive = 0;   // おなじ ときに ならす こうかおんは 2つまで（3つめは すてる）
   function sfxPlay(k, delay = 0, kind = 'fx') {
     if (!SFX_NEW || !sndOn(kind)) return;
-    try { if (!sfxBuf[k]) { sfxLoad(); return; } const ctx = ready(), src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = sfxBuf[k]; g.gain.value = 1; src.connect(g).connect(fxOut(ctx)); src.start(ctx.currentTime + delay); } catch {}
+    try { if (!sfxBuf[k]) { sfxLoad(); return; } if (sfxActive >= 2 && delay === 0) return; const ctx = ready(), src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = sfxBuf[k]; g.gain.value = k === 'pikon' ? .28 : .15; src.connect(g).connect(fxOut(ctx)); sfxActive++; src.onended = () => { sfxActive = Math.max(0, sfxActive - 1); }; src.start(ctx.currentTime + delay); } catch (e) { try { console.warn('sfx', e && e.message); } catch {} }   // BGM より ちいさめ〜おなじくらい（−16dB）。あんない音は +5dB
   }
   const sfxReward = k => { const now = performance.now(); if (now - sfxLastReward < 2000) return; sfxLastReward = now; sfxPlay(k); };   // ごほうび（ぴったり・つれた）は 2びょうに 1つ
   Object.keys(SFX).forEach(k => { SFX[k] = () => {}; });   // ふるい おとは ぜんぶ むおん
