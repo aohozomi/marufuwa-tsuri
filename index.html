@@ -360,6 +360,11 @@ html[data-clip] #main-button{display:block !important;position:fixed;left:0;bott
 .shore-pick button{display:block;width:100%;min-height:56px;text-align:left;padding:8px 16px;line-height:1.35}
 .shore-pick button small{display:block;font-weight:700;font-size:.78rem;opacity:.9}
 .shore-pick .shore-hard{min-height:44px;font-size:.85rem;text-align:center}
+/* えらんで いる ほう：みどりの ぬり（下の 釣り場と おなじ）・ふとい ふち・大きな まるバッジ ✓・みぎに「いま これ」（いろに たよらない） */
+.shore-pick button{position:relative}
+.shore-pick button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0b3d2b;border:5px solid #2f9a70;padding-left:52px;padding-right:84px;text-shadow:none}
+.shore-pick button[aria-pressed=true]::before{content:"✓";position:absolute;left:12px;top:50%;translate:0 -50%;width:28px;height:28px;border-radius:50%;background:#fff;color:#1f8a5c;font-size:1.05rem;font-weight:900;line-height:28px;text-align:center;box-shadow:0 0 0 2px #2f9a70}
+.shore-pick button[aria-pressed=true]::after{content:attr(data-now);position:absolute;right:12px;top:50%;translate:0 -50%;padding:1px 9px;border-radius:12px;background:#fff;color:#0b3d2b;font-size:.78rem;font-weight:900}
 .tap-hint{margin:0;padding:2px 12px 0;text-align:center;font-size:.8rem;font-weight:800;color:#35566a}
 :root[data-night=true] .tap-hint{color:#e8f1f8}
 /* いちばん うえの 🔇 おとを けす（まるいろと おなじ しき。おとは はじめから ON） */
@@ -2807,10 +2812,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function drawShoreLabel() { const l = $('shore-label'); if (l) { const m = curMode(); l.textContent = L(SHORE[m][0], SHORE[m][1]); } }
   function drawShorePick() {
     const box = $('shore-pick'); if (!box) return; box.replaceChildren(); const m = curMode();
-    const mk = (cls, key, icon, ja, sub, en, enSub) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.dataset.shore = key; b.setAttribute('aria-pressed', String(m === key)); b.append((m === key ? '✓ ' : '') + icon + ' ' + L(ja, en)); if (sub) { const sm = document.createElement('small'); sm.textContent = L(sub, enSub); b.append(sm); } b.addEventListener('click', () => { setMode(key); drawShorePick(); drawShoreLabel(); }); box.append(b); };
+    const mk = (cls, key, icon, ja, sub, en, enSub) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.dataset.shore = key; b.setAttribute('aria-pressed', String(m === key)); b.append(icon + ' ' + L(ja, en)); b.dataset.now = L('いま これ', 'Selected'); if (sub) { const sm = document.createElement('small'); sm.textContent = L(sub, enSub); b.append(sm); } b.addEventListener('click', () => { setMode(key); drawShorePick(); drawShoreLabel(); }); box.append(b); };
     mk('pill', 'easy', '🌿', 'やさしい水ぎわ（らくちん）', 'おすだけ・魚が いつも いるよ・にげないよ', 'Gentle shore (easy)', 'Just press. Fish are always around.');
     mk('pill', 'normal', '🎣', 'ふつうの水ぎわ', 'タイミングを あわせて つる', 'Standard shore', 'Time your press to catch.');
-    mk('pill shore-hard', m === 'hard' ? 'normal' : 'hard', '', m === 'hard' ? 'ふつうに もどす' : 'しっかりに する（むずかしめ）', '', m === 'hard' ? 'Back to Standard' : 'Make it Focused (harder)', '');
+    mk('pill shore-hard', 'hard', '🎯', 'しっかり（むずかしめ）', '', 'Focused (harder)', '');
   }
   function drawAreaPick() { drawShorePick();
     const box = $('areapick-list'); box.replaceChildren();
