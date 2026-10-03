@@ -117,6 +117,16 @@ async function main() {
   for (let t = 0; t < T; t++) { await ev(`document.getElementById('lever').click()`); await sleep(80); const l = await ev(`__aim()`); if (l === 'win') timedWins++; }
   ok('ねらって とめれば そろう（10回 中 8回 いじょう）', timedWins >= 8, timedWins + '/' + T);
 
+  // ── 4b. まどを タップ／クリックで 3回：ひだり→まんなか→みぎ ──
+  await ev(`document.getElementById('lever').click()`); await sleep(150);
+  const order = [];
+  for (let i = 0; i < 3; i++) { await click('#win'); await sleep(40); order.push(await ev(`[0,1,2].map(i=>__kuru.state(i)==='spin'?'S':'-').join('')`)); await sleep(300); }
+  ok('まどを 3回 タップすると ひだり→まんなか→みぎ の じゅんに とまる', order[0] === '-SS' && order[1] === '--S' && order[2] === '---' && (await ev(`__kuru.phase()==='done'`)), order.join(' '));
+  ok('まどの タップで れば（まわりだす）も できる', await (async () => { await click('#win'); await sleep(100); return ev(`__kuru.phase()==='spin'`); })());
+  await ev(`document.querySelectorAll('#stops button').forEach(b=>b.click())`); await sleep(500);
+  ok('えがらは 6しゅ（まるふわ・おにぎり・ドーナツ・マカロン・ケーキ・クッキー）で ほし・つきは ない', await ev(`__kuru.strip.every(r=>r.length===6&&new Set(r).size===6&&['face','onigiri','donut','macaron','cake','cookie'].every(x=>r.includes(x)))`));
+  ok('ほんものの え（まるふわの かお・おにぎり・おやつ）が よみこまれている', await ev(`(()=>{const z=__kuru.sprites();return z.face==='canvas-crop'&&['onigiri','donut','macaron','cake','cookie'].every(k=>z[k]==='img')})()`), await ev(`JSON.stringify(__kuru.sprites())`));
+
   // ── 5. よかん：2つ そろうと のこりが ゆっくり・ランプが はやく ──
   await ev(`document.getElementById('lever').click()`); await sleep(100);
   const y = await ev(`(async()=>{ const K=__kuru, raf=()=>new Promise(r=>requestAnimationFrame(r)); const b=i=>document.querySelectorAll('#stops button')[i];

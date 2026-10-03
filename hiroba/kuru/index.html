@@ -13,8 +13,8 @@
 <!--
   くるくる まるふわ（日本の パチスロ風の かわいい きかい・おかね ぜんぶ なし）
   【仮の え】いまの 絵は ぜんぶ コード（canvas／CSS）で えがいた「仮の え」です。
-  天の ほんものの え（img/kuru/*.webp）が とどいたら、読めた ものから 自動で さしかわります（読めなければ 仮の えの まま）。
-    img/kuru/sym_<id>.webp     … 絵柄（透明・360x360）。id = face / onigiri / acorn / shell / moon / star
+  本物の え（img/ の まるふわ・おにぎり・おやつ）を つかい、天の え（img/kuru/*.webp）が とどいたら、読めた ものから 自動で さしかわります（読めなければ 仮の えの まま）。
+    img/kuru/sym_<id>.webp     … 絵柄（透明・360x360）。id = face / onigiri / donut / macaron / cake / cookie
     img/kuru/reward_<id>.webp  … ごほうびの え（透明・480x480）。同じ id
     img/kuru/cabinet.webp      … きかいの 外わく（透明・1080x1500）※まだ 使わない（将来）
   ・ランキング・サーバー・解析・自由入力・きろく（保存）は ありません。みるだけ。
@@ -35,7 +35,7 @@ try {
 :root[data-large=true]{font-size:125%}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:radial-gradient(ellipse at 50% 18%,#6a4228 0%,var(--bg1) 38%,var(--bg2) 100%) fixed;padding:12px 12px 36px}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:repeating-linear-gradient(90deg,rgba(255,225,180,.035) 0 3px,transparent 3px 19px),repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 1px,transparent 1px 47px),radial-gradient(ellipse at 50% 18%,#6a4228 0%,var(--bg1) 38%,var(--bg2) 100%) fixed;padding:12px 12px 36px}
 :root[data-inapp=x] body{padding-bottom:84px}
 .hut{max-width:520px;margin:0 auto}
 .back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(#fff,#dff1f7);border:2px solid #9bc9da;color:#14506b;font-weight:800;text-decoration:none}
@@ -50,7 +50,7 @@ h1{margin:8px 0 0;font-size:1.4rem;line-height:1.4;text-align:center}
 @keyframes lamp{from{opacity:.55}to{opacity:1}}
 .cab.yokan .lamp{animation-duration:1.3s}   /* よかん：ふわっと はやく（1.3びょうで 1かい＝ 3回/秒 みまん） */
 .win-l .lamp{opacity:1}
-.window{position:relative;padding:8px;border-radius:18px;background:#1b110b;border:3px solid var(--gold2);box-shadow:inset 0 0 14px #000}
+.window{cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;position:relative;padding:8px;border-radius:18px;background:#1b110b;border:3px solid var(--gold2);box-shadow:inset 0 0 14px #000}
 .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .reels canvas{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:10px;background:var(--glass)}
 .payline{position:absolute;left:2px;right:2px;top:50%;height:0;border-top:3px solid #e0555a;transform:translateY(-1.5px);pointer-events:none;opacity:.8}
@@ -100,7 +100,7 @@ h1{margin:8px 0 0;font-size:1.4rem;line-height:1.4;text-align:center}
 <main class="hut" id="hut">
   <a class="back" id="back" href="../index.html">← ひろばへ</a>
   <h1>くるくる まるふわ</h1>
-  <p class="lead" id="lead">ればを ひいて、ボタンで ひとつずつ とめよう。</p>
+  <p class="lead" id="lead">ればを ひいて、まどを タップして とめよう。</p>
   <div class="cab" id="cab">
     <div class="marq" aria-hidden="true"><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span></div>
     <div class="window" id="win">
@@ -124,8 +124,8 @@ h1{margin:8px 0 0;font-size:1.4rem;line-height:1.4;text-align:center}
   </section>
   <details class="more" id="more"><summary>あそびかた・らくちん</summary>
     <div class="inner">
-      <p>ればを ひくと 3つの まどが まわるよ。ボタンを おして ひとつずつ とめてね（キーボードは スペース）。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。</p>
-      <p>ふつう：ほんとうの タイミングで とめるよ（れんだ しても そろわないよ）。</p>
+      <p>ればを ひくと 3つの まどが まわるよ。まどを タップ（クリック・スペース）すると、ひだり・まんなか・みぎの じゅんに とまるよ。したの ボタンでも とめられるよ。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。</p>
+      <p>ふつう：おした しゅんかんの えで とまるよ（れんだ しても そろわないよ）。</p>
       <p>らくちん：ゆっくり まわって、じどうで とまって、ちゃんと そろうよ。</p>
       <p>おかねも てんすうも ありません。きろくも しません。ごほうびは みるだけです。</p>
       <button type="button" class="btn mode" id="mode" aria-pressed="false">いまは ふつう</button>
@@ -137,17 +137,17 @@ h1{margin:8px 0 0;font-size:1.4rem;line-height:1.4;text-align:center}
 <script>
 // English：この ページの ことば（tsuri-en.js の TsuriEn.add）。うごく ぶぶん（おしらせ・ごほうび）の ぶんも ここで ぜんぶ ひょうに する。
 const KURU_SYM = [
-  { id: 'face',    ja: 'まるふわ',     en: 'Marufuwa',    rj: 'まるふわの シール',   re: 'Marufuwa sticker',     k: 'シール', ke: 'sticker' },
-  { id: 'onigiri', ja: 'おにぎり',     en: 'rice ball',   rj: 'おにぎりの かざり',   re: 'rice ball decoration', k: 'かざり', ke: 'decoration' },
-  { id: 'acorn',   ja: 'どんぐり',     en: 'acorn',       rj: 'どんぐりの シール',   re: 'acorn sticker',        k: 'シール', ke: 'sticker' },
-  { id: 'shell',   ja: 'かいがら',     en: 'seashell',    rj: 'かいがらの かざり',   re: 'seashell decoration',  k: 'かざり', ke: 'decoration' },
-  { id: 'moon',    ja: 'おつきさま',   en: 'moon',        rj: 'おつきさまの シール', re: 'moon sticker',         k: 'シール', ke: 'sticker' },
-  { id: 'star',    ja: 'おほしさま',   en: 'star',        rj: 'おほしさまの かざり', re: 'star decoration',      k: 'かざり', ke: 'decoration' }
+  { id: 'face',    ja: 'まるふわ',   en: 'Marufuwa', rj: 'まるふわの シール',   re: 'Marufuwa sticker',   k: 'シール', ke: 'sticker' },
+  { id: 'onigiri', ja: 'おにぎり',   en: 'rice ball', rj: 'おにぎりの シール',   re: 'rice ball sticker',  k: 'シール', ke: 'sticker' },
+  { id: 'donut',   ja: 'ドーナツ',   en: 'donut',     rj: 'ドーナツの シール',   re: 'donut sticker',      k: 'シール', ke: 'sticker' },
+  { id: 'macaron', ja: 'マカロン',   en: 'macaron',   rj: 'マカロンの シール',   re: 'macaron sticker',    k: 'シール', ke: 'sticker' },
+  { id: 'cake',    ja: 'ケーキ',     en: 'cake',      rj: 'ケーキの シール',     re: 'cake sticker',       k: 'シール', ke: 'sticker' },
+  { id: 'cookie',  ja: 'クッキー',   en: 'cookie',    rj: 'クッキーの シール',   re: 'cookie sticker',     k: 'シール', ke: 'sticker' }
 ];
 const KURU_SIDE = ['ひだり', 'まんなか', 'みぎ'], KURU_SIDE_EN = ['Left', 'Middle', 'Right'];
 const KURU_MSG = {
   idle: 'ればを ひいて はじめよう。',
-  spin: 'ボタンを おして、ひとつずつ とめてね。',
+  spin: 'まどを タップして、ひだりから ひとつずつ とめてね。',
   yokan: 'おや…？ そろいそう。',
   win: 'そろったよ！ ふわっと きれい。',
   near: 'おしい、ふたつ そろったね。',
@@ -159,12 +159,12 @@ const KURU_MSG = {
     'くるくる まるふわ｜まるふわの ひろば': 'Round and Round Marufuwa | Marufuwa Plaza',
     'くるくる まるふわ': 'Round and Round Marufuwa',
     '← ひろばへ': '← Back to the Plaza',
-    'ればを ひいて、ボタンで ひとつずつ とめよう。': 'Pull the lever, then stop each window with a button.',
+    'ればを ひいて、まどを タップして とめよう。': 'Pull the lever, then tap the windows to stop them.',
     'ればを ひく': 'Pull the lever',
     'とめる': 'Stop', 'ひだりの まど': 'left window', 'まんなかの まど': 'middle window', 'みぎの まど': 'right window',
     'あそびかた・らくちん': 'How to play / Easy mode',
-    'ればを ひくと 3つの まどが まわるよ。ボタンを おして ひとつずつ とめてね（キーボードは スペース）。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。': 'Pull the lever and three windows spin. Press a button to stop them one at a time (on a keyboard, press Space). When three of the same picture line up on the red line, we celebrate.',
-    'ふつう：ほんとうの タイミングで とめるよ（れんだ しても そろわないよ）。': 'Normal: stop with your own timing (mashing the buttons will not line them up).',
+    'ればを ひくと 3つの まどが まわるよ。まどを タップ（クリック・スペース）すると、ひだり・まんなか・みぎの じゅんに とまるよ。したの ボタンでも とめられるよ。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。': 'Pull the lever and three windows spin. Tap the window (or click, or press Space) to stop them left, middle, right. The buttons below work too. When three of the same picture line up on the red line, we celebrate.',
+    'ふつう：おした しゅんかんの えで とまるよ（れんだ しても そろわないよ）。': 'Normal: it stops on the picture you see the moment you press (mashing the buttons will not line them up).',
     'らくちん：ゆっくり まわって、じどうで とまって、ちゃんと そろうよ。': 'Easy: it spins slowly, stops by itself, and always lines up.',
     'おかねも てんすうも ありません。きろくも しません。ごほうびは みるだけです。': 'There is no money and no points. Nothing is saved. The treat is just to look at.',
     'いまは ふつう': 'Now: Normal', 'いまは らくちん': 'Now: Easy',
@@ -173,7 +173,7 @@ const KURU_MSG = {
     'おうちの かたへ': 'For grown-ups'
   };
   Object.entries(KURU_MSG).forEach(([k, v]) => { EX[v] = ({
-    'idle': 'Pull the lever to begin.', 'spin': 'Press the buttons to stop them one by one.', 'yokan': 'Oh…? They might line up.',
+    'idle': 'Pull the lever to begin.', 'spin': 'Tap the window to stop them one by one, from the left.', 'yokan': 'Oh…? They might line up.',
     'win': 'They lined up! A soft, pretty glow.', 'near': 'So close, two lined up.', 'none': 'They did not line up. Take your time.', 'easy': 'Slow spinning. They stop by themselves, so just wait.'
   })[k]; });
   KURU_SYM.forEach(s => {
@@ -199,9 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const cv = [0, 1, 2].map(i => $('r' + i));
   const calm = () => rootEl.dataset.calm === 'true' || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   const STRIP = [   // 3つの まどの えの ならび（どの まども 6しゅるい ぜんぶ 1回ずつ）
-    ['face', 'onigiri', 'acorn', 'shell', 'moon', 'star'],
-    ['star', 'face', 'shell', 'onigiri', 'moon', 'acorn'],
-    ['moon', 'acorn', 'face', 'star', 'onigiri', 'shell']
+    ['face', 'onigiri', 'donut', 'macaron', 'cake', 'cookie'],
+    ['cookie', 'face', 'cake', 'onigiri', 'macaron', 'donut'],
+    ['macaron', 'donut', 'face', 'cookie', 'onigiri', 'cake']
   ];
   const SYM = Object.fromEntries(KURU_SYM.map(s => [s.id, s]));
   const idx = c => ((c % N) + N) % N;
@@ -224,33 +224,43 @@ document.addEventListener('DOMContentLoaded', () => {
       g.fillStyle = '#2f3a36'; g.beginPath(); g.moveTo(31, 62); g.lineTo(69, 62); g.lineTo(76, 86); g.lineTo(24, 86); g.closePath(); g.fill();
       g.fillStyle = '#4a2c1a'; [[40, 46], [60, 46]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 3.4, 0, 7); g.fill(); });
       g.strokeStyle = '#4a2c1a'; g.lineWidth = 3; g.beginPath(); g.moveTo(45, 52); g.quadraticCurveTo(50, 57, 55, 52); g.stroke();
-    } else if (id === 'acorn') {
+    } else if (id === 'donut') {
+      g.strokeStyle = outline; g.lineWidth = 3.5; g.fillStyle = '#e9b97a';
+      g.beginPath(); g.arc(50, 52, 38, 0, 7); g.fill(); g.stroke();
+      g.fillStyle = '#ffb4c8'; g.beginPath(); g.arc(50, 50, 33, 0, 7); g.fill();
+      g.fillStyle = '#fff'; [[34, 34, 20], [62, 30, -30], [70, 56, 60], [30, 62, 100], [52, 74, 10]].forEach(([x, y, a]) => { g.save(); g.translate(x, y); g.rotate(a); g.fillRect(-4, -1.5, 8, 3); g.restore(); });
+      g.fillStyle = '#fff6e4'; g.beginPath(); g.arc(50, 52, 11, 0, 7); g.fill(); g.stroke();
+    } else if (id === 'macaron') {
       g.strokeStyle = outline; g.lineWidth = 3.5;
-      g.fillStyle = '#e2b676'; g.beginPath(); g.moveTo(24, 46); g.quadraticCurveTo(24, 88, 50, 90); g.quadraticCurveTo(76, 88, 76, 46); g.closePath(); g.fill(); g.stroke();
-      g.fillStyle = '#9a6a3a'; g.beginPath(); g.ellipse(50, 40, 33, 22, 0, Math.PI, 0); g.lineTo(83, 46); g.lineTo(17, 46); g.closePath(); g.fill(); g.stroke();
-      g.beginPath(); g.moveTo(50, 20); g.lineTo(50, 10); g.stroke();
-    } else if (id === 'shell') {
-      g.strokeStyle = outline; g.lineWidth = 3.5; g.fillStyle = '#ffd0d6';
-      g.beginPath(); g.moveTo(50, 88); g.lineTo(14, 44); g.quadraticCurveTo(14, 12, 50, 12); g.quadraticCurveTo(86, 12, 86, 44); g.closePath(); g.fill(); g.stroke();
-      g.lineWidth = 2.5; [[50, 12], [32, 17], [68, 17], [18, 32], [82, 32]].forEach(([x, y]) => { g.beginPath(); g.moveTo(50, 88); g.lineTo(x, y); g.stroke(); });
-      g.fillStyle = '#e8a0aa'; g.beginPath(); g.roundRect ? g.roundRect(36, 84, 28, 8, 4) : g.rect(36, 84, 28, 8); g.fill(); g.stroke();
-    } else if (id === 'moon') {
-      g.strokeStyle = outline; g.lineWidth = 3.5; g.fillStyle = '#ffe58a';
-      g.beginPath(); g.arc(50, 50, 38, 0.55, Math.PI * 2 - 0.55, false); g.arc(64, 50, 31, Math.PI * 2 - 0.9, 0.9, true); g.closePath(); g.fill(); g.stroke();
-      g.fillStyle = '#4a2c1a'; g.beginPath(); g.arc(30, 52, 3.2, 0, 7); g.fill();
-    } else if (id === 'star') {
-      g.strokeStyle = outline; g.lineWidth = 3.5; g.fillStyle = '#ffe070';
-      g.beginPath(); for (let k = 0; k < 10; k++) { const r = k % 2 ? 19 : 42, a = -Math.PI / 2 + k * Math.PI / 5; g.lineTo(50 + r * Math.cos(a), 54 + r * Math.sin(a)); } g.closePath(); g.fill(); g.stroke();
-      g.fillStyle = '#4a2c1a'; [[43, 54], [57, 54]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 2.8, 0, 7); g.fill(); });
+      g.fillStyle = '#ffc7da'; g.beginPath(); g.ellipse(50, 36, 34, 18, 0, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#fffaf0'; g.fillRect(18, 38, 64, 12); g.strokeRect(18, 38, 64, 12);
+      g.fillStyle = '#ffc7da'; g.beginPath(); g.ellipse(50, 62, 34, 18, 0, 0, Math.PI); g.closePath(); g.fill(); g.stroke();
+    } else if (id === 'cake') {
+      g.strokeStyle = outline; g.lineWidth = 3.5;
+      g.fillStyle = '#fff3d6'; g.beginPath(); g.moveTo(14, 84); g.lineTo(14, 44); g.lineTo(86, 44); g.lineTo(86, 84); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#ffd0dc'; g.beginPath(); g.moveTo(12, 46); g.quadraticCurveTo(50, 22, 88, 46); g.quadraticCurveTo(80, 58, 70, 48); g.quadraticCurveTo(60, 60, 50, 48); g.quadraticCurveTo(40, 60, 30, 48); g.quadraticCurveTo(20, 58, 12, 46); g.fill(); g.stroke();
+      g.fillStyle = '#e0555a'; g.beginPath(); g.arc(50, 30, 8, 0, 7); g.fill(); g.stroke();
+    } else if (id === 'cookie') {
+      g.strokeStyle = outline; g.lineWidth = 3.5; g.fillStyle = '#e8b878';
+      g.beginPath(); g.arc(50, 50, 38, 0, 7); g.fill(); g.stroke();
+      g.fillStyle = '#6a3e22'; [[36, 38], [62, 34], [66, 62], [38, 66], [50, 50]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 5.5, 0, 7); g.fill(); });
     }
     g.restore();
   }
+  const FILES = { onigiri: 'img/food/onigiri_1.webp', donut: 'img/oyatsu/oyatsu_3_donut.webp', macaron: 'img/oyatsu/oyatsu_2_macaron.webp', cake: 'img/oyatsu/oyatsu_5_cake.webp', cookie: 'img/oyatsu/oyatsu_1_cookie.webp' };
+  function faceCrop(im) {   // まるふわの 顔を 丸く きりだす（クロップ だけ・ひきのばさない）
+    const w = im.naturalWidth, R = Math.floor(w * .43), S = R * 2, c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d'); g.fillStyle = '#fff6e4'; g.beginPath(); g.arc(R, R, R, 0, 7); g.fill();
+    g.save(); g.beginPath(); g.arc(R, R, R - 2, 0, 7); g.clip();
+    g.drawImage(im, Math.round(w / 2 - R), Math.round(w * .30 - R), S, S, 0, 0, S, S); g.restore();
+    g.strokeStyle = '#7a4a2a'; g.lineWidth = 4; g.beginPath(); g.arc(R, R, R - 2, 0, 7); g.stroke(); return c;
+  }
+  function loadImg(src, ok, fail) { const im = new Image(); im.decoding = 'async'; im.referrerPolicy = 'no-referrer'; im.onload = () => { if (im.naturalWidth >= 32) ok(im); else if (fail) fail(); }; im.onerror = () => { if (fail) fail(); }; im.src = '../../' + src; }
   KURU_SYM.forEach(s => {
-    const c = document.createElement('canvas'); c.width = c.height = SZ; drawSym(c.getContext('2d'), s.id, SZ); sprites[s.id] = c;
-    const im = new Image(); im.decoding = 'async'; im.referrerPolicy = 'no-referrer';
-    im.onload = () => { if (im.naturalWidth >= 32) { sprites[s.id] = im; dirty(); } };
-    im.onerror = () => {};   // 読めない ときは 仮の えの まま
-    im.src = '../../img/kuru/sym_' + s.id + '.webp';
+    const c = document.createElement('canvas'); c.width = c.height = SZ; drawSym(c.getContext('2d'), s.id, SZ); sprites[s.id] = c;   // コード描き（よめない ときの 仮の え）
+    if (s.id === 'face') loadImg('img/game-smile.webp', im => { sprites.face = faceCrop(im); dirty(); }, () => loadImg('img/game-blue.webp', im => { sprites.face = faceCrop(im); dirty(); }));
+    else loadImg(FILES[s.id], im => { sprites[s.id] = im; dirty(); });
+    loadImg('img/kuru/sym_' + s.id + '.webp', im => { sprites[s.id] = im; dirty(); });   // 天の えが とどけば それを つかう
   });
 
   // ─── ようす ───
@@ -397,6 +407,11 @@ document.addEventListener('DOMContentLoaded', () => {
     easy = !easy; modeBtn.setAttribute('aria-pressed', String(easy));
     modeBtn.textContent = easy ? 'いまは らくちん' : 'いまは ふつう';
   });
+  $('win').addEventListener('pointerdown', e => {   // まどを タップ：ひだり→まんなか→みぎ の じゅんに とまる（おした しゅんかんの えで）
+    if (e.button > 0) return;
+    if (phase !== 'spin') return pull();
+    const r = reels.find(x => x.st === 'spin' && x.seek === null); if (r) stop(r.i);
+  });
   document.addEventListener('keydown', e => {
     if (e.key !== ' ' && e.code !== 'Space') return;
     if (e.target && e.target.closest && e.target.closest('details')) return;
@@ -410,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 検査用の よみとり口（よむだけ）
   window.__kuru = {
     pos: i => reels[i].pos, sym: i => centerSym(reels[i]), symAt: (i, c) => STRIP[i][idx(c)], state: i => reels[i].st, phase: () => phase, easy: () => easy, strip: STRIP,
+    sprites: () => Object.fromEntries(Object.entries(sprites).map(([k, v]) => [k, v instanceof HTMLImageElement ? 'img' : (v.width > SZ ? 'canvas-crop' : 'canvas')])),
     speed: i => reels[i].v * reels[i].k
   };
 });
