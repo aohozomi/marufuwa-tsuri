@@ -1,4 +1,4 @@
-OpenTracks（旧 DOVA-SYNDROME）https://opentracks.com/ の フリーBGM（ローファイ・おちついた 系・10/2 マスター「ボサノバじゃなくて ローファイ。全部 おちついた 曲」）。
-asa＝Natura（のる）／hiru＝Nakazaki-cho（のる）／yuu＝Default Mode Network（Anonyment）／yoru＝draw in the night（のる）／heya（おへや・カフェ）＝西に浸る（まんぼう二等兵）／gaze（ながめる）＝こどものくに（ネコト）
-規約（音源利用ライセンス・10/2 確認）：商用可・クレジット不要・背景音楽としての利用は ライセンスの範囲内・曲だけの 配布/販売は 禁止。作曲者の 追加条件の ある 曲は 選ばなかった（サイト準拠の 曲だけ）。
-音量 −24 LUFS・2.8kHz より 上を 切った。2kHz 以上の エネルギーは 0.0〜1.0% の 曲だけ 選んだ。前の ボサノバ 6曲は 10/2 夜に 置き換え。
+OpenTracks（旧 DOVA-SYNDROME）https://opentracks.com/ の フリーBGM（ローファイ・おちついた 系・10/3 に「笛みたいな 高い 音」「チューチュー」「ふうふう」の 苦情で 曲を えらびなおし）。
+asa＝Beyond the Sunset（MFP）／hiru＝Afterimage of Dusk（MFP）／yuu＝Lazy Summer Breeze（MFP）／yoru＝draw in the night（のる）／heya（おへや・カフェ）＝Twilight Breath（MFP）／gaze（ながめる）＝Late Sunset（MFP）
+規約（音源利用ライセンス・10/3 確認）：商用可・クレジット不要・背景音楽としての 利用は ライセンスの 範囲内・曲だけの 配布/販売は 禁止。MFP【Marron Fields Production】＝サイトの 規約どおりなら 使用許可は 不要（作曲者の コメント）・のる＝追加条件なし。
+音量 −24 LUFS・1.1kHz より 上を 2段で 切った（旋律の 高い 笛のような 音を 消す）。2kHz 以上は ほぼ 0%。
