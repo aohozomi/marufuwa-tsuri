@@ -148,8 +148,28 @@
   const decorMarkup = (name, size, c) => { const au = tkArtUrl(window.TsuriTankArt && window.TsuriTankArt.decor && window.TsuriTankArt.decor[name]); if (au) return '<img src="' + au + '" alt="" width="' + size + '" height="' + size + '" draggable="false" decoding="async" style="display:block">'; const d = DECOR[name] || DECOR['きれいな いし']; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">${d.svg(c)}</svg>`; };
 
   // ─── 部屋（かべ・ゆか・たな・ラグ・ちゃぶ台）。360×640 のせかい。色は文字のまま（しゃしんにも使う） ───
-  const ROOM = { w: 360, h: 640, tank: { x: 16, y: 56, w: 328, h: 180 }, mascot: { cx: 140, foot: 574, w: 100, h: 133 }, friend: { w: 66, foot: [572, 582] }, friendX: [60, 296], bubble: { x: 204, y: 430, w: 148 }, guest: { cx: 180, foot: 414, w: 60 } };
+  // 部屋は 2組：tall＝縦長 360×640（9:16・スマホ・本線）／wide＝横長 480×360（4:3・PC）。水槽の枠は どちらも 画面の はばの 約8割を 中央に（天への 注文書 10/3）。
+  const ROOMS = { tall: { mode: 'tall', w: 360, h: 640, tank: { x: 16, y: 56, w: 328, h: 180 }, mascot: { cx: 140, foot: 574, w: 100, h: 133 }, friend: { w: 66, foot: [572, 582] }, friendX: [60, 296], bubble: { x: 204, y: 430, w: 148 }, guest: { cx: 180, foot: 414, w: 60 }, lamp: { cx: 180 }, rice: { x: 211, y: 491, w: 30, h: 26 }, shelf: { panels: [{ x: 22, y: 264, w: 152, h: 72 }, { x: 186, y: 264, w: 152, h: 72 }], cols: 3, rows: 2, max: 12, btn: [3.9, 39.7, 92.2, 14.4] }, lampBtn: [41.7, 0, 16.7, 8.8], riceBtn: [54.5, 74.5, 16.5, 8.6], app: { left: '3%', top: '52%', appcLeft: '3%', appcTop: '52%', appcW: '62%' } },
+    wide: { mode: 'wide', w: 480, h: 360, tank: { x: 48, y: 65, w: 384, h: 194 }, mascot: { cx: 76, foot: 356, w: 56, h: 74 }, friend: { w: 38, foot: [352, 357] }, friendX: [352, 412], bubble: { x: 30, y: 8, w: 270 }, guest: { cx: 192, foot: 324, w: 40 }, lamp: { cx: 420 }, rice: { x: 268, y: 326, w: 17, h: 15 }, shelf: { panels: [{ x: 50, y: 289, w: 182, h: 27 }, { x: 248, y: 289, w: 182, h: 27 }], cols: 6, rows: 1, max: 12, btn: [8.3, 80.3, 83.4, 10.3] }, lampBtn: [82.3, 0, 10.8, 14.2], riceBtn: [55.8, 90.3, 4.5, 4.2], app: { left: '21%', top: '88%', appcLeft: '19%', appcTop: '44%', appcW: '56%' } } };
+  let ROOM = ROOMS.tall;
+  function roomSvgWide() {   // 横長 480×360（仮の 絵＝コードの 色。天の 部屋絵が とどいたら 差し替え）
+    const planks = [334, 344, 352].map(y => `<line x1="0" y1="${y}" x2="480" y2="${y}"/>`).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360">
+      <defs><pattern id="tk-dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="1.7" fill="#f3dcb8"/><circle cx="19" cy="19" r="1.7" fill="#f3dcb8"/></pattern></defs>
+      <rect width="480" height="316" fill="#fdf1e0"/><rect width="480" height="316" fill="url(#tk-dots)"/>
+      <rect y="232" width="480" height="84" fill="#d8efe8"/>
+      <rect y="316" width="480" height="10" fill="#fffaf0"/><rect y="325" width="480" height="2" fill="#e9dcc6"/>
+      <rect y="326" width="480" height="34" fill="#ebcb9d"/><g stroke="#d9b07c" stroke-opacity=".55" stroke-width="1.4">${planks}</g>
+      <ellipse cx="250" cy="343" rx="112" ry="12" fill="#ffcfc4"/><ellipse cx="250" cy="343" rx="92" ry="8.5" fill="#fff1ea"/>
+      <g transform="translate(268 340) scale(.55) translate(-226 -516)"><ellipse cx="226" cy="541" rx="34" ry="7" fill="#8a5a2b" opacity=".16"/><rect x="199" y="519" width="7" height="21" rx="2.5" fill="#b98a5a"/><rect x="246" y="519" width="7" height="21" rx="2.5" fill="#b98a5a"/><path d="M192 516 Q192 526 226 528 Q260 526 260 516 Z" fill="#b98a5a"/><ellipse cx="226" cy="516" rx="34" ry="10" fill="#d9a96c" stroke="#a87646" stroke-width="2"/><ellipse cx="226" cy="514.5" rx="18" ry="5.5" fill="#fffaf0" stroke="#e2d3b8" stroke-width="1.6"/></g>
+      <rect x="36" y="276" width="408" height="8" rx="4" fill="#f6dcae"/><rect x="42" y="284" width="396" height="38" rx="6" fill="#e5bf8c"/>
+      <rect x="46" y="287" width="190" height="32" rx="5" fill="none" stroke="#c99a62" stroke-width="2"/><rect x="244" y="287" width="190" height="32" rx="5" fill="none" stroke="#c99a62" stroke-width="2"/>
+      <rect x="50" y="322" width="7" height="8" fill="#c99a62"/><rect x="423" y="322" width="7" height="8" fill="#c99a62"/>
+      <g transform="translate(452 272) scale(.5)"><path d="M34 244 h26 l-3 -22 h-20z" fill="#ffb18f"/><path d="M47 222 Q34 208 38 190 Q48 200 47 222z" fill="#7fd6a4"/><path d="M47 222 Q60 210 58 192 Q48 202 47 222z" fill="#5cc39a"/></g>
+    </svg>`;
+  }
   function roomSvg() {
+    if (ROOM.mode === 'wide') return roomSvgWide();
     const planks = [430, 452, 478, 508, 542, 580, 622].map(y => `<line x1="0" y1="${y}" x2="360" y2="${y}"/>`).join('');
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640">
       <defs><pattern id="tk-dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="1.7" fill="#f3dcb8"/><circle cx="19" cy="19" r="1.7" fill="#f3dcb8"/></pattern></defs>
@@ -168,7 +188,7 @@
       <g transform="translate(298 22)"><path d="M0 26 L14 -2 L28 26 Z" fill="#ffffff" stroke="#e8d6c2" stroke-width="2.4" stroke-linejoin="round"/><rect x="7" y="12" width="14" height="14" rx="3" fill="#4b6a5a"/></g>
     </svg>`;
   }
-  const RICE = { x: 211, y: 491, w: 30, h: 26 };   // ちゃぶ台の 上の お皿の おにぎり（3かい さわると はんぶんこ）。食べ物は 器と 台の 上（ゆか・ラグには 置かない）
+  let RICE = ROOMS.tall.rice;   // ちゃぶ台の 上の お皿の おにぎり（3かい さわると はんぶんこ）。食べ物は 器と 台の 上（ゆか・ラグには 置かない）
   const roundTriD = function(v, t, b) { var n = v.length, f = function (p, q, k) { return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; }, d = '', i; for (i = 0; i < n; i++) { var p = v[i], pr = v[(i + n - 1) % n], nx = v[(i + 1) % n], a = f(p, pr, t), z = f(p, nx, t), q = v[(i + 1) % n], a2 = f(q, p, t), mx = (z[0] + a2[0]) / 2, my = (z[1] + a2[1]) / 2, cx = (v[0][0] + v[1][0] + v[2][0]) / 3, cy = (v[0][1] + v[1][1] + v[2][1]) / 3, ox = mx - cx, oy = my - cy, ol = Math.sqrt(ox * ox + oy * oy) || 1, ex = Math.sqrt(Math.pow(nx[0] - p[0], 2) + Math.pow(nx[1] - p[1], 2)); d += (i ? 'L' : 'M') + a[0].toFixed(2) + ' ' + a[1].toFixed(2) + 'Q' + p[0] + ' ' + p[1] + ' ' + z[0].toFixed(2) + ' ' + z[1].toFixed(2) + 'Q' + (mx + ox / ol * ex * b).toFixed(2) + ' ' + (my + oy / ol * ex * b).toFixed(2) + ' ' + a2[0].toFixed(2) + ' ' + a2[1].toFixed(2); } return d + 'Z'; }
   const RICE_D = roundTriD([[15, 2.5], [28, 24], [2, 24]], .3, .06);
   const RICE_KINDS = [{ k: 'onigiri', ja: 'おにぎり' }, { k: 'acorn', ja: 'どんぐり' }, { k: 'shell', ja: 'かいがら' }, { k: 'flower', ja: 'おはな' }];
@@ -183,12 +203,13 @@
     return H + '<defs><clipPath id="rcl"><path d="' + RICE_D + '"/></clipPath></defs><path d="' + RICE_D + '" fill="#fff7e6"/><g clip-path="url(#rcl)"><rect x="1" y="17" width="28" height="9" rx="3.5" fill="#3f5a4a"/></g><path d="' + RICE_D + '" fill="none" stroke="' + ink + '" stroke-width="2.4" stroke-linejoin="round"/>' + E;
   };
   function lampSvg(off) { // ランプ（よるは ひかる）。部屋の暗さより上に置く
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640"><defs><radialGradient id="tk-halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3b8" stop-opacity=".95"/><stop offset="1" stop-color="#fff3b8" stop-opacity="0"/></radialGradient></defs>
+    const cx = ROOM.lamp.cx, dx = cx - 180;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-dx} 0 ${ROOM.w} ${ROOM.h}" width="${ROOM.w}" height="${ROOM.h}"><defs><radialGradient id="tk-halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3b8" stop-opacity=".95"/><stop offset="1" stop-color="#fff3b8" stop-opacity="0"/></radialGradient></defs>
       <circle class="tk-halo" cx="180" cy="40" r="60" fill="url(#tk-halo)"${off ? ' opacity="0"' : ''}/><line x1="180" y1="0" x2="180" y2="16" stroke="#b58c5e" stroke-width="3"/><path d="M156 40 Q156 20 180 18 Q204 20 204 40 Z" fill="#ffd76a" stroke="#e5b542" stroke-width="2"/><ellipse cx="180" cy="42" rx="17" ry="4" fill="#fff6c9"/></svg>`;
   }
   function frameSvg() {
     const t = ROOM.tank;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640"><rect x="${t.x - 8}" y="${t.y - 8}" width="${t.w + 16}" height="${t.h + 16}" rx="22" fill="none" stroke="#d6b07a" stroke-width="12"/><rect x="${t.x - 2.5}" y="${t.y - 2.5}" width="${t.w + 5}" height="${t.h + 5}" rx="16" fill="none" stroke="#fff6e4" stroke-width="3"/><rect x="${t.x - 13.5}" y="${t.y - 13.5}" width="${t.w + 27}" height="${t.h + 27}" rx="26" fill="none" stroke="#b98d55" stroke-width="2" stroke-opacity=".7"/></svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ROOM.w} ${ROOM.h}" width="${ROOM.w}" height="${ROOM.h}"><rect x="${t.x - 8}" y="${t.y - 8}" width="${t.w + 16}" height="${t.h + 16}" rx="22" fill="none" stroke="#d6b07a" stroke-width="12"/><rect x="${t.x - 2.5}" y="${t.y - 2.5}" width="${t.w + 5}" height="${t.h + 5}" rx="16" fill="none" stroke="#fff6e4" stroke-width="3"/><rect x="${t.x - 13.5}" y="${t.y - 13.5}" width="${t.w + 27}" height="${t.h + 27}" rx="26" fill="none" stroke="#b98d55" stroke-width="2" stroke-opacity=".7"/></svg>`;
   }
   // 水槽のなか：砂・水草・流木・小石・エアストーン（328×180）
   // みずくさ（C-2）：ごはんを あげた 日が ふえる と、2日ごとに 1ほん（さいだい 8ほん）ゆっくり のびる。へらない・かれない・おやすみしても そのまま。数字は 出さない。ほうもん中は ふえない（ふつうの 水槽）
@@ -410,6 +431,8 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-giftrow small{display:block;font-size:.9rem;color:#506874}
 .tk-giftclose{display:block;margin:0 auto;min-width:160px;min-height:48px}
 .tk-rice{display:flex;align-items:center;justify-content:center;border-radius:14px}
+.tk-wide .tk-rice{min-width:44px;min-height:44px}   /* 横長は 絵が ちいさい ぶん、さわる ばしょは 44px の まま（見えない ボタンが 右・下へ ひろがる） */
+.tk-wide .tk-lampbtn,.tk-wide .tk-shelfbtn{min-height:44px}
 .tk-rice svg{width:60%;height:auto;display:block;pointer-events:none}
 .tk-rice .tk-riceimg{width:max(48px,86%);height:auto;display:block;pointer-events:none}
 .tk-rice.tk-gone{visibility:hidden}
@@ -507,6 +530,19 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     Object.assign(says.style, { left: pct(ROOM.bubble.x, ROOM.w), top: pct(ROOM.bubble.y, ROOM.h), width: pct(ROOM.bubble.w, ROOM.w), position: 'absolute' });
   }
   placeRoom();
+  // 縦長（スマホ）／横長（PC）の きりかえ。部屋の 絵・ランプ・枠・たな・ボタンの 場所を 組みなおす（記録・魚・かざりの 中身は かえない）
+  function applyMode(mode) {
+    const r = ROOMS[mode] || ROOMS.tall; if (r === ROOM) return false;
+    ROOM = r; RICE = r.rice; SHELF = r.shelf; room.classList.toggle('tk-wide', r.mode === 'wide');
+    $(dlg, '.tk-roomsvg').innerHTML = roomSvg(); $(dlg, '.tk-lamp').innerHTML = lampSvg(); $(dlg, '.tk-frame').innerHTML = frameSvg();
+    for (const child of [$(dlg, '.tk-roomsvg'), $(dlg, '.tk-lamp'), $(dlg, '.tk-frame')]) { const sv = child.querySelector('svg'); if (sv) sv.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;display:block'; }
+    placeRoom();
+    const box = (el, [l, t, w, h]) => Object.assign(el.style, { left: l + '%', top: t + '%', width: w + '%', height: h + '%' });
+    box(lampBtn, r.lampBtn); box(shelfBtn, r.shelf.btn); box(rice, r.riceBtn);
+    appBtn.style.left = r.app.left; appBtn.style.top = r.app.top; appC.style.left = r.app.appcLeft; appC.style.top = r.app.appcTop; appC.style.width = r.app.appcW;
+    try { renderShelf(); } catch {}
+    return true;
+  }
 
   // 開くボタン：本体の「ずかん」の隣に足す（なければ「なげる」の隣）
   const openBtn = document.createElement('button');
@@ -528,6 +564,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 
   function layoutRoom() {
     dlg.style.width = '';
+    { const wantWide = innerWidth >= 760 && innerWidth / innerHeight >= 1.1; applyMode(wantWide ? 'wide' : 'tall'); if (wantWide) dlg.style.width = Math.max(300, innerWidth - 12) + 'px'; }
     const cs = getComputedStyle(stage), measure = () => ({ aw: stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ah: stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) });
     let { aw, ah } = measure(), s = Math.max(.3, Math.min(aw / ROOM.w, ah / ROOM.h));
     if (aw > ROOM.w * s + 40) {
@@ -1003,7 +1040,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   //   URL の 文字は 一切 画面に 出さない（出すのは この 表から 引いた ことばだけ）。ぬし・まぼろしは 贈れない（本体が 決める）。
   const PAL_NAME = ['ミントの うさぎ', 'ラテの かわうそ', 'レモンの ひよこ', 'リボンの うさぎ', 'おひるね パンダ', 'おほしさまの こじか', 'クローバーの たぬき', 'チョコの りす', 'ももの ねこ', 'はちみつの こいぬ', 'いちごの ハムスター', 'ほほきずの ねこ', 'さくらの あざらし', 'わたあめの アルパカ', 'がんたいの くま'];
   const GIFT_WORD = ['ひとこと なし', 'これ、あげる！', 'いっしょに つろうね', 'おおきいの つれたよ', 'きょうも おつかれさま', 'ゆっくり しようね', 'また あそぼうね', 'みて みて！', 'いい ことが ありますように', 'ありがとう。'];
-  const SHELF = { panels: [{ x: 22, y: 264, w: 152, h: 72 }, { x: 186, y: 264, w: 152, h: 72 }], cols: 3, rows: 2, max: 12 };
+  let SHELF = ROOMS.tall.shelf;
   let gifts = [];
   const palName = i => Number.isInteger(i) && PAL_NAME[i] ? PAL_NAME[i] : 'だれか', giftWord = i => Number.isInteger(i) && i > 0 && GIFT_WORD[i] ? GIFT_WORD[i] : '';
   function giftsNow() {
