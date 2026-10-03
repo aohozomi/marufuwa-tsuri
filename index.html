@@ -3372,7 +3372,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('give-go').addEventListener('click', async () => {
     if (!giving) return;
     const {f, size} = giving, code = [f.id, Math.min(9999, Math.round(size * 10)), Math.max(0, PALS.indexOf(giverOf())), givingWord, newSeal()].join('.');
-    const url = HOME + '?gift=' + code, text = EN() ? 'I caught a ' + f.name + ' (' + cm(size) + ' cm) in Marufuwa Fishing Days. This one is for you! ' + TAG() : 'まるふわ つりびよりで ' + f.name + ' ' + cm(size) + 'センチ、つったよ。あげる！ #まるふわつりびより';
+    const url = HOME_SHARE() + '?gift=' + code, text = EN() ? 'I caught a ' + f.name + ' (' + cm(size) + ' cm) in Marufuwa Fishing Days. This one is for you! ' + TAG() : 'まるふわ つりびよりで ' + f.name + ' ' + cm(size) + 'センチ、つったよ。あげる！ #まるふわつりびより';
     if (navigator.share) {
       try { await navigator.share({text, url}); giveSay('きょうゆうの がめんを とじました。'); return; }
       catch (error) { if (error.name === 'AbortError') { giveSay('やめました。'); return; } }
