@@ -353,6 +353,12 @@ html[data-clip] #main-button{display:block !important;position:fixed;left:0;bott
 .push-hint{margin:2px 0 0;text-align:center;font-weight:900;font-size:.9rem;color:#35566a}
 :root[data-night=true] .push-hint{color:#e8f1f8}
 @media (prefers-reduced-motion:reduce){#main-button[data-pulse=true]{outline:4px solid #ffd34d;outline-offset:3px}}   /* うごきを へらす：うごく pulse の かわりに しずかな ふちどり（天の 見回り②） */
+.shore-label{margin:0;text-align:center;font-size:.8rem;font-weight:800;color:#35566a}
+:root[data-night=true] .shore-label{color:#e8f1f8}
+.shore-pick{display:flex;flex-direction:column;gap:8px;margin:6px 0 12px}
+.shore-pick button{display:block;width:100%;min-height:56px;text-align:left;padding:8px 16px;line-height:1.35}
+.shore-pick button small{display:block;font-weight:700;font-size:.78rem;opacity:.9}
+.shore-pick .shore-hard{min-height:44px;font-size:.85rem;text-align:center}
 .tap-hint{margin:0;padding:2px 12px 0;text-align:center;font-size:.8rem;font-weight:800;color:#35566a}
 :root[data-night=true] .tap-hint{color:#e8f1f8}
 /* いちばん うえの 🔇 おとを けす（まるいろと おなじ しき。おとは はじめから ON） */
@@ -988,6 +994,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   </div>
 
   <button id="area-open" type="button" class="area-open">つりばを かえる ▸</button>
+  <p class="shore-label" id="shore-label"></p>
   <p class="mini-progress" id="mini-progress" hidden></p>
   <p class="push-hint" id="quiet-hint" hidden></p>
   <p class="push-hint" id="seat-hint" hidden></p>
@@ -1096,6 +1103,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
   <dialog id="areapick" aria-labelledby="areapick-title">
     <h2 id="areapick-title" tabindex="-1">つりばを かえる</h2>
+    <div id="shore-pick" class="shore-pick" role="group"></div>
     <div id="areapick-list" class="areas" role="group"></div>
     <button class="close" type="button" id="areapick-close">とじる</button>
   </dialog>
@@ -1943,6 +1951,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   { const mk = () => { const row = document.querySelector('.sub-actions'); if (!row || $('howto-toggle')) return; const b = document.createElement('button'); b.type = 'button'; b.id = 'howto-toggle'; b.className = 'pill'; b.setAttribute('aria-controls', 'sound'); row.append(b);
       b.addEventListener('click', () => { const open = !document.body.classList.contains('howto-open'); document.body.classList.toggle('howto-open', open); row.dataset.howto = open ? 'open' : ''; drawHowto(); }); drawHowto(); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mk); else mk(); addEventListener('load', () => { mk(); drawHowto(); }); setTimeout(drawHowto, 900); }   // おと・BGM・とおく・ながめる・おやすみ・つかいやすく する を 1つの「あそびかた」に まとめる（ふだんは かくす）
+  addEventListener('load', () => { try { drawShoreLabel(); } catch {} }); setTimeout(() => { try { drawShoreLabel(); } catch {} }, 900);
   { const pg = () => { const a = $('plaza-go'); if (a) a.textContent = L('ひろば（あそびば・おみせ）', 'Plaza (games & shop)'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pg); else pg(); addEventListener('load', pg); setTimeout(pg, 900); }
   function drawMute() { const b = $('mute-top'); if (!b) return; const on = !!save.sound; b.setAttribute('aria-pressed', String(on)); b.textContent = L(on ? '🔊 おと：ON' : '🔇 おと：OFF', on ? '🔊 Sound: ON' : '🔇 Sound: OFF'); }   // ボタンの えは「いまの じょうたい」（ON＝🔊・OFF＝🔇）。おすと きりかわる
   function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
@@ -2161,7 +2170,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       : 'みんな おなじ ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (luckyLeft ? 'あと ' + luckyLeft + 'ひき。' : '') + (boss ? 'ぬし：「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」。' : ''));
   }
   // ===== にぎわい（水の なかの 魚かげの かず 0〜5）：ゆっくり 入れかわる（3〜8分）。ふつう／しっかり は アタリまでの まちじかんが かげの かずに ひれい（らくちんは つねに 3いじょう）。かずは 画面に みえる かげと おなじ（うその まちを つくらない）
-  const BUSTLE = {n: 3, timer: 0, els: []}, AMB_LANES = [78, 82, 86, 90, 93], AMB_W = [13, 16, 12, 15, 11], AMB_LAP = [41, 53, 67, 47, 59];
+  const BUSTLE = {n: 3, timer: 0, els: [], hintAt: {}, hintOn: false}, AMB_LANES = [78, 82, 86, 90, 93], AMB_W = [13, 16, 12, 15, 11], AMB_LAP = [41, 53, 67, 47, 59];
   const bustleEff = () => { const forced = Number(probe('bustle')); const n = Number.isFinite(forced) && probe('bustle') !== null && probe('bustle') !== '' ? Math.max(0, Math.min(5, forced)) : BUSTLE.n; return curMode() === 'easy' ? Math.max(3, n) : n; };   // 見える かず
   const calcWait = (base, rare, nb) => Math.round((Math.round(base * 1.6 * (1 + .08 * (rare - 1))) + Math.round(3000 + Math.random() * 3000)) * bustleFactor(nb) * (nb === 0 && Math.random() < .25 ? 2.5 : 1));
   const bustleFactor = n => n >= 3 ? 1 : n === 2 ? 2 : n === 1 ? 5.5 : 8;
@@ -2171,7 +2180,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function bustleDraw() {
     const n = bustleEff(); BUSTLE.els.forEach((el, i) => el.classList.toggle('away', i >= n));
-    const h = $('quiet-hint'); if (h) { const on = n <= 1 && curMode() !== 'easy' && (phase === 'idle' || phase === 'waiting'); h.hidden = !on; if (on) h.textContent = L('いまは あまり いないね。ひろばで あそぶ？', 'Not many fish right now. Want to play in the plaza?'); }
+    const h = $('quiet-hint'); if (h) { const quiet = n <= 1 && curMode() !== 'easy', last = BUSTLE.hintAt[save.area], now = performance.now();   // おなじ つりばで 20ぶんに 1かい・25びょうだけ（なんども おなじ ぶんを だらない）
+      if (quiet && !BUSTLE.hintOn && (last === undefined || now - last > 20 * 60000)) { BUSTLE.hintOn = true; BUSTLE.hintAt[save.area] = now; setTimeout(() => { BUSTLE.hintOn = false; try { bustleDraw(); } catch {} }, 25000); }
+      const on = quiet && BUSTLE.hintOn && (phase === 'idle' || phase === 'waiting'); h.hidden = !on; if (on) h.textContent = L('いまは あまり いないね。ひろばで あそぶ？', 'Not many fish right now. Want to play in the plaza?'); }
   }
   function bustleStart() {
     BUSTLE.els.forEach(e => e.remove()); BUSTLE.els = [];
@@ -2791,7 +2802,16 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('areago-no').addEventListener('click', () => $('areago').close());
   $('edge-prev').addEventListener('click', event => { event.stopPropagation(); switchArea(AREAS[areaIdx() - 1]); });
   $('edge-next').addEventListener('click', event => { event.stopPropagation(); switchArea(AREAS[areaIdx() + 1]); });
-  function drawAreaPick() {
+  const SHORE = {easy: ['やさしい水ぎわ', 'Gentle shore'], normal: ['ふつうの水ぎわ', 'Standard shore'], hard: ['しっかりの水ぎわ', 'Focused shore']};
+  function drawShoreLabel() { const l = $('shore-label'); if (l) { const m = curMode(); l.textContent = L(SHORE[m][0], SHORE[m][1]); } }
+  function drawShorePick() {
+    const box = $('shore-pick'); if (!box) return; box.replaceChildren(); const m = curMode();
+    const mk = (cls, key, icon, ja, sub, en, enSub) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.dataset.shore = key; b.setAttribute('aria-pressed', String(m === key)); b.append(icon + ' ' + L(ja, en)); if (sub) { const sm = document.createElement('small'); sm.textContent = L(sub, enSub); b.append(sm); } b.addEventListener('click', () => { setMode(key); drawShorePick(); drawShoreLabel(); }); box.append(b); };
+    mk('pill', 'easy', '🌿', 'やさしい水ぎわ（らくちん）', 'おすだけ・魚が いつも いるよ・にげないよ', 'Gentle shore (easy)', 'Just press. Fish are always around.');
+    mk('pill', 'normal', '🎣', 'ふつうの水ぎわ', 'タイミングを あわせて つる', 'Standard shore', 'Time your press to catch.');
+    mk('pill shore-hard', m === 'hard' ? 'normal' : 'hard', '', m === 'hard' ? 'ふつうに もどす' : 'しっかりに する（むずかしめ）', '', m === 'hard' ? 'Back to Standard' : 'Make it Focused (harder)', '');
+  }
+  function drawAreaPick() { drawShorePick();
     const box = $('areapick-list'); box.replaceChildren();
     AREAS.forEach(a => { const b = document.createElement('button'), open = areaOpen(a); b.type = 'button'; b.setAttribute('aria-pressed', String(save.area === a.id)); if (!open) b.setAttribute('aria-disabled', 'true'); b.textContent = (open ? '' : '🔒') + L(a.name, T(a.name)) + (open ? '' : L('　あと ' + (a.need - save.total) + 'ひき', '  ' + (a.need - save.total) + ' to go'));
       b.addEventListener('click', () => { if (!open) { lockedSay(a); return; } if (switchArea(a)) $('areapick').close(); }); box.append(b); });
@@ -4237,7 +4257,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // つかいやすく する（ふだんは とじて いる 折りたたみ）：らくちん・ふるえ。名前で 年れいを わけない（おとなも えらべる）
   // らくちん：タイミングを あわせなくて いい。おすだけで つれる。がめんの せっていを さわらなくても つかえる。えらんだ ことは おぼえて おく
   function drawEasy() {
-    const m = curMode(), on = m === 'easy'; scene.dataset.easy = String(on); try { bustleDraw(); } catch {} scene.dataset.mode = m;
+    const m = curMode(), on = m === 'easy'; scene.dataset.easy = String(on); try { bustleDraw(); } catch {} try { drawShoreLabel(); } catch {} scene.dataset.mode = m;
     $('mode-h').textContent = L('あそびかた', 'Play style');
     [['easy', 'easy', 'らくちん', 'Easy'], ['mode-normal', 'normal', 'ふつう', 'Normal'], ['mode-hard', 'hard', 'しっかり', 'Focused']].forEach(([id, key, ja, en]) => { const b = $(id); b.textContent = L(ja, en); b.setAttribute('aria-pressed', String(m === key)); });
     $('mode-note').textContent = m === 'easy' ? L('おすだけで つれるよ。にげないよ。', 'Just press to catch. Nothing gets away.') : m === 'hard' ? L('わの はばが せまく、いとが はりやすい。ぴったりで ぐんと ひけるよ。', 'A narrower window and the line tightens faster. A perfect pull reels in a lot.') : L('わが ひかったら おす。ぴったり あわせると、はやく つれるよ。', 'Press when the ring glows. Hit the timing and you catch it faster.');
