@@ -13,8 +13,8 @@
   const L = (ja, en) => isEn() ? en : ja;
   const calm = () => document.documentElement.dataset.calm === 'true' || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   let rec = { mute: null, hint: 0 };
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { if (d.mute === 0 || d.mute === 1) rec.mute = d.mute; rec.hint = d.hint === 1 ? 1 : 0; } } catch (e) {}
-  const save = () => { try { const o = { v: 1, hint: rec.hint }; if (rec.mute !== null) o.mute = rec.mute; localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} };
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { if (d.migrated === 1 && (d.mute === 0 || d.mute === 1)) rec.mute = d.mute; } } catch (e) {}   /* 古い きろく（migrated なし）の mute は 一度だけ むし（10/3） */
+  const save = () => { try { const o = { v: 1, migrated: 1 }; if (rec.mute !== null) o.mute = rec.mute; localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} };
   const soundOn = () => rec.mute === null ? !calm() : rec.mute === 0;
 
   let ac = null, opts = null, btn = null, hintEl = null, bgmMine = false, bgmPrev = false, ambT = 0, log = null;
@@ -35,7 +35,7 @@
 
   function drawBtn() {
     if (!btn) return; const on = soundOn();
-    btn.setAttribute('aria-pressed', String(!on)); btn.textContent = L(on ? '🔇 おとを けす' : '🔊 おとを ならす', on ? '🔇 Mute sound' : '🔊 Turn sound on');
+    btn.setAttribute('aria-pressed', String(on)); btn.textContent = L(on ? '🔊 おと：ON' : '🔇 おと：OFF', on ? '🔊 Sound: ON' : '🔇 Sound: OFF');
   }
   function applyBgm() { const B = window.TsuriBgm; if (B && bgmMine) { try { B.set(soundOn()); } catch (e) {} } }
   function setMute(m) { rec.mute = m ? 1 : 0; save(); drawBtn(); applyBgm(); if (!m) mkAc(); }
@@ -61,9 +61,10 @@
     const m = opts.mount; if (m && m.parentNode) { m.parentNode.insertBefore(row, m); row.append(m, grp); } else { document.body.prepend(row); row.append(grp); }
     btn.addEventListener('click', () => { setMute(soundOn()); });
     drawBtn();
-    // はじめて ひらいた とき 1かいだけ「ミュートボタンは こちら →」を 3びょう
-    if (!rec.hint) { hintEl.textContent = L('ミュートボタンは こちら →', 'Mute button is here →'); hintEl.hidden = false; rec.hint = 1; save(); setTimeout(() => { hintEl.hidden = true; }, 3000); }
-    const E = window.TsuriEn; const reg = () => { const T = window.TsuriEn; if (T && T.lang === 'en' && typeof T.add === 'function' && !reg.done) { reg.done = true; T.add({ ex: { '🔇 おとを けす': '🔇 Mute sound', '🔊 おとを ならす': '🔊 Turn sound on', 'ミュートボタンは こちら →': 'Mute button is here →' } }); } };
+    // さいしょの タップ／キーまで だけ「どこかを さわると おとが なるよ」（おとが ONの ときだけ・すぐ きえる）
+    save();   // 古い mute を むしして migrated:1 に そろえる
+    if (soundOn()) { hintEl.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); hintEl.hidden = false; const hide = () => { hintEl.hidden = true; }; addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
+    const E = window.TsuriEn; const reg = () => { const T = window.TsuriEn; if (T && T.lang === 'en' && typeof T.add === 'function' && !reg.done) { reg.done = true; T.add({ ex: { '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', 'どこかを さわると おとが なるよ': 'Tap anywhere to hear sounds' } }); } };
     reg(); addEventListener('load', reg);
     addEventListener('pointerdown', () => { if (soundOn()) mkAc(); }, { once: true }); addEventListener('keydown', () => { if (soundOn()) mkAc(); }, { once: true });
     initBgm(); scheduleAmbient();

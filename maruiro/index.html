@@ -75,7 +75,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
 </head>
 <body>
 <main class="room" id="room">
-  <div class="toprow"><a class="back" id="back" href="../hiroba/index.html">← ひろばへ</a><span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">ミュートボタンは こちら →</span><button type="button" id="mute" class="mutebtn" aria-pressed="false">🔇 おとを けす</button></span></div>
+  <div class="toprow"><a class="back" id="back" href="../hiroba/index.html">← ひろばへ</a><span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">どこかを さわると おとが なるよ</span><button type="button" id="mute" class="mutebtn" aria-pressed="true">🔊 おと：ON</button></span></div>
   <h1>まるふわ まるいろ</h1>
   <p class="lead">ふたつ組を まわして、ならべよう。</p>
   <div id="plays" class="plays" role="group" aria-label="あそびかた"></div>
@@ -109,7 +109,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
 // English（tsuri-en.js の E.add）
 (() => {
   const EX = {
-    'まるふわ まるいろ': 'Marufuwa Maruiro', 'あそびかた・おうちの かたへ': 'How to play / For grown-ups', 'ミュートボタンは こちら →': 'Mute button is here →',
+    'まるふわ まるいろ': 'Marufuwa Maruiro', 'あそびかた・おうちの かたへ': 'How to play / For grown-ups', 'どこかを さわると おとが なるよ': 'Tap anywhere to hear sounds',
     '← ひろばへ': '← Back to the Plaza',
     'うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。': 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join at your own pace — no time limit, no game over.',
     'あそびかた：そだてる': 'How to play: Grow', 'あそびかた：そろえる': 'How to play: Match', 'いちばん ながい れんさ：まだ ないよ': 'Longest chain so far: none yet',
@@ -122,7 +122,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     'いちばん おおきい まる：まだ ないよ': 'Biggest circle so far: none yet',
     'いちばん おおきい まる：': 'Biggest circle so far: ',
     '◀ ひだり': '◀ Left', 'みぎ ▶': 'Right ▶', 'おとす': 'Drop', 'ひだりへ': 'Move left', 'みぎへ': 'Move right',
-    '🔇 おとを けす': '🔇 Mute sound', '🔊 おとを ならす': '🔊 Turn sound on', 'おと：OFF': 'Sound: OFF', 'おと：ON': 'Sound: ON', 'さいしょから': 'Start over',
+    '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', 'おと：OFF': 'Sound: OFF', 'おと：ON': 'Sound: ON', 'さいしょから': 'Start over',
     'まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ': 'The Maruiro board. Move with the left and right arrow keys and drop with Space or Enter. With a finger, slide and let go to drop.',
     'おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの 子が ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。': 'For grown-ups: there is no time limit, no game over and no ranking. If it fills up past the red line, the topmost friend floats up to the sky (“See you!”) and play goes on. The only record is “the biggest circle so far”, kept on this device only (nothing is sent anywhere). Sounds are soft and under 1200 Hz, and start ON (the “Mute sound” button at the top stops everything; with “reduce motion” they start OFF). Nothing flashes.',
     'いっぱいに なったので、いちばん うえの 子が ぷかぷか そらへ とんでいくよ。「またね」。そのまま つづけて だいじょうぶ。': 'It filled up, so the topmost friend floated up to the sky. “See you!” Keep going — it’s okay.',
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── きろく（数字だけ・この たんまつだけ）───
   let rec = { v: 2, hint: 0, best: -1, snd: !(document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches), mode: 1, play: 4, chain: 0, fly: 0, big: -1 };
-  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (typeof d.mute === 'boolean') rec.snd = !d.mute; rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.migrated = d.migrated === 1 ? 1 : 0; rec.play = d.migrated !== 1 ? 4 : d.v !== 2 ? 3 : d.play === 1 ? 1 : d.play === 2 ? 2 : d.play === 3 ? 3 : d.play === 4 ? 4 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (d.migrated === 1 && typeof d.mute === 'boolean') rec.snd = !d.mute;   /* 古い きろくの mute は 一度だけ むし（10/3） */ rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.migrated = d.migrated === 1 ? 1 : 0; rec.play = d.migrated !== 1 ? 4 : d.v !== 2 ? 3 : d.play === 1 ? 1 : d.play === 2 ? 2 : d.play === 3 ? 3 : d.play === 4 ? 4 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 2, hint: rec.hint, best: rec.best, mute: !rec.snd, mode: rec.mode, play: rec.play, migrated: 1, chain: rec.chain, fly: rec.fly, big: rec.big })); } catch (e) {} };
 
   // ─── 乱数（?seed=数字 で ならべを そろえられる）───
@@ -652,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'ArrowLeft') { e.preventDefault(); setAim(aimX - 6); } else if (e.key === 'ArrowRight') { e.preventDefault(); setAim(aimX + 6); }
     else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); dropBall(); }
   });
-  function drawSnd() { const b = $('mute'); b.setAttribute('aria-pressed', String(!rec.snd)); b.textContent = L(rec.snd ? '🔇 おとを けす' : '🔊 おとを ならす', rec.snd ? '🔇 Mute sound' : '🔊 Turn sound on'); }
+  function drawSnd() { const b = $('mute'); b.setAttribute('aria-pressed', String(rec.snd)); b.textContent = L(rec.snd ? '🔊 おと：ON' : '🔇 おと：OFF', rec.snd ? '🔊 Sound: ON' : '🔇 Sound: OFF'); }
   function applySound(on) {   // こうかおんと BGM を いっしょに（おとの ON/OFF を おぼえる）
     rec.snd = !!on; save(); drawSnd(); const B = window.TsuriBgm; if (B && bgmMine) { try { B.set(rec.snd); } catch (e) {} }
     if (rec.snd) { mkAc(); }
@@ -714,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   initBgm();
   // はじめて ひらいた ときだけ、🔇の よこに「ミュートボタンは こちら →」を 3びょう（てんめつなし・おさなくても きえる・2回めからは 出さない）
-  if (!rec.hint) { const h = $('mutehint'); h.textContent = L('ミュートボタンは こちら →', 'Mute button is here →'); h.hidden = false; rec.hint = 1; save(); setTimeout(() => { h.hidden = true; }, 3000); }
+  save(); if (rec.snd) { const h = $('mutehint'); h.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); h.hidden = false; const hide = () => { h.hidden = true; }; addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
   addEventListener('pointerdown', () => { if (rec.snd) mkAc(); }, { once: true });
   if (rec.play === 3) tsReset();
   drawPlay(); drawBest(); drawSnd(); drawMode(); setAim(W / 2); requestAnimationFrame(frame);
