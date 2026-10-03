@@ -337,7 +337,7 @@ html[data-clip] #main-button{display:block !important;position:fixed;left:0;bott
 .mini-progress{margin:2px 0 4px;text-align:center;font-size:.85rem;font-weight:800;color:#35566a}
 :root[data-night=true] .mini-progress{color:#e8f1f8}   /* よるは くらい じ（13:1）。ひるは こい いろ */   /* なげる の ちかくの ちいさな すすみぐあい（せかさない） */
 /* たまに きらっと する レアな かげ（ふだんは でない）。きんいろに ほんのり・約12びょうで さる */
-.rare-glimpse{position:absolute;z-index:2;pointer-events:none;left:0;width:var(--w,15%);aspect-ratio:var(--ar,2.4);background:linear-gradient(90deg,#ffe58a,#ffd34d);opacity:0;-webkit-mask:var(--m) center/100% 100% no-repeat;mask:var(--m) center/100% 100% no-repeat;filter:drop-shadow(0 0 5px #fff3b0)}
+.rare-glimpse{position:absolute;z-index:1;pointer-events:none;left:0;top:0;width:var(--w,19%);aspect-ratio:var(--ar,2.4);background:linear-gradient(90deg,#ffe58a,#ffd34d);opacity:0;-webkit-mask:var(--m) center/100% 100% no-repeat;mask:var(--m) center/100% 100% no-repeat;filter:drop-shadow(0 0 5px #fff3b0)}
 .rare-glimpse.plain{border-radius:50%;-webkit-mask:none;mask:none;aspect-ratio:2.4}
 .rare-spark{position:absolute;z-index:3;pointer-events:none;font-size:.9rem;color:#fff7c8;text-shadow:0 0 4px #ffd34d;opacity:0}
 .tap-hint{margin:0;padding:2px 12px 0;text-align:center;font-size:.8rem;font-weight:800;color:#35566a}
@@ -4322,14 +4322,23 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function rareShow(forceId) {
     const ids = forceId !== undefined ? [forceId] : RARE.ids(); if (!ids.length) return false;
     if (document.hidden || dlgOpen || document.querySelector('dialog[open]') || scene.dataset.tooku === 'true' || !(phase === 'idle' || phase === 'waiting')) return false;
-    const id = ids[Math.floor(Math.random() * ids.length)], el = document.createElement('div'), box = scene.getBoundingClientRect(), top = 58 + Math.random() * 14;
-    el.className = 'rare-glimpse'; el.setAttribute('aria-hidden', 'true'); el.style.top = top + '%'; el.style.setProperty('--w', '15%');
-    if (ART && ART.shadow && ART.shadowMask && ART.shadow[id]) { el.style.setProperty('--m', ART.shadowMask(id)); el.style.setProperty('--ar', String((ART.meta && ART.meta.shadowAspect && ART.meta.shadowAspect[id]) || 2.4)); } else el.classList.add('plain');
-    scene.append(el); RARE.shown++;
-    const still = reduce(), dur = 12000, W = box.width * .15;
-    if (still) { el.style.left = '40%'; el.animate([{opacity: 0}, {opacity: .55, offset: .2}, {opacity: .55, offset: .8}, {opacity: 0}], {duration: dur}).onfinish = () => el.remove(); }   // うごきを へらす：いろだけ（うごかない）
-    else el.animate([{translate: (box.width + W) + 'px 0', opacity: 0}, {opacity: .55, offset: .12}, {opacity: .55, offset: .88}, {translate: (-W * 1.2) + 'px 0', opacity: 0}], {duration: dur, easing: 'linear'}).onfinish = () => el.remove();
-    if (!still) for (let k = 0; k < 4; k++) { const sp = document.createElement('i'); sp.className = 'rare-spark'; sp.textContent = '✦'; sp.setAttribute('aria-hidden', 'true'); sp.style.left = (22 + Math.random() * 56) + '%'; sp.style.top = (top - 4 + Math.random() * 8) + '%'; scene.append(sp); sp.animate([{opacity: 0, scale: '.6'}, {opacity: .9, scale: '1', offset: .4}, {opacity: 0, scale: '.6'}], {duration: 900, delay: 800 + k * 1700}).onfinish = () => sp.remove(); }
+    const id = ids[Math.floor(Math.random() * ids.length)], el = document.createElement('div'), box = scene.getBoundingClientRect();
+    el.className = 'rare-glimpse'; el.setAttribute('aria-hidden', 'true'); el.style.setProperty('--w', '19%');
+    let ar = 2.4; if (ART && ART.shadow && ART.shadowMask && ART.shadow[id]) { ar = (ART.meta && ART.meta.shadowAspect && ART.meta.shadowAspect[id]) || 2.4; el.style.setProperty('--m', ART.shadowMask(id)); el.style.setProperty('--ar', String(ar)); } else el.classList.add('plain');
+    scene.append(el);
+    // 水の なかだけ およぐ：きし（shore）の したで、水面の 下の おびの なか。桟橋・キャラの したに かく（z-index 1）
+    const fw = box.width * .19, fh = fw / ar, depth = 3 + Math.random() * 4, wy = x => Math.min(88 - fh / box.height * 50, shore(x) + 3 + fh / box.height * 50 + depth);   // x・y は 景色の %（中心）
+    const dur = 28000, X0 = 108, X1 = -22, N = 56, still = reduce();
+    RARE.shown++;
+    if (still) {   // うごきを へらす：その場で ふわっと 色だけ（約26びょう）
+      const cx = 46, cy = wy(cx); el.style.translate = (cx / 100 * box.width - fw / 2) + 'px ' + (cy / 100 * box.height - fh / 2) + 'px';
+      el.animate([{opacity: 0}, {opacity: .6, offset: .08}, {opacity: .6, offset: .92}, {opacity: 0}], {duration: 26000}).onfinish = () => el.remove();
+    } else {
+      const kf = []; for (let i = 0; i <= N; i++) { const t = i / N, x = X0 + (X1 - X0) * t, bob = Math.sin(t * 17) * 1.1, y = Math.min(90 - fh / box.height * 50, wy(x) + bob), fade = t < .07 ? t / .07 : t > .93 ? (1 - t) / .07 : 1;
+        kf.push({translate: (x / 100 * box.width - fw / 2) + 'px ' + (y / 100 * box.height - fh / 2) + 'px', rotate: (Math.sin(t * 40) * 3).toFixed(2) + 'deg', opacity: (.62 * fade).toFixed(3)}); }   // なみに あわせて すこし うえした・おびれを ふる・はじめと おわりは 2びょうで フェード
+      el.animate(kf, {duration: dur, easing: 'linear'}).onfinish = () => el.remove();
+    }
+    if (!still) for (let k = 0; k < 4; k++) { const t = .18 + k * .17, x = X0 + (X1 - X0) * t, y = wy(x) + (Math.random() - .5) * 3, sp = document.createElement('i'); sp.className = 'rare-spark'; sp.textContent = '✦'; sp.setAttribute('aria-hidden', 'true'); sp.style.left = x + '%'; sp.style.top = Math.min(90, y) + '%'; scene.append(sp); sp.animate([{opacity: 0, scale: '.6'}, {opacity: .9, scale: '1', offset: .4}, {opacity: 0, scale: '.6'}], {duration: 1200, delay: t * dur}).onfinish = () => sp.remove(); }   // きらきらも 水の なか（およぐ 魚の いちに あわせる）
     say(L('いま なにか きらっと したよ。', 'Something just sparkled.'));
     RARE.hot = {id, until: performance.now() + 20000};   // この あいだに ちかくへ なげると その 魚が つれやすい（かならず では ない）
     return true;
