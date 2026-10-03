@@ -147,6 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
     { k: 'midori', ja: 'みどり', en: 'Green', c: '#3fa56a', c2: '#145230' }, { k: 'kiiro', ja: 'きいろ', en: 'Yellow', c: '#e8c030', c2: '#8a6a08' },
     { k: 'murasaki', ja: 'むらさき', en: 'Purple', c: '#8a5ac8', c2: '#3c1f72' }, { k: 'daidai', ja: 'だいだい', en: 'Orange', c: '#ec8a30', c2: '#8a3f08' }
   ];
+  // ─── なかま（見守る 席・日がわり 4人）───
+  const FRIENDS = [{ id: 'neko', ja: 'ねこ', en: 'Cat' }, { id: 'usagi', ja: 'うさぎ', en: 'Rabbit' }, { id: 'tanuki', ja: 'たぬき', en: 'Tanuki' }, { id: 'komugi', ja: 'こむぎ', en: 'Komugi' }, { id: 'koinu', ja: 'こいぬ', en: 'Puppy' }, { id: 'panda', ja: 'パンダ', en: 'Panda' }, { id: 'penguin', ja: 'ペンギン', en: 'Penguin' }, { id: 'risu', ja: 'りす', en: 'Squirrel' }];
+  const dayN = Math.floor(Date.now() / 864e5), CAST = [];
+  for (let i = 0; CAST.length < 4; i++) { const f = FRIENDS[(dayN * 3 + i * 2 + (i > 3 ? 1 : 0)) % FRIENDS.length]; if (!CAST.includes(f)) CAST.push(f); }
+  const SEATS = [{ x: 38, y: 500 }, { x: 38, y: 590 }, { x: 562, y: 500 }, { x: 562, y: 590 }];
+  const MARU = { w: 132, h: 176, x: CX, y: 664 };
   // ─── ピンの ならび（ひとつの フレームに 10本）：row 0＝あたまの ピン（いちばん てまえ）───
   const PINX = [[0], [-.15, .15], [-.3, 0, .3], [-.45, -.15, .15, .45]];
   const PIN_D = r => .90 + r * .03;
@@ -157,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const MODES = { normal: { aimHalf: 1.3, powHalf: 1.0, band: [.62, .88], zone: .10, q: .30, hit: .17, hook: 1 }, easy: { aimHalf: 3.0, powHalf: 1.8, band: [.50, .95], zone: .16, q: .45, hit: .21, hook: .3 } };
   const S = {
     phase: 'ready', t: 0, mode: 'normal', ball: 1, frame: 0, throwN: 0, frames: [], pins: [], aim: 0, power: 0, aimV: 0, powV: 0, lock: 0,
-    roll: null, say: '', last: null, friendLast: '', lastFriend: [], over: false, shake: 0, flash: 0, banner: '', bannerT: 0, said: [], throws: []
+    roll: null, pose: 'idle', say: '', last: null, friendLast: '', lastFriend: [], over: false, shake: 0, flash: 0, banner: '', bannerT: 0, said: [], throws: []
   };
   let rng = Math.random;
   function resetGame() {
@@ -191,12 +197,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const sndSpare = () => { tone(262, .4, .05, 0); tone(330, .5, .05, .2); };
 
   // ─── 絵（本物が とどいたら さしかわる）：img/bowling/*.webp を ためして、読めない 物は 仮の 絵 ───
-  const IM = { bg: null, pin: null, balls: {} };
+  const IM = { bg: null, pin: null, balls: {}, maru: null, fr: {} };
   function tryImg(url, cb) { const im = new Image(); im.onload = () => cb(im); im.onerror = () => {}; im.src = url; }
   function loadArt() {
     const tm = root.dataset.time === 'n' ? 'yoru' : 'hiru', tate = innerWidth < 600 ? '_tate' : '';
     tryImg('../../img/bowling/bg_' + tm + tate + '.webp', im => { IM.bg = im; bgDirty = true; });
     tryImg('../../img/bowling/pin_stand.webp', im => { IM.pin = im; });
+    tryImg('../../img/game-blue.webp', im => { IM.maru = im; });
+    FRIENDS.forEach(f => tryImg('../../img/friend-' + f.id + '-s.webp', im => { IM.fr[f.id] = im; }));
     BALLS.forEach(b => tryImg('../../img/bowling/ball_' + b.k + '.webp', im => { IM.balls[b.k] = im; }));
   }
 
@@ -234,8 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = -3; i <= 3; i++) { g.beginPath(); g.arc(xOf(i * .26, .06), yOf(.06), 2.4, 0, 6.3); g.fillStyle = 'rgba(70,36,14,.5)'; g.fill(); }
     // あかりの つや・きりかえの くらさ
     const pool = g.createRadialGradient(CX, Y_FAR + 40, 10, CX, Y_FAR + 40, 330); pool.addColorStop(0, 'rgba(255,224,160,.28)'); pool.addColorStop(1, 'rgba(255,224,160,0)'); g.fillStyle = pool; g.fillRect(0, Y_FAR - 20, W, H);
-    // ベンチ（なかまの せき）
-    rr(g, 18, H - 70, 106, 22, 10); g.fillStyle = '#5a3b22'; g.fill(); rr(g, 22, H - 48, 98, 8, 4); g.fillStyle = '#3a2416'; g.fill();
+    // ベンチ（なかまの せき：レーンの 左右）
+    SEATS.forEach(st => { rr(g, st.x - 34, st.y - 2, 68, 14, 6); g.fillStyle = '#5a3b22'; g.fill(); rr(g, st.x - 30, st.y + 10, 60, 6, 3); g.fillStyle = '#3a2416'; g.fill(); });
     // ふちの かげ
     const vg = g.createRadialGradient(CX, H * .5, 220, CX, H * .5, 470); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, dark ? 'rgba(0,0,0,.62)' : 'rgba(0,0,0,.42)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
   }
@@ -253,10 +261,15 @@ document.addEventListener('DOMContentLoaded', () => {
     g.save(); g.clip(); g.fillStyle = '#c8362e'; g.fillRect(-w * 2, -h * .745, w * 4, h * .035); g.fillRect(-w * 2, -h * .685, w * 4, h * .035); g.restore();
     g.restore();
   }
-  function drawBall(g, x, d, alpha, spin) {
-    const sc = sOf(d), px = xOf(x, d), r = .14 * WH * sc, py = yOf(d) - r * .85, b = BALLS[S.ball];
+  function drawBall(g, x, d, alpha, spin, hand) {
+    const sc = sOf(d), r = .14 * WH * sc; let px = xOf(x, d), py = yOf(d) - r * .85, sh = true;
+    if (hand) { const u = hand.u; px = hand.x + (px - hand.x) * u; py = hand.y + (py - hand.y) * u; sh = u > .6; }
+    drawBallPx(g, px, py, hand ? hand.r + (r - hand.r) * hand.u : r, alpha, spin, sh ? yOf(d) : null);
+  }
+  function drawBallPx(g, px, py, r, alpha, spin, shadowY) {
+    const b = BALLS[S.ball];
     g.save(); g.globalAlpha = alpha;
-    g.fillStyle = 'rgba(0,0,0,.32)'; g.beginPath(); g.ellipse(px, yOf(d), r * .95, r * .3, 0, 0, 6.3); g.fill();
+    if (shadowY !== null) { g.fillStyle = 'rgba(0,0,0,.32)'; g.beginPath(); g.ellipse(px, shadowY, r * .95, r * .3, 0, 0, 6.3); g.fill(); }
     const im = IM.balls[b.k];
     if (im) { g.drawImage(im, px - r, py - r, 2 * r, 2 * r); g.restore(); return; }
     const gr = g.createRadialGradient(px - r * .35, py - r * .4, r * .1, px, py, r); gr.addColorStop(0, b.c); gr.addColorStop(1, b.c2); g.fillStyle = gr; g.beginPath(); g.arc(px, py, r, 0, 6.3); g.fill();
@@ -264,23 +277,54 @@ document.addEventListener('DOMContentLoaded', () => {
     g.fillStyle = 'rgba(255,255,255,.65)'; g.beginPath(); g.ellipse(px - r * .38, py - r * .42, r * .2, r * .12, -.6, 0, 6.3); g.fill();
     g.restore();
   }
-  function drawFriend(g, tt) {
-    const x = 70, y = H - 78, bob = calm() ? 0 : Math.sin(tt * 1.6) * 1.5;
-    g.fillStyle = '#f5d7a8'; g.beginPath(); g.ellipse(x, y + bob, 24, 22, 0, 0, 6.3); g.fill();
-    g.beginPath(); g.arc(x - 15, y - 20 + bob, 8, 0, 6.3); g.arc(x + 15, y - 20 + bob, 8, 0, 6.3); g.fill();
-    g.fillStyle = '#3a2416'; g.beginPath(); g.arc(x - 8, y - 3 + bob, 2.4, 0, 6.3); g.arc(x + 8, y - 3 + bob, 2.4, 0, 6.3); g.fill();
-    g.strokeStyle = '#3a2416'; g.lineWidth = 2; g.beginPath(); g.arc(x, y + 4 + bob, 5, .2, 2.9); g.stroke();
+  // ─── まるふわ（しゅじんこう）と なかま ───
+  function poseOf() {
+    const R = S.roll;
+    if (S.phase === 'aim') return 'aim'; if (S.phase === 'power') return 'power';
+    if (R) { if (R.sub === 'roll' && R.tt < .5) return 'throw'; if (R.res.strike && (R.sub === 'through' || R.sub === 'sweep')) return 'strike'; if (R.res.kind === 'gutter' && (R.sub === 'gutter' || R.sub === 'sweep')) return 'gutter'; }
+    return 'idle';
+  }
+  function maruXform() {
+    const pose = S.pose = poseOf(), c = calm(), R = S.roll; let dx = 0, rot = 0, sy = 1, dy = 0;
+    if (!c) {
+      if (pose === 'aim') { dx = S.aim * 26; rot = S.aim * .05; }
+      else if (pose === 'power') { dx = S.aimLocked * 26; sy = .92; }
+      else if (pose === 'throw') { dx = S.aimLocked * 26; rot = .14; }
+      else if (pose === 'strike') { const tt = R.sub === 'through' ? R.tt : 1.3 + R.tt; dy = -Math.abs(Math.sin(tt * 7)) * 26 * Math.max(0, 1 - tt / 2); }
+      else if (pose === 'gutter') { sy = .95; dy = 5; rot = -.06; }
+    }
+    return { dx, rot, sy, dy };
+  }
+  function handPos() { const m = maruXform(), hh = MARU.h * .5 * m.sy; return { x: MARU.x + m.dx + hh * Math.sin(m.rot), y: MARU.y + m.dy - hh * Math.cos(m.rot) }; }
+  function drawMaru(g) {
+    const m = maruXform(), im = IM.maru;
+    if (!im) { g.fillStyle = '#e8f4fa'; g.beginPath(); g.ellipse(MARU.x + m.dx, MARU.y - 70 + m.dy, 44, 70, 0, 0, 6.3); g.fill(); return; }
+    g.save(); g.translate(MARU.x + m.dx, MARU.y + m.dy); g.rotate(m.rot); g.scale(1, m.sy);
+    g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(0, 2, MARU.w * .34, 7, 0, 0, 6.3); g.fill();
+    g.drawImage(im, -MARU.w / 2, -MARU.h, MARU.w, MARU.h); g.restore();
+  }
+  function drawFriends(g) {
+    const R = S.roll, c = calm();
+    CAST.forEach((f, i) => {
+      const im = IM.fr[f.id], st = SEATS[i]; if (!im) return;
+      let dy = 0, rot = 0;
+      if (!c && R) {
+        if (R.res.strike && (R.sub === 'through' || R.sub === 'sweep')) { const tt = R.sub === 'through' ? R.tt : 1.3 + R.tt; dy = -Math.abs(Math.sin(tt * 8 + i)) * 12 * Math.max(0, 1 - tt / 1.8); }
+        else if (R.res.kind === 'gutter' && (R.sub === 'gutter' || R.sub === 'sweep') && R.tt < 1.6) rot = (i % 2 ? -1 : 1) * .22;
+      }
+      const w = 58, h = 66; g.save(); g.translate(st.x, st.y + dy); g.rotate(rot); g.drawImage(im, -w / 2, -h + 6, w, h); g.restore();
+    });
   }
 
   // ─── 描画 ───
-  const GAUGE = { x: 130, y: H - 56, w: 340, h: 26 };
+  const GAUGE = { x: 130, y: H - 40, w: 340, h: 26 };
   function draw() {
     if (bgDirty || !bgC) { buildBg(); bgDirty = false; }
     const g = ctx; g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H);
     g.save();
     if (S.shake > 0 && !calm()) g.translate(Math.sin(S.t * 90) * S.shake * 3, 0);   // 絵の ゆれ（うごきを へらすで なし）
     g.drawImage(bgC, 0, 0, W, H);
-    drawFriend(g, S.t);
+    drawFriends(g);
     const easy = S.mode === 'easy';
     if (easy) { [-1, 1].forEach(sg => { g.beginPath(); const a = sg * .88, b = sg * 1.0; g.moveTo(xOf(a, 1), yOf(1)); g.lineTo(xOf(b, 1), yOf(1)); g.lineTo(xOf(b, 0), yOf(0)); g.lineTo(xOf(a, 0), yOf(0)); g.closePath(); g.fillStyle = 'rgba(214,226,232,.88)'; g.fill(); g.strokeStyle = 'rgba(40,60,70,.6)'; g.lineWidth = 2; g.stroke(); }); }
     // ピン（おくから）
@@ -300,8 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // ボール
     const R = S.roll;
-    if (R) { if (R.ball) drawBall(g, R.ball.x, R.ball.d, R.ball.a, R.ball.spin); }
-    else if (S.phase === 'aim' || S.phase === 'power' || S.phase === 'ready') drawBall(g, S.phase === 'ready' ? 0 : S.aim, -.04, 1, 0);
+    if (R && R.ball) { if (R.sub === 'roll' && R.tt < .25) { const h = handPos(); drawMaru(g); drawBall(g, R.ball.x, R.ball.d, R.ball.a, R.ball.spin, { x: h.x, y: h.y, r: 22, u: R.tt / .25 }); } else { drawMaru(g); drawBall(g, R.ball.x, R.ball.d, R.ball.a, R.ball.spin); } }
+    else { drawMaru(g); if (S.phase === 'aim' || S.phase === 'power' || S.phase === 'ready') { const h = handPos(); drawBallPx(g, h.x, h.y, 22, 1, 0, null); } }
     g.restore();
     // ちからの ゲージ
     if (S.phase === 'power' || S.phase === 'aim') {
@@ -361,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function friendSay(kind) {
     const a = FRIEND[kind]; let t = a[Math.floor(rng() * a.length)]; if (t === S.friendLast) t = a[(a.indexOf(t) + 1) % a.length];
     if (t === S.friendLast) return;   // 同じ 挨拶を かさねない
-    S.friendLast = t; $('friend').textContent = '🐾 ' + T(t, FRIEND_EN[t] || t);
+    S.friendLast = t; const who = CAST[S.who = ((S.who === undefined ? -1 : S.who) + 1) % CAST.length]; $('friend').textContent = '🐾 ' + T(who.ja, who.en) + T('：', ': ') + T(t, FRIEND_EN[t] || t);
   }
   function frameNo() { return S.frame + 1; }
   function aimMsg() { return T('フレーム ' + frameNo() + '／5・' + (S.throwN + 1) + 'なげめ。めじるしを タップで とめてね。', 'Frame ' + frameNo() + ' of 5, throw ' + (S.throwN + 1) + '. Tap to stop the marker.'); }
@@ -445,6 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function update(dt) {
     S.t += dt; if (S.lock > 0) S.lock -= dt; if (S.shake > 0) S.shake = Math.max(0, S.shake - dt * .8); if (S.flash > 0) S.flash = Math.max(0, S.flash - dt * 1.6); if (S.bannerT > 0) S.bannerT -= dt;
+    S.pose = poseOf();
     const M = MODES[S.mode];
     if (S.phase === 'aim') { S.tA += dt; const u = S.tA / (M.aimHalf); S.aim = -.9 + 1.8 * tri(u); }
     else if (S.phase === 'power') { S.tP += dt; S.power = tri(S.tP / M.powHalf); }
@@ -505,8 +550,9 @@ document.addEventListener('DOMContentLoaded', () => {
   rafId = requestAnimationFrame(loop);
 
   window.__bowling = {
-    state: () => ({ phase: S.phase, mode: S.mode, frame: S.frame, throwN: S.throwN, aim: S.aim, power: S.power, total: S.total, frames: S.frames.map(f => [f.t1, f.t2]), standing: standing().length, said: S.said.slice(), ball: S.ball, banner: S.banner, bannerT: S.bannerT, sub: S.roll ? S.roll.sub : '', throws: S.throws.slice(), over: S.over, shake: S.shake }),
+    state: () => ({ phase: S.phase, mode: S.mode, frame: S.frame, throwN: S.throwN, aim: S.aim, power: S.power, total: S.total, frames: S.frames.map(f => [f.t1, f.t2]), standing: standing().length, said: S.said.slice(), ball: S.ball, banner: S.banner, bannerT: S.bannerT, sub: S.roll ? S.roll.sub : '', throws: S.throws.slice(), over: S.over, shake: S.shake, pose: S.pose, cast: CAST.map(f => f.id), art: { maru: IM.maru ? IM.maru.naturalWidth : 0, friends: Object.keys(IM.fr).length } }),
     advance: ms => { let r = ms; while (r > 0) { const s = Math.min(16, r); update(s / 1000); r -= s; } draw(); },
+    maruRect: () => { const m = maruXform(); return { x: MARU.x + m.dx - MARU.w / 2, y: MARU.y + m.dy - MARU.h, w: MARU.w, h: MARU.h, xf: m }; },
     setRng: f => { rng = f; }, sfxLog: () => sfxLog.slice(), tap: () => { S.lock = 0; stopPressed(); }, SFX_OFF
   };
 });
