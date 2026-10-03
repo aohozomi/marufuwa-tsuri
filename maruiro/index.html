@@ -152,6 +152,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const ITEMS = ['どんぐり', 'かいがら', 'ウキ', 'おはな', 'おにぎり', 'ゆきだるま', 'おつきさま'];
   const ITEMS_EN = ['acorn', 'seashell', 'fishing float', 'flower', 'rice ball', 'snowman', 'moon'];
   const OY_JA = ['あめ', 'クッキー', 'マカロン', 'ドーナツ', 'プリン', 'ケーキ', 'ソフトクリーム'], OY_EN = ['candy', 'cookie', 'macaron', 'donut', 'pudding', 'cake', 'soft serve'];
+  // ぷにぷにバウンドの「うごきかた」（しょうぎの こまの ように おやつごとに ちがう・はねる たびに ひとつ ランダム＝どう はねるか わからない）
+  //   あめ＝歩（まっすぐ うえ）／クッキー＝桂馬（ななめ うえに おおきく・ひだり みぎ 二分の一）／マカロン＝角（ななめ・二分の一）／ドーナツ＝飛車（うえ か よこ）／プリン＝ひだり か みぎ だけ／ケーキ＝王（ちいさく ごほうこう）／ソフト＝香車（まっすぐ たかく 1かいだけ）
+  const MOVE_SETS = [['u'], ['kn'], ['dg'], ['u', 'sd'], ['pd'], ['u', 'ul', 'ur', 'l', 'r'], ['kyo']];
+  const MOVE_ARROW = ['↑', '↖ ↗', '↖ ↗', '↑ ← →', '← →', '↑ ↖ ↗ ← →', '↑'];
+  const jr = () => (Number(q.get('seed')) ? rnd() : Math.random());   // ほんばんは Math.random・けんさ（?seed=）では たねから
+  function applyMove(b, V) {
+    const set = MOVE_SETS[b.l], k = set[Math.floor(jr() * set.length)], sg = jr() < .5 ? -1 : 1; let vx = 0, vy = -V;
+    if (k === 'kn') { vx = sg * .55 * V; vy = -.95 * V; } else if (k === 'dg') { vx = sg * .7 * V; vy = -.7 * V; } else if (k === 'sd') { vx = sg * .9 * V; vy = -.25 * V; }
+    else if (k === 'pd') { vx = sg * .8 * V; vy = -.3 * V; } else if (k === 'ul' || k === 'ur') { vx = (k === 'ul' ? -1 : 1) * .45 * V; vy = -.5 * V; } else if (k === 'l' || k === 'r') { vx = (k === 'l' ? -1 : 1) * .5 * V; vy = -.2 * V; }
+    else if (k === 'u' && b.l === 5) { vy = -.55 * V; } else if (k === 'kyo') { vy = (b.kb || 0) === 0 ? -1.15 * V : -.25 * V; }
+    b.kb = (b.kb || 0) + 1; b.vx = reduced() ? vx * .5 : vx; b.vy = vy;
+  }
   const BOUNCE = [.9, .74, .86, .95, .66, .7, .82];   // ぷにぷにバウンド：おやつごとの はずみかた（あめ・ドーナツは よく／プリン・ケーキは ぷるん）
   const KEY = 'marufuwa-maruiro-v1';
   const $ = id => document.getElementById(id);
@@ -529,12 +541,13 @@ document.addEventListener('DOMContentLoaded', () => {
         a.x -= nx * ov * ia / s; a.y -= ny * ov * ia / s; c.x += nx * ov * ic / s; c.y += ny * ov * ic / s;
         const vn = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
         if (vn < 0) { const j2 = -(oyP ? 1 + (bn(a.l) + bn(c.l)) * .5 * .98 : 1.08) * vn / s; if (oyP && -vn > 140) { a.sq = 0; c.sq = 0; a.amp = c.amp = Math.min(1.5, -vn / 380); } a.vx -= j2 * nx * ia; a.vy -= j2 * ny * ia; c.vx += j2 * nx * ic; c.vy += j2 * ny * ic;
+          if (oyP && -vn > 170 && Math.abs(ny) > .6) { const u = ny > 0 ? a : c; if (u.vy < 0) applyMove(u, Math.min(430, Math.hypot(u.vx, u.vy))); }   // うえに のった ほうが じぶんの うごきかたで はねる
           const tx = -ny, ty = nx, vt = (c.vx - a.vx) * tx + (c.vy - a.vy) * ty, f = vt * .08 / s; a.vx += f * tx * ia; a.vy += f * ty * ia; c.vx -= f * tx * ic; c.vy -= f * ty * ic; }
       }
       for (const b of act) {
         const wk = oyP ? bn(b.l) * .8 : .1; if (b.x < b.r) { b.x = b.r; if (b.vx < 0) b.vx *= -wk; } else if (b.x > W - b.r) { b.x = W - b.r; if (b.vx > 0) b.vx *= -wk; }
         if (b.y > H - b.r - 1) b.touched = true;
-        if (b.y > H - b.r) { b.y = H - b.r; if (b.vy > 0) { if (oyP && b.vy > 120) { b.sq = 0; b.amp = Math.min(1.5, b.vy / 360); } b.vy *= oyP ? (b.vy < 90 ? -.08 : -bn(b.l)) : -.08; } b.vx *= 1 - Math.min(.5, 6 * dt / 6); }
+        if (b.y > H - b.r) { b.y = H - b.r; if (b.vy > 0) { if (oyP && b.vy > 120) { b.sq = 0; b.amp = Math.min(1.5, b.vy / 360); } if (oyP && b.vy >= 90) applyMove(b, b.vy * bn(b.l)); else b.vy *= -.08; } b.vx *= 1 - Math.min(.5, 6 * dt / 6); }
       }
     }
     for (const b of act) { const sp = Math.hypot(b.vx, b.vy); if (sp < 80) { if (sp < 14) { b.vx *= .8; b.vy *= .8; } b.still += dt; } else b.still = 0; }
@@ -594,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function backdrop() {
     const fi = fieldImg();
     if (fi) { const k = Math.max(W / fi.naturalWidth, H / fi.naturalHeight), w = fi.naturalWidth * k, h = fi.naturalHeight * k; ctx.drawImage(fi, (W - w) / 2, (H - h) / 2, w, h);
-      if (fieldFallback) { const t = timeKey(), warm = t === 'y' ? 'rgba(255,226,196,.42)' : t === 'a' ? 'rgba(255,236,208,.45)' : 'rgba(255,248,232,.28)', sky = t === 'y' ? 'rgba(255,170,120,' : t === 'a' ? 'rgba(255,200,150,' : 'rgba(169,222,250,'; ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = t === 'y' ? 'rgba(255,170,120,.85)' : t === 'a' ? 'rgba(255,200,150,.8)' : 'rgba(150,205,240,.68)'; ctx.fillRect(0, 0, W, H); ctx.restore(); ctx.fillStyle = warm; ctx.fillRect(0, 0, W, H); const g2 = ctx.createLinearGradient(0, 0, 0, H * .62); g2.addColorStop(0, sky + '.55)'); g2.addColorStop(1, sky + '0)'); ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H * .62); }
+      if (fieldFallback) { const t = timeKey(), warm = t === 'y' ? 'rgba(255,226,196,.42)' : t === 'a' ? 'rgba(255,236,208,.45)' : 'rgba(255,248,232,.2)', sky = t === 'y' ? 'rgba(255,170,120,' : t === 'a' ? 'rgba(255,200,150,' : 'rgba(169,222,250,'; ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = t === 'y' ? 'rgba(255,170,120,.85)' : t === 'a' ? 'rgba(255,200,150,.8)' : 'rgba(150,205,240,.58)'; ctx.fillRect(0, 0, W, H); ctx.restore(); ctx.fillStyle = warm; ctx.fillRect(0, 0, W, H); const g2 = ctx.createLinearGradient(0, 0, 0, H * .62); g2.addColorStop(0, sky + '.3)'); g2.addColorStop(1, sky + '0)'); ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H * .62); }
       if (HAZE > 0) { ctx.fillStyle = 'rgba(255,255,255,' + HAZE + ')'; ctx.fillRect(0, 0, W, H); } return; }
     const t = timeKey(), sky1 = cssv('--sky1') || '#a9defa', sky2 = cssv('--sky2') || '#eaf8ff';
     const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, sky1); g.addColorStop(.7, sky2); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
@@ -626,7 +639,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H); backdrop(); basket();
     if (rec.play === 3) { tsDraw(); dropperDraw(); return; }
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
-    if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 52); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 46, rOf(nextL), nextL, 1); }
+    if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 52); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 46, rOf(nextL), nextL, 1);
+      if (rec.play === 4) { const ty = rOf(nextL) * 2 + 62, tx = MOVE_ARROW[nextL]; ctx.font = '800 15px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tx).width + 14; ctx.globalAlpha = .55; ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(aimX - tw / 2, ty - 11, tw, 22, 11) : ctx.rect(aimX - tw / 2, ty - 11, tw, 22); ctx.fill(); ctx.fillStyle = '#5a3a2e'; ctx.fillText(tx, aimX, ty + 1); ctx.globalAlpha = 1; } }
     dropperDraw();
     for (const b of balls) { const m = b.melt; if (rec.play === 4 && m === 0 && b.sq >= 0 && !reduced()) { const t = b.sq, sy = 1 - .15 * b.amp * Math.exp(-10 * t) * Math.cos(2 * Math.PI * 10 * t); ctx.save(); ctx.translate(b.x, b.y + b.r); ctx.scale(1 / Math.sqrt(sy), sy); piece(ctx, 0, -b.r, b.r, b.l, 1, 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); ctx.restore(); continue; } piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); }   // もふっ
   }
