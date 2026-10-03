@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google" content="notranslate">
+<title>タイヤ ひっぱりっこ｜まるふわの ひろば</title>
+<meta name="description" content="まるふわと なかまが、おおきな タイヤを ひっぱりっこ。めじるしが みどりに きた しゅんかんに ひく、タイミングの ゲーム。いそがなくて だいじょうぶ。">
+<meta name="theme-color" content="#3a2a1e">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23bfe6f5'/%3E%3Ccircle cx='50' cy='54' r='30' fill='%233a3a40'/%3E%3Ccircle cx='50' cy='54' r='13' fill='%23bfe6f5'/%3E%3C/svg%3E">
+<!--
+  タイヤ ひっぱりっこ（まるふわパーク・ゲーム開発6）
+  【仮の え】いまの タイヤ・なわ・じめん（しばふ・しろい せん）・そら・がめんの ぶぶんは ぜんぶ コード（canvas）で えがいた「仮の え」です。
+  キャラクターは ほんものの え（img/game-blue.webp・img/friend-<id>-s.webp）を つかっています。
+  天の ほんものの え（img/tug/*.webp）が とどいたら、読めた ものから 自動で さしかわります（読めなければ 仮の えの まま）。
+    img/tug/tire.webp           … タイヤ（透明・300x300・まんなかに あな）
+    img/tug/rope.webp           … なわ（透明・600x40・よこに ながい）
+    img/tug/bg_hiru.webp        … はいけい ひる（1280x820・そら・おかの しばふ・しろい ライン）
+    img/tug/bg_yoru.webp        … はいけい よる（1280x820）
+    img/tug/bg_hiru_tate.webp   … はいけい ひる スマホ たて（900x1440）／ bg_yoru_tate.webp おなじ
+    img/tug/lines.webp          … ゴールの しろい せん（透明・40x300）
+  ・ランキング・サーバー・解析・自由入力・ほぞん（きろく）は ありません。ことば：「やった！」「おしい！」だけ（かち・まけ・てんすうは だしません）。
+  ・おと：低〜中の 音だけ（80〜440Hz・sine・立ち上がり 30ms 以上）。
+-->
+<script>
+// つかいやすく する（もじを おおきく・うごきを へらす）と 時間帯に したがう（本体の 記録 marufuwa-tsuri-v1 を よむだけ）。時間帯は ?time=a|h|y|n → 記録の time → 時計。
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement, q = new URLSearchParams(location.search);
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+  var tf = q.get('time'), t = /^[ahyn]$/.test(tf || '') ? tf : /^[ahyn]$/.test(early.time || '') ? early.time : null;
+  if (!t) { var h = new Date().getHours(); t = h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n'; }
+  root.dataset.time = t;
+} catch (e) { document.documentElement.dataset.time = 'h'; }
+</script>
+<style>
+:root{--ink:#2b2018;--ink2:#4a382a;--plate:#fffaf0;--wall:#f6ead6;--wood:#d9b07c;--wood2:#8a5a36;--line:#c9a272;--btn1:#ffffff;--btn2:#e6f2f6;--btn-line:#7fb0c4;--link:#14506b;--sky1:#5a4332;--sky2:#2e2219}
+:root[data-time=n]{--sky1:#2a2230;--sky2:#15111c;--wall:#ebe4f2;--plate:#f7f3fb;--wood2:#6e5a86;--line:#8e80b0}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.65;background:linear-gradient(var(--sky1),var(--sky2)) fixed;padding:10px 10px 30px}
+:root[data-inapp=x] body{padding-bottom:84px}
+.room{max-width:680px;margin:0 auto;background:var(--wall);border:3px solid var(--wood2);border-radius:22px;padding:10px 12px 16px;box-shadow:0 8px 24px #0008}
+.back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
+h1{margin:4px 0 0;font-size:1.3rem;line-height:1.4}
+.lead{margin:0 0 6px;font-size:.92rem;color:var(--ink2)}
+.stagewrap{display:flex;justify-content:center}
+canvas#cv{display:block;width:100%;max-width:560px;height:auto;aspect-ratio:560/350;border-radius:14px;border:3px solid var(--wood2);background:#bfe6f5;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a}
+.say{margin:8px 0 2px;min-height:3.3em;padding:6px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.98rem}
+.friend{margin:2px 0 6px;font-size:.85rem;color:var(--ink2);min-height:1.7em}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.acts button{min-height:48px;min-width:44px;padding:4px 14px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;flex:1 1 120px;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.acts button.big{flex:2 1 220px;min-height:64px;font-size:1.25rem;background:linear-gradient(#fff6d8,#ffd98a);border-color:#b3812f;color:#4a2f06}
+.acts button.big:active{transform:translateY(2px)}
+.end{margin:8px 0;padding:10px 12px;border-radius:14px;background:#fff1cf;border:2px solid #b3812f}
+.end img{display:block;max-width:100%;height:auto;margin:8px auto 0;border-radius:10px;border:2px solid var(--line)}
+.end p{margin:2px 0}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}
+.more .note{margin:6px 0 0;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.88rem;color:var(--ink2)}
+.more .note p{margin:2px 0}
+[hidden]{display:none!important}
+/* 「どこかを さわると…」は ゆかを おさない（さいしょの タップで がめんが ずれて、おした ボタンが ぬけるのを ふせぐ） */
+.ps-row .ps-grp{position:relative}
+.ps-row .ps-hint{position:absolute;right:0;top:100%;z-index:5;white-space:nowrap;padding:2px 10px;border-radius:12px;background:var(--plate);border:2px solid var(--line);font-size:.8rem;color:var(--ink2)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+:root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+</style>
+</head>
+<body>
+<main class="room" id="room">
+  <a class="back" id="back" href="../index.html">← ひろばへ</a>
+  <h1>タイヤ ひっぱりっこ</h1>
+  <p class="lead" id="lead">めじるしが みどりに きた しゅんかんに「ひく」を おそう。</p>
+  <div class="stagewrap"><canvas id="cv" width="560" height="350" tabindex="0" aria-label="タイヤの ひっぱりっこ。まるふわチームが ひだり、ふわふわ もふもふ チームが みぎ。スペースキーか タップで ひきます"></canvas></div>
+  <p class="say" id="say" role="status" aria-live="polite">「はじめる」を おしてね。</p>
+  <p class="friend" id="friend" data-noruby></p>
+  <div class="acts" id="acts">
+    <button type="button" id="mode" aria-pressed="false">いまは ふつう</button>
+    <button type="button" id="go" class="big">はじめる</button>
+  </div>
+  <div class="end" id="end" hidden>
+    <p id="end-t"></p>
+    <div class="acts"><button type="button" id="card">カードに する</button></div>
+    <p id="card-note" class="lead" hidden>この たんまつに ほぞん します。どこにも おくりません。</p>
+    <img id="card-img" alt="" hidden>
+  </div>
+  <details class="more"><summary>あそびかた</summary><div class="note">
+    <p>1. 「はじめる」を おすと、した の めじるしが ゆっくり うごくよ。</p>
+    <p>2. めじるしが まんなかの みどりに きた しゅんかんに「ひく」を おす（キーボードは スペース）。</p>
+    <p>3. ぴったりだと ぐいっと、すこし ずれても すこし ひけるよ。はずれると タイヤが すこし もどる。</p>
+    <p>4. れんだしても ひけないよ。ゆっくり タイミングを まとう。</p>
+    <p>5.「らくちん」だと めじるしが ゆっくりで、みどりも ひろいよ。</p>
+    <p>おかねも つかいません。ランキングも ほぞんも ありません。</p>
+  </div></details>
+</main>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
+<script>
+// English：この ページの ことば（tsuri-en.js の TsuriEn.add）。うごく ことばは ゲームの なかで T(ja,en) で えらぶ。
+(() => {
+  const EX = {
+    'タイヤ ひっぱりっこ｜まるふわの ひろば': 'Tire Tug | Marufuwa Plaza', 'タイヤ ひっぱりっこ': 'Tire Tug', '← ひろばへ': '← Back to the Plaza',
+    'めじるしが みどりに きた しゅんかんに「ひく」を おそう。': 'Press “Pull” the moment the marker is on the green.',
+    'タイヤの ひっぱりっこ。まるふわチームが ひだり、ふわふわ もふもふ チームが みぎ。スペースキーか タップで ひきます': 'Tire tug-of-war. Team Marufuwa is on the left and the Fluffy Team is on the right. Press Space or tap to pull.',
+    '「はじめる」を おしてね。': 'Press “Start”.',
+    'この たんまつに ほぞん します。どこにも おくりません。': 'It is saved on this device only. Nothing is sent anywhere.',
+    'あそびかた': 'How to play',
+    '1. 「はじめる」を おすと、した の めじるしが ゆっくり うごくよ。': '1. Press “Start” and the marker at the bottom begins to move slowly.',
+    '2. めじるしが まんなかの みどりに きた しゅんかんに「ひく」を おす（キーボードは スペース）。': '2. Press “Pull” the moment the marker is on the green in the middle (on a keyboard, press Space).',
+    '3. ぴったりだと ぐいっと、すこし ずれても すこし ひけるよ。はずれると タイヤが すこし もどる。': '3. A perfect press pulls hard, a close one pulls a little, and a miss lets the tire slip back a bit.',
+    '4. れんだしても ひけないよ。ゆっくり タイミングを まとう。': '4. Mashing the button will not help. Wait for the right moment.',
+    '5.「らくちん」だと めじるしが ゆっくりで、みどりも ひろいよ。': '5. In “Easy”, the marker is slower and the green is wider.',
+    'おかねも つかいません。ランキングも ほぞんも ありません。': 'No money is used. No rankings, nothing saved.',
+    'いまは ふつう': 'Now: Normal', 'いまは らくちん': 'Now: Easy',
+    'もういちど': 'Play again', 'カードに する': 'Make a card', 'はじめる': 'Start', 'ひく！': 'Pull!'
+  };
+  const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
+  const title = () => { const E = window.TsuriEn; if (E && E.lang === 'en') document.title = 'Tire Tug | Marufuwa Plaza'; };
+  document.addEventListener('DOMContentLoaded', () => { reg(); title(); setTimeout(title, 300); setTimeout(title, 1200); });
+  addEventListener('load', () => { reg(); title(); });
+})();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
+  const TUG_SFX = true;   // 10/2「効果音は 一旦 止める」の なかで、この ページは 仕様どおり 低い 音を ならす（1行で 止められる）
+  const $ = id => document.getElementById(id);
+  const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+  const T = (ja, en) => isEn() ? en : ja;
+  const root = document.documentElement;
+  const calm = () => root.dataset.calm === 'true' || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const cv = $('cv'), g = cv.getContext('2d'), W = 560, H = 350;
+  const sayEl = $('say'), friendEl = $('friend'), goBtn = $('go'), modeBtn = $('mode');
+
+  // ─── 日替わりの なかま：あいての チーム 3人・じぶんの がわの なかま 2人（その日 ずっと おなじ）───
+  const IDS = ['alpaca', 'azarashi', 'gantai', 'hamster', 'hiyoko', 'hoho', 'kawauso', 'kogitsune', 'koinu', 'kojika', 'komugi', 'neko', 'panda', 'penguin', 'ribbon', 'risu', 'shirotama', 'tanuki', 'usagi'];
+  let seed = (() => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); })();
+  { const sq = new URLSearchParams(location.search).get('seed'); if (/^\d{1,8}$/.test(sq || '')) seed = +sq; }
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  const pool = IDS.slice(); for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const OPP = pool.slice(0, 3), MINE = ['marufuwa', pool[3], pool[4]];
+
+  // ─── え（キャラは ほんもの・タイヤ ほかは 仮の え。img/tug/*.webp が 読めたら さしかわる）───
+  const IM = {}, tryImg = (key, url, ok) => { const im = new Image(); im.decoding = 'async'; im.referrerPolicy = 'no-referrer'; im.onload = () => { if (im.naturalWidth >= 8) { IM[key] = im; if (ok) ok(im); bgDirty = true; } }; im.onerror = () => {}; im.src = url; };
+  let bgDirty = true;
+  const chrUrl = id => id === 'marufuwa' ? '../../img/game-blue.webp' : '../../img/friend-' + id + '-s.webp';
+  [...MINE, ...OPP].forEach(id => { if (!IM['c_' + id]) tryImg('c_' + id, chrUrl(id)); });
+  const tm = () => root.dataset.time === 'n' ? 'yoru' : 'hiru';
+  ['hiru', 'yoru'].forEach(n => { tryImg('bg_' + n, '../../img/tug/bg_' + n + '.webp'); tryImg('bg_' + n + '_t', '../../img/tug/bg_' + n + '_tate.webp'); });
+  tryImg('tire', '../../img/tug/tire.webp'); tryImg('rope', '../../img/tug/rope.webp'); tryImg('lines', '../../img/tug/lines.webp');
+
+  // ─── ルール ───
+  const LOCK = .4;   // ひいた あとは すこし ひけない（れんだ よけ）
+  const MODES = {
+    normal: { half: 1.0, perf: .06, good: .16, drift: .035, gain: { perfect: .10, good: .05, miss: -.06 } },
+    easy:   { half: 2.0, perf: .12, good: .30, drift: .02,  gain: { perfect: .14, good: .07, miss: -.04 } }
+  };
+  const FY = 280, TY = 246, TR = 34, CX = 280, RANGE = 88, SHIFT = 28;
+  const S = { phase: 'ready', mode: 'normal', p: 0, vp: 0, mt: 0, lock: 0, t: 0, pullT: 0, missT: 0, cheerT: 0, over: false, result: '', endT: 0, uiShown: false, said: '', friendLast: '', pd: 0, picks: [] };
+  const tri = u => { const x = ((u % 2) + 2) % 2; return x <= 1 ? x : 2 - x; };
+  const markerNow = () => tri(S.mt / MODES[S.mode].half);
+
+  // ─── おと（低〜中：80〜440Hz・sine・立ち上がり 30ms いじょう）。さいしょの タップの あとから。🔇で ぜんぶ とまる ───
+  const sndLog = (window.__tugSnd = []);
+  let acOwn = null;
+  function acFallback() { try { acOwn = acOwn || new (window.AudioContext || window.webkitAudioContext)(); if (acOwn.state === 'suspended') acOwn.resume(); return acOwn; } catch (e) { return null; } }
+  function tone(hz, at, len, vol, att) {
+    if (!TUG_SFX) return;
+    const PS = window.PageSound; if (!PS || !PS.soundOn()) return;
+    const ctx = acFallback(); if (!ctx) return;
+    hz = Math.max(80, Math.min(440, hz)); att = Math.max(.03, att || .03);
+    try {
+      const t0 = ctx.currentTime + (at || 0), o = ctx.createOscillator(), gn = ctx.createGain(), f = ctx.createBiquadFilter();
+      o.type = 'sine'; o.frequency.value = hz; f.type = 'lowpass'; f.frequency.value = 900;
+      gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(vol, t0 + att); gn.gain.exponentialRampToValueAtTime(.0008, t0 + len);
+      o.connect(f); f.connect(gn); gn.connect(ctx.destination); o.start(t0); o.stop(t0 + len + .05);
+      sndLog.push({ hz, type: o.type, attack: att, len, vol });
+    } catch (e) {}
+  }
+  const sfx = {
+    start() { tone(131, 0, .4, .1, .05); tone(165, .12, .4, .1, .05); },
+    perfect() { tone(196, 0, .24, .12, .03); tone(262, .07, .3, .1, .03); },   // ぽこ・ぽこ
+    good() { tone(196, 0, .22, .09, .03); },                                    // ぽこ
+    miss() { tone(147, 0, .32, .07, .05); },
+    hurry() { tone(131, 0, .2, .05, .03); },
+    win() { tone(262, 0, .7, .12, .05); tone(330, .22, .7, .12, .05); tone(392, .44, 1.0, .12, .05); },   // 低い やさしい 3おと
+    lose() { tone(262, 0, .6, .08, .06); tone(220, .26, .8, .08, .06); }
+  };
+
+  // ─── ことば ───
+  const FR = {
+    start: [['おまかせ！ いっしょに いくよ！', 'Here we go, together!'], ['いいね、ゆっくり やろう。', 'Nice, let’s take it slow.']],
+    perfect: [['おお、ぴったり！', 'Oh, perfect!'], ['すごい！ ぐいっと きたね。', 'Wow, what a pull!']],
+    good: [['いいかんじ！', 'Nice one!'], ['ふむふむ、いいね。', 'Hm hm, good.']],
+    miss: [['こっちも ふんばるよ〜。', 'We are holding on too.'], ['だいじょうぶ、もういっかい！', 'It’s okay, once more!']],
+    win: [['ぱちぱち！ すごい！', 'Clap clap! Amazing!'], ['みんな ぱちぱち〜！', 'Everybody claps!']],
+    lose: [['だいじょうぶ？ ほら、てを どうぞ。', 'Are you okay? Here, take my hand.'], ['いっしょに あそんでくれて ありがとう。', 'Thank you for playing with us.']]
+  };
+  let frCount = {};
+  function friendSay(kind) {
+    const a = FR[kind]; frCount[kind] = ((frCount[kind] || 0) + 1) % a.length; const t = a[frCount[kind]];
+    if (t[0] === S.friendLast) return; S.friendLast = t[0]; friendEl.textContent = '🐾 ' + T(t[0], t[1]);
+  }
+  const say = s => { S.said = s; sayEl.textContent = s; };
+  const log = [];
+
+  // ─── すすめる ───
+  function setGoLabel() {
+    const over = S.over && S.uiShown;
+    goBtn.textContent = over ? T('もういちど', 'Play again') : S.phase === 'ready' ? T('はじめる', 'Start') : T('ひく！', 'Pull!');
+    goBtn.setAttribute('aria-label', over ? T('もういちど あそぶ', 'Play again') : S.phase === 'ready' ? T('はじめる', 'Start') : T('ひく。めじるしが みどりの ときに おす', 'Pull. Press when the marker is on the green'));
+  }
+  function startGame() {
+    S.phase = 'play'; S.p = 0; S.vp = 0; S.mt = 0; S.lock = .35; S.pullT = 0; S.missT = 0; S.cheerT = 0; S.over = false; S.result = ''; S.endT = 0; S.uiShown = false;
+    $('end').hidden = true; $('card-note').hidden = true; $('card-img').hidden = true; $('card-img').removeAttribute('src');
+    say(T('みどりに きた しゅんかんに「ひく」！', 'Press “Pull” the moment it is on the green!')); friendSay('start'); sfx.start(); setGoLabel(); bgDirty = true;
+  }
+  function endGame(res) {
+    S.over = true; S.result = res; S.phase = res; S.endT = 0; S.cheerT = 3;
+    if (res === 'win') { say(T('やった！ みんなで ひっぱれたね！', 'We did it! We pulled it together!')); friendSay('win'); sfx.win(); }
+    else { say(T('おしい！ つぎは いけるよ。', 'So close! You can do it next time.')); friendSay('lose'); sfx.lose(); }
+  }
+  function showEnd() {
+    S.uiShown = true; $('end').hidden = false;
+    $('end-t').textContent = S.result === 'win' ? T('やった！ また あそぼう。', 'We did it! Let’s play again.') : T('おしい！ つぎは いけるよ。もういちど あそぼう。', 'So close! You can do it next time. Play again?');
+    setGoLabel();
+  }
+  function pullPressed() {
+    if (S.phase === 'ready') { startGame(); return; }
+    if (S.over) { if (S.uiShown) startGame(); return; }
+    const M = MODES[S.mode];
+    if (S.lock > 0) { S.p += .03; S.lock = LOCK; S.pullT = 0; say(T('あわてなくて だいじょうぶ。', 'No rush, it is okay.')); sfx.hurry(); log.push('hurry'); return; }
+    const dev = Math.abs(markerNow() - .5); let kind;
+    if (dev <= M.perf) kind = 'perfect'; else if (dev <= M.good) kind = 'good'; else kind = 'miss';
+    S.p -= M.gain[kind]; S.lock = LOCK; log.push(kind);
+    if (kind === 'miss') { S.missT = 1; say(T('おっと、ちょっと もどった。', 'Oops, it slipped back a little.')); friendSay('miss'); sfx.miss(); }
+    else { S.pullT = 1; say(kind === 'perfect' ? T('ぴったり！ ぐいっ！', 'Perfect! Heave!') : T('いいね！', 'Nice!')); friendSay(kind); sfx[kind](); }
+    if (S.p <= -1) { S.p = -1; endGame('win'); } else if (S.p >= 1) { S.p = 1; endGame('lose'); }
+  }
+  function update(dt) {
+    S.t += dt;
+    if (S.phase === 'play') {
+      const M = MODES[S.mode]; S.mt += dt; if (S.lock > 0) S.lock = Math.max(0, S.lock - dt);
+      S.p += M.drift * dt;
+      if (S.p <= -1) { S.p = -1; endGame('win'); } else if (S.p >= 1) { S.p = 1; endGame('lose'); }
+    }
+    S.vp += (S.p - S.vp) * (1 - Math.exp(-dt * 9));
+    S.pullT = Math.max(0, S.pullT - dt * 2.2); S.missT = Math.max(0, S.missT - dt * 2); if (S.cheerT > 0) S.cheerT = Math.max(0, S.cheerT - dt);
+    if (S.over) { S.endT += dt; if (!S.uiShown && S.endT >= (calm() ? .4 : 1.6)) showEnd(); }
+  }
+
+  // ─── ポーズ（よみとり口でも つかう）：calm の とき ふりはばを よわく ───
+  const kq = () => calm() ? .3 : 1;
+  function pose(team, i) {   // team: -1 ひだり（まるふわ）／ 1 みぎ（あいて）
+    const k = kq(), s = team;
+    let lean = .1 + .03 * Math.sin(S.t * 2 + i * 1.3) * k, jump = 0, bob = 0, hand = false;
+    if (team === -1) lean += .24 * S.pullT * k + (S.phase === 'win' ? 0 : 0); else lean += .16 * S.missT * k + .05 * Math.sin(S.t * 2.2 + i) * k;
+    if (S.over) {
+      const win = S.result === 'win', mine = team === -1;
+      if (win) { lean = mine ? .02 : .05; if (mine) jump = Math.abs(Math.sin(S.t * 5 + i * .7)) * 22 * k * Math.min(1, S.cheerT / 2.4 + .0); else bob = Math.abs(Math.sin(S.t * 6 + i)) * 4 * k; }
+      else { lean = mine ? -.05 : -.1; if (!mine && i === 0) hand = true; if (mine) bob = -4; }
+    }
+    return { x: CX + s * (118 + 52 * i) + S.vp * SHIFT, ang: s * lean, jump, bob, hand };
+  }
+
+  // ─── えがく ───
+  let dpr = 1;
+  function resize() { dpr = Math.min(window.devicePixelRatio || 1, 2); cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); bgDirty = true; draw(); }
+  const PAL = () => ({
+    a: ['#cfeaf6', '#f1f8ee'], h: ['#bfe6f5', '#e8f6ee'], y: ['#ffd7a6', '#fff0d6'], n: ['#3a4a7a', '#6e7eaa']
+  })[root.dataset.time || 'h'];
+  const rr = (c, x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  function drawBg() {
+    const night = root.dataset.time === 'n', bgImg = IM['bg_' + tm()];
+    if (bgImg) { g.drawImage(bgImg, 0, 0, W, H); } else {
+      const p = PAL(), sk = g.createLinearGradient(0, 0, 0, 240); sk.addColorStop(0, p[0]); sk.addColorStop(1, p[1]); g.fillStyle = sk; g.fillRect(0, 0, W, H);
+      g.fillStyle = night ? '#fff6c8' : '#fff'; g.globalAlpha = night ? .9 : .8;
+      if (night) { g.beginPath(); g.arc(480, 60, 22, 0, 7); g.fill(); [[90, 40], [180, 80], [260, 30], [400, 50]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 2.2, 0, 7); g.fill(); }); }
+      else { [[100, 70, 1], [360, 52, .8], [500, 96, .7]].forEach(([x, y, s]) => { g.beginPath(); g.ellipse(x, y, 52 * s, 17 * s, 0, 0, 7); g.ellipse(x + 30 * s, y + 6 * s, 36 * s, 14 * s, 0, 0, 7); g.ellipse(x - 30 * s, y + 7 * s, 32 * s, 12 * s, 0, 0, 7); g.fill(); }); }
+      g.globalAlpha = 1;
+      g.fillStyle = night ? '#4a6a6a' : '#b9e2a8'; g.beginPath(); g.ellipse(120, 250, 220, 60, 0, Math.PI, 0); g.fill(); g.beginPath(); g.ellipse(450, 254, 240, 50, 0, Math.PI, 0); g.fill();
+      const gr = g.createLinearGradient(0, 230, 0, H); gr.addColorStop(0, night ? '#4f8a64' : '#a4dc8e'); gr.addColorStop(1, night ? '#3b6e50' : '#78c06e'); g.fillStyle = gr; g.fillRect(0, 240, W, H - 240);
+      g.fillStyle = night ? 'rgba(20,50,40,.18)' : 'rgba(255,255,255,.16)'; for (let k = 0; k < 7; k++) { g.fillRect(0, 246 + k * 16, W, 7); }
+    }
+    // ゴールの せん（ひだり・みぎ）と まんなかの せん
+    const li = IM.lines;
+    [CX - RANGE, CX + RANGE].forEach(x => { if (li) g.drawImage(li, x - 6, 236, 12, 62); else { g.fillStyle = 'rgba(255,255,255,.92)'; rr(g, x - 3, 236, 6, 62, 3); g.fill(); } });
+    g.fillStyle = 'rgba(255,238,160,.9)'; for (let y = 242; y < 296; y += 14) g.fillRect(CX - 1.5, y, 3, 8);
+  }
+  function drawChar(id, x, y, ang, h) {
+    const im = IM['c_' + id];
+    g.save(); g.translate(x, y); g.rotate(ang);
+    if (im) { const w = h * im.naturalWidth / im.naturalHeight; g.drawImage(im, -w / 2, -h, w, h); }
+    else { g.fillStyle = '#fffaf0'; g.strokeStyle = '#7a4a2a'; g.lineWidth = 3; g.beginPath(); g.arc(0, -h * .45, h * .4, 0, 7); g.fill(); g.stroke(); g.fillStyle = '#4a2c1a'; g.beginPath(); g.arc(-10, -h * .5, 3.4, 0, 7); g.arc(10, -h * .5, 3.4, 0, 7); g.fill(); }
+    g.restore();
+  }
+  function drawTire(tx) {
+    const im = IM.tire;
+    g.fillStyle = 'rgba(0,0,0,.2)'; g.beginPath(); g.ellipse(tx, TY + TR + 1, TR * .95, 6, 0, 0, 7); g.fill();
+    if (im) { g.drawImage(im, tx - TR - 4, TY - TR - 4, (TR + 4) * 2, (TR + 4) * 2); return; }
+    g.save(); g.translate(tx, TY); g.rotate(S.vp * 3);
+    g.fillStyle = '#3b3b42'; g.beginPath(); g.arc(0, 0, TR, 0, 7); g.arc(0, 0, 17, 0, 7, true); g.fill('evenodd');
+    g.strokeStyle = '#2a2a30'; g.lineWidth = 4; g.lineCap = 'round'; for (let k = 0; k < 14; k++) { const a = k * Math.PI * 2 / 14; g.beginPath(); g.moveTo(Math.cos(a) * 27, Math.sin(a) * 27); g.lineTo(Math.cos(a) * 33.5, Math.sin(a) * 33.5); g.stroke(); }
+    g.strokeStyle = '#8a8a96'; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, 22.5, -2.4, -1.0); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.ellipse(-12, -22, 10, 4, -.6, 0, 7); g.fill();
+    g.restore();
+    g.strokeStyle = '#4a4a54'; g.lineWidth = 2; g.beginPath(); g.arc(tx, TY, 17, 0, 7); g.stroke();
+  }
+  function rope(x0, y0, x1, y1, sag) {
+    const im = IM.rope;
+    if (im) { const len = Math.hypot(x1 - x0, y1 - y0); g.save(); g.translate(x0, y0); g.rotate(Math.atan2(y1 - y0, x1 - x0)); g.drawImage(im, 0, -5, len, 10); g.restore(); return; }
+    g.lineCap = 'round'; g.strokeStyle = '#6a4520'; g.lineWidth = 7; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2, (y0 + y1) / 2 + sag, x1, y1); g.stroke();
+    g.strokeStyle = '#c9944f'; g.lineWidth = 4; g.stroke();
+  }
+  function drawGauge() {
+    const M = MODES[S.mode], x0 = CX - 180, w = 360, y = 308, hh = 20, active = S.phase === 'play';
+    g.fillStyle = 'rgba(255,250,240,.95)'; rr(g, x0 - 4, y - 4, w + 8, hh + 8, 14); g.fill(); g.strokeStyle = '#5a3a22'; g.lineWidth = 3; g.stroke();
+    g.fillStyle = '#cfeec0'; g.fillRect(x0 + w * (.5 - M.good), y, w * 2 * M.good, hh);
+    g.fillStyle = '#4fbf63'; g.fillRect(x0 + w * (.5 - M.perf), y, w * 2 * M.perf, hh);
+    g.fillStyle = '#2b6a3a'; g.fillRect(CX - 1.5, y, 3, hh);
+    const m = active ? markerNow() : 0, mx = x0 + w * m;
+    g.fillStyle = S.lock > 0 && active ? '#c9c0b4' : '#ff9a3c'; g.strokeStyle = '#5a3a22'; g.lineWidth = 3; g.beginPath(); g.arc(mx, y + hh / 2, 12, 0, 7); g.fill(); g.stroke();
+  }
+  function draw() {
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    drawBg();
+    const tx = CX + S.vp * RANGE;
+    const mem = [];
+    for (let i = 2; i >= 0; i--) { mem.push([-1, i, MINE[i]]); mem.push([1, i, OPP[i]]); }
+    const ps = mem.map(([tm2, i, id]) => ({ tm2, i, id, p: pose(tm2, i) }));
+    ps.forEach(({ p, i }) => { g.fillStyle = 'rgba(0,0,0,.16)'; g.beginPath(); g.ellipse(p.x, FY + 3 - 6 * i, 30 - p.jump * .3, 7, 0, 0, 7); g.fill(); });
+    // なわ（うしろから まえへ）
+    const hy = FY - 46, fl = ps.find(o => o.tm2 === -1 && o.i === 0).p, fr = ps.find(o => o.tm2 === 1 && o.i === 0).p, bl = ps.find(o => o.tm2 === -1 && o.i === 2).p, br = ps.find(o => o.tm2 === 1 && o.i === 2).p;
+    ps.forEach(o => drawChar(o.id, o.p.x, FY - o.p.jump - o.p.bob - 6 * o.i, o.p.ang, (o.id === 'marufuwa' ? 112 : 96) * (1 - .06 * o.i)));
+    rope(bl.x + 14, hy + 2, tx - TR + 3, TY, 5); rope(tx + TR - 3, TY, br.x - 14, hy + 2, 5);
+    drawTire(tx);
+    // あいての てを さしのべる（おしい の とき）
+    ps.forEach(o => { if (o.p.hand) { const hx = o.p.x - 40, hyy = FY - 50; g.strokeStyle = '#7a4a2a'; g.lineWidth = 3; g.fillStyle = '#fff3e0'; g.beginPath(); g.moveTo(o.p.x - 22, FY - 44); g.lineTo(hx, hyy); g.stroke(); g.beginPath(); g.arc(hx, hyy, 8, 0, 7); g.fill(); g.stroke(); } });
+    drawGauge();
+    if (S.over) { const win = S.result === 'win', txt = win ? T('やった！', 'Yay!') : T('おしい！', 'So close!'); g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '900 54px "Hiragino Maru Gothic ProN","Yu Gothic UI","Noto Sans JP",sans-serif'; g.lineWidth = 9; g.strokeStyle = '#fffaf0'; g.strokeText(txt, CX, 72); g.fillStyle = win ? '#c2571a' : '#2f6b8a'; g.fillText(txt, CX, 72); }
+  }
+  let lastTs = 0;
+  function loop(ts) { requestAnimationFrame(loop); if (document.hidden) { lastTs = 0; return; } const dt = lastTs ? Math.min(.05, (ts - lastTs) / 1000) : 0; lastTs = ts; update(dt); draw(); }
+
+  // ─── そうさ ───
+  const handle = () => pullPressed();
+  goBtn.addEventListener('pointerdown', e => { if (e.button) return; S.pd = 1; setTimeout(() => { S.pd = 0; }, 600); handle(); });
+  goBtn.addEventListener('click', () => { if (S.pd) { S.pd = 0; return; } handle(); });
+  cv.addEventListener('pointerdown', e => { if (e.button && e.button !== 0) return; handle(); });
+  addEventListener('keydown', e => {
+    if (e.key !== ' ' && e.code !== 'Space') return;
+    if (e.target !== document.body && e.target !== cv) return;
+    e.preventDefault(); if (e.repeat) return; handle();
+  });
+  modeBtn.addEventListener('click', () => {
+    S.mode = S.mode === 'easy' ? 'normal' : 'easy'; const e = S.mode === 'easy';
+    modeBtn.setAttribute('aria-pressed', String(e)); modeBtn.textContent = e ? T('いまは らくちん', 'Now: Easy') : T('いまは ふつう', 'Now: Normal');
+    say(e ? T('らくちん：めじるしが ゆっくりで、みどりも ひろいよ。', 'Easy: the marker is slower and the green is wider.') : T('ふつう：タイミングで ひこう。', 'Normal: pull with your timing.'));
+    if (S.phase === 'play') S.mt = 0;
+  });
+  // 「カードに する」：canvas・この たんまつだけ・すうじなし・外へは おくらない
+  function makeCard() {
+    const c = document.createElement('canvas'); c.width = 720; c.height = 900; const x = c.getContext('2d'), win = S.result === 'win';
+    const F = '"Hiragino Maru Gothic ProN","Yu Gothic UI","Noto Sans JP",sans-serif';
+    const gr = x.createLinearGradient(0, 0, 0, 900); gr.addColorStop(0, win ? '#ffe6b8' : '#dcecf4'); gr.addColorStop(1, '#a8d890'); x.fillStyle = gr; x.fillRect(0, 0, 720, 900);
+    x.strokeStyle = '#8a5a36'; x.lineWidth = 8; rr(x, 20, 20, 680, 860, 30); x.stroke();
+    x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillStyle = '#4a2f06'; x.font = '800 56px ' + F; x.fillText(T('タイヤ ひっぱりっこ', 'Tire Tug'), 360, 120);
+    x.fillStyle = '#6a4a2a'; x.font = '600 26px ' + F; x.fillText(T('まるふわの ひろば', 'Marufuwa Plaza'), 360, 166);
+    // タイヤ
+    x.fillStyle = '#3b3b42'; x.beginPath(); x.arc(360, 470, 78, 0, 7); x.arc(360, 470, 36, 0, 7, true); x.fill('evenodd');
+    const drawC = (id, cx, h, ang) => { const im = IM['c_' + id]; if (!im) return; const w = h * im.naturalWidth / im.naturalHeight; x.save(); x.translate(cx, 700); x.rotate(ang); x.drawImage(im, -w / 2, -h, w, h); x.restore(); };
+    MINE.forEach((id, i) => drawC(id, 250 - i * 100, id === 'marufuwa' ? 250 : 200, win ? .02 : -.04)); OPP.forEach((id, i) => drawC(id, 470 + i * 100, 200, .06));
+    x.strokeStyle = '#6a4520'; x.lineWidth = 9; x.beginPath(); x.moveTo(40, 590); x.lineTo(282, 470); x.moveTo(438, 470); x.lineTo(680, 590); x.stroke();
+    x.fillStyle = win ? '#c2571a' : '#2f6b8a'; x.font = '900 84px ' + F; x.fillText(win ? T('やった！', 'Yay!') : T('おしい！', 'So close!'), 360, 810);
+    x.fillStyle = '#6a4a2a'; x.font = '600 20px ' + F; x.fillText('aohozomi.github.io/marufuwa-tsuri/links/', 360, 856);
+    return c;
+  }
+  $('card').addEventListener('click', () => {
+    const c = makeCard(), url = c.toDataURL('image/png'), im = $('card-img');
+    im.src = url; im.alt = T('きょうの ひっぱりっこの カード', 'Today’s tire tug card'); im.hidden = false; $('card-note').hidden = false;
+    const a = document.createElement('a'); a.href = url; a.download = 'marufuwa-tug.png'; document.body.append(a); a.click(); a.remove();
+    say(T('カードを つくったよ。', 'The card is ready.'));
+  });
+
+  // ─── おと・はいけい・ひらく ───
+  if (window.PageSound) PageSound.init({ mount: $('back'), bgm: 'hiroba', time: () => root.dataset.time, ambient: () => {} });
+  addEventListener('resize', resize);
+  setGoLabel(); resize(); requestAnimationFrame(loop);
+
+  // 検査用の よみとり口
+  window.__tug = {
+    state: () => ({ phase: S.phase, mode: S.mode, p: S.p, vp: S.vp, mt: S.mt, lock: S.lock, marker: markerNow(), result: S.result, over: S.over, uiShown: S.uiShown, said: S.said, log: log.slice(), pullT: S.pullT }),
+    cfg: () => MODES[S.mode], teams: () => ({ mine: MINE.slice(), opp: OPP.slice() }), pose, calm,
+    advance: ms => { let r = ms; while (r > 0) { const s = Math.min(5, r); update(s / 1000); r -= s; } draw(); },
+    step: ms => { let r = ms; while (r > 0) { const s = Math.min(5, r); update(s / 1000); r -= s; } },   // えがかずに すすめる（検査用）
+    tap: pullPressed, setMode: m => { if ((m === 'easy') !== (S.mode === 'easy')) modeBtn.click(); }, sfxLog: () => sndLog.slice()
+  };
+});
+</script>
+<script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-pagesound.js"></script>
+<script defer src="../../tsuri-pagebg.js"></script>
+<script defer src="../../tsuri-en.js"></script>
+<script defer src="../../tsuri-en-hiroba.js"></script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageBg) PageBg.init('tug'); });</script>
+</body>
+</html>
