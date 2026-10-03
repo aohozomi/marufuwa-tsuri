@@ -19,7 +19,7 @@
   }
   function apply() {
     var my = ++tok, night = timeKey() === 'n', narrow = (window.innerWidth || 1000) < 600, list = [], names = night ? ['yoru', 'hiru'] : ['hiru'];
-    names.forEach(function (nm) { if (narrow) list.push({ url: BASE + 'img/bg/' + id + '_' + nm + '_tate.webp', night: night && nm === 'hiru' }); list.push({ url: BASE + 'img/bg/' + id + '_' + nm + '.webp', night: night && nm === 'hiru' }); });
+    names.forEach(function (nm) { if (narrow || opt.tate) list.push({ url: BASE + 'img/bg/' + id + '_' + nm + '_tate.webp', night: night && nm === 'hiru' }); if (!opt.tate) list.push({ url: BASE + 'img/bg/' + id + '_' + nm + '.webp', night: night && nm === 'hiru' }); });
     tryLoad(list, 0, function (hit) {
       if (my !== tok) return;
       var st = document.getElementById('pagebg-style'); if (!st) { st = document.createElement('style'); st.id = 'pagebg-style'; document.head.append(st); }
@@ -29,6 +29,12 @@
       var navy = hit.night ? (function (a) { return 'linear-gradient(rgba(16,24,64,' + a + '),rgba(16,24,64,' + a + ')), '; })(opt.navy !== undefined ? opt.navy : (opt.tint ? .3 : .55)) : '';
       var over = (opt.glow ? opt.glow + ', ' : '') + navy + tint;
       var panel = night ? (opt.panelNight || 'rgba(244,241,252,.84)') : (opt.panel || 'rgba(255,255,255,.82)');
+      if (opt.blur) {   // blur：同じ 絵を ぼかして ページの 地に（別の 絵に 見えない）。body の うしろに 敷く（fixed は つかわない）
+        st.textContent = 'html.pagebg-on body{position:relative;isolation:isolate;overflow-x:clip;background:' + (night ? '#1a1228' : '#2a1d14') + '}'
+          + 'html.pagebg-on body::before{content:"";position:absolute;inset:-40px;z-index:-1;background:' + over + 'url("' + hit.url + '") center/cover no-repeat;filter:blur(' + (+opt.blur || 18) + 'px);pointer-events:none}'
+          + 'html.pagebg-on .room{background:' + panel + '!important;' + (opt.border ? 'border-color:' + opt.border + '!important;' : '') + '-webkit-backdrop-filter:none;backdrop-filter:none}';
+        root.classList.add('pagebg-on'); return;
+      }
       st.textContent = 'html.pagebg-on body{background:' + over + 'url("' + hit.url + '") center/cover no-repeat, ' + (night ? '#2b3560' : '#d9c3a0') + '}'
         + (opt.padY && (window.innerWidth || 1000) < 600 ? 'html.pagebg-on body{padding-top:' + opt.padY + 'px;padding-bottom:' + opt.padY + 'px}' : '')   // せまい がめんでは いたの うえした に よはくを あけて 絵（ランプ・まめの ふくろ）を 見せる
         + 'html.pagebg-on .room{background:' + panel + '!important;' + (opt.border ? 'border-color:' + opt.border + '!important;' : '') + '-webkit-backdrop-filter:none;backdrop-filter:none}';
