@@ -340,6 +340,8 @@ html[data-clip] #main-button{display:block !important;position:fixed;left:0;bott
 .rare-glimpse{position:absolute;z-index:2;pointer-events:none;left:0;width:var(--w,15%);aspect-ratio:var(--ar,2.4);background:linear-gradient(90deg,#ffe58a,#ffd34d);opacity:0;-webkit-mask:var(--m) center/100% 100% no-repeat;mask:var(--m) center/100% 100% no-repeat;filter:drop-shadow(0 0 5px #fff3b0)}
 .rare-glimpse.plain{border-radius:50%;-webkit-mask:none;mask:none;aspect-ratio:2.4}
 .rare-spark{position:absolute;z-index:3;pointer-events:none;font-size:.9rem;color:#fff7c8;text-shadow:0 0 4px #ffd34d;opacity:0}
+.tap-hint{margin:0;padding:2px 12px 0;text-align:center;font-size:.8rem;font-weight:800;color:#35566a}
+:root[data-night=true] .tap-hint{color:#e8f1f8}
 /* いちばん うえの 🔇 おとを けす（まるいろと おなじ しき。おとは はじめから ON） */
 .topmute{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:6px 12px 0;max-width:640px;margin:0 auto}
 .mutebtn{min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid #286b88;background:#fff;color:#17323d;font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation}
@@ -816,6 +818,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 </head>
 <body>
 <a class="skip" href="#main-button">つりを はじめる（「なげる」へ）</a>
+<p class="tap-hint" id="tap-hint" hidden></p>
 <div class="topmute" id="topmute"><span class="mutehint" id="mutehint" hidden aria-hidden="true"></span><button type="button" id="mute-top" class="mutebtn" aria-pressed="false"></button></div>
 <main>
   <noscript><p class="lead" style="margin:24px 16px;font-size:1.1rem;line-height:1.9;text-align:center;color:#244653">JavaScript が オフに なって いるよ。オンに すると あそべるよ。<br>おうちの ひとに きいて みてね。<br><small>This game needs JavaScript. Please turn it on in your browser settings.</small></p></noscript>
@@ -1332,6 +1335,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     return data;
   }
   try { const data = sturdy(JSON.parse(localStorage.getItem(KEY))); if (data) save = data; } catch {}
+  if (save.soundMig !== 1) { if (save.audioSet === true || save.sound === false) { delete save.audioSet; delete save.sound; } save.soundMig = 1; }   // ふるい OFF の きろくは 一度だけ むし（かぎは ふやさない）。これからは じぶんで きった ときだけ OFF を おぼえる
   const soundDefault = save.audioSet !== true && typeof save.sound !== 'boolean' && save.sndFx !== false && save.sndAmb !== false && save.sndGuide !== false && !reduce();   // きろく（audioSet・おとの ON/OFF・こうかおん／なみ／あんない の どれか）が 1つでも あれば それを ゆうせん   // きろくが なければ おとは はじめから ON（うごきを へらす の ときは OFF）。きろくが あれば それを ゆうせん
   if (soundDefault) save.sound = true;
   if (!RODS[save.rod] || !RODS[save.rod].open(save)) save.rod = 0;
@@ -1919,7 +1923,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   { const mk = () => { const row = document.querySelector('.sub-actions'); if (!row || $('howto-toggle')) return; const b = document.createElement('button'); b.type = 'button'; b.id = 'howto-toggle'; b.className = 'pill'; b.setAttribute('aria-controls', 'sound'); row.append(b);
       b.addEventListener('click', () => { const open = !document.body.classList.contains('howto-open'); document.body.classList.toggle('howto-open', open); row.dataset.howto = open ? 'open' : ''; drawHowto(); }); drawHowto(); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mk); else mk(); addEventListener('load', () => { mk(); drawHowto(); }); setTimeout(drawHowto, 900); }   // おと・BGM・とおく・ながめる・おやすみ・つかいやすく する を 1つの「あそびかた」に まとめる（ふだんは かくす）
-  function drawMute() { const b = $('mute-top'); if (!b) return; b.setAttribute('aria-pressed', String(!save.sound)); b.textContent = L(save.sound ? '🔇 おとを けす' : '🔊 おとを ならす', save.sound ? '🔇 Mute sound' : '🔊 Turn sound on'); }
+  function drawMute() { const b = $('mute-top'); if (!b) return; const on = !!save.sound; b.setAttribute('aria-pressed', String(on)); b.textContent = L(on ? '🔊 おと：ON' : '🔇 おと：OFF', on ? '🔊 Sound: ON' : '🔇 Sound: OFF'); }   // ボタンの えは「いまの じょうたい」（ON＝🔊・OFF＝🔇）。おすと きりかわる
   function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
   $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); try { dispatchEvent(new Event('storage')); } catch {} drawSound();   /* おへや（すいそう）など ほかの ぶひんにも「おとが かわった」と しらせる */ if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([440, 523], .09, 'sine', .035, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
@@ -4261,6 +4265,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   drawWater(performance.now()); drawSky(performance.now()); drawSoil();
   if (!reduce()) requestAnimationFrame(flow); else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
   drawSound();
+  { const th = $('tap-hint'), put = () => { th.textContent = L('どこかを さわると おとが なるよ', 'Touch anywhere and the sound will play'); };   // ブラウザの きまりで さわる まえは なりません：さいしょの タップまで だけ 1ぎょう
+    if (th && save.sound && save.tapHint !== 1) { put(); th.hidden = false; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', put); addEventListener('load', put); setTimeout(put, 900);
+      const gone = () => { removeEventListener('pointerdown', gone, true); removeEventListener('keydown', gone, true); th.hidden = true; save.tapHint = 1; store(); };
+      addEventListener('pointerdown', gone, true); addEventListener('keydown', gone, true); } }
   { const moveLang = () => { const row = document.querySelector('.lang-row'), bar = $('topmute'); if (row && bar && row.parentNode !== bar) bar.prepend(row); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(moveLang, 0)); else setTimeout(moveLang, 0);
     addEventListener('load', moveLang); setTimeout(moveLang, 800); }   // tsuri-en.js が さいごに つくる きりかえボタンを うえの ひだりへ
