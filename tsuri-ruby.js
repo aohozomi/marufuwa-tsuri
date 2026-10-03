@@ -75,7 +75,7 @@
   // もじの しゅるい：「かんじ＋ふりがな」（はじめから）／「ひらがなだけ」（幼児・低学年向け。漢字を 一切 出さない）。ほんたいの きろく（save.hira）を よむ
   const hiraOnly = () => { try { const d = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1') || '{}'); return !!(d && d.hira === true); } catch { return false; } };
   let enabled = !(q.get('noruby') === '1' || hiraOnly());
-  const HIRA_MODE = !enabled && q.get('noruby') !== '1';
+  let HIRA_MODE = !enabled && q.get('noruby') !== '1', hiraObs = null;
   const isEn = () => !!(root.TsuriEn && root.TsuriEn.lang === 'en');
   let D = null, observer = null, busy = false, scheduled = 0; const pending = new Set(), made = new WeakSet();
   const SKIP = 'svg,canvas,script,style,textarea,input,select,option,ruby,rt,rp,[data-noruby],#status,.bubble,#bubble,.sr-only,#hm-live,.hm-note,[class*="hm-"],[id^="hm-"],[id^="tk-"],[class*="tk-"],#tank,#himitsu,title,head,.logo,.logo *,[aria-live],[role=status],[role=alert]';
@@ -119,17 +119,18 @@
   function deruby(rootNode) {
     if (!rootNode || rootNode.nodeType !== 1 && rootNode.nodeType !== 9) return;
     const list = rootNode.nodeType === 1 && rootNode.tagName === 'RUBY' ? [rootNode] : [...rootNode.querySelectorAll('ruby')];
-    list.forEach(r => { if (r.closest('svg,[data-noruby]')) return; const rt = r.querySelector('rt'); r.replaceWith(document.createTextNode(rt ? rt.textContent : r.textContent)); });
+    list.forEach(r => { if (r.closest('svg,[data-noruby]')) return; const rt = r.querySelector('rt'), t = document.createTextNode(rt ? rt.textContent : r.textContent); derubied.set(t, r); r.replaceWith(t); });   // もどせる ように おぼえる
   }
+  const derubied = new Map();
   function startHira() {
     if (isEn()) return;
     deruby(document.body);
-    new MutationObserver(records => { for (const r of records) r.addedNodes.forEach(n => { if (n.nodeType === 1) deruby(n); }); }).observe(document.body, {childList: true, subtree: true});
+    hiraObs = new MutationObserver(records => { for (const r of records) r.addedNodes.forEach(n => { if (n.nodeType === 1) deruby(n); }); }); hiraObs.observe(document.body, {childList: true, subtree: true});
   }
   function start() {
     if (HIRA_MODE) { startHira(); return; }
     if (!enabled || isEn() || !ensureDict()) return;
-    const st = document.createElement('style'); st.textContent = 'ruby{ruby-position:over;white-space:nowrap}rt{font-size:.52em;font-weight:700;line-height:1;letter-spacing:0}'; document.head.append(st);
+    if (!document.getElementById('ruby-style')) { const st0 = document.createElement('style'); st0.id = 'ruby-style'; st0.textContent = 'ruby{ruby-position:over;white-space:nowrap}rt{font-size:.52em;font-weight:700;line-height:1;letter-spacing:0}'; document.head.appendChild(st0); }
     schedule(document.body);
     observer = new MutationObserver(records => {
       if (busy) return;
@@ -148,6 +149,12 @@
   root.TsuriRuby = Object.assign({}, api, {
     kanji,
     hira: () => HIRA_MODE,
+    setHira: on => {   // 「ひらがなだけ」を そのばで きりかえる（よみこみ なおし なし）。ふりがなの ある ことばは よみ（rt）だけに／もどす ときは もとの ruby を もどして、のこりを もういちど 変換
+      on = !!on; if (on === HIRA_MODE || isEn()) return HIRA_MODE;
+      if (on) { HIRA_MODE = true; enabled = false; if (observer) { observer.disconnect(); observer = null; } pending.clear(); deruby(document.body); if (!hiraObs) startHira(); else hiraObs.observe(document.body, {childList: true, subtree: true}); }
+      else { HIRA_MODE = false; enabled = true; if (hiraObs) hiraObs.disconnect(); derubied.forEach((r, t) => { if (t.isConnected) t.replaceWith(r); }); derubied.clear(); start(); }
+      return HIRA_MODE;
+    },
     active: () => enabled && !isEn() && !!ensureDict() && !!observer
   });
   // English の ことばが きまって から（TsuriEn.lang）はじめる

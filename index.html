@@ -60,24 +60,31 @@ try {
   var vtCalm = early.calm === true, vtGo = function (e) { try { var p = new URL(e.activation.entry.url).pathname; return !/\/anshin\//.test(p) && /(\/|\/index\.html)$/.test(p); } catch (x) { return false; } };
   var vtHandle = function (e) { var v = e.viewTransition; if (!v) return; ['ready', 'finished', 'updateCallbackDone'].forEach(function (k) { try { if (v[k] && v[k].catch) v[k].catch(function () {}); } catch (x) {} }); if (vtCalm || (e.type === 'pageswap' && !vtGo(e))) { try { v.skipTransition(); } catch (x) {} } };
   try { addEventListener('pageswap', vtHandle); addEventListener('pagereveal', vtHandle); } catch (x) {}
-  if (early.calm === true) {
-    document.documentElement.dataset.calm = 'true';
-    var realMM = window.matchMedia.bind(window); window.__realMatchMedia = realMM;
-    window.matchMedia = function (q) { var m = realMM(q); return /prefers-reduced-motion[ ]*:[ ]*reduce/.test(String(q)) ? new Proxy(m, {get: function (t, k) { if (k === 'matches') return true; var v = t[k]; return typeof v === 'function' ? v.bind(t) : v; }}) : m; };
-    document.addEventListener('DOMContentLoaded', function () {
-      Array.prototype.forEach.call(document.styleSheets, function (sheet) {
-        var rules; try { rules = Array.prototype.slice.call(sheet.cssRules); } catch (e) { return; }
-        rules.forEach(function (rule) {
-          if (rule.type !== 4 || !/prefers-reduced-motion[ ]*:[ ]*reduce/.test(rule.media.mediaText)) return;
-          Array.prototype.forEach.call(rule.cssRules, function (inner) {
-            if (inner.type !== 1) return;
-            var sel = inner.selectorText.split(',').map(function (s) { return ':root[data-calm=true] ' + s.trim(); }).join(',');
-            try { sheet.insertRule(sel + '{' + inner.style.cssText + '}', sheet.cssRules.length); } catch (e) {}
-          });
+  var realMM = window.matchMedia.bind(window); window.__realMatchMedia = realMM;
+  var calmRewritten = false;
+  var rewriteCalm = function () {
+    if (calmRewritten) return; calmRewritten = true;
+    Array.prototype.forEach.call(document.styleSheets, function (sheet) {
+      var rules; try { rules = Array.prototype.slice.call(sheet.cssRules); } catch (e) { return; }
+      rules.forEach(function (rule) {
+        if (rule.type !== 4 || !/prefers-reduced-motion[ ]*:[ ]*reduce/.test(rule.media.mediaText)) return;
+        Array.prototype.forEach.call(rule.cssRules, function (inner) {
+          if (inner.type !== 1) return;
+          var sel = inner.selectorText.split(',').map(function (s) { return ':root[data-calm=true] ' + s.trim(); }).join(',');
+          try { sheet.insertRule(sel + '{' + inner.style.cssText + '}', sheet.cssRules.length); } catch (e) {}
         });
       });
     });
-  }
+  };
+  // うごきを へらす の きりかえ（よみこみ なおし なし）：on＝CSS の きまりを :root[data-calm] に うつし、matchMedia を さしかえる／off＝もとに もどす
+  window.__applyCalm = function (on) {
+    if (on) {
+      document.documentElement.dataset.calm = 'true';
+      window.matchMedia = function (q) { var m = realMM(q); return /prefers-reduced-motion[ ]*:[ ]*reduce/.test(String(q)) ? new Proxy(m, {get: function (t, k) { if (k === 'matches') return true; var v = t[k]; return typeof v === 'function' ? v.bind(t) : v; }}) : m; };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rewriteCalm); else rewriteCalm();
+    } else { delete document.documentElement.dataset.calm; window.matchMedia = realMM; }
+  };
+  if (early.calm === true) window.__applyCalm(true);
 } catch (e) {}
 </script>
 <style>
@@ -3595,7 +3602,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   let dlgOpen = false;
   { const root = document.documentElement, sync = () => { const o = !!document.querySelector('dialog[open]'); if (o !== dlgOpen) { dlgOpen = o; root.classList.toggle('dlg-open', o); } };
     new MutationObserver(sync).observe(document.body, {subtree: true, attributes: true, attributeFilter: ['open']}); sync(); }
-  function flow(now) { if (!document.hidden && !dlgOpen) { if (scene.dataset.tooku !== 'true') drawWater(now); drawSky(now); drawSoil(); } requestAnimationFrame(flow); }   // 窓が ひらいて いる 間と、とおく ON の 間の みずは、みえない ので かかない（CPU を へらす・総司令部の そくてい）
+  let flowOn = false;
+  function flow(now) { if (reduce()) { flowOn = false; lastDraw = lastSky = 0; drawWater(now); drawSky(now); drawSoil(); return; }   // うごきを へらす に なったら ここで とまる（さいごの 1コマで しずか）
+    if (!document.hidden && !dlgOpen) { if (scene.dataset.tooku !== 'true') drawWater(now); drawSky(now); drawSoil(); } requestAnimationFrame(flow); }   // 窓が ひらいて いる 間と、とおく ON の 間の みずは、みえない ので かかない（CPU を へらす・総司令部の そくてい）
 
   // ながめる。つらなくて いい。みずと そらと なかまを、みて いるだけ
   const GAZE_WORDS = ['なみの おとを、きいて いよう。', 'きょうも、おつかれさま。', 'なにも しなくて、いいよ。', 'ゆっくり、いきを しよう。', 'ここに いて、いいよ。', 'ぼんやり するのも、だいじな じかん。', 'いま できる ことだけで、じゅうぶん。', 'みずが きらきら しているね。', 'くもが ゆっくり ながれて いくね。', 'しんこきゅう、ひとつ。', 'いそがなくて、だいじょうぶ。', 'ここは、ゆっくり して いい ばしょ。'];
@@ -4243,8 +4252,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('calm') && $('calm').addEventListener('click', () => {
     if (osReduce()) { say(L('スマホの せっていで、うごきは へらして いるよ。', 'Motion is already reduced by your phone settings.')); return; }
     save.calm = !save.calm; store(); drawCalm();
-    say(L(save.calm ? 'うごきを へらすよ。よみこみ なおすね。' : 'うごきを もとに もどすよ。よみこみ なおすね。', save.calm ? 'Reducing motion. Reloading.' : 'Restoring motion. Reloading.'));
-    setTimeout(() => location.reload(), 900);
+    try { window.__applyCalm(save.calm === true); } catch {}   // よみこみ なおさずに その場で はんえい
+    if (!reduce() && !flowOn) { flowOn = true; requestAnimationFrame(flow); }   // もとに もどした とき：みずの ゆれを さいかい
+    try { layout(); } catch {}
+    say(L(save.calm ? 'うごきを へらしたよ。' : 'うごきを もとに もどしたよ。', save.calm ? 'Motion is reduced.' : 'Motion is back.'));
   });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawCalm); else drawCalm();   // 英語の ときは tsuri-en.js が よみこまれて から 書く
   // もじを おおきく：よわい めの ひと・ちいさい こ・とおくから みる ひと。ぜんぶの もじが 1.25ばい（すぐ かわる・よみこみ なおしは いらない）
@@ -4257,7 +4268,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawLarge); else drawLarge();
   // もじ：「かんじ＋ふりがな」（はじめから）／「ひらがなだけ」（幼児・低学年向け・漢字を 一切 出さない＝もとの ひらがな）。save.hira（tsuri-ruby.js が よむ）。かえたら よみこみなおす
   function drawRuby() { const b = $('ruby'); if (!b) return; b.hidden = EN(); const hira = save.hira === true; b.textContent = L('もじ：' + (hira ? 'ひらがなだけ' : 'かんじ＋ふりがな'), 'Text: ' + (hira ? 'Hiragana only' : 'Kanji + furigana')); b.setAttribute('aria-pressed', String(hira)); }
-  $('ruby') && $('ruby').addEventListener('click', () => { save.hira = !(save.hira === true); store(); drawRuby(); say(L('もじを かえるよ。よみこみ なおすね。', 'Changing the text style. Reloading.')); setTimeout(() => location.reload(), 900); });
+  $('ruby') && $('ruby').addEventListener('click', () => { save.hira = !(save.hira === true); store(); drawRuby(); try { if (window.TsuriRuby && TsuriRuby.setHira) TsuriRuby.setHira(save.hira === true); } catch {} say(L(save.hira ? 'ひらがなだけに したよ。' : 'かんじと ふりがなに もどしたよ。', save.hira ? 'Hiragana only.' : 'Kanji with furigana.')); });   // よみこみ なおさずに その場で はんえい
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawRuby); else drawRuby();
   { const dr = () => { const r = $('renshu-go'); if (r) r.textContent = L('つりの れんしゅうじょ ▸', 'Practice pond ▸'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dr); else dr(); }
   drawBuzz(); drawNature(); drawEasy();
@@ -4271,7 +4282,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   });   // 水の なかを およぐ さかなは、魚種ごとの かげに
   if (ART && ART.float) document.querySelectorAll('.float').forEach(el => { el.classList.add('art'); el.style.setProperty('--fimg', 'url("' + ART.uri(ART.float) + '")'); });   // ウキの え
   drawWater(performance.now()); drawSky(performance.now()); drawSoil();
-  if (!reduce()) requestAnimationFrame(flow); else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
+  if (!reduce()) { flowOn = true; requestAnimationFrame(flow); } else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
   drawSound();
   { const th = $('tap-hint'), put = () => { th.textContent = L('どこかを さわると おとが なるよ', 'Touch anywhere and the sound will play'); };   // ブラウザの きまりで さわる まえは なりません：さいしょの タップまで だけ 1ぎょう
     if (th && save.sound && save.tapHint !== 1) { put(); th.hidden = false; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', put); addEventListener('load', put); setTimeout(put, 900);
