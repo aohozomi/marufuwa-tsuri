@@ -259,8 +259,11 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 #scene[data-dim=true]{--dim:brightness(.7) saturate(.9)}
 
 /* ひろばの がめん（360×560 の せかいを、はばに あわせて ひろげる） */
-#scene{position:relative;width:min(100%,calc((100vh - 232px)*.6429));width:min(100%,calc((100dvh - 232px)*.6429));min-width:min(100%,300px);margin:0 auto;aspect-ratio:360/560;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:var(--sky2);isolation:isolate}
-#scene:focus-visible{outline:3px solid #286b88;outline-offset:3px}
+#viewport{position:relative;width:min(100%,calc((100vh - 232px)*.6429));width:min(100%,calc((100dvh - 232px)*.6429));min-width:min(100%,300px);margin:0 auto;aspect-ratio:360/560;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:var(--sky2);isolation:isolate}
+#scene{position:absolute;left:0;top:0;width:200%;height:100%;will-change:transform}   /* 世界は 窓の 2倍幅（W=720）・かめらが よこに うごかす（--cam） */
+#park-sign{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:60;pointer-events:none;padding:4px 14px;border-radius:14px;background:#fffffff2;border:2px solid #ffd9e6;font-weight:900;font-size:.9rem;color:#244653;white-space:nowrap}
+#scene:focus-visible{outline:none}
+#viewport:has(#scene:focus-visible){outline:3px solid #286b88;outline-offset:3px}
 #bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;filter:var(--dim)}
 #scene[data-rain=true] #bg{filter:var(--dim) brightness(.93) saturate(.9)}   /* 雨の 日も くらく しすぎない（10/1）*/
 .waves path{animation:wave 3.4s ease-in-out infinite alternate}
@@ -269,13 +272,13 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 .tuft:nth-child(2n){animation-duration:2.9s;animation-delay:-1.2s}
 @keyframes sway{from{rotate:-2.4deg}to{rotate:2.4deg}}
 @keyframes wave{from{transform:translateX(-4px)}to{transform:translateX(4px)}}
-.orb{position:absolute;z-index:1;left:76.9%;top:6.25%;width:12.8%;aspect-ratio:1/1;border-radius:50%;background:var(--orb);box-shadow:0 0 0 5px #ffffff3d,0 0 22px #fff6c0a0;cursor:pointer}
+.orb{position:absolute;z-index:1;left:38.45%;top:6.25%;width:6.4%;aspect-ratio:1/1;border-radius:50%;background:var(--orb);box-shadow:0 0 0 5px #ffffff3d,0 0 22px #fff6c0a0;cursor:pointer}
 #scene[data-time=yoru] .orb{background:radial-gradient(circle at 34% 32%,#fff,#fff6cf 60%,#f0e4b0);box-shadow:0 0 0 5px #ffffff26,0 0 26px #fff6cf90}
 #scene[data-time=yoru] .orb[data-moon]{background:var(--moon-img) center/100% 100% no-repeat}   /* 本物の 月齢（TsuriWorld.moon）：ひかる がわと わりあいで かたちが かわる */
 .orb::before{content:"";position:absolute;inset:-14px}
-.cloud{position:absolute;z-index:1;left:0;width:28%;height:auto;aspect-ratio:100/40;opacity:calc(.92 - var(--star)*.6);cursor:pointer;animation:cloud 80s linear infinite}
+.cloud{position:absolute;z-index:1;left:0;width:14%;height:auto;aspect-ratio:100/40;opacity:calc(.92 - var(--star)*.6);cursor:pointer;animation:cloud 80s linear infinite}
 .cloud.c1{top:5%}
-.cloud.c2{top:15%;width:21%;--to:520%;animation-duration:110s;animation-delay:-55s}
+.cloud.c2{top:15%;width:10.5%;--to:520%;animation-duration:110s;animation-delay:-55s}
 @keyframes cloud{from{transform:translateX(-130%)}to{transform:translateX(var(--to,390%))}}
 #props,#actors,#bubbles{position:absolute;inset:0;pointer-events:none}
 #care{position:absolute;inset:0;pointer-events:none;z-index:640}   /* ともだちの おせわの しるし（ようすが ある 子の あたまの うえ・せかさない：うごかない・おとも 出さない） */
@@ -310,13 +313,14 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 #scene[data-time=yuu] .prop[data-id=cafe] .cw{fill:#ffe3a0}
 #scene[data-time=yoru] .prop[data-id=cafe] .cw{fill:#ffd36b}   /* 夜は まどが ぽっと ほんのり（ひかえめ・ちらつかない） */
 #scene[data-time=yoru] .prop[data-id=cafe] svg{filter:drop-shadow(0 0 7px #ffd36b88)}
-button[data-dest=cafe]{--c1:#fff3e0;--c2:#ffd8a8;--side:#d99a55;--ink:#5a3414}
+button[data-dest=cafe],button[data-machi=cafe]{--c1:#fff3e0;--c2:#ffd8a8;--side:#d99a55;--ink:#5a3414}
+button[data-dest=park]{--c1:#f6efff;--c2:#d5c0f7;--side:#9a7ad6;--ink:#3b2466}
 .prop[data-id=machi] .mark{left:88%;top:-14%}   /* まちかど：かんばんの もじに かぶせず 右上に */
 .prop[data-id=maruiro] .mark{left:2%;top:2%}
 .prop[data-id=post] .mark{top:-48%}
    /* ポストの 頭を かくさない よう しるしを 上に うかせる */
 .prop[data-id=well] .mark{left:86%;top:2%}
-@supports (width:1cqw){#scene{container-type:inline-size}.mark{width:clamp(22px,9.44cqw,34px);height:clamp(22px,9.44cqw,34px);font-size:clamp(.8rem,3.19cqw,1.15rem);border-width:clamp(2px,.83cqw,3px)}}   /* せまい がめんでは しるしを ちいさく（かんばんの もじに かぶらない）。しるしは かざり */
+@supports (width:1cqw){#viewport{container-type:inline-size}.mark{width:clamp(22px,9.44cqw,34px);height:clamp(22px,9.44cqw,34px);font-size:clamp(.8rem,3.19cqw,1.15rem);border-width:clamp(2px,.83cqw,3px)}}   /* せまい がめんでは しるしを ちいさく（かんばんの もじに かぶらない）。しるしは かざり */
 @keyframes markbob{50%{translate:0 -4px}}
 /* ひとの すがた。かげ・からだの ゆれは JS。じっと している ときは ゆっくり いきを する */
 .actor{position:absolute;left:0;top:0;transform-origin:50% 100%;pointer-events:none}
@@ -438,8 +442,8 @@ dialog .close{display:block;margin:auto;min-width:160px}
   .actor.arriving{animation:none}.actor.leaving{transition:none}
   .logo span,.bd-trees circle,.waves path,.tuft,.cloud,.canopy,.jet,.arm,.mark,.actor img,#rain{animation:none !important}
   .prop,.door{transition:none}
-  .cloud{left:8%}
-  .cloud.c2{left:56%}
+  .cloud{left:4%}
+  .cloud.c2{left:28%}
   #rain{background-position:0 0}
 }
 /* つかう ひとが「うごき：すくない」を えらんだ とき（OSの せっていと おなじ あつかい） */
@@ -447,8 +451,8 @@ body.calm .logo span,body.calm .bd-trees circle,body.calm .waves path,body.calm 
 body.calm .ty-star,body.calm .ty-bg{animation:none !important}
 body.calm .spw,body.calm .sp,body.calm .ffw,body.calm .ff,body.calm .drop,body.calm .drop .gl,body.calm .wstar{animation:none !important}
 body.calm .prop,body.calm .door{transition:none}
-body.calm .cloud{left:8%}
-body.calm .cloud.c2{left:56%}
+body.calm .cloud{left:4%}
+body.calm .cloud.c2{left:28%}
 /* パソコン（ひろい 画面）：ひろばを 左に 大きく（画面の たかさに あわせる）、あそぶ ボタンなどは 右に。スマホ・せまい 画面は 今まで通り */
 .stage{display:block}
 .actor.leaving{opacity:0;transition:opacity .9s ease}
@@ -457,7 +461,7 @@ body.calm .cloud.c2{left:56%}
 @media (min-width:900px) and (min-height:560px){
   main{max-width:min(1320px,calc(100vw - 32px));padding:14px 28px 22px}   /* 広々（10/1 マスター）：景色を 高さ 約90% まで 大きく（たかさ −110px）。ひろい ぶん 右との あいだも ゆったり */
   .stage{display:grid;grid-template-columns:min(calc((100vh - 110px)*.6429),860px) minmax(340px,480px);grid-template-columns:min(calc((100dvh - 110px)*.6429),860px) minmax(340px,480px);column-gap:44px;justify-content:center;align-items:start}
-  .stage #scene{width:100%;min-width:0;position:sticky;top:12px;margin:0}
+  .stage #viewport{width:100%;min-width:0;position:sticky;top:12px;margin:0}
   #places,#places-wait{grid-template-columns:1fr;gap:12px}   /* ボタンは 縦1列（絵＋なまえ ひだり・ひとこと みぎ） */
   #places button,#places-wait button{flex-direction:row;justify-content:flex-start;gap:14px;min-height:68px;padding:8px 20px;text-align:left}
   #places button small,#places-wait button small{margin-left:auto;text-align:right}
@@ -495,15 +499,17 @@ body.calm .cloud.c2{left:56%}
 
   <script src="../tsuri-world.js"></script>   <!-- 世界の まど：scene の まえに（はじめの 一瞬の 雨も TsuriWorld.daily() で きめる） -->
   <div class="stage">
+  <div id="viewport">
+  <div id="park-sign" role="status" hidden>まるふわパーク</div>
   <div id="scene" data-time="hiru" data-rain="false" data-dim="false" tabindex="0" role="group" aria-label="ひろば。まるふわが あるく ばしょ" aria-describedby="keys-help">
   <script>/* はじめの 一瞬 昼の 素の 画面が 見えない よう、時間・季節・雨を ここで 先に 入れる（あとの 本体の script が おなじ 値を もういちど 入れる） */(function () { try { var s = document.currentScript.parentNode, q = new URLSearchParams(location.search), m = {}; try { m = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}; } catch (e) {} var L = { a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru' }, d = new Date(), h = d.getHours(), mo = d.getMonth() + 1, f = q.get('time'), t = f && L[f] ? f : (m.time && L[m.time] ? m.time : (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n')), S = ['haru', 'natsu', 'aki', 'fuyu']; s.dataset.time = L[t]; s.dataset.season = S.indexOf(q.get('season')) >= 0 ? q.get('season') : (mo >= 3 && mo <= 5 ? 'haru' : mo >= 6 && mo <= 8 ? 'natsu' : mo >= 9 && mo <= 11 ? 'aki' : 'fuyu'); s.dataset.rain = String(q.has('rain') ? q.get('rain') === '1' : (window.TsuriWorld && window.TsuriWorld.daily ? window.TsuriWorld.daily().weather === 'rain' : (d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) * 7 % 4 === 0)); s.dataset.dim = String((h >= 19 || h < 5) && t !== 'n'); } catch (e) {} })();</script>
-    <svg id="bg" viewBox="0 0 360 560" preserveAspectRatio="none" aria-hidden="true">
+    <svg id="bg" viewBox="0 0 720 560" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/></linearGradient>
         <linearGradient id="g-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--water1)"/><stop offset="1" style="stop-color:var(--water2)"/></linearGradient>
         <linearGradient id="g-grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--grass2)"/><stop offset="1" style="stop-color:var(--grass)"/></linearGradient>
       </defs>
-      <rect width="360" height="300" fill="url(#g-sky)"/>
+      <rect width="720" height="300" fill="url(#g-sky)"/>
       <g fill="#fff" style="opacity:var(--star)"><circle cx="30" cy="34" r="1.7"/><circle cx="74" cy="78" r="1.4"/><circle cx="120" cy="26" r="1.8"/><circle cx="168" cy="64" r="1.4"/><circle cx="214" cy="30" r="1.7"/><circle cx="252" cy="92" r="1.4"/><circle cx="330" cy="120" r="1.5"/><circle cx="58" cy="132" r="1.4"/><circle cx="196" cy="118" r="1.3"/><circle cx="290" cy="20" r="1.5"/></g>
       <path d="M0 206 Q52 158 118 196 T250 186 T360 168 V276 H0Z" style="fill:var(--hill)"/>
       <path d="M0 232 Q84 196 176 226 T360 214 V290 H0Z" style="fill:var(--hill2)"/>
@@ -537,6 +543,26 @@ body.calm .cloud.c2{left:56%}
         <path class="tuft" d="M132 542 q-3 -11 -9 -15"/><path class="tuft" d="M238 546 q2 -12 7 -18"/>
         <path class="tuft" d="M30 468 q-3 -11 -9 -15"/><path class="tuft" d="M338 476 q2 -12 7 -18"/>
       </g>
+      <!-- ═ まるふわパーク（右半分・x 360〜720）：仮の 絵（天の 広い 背景が 届いたら さしかえ） ═ -->
+      <g id="park-bg">
+        <g fill="#fff" style="opacity:var(--star)"><circle cx="392" cy="40" r="1.7"/><circle cx="436" cy="82" r="1.4"/><circle cx="486" cy="28" r="1.8"/><circle cx="540" cy="70" r="1.4"/><circle cx="590" cy="34" r="1.7"/><circle cx="640" cy="90" r="1.4"/><circle cx="690" cy="48" r="1.8"/><circle cx="708" cy="120" r="1.4"/></g>
+        <path d="M360 168 Q420 150 484 178 T610 160 T720 172 V276 H360Z" style="fill:var(--hill)"/>
+        <path d="M360 214 Q444 198 534 224 T720 210 V290 H360Z" style="fill:var(--hill2)"/>
+        <g style="fill:var(--ftree)"><circle cx="402" cy="206" r="17"/><circle cx="474" cy="214" r="14"/><circle cx="566" cy="206" r="18"/><circle cx="640" cy="213" r="15"/><circle cx="702" cy="204" r="19"/></g>
+        <path d="M360 246 Q450 240 540 252 T720 244 V560 H360Z" fill="url(#g-grass)"/>
+        <g fill="none" stroke="var(--paving)" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M360 332 C392 336 404 372 436 400" stroke-width="36"/>
+          <path d="M440 340 L440 398" stroke-width="30"/><path d="M542 340 L542 372" stroke-width="30"/><path d="M652 340 L652 384" stroke-width="30"/>
+          <ellipse cx="548" cy="440" rx="148" ry="64" stroke-width="34"/>
+        </g>
+        <ellipse cx="548" cy="440" rx="130" ry="50" fill="none" stroke="#ffb3a3" stroke-width="4" stroke-dasharray="1 10" stroke-linecap="round" opacity=".9"/>
+        <g style="opacity:var(--fl,1)">
+          <g><circle cx="384" cy="470" r="4" fill="#ff9ab8"/><circle cx="384" cy="470" r="1.6" fill="#fff4b8"/></g><g><circle cx="398" cy="482" r="4" fill="#ffd25e"/><circle cx="398" cy="482" r="1.6" fill="#fff"/></g><g><circle cx="372" cy="494" r="4" fill="#c9a8f5"/><circle cx="372" cy="494" r="1.6" fill="#fff4b8"/></g>
+          <g><circle cx="700" cy="470" r="4" fill="#ffd25e"/><circle cx="700" cy="470" r="1.6" fill="#fff"/></g><g><circle cx="688" cy="484" r="4" fill="#ff9ab8"/><circle cx="688" cy="484" r="1.6" fill="#fff4b8"/></g><g><circle cx="706" cy="498" r="4" fill="#c9a8f5"/><circle cx="706" cy="498" r="1.6" fill="#fff4b8"/></g>
+          <g><circle cx="520" cy="540" r="4" fill="#ff9ab8"/><circle cx="520" cy="540" r="1.6" fill="#fff4b8"/></g><g><circle cx="560" cy="546" r="4" fill="#ffd25e"/><circle cx="560" cy="546" r="1.6" fill="#fff"/></g>
+        </g>
+        <g stroke="#5aa85a" stroke-width="3.4" stroke-linecap="round" fill="none"><path class="tuft" d="M404 520 q-3 -11 -9 -15"/><path class="tuft" d="M690 520 q2 -12 7 -18"/><path class="tuft" d="M470 300 q-3 -11 -9 -15"/><path class="tuft" d="M610 298 q2 -12 7 -18"/></g>
+      </g>
     </svg>
     <div class="orb" data-secret="orb" aria-hidden="true"></div>
     <svg class="cloud c1" data-secret="cloud" viewBox="0 0 100 40" aria-hidden="true"><g fill="#fff"><ellipse cx="34" cy="26" rx="30" ry="12"/><ellipse cx="60" cy="18" rx="22" ry="14"/><ellipse cx="76" cy="27" rx="20" ry="10"/></g></svg>
@@ -547,6 +573,7 @@ body.calm .cloud.c2{left:56%}
     <div id="bubbles" aria-hidden="true"></div>
     <div id="season" aria-hidden="true"></div>
     <div id="rain" aria-hidden="true"></div>
+  </div>
   </div>
   <div class="side">
   <p id="status" role="status" aria-live="polite"></p>
@@ -559,7 +586,7 @@ body.calm .cloud.c2{left:56%}
   <nav id="places" aria-label="いきさき">
     <button type="button" data-dest="tsuri"><b aria-hidden="true">🎣</b>つりば<small>つりびより</small></button>
     <button type="button" data-dest="oheya"><b aria-hidden="true">🐠</b>まるふわの おへや<small>すいそう</small></button>
-    <button type="button" data-dest="cafe"><b aria-hidden="true">☕</b>カフェ<small>ひとやすみ</small></button>
+    <button type="button" data-dest="park"><b aria-hidden="true">🎡</b>パークへ<small>あそびば</small></button>
     <button type="button" data-dest="machi"><b aria-hidden="true">🛍️</b>まちかど<small>おみせ・まるいろ・いど</small></button>
   </nav>
 
@@ -657,6 +684,7 @@ body.calm .cloud.c2{left:56%}
   <div class="machi-list">
     <button type="button" data-machi="omise"><b aria-hidden="true">🛍️</b>おみせ<small>ふくの いろや もちものを もらえるよ</small></button>
     <button type="button" data-machi="bijutsu"><b aria-hidden="true">🖼️</b>びじゅつかん<small>えを ながめよう</small></button>
+    <button type="button" data-machi="cafe"><b aria-hidden="true">☕</b>カフェ<small>ひとやすみ</small></button>
     <button type="button" data-machi="maruiro"><b aria-hidden="true">🔵</b>まるいろ<small>まるい こを おとして あそぼう</small></button>
     <button type="button" data-machi="ido"><b aria-hidden="true">💧</b>いど<small>のぞいて みよう</small></button>
     <button type="button" data-machi="osusume" hidden><b aria-hidden="true">⭐</b>おすすめの へや<small>すてきな ひとを しょうかい</small></button>
@@ -708,7 +736,7 @@ body.calm .cloud.c2{left:56%}
 const $ = id => document.getElementById(id);
 const scene = $('scene'), layerProps = $('props'), layerActors = $('actors'), layerBubbles = $('bubbles'), statusEl = $('status'), curtain = $('curtain');
 const q = new URLSearchParams(location.search);
-const W = 360, H = 560, BASE = '../';
+const W = 720, H = 560, VW = 360, BASE = '../';   // 世界は 横 2倍（左＝いままでの ひろば 0〜360／右＝まるふわパーク 360〜720）。窓（VW）は いまの 縦長
 const TE = s => (window.TsuriEn ? window.TsuriEn.t(s) : s);   // English mode（tsuri-en.js）の 時だけ 訳す。日本語では そのまま かえす（canvas に かく もじ・共有の 文に 使う）
 const SHARE_URL = 'aohozomi.github.io/marufuwa-tsuri';   // しゃしんカードの すみに 小さく（マスター 許可の れいがい）。つりびよりの しゃしんカード・おへやの ふだと 完全に 同じ もじ（/hiroba は つけない・訳さない）
 // 魚の 絵（つりびよりと おなじ tsuri-art.js）。ひろばが ひらいて しばらくしてから、じゃまに ならない ように 読む。水槽（おへや）と いけの さかなが 使う。読めなくても 絵文字で 出る
@@ -1150,6 +1178,10 @@ function announceNew(id, quiet) {   // あたらしい 子が きた とき 1回
 // ─── ばしょ（かんばん・たてもの・かざり）。すうじは 360×560 の せかいの なかの いち ───
 const SVG = {
   house: `<svg viewBox="0 0 122 126" xmlns="http://www.w3.org/2000/svg"><ellipse cx="61" cy="120" rx="54" ry="6" fill="#0b2a4a" opacity=".16"/><rect x="16" y="56" width="90" height="62" rx="14" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.5"/><rect x="88" y="14" width="14" height="30" rx="4" fill="#e9c9a0" stroke="#7a4b34" stroke-width="2.5"/><path d="M5 62 Q61 -14 117 62 Q61 50 5 62Z" fill="#ff9f8f" stroke="#7a4b34" stroke-width="2.5" stroke-linejoin="round"/><path d="M26 52 Q61 12 96 52" fill="none" stroke="#ffd6cc" stroke-width="5" stroke-linecap="round"/><circle cx="35" cy="88" r="11" style="fill:var(--win,#bfe3f5)" stroke="#7a4b34" stroke-width="2.5"/><path d="M35 77v22M24 88h22" stroke="#7a4b34" stroke-width="2"/><rect x="21" y="101" width="28" height="9" rx="3" fill="#e5bf8c" stroke="#7a4b34" stroke-width="2"/><g><circle cx="27" cy="99" r="3.4" fill="#ff9ab8"/><circle cx="35" cy="97" r="3.4" fill="#ffd25e"/><circle cx="43" cy="99" r="3.4" fill="#ff9ab8"/></g><g class="door"><path d="M58 118 V94 a15 15 0 0 1 30 0 V118Z" fill="#7fd6a4" stroke="#7a4b34" stroke-width="2.5"/><circle cx="82" cy="105" r="2.6" fill="#ffd25e" stroke="#7a4b34" stroke-width="1.2"/></g><rect x="34" y="40" width="54" height="22" rx="7" fill="#f6dcae" stroke="#7a4b34" stroke-width="2.5"/><text x="61" y="56" text-anchor="middle" font-size="14" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">おへや</text></svg>`,
+  gate: `<svg viewBox="0 0 124 122" xmlns="http://www.w3.org/2000/svg"><ellipse cx="62" cy="118" rx="54" ry="4" fill="#0b2a4a" opacity=".15"/><rect x="8" y="40" width="20" height="76" rx="8" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><rect x="96" y="40" width="20" height="76" rx="8" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><path d="M4 46 Q62 -4 120 46 L120 62 Q62 16 4 62z" fill="#ffd9e6" stroke="#7a4b34" stroke-width="2.4" stroke-linejoin="round"/><rect x="26" y="26" width="72" height="22" rx="9" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.4"/><text x="62" y="42" text-anchor="middle" font-size="11" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">まるふわパーク</text><circle cx="18" cy="34" r="8" fill="#ffe27a" stroke="#7a4b34" stroke-width="2.4"/><circle cx="106" cy="34" r="8" fill="#ffe27a" stroke="#7a4b34" stroke-width="2.4"/><circle cx="62" cy="14" r="7" fill="#ff9fb5" stroke="#7a4b34" stroke-width="2.4"/><path d="M18 44 v-16M106 44 v-16" stroke="#7a4b34" stroke-width="2"/><path d="M30 20 l-12 5 l12 5z" fill="#8fd0f5" stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"/><path d="M94 20 l12 5 l-12 5z" fill="#ff9fb5" stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"/></svg>`,   // まるふわパークの ゲート（左＝しずかな ひろば／右＝パーク）
+  bowling: `<svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="76" rx="44" ry="4" fill="#0b2a4a" opacity=".15"/><rect x="8" y="34" width="84" height="40" rx="9" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><path d="M3 38 Q6 12 24 10 H76 Q94 12 97 38z" fill="#8fd0f5" stroke="#7a4b34" stroke-width="2.4" stroke-linejoin="round"/><rect x="24" y="16" width="52" height="18" rx="7" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.4"/><text x="50" y="29" text-anchor="middle" font-size="10" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">ボーリング</text><rect x="40" y="46" width="20" height="28" rx="10" fill="#ffb8a8" stroke="#7a4b34" stroke-width="2.4"/><g stroke="#7a4b34" stroke-width="1.8"><ellipse cx="22" cy="58" rx="6" ry="9" fill="#fff"/><ellipse cx="78" cy="58" rx="6" ry="9" fill="#fff"/></g><circle cx="22" cy="52" r="2.2" fill="#ff9fb5"/><circle cx="78" cy="52" r="2.2" fill="#ff9fb5"/></svg>`,
+  gym: `<svg viewBox="0 0 110 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="55" cy="76" rx="48" ry="4" fill="#0b2a4a" opacity=".15"/><rect x="8" y="32" width="94" height="42" rx="9" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><path d="M3 36 Q8 8 34 8 H76 Q102 8 107 36z" fill="#c9a8f5" stroke="#7a4b34" stroke-width="2.4" stroke-linejoin="round"/><rect x="28" y="14" width="54" height="18" rx="7" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.4"/><text x="55" y="27" text-anchor="middle" font-size="9.5" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">たいいくかん</text><rect x="46" y="46" width="18" height="28" rx="9" fill="#ffb8a8" stroke="#7a4b34" stroke-width="2.4"/><rect x="16" y="44" width="20" height="16" rx="5" fill="#bfe3f5" stroke="#7a4b34" stroke-width="2"/><rect x="74" y="44" width="20" height="16" rx="5" fill="#bfe3f5" stroke="#7a4b34" stroke-width="2"/></svg>`,
+  drive: `<svg viewBox="0 0 96 64" xmlns="http://www.w3.org/2000/svg"><ellipse cx="48" cy="60" rx="42" ry="4" fill="#0b2a4a" opacity=".15"/><ellipse cx="48" cy="48" rx="40" ry="11" fill="#d9b98a" stroke="#7a4b34" stroke-width="2"/><rect x="26" y="20" width="4" height="26" fill="#8a6a52"/><rect x="66" y="20" width="4" height="26" fill="#8a6a52"/><rect x="14" y="2" width="68" height="22" rx="7" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.4"/><text x="48" y="17" text-anchor="middle" font-size="10" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">じゅんびちゅう</text><path d="M10 54 l4-12 l4 12z" fill="#ff8a3c" stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"/><path d="M78 54 l4-12 l4 12z" fill="#ff8a3c" stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"/></svg>`,   // ドライブ場：まだ ページが ない（札だけ）
   appie: `<svg viewBox="0 0 80 76" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="72" rx="34" ry="4" fill="#0b2a4a" opacity=".15"/><rect x="10" y="32" width="60" height="38" rx="8" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><path d="M4 36 Q8 10 40 8 Q72 10 76 36z" fill="#8fd0f5" stroke="#7a4b34" stroke-width="2.4" stroke-linejoin="round"/><rect x="32" y="46" width="16" height="24" rx="8" fill="#ffb8a8" stroke="#7a4b34" stroke-width="2"/><circle cx="44" cy="59" r="1.6" fill="#7a4b34"/><rect x="14" y="44" width="12" height="18" rx="4" fill="#bfe3f5" stroke="#7a4b34" stroke-width="2"/><rect x="54" y="44" width="12" height="18" rx="4" fill="#bfe3f5" stroke="#7a4b34" stroke-width="2"/><rect x="32" y="16" width="16" height="16" rx="5" fill="#fff6cf" stroke="#7a4b34" stroke-width="2"/><rect x="37" y="19" width="6" height="10" rx="2" fill="#8fd0f5"/></svg>`,   // アプリの おうち（10/2）：ドアの ある ちいさな 家
   cafe: `<svg viewBox="0 0 112 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="95" rx="50" ry="5" fill="#0b2a4a" opacity=".15"/><rect x="10" y="36" width="92" height="58" rx="10" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.5"/><path d="M4 40 Q6 14 20 12 H92 Q106 14 108 40z" fill="#c98a5a" stroke="#7a4b34" stroke-width="2.5" stroke-linejoin="round"/><path d="M14 38 L22 14M32 38 L38 12M50 38 L52 12M68 38 L66 12M86 38 L80 14M102 38 L94 14" stroke="#fff4e0" stroke-width="5" opacity=".85"/><rect x="26" y="19" width="60" height="16" rx="7" fill="#fff4e0" stroke="#7a4b34" stroke-width="2"/><text x="56" y="32" text-anchor="middle" font-size="12" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">カフェ</text><g stroke="#7a4b34" stroke-width="2.2"><rect class="cw" x="16" y="52" width="24" height="24" rx="12" fill="#fff2c8"/><rect class="cw" x="72" y="52" width="24" height="24" rx="12" fill="#fff2c8"/><rect x="45" y="54" width="22" height="40" rx="9" fill="#b7835a"/></g><circle cx="62" cy="76" r="1.8" fill="#fff4e0"/><g stroke="#7a4b34" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M22 66 h12 v4 a5 5 0 0 1 -5 5 h-2 a5 5 0 0 1 -5 -5z" fill="#fff"/><path d="M34 67 q4 0 0 4" fill="none"/><path d="M26 63 q-2 -3 0 -5M30 63 q-2 -3 0 -5" fill="none" opacity=".7"/><path d="M80 75 l6 -14 l6 14z" fill="#ffd9a8"/></g></svg>`,   // カフェ（10/1 マスター「カフェ作って」）：ひろばの 右の おくの 丘。ぬくもりの まど（夜は ひかる）
   machi: `<svg viewBox="0 0 112 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="95" rx="52" ry="5" fill="#0b2a4a" opacity=".15"/><rect x="8" y="38" width="96" height="56" rx="10" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.5"/><rect x="4" y="12" width="104" height="32" rx="9" fill="#f6dcae" stroke="#7a4b34" stroke-width="2.5"/><path d="M12 19 Q56 3 100 19" fill="none" stroke="#fff4e0" stroke-width="4" stroke-linecap="round" opacity=".75"/><text x="56" y="34" text-anchor="middle" font-size="15" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">まちかど</text><g stroke="#7a4b34" stroke-width="2.2" stroke-linejoin="round"><path d="M11 47 h28 v10 a5 5 0 0 1 -5 5 h-18 a5 5 0 0 1 -5 -5z" fill="#ff9fb5"/><path d="M43 47 h28 v10 a5 5 0 0 1 -5 5 h-18 a5 5 0 0 1 -5 -5z" fill="#8fd0f5"/><path d="M75 47 h28 v10 a5 5 0 0 1 -5 5 h-18 a5 5 0 0 1 -5 -5z" fill="#ffd25e"/></g><g stroke="#ffffffcc" stroke-width="3"><path d="M19 48 v13M27 48 v13M35 48 v13"/><path d="M51 48 v13M59 48 v13M67 48 v13"/><path d="M83 48 v13M91 48 v13M99 48 v13"/></g><g stroke="#7a4b34" stroke-width="2.2"><rect x="14" y="66" width="22" height="22" rx="4" fill="#bfe3f5"/><rect x="46" y="66" width="22" height="22" rx="4" fill="#bfe3f5"/><rect x="78" y="66" width="22" height="22" rx="4" fill="#bfe3f5"/></g><g stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"><path d="M20 76 h10 l1.5 8 h-13z" fill="#ffe3ec"/><path d="M22 76 q3 -6 6 0" fill="none"/><rect x="50" y="70" width="14" height="13" fill="#fff"/><path d="M51.5 81 l4 -5 3 3 2.5 -2.5 3 4.5z" fill="#9fd6a8" stroke="none"/><polygon points="89,70 91.2,75 96.5,75.4 92.4,78.8 93.8,84 89,81.2 84.2,84 85.6,78.8 81.5,75.4 86.8,75" fill="#ffd25e"/></g></svg>`,
@@ -1187,6 +1219,8 @@ SVG.shelter = `<svg viewBox="0 0 120 122" xmlns="http://www.w3.org/2000/svg"><de
 { const s = SVG.flowerbed, re = /<path d="M[\d.]+ [\d.]+ Q[^"]*" fill="none" stroke="#4f9a4a" stroke-width="2" stroke-linecap="round"\/>/g, idx = [...s.matchAll(re)].map(m => m.index);
   if (idx.length === 5) { const end = s.lastIndexOf('</svg>'), ch = idx.map((p, k) => s.slice(p, k < 4 ? idx[k + 1] : end)); SVG.flowerbed = s.slice(0, idx[0]) + [0, 3, 1, 2, 4].slice(0, BLOOM_SHOWN).map(k => ch[k]).join('') + '</svg>'; } }   // 花の ならび：ひだり・みぎ・まんなか…（2本は ひだりと みぎ・あとは まんなかから ふえる）
 SVG.post = `<svg viewBox="0 0 40 64" xmlns="http://www.w3.org/2000/svg"><ellipse cx="20" cy="61" rx="15" ry="3" fill="#0b2a4a" opacity=".16"/><rect x="17" y="34" width="6" height="27" rx="2" fill="#b98a5a" stroke="#7a4b34" stroke-width="2"/><path d="M6 34 V22 a14 14 0 0 1 28 0 V34Z" fill="#ff8f8a" stroke="#7a4b34" stroke-width="2.4" stroke-linejoin="round"/><rect x="12" y="24" width="16" height="3.4" rx="1.7" fill="#7a4b34"/><path d="M14 14 q6 -5 12 0" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/><g class="pflag"><rect x="30" y="20" width="2.4" height="15" fill="#7a4b34"/><rect x="30.2" y="20" width="10" height="7" rx="1.4" fill="#ffd25e" stroke="#7a4b34" stroke-width="1.6"/></g></svg>`;
+// まるふわパークの 建物（10/3）：1＝ドアつきで 出す／0＝まるごと 出さない（ページが できるまで）／'soon'＝「じゅんびちゅう」の 札だけ。ページが できたら 1 に するだけ
+const PARK = { bowling: 1, kuru: 0, stream: 1, drive: 'soon' };
 const PROPS = [
   { id: 'pier', x: 78, y: 286, w: 104, h: 76, svg: SVG.pier, dest: 'tsuri', mark: '🎣' },
   { id: 'house', x: 180, y: 264, w: 122, h: 126, svg: SVG.house, dest: 'oheya', mark: '🐠' },
@@ -1203,10 +1237,14 @@ const PROPS = [
   { id: 'flower-l', x: 30, y: 388, w: 60, h: 44, svg: SVG.flowerbed, secret: 'flower' },   // 木の ねもと（木の 手前に 置く＝かくれない）
   { id: 'flower-r', x: 330, y: 388, w: 60, h: 44, svg: SVG.flowerbed, secret: 'flower' },
   { id: 'post', x: 284, y: 352, w: 34, h: 58, svg: SVG.post, dest: 'post', mark: '✉️', block: { rect: [270, 334, 298, 354] } },
-  { id: 'appie', x: 40, y: 504, w: 52, h: 50, svg: SVG.appie, dest: 'appie', mark: '📱', block: { rect: [20, 494, 60, 506] } },   // アプリの おうち：ひろばの 左下（ちいさく なじませる）
+  { id: 'gate', x: 360, y: 312, w: 124, h: 122, svg: SVG.gate },   // まるふわパークの ゲート（左半分と 右半分の さかい）
+  { id: 'appie', x: 470, y: 534, w: 52, h: 50, svg: SVG.appie, dest: 'appie', mark: '📱', block: { rect: [448, 524, 492, 536] } },   // アプリの おうち：パークの 南
+  ...(PARK.bowling ? [{ id: 'bowling', x: 440, y: 342, w: 96, h: 77, svg: SVG.bowling, dest: 'bowling', mark: '🎳', block: { rect: [396, 332, 484, 344] } }] : []),
+  ...(PARK.stream ? [{ id: 'gym', x: 652, y: 342, w: 104, h: 76, svg: SVG.gym, dest: 'gym', mark: '🎙️', block: { rect: [600, 332, 704, 344] } }] : []),
+  ...(PARK.drive === 'soon' ? [{ id: 'drive', x: 694, y: 440, w: 80, h: 53, svg: SVG.drive, dest: 'drive', mark: '🚧', block: { rect: [660, 430, 710, 442] } }] : []),
   { id: 'cafe', x: 84, y: 346, w: 68, h: 61, svg: SVG.cafe, dest: 'cafe', mark: '☕', block: { rect: [56, 338, 112, 348] } },   // カフェ：左の 地面（木の となり・ベンチの うえ）。山の上ではなく あるける ひろばに（10/1 マスター）
   { id: 'machi', x: 50, y: 238, w: 92, h: 84, svg: SVG.machi, dest: 'machi', mark: '🛍️' },   // まちかど（おみせ・びじゅつかん・おすすめの へや）：左の 丘の たてもの。ドアの まえは 池の わき
-  { id: 'maruiro', x: 308, y: 272, w: 88, h: 58, svg: SVG.maruiro, dest: 'maruiro', mark: '🔵' },   // じゅんびちゅうは 右上の 地面の上（おへやの右・空に 浮かせない。10/1 マスター「ういてる」・総司令部）
+  { id: 'maruiro', x: 616, y: 536, w: 88, h: 58, svg: SVG.maruiro, dest: 'maruiro', mark: '🔵' },   // まるいろの 小屋：パークの 南（10/3：ひろばの 右上から うつした。10/1 マスター「ういてる」・総司令部）
   { id: 'well', x: 298, y: 526, w: 122, h: 80, svg: SVG.well, dest: 'ido', mark: '💧', block: { rect: [234, 452, 360, 528] } },
   ...(LITTER ? LITTER_SPOTS.map((s, i) => ({ id: 'litter-' + (i + 1), x: s.x, y: s.y, w: 40, h: 26, svg: litterSvg(), secret: 'litter' })) : []),   // きせつの つもり（はいても 次の 日は また ふえる）
   ...(TRACES.includes('flower') ? [{ id: 'trace-flower', x: TRACE_SIDE === 'r' ? 310 : 50, y: 432, w: 18, h: 22, svg: traceFlower(TRACE_COL), secret: 'trace' }] : []),   // ベンチに だれかの はな（日づけで 出る）
@@ -1216,10 +1254,14 @@ const DEST = {
   tsuri: { name: 'つりば', at: { x: 90, y: 296 }, kind: 'go', url: () => new URL('../', location.href).href, pan: -.8, motif: () => { tone(660, .08, 'sine', 0, .04, 880, 0, .04); } },
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
   thanks: { name: 'ありがとうの いし', at: { x: 320, y: 444 }, kind: 'thanks', pan: .8 },
-  maruiro: { name: 'まるいろ', at: { x: 306, y: 314 }, kind: 'go', url: () => new URL('../maruiro/', location.href).href, pan: .8, motif: () => { chord([523, 659, 880], .08, 'triangle'); } },
+  park: { name: 'まるふわパーク', at: { x: 392, y: 334 }, kind: 'park', pan: .8, motif: () => {} },
+  bowling: { name: 'ボーリングじょう', at: { x: 440, y: 362 }, kind: 'go', url: () => new URL('bowling/', location.href).href, pan: .8, motif: () => {} },
+  gym: { name: 'たいいくかん', at: { x: 652, y: 362 }, kind: 'go', url: () => new URL('../links/stream/', location.href).href, pan: .8, motif: () => {} },
+  drive: { name: 'ドライブじょう', at: { x: 694, y: 462 }, kind: 'wait', line: 'ここは まだ じゅんびちゅう。ちかぢか あそべるよ。たのしみに まっててね', pan: .8 },
+  maruiro: { name: 'まるいろ', at: { x: 616, y: 548 }, kind: 'go', url: () => new URL('../maruiro/', location.href).href, pan: .8, motif: () => { chord([523, 659, 880], .08, 'triangle'); } },
   ido: { name: 'いど', at: { x: 298, y: 540 }, kind: 'well', pan: .8 },
   post: { name: 'ポスト', at: { x: 284, y: 372 }, kind: 'post', pan: .4 },
-  appie: { name: 'アプリの おうち', at: { x: 40, y: 524 }, kind: 'appie', pan: -.8, motif: () => {} },
+  appie: { name: 'アプリの おうち', at: { x: 470, y: 548 }, kind: 'appie', pan: -.8, motif: () => {} },
   cafe: { name: 'カフェ', at: { x: 84, y: 372 }, kind: 'go', url: () => new URL('cafe/', location.href).href, pan: .8, motif: () => { chord([523, 622, 784], .08, 'triangle'); } },
   machi: { name: 'まちかど', at: { x: 46, y: 288 }, kind: 'machi', pan: -.8, motif: () => { chord([523, 659, 784], .08, 'triangle'); } },
   bijutsu: { name: 'びじゅつかん', at: { x: 46, y: 288 }, kind: 'go', url: () => new URL('bijutsukan/', location.href).href, pan: -.8, motif: () => { chord([587, 740, 880], .08, 'triangle'); } },
@@ -1425,7 +1467,14 @@ const propEl = id => layerProps.querySelector(`[data-id="${id}"]`);
 // ─── ことば（ふきだし と、こえに だして よむ ぶん）───
 let T = 0, lastInput = 0;
 const bubbles = [];
-let box = { width: 360, height: 560 }, k = 1;
+let box = { width: 720, height: 560 }, k = 1;
+let cam = 0, camTarget = 0;   // かめら：窓の 左はしの 世界 x（0〜W−VW）。あるく 子を ゆっくり おう（うごきを へらす・わりこみは その場）
+const viewport = document.getElementById('viewport');
+function parkHello() {   // ゲートを くぐると「まるふわパーク」と 1行（1回だけ・3びょう）
+  own.parkHello = 1; saveOwn(); const el = document.getElementById('park-sign'); if (!el) return; el.hidden = false; setTimeout(() => { el.hidden = true; }, 3000);
+}
+function applyCam() { scene.style.transform = 'translate3d(' + (-cam * (viewport.clientWidth / VW)).toFixed(2) + 'px,0,0)'; }
+function camTick(dt, snap) { camTarget = clamp(player.x - VW / 2, 0, W - VW); if (snap || reduce() || Math.abs(camTarget - cam) < .05) cam = camTarget; else cam += (camTarget - cam) * Math.min(1, dt * 4.5); applyCam(); }
 function measure() { box = scene.getBoundingClientRect(); k = box.width / W; }
 let lastHard = -99;
 // soft：かってに おこる ことの しらせ。さっき だいじな しらせが あったら、うわがきしない
@@ -1521,6 +1570,7 @@ function animateActor(a, dt) {
   a.wasWalking = walking;
 }
 function render() {
+  applyCam();
   for (const a of actors) {
     const s = scaleOf(a);
     a.el.style.left = (a.x / W * 100).toFixed(3) + '%'; a.el.style.top = (a.y / H * 100).toFixed(3) + '%';
@@ -2139,6 +2189,7 @@ function arrive(id) {
   if (d.kind === 'post') { trip = null; openPost(); return; }
   if (d.kind === 'machi') { trip = null; sfx.arrive(); openMachi(); return; }
   if (d.kind === 'appie') { trip = null; sfx.arrive(); openAppie(); return; }
+  if (d.kind === 'park') { trip = null; sfx.arrive(); narrate(S('まるふわパークへ ようこそ。ぐるっと あるいて まわれるよ。', 'Welcome to Marufuwa Park. You can walk all the way around.')); return; }
   if (id === 'tsuri') { trip = null; sfx.arrive(); openTsuriba(); return; }   // つりばの 一覧（いけない ところも 見せる）
   if (d.kind === 'wait') { trip = null; if (koujiTap(id) >= 5) { koujiFlip(id); return; } sfx.hammer(); setFace('apricot', 2600); hop(player, 2); speak(player, 'じゅんびちゅう だって', 2200, true); narrate(d.line); return; }
   sfx.arrive(); setFace('sparkle', 3000);
@@ -2374,7 +2425,7 @@ function ensureActorRoom() {   // あいている 席が なければ、いち�
 function summonFriend(id) {   // ひろばの はしから あるいて くる（うごきを へらす 時は その ばに ふっと）
   if (!PALS[id] || friends.some(f => f.id === id) || !ensureActorRoom()) return null;
   const fromLeft = player.x > 180, home = slotAt(friends.length), y = clamp(player.y, 300, 540);
-  const f = spawnFriend(id, home, { x: fromLeft ? 18 : W - 18, y, since: T });
+  const f = spawnFriend(id, home, { x: fromLeft ? cam + 18 : cam + VW - 18, y, since: T });
   friends.push(f); own.seenAt[id] = Date.now(); saveOwn();
   if (reduce()) { const s = nearestFree(clamp(player.x + (fromLeft ? -40 : 40), 14, W - 14), y); if (s) { f.x = s.x; f.y = s.y; } }
   renderPalRow(); return f;
@@ -2466,7 +2517,7 @@ function toggleFav(id) {   // つりびよりと おなじ きろく save.fav �
 }
 let nextFavCheck = 3, nearNote = '', nextNear = 0, nextVisitAt = 30, nextClock = 30, nextBird = 6, nextJump = 14, nextMeteor = 45, nextSwap = swapGap();
 function update(dt) {
-  T += dt;
+  T += dt; camTick(dt); if (!own.parkHello && player.x > 380) parkHello();
   if (groupUntil && T >= groupUntil) groupEnd();   // みんなで しゃしんの あつまりを おえる（ひかるのも やめる）
   if (sit) { if (player.moving) sitEnd(); else sitTick(); }   // ベンチで ひとやすみ：うごいたら おわり
   const kb = keyMove(dt); if (!kb) stepActor(player, dt);
@@ -2557,7 +2608,7 @@ function roundPath(ctx, x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx
 async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cache }。ふだんの しゃしんは 引数なし（PNG）。動画の 材料づくりでは JPEG・おびを 時間の 名前に・ぴょん／ながれぼしも 描く
   measure();
   const svgImg = o.cache ? svgImageCached : svgImage;
-  const OW = 1080, OH = 1920, S = o.video ? 2.9 : 2.78, PX = (OW - W * S) / 2, PY = 104, K3 = 3;   // しゃしんは ひろばを 少し 小さく して、いちばん 下に ひづけと あそべる ばしょ（URL）の 1行の 場所を あける（動画の 材料は 今まで どおり）
+  const OW = 1080, OH = 1920, S = o.video ? 2.9 : 2.78, PX = (OW - VW * S) / 2, PY = 104, K3 = 3, CAMX = cam;   // しゃしんは 窓に 見えて いる 範囲（VW）だけ・かめらの 分 ずらして 世界を えがく   // しゃしんは ひろばを 少し 小さく して、いちばん 下に ひづけと あそべる ばしょ（URL）の 1行の 場所を あける（動画の 材料は 今まで どおり）
   const cvs = document.createElement('canvas'); cvs.width = OW; cvs.height = OH;
   const ctx = cvs.getContext('2d'), css = getComputedStyle(scene), hasFilter = 'filter' in ctx;
   const grad = ctx.createLinearGradient(0, 0, 0, OH); grad.addColorStop(0, '#dff2fb'); grad.addColorStop(1, '#f4fbff'); ctx.fillStyle = grad; ctx.fillRect(0, 0, OW, OH);
@@ -2568,8 +2619,8 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   glyphs.forEach((ch, i) => { if (ch !== ' ') { ctx.lineWidth = 15; ctx.strokeStyle = colors[gi % 4]; ctx.strokeText(ch, gx, 52); ctx.fillStyle = '#fff'; ctx.fillText(ch, gx, 52); gi++; } gx += gw[i]; });
   ctx.restore();
   // ひろば（かどを まるく）
-  ctx.save(); ctx.fillStyle = '#fff'; roundPath(ctx, PX - 8, PY - 8, W * S + 16, H * S + 16, 46); ctx.fill();
-  roundPath(ctx, PX, PY, W * S, H * S, 38); ctx.clip(); ctx.translate(PX, PY); ctx.scale(S, S);
+  ctx.save(); ctx.fillStyle = '#fff'; roundPath(ctx, PX - 8, PY - 8, VW * S + 16, H * S + 16, 46); ctx.fill();
+  roundPath(ctx, PX, PY, VW * S, H * S, 38); ctx.clip(); ctx.translate(PX - CAMX * S, PY); ctx.scale(S, S);
   const rainy = scene.dataset.rain === 'true', dimF = css.getPropertyValue('--dim').trim() || 'brightness(1)';
   if (hasFilter) ctx.filter = dimF + (rainy ? ' brightness(.93) saturate(.9)' : '');
   if (scene.dataset.art === 'on' && $('art')) { for (const im of $('art').querySelectorAll('img')) ctx.drawImage(im, 0, 0, W, H); }   // 絵の さしかえが ある 時は その 絵を 写す
@@ -3097,7 +3148,7 @@ addEventListener('load', () => {
   }, DROP_EN = { 'さくらのはなびら': 'cherry blossom petal', 'あおいは': 'fresh green leaf', 'どんぐり': 'acorn', 'ゆきのけっしょう': 'snow crystal' }, dropEn = n => DROP_EN[n] || null;
   if (E.add) {   // なかま名簿（街人の なまえ・ひとこと）と、♡・いっしょに つりに いく の ことば
     const N = s => { try { const r = E.t(s); return r || s; } catch { return s; } }, TOKU_EN = { めがいいよ: 'sharp-eyed', ちからもちだよ: 'strong', うんがいいよ: 'lucky', おちついているよ: 'calm' };
-    const ex = { 'さくらの ふぶき': 'Cherry blossom blizzard', 'はなび': 'Fireworks', 'もみじの あめ': 'Maple leaf rain', 'ゆきの ふぶき': 'Snow flurry', 'さくらの はなびらが、ふぶきみたいに まって いるよ': 'The cherry petals are dancing like a blizzard.', 'はなびが ぽん、ぽんって あがって いるよ': 'Fireworks are going pop, pop.', 'もみじが あめみたいに ふって いるよ': 'Maple leaves are falling like rain.', 'ゆきが ふわふわ ふって いるよ': 'Snow is drifting down softly.', 'はなびは よるに あがるよ': 'The fireworks go up at night.', 'きれい…': 'So pretty…', 'わあ…': 'Wow…', 'きれいだったね。また らいねん あえるよ': 'That was beautiful. We can meet again next year.', 'この きせつも もうすぐ おわり。また らいねん あえるよ': 'This season is almost over. We can meet again next year.', 'おかえり。おはなが ひとつ さいたよ': 'Welcome back. A flower has bloomed.', 'おかえり。ひろばは いつも ここに あるよ': 'Welcome back. The plaza is always here.', 'あ、コイン！': 'Oh, a coin!', 'さっ さっ': 'Swish, swish', 'ぽっ': 'Pop!', 'もう きれいに なって いるね': 'It’s already neat and tidy.', 'おちばを はいたよ。さっぱり したね': 'You swept the leaves. So neat!', 'はなびらを あつめたよ。いい におい': 'You gathered the petals. They smell nice.', 'ゆきを はらったよ。あったかく なったね': 'You brushed off the snow. It feels warmer.', 'ひろばが きれいに なったね': 'The plaza looks tidy now.', 'きれいに なったね、ありがとう': 'It looks so clean. Thank you!', 'さっぱり した！': 'Fresh and neat!', 'おちばを はく': 'Sweep the leaves', 'はなびらを あつめる': 'Gather the petals', 'ゆきを はらう': 'Brush off the snow', 'あかりを ともす': 'Light the lamps', 'あかりを ともしたよ。ぽわっと あったかいね': 'You lit the lamp. It glows warmly.', 'ふたつとも あかりが ついたね': 'Both lamps are lit now.', 'いまは おひさまが あかるいね。あかりは よるに ともるよ': 'The sun is bright now. The lamps glow at night.', 'もう あかりが ついて いるね': 'The lamp is already lit.', 'あかりが ついたね': 'The light is on!', 'あったかい ひかりだね': 'What a warm light.', 'ともだちの ようす': 'How friends are doing', 'おなか、くう…って なったよ': 'My tummy went rumble…', 'ちょっと さむいね…': 'It’s a little chilly…', 'ふぁ…ねむい ねむい': 'Yaaawn… so sleepy.', 'もぐもぐ…おいしいな。ありがとう': 'Munch munch… yummy. Thank you.', 'おなか いっぱい。ありがとう': 'My tummy’s full. Thank you.', 'あったかい。ありがとう': 'So warm. Thank you.', 'ぽかぽか するよ。ありがとう': 'Nice and toasty. Thank you.', 'ふわふわ…ぐっすり ねむれそう。ありがとう': 'So fluffy… I can sleep soundly. Thank you.', 'ぬくぬく…ありがとう': 'Snug as can be… thank you.', 'ごはんを あげる': 'Give some food', 'うわぎを かける': 'Put a jacket on', 'もうふを かける': 'Cover with a blanket', 'ごはんを あげたよ。よろこんで いるよ': 'You gave some food. They look happy.', 'うわぎを かけて あげたよ。よろこんで いるよ': 'You put a jacket on them. They look happy.', 'もうふを かけて あげたよ。よろこんで いるよ': 'You covered them with a blanket. They look happy.', 'いま：おなかが すいて いるみたい': 'Right now: seems hungry', 'いま：さむそうに して いるみたい': 'Right now: seems chilly', 'いま：ねむそうに して いるみたい': 'Right now: seems sleepy', 'おおきな かさの した。ここだけ あめが ふらないよ': 'Under the big umbrella. No rain falls right here.', 'かさの した、ぽかぽかだね': 'Nice and cozy under the umbrella.', 'ここなら ぬれないね': 'We won’t get wet here.', 'いっしょに あまやどり、いいね': 'Sheltering together feels nice.', 'あめを ながめて いよう': 'Let’s watch the rain.', 'せまいけど、なかよく しようね': 'It’s snug, but let’s get along.', "つらい ときは": "If it’s hard right now", "きょうの おてがみ": "Today’s letter", "ありがとう": "Thank you", "おてがみを しまったよ。": "Put the letter away.", "いけ": "Pond", "はな": "Flowers", "ポスト": "Mailbox", "ぴょん ぴょん": "Hop, hop", "みずきり、ぴょん ぴょん。いけに わっかが ひろがったよ": "Stone skipping: hop, hop. Ripples spread across the pond.", "ふゆは はなが ねて いるよ。はるを まって いるね": "The flowers are sleeping in winter. They’re waiting for spring.", "ふゆだね": "It’s winter.", "ごくごく": "Glug glug", "おみず ごくごく。はなが うれしそうだよ": "Glug glug. The flowers look happy.", "きょうも きて くれて ありがとう。いるだけで うれしいよ。": "Thank you for coming today. I’m happy just because you’re here.", "がんばらなくて いいよ。ここは ゆっくりで いい ばしょ。": "You don’t have to try hard. This is a place to take it slowly.", "つかれた ときは、やすんで いいんだよ。": "When you’re tired, it’s okay to rest.", "きのうの ことは わすれても いいよ。きょうの ひろばは やさしいよ。": "It’s okay to forget yesterday. The plaza is gentle today.", "ふんすいの おと、すきだよ。いっしょに きこうね。": "I love the sound of the fountain. Let’s listen together.", "あめの ひも、はれの ひも、あなたが いると たのしいよ。": "Rainy days or sunny days, it’s fun when you’re here.", "なにも しなくても だいじょうぶ。そばに いるね。": "You don’t have to do anything. I’ll be right beside you.", "きょうは おふとんで ごろごろ する ひでも いいんだよ。": "It’s okay to spend today snuggled up in bed.", "いけの おみずは、きょうも きれいだね。": "The pond water is clear again today.", "ねむれない よるは、ひろばで ぼーっと しよう。": "On nights you can’t sleep, let’s spend time quietly in the plaza.", "できない ひも、やすむ ひも、ぜんぶ あなたの ひだよ。": "Days you can’t do things, days you rest—they’re all your days.", "あなたの ペースで いいよ。いそがなくて いいよ。": "Your pace is just fine. No need to hurry.", "ないても いいよ。ここには だれも おこらないよ。": "It’s okay to cry. No one here will be angry.", "こころが おもい ひは、そっと ベンチに すわろう。": "On heavy-hearted days, let’s sit quietly on the bench.", "きょうの くもは ふわふわ。みて みて。": "Today’s clouds are fluffy. Look, look!", "はなが さいて いたよ。あなたに みせたかったんだ。": "The flowers are blooming. I wanted to show you.", "ありがとう って いわれると、うれしいね。いつも ありがとう。": "It feels nice to be thanked. Thank you, always.", "あしたの ことは、あした かんがえよう。": "Let’s think about tomorrow tomorrow.", "となりに すわるね。なにも はなさなくて いいよ。": "I’ll sit next to you. You don’t have to say anything.", "きょうは いちにち、ゆるく いこうね。": "Let’s take it easy all day today.", "きょうは どんな きもちでも、ここに いて いいよ。": "Whatever you feel today, you can be here.", "ひとりじゃ ないよ。ここに なかまたちが いるよ。": "You’re not alone. Your pals are here.", "くるしい ときは、ひとりで がまんしなくて いいよ。ここに いるよ。": "When it hurts, you don’t have to bear it alone. I’m right here.", "ほしが きれいな よるだよ。みあげて みよう。": "It’s a night with beautiful stars. Let’s look up.", "あったかい ひざしが きもち いいね。": "The warm sunshine feels nice.", "うまく いかない ひも あるよね。みんな そういう ひが あるよ。": "Some days things don’t go well. Everyone has those days.", "わたしは あなたが すきだよ。そのままで いいよ。": "I like you. You’re fine just as you are.", "きょう ひろばに きた。それだけで すごい ことだよ。": "You came to the plaza today. That alone is wonderful.", "きょうの そらは、ひろいね。いっしょに ながめよう。": "The sky is wide today. Let’s look at it together.", "しんどい ときは、たすけてって いって いいんだよ。": "When it’s hard, it’s okay to ask for help.", "ひろばの なかまたちは、あなたが くると うれしいよ。": "The pals in the plaza are happy when you come.", "きょうの おはなし、はなしても だまって いても いいよ。": "You can tell me about your day, or stay quiet. Either is fine.", "あくびが でたら、ねむい って こと。おふとんで ゆっくり してね。": "If you yawn, you’re sleepy. Please rest well in your bed.", "ちいさい ことでも、ほめて いいんだよ。えらいね。": "Even small things deserve praise. Well done.", "ときどき、なにも かんがえない じかんを つくろうね。": "Sometimes, let’s make time to think about nothing.", "かぜが きもち いいよ。まどを あけて みると いいかも。": "The breeze feels nice. Maybe try opening a window.", "あなたの いろんな かお、ぜんぶ すてきだよ。": "All of your many faces are lovely.", "きょうも ここに いて くれて ありがとう。": "Thank you for being here today.", "つらい ことが つづく ときは、だれかに はなして みよう。": "When hard things keep happening, try talking to someone.", "いつでも ひろばは ここに あるよ。また おいでね。": "The plaza is always here. Please come again.", 'なかま': 'Friends', 'ひろばに いる なかまと、いっしょに いく なかまが ここに ならぶよ。すうじは じぶんの ぶんだけ。いそがなくて だいじょうぶ。': 'Friends in the plaza and friends coming along are here. Numbers are only yours. No need to rush.', 'いっしょに いく なかま（3にんまで）': 'Coming along (up to 3)', 'ぜんいん': 'Everyone', 'あき': 'Empty', 'いっしょ': 'Together', 'せってい': 'Settings', 'おと・BGM・うごきの せってい': 'Sound, BGM and motion settings', 'せっていを ひらいたよ。おと・BGM・くみたてる・うごき。': 'Settings are open: sound, BGM, build and motion.', 'せっていを とじたよ。': 'Settings are closed.', 'まちかど': 'Town Corner', 'つりば': 'Fishing Spots', 'アプリの おうち': 'The App House', 'ここから さきは アプリの おはなし。アプリだけの たのしみを ちょっと だけ みせるよ。': 'From here on, it is about the app. A small peek at fun only the app has.', 'アプリの がめんの しゃしんが ここに ならぶよ。': 'Photos of the app screens will line up here.', 'App Storeを みる': 'See on the App Store', 'App Storeへ いくよ。いい？': 'We will go to the App Store. Is that OK?', 'App Storeへ いく': 'Go to the App Store', 'やめて もどる': 'Cancel', 'いかなくても ぜんぜん だいじょうぶ。': 'No need to go at all.', 'おとを けす（いまは ON）': 'Mute sound (now ON)', 'おとを ならす（いまは OFF）': 'Turn sound on (now OFF)', 'どこかを さわると おとが なるよ': 'Touch anywhere and the sound will play', 'ミュートボタンは こちら →': 'Mute button is here →', 'おてがみカード': 'Letter card', 'カードに する': 'Make a card', 'かってに とうこうは しません。': 'Nothing is posted by itself.', 'まるいろ': 'Maruiro', 'まるい こを おとして あそぼう': 'Drop round friends and play', 'おみせ・まるいろ・いど': 'Shop, Maruiro, Well', 'まるいろで、まるい こを おとして あそべるよ': 'At Maruiro you can drop round friends and play', 'カフェ': 'Cafe', 'ひとやすみ': 'Take a break', 'ひろばに ついたよ。': 'You are at the plaza.', 'いまの ひろばの ようす': 'Plaza status', 'どこへ いく？': 'Where to?', 'どこへ いく？ いそがなくて だいじょうぶ。': 'Where to? No rush at all.', 'おみせ': 'Shop', 'びじゅつかん': 'Art Gallery', 'おすすめの へや': 'Recommended Room', 'ふくの いろや もちものを もらえるよ': 'Get colors and things to hold', 'えを ながめよう': 'Look at pictures', 'すてきな ひとを しょうかい': 'Meet lovely people', 'おみせ・びじゅつかん': 'Shop & Gallery', 'かぞえてみる': 'Count', 'もとの ふくに もどす': 'Back to usual look', 'あき。おして から、なかまを えらんでね。': 'Empty. Press it, then pick a friend.', 'あき。いま えらんで いるよ。もういちど おすと やめるよ。': 'Empty. Choosing now. Press again to cancel.', 'だれを つれていく？': 'Who should come along?', 'えらんで ね。もういちど「あき」を おすと やめるよ。': 'Pick one. Press “Empty” again to cancel.', 'だれを つれていく？ なかまを えらんでね。もういちど あきを おすと やめるよ。': 'Who should come along? Pick a friend. Press Empty again to cancel.', 'やめたよ。': 'Cancelled.', 'おるすばんに する': 'Stay behind',
+    const ex = { 'さくらの ふぶき': 'Cherry blossom blizzard', 'はなび': 'Fireworks', 'もみじの あめ': 'Maple leaf rain', 'ゆきの ふぶき': 'Snow flurry', 'さくらの はなびらが、ふぶきみたいに まって いるよ': 'The cherry petals are dancing like a blizzard.', 'はなびが ぽん、ぽんって あがって いるよ': 'Fireworks are going pop, pop.', 'もみじが あめみたいに ふって いるよ': 'Maple leaves are falling like rain.', 'ゆきが ふわふわ ふって いるよ': 'Snow is drifting down softly.', 'はなびは よるに あがるよ': 'The fireworks go up at night.', 'きれい…': 'So pretty…', 'わあ…': 'Wow…', 'きれいだったね。また らいねん あえるよ': 'That was beautiful. We can meet again next year.', 'この きせつも もうすぐ おわり。また らいねん あえるよ': 'This season is almost over. We can meet again next year.', 'おかえり。おはなが ひとつ さいたよ': 'Welcome back. A flower has bloomed.', 'おかえり。ひろばは いつも ここに あるよ': 'Welcome back. The plaza is always here.', 'あ、コイン！': 'Oh, a coin!', 'さっ さっ': 'Swish, swish', 'ぽっ': 'Pop!', 'もう きれいに なって いるね': 'It’s already neat and tidy.', 'おちばを はいたよ。さっぱり したね': 'You swept the leaves. So neat!', 'はなびらを あつめたよ。いい におい': 'You gathered the petals. They smell nice.', 'ゆきを はらったよ。あったかく なったね': 'You brushed off the snow. It feels warmer.', 'ひろばが きれいに なったね': 'The plaza looks tidy now.', 'きれいに なったね、ありがとう': 'It looks so clean. Thank you!', 'さっぱり した！': 'Fresh and neat!', 'おちばを はく': 'Sweep the leaves', 'はなびらを あつめる': 'Gather the petals', 'ゆきを はらう': 'Brush off the snow', 'あかりを ともす': 'Light the lamps', 'あかりを ともしたよ。ぽわっと あったかいね': 'You lit the lamp. It glows warmly.', 'ふたつとも あかりが ついたね': 'Both lamps are lit now.', 'いまは おひさまが あかるいね。あかりは よるに ともるよ': 'The sun is bright now. The lamps glow at night.', 'もう あかりが ついて いるね': 'The lamp is already lit.', 'あかりが ついたね': 'The light is on!', 'あったかい ひかりだね': 'What a warm light.', 'ともだちの ようす': 'How friends are doing', 'おなか、くう…って なったよ': 'My tummy went rumble…', 'ちょっと さむいね…': 'It’s a little chilly…', 'ふぁ…ねむい ねむい': 'Yaaawn… so sleepy.', 'もぐもぐ…おいしいな。ありがとう': 'Munch munch… yummy. Thank you.', 'おなか いっぱい。ありがとう': 'My tummy’s full. Thank you.', 'あったかい。ありがとう': 'So warm. Thank you.', 'ぽかぽか するよ。ありがとう': 'Nice and toasty. Thank you.', 'ふわふわ…ぐっすり ねむれそう。ありがとう': 'So fluffy… I can sleep soundly. Thank you.', 'ぬくぬく…ありがとう': 'Snug as can be… thank you.', 'ごはんを あげる': 'Give some food', 'うわぎを かける': 'Put a jacket on', 'もうふを かける': 'Cover with a blanket', 'ごはんを あげたよ。よろこんで いるよ': 'You gave some food. They look happy.', 'うわぎを かけて あげたよ。よろこんで いるよ': 'You put a jacket on them. They look happy.', 'もうふを かけて あげたよ。よろこんで いるよ': 'You covered them with a blanket. They look happy.', 'いま：おなかが すいて いるみたい': 'Right now: seems hungry', 'いま：さむそうに して いるみたい': 'Right now: seems chilly', 'いま：ねむそうに して いるみたい': 'Right now: seems sleepy', 'おおきな かさの した。ここだけ あめが ふらないよ': 'Under the big umbrella. No rain falls right here.', 'かさの した、ぽかぽかだね': 'Nice and cozy under the umbrella.', 'ここなら ぬれないね': 'We won’t get wet here.', 'いっしょに あまやどり、いいね': 'Sheltering together feels nice.', 'あめを ながめて いよう': 'Let’s watch the rain.', 'せまいけど、なかよく しようね': 'It’s snug, but let’s get along.', "つらい ときは": "If it’s hard right now", "きょうの おてがみ": "Today’s letter", "ありがとう": "Thank you", "おてがみを しまったよ。": "Put the letter away.", "いけ": "Pond", "はな": "Flowers", "ポスト": "Mailbox", "ぴょん ぴょん": "Hop, hop", "みずきり、ぴょん ぴょん。いけに わっかが ひろがったよ": "Stone skipping: hop, hop. Ripples spread across the pond.", "ふゆは はなが ねて いるよ。はるを まって いるね": "The flowers are sleeping in winter. They’re waiting for spring.", "ふゆだね": "It’s winter.", "ごくごく": "Glug glug", "おみず ごくごく。はなが うれしそうだよ": "Glug glug. The flowers look happy.", "きょうも きて くれて ありがとう。いるだけで うれしいよ。": "Thank you for coming today. I’m happy just because you’re here.", "がんばらなくて いいよ。ここは ゆっくりで いい ばしょ。": "You don’t have to try hard. This is a place to take it slowly.", "つかれた ときは、やすんで いいんだよ。": "When you’re tired, it’s okay to rest.", "きのうの ことは わすれても いいよ。きょうの ひろばは やさしいよ。": "It’s okay to forget yesterday. The plaza is gentle today.", "ふんすいの おと、すきだよ。いっしょに きこうね。": "I love the sound of the fountain. Let’s listen together.", "あめの ひも、はれの ひも、あなたが いると たのしいよ。": "Rainy days or sunny days, it’s fun when you’re here.", "なにも しなくても だいじょうぶ。そばに いるね。": "You don’t have to do anything. I’ll be right beside you.", "きょうは おふとんで ごろごろ する ひでも いいんだよ。": "It’s okay to spend today snuggled up in bed.", "いけの おみずは、きょうも きれいだね。": "The pond water is clear again today.", "ねむれない よるは、ひろばで ぼーっと しよう。": "On nights you can’t sleep, let’s spend time quietly in the plaza.", "できない ひも、やすむ ひも、ぜんぶ あなたの ひだよ。": "Days you can’t do things, days you rest—they’re all your days.", "あなたの ペースで いいよ。いそがなくて いいよ。": "Your pace is just fine. No need to hurry.", "ないても いいよ。ここには だれも おこらないよ。": "It’s okay to cry. No one here will be angry.", "こころが おもい ひは、そっと ベンチに すわろう。": "On heavy-hearted days, let’s sit quietly on the bench.", "きょうの くもは ふわふわ。みて みて。": "Today’s clouds are fluffy. Look, look!", "はなが さいて いたよ。あなたに みせたかったんだ。": "The flowers are blooming. I wanted to show you.", "ありがとう って いわれると、うれしいね。いつも ありがとう。": "It feels nice to be thanked. Thank you, always.", "あしたの ことは、あした かんがえよう。": "Let’s think about tomorrow tomorrow.", "となりに すわるね。なにも はなさなくて いいよ。": "I’ll sit next to you. You don’t have to say anything.", "きょうは いちにち、ゆるく いこうね。": "Let’s take it easy all day today.", "きょうは どんな きもちでも、ここに いて いいよ。": "Whatever you feel today, you can be here.", "ひとりじゃ ないよ。ここに なかまたちが いるよ。": "You’re not alone. Your pals are here.", "くるしい ときは、ひとりで がまんしなくて いいよ。ここに いるよ。": "When it hurts, you don’t have to bear it alone. I’m right here.", "ほしが きれいな よるだよ。みあげて みよう。": "It’s a night with beautiful stars. Let’s look up.", "あったかい ひざしが きもち いいね。": "The warm sunshine feels nice.", "うまく いかない ひも あるよね。みんな そういう ひが あるよ。": "Some days things don’t go well. Everyone has those days.", "わたしは あなたが すきだよ。そのままで いいよ。": "I like you. You’re fine just as you are.", "きょう ひろばに きた。それだけで すごい ことだよ。": "You came to the plaza today. That alone is wonderful.", "きょうの そらは、ひろいね。いっしょに ながめよう。": "The sky is wide today. Let’s look at it together.", "しんどい ときは、たすけてって いって いいんだよ。": "When it’s hard, it’s okay to ask for help.", "ひろばの なかまたちは、あなたが くると うれしいよ。": "The pals in the plaza are happy when you come.", "きょうの おはなし、はなしても だまって いても いいよ。": "You can tell me about your day, or stay quiet. Either is fine.", "あくびが でたら、ねむい って こと。おふとんで ゆっくり してね。": "If you yawn, you’re sleepy. Please rest well in your bed.", "ちいさい ことでも、ほめて いいんだよ。えらいね。": "Even small things deserve praise. Well done.", "ときどき、なにも かんがえない じかんを つくろうね。": "Sometimes, let’s make time to think about nothing.", "かぜが きもち いいよ。まどを あけて みると いいかも。": "The breeze feels nice. Maybe try opening a window.", "あなたの いろんな かお、ぜんぶ すてきだよ。": "All of your many faces are lovely.", "きょうも ここに いて くれて ありがとう。": "Thank you for being here today.", "つらい ことが つづく ときは、だれかに はなして みよう。": "When hard things keep happening, try talking to someone.", "いつでも ひろばは ここに あるよ。また おいでね。": "The plaza is always here. Please come again.", 'なかま': 'Friends', 'ひろばに いる なかまと、いっしょに いく なかまが ここに ならぶよ。すうじは じぶんの ぶんだけ。いそがなくて だいじょうぶ。': 'Friends in the plaza and friends coming along are here. Numbers are only yours. No need to rush.', 'いっしょに いく なかま（3にんまで）': 'Coming along (up to 3)', 'ぜんいん': 'Everyone', 'あき': 'Empty', 'いっしょ': 'Together', 'せってい': 'Settings', 'おと・BGM・うごきの せってい': 'Sound, BGM and motion settings', 'せっていを ひらいたよ。おと・BGM・くみたてる・うごき。': 'Settings are open: sound, BGM, build and motion.', 'せっていを とじたよ。': 'Settings are closed.', 'まちかど': 'Town Corner', 'つりば': 'Fishing Spots', 'パークへ': 'To the Park', 'あそびば': 'Fun place', 'まるふわパーク': 'Marufuwa Park', 'ボーリングじょう': 'Bowling Alley', 'ドライブじょう': 'Drive Course', 'ボーリング': 'Bowling', 'たいいくかん': 'Gym', 'アプリの おうち': 'The App House', 'ここから さきは アプリの おはなし。アプリだけの たのしみを ちょっと だけ みせるよ。': 'From here on, it is about the app. A small peek at fun only the app has.', 'アプリの がめんの しゃしんが ここに ならぶよ。': 'Photos of the app screens will line up here.', 'App Storeを みる': 'See on the App Store', 'App Storeへ いくよ。いい？': 'We will go to the App Store. Is that OK?', 'App Storeへ いく': 'Go to the App Store', 'やめて もどる': 'Cancel', 'いかなくても ぜんぜん だいじょうぶ。': 'No need to go at all.', 'おとを けす（いまは ON）': 'Mute sound (now ON)', 'おとを ならす（いまは OFF）': 'Turn sound on (now OFF)', 'どこかを さわると おとが なるよ': 'Touch anywhere and the sound will play', 'ミュートボタンは こちら →': 'Mute button is here →', 'おてがみカード': 'Letter card', 'カードに する': 'Make a card', 'かってに とうこうは しません。': 'Nothing is posted by itself.', 'まるいろ': 'Maruiro', 'まるい こを おとして あそぼう': 'Drop round friends and play', 'おみせ・まるいろ・いど': 'Shop, Maruiro, Well', 'まるいろで、まるい こを おとして あそべるよ': 'At Maruiro you can drop round friends and play', 'カフェ': 'Cafe', 'ひとやすみ': 'Take a break', 'ひろばに ついたよ。': 'You are at the plaza.', 'いまの ひろばの ようす': 'Plaza status', 'どこへ いく？': 'Where to?', 'どこへ いく？ いそがなくて だいじょうぶ。': 'Where to? No rush at all.', 'おみせ': 'Shop', 'びじゅつかん': 'Art Gallery', 'おすすめの へや': 'Recommended Room', 'ふくの いろや もちものを もらえるよ': 'Get colors and things to hold', 'えを ながめよう': 'Look at pictures', 'すてきな ひとを しょうかい': 'Meet lovely people', 'おみせ・びじゅつかん': 'Shop & Gallery', 'かぞえてみる': 'Count', 'もとの ふくに もどす': 'Back to usual look', 'あき。おして から、なかまを えらんでね。': 'Empty. Press it, then pick a friend.', 'あき。いま えらんで いるよ。もういちど おすと やめるよ。': 'Empty. Choosing now. Press again to cancel.', 'だれを つれていく？': 'Who should come along?', 'えらんで ね。もういちど「あき」を おすと やめるよ。': 'Pick one. Press “Empty” again to cancel.', 'だれを つれていく？ なかまを えらんでね。もういちど あきを おすと やめるよ。': 'Who should come along? Pick a friend. Press Empty again to cancel.', 'やめたよ。': 'Cancelled.', 'おるすばんに する': 'Stay behind',
       'なかまの がめんを ひらいたよ。いま ひろばに いる なかまと、いっしょに いく なかまが ならんで いるよ。': 'Opened the Friends screen. Friends in the plaza and friends coming along are lined up.', 'なかまの がめんを とじたよ。': 'Closed the Friends screen.',
       'うん、また こんど。いつでも はなしかけてね。': 'Okay, maybe next time. Talk to me anytime.', 'だれか とおりかかったよ。はなしかけて みてね。': 'Someone is passing by. Try talking to them!', 'やった！ なかまだね': 'Yay! We’re friends now.',
       'まるふわ、きたね': 'Marufuwa, you’re here!', 'つりで あったよ。': 'We met while fishing.', 'はい': 'Yes', 'また こんど': 'Maybe later', 'ここで まつ': 'Wait here', 'いっしょに いく': 'Come along', 'いっしょに いく！': 'Let’s go together!', 'ここで まってるね': 'I’ll wait here.', 'うん、また こんど。いつでも さそってね。': 'Okay, maybe next time. Ask me anytime.',
