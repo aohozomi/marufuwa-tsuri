@@ -1674,7 +1674,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // おとは ぷつっと はじまって、すぱっと きれる。たかさは だんだんに うごく（ピロリッ、ヒュ〜）
   let audio = null, guide = 0, hiss = null;
   const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // iPhone は マナー スイッチで おとが きえる（Web Audio は マナーに したがう）
-  function ready() { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume(); return audio; }
+  function ready() { if (!audio) { audio = new (window.AudioContext || window.webkitAudioContext)(); try { audio.addEventListener('statechange', () => { try { drawMute(); } catch {} }); } catch {} } if (audio.state === 'suspended') audio.resume(); return audio; }
   // おとは 3つに わけて けせる（きこえかたに びんかんな ひと・おとが いらない ひと の ため）。「おと」ボタンが ぜんぶの もと
   // guide＝あんない（わ・ピコン・ちょんちょん・ピピッ・はんてい）／fx＝こうかおん（なげる・おいわい・おくりもの など）／amb＝なみと あめ／ui＝おとを つけた ときの かくにん（いつも ならす）
   const SND_KEY = {guide: 'sndGuide', fx: 'sndFx', amb: 'sndAmb'};
@@ -1959,7 +1959,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mk); else mk(); addEventListener('load', () => { mk(); drawHowto(); }); setTimeout(drawHowto, 900); }   // おと・BGM・とおく・ながめる・おやすみ・つかいやすく する を 1つの「あそびかた」に まとめる（ふだんは かくす）
   addEventListener('load', () => { try { drawShoreLabel(); } catch {} }); setTimeout(() => { try { drawShoreLabel(); } catch {} }, 900);
   { const pg = () => { const a = $('plaza-go'); if (a) a.textContent = L('ひろば（あそびば・おみせ）', 'Plaza (games & shop)'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pg); else pg(); addEventListener('load', pg); setTimeout(pg, 900); }
-  function drawMute() { const b = $('mute-top'); if (!b) return; const on = !!save.sound; b.setAttribute('aria-pressed', String(on)); b.textContent = L(on ? '🔊 おと：ON' : '🔇 おと：OFF', on ? '🔊 Sound: ON' : '🔇 Sound: OFF'); }   // ボタンの えは「いまの じょうたい」（ON＝🔊・OFF＝🔇）。おすと きりかわる
+  const bgmWaiting = () => { try { return !!(window.TsuriBgm && TsuriBgm.on() && !TsuriBgm.state().playing); } catch { return false; } };
+  const audioLocked = () => !!save.sound && (!(audio && audio.state === 'running') || bgmWaiting());   // ならして くれない（ブラウザ）か、BGM が まだ はじまって いない あいだは「ON」と ひょうじ しない   // おとは ON だが ブラウザが まだ ならして くれない（さわる まえ）
+  function drawMute() { const b = $('mute-top'); if (!b) return; const on = !!save.sound, lock = audioLocked(); b.setAttribute('aria-pressed', String(on)); b.dataset.locked = String(lock);
+    b.textContent = lock ? L('🔈 タップで おとが でるよ', '🔈 Tap to hear sound') : L(on ? '🔊 おと：ON' : '🔇 おと：OFF', on ? '🔊 Sound: ON' : '🔇 Sound: OFF'); if (lock) b.setAttribute('aria-label', L('おとは ON。さわると なります', 'Sound is on. It plays after you tap.')); else b.removeAttribute('aria-label'); }   // ONと ひょうじ して ならない うそを なくす   // ボタンの えは「いまの じょうたい」（ON＝🔊・OFF＝🔇）。おすと きりかわる
   function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
   $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); try { dispatchEvent(new Event('storage')); } catch {} drawSound();   /* おへや（すいそう）など ほかの ぶひんにも「おとが かわった」と しらせる */ if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([440, 523], .09, 'sine', .035, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
@@ -4360,6 +4363,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   drawWater(performance.now()); drawSky(performance.now()); drawSoil();
   if (!reduce()) { flowOn = true; requestAnimationFrame(flow); } else new MutationObserver(() => { lastDraw = lastSky = 0; drawWater(performance.now()); drawSky(performance.now()); drawSoil(); }).observe(scene, {attributes: true, attributeFilter: ['data-time', 'data-area']});
   drawSound();
+  setInterval(() => { try { if (audioLocked() || $('mute-top').dataset.locked === 'true') drawMute(); } catch {} }, 700);
   { const th = $('tap-hint'), put = () => { th.textContent = L('どこかを さわると おとが なるよ', 'Touch anywhere and the sound will play'); };   // ブラウザの きまりで さわる まえは なりません：さいしょの タップまで だけ 1ぎょう
     if (th && save.sound && save.tapHint !== 1) { put(); th.hidden = false; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', put); addEventListener('load', put); setTimeout(put, 900);
       const gone = () => { removeEventListener('pointerdown', gone, true); removeEventListener('keydown', gone, true); th.hidden = true; save.tapHint = 1; store(); };
@@ -4367,7 +4371,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   { const moveLang = () => { const row = document.querySelector('.lang-row'), bar = $('topmute'); if (row && bar && row.parentNode !== bar) bar.prepend(row); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(moveLang, 0)); else setTimeout(moveLang, 0);
     addEventListener('load', moveLang); setTimeout(moveLang, 800); }   // tsuri-en.js が さいごに つくる きりかえボタンを うえの ひだりへ
-  $('mute-top').addEventListener('click', () => { $('sound').click(); if (window.TsuriBgm && TsuriBgm.set) { try { TsuriBgm.set(!!save.sound); } catch {} } drawMute(); });   // 上の ボタン：こうかおん・なみ・BGM を ぜんぶ いっしょに
+  $('mute-top').addEventListener('click', () => { if (audioLocked() && navigator.userActivation && navigator.userActivation.isActive) { try { ready(); sfxLoad(); if (window.TsuriBgm && TsuriBgm.refresh) TsuriBgm.refresh(); } catch {} setTimeout(drawMute, 300); setTimeout(drawMute, 900); return; }   /* ならない うちの さいしょの タップは「ならす」だけ（きらない） */
+    $('sound').click(); if (window.TsuriBgm && TsuriBgm.set) { try { TsuriBgm.set(!!save.sound); } catch {} } drawMute(); });   // 上の ボタン：こうかおん・なみ・BGM を ぜんぶ いっしょに
   { const first = () => { removeEventListener('click', first); if (save.sound) { try { startAmbient(); sfxLoad(); } catch {} } };   // AudioContext は BGM の ためだけ（ここでは つくらない）   // ブラウザの きまり：さいしょの タップ（click）から なる。🔇で OFF に した その タップでは つくらない（ボタンの あとで しらべる）
     addEventListener('click', first); }
   { const redraw = () => { drawMute(); if (soundDefault && window.TsuriBgm && TsuriBgm.set && TsuriBgm.on && !TsuriBgm.on()) { let rec = null; try { rec = localStorage.getItem('marufuwa-bgm-v1') || localStorage.getItem('marufuwa-bgm-v2'); /* どちらかに きろくが あれば それを ゆうせん（ふるい OFF の むしは 共通部＝tsuri-bgm.js の しごと） */ } catch {} if (rec === null) { try { TsuriBgm.set(true); } catch {} } } };   // BGM も はじめから ON（きろくが なければ）

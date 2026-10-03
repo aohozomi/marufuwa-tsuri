@@ -416,7 +416,20 @@
   };
   window.TsuriBgm = api;
   // ゆびで さわった あとで はじめて 音の 部品を 作る／画面が かくれたら 止める／ほかの タブで「おと」「BGM」が かわったら 取りこむ
-  ['pointerup', 'pointerdown', 'keydown', 'touchend', 'click'].forEach(ev => addEventListener(ev, () => { if (wantGesture) { wantGesture = false; gestureBlock = false; refresh(); } }, { passive: true, capture: true }));
+  // 最初の タップ／キー（どこでも）で 音を 必ず ほどく：AudioContext を resume ＋ むおんの 1サンプル（iOS の ロック かいじょ）＋ BGM を はじめる。
+  // 1回 では なく「ならし はじめるまで」ずっと 見はる（resume が まにあわない・ブラウザが 1回めを みのがす ときでも 次の タップで 取りもどす）
+  const needUnlock = () => on && stack.length && !document.hidden && !(cur && cur.ctx && cur.ctx.state === 'running');
+  const unlock = () => {
+    if (!needUnlock()) return;
+    if (!touched()) { wantGesture = true; return; }   // さわる まえには 作らない（pointerdown / touchstart は まだ「さわった」に ならない ブラウザが ある）
+    wantGesture = false; gestureBlock = false;
+    try {
+      const top = stack[stack.length - 1], c = (top && typeof top.o.ctx === 'function' ? top.o.ctx() : null) || (ownCtx && ownCtx.state !== 'closed' ? ownCtx : null);
+      if (c) { if (c.state === 'suspended') c.resume().catch(() => {}); try { const sb = c.createBufferSource(); sb.buffer = c.createBuffer(1, 1, 22050); sb.connect(c.destination); sb.start(0); } catch {} }
+    } catch {}
+    refresh();
+  };
+  ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'click'].forEach(ev => addEventListener(ev, unlock, { passive: true, capture: true }));
   document.addEventListener('visibilitychange', refresh);
   addEventListener('pageshow', refresh);
   // 「おと」の ボタンなど、どこかを おした 直後に 見なおす（本体の おとボタンが 記録を かえた あと すぐ 止まる。ほかの ページの 記録の かわりは storage が しらせる）
