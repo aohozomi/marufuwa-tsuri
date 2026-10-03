@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google" content="notranslate">
+<title>のんびり ドライブ｜まるふわの ひろば</title>
+<meta name="description" content="ゆっくり すすむ まるい カートで、みずうみや ひろばを ぐるっと 一周。ひだり・みぎで ハンドル。みちから はずれても だいじょうぶ、いそがなくて いいよ。">
+<meta name="theme-color" content="#2b1d15">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23f3b95a'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%F0%9F%9A%97%3C/text%3E%3C/svg%3E">
+<!--
+  のんびり ドライブ（ゆっくり のる カートの ドライブ・じゅんい／タイム／てんすう／じかんぎれ なし）
+  【仮の え】いまの 絵は ぜんぶ コード（canvas）で えがいた「仮の え」です。
+  天の ほんものの え（img/drive/*.webp）が とどいたら、読めた ものから 自動で さしかわります（読めなければ 仮の えの まま）。
+    img/drive/cart_back.webp            … まるふわの カート（うしろ すがた・透明・480x480）
+    img/drive/friend_cart_0..2.webp     … ともだちの カート（うしろ すがた・透明・384x384）
+    img/drive/deco_flower|friend|fountain|tree|lamp|balloon|house.webp … みちばたの 小物（透明・256x256）
+    img/drive/nushi_lake.webp / nushi_plaza.webp … ぬし（透明・768x768）
+    img/drive/bg_lake.webp / bg_plaza.webp       … そら・とおくの けしき（よこに つながる・2400x480）
+    img/drive/reward_lake.webp / reward_plaza.webp … ごほうびの かざり（透明・480x480）
+  ・ランキング・サーバー・解析・自由入力・きろく（保存）は ありません。
+-->
+<script>
+// つりびよりの「つかいやすく する」（もじを おおきく・うごきを へらす）と 時間帯に したがう（本体の 記録を よむだけ）
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement, q = new URLSearchParams(location.search);
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+  var tf = q.get('time'), t = /^[ahyn]$/.test(tf || '') ? tf : /^[ahyn]$/.test(early.time || '') ? early.time : null;
+  if (!t) { var h = new Date().getHours(); t = h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n'; }
+  root.dataset.time = t;
+} catch (e) { document.documentElement.dataset.time = 'h'; }
+</script>
+<style>
+:root{--ink:#fff3dc;--ink2:#f1dcc0;--bg1:#3a261a;--bg2:#1f140e;--gold:#f0c46a;--gold2:#c8963a;--btn1:#ffdf9c;--btn2:#f1b455;--btn-ink:#3a2410;--btn-line:#fff3dc;--plate:#33211a;--line:#b98a5a}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:radial-gradient(ellipse at 50% 18%,#6a4228 0%,var(--bg1) 38%,var(--bg2) 100%) fixed;padding:12px 12px 36px}
+:root[data-inapp=x] body{padding-bottom:84px}
+.hut{max-width:520px;margin:0 auto}
+.back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(#fff,#dff1f7);border:2px solid #9bc9da;color:#14506b;font-weight:800;text-decoration:none}
+h1{margin:6px 0 0;font-size:1.3rem;line-height:1.4;text-align:center}
+.lead{margin:0 0 8px;text-align:center;font-size:.92rem;color:var(--ink2)}
+.stage{position:relative;border-radius:20px;overflow:hidden;border:3px solid var(--gold2);background:#2b2450;box-shadow:0 8px 24px #0008}
+.stage canvas{display:block;width:100%;aspect-ratio:10/10.5;touch-action:none}
+.msg{margin:8px 0 8px;min-height:3.2em;padding:6px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);text-align:center;font-weight:700;font-size:.95rem}
+.ctl{display:grid;grid-template-columns:1fr .8fr 1fr;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;min-width:44px;padding:6px 10px;border-radius:30px;border:3px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--btn-ink);font:inherit;font-weight:800;font-size:1.1rem;cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;box-shadow:0 4px 0 #8a5a1e}
+.btn.big{min-height:84px;font-size:1.25rem}
+.btn:active,.btn.on{transform:translateY(3px);box-shadow:0 1px 0 #8a5a1e;background:linear-gradient(#ffe9b8,#f7c46e)}
+.btn:focus-visible,.back:focus-visible,summary:focus-visible{outline:4px solid #fff;outline-offset:3px;box-shadow:0 0 0 8px #17658a}
+.btn small{display:block;font-size:.72rem;font-weight:700}
+.btn.mode,.btn.course{min-height:48px;touch-action:manipulation;font-size:.98rem;margin:4px 6px 0 0}
+.btn.course[aria-pressed=true],.btn.mode[aria-pressed=true]{background:linear-gradient(#cfeee0,#8fd1b3)}
+.ovl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;background:rgba(25,16,12,.82);text-align:center;font-size:.85rem;color:var(--ink)}
+.ovl img{display:block;max-width:62%;max-height:calc(100% - 52px);width:auto;height:auto;border-radius:12px;border:3px solid var(--gold)}
+.ovl p{margin:0;font-weight:700}
+[hidden]{display:none!important}
+.foot{margin:14px 0 0;text-align:center;font-size:.8rem;color:var(--ink2);word-break:break-all}
+.more{margin:12px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--line);background:var(--plate);color:var(--ink);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}
+.more .inner{margin:8px 0 0;padding:10px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.88rem}
+.more .inner p{margin:0 0 6px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ps-hint{color:#27424e}
+@media(min-width:700px){.hut{max-width:680px}.stage canvas{aspect-ratio:16/10}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+:root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+</style>
+</head>
+<body>
+<main class="hut" id="hut">
+  <a class="back" id="back" href="../index.html">← ひろばへ</a>
+  <h1>のんびり ドライブ</h1>
+  <p class="lead" id="lead">ひだり・みぎで ハンドル。ゆっくり どうぞ。</p>
+  <div class="stage" id="stage">
+    <canvas id="cv" width="360" height="378" role="img" aria-label="ゆうがたの みちを すすむ、まるい カートの うしろすがた。"></canvas>
+    <div class="ovl" id="ovl" hidden>
+      <img id="ovl-img" alt="">
+      <p id="ovl-p">ながおしで がぞうを とっておけるよ（タップで とじる）</p>
+    </div>
+  </div>
+  <p class="msg" id="msg" role="status" aria-live="polite">じどうで すすむよ。ひだり・みぎで ハンドルを きろう。</p>
+  <div class="ctl" id="ctl">
+    <button type="button" class="btn big" id="bl" aria-label="ひだりへ ハンドル"><span aria-hidden="true">◀</span> ひだり</button>
+    <button type="button" class="btn big" id="bb" aria-label="ブレーキ">ブレーキ</button>
+    <button type="button" class="btn big" id="br" aria-label="みぎへ ハンドル">みぎ <span aria-hidden="true">▶</span></button>
+  </div>
+  <details class="more" id="more"><summary>あそびかた・コース・らくちん</summary>
+    <div class="inner">
+      <p>カートは じどうで ゆっくり すすむよ。ひだり・みぎの ボタン（キーボードは やじるし）で ハンドルを きろう。ブレーキを おすと もっと ゆっくり。</p>
+      <p>みちから はずれても だいじょうぶ。ふわっと みちに もどるよ。みちばたの おはな・ともだち・ふんすいに ちかづくと ひかるよ。</p>
+      <p>じゅんいも タイムも ありません。きろくも しません。ぐるっと 一周 すると、きょうの ドライブの カードが でるよ。</p>
+      <p>コース：</p>
+      <button type="button" class="btn course" id="c0" aria-pressed="true">みずうみ 一周</button><button type="button" class="btn course" id="c1" aria-pressed="false">ひろば 一周</button>
+      <p>らくちん：ハンドルは じどうで、みちから はずれないよ。</p>
+      <button type="button" class="btn mode" id="mode" aria-pressed="false">いまは ふつう</button>
+    </div>
+  </details>
+  <p class="foot" id="foot">ほかの ばしょ：aohozomi.github.io/marufuwa-tsuri/links/</p>
+</main>
+<script>
+// English：この ページの ことば（tsuri-en.js の TsuriEn.add）。うごく ぶぶん（おしらせ）の ぶんも ここで ぜんぶ ひょうに する。
+const DRV_MSG = {
+  start:  ['じどうで すすむよ。ひだり・みぎで ハンドルを きろう。', 'It drives by itself. Steer with left and right.'],
+  easy:   ['らくちん：ハンドルは じどうだよ。ゆったり どうぞ。', 'Easy: the steering is automatic. Just relax.'],
+  normal: ['ふつう：ひだり・みぎで ハンドルを きろう。', 'Normal: steer with left and right.'],
+  back:   ['みちに もどるよ。だいじょうぶ。', 'Heading back to the road. It is okay.'],
+  flower: ['おはなを みつけたよ。', 'You found a flower.'],
+  friend: ['ともだちが てを ふったよ。', 'A friend waved at you.'],
+  fountain: ['ふんすいが きらきら。', 'The fountain sparkles.'],
+  yokan:  ['おや…？ むこうに なにか いるよ。', 'Oh…? Something is over there.'],
+  nushi:  ['ぬしが あらわれたよ！ こんにちは。', 'The guardian appeared! Hello.'],
+  lap:    ['ぐるっと 一周 できたよ！ ごほうびの カードだよ。', 'You made it around! Here is a little card.'],
+  course0: ['みずうみ 一周 に でかけよう。', 'Off we go around the lake.'],
+  course1: ['ひろば 一周 に でかけよう。', 'Off we go around the plaza.'],
+  brake:  ['ブレーキで ゆっくり。', 'Slowing down with the brake.']
+};
+(() => {
+  const EX = {
+    'のんびり ドライブ｜まるふわの ひろば': 'Relaxed Drive | Marufuwa Plaza',
+    'のんびり ドライブ': 'Relaxed Drive',
+    '← ひろばへ': '← Back to the Plaza',
+    'ひだり・みぎで ハンドル。ゆっくり どうぞ。': 'Steer with left and right. Take it slow.',
+    'ひだり': 'Left', 'みぎ': 'Right', 'ブレーキ': 'Brake',
+    'ひだりへ ハンドル': 'Steer left', 'みぎへ ハンドル': 'Steer right',
+    'あそびかた・コース・らくちん': 'How to play / Course / Easy mode',
+    'カートは じどうで ゆっくり すすむよ。ひだり・みぎの ボタン（キーボードは やじるし）で ハンドルを きろう。ブレーキを おすと もっと ゆっくり。': 'The cart moves slowly by itself. Steer with the left and right buttons (arrow keys on a keyboard). The brake makes it even slower.',
+    'みちから はずれても だいじょうぶ。ふわっと みちに もどるよ。みちばたの おはな・ともだち・ふんすいに ちかづくと ひかるよ。': 'It is fine if you leave the road. You will drift softly back. Flowers, friends and fountains by the road glow when you pass close.',
+    'じゅんいも タイムも ありません。きろくも しません。ぐるっと 一周 すると、きょうの ドライブの カードが でるよ。': 'There are no rankings and no timers. Nothing is saved. After one lap you get a card of today’s drive.',
+    'コース：': 'Course:',
+    'みずうみ 一周': 'Around the Lake', 'ひろば 一周': 'Around the Plaza',
+    'らくちん：ハンドルは じどうで、みちから はずれないよ。': 'Easy: the steering is automatic and you stay on the road.',
+    'いまは ふつう': 'Now: Normal', 'いまは らくちん': 'Now: Easy',
+    'ほかの ばしょ：aohozomi.github.io/marufuwa-tsuri/links/': 'More places: aohozomi.github.io/marufuwa-tsuri/links/',
+    'ながおしで がぞうを とっておけるよ（タップで とじる）': 'Press and hold the picture to keep it (tap to close)',
+    'ゆうがたの みちを すすむ、まるい カートの うしろすがた。': 'The back of a round cart driving down an evening road.'
+  };
+  Object.values(DRV_MSG).forEach(m => { EX[m[0]] = m[1]; });
+  const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
+  const title = () => { const E = window.TsuriEn; if (E && E.lang === 'en') document.title = 'Relaxed Drive | Marufuwa Plaza'; };
+  document.addEventListener('DOMContentLoaded', () => { reg(); title(); setTimeout(title, 300); setTimeout(title, 1200); });
+  addEventListener('load', () => { reg(); title(); });
+})();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
+  const rootEl = document.documentElement, $ = id => document.getElementById(id);
+  const cv = $('cv'), g = cv.getContext('2d'), msgEl = $('msg'), ovl = $('ovl'), ovlImg = $('ovl-img');
+  const mqCalm = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const calm = () => rootEl.dataset.calm === 'true' || !!(mqCalm && mqCalm.matches);
+  const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+  const TAU = Math.PI * 2;
+
+  // ─── コース（なだらかな カーブ・1周 900 マス・いまの はやさで 60〜90びょう） ───
+  const L = 900, CU = 0.0013, V0 = 12, DRAW = 110;
+  const COURSES = [
+    { id: 'lake', ja: 'みずうみ 一周', en: 'Around the Lake', secs: [[120, 0], [100, 1], [80, 0], [110, -1], [90, 0], [120, 1.2], [80, 0], [100, -1.2], [100, 0]], nushi: { z: 650, side: -4.2 },
+      ground: ['#3f5f3c', '#385636'], rumble: ['#d9776b', '#f3e2c4'], road: ['#5f4d4a', '#594846'], water: ['#3f6fa0', '#3a6697'], sand: '#c9a56e', decor: ['tree', 'lamp', 'balloon'] },
+    { id: 'plaza', ja: 'ひろば 一周', en: 'Around the Plaza', secs: [[100, 0], [90, -1], [100, 1], [70, 0], [120, -1.1], [90, 0.8], [100, 0], [110, 1.3], [120, 0]], nushi: { z: 640, side: 4.2 },
+      ground: ['#46663f', '#3f5d3a'], rumble: ['#e8a15a', '#f3e2c4'], road: ['#625048', '#5c4a43'], water: null, sand: null, decor: ['tree', 'lamp', 'balloon', 'house'] }
+  ];
+  function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function build(ci) {
+    const C = COURSES[ci], raw = new Float32Array(L); let k = 0;
+    C.secs.forEach(([len, c]) => { for (let i = 0; i < len; i++) raw[k++] = c; });
+    let cur = raw;   // まるく ならして ハンドルの きゅうな ひつようを なくす
+    for (let pass = 0; pass < 2; pass++) { const nx = new Float32Array(L), W = 45; for (let i = 0; i < L; i++) { let s = 0; for (let j = -W; j <= W; j++) s += cur[(i + j + L) % L]; nx[i] = s / (2 * W + 1); } cur = nx; }
+    for (let i = 0; i < L; i++) cur[i] *= CU;
+    C.curve = cur;
+    const r = rng(ci * 77 + 5), pk = [], dc = [], kinds = ['flower', 'friend', 'flower', 'fountain', 'friend', 'flower'];
+    for (let n = 0, z = 36; z < L - 12; n++, z += 38) {
+      if (Math.abs(z - C.nushi.z) < 22) continue;
+      pk.push({ type: kinds[n % kinds.length], z, side: (n % 2 ? 1 : -1) * 1.32, v: n % 3, glow: 0, got: false });
+    }
+    for (let z = 8; z < L; z += 11 + Math.floor(r() * 9)) {
+      const type = C.decor[Math.floor(r() * C.decor.length)], sgn = r() < .5 ? -1 : 1;
+      if (C.id === 'lake' && sgn < 0 && type !== 'balloon') continue;   // ひだりは みずうみ
+      dc.push({ type, z, side: sgn * (2.3 + r() * 2.2), v: Math.floor(r() * 3), glow: 0 });
+    }
+    C.pick = pk; C.decorObjs = dc;
+  }
+  COURSES.forEach((c, i) => build(i));
+
+  // ─── 仮の え の さしかえ（img/drive/*.webp が よめた ものだけ つかう） ───
+  const IMG = {};
+  ['cart_back', 'friend_cart_0', 'friend_cart_1', 'friend_cart_2', 'deco_flower', 'deco_friend', 'deco_fountain', 'deco_tree', 'deco_lamp', 'deco_balloon', 'deco_house', 'nushi_lake', 'nushi_plaza', 'bg_lake', 'bg_plaza', 'reward_lake', 'reward_plaza'].forEach(n => {
+    const im = new Image(); im.onload = () => { IMG[n] = im; }; im.src = '../../img/drive/' + n + '.webp';
+  });
+
+  // ─── ようす ───
+  const S = { ci: 0, z: 0, px: 0, steerVel: 0, speed: V0, brake: 0, easy: false, t: 0, userOff: 0, laps: 0, offT: 0, back: false, scroll: 0, carGlow: 0, found: {}, yokan: false, nushiShown: false, nushiSeen: false, lastSay: -9, lapT: 0, lastLapT: 0, lastMsg: '', frames: 0, step: 0 };
+  const held = { l: 0, r: 0, b: 0, kl: 0, kr: 0, kb: 0 };
+  const course = () => COURSES[S.ci];
+  const say = (key, force) => {
+    const m = DRV_MSG[key]; if (!m) return;
+    if (!force && S.t - S.lastSay < 1.6) return;
+    S.lastSay = S.t; if (msgEl.textContent !== m[0]) msgEl.textContent = m[0];
+  };
+
+  // ─── おと（低〜中の 音だけ：80〜440Hz・sine・立ち上がり 30ms 以上・エンジンの おとは なし） ───
+  const sndLog = (window.__driveSnd = []);
+  let acOwn = null;
+  function acFallback() { try { acOwn = acOwn || new (window.AudioContext || window.webkitAudioContext)(); if (acOwn.state === 'suspended') acOwn.resume(); return acOwn; } catch (e) { return null; } }
+  function tone(hz, at, len, vol, att) {
+    const PS = window.PageSound; if (!PS || !PS.soundOn()) return;
+    const ctx = acFallback(); if (!ctx) return;
+    hz = clamp(hz, 80, 440); att = Math.max(.03, att || .03);
+    try {
+      const t = ctx.currentTime + (at || 0), o = ctx.createOscillator(), gn = ctx.createGain(), f = ctx.createBiquadFilter();
+      o.type = 'sine'; o.frequency.value = hz; f.type = 'lowpass'; f.frequency.value = 900;
+      gn.gain.setValueAtTime(0, t); gn.gain.linearRampToValueAtTime(vol, t + att); gn.gain.exponentialRampToValueAtTime(.0008, t + len);
+      o.connect(f); f.connect(gn); gn.connect(ctx.destination); o.start(t); o.stop(t + len + .05);
+      sndLog.push({ hz, type: o.type, attack: att, len, vol });
+    } catch (e) {}
+  }
+  const sfx = {
+    poko() { tone(196, 0, .22, .09, .03); tone(262, .14, .26, .08, .03); },   // ぽこぽこ
+    lap() { tone(262, 0, .7, .1, .05); tone(330, .24, .7, .1, .05); tone(392, .48, 1.0, .1, .05); },
+    nushi() { tone(110, 0, 1.4, .1, .2); tone(165, .3, 1.2, .07, .2); },
+    brake() { tone(147, 0, .3, .06, .06); }
+  };
+
+  // ─── にゅうりょく（ボタンを おしている あいだ・やじるし・A/D・スペース） ───
+  const steerIn = () => ((held.r || held.kr) ? 1 : 0) - ((held.l || held.kl) ? 1 : 0);
+  const brakeIn = () => (held.b || held.kb) ? 1 : 0;
+  function bindHold(btn, key) {
+    const on = e => { held[key] = 1; btn.classList.add('on'); try { btn.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); };
+    const off = () => { held[key] = 0; btn.classList.remove('on'); };
+    btn.addEventListener('pointerdown', on);
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => btn.addEventListener(ev, off));
+    btn.addEventListener('contextmenu', e => e.preventDefault());
+    btn.addEventListener('click', e => { if (e.detail === 0) { held[key] = 1; btn.classList.add('on'); setTimeout(() => { held[key] = 0; btn.classList.remove('on'); }, 320); } });   // キーボードで ボタンを おした とき
+  }
+  bindHold($('bl'), 'l'); bindHold($('br'), 'r'); bindHold($('bb'), 'b');
+  const KEYMAP = { ArrowLeft: 'kl', KeyA: 'kl', ArrowRight: 'kr', KeyD: 'kr', ArrowDown: 'kb', KeyS: 'kb', Space: 'kb' };
+  addEventListener('keydown', e => {
+    const k = KEYMAP[e.code]; if (!k) { if (e.key === 'Escape') hideCard(); return; }
+    if (e.target && e.target.closest && e.target.closest('details,button,a,summary') && k === 'kb') return;   // スペースは ボタンの もの
+    if (e.target && e.target.closest && e.target.closest('details')) return;
+    held[k] = 1; e.preventDefault();
+  });
+  addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) held[k] = 0; });
+  addEventListener('blur', () => { Object.keys(held).forEach(k => { held[k] = 0; }); });
+
+  // ─── コース・らくちん ───
+  const modeBtn = $('mode'), cBtns = [$('c0'), $('c1')];
+  function setCourse(i) {
+    S.ci = i; S.z = 0; S.lapT = 0; S.px = 0; S.steerVel = 0; S.userOff = 0; S.laps = 0; S.found = {}; S.yokan = false; S.nushiShown = false; S.nushiSeen = false; S.back = false; S.offT = 0;
+    COURSES[i].pick.forEach(p => { p.got = false; p.glow = 0; });
+    cBtns.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+    hideCard(); say('course' + i, true);
+  }
+  cBtns.forEach((b, i) => b.addEventListener('click', () => setCourse(i)));
+  modeBtn.addEventListener('click', () => {
+    S.easy = !S.easy; modeBtn.setAttribute('aria-pressed', String(S.easy));
+    modeBtn.textContent = S.easy ? 'いまは らくちん' : 'いまは ふつう'; S.userOff = 0; say(S.easy ? 'easy' : 'normal', true);
+  });
+
+  // ─── しんこう（ここは えがかずに ようすだけ すすめる＝けんさでも つかう） ───
+  const crossed = (a, b, oz) => b < L ? (a < oz && b >= oz) : (oz > a || oz <= b - L);
+  function sim(dt) {
+    dt = Math.min(dt, .05); S.t += dt; S.lapT += dt; S.step++;
+    const C = course(), cm = calm(), z0 = S.z;
+    // はやさ：ゆっくり（らくちん・うごきを へらす・ブレーキで もっと ゆっくり）
+    const bi = brakeIn(); S.brake += (bi - S.brake) * Math.min(1, dt * 3);
+    if (bi && !S.brakeSaid) { S.brakeSaid = true; say('brake'); sfx.brake(); } else if (!bi) S.brakeSaid = false;
+    const target = V0 * (S.easy ? .85 : 1) * (cm ? .7 : 1) * (1 - S.brake * .6) * (S.back ? .85 : 1);
+    S.speed += (target - S.speed) * Math.min(1, dt * 2.5);
+    const cHere = C.curve[Math.floor(S.z) % L], si = steerIn();
+    S.steerVel += (si - S.steerVel) * Math.min(1, dt * 6);   // なめらかに（きゅうな かいてん なし）
+    if (S.easy) {
+      S.userOff += S.steerVel * .5 * dt; if (!si) S.userOff -= S.userOff * Math.min(1, dt * .25);
+      S.userOff = clamp(S.userOff, -.6, .6);
+      let mag = 0;
+      if (!si) for (const p of C.pick) { const d = ((p.z - S.z) % L + L) % L; if (!p.got && d > 3 && d < 30) { mag = p.side * .55; break; } }
+      const tg = clamp(S.userOff + mag, -.7, .7);
+      S.px += (tg - S.px) * Math.min(1, dt * 1.6);
+      S.back = false; S.offT = 0;
+    } else {
+      S.px += S.steerVel * .6 * dt - cHere * 10 * S.speed * dt;   // カーブでは ふくらむ
+      const off = Math.abs(S.px) > 1.12;
+      if (off) {
+        S.offT += dt;
+        if (S.offT > 1.1) { if (!S.back) { S.back = true; say('back', true); } }
+      } else { S.offT = 0; if (Math.abs(S.px) < .95) S.back = false; }
+      if (S.back) { const to = Math.sign(S.px) * .7; S.px += (to - S.px) * Math.min(1, dt * 1.1); }   // ふわっと もどる（とまらない・ばつなし）
+      S.px = clamp(S.px, -2.2, 2.2);
+    }
+    S.z += S.speed * dt;
+    // よりみち（とおると ひかる）
+    const zn = S.z;
+    C.pick.forEach(p => {
+      p.glow = Math.max(0, p.glow - dt / 1.8);
+      if (!p.got && crossed(z0, zn, p.z) && Math.abs(S.px - p.side) < .9) {
+        p.got = true; p.glow = 1; S.carGlow = 1; S.found[p.type] = 1; say(p.type, true); sfx.poko();
+      }
+    });
+    S.carGlow = Math.max(0, S.carGlow - dt / 1.8);
+    // ぬし（よかん → あらわれる）
+    const dn = ((C.nushi.z - S.z) % L + L) % L;
+    if (dn < 95 && dn > 55 && !S.yokan) { S.yokan = true; say('yokan', true); }
+    if (dn <= 55 && dn > 0 && !S.nushiShown) { S.nushiShown = true; say('nushi', true); sfx.nushi(); }
+    if (dn < 20 && S.nushiShown) { S.nushiSeen = true; S.found.nushi = 1; }
+    // 背景（ゆっくり なめらかに）
+    S.scroll += cHere * S.speed * dt * (cm ? 12000 : 40000) * 1.0;
+    if (S.z >= L) { S.z -= L; lapDone(); }
+  }
+  function lapDone() {
+    S.laps++; S.lastLapT = S.lapT; S.lapT = 0; say('lap', true); sfx.lap();
+    showCard();
+    S.yokan = false; S.nushiShown = false; S.nushiSeen = false;
+    const found = S.found; S.found = {};
+    course().pick.forEach(p => { p.got = false; });
+    S.lastFound = found;
+  }
+
+  // ─── えがく ───
+  let W = 0, H = 0, h = 0, HH = 0, Zs = 0, cache = {};
+  const latI = new Float32Array(2048);
+  function size() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), cw = cv.clientWidth || 360, ch = cv.clientHeight || 378;
+    W = Math.min(Math.round(cw * dpr), 640); H = Math.round(W * ch / cw);
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    h = Math.round(H * .4); HH = H - h; Zs = 1.5 * HH; cache = {};
+  }
+  addEventListener('resize', size); size();
+  function circ(x, y, r, c) { g.fillStyle = c; g.beginPath(); g.arc(x, y, Math.max(.5, r), 0, TAU); g.fill(); }
+  function ell(x, y, rx, ry, c) { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, Math.max(.5, rx), Math.max(.5, ry), 0, 0, TAU); g.fill(); }
+  function rr(x, y, w, hh, r, c) { g.fillStyle = c; g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + hh, r); g.arcTo(x + w, y + hh, x, y + hh, r); g.arcTo(x, y + hh, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); g.fill(); }
+  function halo(x, y, r, a, col) {
+    if (a <= .01) return; const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, 'rgba(' + col + ',' + (a * .85).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + col + ',0)');
+    g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  const HEADS = { cream: '#fff1dc', brown: '#c98b5a', gray: '#cdd3da', pink: '#ffc4d0' };
+  function cart(x, yb, s, body, head, tilt) {
+    g.save(); g.translate(x, yb); if (tilt) g.rotate(tilt);
+    ell(0, 0, s * .55, s * .1, 'rgba(0,0,0,.3)');
+    ell(-s * .4, -s * .12, s * .1, s * .15, '#2a1f1c'); ell(s * .4, -s * .12, s * .1, s * .15, '#2a1f1c');
+    rr(-s * .46, -s * .5, s * .92, s * .42, s * .17, body);
+    rr(-s * .3, -s * .22, s * .6, s * .1, s * .05, 'rgba(0,0,0,.22)');
+    circ(-s * .18, -s * .3, s * .04, '#ffe9a8'); circ(s * .18, -s * .3, s * .04, '#ffe9a8');
+    const hc = HEADS[head] || head;
+    circ(-s * .2, -s * .92, s * .1, hc); circ(s * .2, -s * .92, s * .1, hc);
+    circ(0, -s * .7, s * .27, hc);
+    circ(-s * .15, -s * .62, s * .05, 'rgba(255,150,160,.5)'); circ(s * .15, -s * .62, s * .05, 'rgba(255,150,160,.5)');
+    if (head === 'cream') { rr(-s * .22, -s * .47, s * .44, s * .08, s * .04, '#7fc3e6'); }
+    g.restore();
+  }
+  function sprite(type, x, yb, s, v, a, t, c) {
+    const im = IMG['deco_' + type];
+    if (im) { g.drawImage(im, x - s / 2, yb - s, s, s); return; }
+    if (type === 'flower') {
+      const cols = ['#ff9db5', '#ffd25e', '#d3a7ff'];
+      g.strokeStyle = '#4f8a45'; g.lineWidth = Math.max(1, s * .06); g.beginPath(); g.moveTo(x, yb); g.lineTo(x, yb - s * .6); g.stroke();
+      circ(x - s * .22, yb - s * .2, s * .12, '#5e9a50'); circ(x + s * .22, yb - s * .16, s * .12, '#5e9a50');
+      for (let i = 0; i < 5; i++) circ(x + Math.cos(i * TAU / 5) * s * .2, yb - s * .75 + Math.sin(i * TAU / 5) * s * .2, s * .17, cols[v % 3]);
+      circ(x, yb - s * .75, s * .13, '#ffe27a');
+    } else if (type === 'friend') {
+      const cols = ['#d9a56e', '#cfd6dd', '#ffd0d8'], col = cols[v % 3], wv = c ? 0 : Math.sin(t * 2.2) * .25;
+      ell(x, yb, s * .38, s * .07, 'rgba(0,0,0,.25)');
+      circ(x, yb - s * .3, s * .3, col);
+      circ(x - s * .22, yb - s * .78, s * .1, col); circ(x + s * .22, yb - s * .78, s * .1, col);
+      circ(x, yb - s * .6, s * .3, col);
+      circ(x - s * .1, yb - s * .62, s * .035, '#3a2818'); circ(x + s * .1, yb - s * .62, s * .035, '#3a2818');
+      circ(x - s * .17, yb - s * .53, s * .05, 'rgba(255,140,150,.5)'); circ(x + s * .17, yb - s * .53, s * .05, 'rgba(255,140,150,.5)');
+      g.strokeStyle = '#3a2818'; g.lineWidth = Math.max(1, s * .03); g.beginPath(); g.arc(x, yb - s * .55, s * .06, .2, Math.PI - .2); g.stroke();
+      g.strokeStyle = col; g.lineWidth = Math.max(2, s * .09); g.lineCap = 'round'; g.beginPath(); g.moveTo(x + s * .26, yb - s * .35); g.lineTo(x + s * (.45 + wv * .2), yb - s * (.65 + wv)); g.stroke(); g.lineCap = 'butt';
+    } else if (type === 'fountain') {
+      ell(x, yb - s * .1, s * .5, s * .14, '#8a7a6a'); ell(x, yb - s * .14, s * .42, s * .1, '#6fb3d9');
+      rr(x - s * .06, yb - s * .55, s * .12, s * .42, s * .04, '#a89888');
+      g.strokeStyle = 'rgba(190,230,250,.9)'; g.lineWidth = Math.max(1.5, s * .05); g.lineCap = 'round';
+      [-1, 0, 1].forEach(k => { g.beginPath(); g.moveTo(x, yb - s * .55); g.quadraticCurveTo(x + k * s * .22, yb - s * .95, x + k * s * .4, yb - s * .2); g.stroke(); });
+      g.lineCap = 'butt';
+    } else if (type === 'tree') {
+      rr(x - s * .07, yb - s * .45, s * .14, s * .45, s * .03, '#6e4a2e');
+      circ(x, yb - s * .75, s * .36, '#46703f'); circ(x - s * .22, yb - s * .55, s * .25, '#4f7d46'); circ(x + s * .22, yb - s * .58, s * .25, '#3f6a3a');
+    } else if (type === 'lamp') {
+      rr(x - s * .035, yb - s * 1.0, s * .07, s * 1.0, s * .02, '#3b2f2b'); halo(x, yb - s * 1.05, s * .5, .55, '255,214,140'); circ(x, yb - s * 1.05, s * .1, '#ffe2a0');
+    } else if (type === 'balloon') {
+      const y = yb - s * 1.2 - (c ? 0 : Math.sin(t * .9 + x) * s * .06), cols = ['#ff8fa6', '#8fd0ff', '#ffd06e'];
+      g.strokeStyle = 'rgba(255,243,220,.6)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y + s * .3); g.lineTo(x, yb - s * .1); g.stroke();
+      ell(x, y, s * .22, s * .28, cols[v % 3]); circ(x - s * .07, y - s * .1, s * .05, 'rgba(255,255,255,.4)');
+    } else if (type === 'house') {
+      rr(x - s * .45, yb - s * .55, s * .9, s * .55, s * .04, '#d9b98a');
+      g.fillStyle = '#b5584a'; g.beginPath(); g.moveTo(x - s * .55, yb - s * .55); g.lineTo(x, yb - s * 1.0); g.lineTo(x + s * .55, yb - s * .55); g.closePath(); g.fill();
+      rr(x - s * .1, yb - s * .3, s * .2, s * .3, s * .03, '#7a4a2e'); rr(x + s * .22, yb - s * .42, s * .16, s * .16, s * .02, '#ffe2a0'); rr(x - s * .38, yb - s * .42, s * .16, s * .16, s * .02, '#ffe2a0');
+    }
+  }
+  function nushiSprite(x, yb, s, a, id) {
+    const im = IMG['nushi_' + id];
+    g.save(); g.globalAlpha = a;
+    if (im) { g.drawImage(im, x - s / 2, yb - s, s, s); g.restore(); return; }
+    if (id === 'lake') {   // おおきな くじらの ぬし
+      ell(x, yb - s * .35, s * .5, s * .3, '#6fa8d8'); ell(x, yb - s * .28, s * .42, s * .2, '#f2e6d2');
+      g.fillStyle = '#6fa8d8'; g.beginPath(); g.moveTo(x + s * .42, yb - s * .45); g.quadraticCurveTo(x + s * .66, yb - s * .75, x + s * .62, yb - s * .3); g.quadraticCurveTo(x + s * .55, yb - s * .45, x + s * .42, yb - s * .35); g.fill();
+      circ(x - s * .22, yb - s * .43, s * .04, '#2a2038'); circ(x - s * .3, yb - s * .33, s * .05, 'rgba(255,140,150,.5)');
+      g.strokeStyle = '#2a2038'; g.lineWidth = Math.max(1, s * .02); g.beginPath(); g.arc(x - s * .22, yb - s * .34, s * .07, .2, Math.PI - .2); g.stroke();
+      ell(x, yb - s * .06, s * .6, s * .1, 'rgba(120,180,230,.7)');
+    } else {   // ふわふわの おおきな ぬし
+      ell(x, yb - s * .06, s * .45, s * .07, 'rgba(0,0,0,.25)');
+      circ(x - s * .26, yb - s * .8, s * .14, '#fff1dc'); circ(x + s * .26, yb - s * .8, s * .14, '#fff1dc');
+      circ(x, yb - s * .4, s * .45, '#fff1dc'); circ(x, yb - s * .5, s * .38, '#fff7ea');
+      circ(x - s * .14, yb - s * .52, s * .04, '#3a2818'); circ(x + s * .14, yb - s * .52, s * .04, '#3a2818');
+      circ(x - s * .24, yb - s * .4, s * .06, 'rgba(255,140,150,.5)'); circ(x + s * .24, yb - s * .4, s * .06, 'rgba(255,140,150,.5)');
+      g.strokeStyle = '#3a2818'; g.lineWidth = Math.max(1, s * .02); g.beginPath(); g.arc(x, yb - s * .44, s * .07, .2, Math.PI - .2); g.stroke();
+      rr(x - s * .26, yb - s * .2, s * .52, s * .07, s * .035, '#e8837a');
+    }
+    g.restore();
+  }
+  function grads() {
+    if (cache.k === (night() ? 1 : 0)) return cache;
+    const n = night(), sk = g.createLinearGradient(0, 0, 0, h + 4);
+    (n ? ['#0f1432', '#2a2458', '#7a4a6a'] : ['#2b2450', '#7c4560', '#e89a62']).forEach((c, i) => sk.addColorStop(i / 2, c));
+    const hz = g.createLinearGradient(0, h, 0, h + HH * .22); hz.addColorStop(0, n ? 'rgba(122,74,106,.9)' : 'rgba(232,154,98,.85)'); hz.addColorStop(1, 'rgba(0,0,0,0)');
+    cache = { k: n ? 1 : 0, sky: sk, haze: hz }; return cache;
+  }
+  const night = () => rootEl.dataset.time === 'n';
+  function ridge(base, amp, ph, col) {
+    g.fillStyle = col; g.beginPath(); g.moveTo(0, h + 2);
+    const per = W * 2, sc = S.scroll * ph;
+    for (let x = 0; x <= W + 8; x += 8) {
+      const u = (x + sc) / per * TAU;
+      g.lineTo(x, h - base - amp * (.55 * Math.sin(u * 2) + .3 * Math.sin(u * 5 + 1) + .15 * Math.sin(u * 11 + 2)));
+    }
+    g.lineTo(W, h + 2); g.closePath(); g.fill();
+  }
+  const items = [];
+  function draw() {
+    const C = course(), cm = calm(), G = grads();
+    // そら・とおくの けしき
+    const bg = IMG['bg_' + C.id];
+    if (bg) {
+      const pw = W * 2, x0 = -(((S.scroll * .3) % pw) + pw) % pw; g.drawImage(bg, x0, 0, pw, h + 3); g.drawImage(bg, x0 + pw, 0, pw, h + 3);
+    } else {
+      g.fillStyle = G.sky; g.fillRect(0, 0, W, h + 4);
+      if (night()) { g.fillStyle = 'rgba(255,243,220,.7)'; for (let i = 0; i < 24; i++) { const sx = (i * 97.3 + 13) % W, sy = (i * 53.7 + 7) % (h * .6); g.fillRect(sx, sy, 2, 2); } }
+      halo(W * .68 - (S.scroll * .15) % W * 0, h - H * .08, H * .22, .9, night() ? '240,230,255' : '255,214,140');
+      circ(W * .68, h - H * .08, H * .045, night() ? '#f4eefc' : '#ffe9b0');
+      for (let i = 0; i < 3; i++) { const cx = ((i * W * .5 - S.scroll * .08) % (W * 1.5) + W * 1.5) % (W * 1.5) - W * .25; ell(cx, h * (.25 + i * .12), W * .14, H * .016, 'rgba(255,200,180,.28)'); ell(cx + W * .06, h * (.25 + i * .12) - H * .008, W * .09, H * .014, 'rgba(255,200,180,.28)'); }
+      ridge(H * .02, H * .12, .25, night() ? '#2a2450' : '#6b4568'); ridge(0, H * .08, .5, night() ? '#1d1a3c' : '#4a3556');
+      if (C.id === 'plaza') { /* とおくの まちなみ */ g.fillStyle = night() ? '#1a1736' : '#3f3050'; for (let i = 0; i < 14; i++) { const bx = ((i * W / 11 - S.scroll * .5) % (W * 1.3) + W * 1.3) % (W * 1.3) - W * .15; g.fillRect(bx, h - H * (.025 + (i * 7 % 5) * .008), W / 16, H * (.025 + (i * 7 % 5) * .008) + 2); } }
+    }
+    // みち（ちかい ほうから とおくへ）
+    let lat = 0, dx = 0, zp = 0, cz = S.z;
+    for (let i = HH - 1; i >= 3; i--) {
+      const y = h + i, z = Zs / i, dz = z - zp; zp = z;
+      const s = Math.floor(cz + z), cu = C.curve[((s % L) + L) % L];
+      dx += cu * dz; lat += dx * dz; latI[i] = lat;
+      const u = i / HH * W * .42, cx = W / 2 + (lat - S.px) * u, par = Math.floor((cz + z) / 6) & 1;
+      g.fillStyle = C.ground[par]; g.fillRect(0, y, W, 1);
+      if (C.water) {
+        const wl = cx - 1.8 * u; if (wl > 0) { g.fillStyle = C.water[par]; g.fillRect(0, y, wl, 1); }
+        g.fillStyle = C.sand; const sl = Math.max(0, cx - 1.8 * u); g.fillRect(sl, y, 0.45 * u + 1, 1);
+      }
+      g.fillStyle = C.rumble[par]; g.fillRect(cx - 1.12 * u, y, 2.24 * u, 1);
+      g.fillStyle = C.road[par]; g.fillRect(cx - u, y, 2 * u, 1);
+      if ((Math.floor((cz + z) / 4) & 1) === 0 && z < 70) { g.fillStyle = '#f3dfb0'; g.fillRect(cx - Math.max(.5, .03 * u), y, Math.max(1, .06 * u), 1); }
+    }
+    g.fillStyle = G.haze; g.fillRect(0, h, W, HH * .22);
+    // みちばたの もの・ともだちの カート・ぬし（とおい ほうから）
+    items.length = 0;
+    const add = (o, kind) => { const d = ((o.z - S.z) % L + L) % L; if (d > 1.7 && d < DRAW) items.push({ d, o, kind }); };
+    C.decorObjs.forEach(o => add(o, 'd')); C.pick.forEach(o => add(o, 'p'));
+    const nd = ((C.nushi.z - S.z) % L + L) % L; if (nd > 1.7 && nd < DRAW) items.push({ d: nd, o: C.nushi, kind: 'n' });
+    FRIENDS.forEach((f, k) => {
+      const gap = f.gap + Math.sin(S.t * .35 + f.ph) * 2.5, d = Math.max(9, gap);
+      items.push({ d, o: f, kind: 'f', k, fx: f.lane + Math.sin(S.t * .3 + f.ph * 2) * .18 });
+    });
+    items.sort((a, b) => b.d - a.d);
+    for (const it of items) {
+      const d = it.d, i = Zs / d, p = i / HH, u = p * W * .42, idx = clamp(Math.round(i), 3, HH - 1), lt = latI[idx], yb = h + i;
+      let sd = it.kind === 'f' ? it.fx : it.o.side;
+      const x = W / 2 + (lt - S.px + sd) * u;
+      if (x < -u * 4 || x > W + u * 4) continue;
+      if (it.kind === 'd') { sprite(it.o.type, x, yb, u * (it.o.type === 'house' ? 1.9 : it.o.type === 'lamp' ? 1.7 : it.o.type === 'balloon' ? 1.1 : 1.5), it.o.v, 1, S.t, cm); }
+      else if (it.kind === 'p') {
+        const o = it.o, sz = u * (o.type === 'fountain' ? 1.0 : .95);
+        if (o.glow > 0) { const a = Math.min(1, (1 - o.glow) * 4) * o.glow * 1.3; halo(x, yb - sz * .5, sz * 1.4, Math.min(1, a), '255,226,140'); }
+        sprite(o.type, x, yb, sz, o.v, 1, S.t, cm);
+      } else if (it.kind === 'n') {
+        const a = clamp((55 - d) / 20, 0, 1);
+        if (d > 50 && d < 95 && !cm) { const rp = (S.t % 3) / 3; g.strokeStyle = 'rgba(255,243,220,' + (.22 * (1 - rp)).toFixed(3) + ')'; g.lineWidth = 2; g.beginPath(); g.ellipse(x, yb, u * (.6 + rp * 1.4), u * (.12 + rp * .3), 0, 0, TAU); g.stroke(); }
+        else if (d > 50 && d < 95) { g.strokeStyle = 'rgba(255,243,220,.18)'; g.lineWidth = 2; g.beginPath(); g.ellipse(x, yb, u * .9, u * .2, 0, 0, TAU); g.stroke(); }
+        if (a > 0) nushiSprite(x, yb, u * 5.2, a, C.id);
+      } else {
+        const f = it.o, im = IMG['friend_cart_' + it.k];
+        if (im) g.drawImage(im, x - u * .45, yb - u * .9, u * .9, u * .9); else cart(x, yb, u * .8, f.col, f.head, 0);
+      }
+    }
+    // じぶんの カート
+    const cs = W * .3, tilt = cm ? 0 : S.steerVel * .06, cy = H - H * .03;
+    if (S.carGlow > 0) halo(W / 2, cy - cs * .5, cs * 1.3, Math.min(1, (1 - S.carGlow) * 4) * S.carGlow * 1.2, '255,226,140');
+    const pi = IMG.cart_back;
+    if (pi) { g.save(); g.translate(W / 2, cy); g.rotate(tilt); g.drawImage(pi, -cs * .6, -cs * 1.2, cs * 1.2, cs * 1.2); g.restore(); }
+    else cart(W / 2, cy, cs, '#e8837a', 'cream', tilt);
+  }
+  const FRIENDS = [
+    { gap: 15, lane: -.45, ph: 0, col: '#7fc58e', head: 'brown' },
+    { gap: 23, lane: .4, ph: 2, col: '#f2c25b', head: 'gray' },
+    { gap: 31, lane: -.05, ph: 4, col: '#b99be0', head: 'pink' }
+  ];
+
+  // ─── ごほうび（かざり）と 「きょうの ドライブ」カード（すうじ なし・保存は しない・長押しで 画像を もてる） ───
+  function cardImage() {
+    const c = document.createElement('canvas'); c.width = 540; c.height = 760; const x = c.getContext('2d'), en = isEn(), C = course();
+    const FONT = '"Hiragino Maru Gothic ProN","Yu Gothic UI",Meiryo,sans-serif';
+    const bgG = x.createLinearGradient(0, 0, 0, 760); bgG.addColorStop(0, '#4a2f20'); bgG.addColorStop(1, '#241710'); x.fillStyle = bgG; x.fillRect(0, 0, 540, 760);
+    x.strokeStyle = '#c8963a'; x.lineWidth = 6; x.strokeRect(10, 10, 520, 740);
+    x.fillStyle = '#fff3dc'; x.textAlign = 'center'; x.font = '800 38px ' + FONT; x.fillText(en ? 'Today’s Drive' : 'きょうの ドライブ', 270, 70);
+    const bw = 480, bh = 440, sx = 30, sy = 92, ar = cv.width / cv.height;
+    let cw = cv.width, ch = cv.width * bh / bw; if (ch > cv.height) { ch = cv.height; cw = ch * bw / bh; }
+    x.save(); x.beginPath(); x.rect(sx, sy, bw, bh); x.clip(); x.drawImage(cv, (cv.width - cw) / 2, cv.height - ch, cw, ch, sx, sy, bw, bh); x.restore();
+    x.strokeStyle = '#f0c46a'; x.lineWidth = 4; x.strokeRect(sx, sy, bw, bh);
+    // かざり
+    const rw = IMG['reward_' + C.id], bx = 430, by = 520;
+    x.fillStyle = '#fff6e4'; x.beginPath(); x.arc(bx, by, 52, 0, TAU); x.fill(); x.strokeStyle = '#f0c46a'; x.lineWidth = 4; x.stroke();
+    if (rw) x.drawImage(rw, bx - 40, by - 40, 80, 80);
+    else if (C.id === 'lake') { x.fillStyle = '#6fb3d9'; x.beginPath(); x.moveTo(bx, by - 36); x.quadraticCurveTo(bx + 34, by + 6, bx, by + 34); x.quadraticCurveTo(bx - 34, by + 6, bx, by - 36); x.fill(); x.fillStyle = 'rgba(255,255,255,.55)'; x.beginPath(); x.arc(bx - 9, by + 2, 7, 0, TAU); x.fill(); }
+    else { for (let i = 0; i < 5; i++) { x.fillStyle = '#ff9db5'; x.beginPath(); x.arc(bx + Math.cos(i * TAU / 5) * 20, by + Math.sin(i * TAU / 5) * 20, 14, 0, TAU); x.fill(); } x.fillStyle = '#ffe27a'; x.beginPath(); x.arc(bx, by, 12, 0, TAU); x.fill(); }
+    // ことば
+    x.fillStyle = '#fff3dc'; x.font = '800 30px ' + FONT; x.fillText(en ? C.en : C.ja.replace(' 一周', ' いっしゅう'), 240, 590);
+    const F = S.lastFound || {}, nm = en ? { flower: 'flowers', friend: 'friends', fountain: 'a fountain', nushi: 'the guardian' } : { flower: 'おはな', friend: 'ともだち', fountain: 'ふんすい', nushi: 'ぬし' };
+    const got = ['flower', 'friend', 'fountain', 'nushi'].filter(k => F[k]).map(k => nm[k]);
+    x.font = '700 24px ' + FONT; x.fillStyle = '#f1dcc0';
+    const line = got.length ? (en ? 'You met ' + got.join(', ') + '.' : 'きょうは ' + got.join('・') + ' に あえたよ。') : (en ? 'A slow, lovely lap.' : 'きょうは のんびり ぐるっと はしったよ。');
+    x.fillText(line, 270, 640);
+    x.font = '700 22px ' + FONT; x.fillText(en ? 'Thank you for driving with us.' : 'いっしょに ドライブ ありがとう。', 270, 680);
+    x.font = '600 18px ' + FONT; x.fillStyle = '#e6c9a0'; x.fillText('aohozomi.github.io/marufuwa-tsuri/links/', 270, 728);
+    return c;
+  }
+  let cardTimer = 0;
+  function showCard() {
+    try {
+      const c = cardImage(); ovlImg.src = c.toDataURL('image/png'); ovlImg.alt = isEn() ? 'Today’s Drive card' : 'きょうの ドライブの カード';
+      ovl.hidden = false; clearTimeout(cardTimer); cardTimer = setTimeout(hideCard, 22000);
+    } catch (e) {}
+  }
+  function hideCard() { ovl.hidden = true; clearTimeout(cardTimer); }
+  ovl.addEventListener('click', hideCard);
+
+  // ─── ループ ───
+  let last = 0;
+  function frame(ts) {
+    requestAnimationFrame(frame);
+    if (S.manual) return;
+    const dt = last ? (ts - last) / 1000 : 0; last = ts; S.frames++;
+    sim(dt); draw();
+  }
+  requestAnimationFrame(frame);
+
+  // 検査用の よみとり口
+  window.__drive = {
+    st: () => ({ z: S.z, px: S.px, speed: S.speed, laps: S.laps, ci: S.ci, easy: S.easy, steerVel: S.steerVel, back: S.back, found: Object.assign({}, S.found), lastFound: Object.assign({}, S.lastFound || {}), yokan: S.yokan, nushiShown: S.nushiShown, nushiSeen: S.nushiSeen, frames: S.frames, step: S.step, t: S.t, lapT: S.lapT, lastLapT: S.lastLapT, brake: S.brake }),
+    manual: v => { S.manual = !!v; last = 0; },
+    advance: (sec, fn) => { const n = Math.round(sec / .033); for (let i = 0; i < n; i++) { if (fn) fn(i); sim(.033); } draw(); },
+    draw, setPx: v => { S.px = v; }, setZ: v => { S.z = v; }, setCourse, curveAt: (ci, z) => COURSES[ci].curve[z % L], L,
+    pickups: () => course().pick.map(p => ({ type: p.type, z: p.z, side: p.side })), nushi: () => course().nushi,
+    imgOk: () => Object.keys(IMG)
+  };
+});
+</script>
+<script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-pagesound.js"></script>
+<script defer src="../../tsuri-pagebg.js"></script>
+<script defer src="../../tsuri-en.js"></script>
+<script defer src="../../tsuri-en-hiroba.js"></script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ mount: document.getElementById('back'), bgm: 'hiroba', time: () => document.documentElement.dataset.time }); });</script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageBg) PageBg.init('drive'); });</script>
+</body>
+</html>
