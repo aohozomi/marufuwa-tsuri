@@ -176,6 +176,8 @@ html[data-ready=fresh] #scene > *{animation:sceneIn .4s ease-out}
 .areas button[aria-pressed=true]{--c1:#c9f7e4;--c2:#6fdcb0;--side:#38a87e;--ink:#0f4a36}
 .times button[aria-pressed=true]{--c1:#e6dcff;--c2:#b79cf0;--side:#8a6bd0;--ink:#33205f}
 .hud button,.hud .pill{white-space:nowrap;padding:8px 6px;font-size:.88rem;min-width:0}
+a.pill.plaza-big{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;margin:6px 0 4px;--c1:#fff1dc;--c2:#ffc98f;--side:#d98a45;--ink:#5a2f0c;text-shadow:none;text-decoration:none;text-align:center}   /* 広場への おおきな いりぐち（あそびかたの すぐ した・あたたかい オレンジ・主ボタンより めだたせない） */
+body.gazing .plaza-big,body[data-phase=waiting] .plaza-big,body[data-phase=bite] .plaza-big,body[data-phase=reel] .plaza-big{display:none}
 .hud .plaza{--c1:#fff1dc;--c2:#ffc98f;--side:#d98a45;--ink:#5a2f0c;text-shadow:none;min-height:52px}
 .hud button{--c1:#ffffffe6;--c2:#c9ecfb99;--side:#8fc3dd}
 .hud button::after{content:"";position:absolute;left:12%;top:18%;width:7px;height:7px;border-radius:50%;background:#ffffffe6;pointer-events:none}
@@ -866,7 +868,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="open-trophy" type="button" style="flex:1"></button>
     <button id="open-gear" type="button" style="flex:1" aria-label="じぶんの どうぐ">どうぐ</button>
     <button id="open-nakama" type="button" style="flex:1"></button>
-    <a class="pill plaza" href="hiroba/" style="flex:1">ひろば</a>
   </div>
   <p class="note" id="plaza-note">ひろばでは、まるふわの おへやで あそべるよ。</p>
 
@@ -1007,6 +1008,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="sleep" type="button">おやすみタイマー：なし</button>
     <button id="fullscreen" type="button">ぜんがめん</button>
   </div>
+  <a class="pill plaza plaza-big" id="plaza-go" href="hiroba/">ひろば（あそびば・おみせ）</a>
   <p id="status" role="status" aria-live="polite">「なげる」を おしてね。</p>
   <p id="today" class="note today" hidden></p>
   <p id="nosave" class="note" role="status" style="font-weight:800" hidden></p>
@@ -1941,6 +1943,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   { const mk = () => { const row = document.querySelector('.sub-actions'); if (!row || $('howto-toggle')) return; const b = document.createElement('button'); b.type = 'button'; b.id = 'howto-toggle'; b.className = 'pill'; b.setAttribute('aria-controls', 'sound'); row.append(b);
       b.addEventListener('click', () => { const open = !document.body.classList.contains('howto-open'); document.body.classList.toggle('howto-open', open); row.dataset.howto = open ? 'open' : ''; drawHowto(); }); drawHowto(); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mk); else mk(); addEventListener('load', () => { mk(); drawHowto(); }); setTimeout(drawHowto, 900); }   // おと・BGM・とおく・ながめる・おやすみ・つかいやすく する を 1つの「あそびかた」に まとめる（ふだんは かくす）
+  { const pg = () => { const a = $('plaza-go'); if (a) a.textContent = L('ひろば（あそびば・おみせ）', 'Plaza (games & shop)'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pg); else pg(); addEventListener('load', pg); setTimeout(pg, 900); }
   function drawMute() { const b = $('mute-top'); if (!b) return; const on = !!save.sound; b.setAttribute('aria-pressed', String(on)); b.textContent = L(on ? '🔊 おと：ON' : '🔇 おと：OFF', on ? '🔊 Sound: ON' : '🔇 Sound: OFF'); }   // ボタンの えは「いまの じょうたい」（ON＝🔊・OFF＝🔇）。おすと きりかわる
   function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
   $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); try { dispatchEvent(new Event('storage')); } catch {} drawSound();   /* おへや（すいそう）など ほかの ぶひんにも「おとが かわった」と しらせる */ if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([440, 523], .09, 'sine', .035, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
