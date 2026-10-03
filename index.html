@@ -989,6 +989,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 
   <button id="area-open" type="button" class="area-open">つりばを かえる ▸</button>
   <p class="mini-progress" id="mini-progress" hidden></p>
+  <p class="push-hint" id="seat-hint" hidden></p>
   <p class="push-hint" id="push-hint" hidden></p>
   <div class="actions">
     <button id="main-button" type="button">なげる</button>
@@ -1648,7 +1649,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     button.textContent = 'なげる'; button.dataset.hot = 'false';
     say('ここに しよう。「なげる」を おしてね。');
   }
-  spots.forEach((spot, i) => spot.addEventListener('click', () => moveTo(i)));
+  spots.forEach((spot, i) => spot.addEventListener('click', () => { moveTo(i); if (save.total === 0) setTimeout(seatRipple, 60); }));
+  setTimeout(() => { if (save.total === 0) { try { seatRipple(); drawSeatLine(); } catch {} } }, 1400);
 
   // おと。めが みえなくても、おとだけで あそべる ように。わが ちかづくと おとが たかく なり、いまだ の ところで「ピコン」
   // おとの つくりは、むかしの ゲームき ふう：かくばった なみ（square）・さんかくの なみ（triangle）・みじかい ざっ（noise）の 3つだけ。
@@ -2102,7 +2104,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, precise = false, periodBase = 1100, period = 1600, ringStart = 0, reelStartAt = 0, perfectStreak = 0, slips = 0, tension = 0, tensionAt = 0, closeStreak = 0, tStage = 0, escapeRun = 0, escapeHinted = false, lockTimer = 0, waitNoted = false, kickUntil = 0, kickPower = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
-  function setPhase(next) { if (next !== phase) rodPose(next); phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; { const ph = $('push-hint'); if (ph) { ph.hidden = !(reduce() && button.dataset.pulse === 'true'); if (!ph.hidden) ph.textContent = L('ここを おして', 'Press here'); } } $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { if (next !== phase) rodPose(next); phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; try { drawSeatLine(); } catch {} { const ph = $('push-hint'); if (ph) { ph.hidden = !(reduce() && button.dataset.pulse === 'true'); if (!ph.hidden) ph.textContent = L('ここを おして', 'Press here'); } } $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
@@ -2154,7 +2156,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ? 'Everyone' + String.fromCharCode(39) + 's lucky fish: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (luckyLeft ? ' ' + luckyLeft + ' more to unlock.' : '') + (boss ? ' Guardian: ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ').' : '')
       : 'みんな おなじ ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (luckyLeft ? 'あと ' + luckyLeft + 'ひき。' : '') + (boss ? 'ぬし：「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」。' : ''));
   }
-  function drawSeatHint() { document.body.dataset.seathint = String(!save.seatMoved && save.total >= 1 && save.total < 6); }   // 1〜5ひき つる あいだ、せきを うごかした ことが なければ ゆらゆら
+  // さいしょの 1投 まえだけ：「バケツを えらぶと そこへ なげるよ」＋えらんだ バケツから 波紋（うごきを へらす では 波紋なし）
+  function seatRipple() {
+    if (reduce() || !spots[mine]) return; const w = {x: SPOT_X[mine] + 10, y: shore(SPOT_X[mine] + 10) + 4};
+    for (let k = 0; k < 2; k++) { const ring = document.createElement('i'); ring.className = 'ripple'; ring.setAttribute('aria-hidden', 'true'); place(ring, w); scene.append(ring); ring.animate([{scale: '.3', opacity: .9}, {scale: '1.9', opacity: 0}], {duration: 1100, delay: k * 380, easing: 'ease-out', fill: 'backwards'}).onfinish = () => ring.remove(); }
+  }
+  function drawSeatLine() { const h = $('seat-hint'); if (!h) return; const on = save.total === 0 && phase === 'idle'; h.hidden = !on; if (on) h.textContent = L('バケツを えらぶと、そこへ なげるよ', 'Pick a bucket and you cast from there'); }
+  function drawSeatHint() { drawSeatLine(); document.body.dataset.seathint = String(!save.seatMoved && save.total >= 1 && save.total < 6); }   // 1〜5ひき つる あいだ、せきを うごかした ことが なければ ゆらゆら
   function drawBadge() {   // ずかんに まだ みて いない あたらしい さかなが いる とき（かず）。ひらいたら きえる。へらす・くらべる ものでは ない
     const b = $('open-book'); if (!b) return; let badge = $('book-badge');
     if (!badge) { badge = document.createElement('b'); badge.id = 'book-badge'; badge.className = 'book-badge'; badge.setAttribute('aria-hidden', 'true'); badge.hidden = true; b.append(badge); }
