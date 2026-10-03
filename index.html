@@ -475,7 +475,7 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 .shadow{position:absolute;z-index:2;width:var(--w,12%);aspect-ratio:5/2;transform:translate(-50%,-50%);border-radius:50%;background:#0b2a4a70;pointer-events:none}
 .shadow::after{content:"";position:absolute;right:-24%;top:8%;width:36%;height:84%;background:inherit;clip-path:polygon(0 50%,100% 0,100% 100%)}
 .shadow.ambient-fish{opacity:.72;transition:opacity 2.2s ease}
-.shadow.ambient-fish.away{opacity:0 !important}   /* にぎわい：いない ときは すうっと きえる（ゆっくり 2びょう） */
+.shadow.ambient-fish.away,.shadow.ambient-fish.dodge{opacity:0 !important}   /* にぎわい：いない ときは すうっと きえる（ゆっくり 2びょう） */
 .shadow.ambient-fish.art{aspect-ratio:var(--ar,2.4);border-radius:0;-webkit-mask:var(--m) center/100% 100% no-repeat;mask:var(--m) center/100% 100% no-repeat}
 .shadow.ambient-fish.art::after{display:none}
 .shadow[data-rare="3"]{background:#ffffffb8}
@@ -2176,7 +2176,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       : 'みんな おなじ ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (luckyLeft ? 'あと ' + luckyLeft + 'ひき。' : '') + (boss ? 'ぬし：「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」。' : ''));
   }
   // ===== にぎわい（水の なかの 魚かげの かず 0〜5）：ゆっくり 入れかわる（3〜8分）。ふつう／しっかり は アタリまでの まちじかんが かげの かずに ひれい（らくちんは つねに 3いじょう）。かずは 画面に みえる かげと おなじ（うその まちを つくらない）
-  const BUSTLE = {n: 3, timer: 0, els: [], hintAt: {}, hintOn: false}, AMB_LANES = [78, 82, 86, 90, 93], AMB_W = [13, 16, 12, 15, 11], AMB_LAP = [41, 53, 67, 47, 59];
+  // 影の おおきさ＝その魚の 実寸（cm）に ひれい（対数）：いちばん ちいさい 魚＝今の 約25%・いちばん おおきい 魚＝100%。ぬし・まぼろしは 1.35ばい（べっかく）
+  const SIZE = (() => { let lo = 1e9, hi = 0; FISH.forEach(f => { if (f.min > 0) lo = Math.min(lo, f.min); hi = Math.max(hi, f.max); }); return {lo, hi}; })();
+  const shadowW = cm => { const t = Math.min(1, Math.max(0, (Math.log(Math.max(cm, SIZE.lo)) - Math.log(SIZE.lo)) / (Math.log(SIZE.hi) - Math.log(SIZE.lo)))); return 5 + 17 * t; };   // 景色の はば の %
+  const rollSize = () => nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + (fish.max - fish.min) * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8);
+  const BUSTLE = {n: 3, timer: 0, els: [], ws: [], ars: [], hintAt: {}, hintOn: false, dodge: 0}, AMB_LANES = [79, 85, 91, 82, 88], AMB_LAP = 58;   // 5ひき とも おなじ はやさ・1/5ずつ ずらす＝どの じこくでも かさならない
   const bustleEff = () => { const forced = Number(probe('bustle')); const n = Number.isFinite(forced) && probe('bustle') !== null && probe('bustle') !== '' ? Math.max(0, Math.min(5, forced)) : BUSTLE.n; return curMode() === 'easy' ? Math.max(3, n) : n; };   // 見える かず
   const calcWait = (base, rare, nb) => Math.round((Math.round(base * 1.6 * (1 + .08 * (rare - 1))) + Math.round(3000 + Math.random() * 3000)) * bustleFactor(nb) * (nb === 0 && Math.random() < .25 ? 2.5 : 1));
   const bustleFactor = n => n >= 3 ? 1 : n === 2 ? 2 : n === 1 ? 5.5 : 8;
@@ -2186,21 +2190,29 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function bustleDraw() {
     const n = bustleEff(); BUSTLE.els.forEach((el, i) => el.classList.toggle('away', i >= n));
+    { let sum = 0; for (let i = 0; i < n; i++) sum += BUSTLE.ws[i] * BUSTLE.ws[i] / 10000 / BUSTLE.ars[i] / .75;   // 景色の めんせき に たいする わりあい
+      const cap = .15 * .34, k = sum > cap ? Math.sqrt(cap / sum) : 1;   // 水面（景色の 約34%）の 15%まで。こえる ときは ちいさく する（かずは かえない）
+      BUSTLE.els.forEach((el, i) => { const w = BUSTLE.ws[i] * k; el.style.setProperty('--w', w.toFixed(2) + '%'); el.style.setProperty('--wn', w.toFixed(2)); }); BUSTLE.k = k; }
     const h = $('quiet-hint'); if (h) { const quiet = n <= 1 && curMode() !== 'easy', last = BUSTLE.hintAt[save.area], now = performance.now();   // おなじ つりばで 20ぶんに 1かい・25びょうだけ（なんども おなじ ぶんを だらない）
       if (quiet && !BUSTLE.hintOn && (last === undefined || now - last > 20 * 60000)) { BUSTLE.hintOn = true; BUSTLE.hintAt[save.area] = now; setTimeout(() => { BUSTLE.hintOn = false; try { bustleDraw(); } catch {} }, 25000); }
       const on = quiet && BUSTLE.hintOn && (phase === 'idle' || phase === 'waiting'); h.hidden = !on; if (on) h.textContent = L('いまは あまり いないね。ひろばで あそぶ？', 'Not many fish right now. Want to play in the plaza?'); }
   }
+  function bustleDodge() {   // ウキの まわり（あたりの わ）に かげが かぶらない：かぶる 影は ゆっくり うすく する
+    const f = floatAt(mine), sc = scene.getBoundingClientRect(); if (!sc.width) return; const zx0 = sc.left + (f.x - 11) / 100 * sc.width, zx1 = sc.left + (f.x + 11) / 100 * sc.width, zy0 = sc.top + (f.y - 8) / 100 * sc.height, zy1 = sc.top + (f.y + 7) / 100 * sc.height;
+    BUSTLE.els.forEach(el => { if (el.classList.contains('away')) { el.classList.remove('dodge'); return; } const r = el.getBoundingClientRect(); el.classList.toggle('dodge', r.right > zx0 && r.left < zx1 && r.bottom > zy0 && r.top < zy1); });
+  }
   function bustleStart() {
-    BUSTLE.els.forEach(e => e.remove()); BUSTLE.els = [];
-    const pool = poolOf(save.area).filter(f => f.rare <= 2 && !f.ext), ids = (pool.length ? pool : [FISH[3], FISH[12]]).map(f => f.id);
+    BUSTLE.els.forEach(e => e.remove()); BUSTLE.els = []; BUSTLE.ws = []; BUSTLE.ars = [];
+    const pool = poolOf(save.area).filter(f => f.rare <= 2 && !f.ext), list = (pool.length ? pool : [FISH[3], FISH[12]]);
     for (let i = 0; i < 5; i++) {
-      const el = document.createElement('div'); el.className = 'shadow drift ambient-fish away'; el.setAttribute('aria-hidden', 'true'); el.setAttribute('data-fish', String(ids[i % ids.length]));
-      el.style.cssText = 'top:' + AMB_LANES[i] + '%;--w:' + AMB_W[i] + '%;--wn:' + AMB_W[i] + ';--lap:' + AMB_LAP[i] + 's;animation-delay:-' + Math.round(AMB_LAP[i] * (i * .37 % 1)) + 's';
-      if (ART && ART.shadow && ART.shadowMask && ART.shadow[ids[i % ids.length]]) { const id = ids[i % ids.length], ratio = ART.meta && ART.meta.shadowAspect && ART.meta.shadowAspect[id]; el.classList.add('art'); el.style.setProperty('--m', ART.shadowMask(id)); el.style.setProperty('--ar', String(ratio || 2.4)); }
-      scene.insertBefore(el, $('shadow') || null); BUSTLE.els.push(el);
+      const f = list[(i * 2 + 1) % list.length] || list[i % list.length], w0 = shadowW(Math.sqrt(f.min * f.max)), id = f.id;
+      const el = document.createElement('div'); el.className = 'shadow drift ambient-fish away'; el.setAttribute('aria-hidden', 'true'); el.setAttribute('data-fish', String(id));
+      let ar = 2.4; if (ART && ART.shadow && ART.shadowMask && ART.shadow[id]) { ar = (ART.meta && ART.meta.shadowAspect && ART.meta.shadowAspect[id]) || 2.4; el.classList.add('art'); el.style.setProperty('--m', ART.shadowMask(id)); el.style.setProperty('--ar', String(ar)); }
+      el.style.cssText += ';top:' + AMB_LANES[i] + '%;--w:' + w0.toFixed(2) + '%;--wn:' + w0.toFixed(2) + ';--lap:' + AMB_LAP + 's;animation-delay:-' + (AMB_LAP * i / 5).toFixed(2) + 's';
+      scene.insertBefore(el, $('shadow') || null); BUSTLE.els.push(el); BUSTLE.ws.push(w0); BUSTLE.ars.push(ar);
     }
     BUSTLE.n = bustleRoll(); clearTimeout(BUSTLE.timer); const again = () => { BUSTLE.n = bustleRoll(); bustleDraw(); BUSTLE.timer = setTimeout(again, (3 + Math.random() * 5) * 60000); }; BUSTLE.timer = setTimeout(again, (3 + Math.random() * 5) * 60000);
-    requestAnimationFrame(() => requestAnimationFrame(bustleDraw));
+    requestAnimationFrame(() => requestAnimationFrame(bustleDraw)); clearInterval(BUSTLE.dodge); BUSTLE.dodge = setInterval(() => { if (!document.hidden) bustleDodge(); }, 150);
   }
   // さいしょの 1投 まえだけ：「バケツを えらぶと そこへ なげるよ」＋えらんだ バケツから 波紋（うごきを へらす では 波紋なし）
   function seatRipple() {
@@ -2261,7 +2273,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (!reduce()) setTimeout(() => { if (phase !== 'waiting') return; const w2 = floatAt(mine), r = document.createElement('i'); r.className = 'ripple'; r.setAttribute('aria-hidden', 'true'); place(r, {x: w2.x - 7, y: w2.y + 5}); scene.append(r); r.animate([{scale: '.2', opacity: .8}, {scale: '1.1', opacity: 0}], {duration: 1400, easing: 'ease-out'}).onfinish = () => r.remove(); }, Math.round(wait * .45));   // まって いる あいだの ちいさな へんか（あわの わっか）
     }
     if (ART && ART.shadow && ART.shadow[fish.id]) { shadow.classList.add('art'); shadow.style.setProperty('--m', ART.shadowMask(fish.id)); shadow.style.setProperty('--ar', String(ART.meta.shadowAspect[fish.id])); } else shadow.classList.remove('art');   // さかなごとの かげの かたち
-    shadow.style.setProperty('--w', Math.min(44, Math.max(8, 7 + fish.max / 12) * (nushi ? 1.7 : 1)) + '%');
+    plannedBase = rollSize();   // 影の おおきさ＝これから つれる 実寸（つった あとの サイズと おなじ）
+    shadow.style.setProperty('--w', Math.min(34, shadowW(plannedBase) * (nushi || fish.legend ? 1.35 : 1)) + '%');
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
     shadow.style.setProperty('--swim', reduce() ? '0s' : wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});   // うごきを へらす では かげは うごかない（ウキの そばに すぐ）
     // かかる まえの「ちょんちょん」。ウキが ちいさく ゆれて、もうすぐ くると わかる
@@ -2303,7 +2316,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (save.total === 0) { hpMax = hp = 3; period = 1700; }   // さいしょの 1ぴきは、かならず すぐ つれる
     periodBase = period;
     if (fish.legend) { hpMax = hp = 7; period = periodBase = 770; }   // まぼろしは、でて きたら つれる。わは ゆっくり
-    plannedBase = nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + (fish.max - fish.min) * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8);   // おおきさは さきに きめる（おおきい ほど わが すこし はやい・±10%）
+    if (plannedBase == null) plannedBase = rollSize();   // おおきさは さきに きめる（おおきい ほど わが すこし はやい・±10%）
     if (save.total > 0 && !fish.legend && !query.get('swim')) { const sn = nushi ? 1 : Math.min(1, Math.max(0, (plannedBase - fish.min) / ((fish.max - fish.min) || 1))); period = Math.round(period * (1 - .1 * (2 * sn - 1))); }
     swimBase = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : specialOf(fish, nushi) || swimOf(fish)]; qk = !query.get('swim') && specialOf(fish, nushi) ? '' : query.has('quirk') ? (QUIRKS[query.get('quirk')] ? query.get('quirk') : '') : (query.get('swim') || save.total === 0 ? '' : quirkOf(fish)); nushiPhase2 = false;   // ?swim=・さいしょの 1ぴきは くせなし   // とくべつな うごきの 子は くせ（せっかち・のんびり・ためる）を つけない
     swim = withQuirk(swimBase, qk); qk = swim.quirk || ''; perfects = 0; perfectStreak = 0; slips = 0; misses = 0; restUntil = 0;
@@ -4428,7 +4441,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function rareSchedule(first) { clearTimeout(RARE.timer); RARE.timer = setTimeout(() => { if (!rareShow()) { RARE.timer = setTimeout(() => rareSchedule(false), 30000); return; } rareSchedule(false); }, first && probe('rare-first') ? Number(probe('rare-first')) : RARE.nextGap(Math.random)); }   // だせない とき（なげて いる 最中・ダイアログ）は 30びょう あとに もういちど
   RARE.show = rareShow; RARE.start = rareSchedule;
   if (!(window.TsuriClip || document.documentElement.dataset.clip)) rareSchedule(true);
-  window.Tsuri = {rare: RARE, bustle: {n: () => bustleEff(), waitSample: (n, rare = 3) => calcWait(2200 + Math.random() * 3300, rare, n)}, all: FISH.filter(f => !f.season && !f.ext), ext: () => FISH.filter(f => f.ext).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, rare: f.rare, time: f.time, area: f.area, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0})), sampleFish: n => { const c = {}; for (let i = 0; i < Math.min(20000, Math.max(0, n | 0)); i++) { const f = pickFish(); if (f) c[f.id] = (c[f.id] || 0) + 1; } return c; }, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), fishList: () => FISH.map(f => ({id: f.id, name: f.name, kanji: f.kanji})), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
+  window.Tsuri = {rare: RARE, bustle: {n: () => bustleEff(), widthOf: cm => shadowW(cm), dodgeNow: () => bustleDodge(), area: () => BUSTLE.k,  waitSample: (n, rare = 3) => calcWait(2200 + Math.random() * 3300, rare, n)}, all: FISH.filter(f => !f.season && !f.ext), ext: () => FISH.filter(f => f.ext).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, rare: f.rare, time: f.time, area: f.area, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0})), sampleFish: n => { const c = {}; for (let i = 0; i < Math.min(20000, Math.max(0, n | 0)); i++) { const f = pickFish(); if (f) c[f.id] = (c[f.id] || 0) + 1; } return c; }, beat: () => ({hitAt, period, swim: swim.name, off: Math.round(offBeat()), window: Math.round(windowMs()), ring: ringSize()}), state: () => phase, fish: () => fish, hp: () => hp, tension: () => tension, mode: () => curMode(), fishList: () => FISH.map(f => ({id: f.id, name: f.name, kanji: f.kanji})), ambient: () => ({file: !!ambientEl, src: ambientEl ? ambientEl.currentSrc : '', paused: ambientEl ? ambientEl.paused : null, t: ambientEl ? ambientEl.currentTime : 0, loop: ambientEl ? ambientEl.loop : null, failed: ambientFileFailed, want: AMB_FILE}), note: () => (Array.isArray(save.note) ? save.note : []).map(n => ({...n, party: [...(n.party || [])]})), simSeats: (n, stepMs) => { const keepAt = JSON.stringify(save.palsAt || {}), keepPals = pals.slice(), seq = []; let t = Date.now(), flip = 0; for (let i = 0; i < n; i++) { const slot = flip; flip = 1 - flip; const next = pickPal(slot ? 'any' : 'home', pals); if (!next) break; pals[slot] = next; save.palsAt = save.palsAt && typeof save.palsAt === 'object' ? save.palsAt : {}; save.palsAt[next.id] = t += (stepMs || 360000); save.pals = save.pals || {}; save.pals[next.id] = true; seq.push(next.id); } pals = keepPals; save.palsAt = JSON.parse(keepAt); return seq; }, spot: () => mine, friends: () => [...friends], pals: () => pals.map(p => p.id), level: () => levelOf(save.xp || 0), my: () => ({...(save.my || {})}), wearUrl: name => wearUrl(name), gearUrl: kind => { const svg = kind === 'float' ? floatSvg() : kind === 'lure' ? lureSvg() : kind === 'rod' ? rodSvg(save.rod) : ''; return svg && ART ? ART.uri(svg) : ''; }, gifts: () => (Array.isArray(save.gifts) ? save.gifts : []).map(g => ({...g})), season: () => FISH.filter(f => f.season).map(f => ({id: f.id, name: f.name, icon: f.icon, min: f.min, max: f.max, month: f.season, got: !!save.fish[f.id], count: (save.fish[f.id] || {}).count || 0, best: (save.fish[f.id] || {}).best || 0}))};   // 外付けが「じぶんの どうぐ」の いろ・「もらった さかな」を よめる（かずには いれない）
 })();
 </script>
 <script defer src="tsuri-tank.js"></script>
