@@ -260,6 +260,7 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 
 /* ひろばの がめん（360×560 の せかいを、はばに あわせて ひろげる） */
 #viewport{position:relative;width:min(100%,calc((100vh - 232px)*.6429));width:min(100%,calc((100dvh - 232px)*.6429));min-width:min(100%,300px);margin:0 auto;aspect-ratio:360/560;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:var(--sky2);isolation:isolate}
+#viewport{contain:layout paint;clip-path:inset(0 round 26px)}
 #scene{position:absolute;left:0;top:0;width:200%;height:100%;will-change:transform}   /* 世界は 窓の 2倍幅（W=720）・かめらが よこに うごかす（--cam） */
 #park-sign{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:60;pointer-events:none;padding:4px 14px;border-radius:14px;background:#fffffff2;border:2px solid #ffd9e6;font-weight:900;font-size:.9rem;color:#244653;white-space:nowrap}
 #scene:focus-visible{outline:none}
@@ -1239,7 +1240,7 @@ const PROPS = [
   { id: 'flower-l', x: 30, y: 388, w: 60, h: 44, svg: SVG.flowerbed, secret: 'flower' },   // 木の ねもと（木の 手前に 置く＝かくれない）
   { id: 'flower-r', x: 330, y: 388, w: 60, h: 44, svg: SVG.flowerbed, secret: 'flower' },
   { id: 'post', x: 284, y: 352, w: 34, h: 58, svg: SVG.post, dest: 'post', mark: '✉️', block: { rect: [270, 334, 298, 354] } },
-  { id: 'gate', x: 360, y: 312, w: 124, h: 122, svg: SVG.gate },   // まるふわパークの ゲート（左半分と 右半分の さかい）
+  { id: 'gate', x: 306, y: 312, w: 104, h: 102, svg: SVG.gate },   // まるふわパークの ゲート（10/3：はじめの 窓で 看板が きれない よう 左半分の はしに。パークの 地面は x 360 から）
   { id: 'appie', x: 470, y: 534, w: 52, h: 50, svg: SVG.appie, dest: 'appie', mark: '📱', block: { rect: [448, 524, 492, 536] } },   // アプリの おうち：パークの 南
   ...(PARK.bowling ? [{ id: 'bowling', x: 440, y: 342, w: 96, h: 77, svg: SVG.bowling, dest: 'bowling', mark: '🎳', block: { rect: [396, 332, 484, 344] } }] : []),
   ...(PARK.kuru ? [{ id: 'kuru', x: 546, y: 342, w: 88, h: 70, svg: SVG.kuru, dest: 'kuru', mark: '🎰', block: { rect: [506, 332, 588, 344] } }] : []),
