@@ -46,7 +46,7 @@
   const FILE_DIR = (() => { try { return new URL('snd/bgm/', SELF || location.href).href; } catch { return 'snd/bgm/'; } })();
   const FILE_OF = { a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru' };   // じかんたい → ファイル（おへやは heya・ながめるは gaze）
   // 大きさ：ファイルの K重み LUFS（ffmpeg ebur128 で 測った）＝asa −23.4・hiru −23.9・yuu −23.7・yoru −23.7・heya −23.6・gaze −24.0。なみ（−28）より 6dB 下＝−34 に そろえる ゲイン（10^((−34−L)/20)）
-  const FILE_GAIN = { asa: .295, hiru: .313, yuu: .306, yoru: .306, heya: .302, gaze: .316 }, FILE_XF = 3, FILE_GIVEUP = 9000;
+  const FILE_GAIN = { asa: .32, hiru: .313, yuu: .266, yoru: .363, heya: .35, gaze: .18 }, FILE_XF = 3, FILE_GIVEUP = 9000;
   const FILE_EXT = (() => { try { const a = document.createElement('audio'); return !a.canPlayType ? '' : a.canPlayType('audio/ogg; codecs="vorbis"') ? 'ogg' : a.canPlayType('audio/mp4; codecs="mp4a.40.2"') ? 'm4a' : ''; } catch { return ''; } })();   // iPhone など ogg が よめない ときは m4a
   const FILE_OFF = (() => { try { return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && new URLSearchParams(location.search).get('bgmfile') === '0'; } catch { return false; } })();   // 手もとの けんさ用：?bgmfile=0 で ごうせいだけ
   const failed = new Set(), lastPos = {};   // よめなかった ファイル（このページを ひらいている あいだは ごうせいで）／ファイルごとの 止めた 場所（もどった とき つづきから）
@@ -180,7 +180,7 @@
     const t = norm(val(o.time)); return Object.prototype.hasOwnProperty.call(KEYS, t) ? t : 'h';
   }
   function desired() {
-    const top = stack[stack.length - 1]; if (!top || !on || document.hidden) return null;
+    const top = stack[stack.length - 1]; if (!top || !on || document.hidden || Date.now() < yieldUntil) return null;
     try { if (!soundOk(top.o.sound) || val(top.o.mute)) return null; return pickKey(top.name, top.o); } catch { return null; }
   }
   const touched = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;   // ゆびで さわった あとか
@@ -220,11 +220,19 @@
   const closeEl = o => { try { o.el.pause(); } catch {} try { o.el.removeAttribute('src'); o.el.load(); } catch {} try { o.src.disconnect(); } catch {} try { o.eg.disconnect(); } catch {} o.dead = true; };
   const closeFile = p => { (p.els || []).forEach(closeEl); p.els = []; };
   function rememberPos(p) { try { const o = p.els[p.els.length - 1]; if (o && o.el.currentTime > 1) lastPos[p.file] = { t: o.el.currentTime, at: Date.now() }; } catch {} }
-  const QUIET_TSURI = .5;   // つりばの 曲は ひろば・おへやの −6dB（釣りの こうかおんと あんないの おとが きこえる 大きさ）
+  const QUIET_TSURI = 1;   // 10/4 どの がめんでも おなじ おおきさ（差 2dB いない）。   // つりばの 曲は ひろば・おへやの −6dB（釣りの こうかおんと あんないの おとが きこえる 大きさ）
+  // BGM の でぐちは どの がめんも 1つ：ローパス→コンプレッサー（−24dB・6:1）→ぜんたいの ゲイン。かさなっても ピークが でない
+  let yieldUntil = 0;   // ほかの ウィンドウが ならして いる あいだは だまる
+  const buses = new WeakMap();
+  function bgmBus(c) {
+    let b = buses.get(c); if (b) return b;
+    try { const comp = c.createDynamicsCompressor(), out = c.createGain(); comp.threshold.value = -24; comp.knee.value = 6; comp.ratio.value = 6; comp.attack.value = .005; comp.release.value = .25; out.gain.value = .3; comp.connect(out); out.connect(c.destination); b = comp; } catch { b = c.destination; }
+    buses.set(c, b); return b;
+  }
   function startFilePlayer(c, key, file, scale = 1) {
     if (typeof c.createMediaElementSource !== 'function') throw new Error('no media element source');
     const g = c.createGain(), now = c.currentTime, vol = (FILE_GAIN[file] || .3) * boost * scale;
-    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(vol, now + FILE_XF); g.connect(c.destination);
+    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(vol, now + 1.5); g.connect(bgmBus(c));   // さいしょは ちいさく 1.5びょうで フェードイン
     const p = { key, sig: 'file:' + file, file, ctx: c, gain: g, startPart: 0, ended: false, made: 0, els: [], looping: false, heard: false, born: Date.now(), vol };
     const abandon = why => { if (p.ended) return; p.ended = true; closeFile(p); try { g.disconnect(); } catch {} if (cur === p) cur = null; if (why === 'error' || why === 'slow') failed.add(file); if (why === 'gesture') { gestureBlock = true; wantGesture = true; return; } refresh(); };   // 'gesture'＝ゆびで さわる まで 止められた：よめない とは しない・つぎに さわった 時に もういちど（すぐには よびなおさない）
     p.abandon = abandon;
@@ -430,6 +438,10 @@
     refresh();
   };
   ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'click'].forEach(ev => addEventListener(ev, unlock, { passive: true, capture: true }));
+  // ほかの タブ／ウィンドウで BGM が ならされたら こちらは だまる（二重に ならない・ひとつだけ）。見ている ページが 次に さわられた ときに もどる
+  let bc = null, bcMuted = 0; const bcId = Math.random().toString(36).slice(2);
+  try { bc = typeof BroadcastChannel === 'function' ? new BroadcastChannel('marufuwa-bgm-owner') : null; } catch { bc = null; }
+  if (bc) { bc.onmessage = e => { const d = e && e.data; if (d && d.id !== bcId && cur) { bcMuted = d.t; yieldUntil = Date.now() + 12000; try { stopPlayer(cur, .8); cur = null; } catch {} } else if (d && d.id !== bcId) { yieldUntil = Date.now() + 12000; } }; setInterval(() => { try { if (cur && !document.hidden) bc.postMessage({ id: bcId, t: Date.now() }); } catch {} }, 5000); }
   document.addEventListener('visibilitychange', refresh);
   addEventListener('pageshow', refresh);
   // 「おと」の ボタンなど、どこかを おした 直後に 見なおす（本体の おとボタンが 記録を かえた あと すぐ 止まる。ほかの ページの 記録の かわりは storage が しらせる）
