@@ -353,6 +353,7 @@ html[data-clip] #main-button{display:block !important;position:fixed;left:0;bott
 .push-hint{margin:2px 0 0;text-align:center;font-weight:900;font-size:.9rem;color:#35566a}
 :root[data-night=true] .push-hint{color:#e8f1f8}
 @media (prefers-reduced-motion:reduce){#main-button[data-pulse=true]{outline:4px solid #ffd34d;outline-offset:3px}}   /* うごきを へらす：うごく pulse の かわりに しずかな ふちどり（天の 見回り②） */
+:root[data-night=true] #areapick h2,:root[data-night=true] #areago-q{color:#e8f1f8 !important}   /* よるの ダイアログの みだし（くらい 地で よめる） */
 .shore-label{margin:0;text-align:center;font-size:.8rem;font-weight:800;color:#35566a}
 :root[data-night=true] .shore-label{color:#e8f1f8}
 .shore-pick{display:flex;flex-direction:column;gap:8px;margin:6px 0 12px}
@@ -2806,7 +2807,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function drawShoreLabel() { const l = $('shore-label'); if (l) { const m = curMode(); l.textContent = L(SHORE[m][0], SHORE[m][1]); } }
   function drawShorePick() {
     const box = $('shore-pick'); if (!box) return; box.replaceChildren(); const m = curMode();
-    const mk = (cls, key, icon, ja, sub, en, enSub) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.dataset.shore = key; b.setAttribute('aria-pressed', String(m === key)); b.append(icon + ' ' + L(ja, en)); if (sub) { const sm = document.createElement('small'); sm.textContent = L(sub, enSub); b.append(sm); } b.addEventListener('click', () => { setMode(key); drawShorePick(); drawShoreLabel(); }); box.append(b); };
+    const mk = (cls, key, icon, ja, sub, en, enSub) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.dataset.shore = key; b.setAttribute('aria-pressed', String(m === key)); b.append((m === key ? '✓ ' : '') + icon + ' ' + L(ja, en)); if (sub) { const sm = document.createElement('small'); sm.textContent = L(sub, enSub); b.append(sm); } b.addEventListener('click', () => { setMode(key); drawShorePick(); drawShoreLabel(); }); box.append(b); };
     mk('pill', 'easy', '🌿', 'やさしい水ぎわ（らくちん）', 'おすだけ・魚が いつも いるよ・にげないよ', 'Gentle shore (easy)', 'Just press. Fish are always around.');
     mk('pill', 'normal', '🎣', 'ふつうの水ぎわ', 'タイミングを あわせて つる', 'Standard shore', 'Time your press to catch.');
     mk('pill shore-hard', m === 'hard' ? 'normal' : 'hard', '', m === 'hard' ? 'ふつうに もどす' : 'しっかりに する（むずかしめ）', '', m === 'hard' ? 'Back to Standard' : 'Make it Focused (harder)', '');
