@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google" content="notranslate">
+<title>くるくる まるふわ｜まるふわの ひろば</title>
+<meta name="description" content="3つの まるい まどが くるくる まわる、まるふわの かわいい きかい。ボタンで じぶんで とめて、えが そろったら ふわっと おいわい。いそがなくて だいじょうぶ。">
+<meta name="theme-color" content="#2b1d15">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23f3b95a'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%F0%9F%8E%80%3C/text%3E%3C/svg%3E">
+<!--
+  くるくる まるふわ（日本の パチスロ風の かわいい きかい・おかね ぜんぶ なし）
+  【仮の え】いまの 絵は ぜんぶ コード（canvas／CSS）で えがいた「仮の え」です。
+  天の ほんものの え（img/kuru/*.webp）が とどいたら、読めた ものから 自動で さしかわります（読めなければ 仮の えの まま）。
+    img/kuru/sym_<id>.webp     … 絵柄（透明・360x360）。id = face / onigiri / acorn / shell / moon / star
+    img/kuru/reward_<id>.webp  … ごほうびの え（透明・480x480）。同じ id
+    img/kuru/cabinet.webp      … きかいの 外わく（透明・1080x1500）※まだ 使わない（将来）
+  ・ランキング・サーバー・解析・自由入力・きろく（保存）は ありません。みるだけ。
+-->
+<script>
+// つりびよりの「つかいやすく する」（もじを おおきく・うごきを へらす）と 時間帯に したがう（本体の 記録を よむだけ）
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement, q = new URLSearchParams(location.search);
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+  var tf = q.get('time'), t = /^[ahyn]$/.test(tf || '') ? tf : /^[ahyn]$/.test(early.time || '') ? early.time : null;
+  if (!t) { var h = new Date().getHours(); t = h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n'; }
+  root.dataset.time = t;
+} catch (e) { document.documentElement.dataset.time = 'h'; }
+</script>
+<style>
+:root{--ink:#fff3dc;--ink2:#f1dcc0;--bg1:#3a261a;--bg2:#1f140e;--wood:#8a5a34;--wood2:#5e3a1f;--gold:#f0c46a;--gold2:#c8963a;--glass:#fff6e4;--btn1:#ffdf9c;--btn2:#f1b455;--btn-ink:#3a2410;--btn-line:#fff3dc;--plate:#33211a;--line:#b98a5a}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:radial-gradient(ellipse at 50% 18%,#6a4228 0%,var(--bg1) 38%,var(--bg2) 100%) fixed;padding:12px 12px 36px}
+:root[data-inapp=x] body{padding-bottom:84px}
+.hut{max-width:520px;margin:0 auto}
+.back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(#fff,#dff1f7);border:2px solid #9bc9da;color:#14506b;font-weight:800;text-decoration:none}
+h1{margin:8px 0 0;font-size:1.4rem;line-height:1.4;text-align:center}
+.lead{margin:0 0 10px;text-align:center;font-size:.95rem;color:var(--ink2)}
+/* きかい */
+.cab{position:relative;margin:0 auto;padding:12px 12px 14px;border-radius:26px;background:linear-gradient(160deg,#a7703f,var(--wood) 40%,var(--wood2));border:3px solid #3a2410;box-shadow:inset 0 0 0 3px var(--gold2),inset 0 0 0 5px #5e3a1f,0 10px 28px #0008}
+.marq{display:flex;justify-content:space-between;align-items:center;gap:4px;padding:6px 10px;margin:0 0 10px;border-radius:16px;background:#2a1a10;border:2px solid var(--gold2)}
+.lamp{width:20px;height:20px;border-radius:50%;flex:0 0 auto;background:radial-gradient(circle at 35% 30%,#fffbe8,#ffd98a 45%,#d28a2a 100%);box-shadow:0 0 9px 2px #ffd98a88;animation:lamp 2.4s ease-in-out infinite alternate}
+.lamp:nth-child(2n){animation-delay:-1.2s;background:radial-gradient(circle at 35% 30%,#fff3f3,#ffb4c0 45%,#d0566c 100%);box-shadow:0 0 9px 2px #ffb4c088}
+.lamp:nth-child(3n){animation-delay:-.6s}
+@keyframes lamp{from{opacity:.55}to{opacity:1}}
+.cab.yokan .lamp{animation-duration:1.3s}   /* よかん：ふわっと はやく（1.3びょうで 1かい＝ 3回/秒 みまん） */
+.win-l .lamp{opacity:1}
+.window{position:relative;padding:8px;border-radius:18px;background:#1b110b;border:3px solid var(--gold2);box-shadow:inset 0 0 14px #000}
+.reels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.reels canvas{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:10px;background:var(--glass)}
+.payline{position:absolute;left:2px;right:2px;top:50%;height:0;border-top:3px solid #e0555a;transform:translateY(-1.5px);pointer-events:none;opacity:.8}
+.payline:before,.payline:after{content:"";position:absolute;top:-9px;border:8px solid transparent}
+.payline:before{left:0;border-left-color:#e0555a;border-right:0}
+.payline:after{right:0;border-right-color:#e0555a;border-left:0}
+.glow{position:absolute;inset:-6px;border-radius:24px;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 50% 50%,#fff3b8cc,#ffd98a55 50%,transparent 75%)}
+.cab.win .glow{animation:glow 2.6s ease-in-out forwards}
+@keyframes glow{0%{opacity:0}30%{opacity:1}100%{opacity:.35}}
+.cab.yokan .window{box-shadow:inset 0 0 14px #000,0 0 18px 3px #ffd98a77}
+.cab.yokan .window,.cab .window{transition:box-shadow .6s ease}
+.msg{margin:10px 0 6px;min-height:3.2em;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);text-align:center;font-weight:700}
+/* ボタン */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;min-width:44px;padding:6px 14px;border-radius:30px;border:3px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--btn-ink);font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;box-shadow:0 4px 0 #8a5a1e}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #8a5a1e}
+.btn:focus-visible,.back:focus-visible,summary:focus-visible{outline:4px solid #fff;outline-offset:3px;box-shadow:0 0 0 8px #17658a}
+.lever{display:flex;width:100%;min-height:68px;font-size:1.2rem}
+.lever i{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffd0d0,#e0555a 60%,#9c2a30);border:2px solid #5a1418;flex:0 0 auto}
+.stops{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stops .btn{min-height:72px;flex-direction:column;gap:0;line-height:1.3;padding:6px 4px}
+.stops .btn small{font-size:.75rem;font-weight:700}
+.stops .btn[disabled],.stops .btn.done{opacity:1;background:#d9c9a8;box-shadow:none;border-style:dashed}
+[hidden]{display:none!important}
+/* ごほうび */
+.card{margin:12px 0 0;padding:12px;border-radius:18px;background:var(--plate);border:3px solid var(--gold2);text-align:center}
+.card .pic{position:relative;display:grid;place-items:center;margin:0 auto 6px;width:132px;height:132px;border-radius:50%;background:radial-gradient(circle,#fff6e4,#f6dca4);border:4px solid var(--gold)}
+.card canvas,.card img{display:block;width:96px;height:96px}
+.card.win .pic{animation:hop 1.8s ease-in-out 1}
+@keyframes hop{0%,100%{transform:translateY(0)}20%{transform:translateY(-16px)}40%{transform:translateY(0)}60%{transform:translateY(-9px)}80%{transform:translateY(0)}}
+.card h2{margin:0;font-size:1.1rem;line-height:1.5}
+.card p{margin:2px 0;font-size:.9rem;color:var(--ink2)}
+.foot{margin:14px 0 0;text-align:center;font-size:.8rem;color:var(--ink2);word-break:break-all}
+.more{margin:12px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--line);background:var(--plate);color:var(--ink);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}
+.more .inner{margin:8px 0 0;padding:10px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.88rem}
+.more .inner p{margin:0 0 6px}
+.mode{margin:6px 0 0;min-height:44px;font-size:.95rem}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ps-hint{color:#27424e}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}.lamp{opacity:1}}
+:root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+:root[data-calm=true] .lamp{opacity:1}
+@media(prefers-reduced-motion:reduce){.cab.win .glow{opacity:.6}}
+:root[data-calm=true] .cab.win .glow{opacity:.6}
+</style>
+</head>
+<body>
+<main class="hut" id="hut">
+  <a class="back" id="back" href="../index.html">← ひろばへ</a>
+  <h1>くるくる まるふわ</h1>
+  <p class="lead" id="lead">ればを ひいて、ボタンで ひとつずつ とめよう。</p>
+  <div class="cab" id="cab">
+    <div class="marq" aria-hidden="true"><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span></div>
+    <div class="window" id="win">
+      <div class="reels"><canvas id="r0" aria-hidden="true"></canvas><canvas id="r1" aria-hidden="true"></canvas><canvas id="r2" aria-hidden="true"></canvas></div>
+      <div class="payline" aria-hidden="true"></div>
+    </div>
+    <div class="glow" aria-hidden="true"></div>
+  </div>
+  <p class="msg" id="msg" role="status" aria-live="polite">ればを ひいて はじめよう。</p>
+  <button type="button" class="btn lever" id="lever"><i aria-hidden="true"></i>ればを ひく</button>
+  <div class="stops" id="stops" hidden>
+    <button type="button" class="btn" data-r="0">とめる<small>1</small><span class="sr">ひだりの まど</span></button>
+    <button type="button" class="btn" data-r="1">とめる<small>2</small><span class="sr">まんなかの まど</span></button>
+    <button type="button" class="btn" data-r="2">とめる<small>3</small><span class="sr">みぎの まど</span></button>
+  </div>
+  <section class="card" id="card" hidden aria-labelledby="c-h">
+    <div class="pic" id="c-pic"></div>
+    <h2 id="c-h"></h2>
+    <p id="c-p1"></p>
+    <p id="c-p2"></p>
+  </section>
+  <details class="more" id="more"><summary>あそびかた・らくちん</summary>
+    <div class="inner">
+      <p>ればを ひくと 3つの まどが まわるよ。ボタンを おして ひとつずつ とめてね（キーボードは スペース）。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。</p>
+      <p>ふつう：ほんとうの タイミングで とめるよ（れんだ しても そろわないよ）。</p>
+      <p>らくちん：ゆっくり まわって、じどうで とまって、ちゃんと そろうよ。</p>
+      <p>おかねも てんすうも ありません。きろくも しません。ごほうびは みるだけです。</p>
+      <button type="button" class="btn mode" id="mode" aria-pressed="false">いまは ふつう</button>
+    </div>
+  </details>
+  <p class="foot" id="foot">ほかの ばしょ：aohozomi.github.io/marufuwa-tsuri/links/</p>
+</main>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
+<script>
+// English：この ページの ことば（tsuri-en.js の TsuriEn.add）。うごく ぶぶん（おしらせ・ごほうび）の ぶんも ここで ぜんぶ ひょうに する。
+const KURU_SYM = [
+  { id: 'face',    ja: 'まるふわ',     en: 'Marufuwa',    rj: 'まるふわの シール',   re: 'Marufuwa sticker',     k: 'シール', ke: 'sticker' },
+  { id: 'onigiri', ja: 'おにぎり',     en: 'rice ball',   rj: 'おにぎりの かざり',   re: 'rice ball decoration', k: 'かざり', ke: 'decoration' },
+  { id: 'acorn',   ja: 'どんぐり',     en: 'acorn',       rj: 'どんぐりの シール',   re: 'acorn sticker',        k: 'シール', ke: 'sticker' },
+  { id: 'shell',   ja: 'かいがら',     en: 'seashell',    rj: 'かいがらの かざり',   re: 'seashell decoration',  k: 'かざり', ke: 'decoration' },
+  { id: 'moon',    ja: 'おつきさま',   en: 'moon',        rj: 'おつきさまの シール', re: 'moon sticker',         k: 'シール', ke: 'sticker' },
+  { id: 'star',    ja: 'おほしさま',   en: 'star',        rj: 'おほしさまの かざり', re: 'star decoration',      k: 'かざり', ke: 'decoration' }
+];
+const KURU_SIDE = ['ひだり', 'まんなか', 'みぎ'], KURU_SIDE_EN = ['Left', 'Middle', 'Right'];
+const KURU_MSG = {
+  idle: 'ればを ひいて はじめよう。',
+  spin: 'ボタンを おして、ひとつずつ とめてね。',
+  yokan: 'おや…？ そろいそう。',
+  win: 'そろったよ！ ふわっと きれい。',
+  near: 'おしい、ふたつ そろったね。',
+  none: 'そろわなかったよ。ゆっくり どうぞ。',
+  easy: 'ゆっくり まわるよ。じどうで とまるから まっててね。'
+};
+(() => {
+  const EX = {
+    'くるくる まるふわ｜まるふわの ひろば': 'Round and Round Marufuwa | Marufuwa Plaza',
+    'くるくる まるふわ': 'Round and Round Marufuwa',
+    '← ひろばへ': '← Back to the Plaza',
+    'ればを ひいて、ボタンで ひとつずつ とめよう。': 'Pull the lever, then stop each window with a button.',
+    'ればを ひく': 'Pull the lever',
+    'とめる': 'Stop', 'ひだりの まど': 'left window', 'まんなかの まど': 'middle window', 'みぎの まど': 'right window',
+    'あそびかた・らくちん': 'How to play / Easy mode',
+    'ればを ひくと 3つの まどが まわるよ。ボタンを おして ひとつずつ とめてね（キーボードは スペース）。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。': 'Pull the lever and three windows spin. Press a button to stop them one at a time (on a keyboard, press Space). When three of the same picture line up on the red line, we celebrate.',
+    'ふつう：ほんとうの タイミングで とめるよ（れんだ しても そろわないよ）。': 'Normal: stop with your own timing (mashing the buttons will not line them up).',
+    'らくちん：ゆっくり まわって、じどうで とまって、ちゃんと そろうよ。': 'Easy: it spins slowly, stops by itself, and always lines up.',
+    'おかねも てんすうも ありません。きろくも しません。ごほうびは みるだけです。': 'There is no money and no points. Nothing is saved. The treat is just to look at.',
+    'いまは ふつう': 'Now: Normal', 'いまは らくちん': 'Now: Easy',
+    'ほかの ばしょ：aohozomi.github.io/marufuwa-tsuri/links/': 'More places: aohozomi.github.io/marufuwa-tsuri/links/',
+    'いまは みるだけです。ずかんや おへやには まだ おくれません。': 'For now it is just to look at. It cannot be sent to a book or a room yet.',
+    'おうちの かたへ': 'For grown-ups'
+  };
+  Object.entries(KURU_MSG).forEach(([k, v]) => { EX[v] = ({
+    'idle': 'Pull the lever to begin.', 'spin': 'Press the buttons to stop them one by one.', 'yokan': 'Oh…? They might line up.',
+    'win': 'They lined up! A soft, pretty glow.', 'near': 'So close, two lined up.', 'none': 'They did not line up. Take your time.', 'easy': 'Slow spinning. They stop by themselves, so just wait.'
+  })[k]; });
+  KURU_SYM.forEach(s => {
+    KURU_SIDE.forEach((side, i) => { EX[side + 'が とまったよ：' + s.ja] = KURU_SIDE_EN[i] + ' stopped: ' + s.en; });
+    EX['「' + s.rj + '」を みつけたよ'] = 'You found a “' + s.re + '”';
+    EX[s.k + 'を みせるね。'] = 'Here is a ' + s.ke + ' to look at.';
+    EX[s.ja] = s.en;
+  });
+  const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
+  const title = () => { const E = window.TsuriEn; if (E && E.lang === 'en') document.title = 'Round and Round Marufuwa | Marufuwa Plaza'; };
+  document.addEventListener('DOMContentLoaded', () => { reg(); title(); setTimeout(title, 300); setTimeout(title, 1200); });
+  addEventListener('load', () => { reg(); title(); });
+})();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
+  const KURU_SFX = true;   // 10/2「効果音は 一旦 止める」の なかで、この 小屋だけ 仕様どおり 低い 音を ならす（1行で 止められる）
+  const N = 6, rootEl = document.documentElement;
+  const $ = id => document.getElementById(id);
+  const cab = $('cab'), msgEl = $('msg'), lever = $('lever'), stopsEl = $('stops'), card = $('card'), modeBtn = $('mode');
+  const stopBtns = [...stopsEl.querySelectorAll('button')];
+  const cv = [0, 1, 2].map(i => $('r' + i));
+  const calm = () => rootEl.dataset.calm === 'true' || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const STRIP = [   // 3つの まどの えの ならび（どの まども 6しゅるい ぜんぶ 1回ずつ）
+    ['face', 'onigiri', 'acorn', 'shell', 'moon', 'star'],
+    ['star', 'face', 'shell', 'onigiri', 'moon', 'acorn'],
+    ['moon', 'acorn', 'face', 'star', 'onigiri', 'shell']
+  ];
+  const SYM = Object.fromEntries(KURU_SYM.map(s => [s.id, s]));
+  const idx = c => ((c % N) + N) % N;
+
+  // ─── 仮の え（canvas）。img/kuru/sym_<id>.webp が 読めたら そちらに さしかえる ───
+  const SZ = 160, sprites = {};
+  function drawSym(g, id, S) {
+    g.clearRect(0, 0, S, S); g.save(); g.scale(S / 100, S / 100); g.lineJoin = 'round'; g.lineCap = 'round';
+    const outline = '#7a4a2a';
+    if (id === 'face') {
+      g.fillStyle = '#fffaf0'; g.strokeStyle = outline; g.lineWidth = 3.5;
+      g.beginPath(); g.arc(50, 52, 38, 0, 7); g.fill(); g.stroke();
+      g.fillStyle = '#bfe6f2'; [[22, 22], [78, 22]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 11, 0, 7); g.fill(); g.stroke(); });
+      g.fillStyle = '#ffb4be'; [[28, 60], [72, 60]].forEach(([x, y]) => { g.beginPath(); g.ellipse(x, y, 8, 5.5, 0, 0, 7); g.fill(); });
+      g.fillStyle = '#4a2c1a'; [[37, 50], [63, 50]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 4.2, 0, 7); g.fill(); });
+      g.strokeStyle = '#4a2c1a'; g.lineWidth = 3.5; g.beginPath(); g.moveTo(42, 62); g.quadraticCurveTo(50, 70, 58, 62); g.stroke();   // 口は 閉じた 一筆の えがお
+    } else if (id === 'onigiri') {
+      g.fillStyle = '#fffdf6'; g.strokeStyle = outline; g.lineWidth = 3.5;
+      g.beginPath(); g.moveTo(50, 14); g.quadraticCurveTo(58, 14, 84, 74); g.quadraticCurveTo(88, 86, 74, 86); g.lineTo(26, 86); g.quadraticCurveTo(12, 86, 16, 74); g.quadraticCurveTo(42, 14, 50, 14); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#2f3a36'; g.beginPath(); g.moveTo(31, 62); g.lineTo(69, 62); g.lineTo(76, 86); g.lineTo(24, 86); g.closePath(); g.fill();
+      g.fillStyle = '#4a2c1a'; [[40, 46], [60, 46]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 3.4, 0, 7); g.fill(); });
+      g.strokeStyle = '#4a2c1a'; g.lineWidth = 3; g.beginPath(); g.moveTo(45, 52); g.quadraticCurveTo(50, 57, 55, 52); g.stroke();
+    } else if (id === 'acorn') {
+      g.strokeStyle = outline; g.lineWidth = 3.5;
+      g.fillStyle = '#e2b676'; g.beginPath(); g.moveTo(24, 46); g.quadraticCurveTo(24, 88, 50, 90); g.quadraticCurveTo(76, 88, 76, 46); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#9a6a3a'; g.beginPath(); g.ellipse(50, 40, 33, 22, 0, Math.PI, 0); g.lineTo(83, 46); g.lineTo(17, 46); g.closePath(); g.fill(); g.stroke();
+      g.beginPath(); g.moveTo(50, 20); g.lineTo(50, 10); g.stroke();
+    } else if (id === 'shell') {
+      g.strokeStyle = outline; g.lineWidth = 3.5; g.fillStyle = '#ffd0d6';
+      g.beginPath(); g.moveTo(50, 88); g.lineTo(14, 44); g.quadraticCurveTo(14, 12, 50, 12); g.quadraticCurveTo(86, 12, 86, 44); g.closePath(); g.fill(); g.stroke();
+      g.lineWidth = 2.5; [[50, 12], [32, 17], [68, 17], [18, 32], [82, 32]].forEach(([x, y]) => { g.beginPath(); g.moveTo(50, 88); g.lineTo(x, y); g.stroke(); });
+      g.fillStyle = '#e8a0aa'; g.beginPath(); g.roundRect ? g.roundRect(36, 84, 28, 8, 4) : g.rect(36, 84, 28, 8); g.fill(); g.stroke();
+    } else if (id === 'moon') {
+      g.strokeStyle = outline; g.lineWidth = 3.5; g.fillStyle = '#ffe58a';
+      g.beginPath(); g.arc(50, 50, 38, 0.55, Math.PI * 2 - 0.55, false); g.arc(64, 50, 31, Math.PI * 2 - 0.9, 0.9, true); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#4a2c1a'; g.beginPath(); g.arc(30, 52, 3.2, 0, 7); g.fill();
+    } else if (id === 'star') {
+      g.strokeStyle = outline; g.lineWidth = 3.5; g.fillStyle = '#ffe070';
+      g.beginPath(); for (let k = 0; k < 10; k++) { const r = k % 2 ? 19 : 42, a = -Math.PI / 2 + k * Math.PI / 5; g.lineTo(50 + r * Math.cos(a), 54 + r * Math.sin(a)); } g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#4a2c1a'; [[43, 54], [57, 54]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 2.8, 0, 7); g.fill(); });
+    }
+    g.restore();
+  }
+  KURU_SYM.forEach(s => {
+    const c = document.createElement('canvas'); c.width = c.height = SZ; drawSym(c.getContext('2d'), s.id, SZ); sprites[s.id] = c;
+    const im = new Image(); im.decoding = 'async'; im.referrerPolicy = 'no-referrer';
+    im.onload = () => { if (im.naturalWidth >= 32) { sprites[s.id] = im; dirty(); } };
+    im.onerror = () => {};   // 読めない ときは 仮の えの まま
+    im.src = '../../img/kuru/sym_' + s.id + '.webp';
+  });
+
+  // ─── ようす ───
+  const reels = [0, 1, 2].map(i => ({ i, pos: [0, 2, 4][i], st: 'stop', v: 0, p0: 0, p1: 0, te: 0, dur: .15, seek: null, auto: null, k: 1 }));
+  let phase = 'idle', easy = false, easyTarget = 'face', last = 0, raf = 0, sim = 0, drewDirty = true, yokanOn = false;
+  const centerSym = r => STRIP[r.i][idx(Math.round(r.pos))];
+  const say = (s) => { msgEl.textContent = s; };
+  const dirty = () => { drewDirty = true; if (!raf) raf = requestAnimationFrame(frame); };
+
+  // ─── おと（低〜中の 音だけ：80〜440Hz・sine・立ち上がり 30ms 以上）。ブラウザの きまりで さいしょの タップの あとから ───
+  const sndLog = (window.__kuruSnd = []);
+  function tone(hz, at, len, vol, att) {
+    if (!KURU_SFX) return;
+    const PS = window.PageSound; if (!PS || !PS.soundOn()) return;
+    const ctx = acFallback(); if (!ctx) return;
+    hz = Math.max(80, Math.min(440, hz)); att = Math.max(.03, att || .03);
+    try {
+      const t = ctx.currentTime + (at || 0), o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+      o.type = 'sine'; o.frequency.value = hz; f.type = 'lowpass'; f.frequency.value = 900;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(.0008, t + len);
+      o.connect(f); f.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + len + .05);
+      sndLog.push({ hz, type: o.type, attack: att, len, vol });
+    } catch (e) {}
+  }
+  let acOwn = null;
+  function acFallback() { try { acOwn = acOwn || new (window.AudioContext || window.webkitAudioContext)(); if (acOwn.state === 'suspended') acOwn.resume(); return acOwn; } catch (e) { return null; } }
+  const sfx = {
+    lever() { tone(131, 0, .5, .12, .06); tone(98, .12, .45, .09, .06); },
+    stop() { tone(220, 0, .2, .13, .03); tone(165, .06, .22, .1, .03); },   // コトン
+    yokan() { tone(262, 0, .7, .07, .2); },
+    win() { tone(262, 0, .7, .12, .05); tone(330, .22, .7, .12, .05); tone(392, .44, 1.0, .12, .05); }   // 低い やさしい 3おと
+  };
+
+  // ─── えがく ───
+  let cell = 0;
+  function sizeCanvases() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv[0].clientWidth || 100; cell = Math.max(48, Math.round(w * dpr));
+    cv.forEach(c => { c.width = cell; c.height = cell * 3; });
+    dirty();
+  }
+  function draw(r) {
+    const c = cv[r.i], g = c.getContext('2d'), H = cell, W = cell;
+    g.clearRect(0, 0, W, H * 3); g.fillStyle = '#fff6e4'; g.fillRect(0, 0, W, H * 3);
+    const f = Math.floor(r.pos);
+    for (let k = f - 3; k <= f + 4; k++) {
+      const y = H * 1.5 - (k - r.pos) * H;   // k が pos に ちかい ほど まんなか。k が おおきい ほど うえ
+      if (y < -H || y > H * 4) continue;
+      const s = sprites[STRIP[r.i][idx(k)]], pad = H * .12, d = H - pad * 2;
+      if (!s) continue; const nw = s.naturalWidth || s.width;
+      const sz = Math.min(d, nw);   // もとの おおきさ いじょうに ひきのばさない
+      g.drawImage(s, (W - sz) / 2, y - sz / 2, sz, sz);
+    }
+    const sh = g.createLinearGradient(0, 0, 0, H * 3);
+    sh.addColorStop(0, 'rgba(60,35,20,.55)'); sh.addColorStop(.3, 'rgba(60,35,20,0)'); sh.addColorStop(.7, 'rgba(60,35,20,0)'); sh.addColorStop(1, 'rgba(60,35,20,.55)');
+    g.fillStyle = sh; g.fillRect(0, 0, W, H * 3);
+  }
+
+  // ─── うごき ───
+  const BASE = [3.2, 3.5, 3.8];   // 1びょうに すすむ えの かず（ふつう）
+  const stoppedCount = () => reels.filter(r => r.st === 'stop').length;
+  function startSlide(r, target, dur) { r.st = 'slide'; r.p0 = r.pos; r.p1 = target; r.te = 0; r.dur = dur; r.seek = null; dirty(); }
+  function frame(t) {
+    raf = 0; const dt = Math.min(.05, Math.max(0, (t - (last || t)) / 1000)); last = t; let act = false;
+    sim += dt;
+    reels.forEach(r => {
+      if (r.st === 'spin') {
+        act = true; r.pos += r.v * r.k * dt; if (r.pos > 600) r.pos -= 600;
+        if (easy && r.auto !== null && sim >= r.auto && r.seek === null) beginSeek(r);
+        if (r.seek) { const c = Math.round(r.pos); if (STRIP[r.i][idx(c)] === r.seek && r.pos - c >= 0) startSlide(r, c, .14); }
+      } else if (r.st === 'slide') {
+        act = true; r.te += dt; const u = Math.min(1, r.te / r.dur), e = 1 - (1 - u) * (1 - u); r.pos = r.p0 + (r.p1 - r.p0) * e;
+        if (u >= 1) { r.pos = r.p1; settle(r); }
+      }
+    });
+    if (act || drewDirty) { reels.forEach(draw); drewDirty = false; }
+    if (act) raf = requestAnimationFrame(frame); else last = 0;
+  }
+  function beginSeek(r) {
+    r.seek = easyTarget; r.auto = null; const b = stopBtns[r.i]; b.disabled = true;
+  }
+  function settle(r) {
+    r.st = 'stop'; r.pos = ((r.pos % N) + N) % N; stopBtns[r.i].classList.add('done'); stopBtns[r.i].disabled = true;
+    sfx.stop();
+    const name = SYM[centerSym(r)].ja;
+    live(KURU_SIDE[r.i] + 'が とまったよ：' + name);
+    const left = reels.filter(x => x.st !== 'stop');
+    if (!left.length) return finish();
+    if (left.length === 1) {
+      const [a, b] = reels.filter(x => x.st === 'stop');
+      if (a && b && centerSym(a) === centerSym(b) && !yokanOn) {   // よかん：のこりの まどが ゆっくり・ランプが ふわっと
+        yokanOn = true; cab.classList.add('yokan'); left[0].k = .45; say(KURU_MSG.yokan); sfx.yokan();
+      }
+    }
+  }
+  const live = s => { $('live').textContent = ''; setTimeout(() => { $('live').textContent = s; }, 30); };
+  function finish() {
+    phase = 'done'; yokanOn = false; cab.classList.remove('yokan');
+    stopsEl.hidden = true; lever.hidden = false;
+    const ids = reels.map(centerSym), same = ids[0] === ids[1] && ids[1] === ids[2];
+    const two = !same && (ids[0] === ids[1] || ids[1] === ids[2] || ids[0] === ids[2]);
+    if (same) win(ids[0]); else { card.hidden = true; card.classList.remove('win'); say(two ? KURU_MSG.near : KURU_MSG.none); }
+    $('hut').dataset.last = same ? 'win' : two ? 'near' : 'none';
+  }
+  function win(id) {
+    const s = SYM[id];
+    cab.classList.remove('win'); void cab.offsetWidth; cab.classList.add('win');
+    say(KURU_MSG.win); sfx.win();
+    $('c-h').textContent = '「' + s.rj + '」を みつけたよ';
+    $('c-p1').textContent = s.k + 'を みせるね。';
+    $('c-p2').textContent = 'いまは みるだけです。ずかんや おへやには まだ おくれません。';
+    const pic = $('c-pic'); pic.replaceChildren();
+    const c = document.createElement('canvas'); c.width = c.height = 192; c.setAttribute('aria-hidden', 'true');
+    c.getContext('2d').drawImage(sprites[id], 0, 0, 192, 192); pic.append(c);
+    const im = new Image(); im.alt = ''; im.referrerPolicy = 'no-referrer';
+    im.onload = () => { if (im.naturalWidth >= 32) pic.replaceChildren(im); };   // 天の ごほうびの え（あれば）
+    im.src = '../../img/kuru/reward_' + id + '.webp';
+    card.hidden = false; card.classList.remove('win'); void card.offsetWidth; card.classList.add('win');
+  }
+
+  // ─── そうさ ───
+  function pull() {
+    if (phase === 'spin') return;
+    phase = 'spin'; yokanOn = false; cab.classList.remove('yokan', 'win'); card.hidden = true;
+    lever.hidden = true; stopsEl.hidden = false;
+    const slow = calm() ? .5 : 1, ez = easy ? .5 : 1;
+    easyTarget = KURU_SYM[Math.floor(Math.random() * N)].id;
+    stopBtns.forEach(b => { b.disabled = false; b.classList.remove('done'); });
+    reels.forEach((r, i) => {
+      r.st = 'spin'; r.pos = Math.random() * N; r.v = BASE[i] * slow * ez; r.k = 1; r.seek = null;
+      r.auto = easy ? sim + 2.2 + i * 1.6 : null;
+    });
+    sfx.lever(); say(easy ? KURU_MSG.easy : KURU_MSG.spin); live(easy ? KURU_MSG.easy : KURU_MSG.spin);
+    $('hut').dataset.last = '';
+    last = 0; dirty();
+  }
+  function stop(i) {
+    const r = reels[i]; if (phase !== 'spin' || r.st !== 'spin') return;
+    if (easy) { if (r.seek === null) beginSeek(r); return; }
+    startSlide(r, Math.round(r.pos), calm() ? .3 : .14);
+  }
+  lever.addEventListener('click', pull);
+  stopBtns.forEach((b, i) => b.addEventListener('click', () => stop(i)));
+  modeBtn.addEventListener('click', () => {
+    easy = !easy; modeBtn.setAttribute('aria-pressed', String(easy));
+    modeBtn.textContent = easy ? 'いまは らくちん' : 'いまは ふつう';
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== ' ' && e.code !== 'Space') return;
+    if (e.target && e.target.closest && e.target.closest('details')) return;
+    e.preventDefault(); if (e.repeat) return;
+    if (phase !== 'spin') pull(); else { const r = reels.find(x => x.st === 'spin' && x.seek === null); if (r) stop(r.i); }
+  });
+  document.addEventListener('keyup', e => { if ((e.key === ' ' || e.code === 'Space') && !(e.target.closest && e.target.closest('details'))) e.preventDefault(); });
+  addEventListener('resize', sizeCanvases);
+  sizeCanvases();
+
+  // 検査用の よみとり口（よむだけ）
+  window.__kuru = {
+    pos: i => reels[i].pos, sym: i => centerSym(reels[i]), symAt: (i, c) => STRIP[i][idx(c)], state: i => reels[i].st, phase: () => phase, easy: () => easy, strip: STRIP,
+    speed: i => reels[i].v * reels[i].k
+  };
+});
+</script>
+<script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-pagesound.js"></script>
+<script defer src="../../tsuri-pagebg.js"></script>
+<script defer src="../../tsuri-en.js"></script>
+<script defer src="../../tsuri-en-hiroba.js"></script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ mount: document.getElementById('back'), bgm: 'hiroba', time: () => document.documentElement.dataset.time }); });</script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageBg) PageBg.init('kuru'); });</script>
+</body>
+</html>
