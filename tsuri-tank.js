@@ -127,6 +127,9 @@
 
   // ─── かざり：魚がときどき持ってくる物。水槽に置ける（本体の save.decor の名前） ───
   //   sand=砂の上に置く／float=水の中にうかぶ
+  // 絵の さしかえ口（天の えが とどいたら window.TsuriTankArt = { bg, far, mid, near, glass, decor:{ 'サンゴ': 'img/tank/coral.webp', … } } を 先に 置く）。
+  //   各 層は "url" か { hiru, yuu, yoru, default }。無い 層は いまの 仮の えの まま。相対 URL は BASE が つく。
+  const tkArtUrl = v => { if (!v) return ''; const t = (typeof v === 'string') ? v : (v[pal && pal.time] || v.default || ''); if (!t || /^(javascript|data:text)/i.test(t)) return ''; return /^(https?:|\/|data:image\/)/.test(t) ? t : BASE + t; };
   const DECOR = {
     'かいがら': { kind: 'sand', svg: (c = {}) => `<path d="M8 32 Q4 14 20 8 Q36 14 32 32 Z" fill="${c.a || '#ffd9c4'}" stroke="#f0a98a" stroke-width="2" stroke-linejoin="round"/><path d="M20 32 V10 M13 32 L11 14 M27 32 L29 14" stroke="#f0a98a" stroke-width="1.6" stroke-linecap="round" fill="none"/>` },
     'きれいな いし': { kind: 'sand', svg: () => `<ellipse cx="20" cy="26" rx="15" ry="10" fill="#8fd6d0" stroke="#5fb9b2" stroke-width="2"/><ellipse cx="15" cy="22" rx="5" ry="2.6" fill="#ffffffaa"/><path d="M29 12 l1.6 3.6 l3.6 1.6 l-3.6 1.6 l-1.6 3.6 l-1.6 -3.6 l-3.6 -1.6 l3.6 -1.6z" fill="#fff8c9"/>` },
@@ -142,7 +145,7 @@
     'ささぶね': { kind: 'surface', bob: true, svg: () => `<path d="M20 27 V7" stroke="#4fae7c" stroke-width="2" stroke-linecap="round"/><path d="M22.5 8.5 Q35 13 32 24 L22.5 24Z" fill="#c6f0d2" stroke="#4fae7c" stroke-width="1.8" stroke-linejoin="round"/><path d="M2 22 C8 22 10 34 20 34 C30 34 32 22 38 22 C33 30 28 31 20 31 C12 31 7 30 2 22Z" fill="#8fe0a8" stroke="#4fae7c" stroke-width="2" stroke-linejoin="round"/><path d="M9 27 Q20 32 31 27" fill="none" stroke="#e9ffe9" stroke-width="1.4" stroke-linecap="round"/>` },
     'やどかり': { kind: 'sand', crawl: true, svg: () => `<g stroke-linecap="round" stroke-linejoin="round"><path d="M8 33 l-3 4 M13 35 l-2 4 M29 35 l2 4 M34 32 l3 3" stroke="#d96f40" stroke-width="2" fill="none"/><path d="M6 31 Q8 26 13 27 L14 33 Q8 35 6 31Z" fill="#ff9a7a" stroke="#d96f40" stroke-width="1.6"/><path d="M14 33 Q24 38 33 33 L32 28 L14 28Z" fill="#ff9a7a" stroke="#d96f40" stroke-width="1.6"/><path d="M33 32 Q40 8 22 7 Q10 8 13 26 Q15 31 33 32Z" fill="#ffe3c4" stroke="#d98a5a" stroke-width="2"/><path d="M17 25 Q18 14 25 14 Q30 17 26 22 Q23 24 21 21" fill="none" stroke="#d98a5a" stroke-width="1.6"/><circle cx="8" cy="24" r="2.1" fill="#fff" stroke="#d96f40" stroke-width="1.2"/><circle cx="8" cy="24" r=".9" fill="#3a2a2a"/><path d="M8 26 v2" stroke="#d96f40" stroke-width="1.6"/></g>` }
   };
-  const decorMarkup = (name, size, c) => { const d = DECOR[name] || DECOR['きれいな いし']; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">${d.svg(c)}</svg>`; };
+  const decorMarkup = (name, size, c) => { const au = tkArtUrl(window.TsuriTankArt && window.TsuriTankArt.decor && window.TsuriTankArt.decor[name]); if (au) return '<img src="' + au + '" alt="" width="' + size + '" height="' + size + '" draggable="false" decoding="async" style="display:block">'; const d = DECOR[name] || DECOR['きれいな いし']; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="${size}" height="${size}">${d.svg(c)}</svg>`; };
 
   // ─── 部屋（かべ・ゆか・たな・ラグ・ちゃぶ台）。360×640 のせかい。色は文字のまま（しゃしんにも使う） ───
   const ROOM = { w: 360, h: 640, tank: { x: 16, y: 56, w: 328, h: 180 }, mascot: { cx: 140, foot: 574, w: 100, h: 133 }, friend: { w: 66, foot: [572, 582] }, friendX: [60, 296], bubble: { x: 204, y: 430, w: 148 }, guest: { cx: 180, foot: 414, w: 60 } };
@@ -201,10 +204,10 @@
     const peb = [[52, 164, 9, 5, '#b9c9d2'], [88, 168, 6, 4, '#d9d2c4'], [150, 166, 10, 5.5, '#aebfc9'], [214, 169, 7, 4.5, '#d6cfc0'], [270, 165, 9, 5, '#b4c4ce'], [304, 170, 6, 4, '#cfd8dc']]
       .map(([x, y, rx, ry, c]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c}" stroke="#ffffff70" stroke-width="1"/>`).join('');
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 328 180" width="328" height="180" preserveAspectRatio="xMidYMax slice">
-      <g opacity=".4" fill="${pal.rock}"><ellipse cx="50" cy="150" rx="60" ry="20"/><ellipse cx="290" cy="152" rx="66" ry="22"/></g>
-      <path d="M0 148 Q60 138 130 146 T262 142 T328 148 V180 H0Z" fill="${pal.sand}"/><path d="M0 164 Q90 156 180 164 T328 160 V180 H0Z" fill="${pal.sand2}"/>
+      <g class="tk-dflt-far" opacity=".4" fill="${pal.rock}"><ellipse cx="50" cy="150" rx="60" ry="20"/><ellipse cx="290" cy="152" rx="66" ry="22"/></g>
+      <g class="tk-dflt-mid"><path d="M0 148 Q60 138 130 146 T262 142 T328 148 V180 H0Z" fill="${pal.sand}"/><path d="M0 164 Q90 156 180 164 T328 160 V180 H0Z" fill="${pal.sand2}"/>
       ${peb}
-      <path d="M196 156 Q210 132 234 138 Q246 140 254 126" fill="none" stroke="#b58c5e" stroke-width="9" stroke-linecap="round"/><path d="M226 138 Q232 150 242 152" fill="none" stroke="#b58c5e" stroke-width="5.5" stroke-linecap="round"/><circle cx="208" cy="146" r="2.2" fill="#8f6a42"/>
+      <path d="M196 156 Q210 132 234 138 Q246 140 254 126" fill="none" stroke="#b58c5e" stroke-width="9" stroke-linecap="round"/><path d="M226 138 Q232 150 242 152" fill="none" stroke="#b58c5e" stroke-width="5.5" stroke-linecap="round"/><circle cx="208" cy="146" r="2.2" fill="#8f6a42"/></g>
       ${sway('M40 156 Q28 122 36 88', 40, 7, '#6cc796', 0)}${sway('M40 156 Q46 128 56 96', 40, 7, '#7fd6a4', -1.3)}${sway('M40 156 Q56 134 62 118', 40, 6, '#59b98a', -2.4)}
       ${sway('M112 158 Q100 132 108 104', 112, 6, '#7fd6a4', -.7)}${sway('M112 158 Q122 138 130 118', 112, 6, '#6cc796', -1.9)}
       ${sway('M288 156 Q276 122 284 84', 288, 7, '#59b98a', -1.1)}${sway('M288 156 Q296 130 306 98', 288, 7, '#7fd6a4', -2.2)}${sway('M288 156 Q304 138 312 122', 288, 6, '#6cc796', -.4)}
@@ -279,6 +282,10 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-deco{position:absolute;pointer-events:none;line-height:0}
 .tk-decorating .tk-deco{pointer-events:auto;cursor:pointer;outline:2px dashed #ffffffb3;outline-offset:2px;border-radius:6px}
 .tk-layer{z-index:3;overflow:hidden}
+.tk-l{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:hidden}   /* 層：bg・far（rays の うしろ）／near・glass（さかなの まえ・ガラスの ひかりの したに）。絵は window.TsuriTankArt で 差し替え */
+.tk-l-bg,.tk-l-far{z-index:0}.tk-l-near{z-index:4}.tk-l-glass{z-index:8}
+.tk-l img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+.tk-art-far .tk-dflt-far,.tk-art-mid .tk-dflt-mid{display:none}
 .tk-sway{transform-origin:50% 100%;transform-box:fill-box;animation:tk-sway 4.6s ease-in-out infinite alternate}
 .tk-float{animation:tk-float 4.2s ease-in-out infinite alternate}
 .tk-twinkle{animation:tk-twinkle 2.6s ease-in-out infinite}
@@ -459,10 +466,12 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
       <button type="button" class="tk-rice" aria-label="つくえの うえの もの" style="left:54.5%;top:74.5%;width:16.5%;height:8.6%"></button>
       <button type="button" class="tk-shelfbtn" aria-expanded="false" aria-label="おくりもの だな" style="left:3.9%;top:39.7%;width:92.2%;height:14.4%" hidden></button>
       <div class="tk-water" data-tk="water">
+        <div class="tk-l tk-l-bg" aria-hidden="true"></div><div class="tk-l tk-l-far" aria-hidden="true"></div>
         <svg class="tk-rays" viewBox="0 0 328 180" preserveAspectRatio="xMidYMin slice" aria-hidden="true"></svg>
         <div class="tk-base" aria-hidden="true"></div>
         <div class="tk-placed" aria-hidden="true"></div>
         <div class="tk-layer" aria-hidden="true"></div>
+        <div class="tk-l tk-l-near" aria-hidden="true"></div><div class="tk-l tk-l-glass" aria-hidden="true"></div>
         <div class="tk-empty" hidden style="position:absolute"><span></span><button type="button">つりに いく</button></div>
       </div>
       <div class="tk-frame" style="left:0;top:0;width:100%;height:100%;pointer-events:none"></div>
@@ -536,12 +545,20 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     water.querySelectorAll('.tk-bub').forEach(b => b.style.setProperty('--h', Math.round(H) + 'px'));
   }
 
+  // 層ごとの 絵（bg・far・near・glass は 全面の 画像／mid は いまの 砂・流木・小石を かくして 差し替え）。 水草（そだつ）は のこす
+  function paintArt() {
+    const A = window.TsuriTankArt || {}, put = (cls, key) => { const box = water.querySelector(cls); if (!box) return ''; const u = tkArtUrl(A[key]); const cur = box.firstChild && box.firstChild.getAttribute('src'); if (!u) { if (box.firstChild) box.textContent = ''; return ''; } if (cur !== u) { box.textContent = ''; const im = document.createElement('img'); im.alt = ''; im.decoding = 'async'; im.draggable = false; im.src = u; im.onerror = () => { im.remove(); }; box.append(im); } return u; };
+    put('.tk-l-bg', 'bg'); const f = put('.tk-l-far', 'far'); put('.tk-l-near', 'near'); put('.tk-l-glass', 'glass');
+    let m = ''; { const box = water.querySelector('.tk-l-mid'); m = tkArtUrl(A.mid); if (m) { let b2 = box; if (!b2) { b2 = document.createElement('div'); b2.className = 'tk-l tk-l-mid'; b2.style.zIndex = '1'; b2.setAttribute('aria-hidden', 'true'); base.before(b2); } if (!b2.firstChild || b2.firstChild.getAttribute('src') !== m) { b2.textContent = ''; const im = document.createElement('img'); im.alt = ''; im.decoding = 'async'; im.draggable = false; im.src = m; im.onerror = () => { im.remove(); room.classList.remove('tk-art-mid'); }; b2.append(im); } } else if (box) box.remove(); }
+    room.classList.toggle('tk-art-far', !!f); room.classList.toggle('tk-art-mid', !!m);
+  }
   function paintWater() {
     pal = palette();
     room.dataset.time = pal.time;
     water.style.setProperty('--tk-a', pal.a); water.style.setProperty('--tk-b', pal.b);
     base.innerHTML = tankBaseSvg(pal); rays.innerHTML = raysSvg(); rays.style.opacity = pal.night ? '.3' : '.85';
     const svg = base.querySelector('svg'); if (svg) svg.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;display:block';
+    paintArt();
     water.querySelectorAll('.tk-bub').forEach(n => n.remove());
     if (reduced()) return;
     const r = mulberry(77);
