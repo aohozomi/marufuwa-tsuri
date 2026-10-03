@@ -1354,6 +1354,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (!RODS[save.rod] || !RODS[save.rod].open(save)) save.rod = 0;
   if (!BAITS[save.bait] || !BAITS[save.bait].open(save)) save.bait = 0;
   if (!AREAS.some(a => a.id === save.area && save.total >= a.need)) save.area = 'L';
+  { const qs = new URLSearchParams(location.search); if (qs.get('clip') === '1' && qs.get('area')) { const want = AREAS.find(x => x.id === qs.get('area')); if (want && save.total >= want.need) save.area = want.id; } }   // ?clip=1&area=R：録画用に 釣り場を えらぶ（かいほう ずみ だけ・ふせいな あたいは いまの ばしょ・ほぞんは しない＝clip では かきこみが むこう）
   if (!Number.isInteger(save.xp)) save.xp = migrateXp(save);
   // ほかの タブ・ページが きろくを かきかえて いたら、あわせてから かく（ずかんが きえない よう）
   // かず（つった かず・さかなごとの かず）は「じぶんの ふえた ぶん」と「あいての ふえた ぶん」を どちらも たす。おおきさは おおきい ほう
