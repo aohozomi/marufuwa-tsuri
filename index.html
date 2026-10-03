@@ -1986,7 +1986,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const cycleTime = () => (performance.now() - ringStart) % period;
   const ringSize = () => swim.f(cycleTime() / period);
   // 「いまだ」までの じかんの ずれ（ミリびょう）。まえでも あとでも、ちかい ほうを かえす
-  function offBeat() { let gap = cycleTime() - hitAt; if (gap > period / 2) gap -= period; if (gap < -period / 2) gap += period; return gap; }
+  function offBeat(at) { let gap = (((at === undefined ? performance.now() : at) - ringStart) % period + period) % period - hitAt; if (gap > period / 2) gap -= period; if (gap < -period / 2) gap += period; return gap; }
   // まどの ひろさ（ミリびょう）。さかなが まんなかに きた とき・いい さお ほど ひろい。いちばん せまくても 0.12びょう
   // 「おしい」が つづく ほど、まどが すこしずつ ひろがる（1かいで 0.03びょう、さいだい 0.24びょう）。「ぴったり」で もとに もどる。きりかえ なしで、だれにでも きく
   // 3つの あそびかた。らくちん＝おすだけ・にげない・はりなし／ふつう（はじめから）＝タイミングを あわせて「つれた！」（はりも にげるも ない。マスター直 10/1 夜「やっぱり タイミング あわせるのが おもしろい」。まえは ★3いじょうの はり）／しっかり＝まどが せまく（0.7ばい）・はりの あがりが 1.3ばい・★2から にげる・そのかわり ぴったりの ひきが 2ばい・ぬしと ★4が 1.5ばい でやすい
@@ -2029,7 +2029,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // わを えがく。がめんの かきかえに あわせて、なめらかに
   // わの ちぢみは Web Animations（ブラウザの 描画スレッド）に まかせる：本体の しごとが おもい スマホでも コマ落ちしない（総司令部 9/30 測定：CPU 6倍おそい とき rAF は 25fps・最長 100ms 止まる）。あわせる じかん（hitAt・offBeat）は これまで どおり performance.now() で 決める
   // わは まと（いまだ）を すぎたら 0.06しゅうで きえて、つぎの しゅうの はじめの 0.08しゅうで そとから あらわれる（ちぢみ つづけて ぱっと とぶ のが「なにが おきて いるか わからない」ため）。はんてい（hitAt・offBeat・windowMs）は かえない
-  const ringAlpha = p => { const th = hitAt / period, fade = Math.max(th + .04, .82); return p < th ? Math.min(1, p / .08) : p < fade ? 1 : Math.max(0, 1 - (p - fade) / (1 - fade)); };   // はずしても とめない：まとを すぎても いちばん ちいさい 円まで なめらかに ちぢんで、さいごに すうっと きえる（じかんが きじゅん）
+  const ringAlpha = p => { const th = hitAt / period; if (p < th) return Math.min(1, p / .08); if (reduce()) { const fade = Math.max(th + .04, .82); return p < fade ? 1 : Math.max(0, 1 - (p - fade) / (1 - fade)); } return Math.max(0, 1 - (p - th) / (1 - th)); };   // きいろい えんを すぎた あとは ちぢみながら うすく きえる（「おそい」の みための てがかり）。ぴったりの まどは かわらない。うごきを へらす は 今の まま   // はずしても とめない：まとを すぎても いちばん ちいさい 円まで なめらかに ちぢんで、さいごに すうっと きえる（じかんが きじゅん）
   function ringSync() {
     const ring = document.querySelector('#reel .ring'); if (!ring || !ring.animate) return;
     if (ringAnim) { ringAnim.cancel(); ringAnim = null; }
@@ -2285,7 +2285,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (tensionOn()) { tickTension(); tension += modeCfg().gtap * (save.slow ? .5 : 1) * Math.max(.5, 1 - .2 * skillMul('chikara')) * (nushi || fish.legend ? 1.15 : 1); if (tension >= 1 && hp > 0) { escapeNow(); return; } paintTension(); }   // れんだ：いとが ぴんと はる
       return;
     }
-    const miss = Math.abs(offBeat()), easy = windowMs();
+    const stampOk = pressStamp > 0 && Math.abs(performance.now() - pressStamp) < 400, miss = Math.abs(offBeat(stampOk ? pressStamp : undefined)), easy = windowMs(); pressStamp = 0;   // ゆびが ふれた じかん（OSの じかん）で はんてい：げんじつの おくれ（ゆびを はなす まで・ブラウザの はいぶん）を ひく
     const blind = blindNow();   // らくちん、または、わも あんないの おとも ない とき：タイミングを みない
     const power = blind ? 2 : miss <= easy ? 3 : miss <= (precise ? easy * PRECISE.near : easy + .12 * period) ? 2 : 1;
     const center = power === 3 && miss <= 40 && !blind;   // ど真ん中（±40ms）：「ぴったり！！！」・いちばん おおきな しぶき・ふるえ ながめ
@@ -2456,6 +2456,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     endFishing(L('やめたよ。また いつでも。', 'Stopped. Come back anytime.'));
   }
   $('quit').addEventListener('click', quitFishing);
+  let pressStamp = 0, clickBlockUntil = 0;   // pointerdown の とき: ゆびが ふれた しゅんかんに はんてい（click は はなした あと＝約0.09びょう おそい）
   function act() {
     startAmbient();   // おとを ON に して いた ひとは、さいしょに おした ときから なみの おと
     // つれた 直後：カードが まだ なら、さいしょの 1回の おしは カードを すぐ 出す（なげない）。カードが 出て から 1びょうは なげない（れんだ しても 結果が きえない）
@@ -2475,7 +2476,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     else if (phase === 'bite') startReel();
     else if (phase === 'reel') pull();
   }
-  button.addEventListener('click', act);
+  button.addEventListener('pointerdown', e => {   // ひく あいだだけ：ふれた しゅんかんに おす（はなす まで またない）。キーボード・よみあげ・プログラムの click は これまで どおり
+    if (phase !== 'reel' || e.button !== 0 || e.isPrimary === false) return;
+    pressStamp = e.timeStamp || performance.now(); clickBlockUntil = performance.now() + 700; act();
+  });
+  button.addEventListener('click', e => { if (e.detail !== 0 && performance.now() < clickBlockUntil) return; act(); });   // pointerdown で もう おした ぶんの click は むし
   // キーボード：スペースか エンターで、なげる・ひく（ボタンや もじの いれものに いる ときは、その うごきを じゃま しない）
   // 「なげる」ボタンに いる ときも、おした しゅんかんに うごく（スペースは ふつう はなした ときに うごくので、タイミングが ずれる。アタリの あとは いつも ここに いる）
   document.addEventListener('keydown', event => {
