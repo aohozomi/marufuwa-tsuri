@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<!--
+  ボーリング場（まるふわの ひろば）／ゲーム開発3／構想書 39_ボーリング場_構想_総司令部.md が 仕様。
+  【仮の え】いまの 絵は ぜんぶ コードで 描いた 仮の 絵（canvas）です。天の 本物の 絵が img/bowling/ に 届いたら、読めた 物だけ 差し替わります（読めない 物は 仮の 絵のまま）。
+  差し替え先（名前＝寸法）：bg_hiru.webp／bg_yoru.webp＝1600×1200（よこ）、bg_hiru_tate.webp／bg_yoru_tate.webp＝900×1600（スマホ たて）、
+  pin_stand.webp＝120×400（立った ピン）、ball_aka／ao／midori／kiiro／murasaki／daidai.webp＝256×256（ボール 6色）。
+  背景の 絵を 使う ときは 絵の 中の レーンの 幾何を この ページの 計算に あわせる：キャンバス 600×720 で、手前（y=630）の レーン半幅 225・奥（y=228）の レーン半幅 112、ピンは 奥の 中央。
+  おと：低〜中の 音だけ（80〜440Hz・sine・立ち上がり 30ms 以上）。転がる 音は つくらない。いま「効果音は 止める」（10/2）ので SFX_OFF＝true（tsuri-pagesound.js と おなじ）。
+  ほぞん：何も しない（おとの きろく marufuwa-sound-v1 を PageSound が 読み書きする だけ）。ランキング・サーバー・解析・自由入力 なし。
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google" content="notranslate">
+<title>ボーリング場｜まるふわの ひろば</title>
+<meta name="description" content="ねらって、ちからを きめて、ころがす。5ふれーむの ボーリング。ふつうは タイミング、らくちんは みぞが ふさがる。いそがなくて だいじょうぶ。">
+<meta name="theme-color" content="#3a2a1e">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23d9a066'/%3E%3Ccircle cx='50' cy='56' r='24' fill='%233a5fa8'/%3E%3C/svg%3E">
+<script>
+// つかいやすく する（もじを おおきく・うごきを へらす）と 時間帯に したがう（本体の 記録 marufuwa-tsuri-v1 を よむだけ）。時間帯は ?time=a|h|y|n → 記録の time → 時計。
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement, q = new URLSearchParams(location.search);
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+  var tf = q.get('time'), t = /^[ahyn]$/.test(tf || '') ? tf : /^[ahyn]$/.test(early.time || '') ? early.time : null;
+  if (!t) { var h = new Date().getHours(); t = h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n'; }
+  root.dataset.time = t;
+} catch (e) { document.documentElement.dataset.time = 'h'; }
+</script>
+<style>
+:root{--ink:#2b2018;--ink2:#4a382a;--plate:#fffaf0;--wall:#f6ead6;--wood:#d9b07c;--wood2:#8a5a36;--line:#c9a272;--btn1:#ffffff;--btn2:#e6f2f6;--btn-line:#7fb0c4;--link:#14506b;--sky1:#5a4332;--sky2:#2e2219}
+:root[data-time=n]{--sky1:#2a2230;--sky2:#15111c;--wall:#ebe4f2;--plate:#f7f3fb;--wood2:#6e5a86;--line:#8e80b0}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.65;background:linear-gradient(var(--sky1),var(--sky2)) fixed;padding:10px 10px 30px}
+:root[data-inapp=x] body{padding-bottom:84px}
+.room{max-width:640px;margin:0 auto;background:var(--wall);border:3px solid var(--wood2);border-radius:22px;padding:10px 12px 16px;box-shadow:0 8px 24px #0008}
+.back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
+h1{margin:4px 0 0;font-size:1.3rem;line-height:1.4}
+.lead{margin:0 0 6px;font-size:.92rem;color:var(--ink2)}
+.score{display:grid;grid-template-columns:repeat(5,1fr) 1.3fr;gap:5px;margin:4px 0 8px;padding:0;list-style:none}
+.score li{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:46px;border:2px solid var(--line);border-radius:10px;background:var(--plate);font-size:.82rem;line-height:1.25;text-align:center;padding:2px}
+.score li b{font-size:1rem}
+.score li.now{border-color:#17658a;box-shadow:0 0 0 2px #17658a}
+.score li.tot{background:#fff1cf}
+.stagewrap{display:flex;justify-content:center}
+canvas#cv{display:block;width:min(100%,calc((100vh - 330px) * 5 / 6),560px);min-width:min(100%,300px);height:auto;aspect-ratio:5/6;border-radius:14px;border:3px solid var(--wood2);background:#2a1d14;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a}
+.say{margin:8px 0 2px;min-height:3.3em;padding:6px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.98rem}
+.friend{margin:2px 0 6px;font-size:.85rem;color:var(--ink2);min-height:1.7em}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.acts button{min-height:48px;min-width:44px;padding:4px 14px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;flex:1 1 120px}
+.acts button.big{flex:2 1 200px;min-height:56px;font-size:1.1rem;background:linear-gradient(#fff6d8,#ffd98a);border-color:#b3812f;color:#4a2f06}
+.acts button[aria-disabled=true]{opacity:1;color:#51606a;background:#eef2f4;border-style:dashed;cursor:default}
+.swatch{display:inline-block;width:1em;height:1em;border-radius:50%;vertical-align:-.15em;margin-right:.3em;border:1px solid #0006}
+.end{margin:8px 0;padding:10px 12px;border-radius:14px;background:#fff1cf;border:2px solid #b3812f}
+.end img{display:block;max-width:100%;height:auto;margin:8px auto 0;border-radius:10px;border:2px solid var(--line)}
+.end p{margin:2px 0}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}
+.more .note{margin:6px 0 0;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.88rem;color:var(--ink2)}
+.more .note p{margin:2px 0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+:root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+</style>
+</head>
+<body>
+<main class="room" id="room">
+  <a class="back" id="back" href="../index.html">← ひろばへ</a>
+  <h1>ボーリング場</h1>
+  <p class="lead" id="lead">めじるしを タップで とめて、ちからを きめて、ころがそう。</p>
+  <ol class="score" id="score" aria-label="フレームごとの たおした ほん"></ol>
+  <div class="stagewrap"><canvas id="cv" width="600" height="720" tabindex="0" aria-label="ボーリングの レーン。スペースキーか タップで とめます"></canvas></div>
+  <p class="say" id="say">ボールを えらんで、「はじめる」を おしてね。</p>
+  <p class="friend" id="friend" data-noruby></p>
+  <div class="acts" id="acts">
+    <button type="button" id="ball"><span class="swatch" id="ball-sw"></span><span id="ball-t">ボール</span></button>
+    <button type="button" id="mode"><span id="mode-t">ふつう</span></button>
+    <button type="button" id="go" class="big">はじめる</button>
+  </div>
+  <div class="end" id="end" hidden>
+    <p id="end-t"></p>
+    <div class="acts"><button type="button" id="again" class="big">もういちど</button><button type="button" id="card">カードに する</button></div>
+    <p id="card-note" class="lead" hidden>この たんまつに ほぞん します。どこにも おくりません。</p>
+    <img id="card-img" alt="" hidden>
+  </div>
+  <details class="more"><summary>あそびかた</summary><div class="note">
+    <p>1. ボールを えらぶ。</p>
+    <p>2. ゆれる めじるしを タップで とめて、ねらう ばしょを きめる。</p>
+    <p>3. ちからの ゲージを タップで とめる。ちょうど いい ところが ねらいめ。</p>
+    <p>4. ころがって、ピンが たおれる。5ふれーむ（2なげずつ）で おわり。</p>
+    <p>「らくちん」だと みぞが ふさがって、めじるしも ゆっくり。キーボードは スペースで とめる。</p>
+    <p>てんすうは たおした ピンの かずだけ。ランキングも ほぞんも ありません。</p>
+  </div></details>
+</main>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
+<script>
+// English：この ページの ことば（tsuri-en.js の TsuriEn.add）。うごく ことばは ゲームの なかで T(ja,en) で えらぶ。
+(() => {
+  const EX = {
+    'ボーリング場｜まるふわの ひろば': 'Bowling Alley | Marufuwa Plaza', 'ボーリング場': 'Bowling Alley', '← ひろばへ': '← Back to the Plaza',
+    'めじるしを タップで とめて、ちからを きめて、ころがそう。': 'Tap to stop the marker, set the power, and roll.',
+    'フレームごとの たおした ほん': 'Pins knocked down per frame',
+    'ボーリングの レーン。スペースキーか タップで とめます': 'The bowling lane. Press Space or tap to stop.',
+    'ボールを えらんで、「はじめる」を おしてね。': 'Pick a ball, then press “Start”.',
+    'この たんまつに ほぞん します。どこにも おくりません。': 'It is saved on this device only. Nothing is sent anywhere.',
+    'あそびかた': 'How to play', '1. ボールを えらぶ。': '1. Pick a ball.',
+    '2. ゆれる めじるしを タップで とめて、ねらう ばしょを きめる。': '2. Tap to stop the moving marker and choose where to aim.',
+    '3. ちからの ゲージを タップで とめる。ちょうど いい ところが ねらいめ。': '3. Tap to stop the power gauge. The green part is the sweet spot.',
+    '4. ころがって、ピンが たおれる。5ふれーむ（2なげずつ）で おわり。': '4. The ball rolls and the pins fall. The game is 5 frames (2 throws each).',
+    '「らくちん」だと みぞが ふさがって、めじるしも ゆっくり。キーボードは スペースで とめる。': 'In “Easy” the gutters are blocked and the marker is slower. On a keyboard, press Space to stop.',
+    'てんすうは たおした ピンの かずだけ。ランキングも ほぞんも ありません。': 'The score is just the number of pins. No rankings, nothing saved.',
+    'もういちど': 'Play again', 'カードに する': 'Make a card', 'はじめる': 'Start'
+  };
+  const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
+  const title = () => { const E = window.TsuriEn; if (E && E.lang === 'en') document.title = 'Bowling Alley | Marufuwa Plaza'; };
+  document.addEventListener('DOMContentLoaded', () => { reg(); title(); setTimeout(title, 300); setTimeout(title, 1200); });
+  addEventListener('load', () => { reg(); title(); });
+})();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+  const T = (ja, en) => isEn() ? en : ja;
+  const root = document.documentElement;
+  const calm = () => root.dataset.calm === 'true' || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  const W = 600, H = 720, CX = 300, Y_NEAR = 630, Y_FAR = 228, WH = 225, K = 1.0;
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = W * DPR; cv.height = H * DPR;
+  const night = () => root.dataset.time === 'n' || root.dataset.time === 'y';
+
+  // ─── 遠近：d＝ふかさ（0＝てまえ・1＝ピン甲板の おく）。s(d)＝その ふかさの ひろがり ───
+  const sOf = d => 1 / (1 + K * d), s1 = sOf(1);
+  const yOf = d => Y_FAR + (Y_NEAR - Y_FAR) * (sOf(d) - s1) / (1 - s1);
+  const xOf = (x, d) => CX + x * WH * sOf(d);
+
+  // ─── ボール（6色・おもさは 見た目だけ）───
+  const BALLS = [
+    { k: 'aka', ja: 'あか', en: 'Red', c: '#d8453a', c2: '#7a1710' }, { k: 'ao', ja: 'あお', en: 'Blue', c: '#3f6fd0', c2: '#14306e' },
+    { k: 'midori', ja: 'みどり', en: 'Green', c: '#3fa56a', c2: '#145230' }, { k: 'kiiro', ja: 'きいろ', en: 'Yellow', c: '#e8c030', c2: '#8a6a08' },
+    { k: 'murasaki', ja: 'むらさき', en: 'Purple', c: '#8a5ac8', c2: '#3c1f72' }, { k: 'daidai', ja: 'だいだい', en: 'Orange', c: '#ec8a30', c2: '#8a3f08' }
+  ];
+  // ─── ピンの ならび（ひとつの フレームに 10本）：row 0＝あたまの ピン（いちばん てまえ）───
+  const PINX = [[0], [-.15, .15], [-.3, 0, .3], [-.45, -.15, .15, .45]];
+  const PIN_D = r => .90 + r * .03;
+  const PIN_POS = []; PINX.forEach((xs, r) => xs.forEach(x => PIN_POS.push({ x, d: PIN_D(r), r })));
+  const NB = []; PIN_POS.forEach((a, i) => { NB[i] = []; PIN_POS.forEach((b, j) => { if (i !== j && Math.hypot(a.x - b.x, (a.r - b.r) * .26) < .34) NB[i].push(j); }); });
+
+  // ─── じょうたい ───
+  const MODES = { normal: { aimHalf: 1.3, powHalf: 1.0, band: [.62, .88], zone: .10, q: .30, hit: .17, hook: 1 }, easy: { aimHalf: 3.0, powHalf: 1.8, band: [.50, .95], zone: .16, q: .45, hit: .21, hook: .3 } };
+  const S = {
+    phase: 'ready', t: 0, mode: 'normal', ball: 1, frame: 0, throwN: 0, frames: [], pins: [], aim: 0, power: 0, aimV: 0, powV: 0, lock: 0,
+    roll: null, say: '', last: null, friendLast: '', lastFriend: [], over: false, shake: 0, flash: 0, banner: '', bannerT: 0, said: [], throws: []
+  };
+  let rng = Math.random;
+  function resetGame() {
+    S.frames = []; for (let i = 0; i < 5; i++) S.frames.push({ t1: null, t2: null });
+    S.frame = 0; S.throwN = 0; S.over = false; S.roll = null; S.banner = ''; S.throws = [];
+    freshPins(); renderScore();
+  }
+  function freshPins() { S.pins = PIN_POS.map((p, i) => ({ i, x: p.x, d: p.d, st: 'stand', t: 0, delay: 0, dir: 1, a: 0 })); }
+  const standing = () => S.pins.filter(p => p.st === 'stand');
+  const tri = u => { u = ((u % 2) + 2) % 2; return u < 1 ? u : 2 - u; };   // 0→1→0 の 三角波
+
+  // ─── おと：低〜中の 音だけ（80〜440Hz・sine・立ち上がり 30ms 以上）。いまは 効果音を 止める（SFX_OFF）───
+  const SFX_OFF = true;
+  let ac = null; const sfxLog = [];
+  const soundOn = () => window.PageSound ? PageSound.soundOn() : false;
+  function tone(hz, len, vol, at) {
+    hz = Math.max(80, Math.min(440, hz)); const atk = .03;
+    sfxLog.push({ hz, len, vol, atk, at: at || 0 }); if (sfxLog.length > 200) sfxLog.shift();
+    if (SFX_OFF || !soundOn()) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
+      const t = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = 900; o.type = 'sine'; o.frequency.setValueAtTime(hz, t);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + atk); g.gain.exponentialRampToValueAtTime(.0008, t + Math.max(len, atk + .05));
+      o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + len + .05);
+    } catch (e) {}
+  }
+  const knock = at => { tone(200 + rng() * 40, .14, .06, at); };   // 小さな 木の「コトン」
+  const sndStrike = () => { tone(196, .5, .07, 0); tone(262, .5, .06, .22); tone(330, .6, .06, .44); };
+  const sndGutter = () => { tone(147, .5, .05, 0); tone(110, .5, .04, .2); };
+  const sndSpare = () => { tone(262, .4, .05, 0); tone(330, .5, .05, .2); };
+
+  // ─── 絵（本物が とどいたら さしかわる）：img/bowling/*.webp を ためして、読めない 物は 仮の 絵 ───
+  const IM = { bg: null, pin: null, balls: {} };
+  function tryImg(url, cb) { const im = new Image(); im.onload = () => cb(im); im.onerror = () => {}; im.src = url; }
+  function loadArt() {
+    const tm = root.dataset.time === 'n' ? 'yoru' : 'hiru', tate = innerWidth < 600 ? '_tate' : '';
+    tryImg('../../img/bowling/bg_' + tm + tate + '.webp', im => { IM.bg = im; bgDirty = true; });
+    tryImg('../../img/bowling/pin_stand.webp', im => { IM.pin = im; });
+    BALLS.forEach(b => tryImg('../../img/bowling/ball_' + b.k + '.webp', im => { IM.balls[b.k] = im; }));
+  }
+
+  // ─── 背景（仮の え）：木の レーン・遠近・暗めで あたたかい あかり ───
+  let bgC = null, bgDirty = true;
+  function buildBg() {
+    bgC = bgC || document.createElement('canvas'); bgC.width = W * DPR; bgC.height = H * DPR;
+    const g = bgC.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const dark = night();
+    if (IM.bg) { const r = Math.max(W / IM.bg.width, H / IM.bg.height); g.drawImage(IM.bg, (W - IM.bg.width * r) / 2, (H - IM.bg.height * r) / 2, IM.bg.width * r, IM.bg.height * r); return; }
+    // かべ・てんじょう
+    let gr = g.createLinearGradient(0, 0, 0, Y_FAR + 20); gr.addColorStop(0, dark ? '#1a120d' : '#2c1d13'); gr.addColorStop(1, dark ? '#2a1c12' : '#4a3020'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    // ピンの うしろの かげ（マスキング ユニット）
+    gr = g.createLinearGradient(0, 96, 0, Y_FAR); gr.addColorStop(0, '#120c08'); gr.addColorStop(1, '#2a1a10'); g.fillStyle = gr;
+    rr(g, 150, 96, 300, Y_FAR - 96, 14); g.fill(); g.strokeStyle = '#6b4a2e'; g.lineWidth = 3; g.stroke();
+    // かんばん（ランプ）
+    rr(g, 190, 18, 220, 58, 14); g.fillStyle = '#3a2416'; g.fill(); g.strokeStyle = '#d9a066'; g.lineWidth = 3; g.stroke();
+    g.fillStyle = '#ffd98a'; g.font = '800 28px "Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(T('ボーリング', 'BOWLING'), 300, 48);
+    for (let i = 0; i < 9; i++) { g.beginPath(); g.arc(200 + i * 25, 26, 3.2, 0, 6.3); g.fillStyle = '#ffe9b0'; g.fill(); g.beginPath(); g.arc(200 + i * 25, 68, 3.2, 0, 6.3); g.fill(); }
+    // てんじょうの あかり
+    [90, 300, 510].forEach(x => { const lg = g.createRadialGradient(x, 6, 2, x, 6, 150); lg.addColorStop(0, 'rgba(255,214,140,.55)'); lg.addColorStop(1, 'rgba(255,214,140,0)'); g.fillStyle = lg; g.fillRect(x - 150, 0, 300, 190); });
+    // 両がわの ゆか・となりの レーン（くらい）
+    g.fillStyle = dark ? '#1c130d' : '#2a1b11'; g.fillRect(0, Y_FAR - 4, W, H - Y_FAR + 4);
+    // ガター（みぞ）と レーン
+    const lane = (x0, x1, col) => { g.beginPath(); g.moveTo(CX + x0 * WH * s1, Y_FAR); g.lineTo(CX + x1 * WH * s1, Y_FAR); g.lineTo(CX + x1 * WH, Y_NEAR); g.lineTo(CX + x0 * WH, Y_NEAR); g.closePath(); g.fillStyle = col; g.fill(); };
+    lane(-1.24, 1.24, '#150d08'); lane(-1.2, -1.0, '#241711'); lane(1.0, 1.2, '#241711');
+    gr = g.createLinearGradient(0, Y_FAR, 0, Y_NEAR); gr.addColorStop(0, dark ? '#7a5532' : '#9c7040'); gr.addColorStop(1, dark ? '#a97c4a' : '#c89a5e');
+    lane(-1, 1, gr);
+    // いたの めと もよう
+    for (let i = -19; i <= 19; i++) { const x = i / 19; g.beginPath(); g.moveTo(xOf(x, 1), yOf(1)); g.lineTo(xOf(x, 0), yOf(0)); g.strokeStyle = i % 2 ? 'rgba(60,34,14,.20)' : 'rgba(255,220,170,.10)'; g.lineWidth = 1; g.stroke(); }
+    // てまえの アプローチ・ファウルライン
+    g.fillStyle = dark ? '#8a6540' : '#b58a55'; g.fillRect(CX - WH - 6, Y_NEAR, 2 * WH + 12, H - Y_NEAR - 56); g.fillStyle = '#e9c88f'; g.fillRect(CX - WH, Y_NEAR - 2, 2 * WH, 4);
+    // 矢印と ドット
+    for (let i = -3; i <= 3; i++) { const x = i * .26, d = .28 - Math.abs(i) * .028, y = yOf(d), sc = sOf(d); g.beginPath(); g.moveTo(xOf(x, d), y - 22 * sc); g.lineTo(xOf(x, d) - 7 * sc, y + 4); g.lineTo(xOf(x, d) + 7 * sc, y + 4); g.closePath(); g.fillStyle = 'rgba(70,36,14,.55)'; g.fill(); }
+    for (let i = -3; i <= 3; i++) { g.beginPath(); g.arc(xOf(i * .26, .06), yOf(.06), 2.4, 0, 6.3); g.fillStyle = 'rgba(70,36,14,.5)'; g.fill(); }
+    // あかりの つや・きりかえの くらさ
+    const pool = g.createRadialGradient(CX, Y_FAR + 40, 10, CX, Y_FAR + 40, 330); pool.addColorStop(0, 'rgba(255,224,160,.28)'); pool.addColorStop(1, 'rgba(255,224,160,0)'); g.fillStyle = pool; g.fillRect(0, Y_FAR - 20, W, H);
+    // ベンチ（なかまの せき）
+    rr(g, 18, H - 70, 106, 22, 10); g.fillStyle = '#5a3b22'; g.fill(); rr(g, 22, H - 48, 98, 8, 4); g.fillStyle = '#3a2416'; g.fill();
+    // ふちの かげ
+    const vg = g.createRadialGradient(CX, H * .5, 220, CX, H * .5, 470); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, dark ? 'rgba(0,0,0,.62)' : 'rgba(0,0,0,.42)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+  }
+  function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+  // ─── 部品：ピン・ボール・なかま ───
+  function drawPin(g, cx, by, h, ang, alpha) {
+    g.save(); g.globalAlpha = alpha; g.translate(cx, by);
+    g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(0, 1, h * .16, h * .045, 0, 0, 6.3); g.fill();
+    g.rotate(ang);
+    if (IM.pin) { g.drawImage(IM.pin, -h * .15, -h, h * .3, h); g.restore(); return; }
+    const w = h * .165;
+    g.beginPath(); g.moveTo(-w * .8, 0); g.quadraticCurveTo(-w * 1.1, -h * .3, -w * .38, -h * .58); g.quadraticCurveTo(-w * .3, -h * .7, -w * .5, -h * .8); g.quadraticCurveTo(-w * .5, -h, 0, -h); g.quadraticCurveTo(w * .5, -h, w * .5, -h * .8); g.quadraticCurveTo(w * .3, -h * .7, w * .38, -h * .58); g.quadraticCurveTo(w * 1.1, -h * .3, w * .8, 0); g.closePath();
+    const gr = g.createLinearGradient(-w, 0, w, 0); gr.addColorStop(0, '#d8cdb8'); gr.addColorStop(.4, '#fffaf0'); gr.addColorStop(1, '#bfb298'); g.fillStyle = gr; g.fill();
+    g.save(); g.clip(); g.fillStyle = '#c8362e'; g.fillRect(-w * 2, -h * .745, w * 4, h * .035); g.fillRect(-w * 2, -h * .685, w * 4, h * .035); g.restore();
+    g.restore();
+  }
+  function drawBall(g, x, d, alpha, spin) {
+    const sc = sOf(d), px = xOf(x, d), r = .14 * WH * sc, py = yOf(d) - r * .85, b = BALLS[S.ball];
+    g.save(); g.globalAlpha = alpha;
+    g.fillStyle = 'rgba(0,0,0,.32)'; g.beginPath(); g.ellipse(px, yOf(d), r * .95, r * .3, 0, 0, 6.3); g.fill();
+    const im = IM.balls[b.k];
+    if (im) { g.drawImage(im, px - r, py - r, 2 * r, 2 * r); g.restore(); return; }
+    const gr = g.createRadialGradient(px - r * .35, py - r * .4, r * .1, px, py, r); gr.addColorStop(0, b.c); gr.addColorStop(1, b.c2); g.fillStyle = gr; g.beginPath(); g.arc(px, py, r, 0, 6.3); g.fill();
+    g.fillStyle = 'rgba(20,10,5,.75)'; [[-.12, -.3], [.1, -.32], [0, -.1]].forEach(([a, c]) => { const ca = Math.cos(spin), sa = Math.sin(spin); g.beginPath(); g.arc(px + (a * ca - c * sa) * r * .9, py + (a * sa + c * ca) * r * .9, r * .09, 0, 6.3); g.fill(); });
+    g.fillStyle = 'rgba(255,255,255,.65)'; g.beginPath(); g.ellipse(px - r * .38, py - r * .42, r * .2, r * .12, -.6, 0, 6.3); g.fill();
+    g.restore();
+  }
+  function drawFriend(g, tt) {
+    const x = 70, y = H - 78, bob = calm() ? 0 : Math.sin(tt * 1.6) * 1.5;
+    g.fillStyle = '#f5d7a8'; g.beginPath(); g.ellipse(x, y + bob, 24, 22, 0, 0, 6.3); g.fill();
+    g.beginPath(); g.arc(x - 15, y - 20 + bob, 8, 0, 6.3); g.arc(x + 15, y - 20 + bob, 8, 0, 6.3); g.fill();
+    g.fillStyle = '#3a2416'; g.beginPath(); g.arc(x - 8, y - 3 + bob, 2.4, 0, 6.3); g.arc(x + 8, y - 3 + bob, 2.4, 0, 6.3); g.fill();
+    g.strokeStyle = '#3a2416'; g.lineWidth = 2; g.beginPath(); g.arc(x, y + 4 + bob, 5, .2, 2.9); g.stroke();
+  }
+
+  // ─── 描画 ───
+  const GAUGE = { x: 130, y: H - 56, w: 340, h: 26 };
+  function draw() {
+    if (bgDirty || !bgC) { buildBg(); bgDirty = false; }
+    const g = ctx; g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H);
+    g.save();
+    if (S.shake > 0 && !calm()) g.translate(Math.sin(S.t * 90) * S.shake * 3, 0);   // 絵の ゆれ（うごきを へらすで なし）
+    g.drawImage(bgC, 0, 0, W, H);
+    drawFriend(g, S.t);
+    const easy = S.mode === 'easy';
+    if (easy) { [-1, 1].forEach(sg => { g.beginPath(); const a = sg * .88, b = sg * 1.0; g.moveTo(xOf(a, 1), yOf(1)); g.lineTo(xOf(b, 1), yOf(1)); g.lineTo(xOf(b, 0), yOf(0)); g.lineTo(xOf(a, 0), yOf(0)); g.closePath(); g.fillStyle = 'rgba(214,226,232,.88)'; g.fill(); g.strokeStyle = 'rgba(40,60,70,.6)'; g.lineWidth = 2; g.stroke(); }); }
+    // ピン（おくから）
+    const list = S.pins.filter(p => p.st !== 'gone').sort((a, b) => b.d - a.d);
+    const wob = S.roll && S.roll.sub === 'pause' && !calm();
+    list.forEach(p => {
+      const sc = sOf(p.d), h = 118 * sc, by = yOf(p.d); let x = xOf(p.x, p.d), ang = 0, al = 1;
+      if (p.st === 'stand') { if (wob) x += Math.sin(S.t * 38 + p.i * 1.7) * 1.6; }
+      else { const u = Math.min(1, Math.max(0, p.t / .45)); ang = p.dir * (1.45 * (1 - Math.pow(1 - u, 2))); x += p.dir * u * 16 * sc; al = p.t > 1.4 ? Math.max(0, 1 - (p.t - 1.4) / .5) : 1; if (p.fade !== undefined) al = Math.max(0, 1 - p.fade / .5); }
+      drawPin(g, x, by - (p.st === 'fall' ? 0 : 0), h, ang, al);
+    });
+    // めじるし（ねらい）・ガイドの せん
+    if (S.phase === 'aim' || S.phase === 'power') {
+      const d = .22, x = xOf(S.aim, d), y = yOf(d), sc = sOf(d);
+      g.save(); g.setLineDash([4, 7]); g.strokeStyle = 'rgba(255,240,200,.55)'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y); g.lineTo(xOf(S.aim, .86), yOf(.86)); g.stroke(); g.restore();
+      g.beginPath(); g.moveTo(x, y - 30 * sc); g.lineTo(x - 17 * sc, y + 8 * sc); g.lineTo(x + 17 * sc, y + 8 * sc); g.closePath(); g.fillStyle = '#fff3c4'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#7a3f10'; g.stroke();
+    }
+    // ボール
+    const R = S.roll;
+    if (R) { if (R.ball) drawBall(g, R.ball.x, R.ball.d, R.ball.a, R.ball.spin); }
+    else if (S.phase === 'aim' || S.phase === 'power' || S.phase === 'ready') drawBall(g, S.phase === 'ready' ? 0 : S.aim, -.04, 1, 0);
+    g.restore();
+    // ちからの ゲージ
+    if (S.phase === 'power' || S.phase === 'aim') {
+      const M = MODES[S.mode], gx = GAUGE.x, gy = GAUGE.y, gw = GAUGE.w, gh = GAUGE.h;
+      rr(g, gx - 4, gy - 4, gw + 8, gh + 8, 14); g.fillStyle = 'rgba(30,18,10,.85)'; g.fill();
+      g.fillStyle = '#3a2a1c'; rr(g, gx, gy, gw, gh, 10); g.fill();
+      g.fillStyle = '#6fbf7a'; g.fillRect(gx + M.band[0] * gw, gy, (M.band[1] - M.band[0]) * gw, gh);
+      g.fillStyle = '#fff3d6'; g.font = '700 14px "Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif'; g.textAlign = 'left'; g.textBaseline = 'bottom'; g.fillText(T('ちから', 'Power'), gx, gy - 6);
+      if (S.phase === 'power') { const px = gx + S.power * gw; g.fillStyle = '#fffaf0'; g.fillRect(px - 3, gy - 6, 6, gh + 12); g.strokeStyle = '#4a2f06'; g.lineWidth = 1.5; g.strokeRect(px - 3, gy - 6, 6, gh + 12); }
+    }
+    // バナー（ストライク など）
+    if (S.banner && S.bannerT > 0) {
+      const u = Math.min(1, S.bannerT / .35), pop = calm() ? 1 : .8 + .2 * u;
+      g.save(); g.globalAlpha = Math.min(1, S.bannerT * 2); g.translate(CX, 140); g.scale(pop, pop); g.font = '900 54px "Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.lineWidth = 9; g.strokeStyle = '#4a2a0c'; g.strokeText(S.banner, 0, 0); g.fillStyle = '#ffe28a'; g.fillText(S.banner, 0, 0); g.restore();
+    }
+    if (S.flash > 0 && !calm()) { g.fillStyle = 'rgba(255,230,160,' + (S.flash * .35).toFixed(3) + ')'; g.fillRect(0, 0, W, H); }
+  }
+
+  // ─── 判定：ねらい・ちからから ボールの みちと たおれる ピンを きめる ───
+  function resolve(aim, pw) {
+    const M = MODES[S.mode], easy = S.mode === 'easy';
+    const sg = aim >= 0 ? 1 : -1;
+    const pq = pw >= M.band[0] && pw <= M.band[1] ? 1 : Math.max(0, 1 - (pw < M.band[0] ? M.band[0] - pw : pw - M.band[1]) * 3);
+    let pwe = pw, short = false;
+    if (easy) pwe = Math.max(pw, .5); else if (pw < .3) short = true;
+    let hook = 0;
+    if (pwe > M.band[1]) hook = (pwe - M.band[1]) * 2.2 * M.hook * sg; else if (pwe < M.band[0]) hook = (M.band[0] - pwe) * 1.0 * M.hook * sg;
+    let xe = aim + hook, gutter = false;
+    if (easy) { const lim = .8; if (Math.abs(xe) > lim) xe = Math.sign(xe) * (lim - (Math.abs(xe) - lim) * .6); xe = Math.max(-.82, Math.min(.82, xe)); }
+    else if (Math.abs(xe) > .95) { gutter = true; xe = Math.sign(xe) * 1.1; }
+    const res = { aim, pw, pq, xe, hook, gutter, short, dStop: .38 + pw * 1.0, hit: [], strike: false, order: {}, kind: '' };
+    const st = standing();
+    if (short) { res.kind = 'short'; res.dStop = Math.min(.7, .3 + pw * 1.2); return res; }
+    if (gutter) { res.kind = 'gutter'; return res; }
+    const first = st.filter(p => Math.abs(p.x - xe) < M.hit);
+    const fallen = new Set(first.map(p => p.i)); const depth = {}; first.forEach(p => depth[p.i] = 0);
+    const all = st.length === 10;
+    if (all && Math.abs(xe - .03) < M.zone && pq > .9) { st.forEach(p => { fallen.add(p.i); depth[p.i] = depth[p.i] === undefined ? 1 + Math.floor(p.i / 3) : depth[p.i]; }); res.strike = true; }
+    else {
+      const q = M.q + .45 * pq; let frontier = [...first];
+      while (frontier.length) { const nx = []; frontier.forEach(p => NB[p.i].forEach(j => { const pj = S.pins[j]; if (pj.st === 'stand' && !fallen.has(j) && rng() < q) { fallen.add(j); depth[j] = depth[p.i] + 1; nx.push(pj); } })); frontier = nx; }
+      if (fallen.size === st.length && all) res.strike = true;   // 連鎖で ぜんぶ たおれた ときも ストライク
+    }
+    res.hit = [...fallen]; res.order = depth; res.kind = res.strike ? 'strike' : (fallen.size ? 'hit' : 'miss');
+    return res;
+  }
+
+  // ─── 進行 ───
+  const live = $('live'), sayEl = $('say'), goBtn = $('go');
+  function say(t, announce) { S.say = t; sayEl.textContent = t; S.said.push(t); if (S.said.length > 60) S.said.shift(); if (announce !== false) { live.textContent = ''; setTimeout(() => { live.textContent = t; }, 30); } }
+  const FRIEND = {
+    start: ['いっしょに たのしもう。', 'ゆっくりで いいよ。'], strike: ['わあ、すごい！', 'ぜんぶ たおれた！'], spare: ['ナイス！', 'やったね。'],
+    gutter: ['どんまい、ゆっくりで いいよ。', 'みぞに はいっても だいじょうぶ。'], hit: ['いいね。', 'そのちょうし。'], end: ['たのしかったね。', 'また いっしょに やろうね。']
+  };
+  const FRIEND_EN = { 'いっしょに たのしもう。': 'Let’s have fun together.', 'ゆっくりで いいよ。': 'Take your time.', 'わあ、すごい！': 'Wow, amazing!', 'ぜんぶ たおれた！': 'They all fell!', 'ナイス！': 'Nice!', 'やったね。': 'You did it.', 'どんまい、ゆっくりで いいよ。': 'No worries, take your time.', 'みぞに はいっても だいじょうぶ。': 'It is okay to land in the gutter.', 'いいね。': 'Nice one.', 'そのちょうし。': 'Keep it up.', 'たのしかったね。': 'That was fun.', 'また いっしょに やろうね。': 'Let’s play together again.' };
+  function friendSay(kind) {
+    const a = FRIEND[kind]; let t = a[Math.floor(rng() * a.length)]; if (t === S.friendLast) t = a[(a.indexOf(t) + 1) % a.length];
+    if (t === S.friendLast) return;   // 同じ 挨拶を かさねない
+    S.friendLast = t; $('friend').textContent = '🐾 ' + T(t, FRIEND_EN[t] || t);
+  }
+  function frameNo() { return S.frame + 1; }
+  function aimMsg() { return T('フレーム ' + frameNo() + '／5・' + (S.throwN + 1) + 'なげめ。めじるしを タップで とめてね。', 'Frame ' + frameNo() + ' of 5, throw ' + (S.throwN + 1) + '. Tap to stop the marker.'); }
+  function setPhase(p) {
+    S.phase = p; S.lock = .15;
+    const label = { ready: T('はじめる', 'Start'), aim: T('とめる（ねらい）', 'Stop (aim)'), power: T('とめる（ちから）', 'Stop (power)'), roll: T('ころがってるよ', 'Rolling…'), end: T('もういちど', 'Play again') }[p];
+    goBtn.textContent = label || goBtn.textContent; goBtn.setAttribute('aria-disabled', p === 'roll' ? 'true' : 'false');
+    $('ball').hidden = $('mode').hidden = goBtn.hidden = (p === 'end');
+    if (p === 'aim') { S.aim = -.9; S.aimV = 0; S.tA = 0; say(aimMsg()); }
+    if (p === 'power') { S.power = 0; S.tP = 0; say(T('こんどは ちから。みどりの ところで とめてね。', 'Now the power. Stop it in the green part.')); }
+  }
+  function renderScore() {
+    const ol = $('score'); ol.replaceChildren(); let tot = 0;
+    S.frames.forEach((f, i) => {
+      const li = document.createElement('li'); if (i === S.frame && !S.over) li.className = 'now';
+      const n = document.createElement('span'); n.textContent = (i + 1);
+      const v = document.createElement('b');
+      if (f.t1 === null) v.textContent = '－'; else if (f.t1 === 10) v.textContent = '★'; else v.textContent = f.t1 + (f.t2 !== null ? '・' + f.t2 : '');
+      li.append(n, v); li.setAttribute('aria-label', T((i + 1) + 'ふれーむ ' + (f.t1 === null ? 'まだ' : ((f.t1 + (f.t2 || 0)) + 'ほん')), 'Frame ' + (i + 1) + ': ' + (f.t1 === null ? 'not yet' : (f.t1 + (f.t2 || 0)) + ' pins'))); ol.append(li);
+      tot += (f.t1 || 0) + (f.t2 || 0);
+    });
+    const t = document.createElement('li'); t.className = 'tot'; const a = document.createElement('span'); a.textContent = T('ぜんぶ', 'Total'); const b = document.createElement('b'); b.textContent = tot + T('ほん', ''); t.append(a, b); ol.append(t); S.total = tot;
+  }
+  function stopPressed() {
+    if (S.lock > 0) return;
+    if (S.phase === 'ready') { resetGame(); setPhase('aim'); friendSay('start'); return; }
+    if (S.phase === 'end') { resetGame(); setPhase('aim'); friendSay('start'); $('end').hidden = true; return; }
+    if (S.phase === 'aim') { S.aimLocked = S.aim; setPhase('power'); return; }
+    if (S.phase === 'power') { throwBall(S.aimLocked, S.power); return; }
+  }
+  function throwBall(aim, pw) {
+    const res = resolve(aim, pw), c = calm();
+    S.roll = { res, sub: 'roll', t: 0, dur: c ? .5 : (1.9 - pw * .8), ball: { x: aim, d: 0, a: 1, spin: 0 }, pause: res.strike ? (c ? .3 : .9) : 0, tt: 0 };
+    setPhase('roll'); say(T('ころがれ…', 'Rolling…'), false);
+  }
+  const IMPACT = .88;
+  function ballAt(R, u) {   // u 0→1：なげた ところから ピンの てまえ(IMPACT) まで
+    const res = R.res, d = u * (res.kind === 'short' ? res.dStop : IMPACT);
+    let x = res.aim + res.hook * Math.pow(u, 2);
+    if (S.mode === 'easy') { const lim = .8, ax = Math.abs(x); if (ax > lim) x = Math.sign(x) * (lim - (ax - lim) * .6); x = Math.max(-.82, Math.min(.82, x)); }
+    else if (Math.abs(x) > .95) x = Math.sign(x) * 1.1;
+    return { x, d };
+  }
+  function startFalls(R) {
+    const res = R.res; let n = 0;
+    S.pins.forEach(p => { if (res.hit.includes(p.i)) { p.st = 'fall'; p.t = -(res.order[p.i] || 0) * .09 - rng() * .05; p.dir = p.x < res.xe ? -1 : p.x > res.xe ? 1 : (rng() < .5 ? -1 : 1); n++; } });
+    for (let i = 0; i < Math.min(n, 4); i++) knock(i * .06);
+    if (res.strike) { sndStrike(); S.banner = T('ストライク！', 'Strike!'); S.bannerT = 1.6; S.shake = .6; S.flash = 1; }
+    else if (res.kind === 'gutter') sndGutter();
+  }
+  function finishThrow(R) {
+    const res = R.res, f = S.frames[S.frame], fell = res.hit.length;
+    S.pins.forEach(p => { if (p.st === 'fall') p.fade = 0; });
+    if (S.throwN === 0) f.t1 = fell; else f.t2 = fell;
+    S.throws.push({ frame: S.frame, n: S.throwN, fell, kind: res.kind, aim: res.aim, pw: res.pw });
+    let msg, fr;
+    const left = standing().length - fell;
+    if (res.kind === 'strike') { msg = T('ストライク！ぜんぶ たおれた！', 'Strike! All the pins fell!'); fr = 'strike'; }
+    else if (res.kind === 'gutter') { msg = T('あらら、みぞに はいったね。だいじょうぶ、ゆっくり いこう。', 'Oops, into the gutter. It’s okay, no rush.'); fr = 'gutter'; }
+    else if (res.kind === 'short') { msg = T('ちょっと とどかなかったね。つぎは もうすこし つよく。', 'It didn’t quite reach. A little stronger next time.'); fr = 'hit'; }
+    else if (S.throwN === 1 && left === 0) { msg = T('スペア！ぜんぶ たおれた。', 'Spare! All down.'); fr = 'spare'; S.banner = T('スペア！', 'Spare!'); S.bannerT = 1.2; sndSpare(); }
+    else if (fell === 0) { msg = T('おしい、ピンに あたらなかった。', 'So close, it missed the pins.'); fr = 'hit'; }
+    else { msg = T(fell + 'ほん たおれたよ。', fell + ' pin' + (fell > 1 ? 's' : '') + ' down.'); fr = 'hit'; }
+    say(msg); friendSay(fr); R.sub = 'sweep'; R.tt = 0; R.next = (res.strike || S.throwN === 1 || left === 0) ? 'frame' : 'second';
+    if (R.next === 'frame' && S.throwN === 0 && fell === 10) { /* ストライク：2なげめ なし */ }
+    renderScore();
+  }
+  function afterSweep(R) {
+    S.roll = null;
+    if (R.next === 'second') { S.throwN = 1; S.pins = S.pins.map(p => p.st === 'stand' ? p : Object.assign(p, { st: 'gone' })); renderScore(); setPhase('aim'); return; }
+    S.frame++; S.throwN = 0;
+    if (S.frame >= 5) { S.frame = 4; endGame(); return; }
+    freshPins(); renderScore(); setPhase('aim');
+  }
+  function endGame() {
+    S.over = true; renderScore(); setPhase('end');
+    const total = S.total, msg = T('おしまい。ぜんぶで ' + total + 'ほん たおしたよ。', 'All done. You knocked down ' + total + ' pins in total.');
+    $('end').hidden = false; $('end-t').textContent = msg; say(msg); friendSay('end');
+    $('card-note').hidden = true; $('card-img').hidden = true; $('card-img').removeAttribute('src');
+  }
+
+  function update(dt) {
+    S.t += dt; if (S.lock > 0) S.lock -= dt; if (S.shake > 0) S.shake = Math.max(0, S.shake - dt * .8); if (S.flash > 0) S.flash = Math.max(0, S.flash - dt * 1.6); if (S.bannerT > 0) S.bannerT -= dt;
+    const M = MODES[S.mode];
+    if (S.phase === 'aim') { S.tA += dt; const u = S.tA / (M.aimHalf); S.aim = -.9 + 1.8 * tri(u); }
+    else if (S.phase === 'power') { S.tP += dt; S.power = tri(S.tP / M.powHalf); }
+    S.pins.forEach(p => { if (p.st === 'fall') { p.t += dt; if (p.fade !== undefined) p.fade += dt; } });
+    const R = S.roll; if (!R) return; R.tt += dt;
+    if (R.sub === 'roll') {
+      const u = Math.min(1, R.tt / R.dur), e = R.res.kind === 'short' ? 1 - Math.pow(1 - u, 2) : u; const b = ballAt(R, e); R.ball.x = b.x; R.ball.d = b.d; R.ball.spin = u * 18;
+      if (u >= 1) { R.tt = 0; if (R.res.kind === 'short') { R.sub = 'fadeout'; } else if (R.res.kind === 'gutter') { R.sub = 'gutter'; } else if (R.pause > 0) { R.sub = 'pause'; } else { R.sub = 'through'; startFalls(R); } }
+    } else if (R.sub === 'pause') { if (R.tt >= R.pause) { R.sub = 'through'; R.tt = 0; startFalls(R); } }
+    else if (R.sub === 'through') { const u = Math.min(1, R.tt / .3); R.ball.d = IMPACT + .16 * u; R.ball.a = 1 - u * .9; if (R.tt >= (calm() ? .6 : 1.3)) { finishThrow(R); } }
+    else if (R.sub === 'gutter') { const u = Math.min(1, R.tt / .5); R.ball.d = IMPACT + .17 * u; R.ball.a = 1 - u; if (u >= 1) { startFalls(R); finishThrow(R); } }
+    else if (R.sub === 'fadeout') { const u = Math.min(1, R.tt / .5); R.ball.a = 1 - u; if (u >= 1) { finishThrow(R); } }
+    else if (R.sub === 'sweep') { if (R.tt >= (calm() ? .3 : .8)) afterSweep(R); }
+  }
+  let lastTs = 0, rafId = 0;
+  function loop(ts) { rafId = requestAnimationFrame(loop); if (document.hidden) { lastTs = 0; return; } const dt = lastTs ? Math.min(.05, (ts - lastTs) / 1000) : 0; lastTs = ts; update(dt); draw(); }
+
+  // ─── もの・ボタン ───
+  function drawBallBtn() { const b = BALLS[S.ball]; $('ball-sw').style.background = b.c; $('ball-t').textContent = T('ボール：' + b.ja, 'Ball: ' + b.en); $('ball').setAttribute('aria-label', T('ボールを かえる。いまは ' + b.ja, 'Change ball. Now: ' + b.en)); }
+  function drawModeBtn() { const e = S.mode === 'easy'; $('mode-t').textContent = e ? T('らくちん', 'Easy') : T('ふつう', 'Normal'); $('mode').setAttribute('aria-label', T('あそびかた：いまは ' + (e ? 'らくちん（みぞが ふさがる）' : 'ふつう（タイミング）') + '。おすと かわる', 'Mode: now ' + (e ? 'Easy (gutters blocked)' : 'Normal (timing)') + '. Press to switch')); }
+  $('ball').addEventListener('click', () => { S.ball = (S.ball + 1) % BALLS.length; drawBallBtn(); });
+  $('mode').addEventListener('click', () => { S.mode = S.mode === 'easy' ? 'normal' : 'easy'; drawModeBtn(); if (S.phase === 'aim') { S.tA = 0; } if (S.phase === 'power') { S.tP = 0; } say(S.mode === 'easy' ? T('らくちん：みぞが ふさがって、めじるしも ゆっくり。', 'Easy: gutters are blocked and the marker is slower.') : T('ふつう：タイミングで ねらおう。', 'Normal: aim with your timing.')); });
+  goBtn.addEventListener('click', () => { if (goBtn.getAttribute('aria-disabled') === 'true') return; stopPressed(); });
+  cv.addEventListener('pointerdown', e => { if (e.button && e.button !== 0) return; if (S.phase === 'aim' || S.phase === 'power') stopPressed(); });
+  addEventListener('keydown', e => { if ((e.key === ' ' || e.code === 'Space') && (e.target === document.body || e.target === cv)) { e.preventDefault(); if (S.phase === 'aim' || S.phase === 'power' || S.phase === 'ready') stopPressed(); } });
+  $('again').addEventListener('click', () => { if (S.lock > 0) S.lock = 0; stopPressed(); });
+
+  // ─── 「きょうの ボーリング」カード（canvas・この たんまつだけ・外へは おくらない）───
+  function makeCard() {
+    const c = document.createElement('canvas'); c.width = 720; c.height = 900; const g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, 0, 900); gr.addColorStop(0, '#3a2618'); gr.addColorStop(1, '#1d130c'); g.fillStyle = gr; g.fillRect(0, 0, 720, 900);
+    g.strokeStyle = '#d9a066'; g.lineWidth = 6; rr(g, 18, 18, 684, 864, 28); g.stroke();
+    const F = '"Hiragino Maru Gothic ProN","Yu Gothic UI","Noto Sans JP",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    g.fillStyle = '#ffe9b0'; g.font = '800 54px ' + F; g.fillText(T('きょうの ボーリング', 'Today’s Bowling'), 360, 110);
+    g.fillStyle = '#e9d3b0'; g.font = '600 26px ' + F; g.fillText(T('まるふわの ひろば', 'Marufuwa Plaza'), 360, 156);
+    const b = BALLS[S.ball]; const bg2 = g.createRadialGradient(330, 205, 6, 345, 220, 50); bg2.addColorStop(0, b.c); bg2.addColorStop(1, b.c2); g.fillStyle = bg2; g.beginPath(); g.arc(360, 225, 46, 0, 6.3); g.fill();
+    S.frames.forEach((f, i) => {
+      const y = 300 + i * 92, n = (f.t1 || 0) + (f.t2 || 0); g.fillStyle = 'rgba(255,240,214,.1)'; rr(g, 60, y, 600, 78, 16); g.fill();
+      g.fillStyle = '#ffe9b0'; g.font = '800 30px ' + F; g.textAlign = 'left'; g.fillText((i + 1), 90, y + 50);
+      let k = 0; for (let r = 0; r < 4; r++) for (let c2 = 0; c2 <= r; c2++) { const px = 380 - r * 11 + c2 * 22 + 0, py = y + 22 + r * 14 - 0; g.beginPath(); g.arc(px - 150, py, 5, 0, 6.3); g.fillStyle = k < n ? '#fff3d6' : 'rgba(255,243,214,.2)'; g.fill(); k++; }
+      g.fillStyle = '#fff3d6'; g.font = '700 32px ' + F; g.textAlign = 'right'; g.fillText(n + T(' ほん', ''), 630, y + 50);
+    });
+    g.textAlign = 'center'; g.fillStyle = '#ffe28a'; g.font = '900 64px ' + F; g.fillText(T('ぜんぶで ' + S.total + ' ほん', S.total + ' pins in total'), 360, 800);
+    g.fillStyle = '#d6c4a4'; g.font = '600 20px ' + F; g.fillText('aohozomi.github.io/marufuwa-tsuri/links/', 360, 850);
+    return c;
+  }
+  $('card').addEventListener('click', () => {
+    const c = makeCard(), url = c.toDataURL('image/png'), im = $('card-img');
+    im.src = url; im.alt = T('きょうの ボーリングの カード：ぜんぶで ' + S.total + 'ほん', 'Today’s bowling card: ' + S.total + ' pins'); im.hidden = false; $('card-note').hidden = false;
+    const a = document.createElement('a'); a.href = url; a.download = 'marufuwa-bowling.png'; document.body.append(a); a.click(); a.remove();
+    say(T('カードを つくったよ。', 'The card is ready.'));
+  });
+
+  // ─── おと・はいけい・ひらく ───
+  if (window.PageSound) PageSound.init({ mount: $('back'), bgm: 'hiroba', time: () => root.dataset.time, ambient: () => {} });
+  if (window.PageBg) PageBg.init('bowling', { tint: 'rgba(30,18,10,.1)', padY: 20, panel: 'rgba(250,240,224,.93)', panelNight: 'rgba(244,238,250,.93)', border: '#5a3a22' });
+  loadArt(); drawBallBtn(); drawModeBtn(); resetGame(); setPhase('ready'); draw();
+  rafId = requestAnimationFrame(loop);
+
+  window.__bowling = {
+    state: () => ({ phase: S.phase, mode: S.mode, frame: S.frame, throwN: S.throwN, aim: S.aim, power: S.power, total: S.total, frames: S.frames.map(f => [f.t1, f.t2]), standing: standing().length, said: S.said.slice(), ball: S.ball, banner: S.banner, bannerT: S.bannerT, sub: S.roll ? S.roll.sub : '', throws: S.throws.slice(), over: S.over, shake: S.shake }),
+    advance: ms => { let r = ms; while (r > 0) { const s = Math.min(16, r); update(s / 1000); r -= s; } draw(); },
+    setRng: f => { rng = f; }, sfxLog: () => sfxLog.slice(), tap: () => { S.lock = 0; stopPressed(); }, SFX_OFF
+  };
+});
+</script>
+<script src="../../tsuri-town.js"></script>
+<script defer src="../../tsuri-world.js"></script>
+<script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-pagesound.js"></script>
+<script defer src="../../tsuri-pagebg.js"></script>
+<script defer src="../../tsuri-en.js"></script>
+<script defer src="../../tsuri-en-hiroba.js"></script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+</body>
+</html>
