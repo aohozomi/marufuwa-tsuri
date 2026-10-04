@@ -82,6 +82,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   <p class="note" id="note">そとへ ひらく ときは かならず きくよ。</p>
   <div class="sr-only" id="live" role="status" aria-live="polite"></div>
 </main>
+<script defer src="../tsuri-pagebg.js"></script>
 <script defer src="../tsuri-ruby-dict.js"></script>
 <script defer src="../tsuri-ruby.js"></script>
 <script>
@@ -123,5 +124,6 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   });
 })();
 </script>
+<script>document.addEventListener('DOMContentLoaded', function () { if (window.PageBg) PageBg.init('iriguchi', { fb: 1, time: function () { return document.documentElement.dataset.night === 'true' ? 'n' : 'h'; } }); });</script>
 </body>
 </html>

@@ -11,7 +11,7 @@
   if (window.PageBg) return;
   var BASE = (function () { try { var s = document.currentScript; return s && s.src ? s.src.replace(/[^\/]*$/, '') : ''; } catch (e) { return ''; } })();
   var root = document.documentElement;
-  var timeKey = function () { var t = root.dataset.time; return /^[ahyn]$/.test(t || '') ? t : 'h'; };
+  var timeKey = function () { var t = (opt && typeof opt.time === 'function') ? opt.time() : root.dataset.time; return /^[ahyn]$/.test(t || '') ? t : 'h'; };
   var cur = null, id = '', tok = 0, opt = {};   // opt＝{tint:'rgba(..)'（絵の うえの かさね色・昼夜 とも）, panel/panelNight:'rgba(..)'（まん中の いた）, border:'#色', navy:数字（夜の 紺の かさねの こさ・既定 .55／tint が あれば .3）, padY:数字（600px みまんの うえしたの よはく）, glow:'radial-gradient(..)'（ほのかな あかり）}
   function tryLoad(list, i, done) {
     if (i >= list.length) { done(null); return; }
