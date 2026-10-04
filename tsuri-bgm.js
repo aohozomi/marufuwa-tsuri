@@ -176,7 +176,7 @@
   function pickKey(name, o) {   // 曲は「いまの じかん」できまる（a あさ・h ひる・y ゆうがた・n よる）。じかんが わからなければ ひる
     o = o || {};
     if (name !== 'hiroba' && name !== 'tank' && name !== 'gaze' && name !== 'tsuri') return null;   // 10/3 マスター「釣りの 最中も BGM」：つりばの 通常画面（'tsuri'）も じかんたいの 曲。ほかは 鳴らさない
-    if (mix) return 'mix';   // じぶんで くんだ BGM（ばしょ・じかんに かかわらず）
+    // 10/4 マスター「トゥー トゥーって 流れて 止まる」：ごうせい（組み立てる）の 音は ながさない。ふつうの ローファイの ファイルだけ。
     if (name === 'tank' && val(o.starry)) return 'n';   // ランプを けして 星空に した へやは よるの 曲
     const t = norm(val(o.time)); return Object.prototype.hasOwnProperty.call(KEYS, t) ? t : 'h';
   }
@@ -330,7 +330,8 @@
       if (cur && (cur.sig || cur.key) === sig && cur.ctx === c) return;
       if (cur) stopPlayer(cur, 3);   // ふわっと つなぐ（前の 曲は 3びょうで きえる）
       let np = null; if (file) { try { np = startFilePlayer(c, key, file, top.name === 'tsuri' ? QUIET_TSURI : 1); } catch { failed.add(file); np = null; } }   // 音の 部品が 作れない：ごうせいに もどる
-      cur = np || (key === 'mix' ? startMixPlayer(c, mix) : startPlayer(c, key, top.name === 'tank' ? 1 : 0));
+      cur = np;   // 10/4 ファイルが よめない 時は ごうせいの 音（トゥー）に せず、しずかに 待って 30びょう あとに もう一度 ためす
+      if (!np && file) { const f0 = file; setTimeout(() => { failed.delete(f0); refresh(); }, 30000); }
     } catch { /* 音が 出せなくても ゲームは 止めない */ } finally { ensureTimer(); }
   }
   // ─── くみたてる まど（かな だけ・ボタンと えらぶ ところだけ。もじを うつ 場所は ない）───
@@ -440,6 +441,7 @@
   const needUnlock = () => on && stack.length && !document.hidden && !(cur && cur.ctx && cur.ctx.state === 'running');
   const unlock = () => {
     if (!needUnlock()) return;
+    { const t = stack[stack.length - 1]; if (t && !soundOk(t.o && t.o.sound)) return; }   // おとが OFF の あいだは 見はりも 部品（AudioContext）も 作らない
     if (!touched()) { wantGesture = true; return; }   // さわる まえには 作らない（pointerdown / touchstart は まだ「さわった」に ならない ブラウザが ある）
     wantGesture = false; gestureBlock = false;
     try {
