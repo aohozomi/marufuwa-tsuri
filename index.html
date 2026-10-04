@@ -107,7 +107,7 @@ button:disabled,#main-button[aria-disabled=true]{opacity:.6;cursor:default;box-s
 #scene .spot:active,#scene #keeper:active{transform:translate(-50%,-50%) scale(.92);box-shadow:none}
 .skip{position:absolute;left:8px;top:-80px;z-index:200;padding:12px 16px;border-radius:14px;background:#fff;color:#0b4a6b;font-weight:800;text-decoration:none;border:3px solid #0b4a6b}
 .skip:focus{top:8px}   /* Tab の ひとつ めで「なげる」へ とべる（おおくの ボタンを とばせる） */
-.friend-hit{position:absolute;z-index:3;width:13%;min-width:44px;height:24%;min-height:44px;padding:0;transform:translate(-50%,-100%);background:none;border:0;border-radius:40%;box-shadow:none;cursor:pointer}   /* なかまの うえの みえない ボタン（おすと はなしかける） */
+.friend-hit{position:absolute;z-index:3;width:13%;min-width:44px;height:20%;min-height:44px;padding:0;transform:translate(-50%,-100%);background:none;border:0;border-radius:40%;box-shadow:none;cursor:pointer}   /* なかまの うえの みえない ボタン（おすと はなしかける） */
 .friend-hit::before,.friend-hit::after{display:none}
 #scene:not([data-phase=idle]):not([data-phase=waiting]) .friend-hit,#scene[data-tooku=true] .friend-hit,body.gazing .friend-hit{pointer-events:none}   /* まって いる とき・なにも して いない ときだけ おせる（ひく とき・カードが でて いる ときは けしきを おして「ひく」「カード」が できる） */
 .spot::after{content:"";position:absolute;inset:-7px;border-radius:50%}   /* みえない あたりはんてい。ちいさい こや ゆびが ふるえる ひとが おしやすい */
@@ -203,7 +203,7 @@ html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.a
 #scene[data-dim=true] > svg:first-of-type{filter:brightness(.62) saturate(.85)}
 .times{grid-template-columns:1.5fr repeat(4,1fr)}
 .times button{min-height:44px;font-size:.78rem}
-#keeper{position:absolute;z-index:2;left:93.5%;top:72%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
+#keeper{position:absolute;z-index:4;left:93.5%;top:72%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
 #keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
 /* 10/5 マスター「お店の キャラが ういてる」：足もとに 接地影と 小さな 屋台（台）。台は きつねの 下半身の 前に ならべて「台の うしろに 立つ」形に する。足の y は なかまと おなじ 地面ライン（58+.16x）*/
 #scene #keeper::before{display:block;content:"";position:absolute;z-index:1;left:50%;bottom:-3%;width:118%;height:27%;transform:translateX(-50%);border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#d9a35e 0 24%,#a8703a 24% 70%,#7d5128 70%);box-shadow:0 2px 0 #00000026;pointer-events:none}
@@ -2864,13 +2864,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('areago-no').addEventListener('click', () => $('areago').close());
   $('edge-prev').addEventListener('click', event => { event.stopPropagation(); switchArea(AREAS[areaIdx() - 1]); });
   $('edge-next').addEventListener('click', event => { event.stopPropagation(); switchArea(AREAS[areaIdx() + 1]); });
-  const SHORE = {easy: ['やさしい水ぎわ', 'Gentle shore'], normal: ['ふつうの水ぎわ', 'Standard shore'], hard: ['しっかりの水ぎわ', 'Focused shore']};
+  const SHORE = {easy: ['やさしい みずぎわ', 'Gentle shore'], normal: ['ふつうの みずぎわ', 'Standard shore'], hard: ['しっかりの みずぎわ', 'Focused shore']};
   function drawShoreLabel() { const l = $('shore-label'); if (l) { const m = curMode(); l.textContent = L(SHORE[m][0], SHORE[m][1]); } }
   function drawShorePick() {
     const box = $('shore-pick'); if (!box) return; box.replaceChildren(); const m = curMode();
     const mk = (cls, key, icon, ja, sub, en, enSub) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.dataset.shore = key; b.setAttribute('aria-pressed', String(m === key)); b.append(icon + ' ' + L(ja, en)); b.dataset.now = L('いま これ', 'Selected'); if (sub) { const sm = document.createElement('small'); sm.textContent = L(sub, enSub); b.append(sm); } b.addEventListener('click', () => { setMode(key); drawShorePick(); drawShoreLabel(); }); box.append(b); };
-    mk('pill', 'easy', '🌿', 'やさしい水ぎわ（らくちん）', 'おすだけ・魚が いつも いるよ・にげないよ', 'Gentle shore (easy)', 'Just press. Fish are always around.');
-    mk('pill', 'normal', '🎣', 'ふつうの水ぎわ', 'タイミングを あわせて つる', 'Standard shore', 'Time your press to catch.');
+    mk('pill', 'easy', '🌿', 'やさしい みずぎわ（らくちん）', 'おすだけ・魚が いつも いるよ・にげないよ', 'Gentle shore (easy)', 'Just press. Fish are always around.');
+    mk('pill', 'normal', '🎣', 'ふつうの みずぎわ', 'タイミングを あわせて つる', 'Standard shore', 'Time your press to catch.');
     mk('pill shore-hard', 'hard', '🎯', 'しっかり（むずかしめ）', '', 'Focused (harder)', '');
   }
   function drawAreaPick() { drawShorePick();
