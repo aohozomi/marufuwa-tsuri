@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       if (!mkAc()) return;
       if (kind === 'drop') voice(196, 147, .24, .07);
-      else if (kind === 'merge') { const hz = FREQ[Math.max(0, Math.min(6, l))]; voice(hz, hz * 1.5, .3, .08); }
+      else if (kind === 'merge') { const hz = FREQ[Math.max(0, Math.min(6, l))]; voice(hz, Math.min(hz * 1.12, 440), .3, .08); }
       else if (kind === 'poof' || kind === 'melt') voice(330, 220, .65, .06);
       else if (kind === 'perfect') [262, 330, 392, 440].forEach((hz, i) => voice(hz, hz, .3, .06, i * .13));
       else if (kind === 'click') voice(220, 220, .09, .05);
