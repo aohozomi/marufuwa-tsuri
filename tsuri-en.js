@@ -107,7 +107,7 @@
     'きのえだのさお': 'Twig Rod', 'さいしょのさお': 'Your first rod', 'たけのさお': 'Bamboo Rod', 'すこしあわせやすい': 'A little easier to time', 'ずかんのみかた': 'Sticker book view', 'ぜんぶ': 'All fish', 'まだつっていない': 'Not caught yet', 'ぴったりのはばが8%ひろい': 'Perfect window 8% wider', 'ぴったりのはばが15%ひろい': 'Perfect window 15% wider', '10ぴきつるともらえる': 'Unlocks at 10 catches',
     'ほしのさお': 'Star Rod', 'とてもあわせやすい': 'Much easier to time', 'ずかんが15しゅるいでもらえる': 'Unlocks with 15 kinds in the Fish Book',
     'ふつうのえさ': 'Regular Bait', 'いつものえさ': 'The usual bait', 'きらきらえさ': 'Sparkle Bait', 'めずらしいこがきやすい': 'Rare fish come more often', 'ずかんが5しゅるいでもらえる': 'Unlocks with 5 kinds in the Fish Book',
-    'おおきいえさ': 'Big Bait', 'おおきいこがきやすい': 'Bigger fish come more often', '20ぴきつるともらえる': 'Unlocks at 20 catches',
+    'おおきいえさ': 'Big Bait', 'おおきいこがきやすい': 'Bigger fish come more often', 'おおきいこやぬしも2ばいきやすい': 'Bigger fish and Guardians come twice as often', '20ぴきつるともらえる': 'Unlocks at 20 catches',
     'さお': 'Rod', 'えさ': 'Bait', '（つかっている）': '(in use)',
     'ちょっとめずらしい': 'A bit rare', 'めずらしい': 'Rare', 'スペシャル': 'Special', 'まぼろし': 'Mythical',
     'かいがら': 'Seashell', 'きれいないし': 'Pretty stone', 'ながれぎ': 'Driftwood', 'みずくさ': 'Water plant', 'ちいさなびん': 'Little bottle', 'ほしのかけら': 'Star fragment',
