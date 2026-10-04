@@ -328,26 +328,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── おと：ぜんぶ 1200Hz いか・みじかい・三角波＋ローパス＋アタック 15ms（つりびよりの tone と おなじ つくり）・「おと」ボタンで きれる・はじめは OFF ───
   let ac = null;
-  const FREQ = [330, 370, 415, 466, 523, 587, 659];
+  const FREQ = [196, 220, 247, 262, 294, 330, 392];   // 10/4：効果音は 低〜中（80〜440Hz）だけ。おおきく なるほど 高く（G3〜G4）
   const mkAc = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; };
-  function voice(hz, to, len, vol, at) {   // 三角波・ローパス 1100Hz・アタック 15ms
-    const t = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
-    f.type = 'lowpass'; f.frequency.value = 1100; o.type = 'sine';
+  const sfxLive = [];
+  function voice(hz, to, len, vol, at) {   // sine・ローパス 900Hz・アタック 30ms・基音 80〜440Hz・同時は 2つまで
+    hz = Math.max(80, Math.min(440, hz)); if (to) to = Math.max(80, Math.min(440, to));
+    const now = ac.currentTime, t = now + (at || 0); for (let i = sfxLive.length - 1; i >= 0; i--) if (sfxLive[i].e < now - .5) sfxLive.splice(i, 1);
+    if (sfxLive.filter(v => v.s <= t + .001 && v.e > t).length >= 2) return; sfxLive.push({ s: t, e: t + len + .05 }); (window.__maruiroSnd = window.__maruiroSnd || []).push({ hz, len, vol, atk: .03, at: at || 0 });
+    const o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 900; o.type = 'sine';
     o.frequency.setValueAtTime(hz, t); if (to && to !== hz) o.frequency.linearRampToValueAtTime(to, t + len * .6);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .015); g.gain.exponentialRampToValueAtTime(.0008, t + len);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .03); g.gain.exponentialRampToValueAtTime(.0008, t + len);
     o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + len + .05);
   }
-  const SFX_OFF = true;   // 10/2 マスター「効果音は 一旦 ぜんぶ 止める」：こうかおん（ぽとん・ぷくっ・ふわっ・ぴったり・ボタン）は 鳴らさない。BGM と「おとを けす」は そのまま
+  const SFX_OFF = false;   // 10/4 マスター「効果音が ない」：低〜中の 音で 復活   // 10/2 マスター「効果音は 一旦 ぜんぶ 止める」：こうかおん（ぽとん・ぷくっ・ふわっ・ぴったり・ボタン）は 鳴らさない。BGM と「おとを けす」は そのまま
   function tone(l, kind) {
     if (SFX_OFF) return;   // kind：drop ぽとん／merge ぷくっ／poof ふわっ（きえた・またね）／perfect ぴったり！／click ボタン
     if (!rec.snd) return;
     try {
       if (!mkAc()) return;
-      if (kind === 'drop') voice(220, 165, .2, .07);
+      if (kind === 'drop') voice(196, 147, .24, .07);
       else if (kind === 'merge') { const hz = FREQ[Math.max(0, Math.min(6, l))]; voice(hz, hz * 1.5, .3, .08); }
-      else if (kind === 'poof' || kind === 'melt') voice(392, 247, .65, .06);
-      else if (kind === 'perfect') [523, 659, 784, 1047].forEach((hz, i) => voice(hz, hz, .32, .06, i * .11));
-      else if (kind === 'click') voice(440, 440, .07, .05);
+      else if (kind === 'poof' || kind === 'melt') voice(330, 220, .65, .06);
+      else if (kind === 'perfect') [262, 330, 392, 440].forEach((hz, i) => voice(hz, hz, .3, .06, i * .13));
+      else if (kind === 'click') voice(220, 220, .09, .05);
     } catch (e) {}
   }
 

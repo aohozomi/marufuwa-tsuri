@@ -371,6 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
     lever() { tone(131, 0, .5, .12, .06); tone(98, .12, .45, .09, .06); },
     stop() { tone(220, 0, .2, .13, .03); tone(165, .06, .22, .1, .03); },   // コトン
     yokan() { tone(262, 0, .7, .07, .2); },
+    near() { tone(220, 0, .35, .08, .04); tone(196, .2, .45, .07, .04); },   // おしい：やさしい 2おと
+    none() { tone(147, 0, .5, .05, .06); },   // はずれ：ひくい ことん
     win() { tone(262, 0, .7, .12, .05); tone(330, .22, .7, .12, .05); tone(392, .44, 1.0, .12, .05); }   // 低い やさしい 3おと
   };
 
@@ -442,6 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ids = reels.map(centerSym), same = ids[0] === ids[1] && ids[1] === ids[2];
     const two = !same && (ids[0] === ids[1] || ids[1] === ids[2] || ids[0] === ids[2]);
     setLcd(same ? 'win' : two ? 'near' : 'none');
+    if (!same) (two ? sfx.near : sfx.none)();
     if (same) win(ids[0]); else { card.hidden = true; card.classList.remove('win'); say(two ? KURU_MSG.near : KURU_MSG.none); }
     $('hut').dataset.last = same ? 'win' : two ? 'near' : 'none';
   }

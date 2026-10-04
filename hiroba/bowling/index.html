@@ -176,26 +176,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const standing = () => S.pins.filter(p => p.st === 'stand');
   const tri = u => { u = ((u % 2) + 2) % 2; return u < 1 ? u : 2 - u; };   // 0→1→0 の 三角波
 
-  // ─── おと：低〜中の 音だけ（80〜440Hz・sine・立ち上がり 30ms 以上）。いまは 効果音を 止める（SFX_OFF）───
-  const SFX_OFF = true;
-  let ac = null; const sfxLog = [];
+  // ─── おと（10/4 マスター「ボウリングの 効果音も ない」）：低〜中の 音だけ（80〜440Hz・sine・立ち上がり 30ms 以上）。
+  //   ボールを はなす＝ひくい ドン／ころがる＝かぜ きり ていどの うすい ノイズ 0.6びょう（ゴロゴロは しない）／ピンが あたる＝木の コトン・コロコロ 3〜6つぶ（たおれた ほんすうに ひれい）／
+  //   ストライク＝ひくい 3おと（のぼる）／スペア＝2おと／ガター＝やさしい ことん。おとが OFF の 間は ならさない・同時は 2つまで・BGM より ちいさい（ピーク −24dBFS ぐらい）。
+  const SFX_OFF = false;
+  let ac = null, bus = null; const sfxLog = [], sfxLive = [];
   const soundOn = () => window.PageSound ? PageSound.soundOn() : false;
+  function sfxCtx() {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
+    if (!bus) {
+      bus = ac.createGain(); bus.gain.value = 1;
+      const an = (() => { try { return new URLSearchParams(location.search).get('sfxmeter') === '1' ? ac.createAnalyser() : null; } catch (e) { return null; } })();
+      if (an) { an.fftSize = 2048; bus.connect(an); window.__bowlAn = an; }
+      bus.connect(ac.destination);
+    }
+    return ac;
+  }
+  function slot(t, len, kind, hz, vol, atk) {   // 同時は 2つまで（その時刻に 重なる 音が 2つ 以上なら ならさない）
+    const now = ac.currentTime; for (let i = sfxLive.length - 1; i >= 0; i--) if (sfxLive[i].e < now - .5) sfxLive.splice(i, 1);
+    const n = sfxLive.filter(v => v.s <= t + .001 && v.e > t).length;
+    if (n >= 2) return false; sfxLive.push({ s: t, e: t + len }); sfxLog.push({ kind, hz, len, vol, atk, at: t - now }); if (sfxLog.length > 200) sfxLog.shift(); return true;
+  }
   function tone(hz, len, vol, at) {
     hz = Math.max(80, Math.min(440, hz)); const atk = .03;
-    sfxLog.push({ hz, len, vol, atk, at: at || 0 }); if (sfxLog.length > 200) sfxLog.shift();
-    if (SFX_OFF || !soundOn()) return;
+    if (SFX_OFF || !soundOn()) { sfxLog.push({ kind: 'tone', hz, len, vol, atk, at: at || 0, muted: true }); if (sfxLog.length > 200) sfxLog.shift(); return; }
     try {
-      ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
-      const t = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
+      sfxCtx(); const t = ac.currentTime + (at || 0); if (!slot(t, len + .05, 'tone', hz, vol, atk)) return;
+      const o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
       f.type = 'lowpass'; f.frequency.value = 900; o.type = 'sine'; o.frequency.setValueAtTime(hz, t);
       g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + atk); g.gain.exponentialRampToValueAtTime(.0008, t + Math.max(len, atk + .05));
-      o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + len + .05);
+      o.connect(f); f.connect(g); g.connect(bus); o.start(t); o.stop(t + len + .05);
     } catch (e) {}
   }
-  const knock = at => { tone(200 + rng() * 40, .14, .06, at); };   // 小さな 木の「コトン」
-  const sndStrike = () => { tone(196, .5, .07, 0); tone(262, .5, .06, .22); tone(330, .6, .06, .44); };
-  const sndGutter = () => { tone(147, .5, .05, 0); tone(110, .5, .04, .2); };
+  function wind(len, vol, at) {   // うすい かぜきり（ゴロゴロの 低い うなりは つくらない）
+    if (SFX_OFF || !soundOn()) { sfxLog.push({ kind: 'wind', len, vol, atk: .08, at: at || 0, muted: true }); return; }
+    try {
+      sfxCtx(); const t = ac.currentTime + (at || 0); if (!slot(t, len, 'wind', 0, vol, .08)) return;
+      const buf = ac.createBuffer(1, Math.floor(ac.sampleRate * len), ac.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); src.buffer = buf; f.type = 'lowpass'; f.frequency.value = 520; f.Q.value = .4;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .08); g.gain.linearRampToValueAtTime(vol * .7, t + len * .6); g.gain.linearRampToValueAtTime(0, t + len);
+      src.connect(f); f.connect(g); g.connect(bus); src.start(t); src.stop(t + len + .02);
+    } catch (e) {}
+  }
+  const knock = at => { tone(200 + rng() * 240, .09, .05, at); };   // 木の「コトン」（基音 200〜440Hz）
+  const sndRelease = () => { tone(140 + rng() * 40, .28, .08, 0); };   // ボールを はなす：ひくい ドン（120〜200Hz）
+  const sndStrike = () => { tone(196, .32, .07, .42); tone(262, .32, .06, .7); tone(330, .45, .06, .98); };   // コロコロの あとに、ひくい 3おと（のぼる）
+  const sndGutter = () => { tone(147, .45, .05, 0); tone(110, .45, .04, .2); };
   const sndSpare = () => { tone(262, .4, .05, 0); tone(330, .5, .05, .2); };
+  const grainsFor = n => n <= 0 ? 0 : Math.max(3, Math.min(6, Math.round(n * .6)));   // たおれた ほんすう → コロコロの つぶ（3〜6）
 
   // ─── 絵（本物が とどいたら さしかわる）：img/bowling/*.webp を ためして、読めない 物は 仮の 絵 ───
   const IM = { bg: null, pin: null, balls: {}, maru: null, fr: {} };
@@ -425,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function throwBall(aim, pw) {
     const res = resolve(aim, pw), c = calm();
     S.roll = { res, sub: 'roll', t: 0, dur: c ? .5 : (1.9 - pw * .8), ball: { x: aim, d: 0, a: 1, spin: 0 }, pause: res.strike ? (c ? .3 : .9) : 0, tt: 0 };
-    setPhase('roll'); say(T('ころがれ…', 'Rolling…'), false);
+    setPhase('roll'); say(T('ころがれ…', 'Rolling…'), false); sndRelease(); wind(.6, .03, .12);
   }
   const IMPACT = .88;
   function ballAt(R, u) {   // u 0→1：なげた ところから ピンの てまえ(IMPACT) まで
@@ -438,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function startFalls(R) {
     const res = R.res; let n = 0;
     S.pins.forEach(p => { if (res.hit.includes(p.i)) { p.st = 'fall'; p.t = -(res.order[p.i] || 0) * .09 - rng() * .05; p.dir = p.x < res.xe ? -1 : p.x > res.xe ? 1 : (rng() < .5 ? -1 : 1); n++; } });
-    for (let i = 0; i < Math.min(n, 4); i++) knock(i * .06);
+    for (let i = 0, g = grainsFor(n); i < g; i++) knock(i * .065 + rng() * .02);   // たおれた 本数に ひれいした コロコロ（3〜6つぶ）
     if (res.strike) { sndStrike(); S.banner = T('ストライク！', 'Strike!'); S.bannerT = 1.6; S.shake = .6; S.flash = 1; }
     else if (res.kind === 'gutter') sndGutter();
   }
