@@ -31,7 +31,19 @@
       o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + len + .05);
     } catch (e) {}
   }
-  const api = { voice, soundOn, ctx: () => ac };
+  // 操作音（10/4）：ボタン・リンクを おした とき、低い 短い 1音（196Hz・sine・attack 30ms・0.14びょう）。init({ tap: true }) の ページだけ。おとが OFF の 間は ならさない。90ms いないは ならさない。
+  let lastTap = 0; const tapLog = (window.__psTap = []);
+  function tapSound() {
+    if (!soundOn()) return; const n = performance.now(); if (n - lastTap < 90) return; lastTap = n;
+    if (!mkAc()) return;
+    try {
+      const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = 900; o.type = 'sine'; o.frequency.setValueAtTime(196, t); o.frequency.linearRampToValueAtTime(175, t + .14);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.05, t + .03); g.gain.exponentialRampToValueAtTime(.0008, t + .14);
+      o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + .2); tapLog.push({ hz: 196, atk: .03, len: .14, vol: .05 }); if (tapLog.length > 50) tapLog.shift();
+    } catch (e) {}
+  }
+  const api = { voice, soundOn, ctx: () => ac, tap: tapSound };
 
   function drawBtn() {
     if (!btn) return; const on = soundOn();
@@ -67,8 +79,9 @@
     const E = window.TsuriEn; const reg = () => { const T = window.TsuriEn; if (T && T.lang === 'en' && typeof T.add === 'function' && !reg.done) { reg.done = true; T.add({ ex: { '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', 'どこかを さわると おとが なるよ': 'Tap anywhere to hear sounds' } }); } };
     reg(); addEventListener('load', reg);
     addEventListener('pointerdown', () => { if (soundOn()) mkAc(); }, { once: true }); addEventListener('keydown', () => { if (soundOn()) mkAc(); }, { once: true });
+    if (opts.tap) document.addEventListener('click', e => { const el = e.target && e.target.closest && e.target.closest('button, a[href], summary, [role=button]'); if (el && el.id !== 'ps-mute') tapSound(); }, true);
     initBgm(); scheduleAmbient();
     return api;
   }
-  window.PageSound = { init, voice, soundOn, setMute, state: () => ({ mute: rec.mute, hint: rec.hint, on: soundOn(), bgm: bgmMine, btn: !!btn }), ambientNow: () => { if (opts && opts.ambient) opts.ambient(api); }, resetAc: () => { ac = null; }, KEY };
+  window.PageSound = { init, voice, soundOn, tap: tapSound, setMute, state: () => ({ mute: rec.mute, hint: rec.hint, on: soundOn(), bgm: bgmMine, btn: !!btn }), ambientNow: () => { if (opts && opts.ambient) opts.ambient(api); }, resetAc: () => { ac = null; }, KEY };
 })();

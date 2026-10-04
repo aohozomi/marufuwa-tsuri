@@ -317,11 +317,14 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 #scene[data-time=yoru] .prop[data-id=cafe] svg{filter:drop-shadow(0 0 7px #ffd36b88)}
 button[data-dest=cafe],button[data-machi=cafe]{--c1:#fff3e0;--c2:#ffd8a8;--side:#d99a55;--ink:#5a3414}
 button[data-dest=park]{--c1:#f6efff;--c2:#d5c0f7;--side:#9a7ad6;--ink:#3b2466}
+button[data-dest=inn]{--c1:#f5e8d2;--c2:#d5b58e;--side:#8d5c35;--ink:#503721}
 .prop[data-id=machi] .mark{left:88%;top:-14%}   /* まちかど：かんばんの もじに かぶせず 右上に */
 .prop[data-id=maruiro] .mark{left:2%;top:2%}
 .prop[data-id=post] .mark{top:-48%}
    /* ポストの 頭を かくさない よう しるしを 上に うかせる */
 .prop[data-id=well] .mark{left:86%;top:2%}
+.prop[data-id=inn] .mark{left:91%;top:2%}
+.inn-sign-label{position:absolute;left:16%;top:45%;width:46%;height:10%;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none;color:#503721;font-size:clamp(5px,1.9vw,8px);font-weight:900;line-height:1;letter-spacing:.02em;text-shadow:0 1px 0 #f8e7bd}
 @supports (width:1cqw){#viewport{container-type:inline-size}.mark{width:clamp(22px,9.44cqw,34px);height:clamp(22px,9.44cqw,34px);font-size:clamp(.8rem,3.19cqw,1.15rem);border-width:clamp(2px,.83cqw,3px)}}   /* せまい がめんでは しるしを ちいさく（かんばんの もじに かぶらない）。しるしは かざり */
 @keyframes markbob{50%{translate:0 -4px}}
 /* ひとの すがた。かげ・からだの ゆれは JS。じっと している ときは ゆっくり いきを する */
@@ -418,6 +421,17 @@ button[data-dest=oheya]{--c1:#fff0ec;--c2:#ffb8a8;--side:#df806f;--ink:#5a1f14}
 #curtain b{font-size:3rem;line-height:1}
 .pill{--c1:#3495c5;--c2:#10587e;--side:#0b425f;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #083a55}   /* 白い もじが 2.7対1 だった → つりびより本体（5e37fd8）と おなじ こい 青（4.5対1 いじょう） */
 dialog{border:2px solid #bfdce8;border-radius:24px;padding:16px;color:#244653;max-width:min(560px,94vw);width:100%}
+#inn-dialog{width:min(92vw,430px);max-height:min(86vh,720px);padding:0;overflow:auto;border:3px solid #9b7850;border-radius:26px;background:linear-gradient(155deg,#fff9ea,#eddbbd 68%,#d3bc95);color:#503b2b;box-shadow:0 24px 80px #14282566}
+#inn-dialog::backdrop{background:#182629a6;backdrop-filter:blur(3px)}
+.inn-panel{padding:18px;text-align:center}
+.inn-topline{margin:0 0 4px;color:#846949;font-size:.78rem;font-weight:900;letter-spacing:.08em}
+.inn-mascot{display:block;width:86px;height:86px;object-fit:contain;margin:2px auto 6px;border-radius:26px;background:radial-gradient(circle at 50% 42%,#fffaf0,#d8c7a7);box-shadow:0 3px 0 #b49b73}
+#inn-title{margin:4px 0 6px;font-size:1.25rem;line-height:1.35}
+#inn-intro{margin:0 0 12px;font-size:.92rem;line-height:1.65}
+#inn-message{min-height:4.1em;display:flex;align-items:center;justify-content:center;margin:10px 0 12px;padding:12px;border:1px solid #c8ae80;border-radius:18px;background:#fffaf0d9;font-weight:800;line-height:1.65}
+.inn-choices{display:grid;gap:8px}
+.inn-choices button{min-height:48px;border-color:#b89a6b;background:#fff9ea;color:#503b2b}
+.inn-exit{width:100%;margin-top:10px;border-color:#a18868;background:#e2cfaa;color:#503b2b}
 /* Xの アプリ：みえる まどが みじかく、下 47px に おびが かぶさる。まどは おびの うえで おわらせる（ボタンが かくれない・中は スクロール） */
 :root[data-inapp=x] main{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}   /* Xの アプリは 下の おび（47px）が かぶさる：いちばん 下の 行が おびの うえに 出る */
 :root[data-inapp=x] dialog{max-height:calc(100dvh - 64px);margin:8px auto auto;overflow:auto}
@@ -594,6 +608,7 @@ body.calm .cloud.c2{left:28%}
   <nav id="places" aria-label="いきさき">
     <button type="button" data-dest="tsuri"><b aria-hidden="true">🎣</b>つりば<small>つりびより</small></button>
     <button type="button" data-dest="oheya"><b aria-hidden="true">🐠</b>まるふわの おへや<small>すいそう</small></button>
+    <button type="button" data-dest="inn"><b aria-hidden="true">🏡</b>やどや<small>おちゃと しおり</small></button>
     <button type="button" data-dest="park"><b aria-hidden="true">🎡</b>パークへ<small>あそびば</small></button>
     <button type="button" data-dest="machi"><b aria-hidden="true">🛍️</b>まちかど<small>おみせ・まるいろ・いど</small></button>
   </nav>
@@ -721,6 +736,21 @@ body.calm .cloud.c2{left:28%}
   </div>
   <p class="count">いかなくても ぜんぜん だいじょうぶ。</p>
   <button class="close" type="button" id="close-appie">とじる</button>
+</dialog>
+<dialog id="inn-dialog" aria-labelledby="inn-title" aria-describedby="inn-intro">
+  <section class="inn-panel">
+    <p class="inn-topline">まるふわの ひろば</p>
+    <img id="inn-mascot" class="inn-mascot" src="../img/game-blue.webp" alt="まるふわ" width="86" height="86">
+    <h2 id="inn-title">やどやで ひとやすみ</h2>
+    <p id="inn-intro">ランプの あかりが ぽっと ともったよ。なにを たのしむ？</p>
+    <p id="inn-message" role="status" aria-live="polite">おちゃ、まどべ、しおり。すきな ものを えらんでね。</p>
+    <div class="inn-choices">
+      <button type="button" data-inn-choice="tea">🍵 おちゃを のむ</button>
+      <button type="button" data-inn-choice="window">🪟 まどべを ながめる</button>
+      <button type="button" data-inn-choice="bookmark">📖 しおりを めくる</button>
+    </div>
+    <button id="inn-exit" class="inn-exit" type="button">ひろばへ もどる</button>
+  </section>
 </dialog>
 <dialog id="omise" aria-labelledby="omise-title">
   <h2 id="omise-title">おみせ</h2>
@@ -984,6 +1014,7 @@ const sfx = {
   spin: () => chord([523, 659, 784, 1047, 784, 1047, 1319], .05),
   water: pan => tone(1568, .04, 'triangle', 0, .04, 2093, pan),
   well: pan => { tone(392, .1, 'triangle', 0, .04, 294, pan); tone(587, .07, 'triangle', .13, .03, 440, pan); },
+  tap: () => tone(196, .14, 'sine', 0, .04, 175, 0, .03),   // 10/4：画面の 操作音（ひくい みじかい 1おと）
   bird: pan => asKind('amb', () => { tone(587, .09, 'sine', 0, .008, 0, pan, .04); }),   // 10/2：ひくい sine 1おと（ピッ を やめた）
   cricket: pan => asKind('amb', () => { tone(523, .08, 'sine', 0, .008, 0, pan, .04); })
 };
@@ -1190,6 +1221,7 @@ function announceNew(id, quiet) {   // あたらしい 子が きた とき 1回
 
 // ─── ばしょ（かんばん・たてもの・かざり）。すうじは 360×560 の せかいの なかの いち ───
 const SVG = {
+  inn: `<svg viewBox="0 0 1169 1345" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="こげちゃ色の木と深緑の屋根の宿屋"><image href="../img/hiroba/inn-front-v1.png" x="0" y="0" width="1169" height="1345" preserveAspectRatio="xMidYMax meet"/></svg>`,
   house: `<svg viewBox="0 0 122 126" xmlns="http://www.w3.org/2000/svg"><ellipse cx="61" cy="120" rx="54" ry="6" fill="#0b2a4a" opacity=".16"/><rect x="16" y="56" width="90" height="62" rx="14" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.5"/><rect x="88" y="14" width="14" height="30" rx="4" fill="#e9c9a0" stroke="#7a4b34" stroke-width="2.5"/><path d="M5 62 Q61 -14 117 62 Q61 50 5 62Z" fill="#ff9f8f" stroke="#7a4b34" stroke-width="2.5" stroke-linejoin="round"/><path d="M26 52 Q61 12 96 52" fill="none" stroke="#ffd6cc" stroke-width="5" stroke-linecap="round"/><circle cx="35" cy="88" r="11" style="fill:var(--win,#bfe3f5)" stroke="#7a4b34" stroke-width="2.5"/><path d="M35 77v22M24 88h22" stroke="#7a4b34" stroke-width="2"/><rect x="21" y="101" width="28" height="9" rx="3" fill="#e5bf8c" stroke="#7a4b34" stroke-width="2"/><g><circle cx="27" cy="99" r="3.4" fill="#ff9ab8"/><circle cx="35" cy="97" r="3.4" fill="#ffd25e"/><circle cx="43" cy="99" r="3.4" fill="#ff9ab8"/></g><g class="door"><path d="M58 118 V94 a15 15 0 0 1 30 0 V118Z" fill="#7fd6a4" stroke="#7a4b34" stroke-width="2.5"/><circle cx="82" cy="105" r="2.6" fill="#ffd25e" stroke="#7a4b34" stroke-width="1.2"/></g><rect x="34" y="40" width="54" height="22" rx="7" fill="#f6dcae" stroke="#7a4b34" stroke-width="2.5"/><text x="61" y="56" text-anchor="middle" font-size="14" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">おへや</text></svg>`,
   gate: `<svg viewBox="0 0 124 122" xmlns="http://www.w3.org/2000/svg"><ellipse cx="62" cy="118" rx="54" ry="4" fill="#0b2a4a" opacity=".15"/><rect x="8" y="40" width="20" height="76" rx="8" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><rect x="96" y="40" width="20" height="76" rx="8" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><path d="M4 46 Q62 -4 120 46 L120 62 Q62 16 4 62z" fill="#ffd9e6" stroke="#7a4b34" stroke-width="2.4" stroke-linejoin="round"/><rect x="26" y="26" width="72" height="22" rx="9" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.4"/><text x="62" y="42" text-anchor="middle" font-size="11" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">まるふわパーク</text><circle cx="18" cy="34" r="8" fill="#ffe27a" stroke="#7a4b34" stroke-width="2.4"/><circle cx="106" cy="34" r="8" fill="#ffe27a" stroke="#7a4b34" stroke-width="2.4"/><circle cx="62" cy="14" r="7" fill="#ff9fb5" stroke="#7a4b34" stroke-width="2.4"/><path d="M18 44 v-16M106 44 v-16" stroke="#7a4b34" stroke-width="2"/><path d="M30 20 l-12 5 l12 5z" fill="#8fd0f5" stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"/><path d="M94 20 l12 5 l-12 5z" fill="#ff9fb5" stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"/></svg>`,   // まるふわパークの ゲート（左＝しずかな ひろば／右＝パーク）
   bowling: `<svg viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="76" rx="44" ry="4" fill="#0b2a4a" opacity=".15"/><rect x="8" y="34" width="84" height="40" rx="9" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><path d="M3 38 Q6 12 24 10 H76 Q94 12 97 38z" fill="#8fd0f5" stroke="#7a4b34" stroke-width="2.4" stroke-linejoin="round"/><rect x="24" y="16" width="52" height="18" rx="7" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.4"/><text x="50" y="29" text-anchor="middle" font-size="10" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">ボーリング</text><rect x="40" y="46" width="20" height="28" rx="10" fill="#ffb8a8" stroke="#7a4b34" stroke-width="2.4"/><g stroke="#7a4b34" stroke-width="1.8"><ellipse cx="22" cy="58" rx="6" ry="9" fill="#fff"/><ellipse cx="78" cy="58" rx="6" ry="9" fill="#fff"/></g><circle cx="22" cy="52" r="2.2" fill="#ff9fb5"/><circle cx="78" cy="52" r="2.2" fill="#ff9fb5"/></svg>`,
@@ -1260,6 +1292,7 @@ const PROPS = [
   { id: 'cafe', x: 84, y: 346, w: 68, h: 61, svg: SVG.cafe, dest: 'cafe', mark: '☕', block: { rect: [56, 338, 112, 348] } },   // カフェ：左の 地面（木の となり・ベンチの うえ）。山の上ではなく あるける ひろばに（10/1 マスター）
   { id: 'machi', x: 50, y: 238, w: 92, h: 84, svg: SVG.machi, dest: 'machi', mark: '🛍️' },   // まちかど（おみせ・びじゅつかん・おすすめの へや）：左の 丘の たてもの。ドアの まえは 池の わき
   { id: 'maruiro', x: 616, y: 536, w: 88, h: 58, svg: SVG.maruiro, dest: 'maruiro', mark: '🔵' },   // まるいろの 小屋：パークの 南（10/3：ひろばの 右上から うつした。10/1 マスター「ういてる」・総司令部）
+  { id: 'inn', x: 520, y: 244, w: 126, h: 142, svg: SVG.inn, dest: 'inn', mark: '🛎️' },   // セミリアルの 宿屋：右のおく
   { id: 'well', x: 298, y: 526, w: 122, h: 80, svg: SVG.well, dest: 'ido', mark: '💧', block: { rect: [234, 452, 360, 528] } },
   ...(LITTER ? LITTER_SPOTS.map((s, i) => ({ id: 'litter-' + (i + 1), x: s.x, y: s.y, w: 40, h: 26, svg: litterSvg(), secret: 'litter' })) : []),   // きせつの つもり（はいても 次の 日は また ふえる）
   ...(TRACES.includes('flower') ? [{ id: 'trace-flower', x: TRACE_SIDE === 'r' ? 310 : 50, y: 432, w: 18, h: 22, svg: traceFlower(TRACE_COL), secret: 'trace' }] : []),   // ベンチに だれかの はな（日づけで 出る）
@@ -1268,6 +1301,7 @@ const PROPS = [
 const DEST = {
   tsuri: { name: 'つりば', at: { x: 90, y: 296 }, kind: 'go', url: () => new URL('../', location.href).href, pan: -.8, motif: () => { tone(660, .08, 'sine', 0, .04, 880, 0, .04); } },
   oheya: { name: 'まるふわの おへや', at: { x: 182, y: 286 }, kind: 'tank', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
+  inn: { name: 'やどや', at: { x: 510, y: 304 }, kind: 'inn', pan: 0, motif: () => { chord([523, 659, 784], .09, 'triangle'); } },
   thanks: { name: 'ありがとうの いし', at: { x: 320, y: 444 }, kind: 'thanks', pan: .8 },
   park: { name: 'まるふわパーク', at: { x: 392, y: 334 }, kind: 'park', pan: .8, motif: () => {} },
   bowling: { name: 'ボーリングじょう', at: { x: 440, y: 362 }, kind: 'go', url: () => new URL('bowling/', location.href).href, pan: .8, motif: () => {} },
@@ -1473,7 +1507,7 @@ function buildProps() {
     if (p.dest) el.dataset.dest = p.dest;
     if (p.secret) el.dataset.secret = p.secret;
     el.style.cssText = `left:${(p.x - p.w / 2) / W * 100}%;top:${(p.y - p.h) / H * 100}%;width:${p.w / W * 100}%;height:${p.h / H * 100}%;z-index:${100 + Math.round(p.y)}`;
-    el.innerHTML = p.svg + (p.mark ? `<span class="mark" aria-hidden="true">${p.mark}</span>` : '');
+    el.innerHTML = p.svg + (p.id === 'inn' ? '<span class="inn-sign-label" aria-hidden="true">やどや</span>' : '') + (p.mark ? `<span class="mark" aria-hidden="true">${p.mark}</span>` : '');
     frag.append(el);
   });
   layerProps.append(frag);
@@ -2212,6 +2246,7 @@ function arrive(id) {
   if (d.kind === 'wait') { trip = null; if (koujiTap(id) >= 5) { koujiFlip(id); return; } sfx.hammer(); setFace('apricot', 2600); hop(player, 2); speak(player, 'じゅんびちゅう だって', 2200, true); narrate(d.line); return; }
   sfx.arrive(); setFace('sparkle', 3000);
   if (d.kind === 'tank') { enterTank(); return; }
+  if (d.kind === 'inn') { enterInn(); return; }
   leave(id);
 }
 function leave(id) {
@@ -2232,21 +2267,51 @@ function enterTank() {
     else { own.last = 'oheya'; own.leftAt = Date.now(); saveOwn(); setTimeout(() => hooks.navigate(new URL('../', location.href).href), 400); }
   }, reduce() ? 100 : 380);
 }
+const INN_MOMENTS = {
+  tea: ['おちゃの ゆげが くるり。ゆげの かたちが さかなに なったよ。', 'カップの ふちに ちいさな ほしもよう。ランプが ゆれているよ。', 'あまい おちゃを ひとくち。ほっぺが ふわっと ゆるんだ。'],
+  window: ['まどから ひろばを ながめる。ふんすいの みずが きらり。', 'はっぱが ひとひら、かぜに のって とおりすぎたよ。', 'ちいさな とりが やねの うえで、ちょんと おじぎした。', 'まるふわが まどに ほっぺを よせると、まるい あとが ついた。'],
+  bookmark: ['しおりには、ひろばで みつけた はっぱが はさんで あった。', 'ページの すみに「また ここで あおう」と ちいさく かいてある。', 'だれかが おいていった はなびら。あかりに すかすと、ももいろだ。']
+};
+let lastInnMoment = '';
+function enterInn() {
+  sfx.door();
+  setTimeout(() => {
+    if (!trip || trip.id !== 'inn') return;
+    player.el.classList.add('gone');
+    $('inn-mascot').src = BASE + 'img/game-' + player.face + '.webp';
+    $('inn-message').textContent = 'おちゃ、まどべ、しおり。すきな ものを えらんでね。';
+    $('inn-dialog').showModal();
+  }, reduce() ? 100 : 380);
+}
+function enjoyInn(kind) {
+  const lines = INN_MOMENTS[kind]; if (!lines) return;
+  const choices = lines.filter(line => line !== lastInnMoment), pool = choices.length ? choices : lines;
+  const line = pool[Math.floor(Math.random() * pool.length)];
+  lastInnMoment = line; $('inn-message').textContent = line;
+  setFace(kind === 'window' ? 'sparkle' : 'smile', 2100);
+  $('inn-mascot').src = BASE + 'img/game-' + player.face + '.webp';
+  sfx.ui(); narrate(line);
+}
+function afterInn() {
+  if (!trip || trip.id !== 'inn') return;
+  trip = null; player.el.classList.remove('gone'); setFace('smile', 2200);
+  speak(player, 'また おいでね', 1800, true); narrate('やどやから ひろばへ もどったよ');
+}
 function afterTank() {
   trip = null; player.el.classList.remove('gone'); const house = propEl('house'); if (house) house.classList.remove('open');
   setFace('smile', 2200); speak(player, 'ただいま！', 2000, true); narrate('おへやから もどったよ');
 }
-document.addEventListener('close', e => { if (e.target && e.target.id === 'tk') afterTank(); }, true);
+document.addEventListener('close', e => { if (!e.target) return; if (e.target.id === 'tk') afterTank(); else if (e.target.id === 'inn-dialog') afterInn(); }, true);
 function setHl(id) { layerProps.querySelectorAll('.prop.hl').forEach(p => p.classList.remove('hl')); if (id) layerProps.querySelectorAll(`[data-dest="${id}"]`).forEach(p => p.classList.add('hl')); }
 
 // ─── まわりを きく／ともだちに あいにいく ───
 const dirWord = (x, from) => { const dx = x - from.x; return Math.abs(dx) < 40 ? 'ちかく' : dx < 0 ? 'ひだり' : 'みぎ'; };
 function listenAround() {
   lastInput = T; startAmbient();
-  const order = ['tsuri', 'oheya'];
+  const order = ['tsuri', 'oheya', 'inn'];
   order.forEach((id, i) => setTimeout(() => { const d = DEST[id]; if (d.motif) asKind('guide', () => d.motif()); }, i * 650));
   const near = friends.filter(f => dist(f, player) < 150).map(f => f.name + '（' + dirWord(f.x, player) + '）');
-  narrate('ひだりの おくに つりば。まんなかの おくに おへや。' + (near.length ? 'ちかくに ' + near.join('、') + ' が いるよ。' : 'ちかくには だれも いないよ。') + 'まんなかには ふんすいが あるよ。');
+  narrate('ひだりの おくに つりば。まんなかの おくに おへや。みぎの おくに やどや。' + (near.length ? 'ちかくに ' + near.join('、') + ' が いるよ。' : 'ちかくには だれも いないよ。') + 'まんなかには ふんすいが あるよ。');
 }
 function findFriend() {
   lastInput = T; const f = nearestFriend(true); if (!f) return; talkTo(f);
@@ -2295,6 +2360,8 @@ hudWrap.addEventListener('focusout', e => { if (!hudPanel.hidden && e.relatedTar
 $('calm').addEventListener('click', () => { own.motion = own.motion === 'less' ? 'auto' : 'less'; saveOwn(); drawMotion(); narrate(own.motion === 'less' ? 'うごきを すくなく したよ。ともだちは その ばに いるよ。' : 'うごきを ふつうに もどしたよ。'); });
 $('listen').addEventListener('click', listenAround);
 $('find').addEventListener('click', findFriend);
+$('inn-exit').addEventListener('click', () => $('inn-dialog').close());
+document.querySelectorAll('[data-inn-choice]').forEach(b => b.addEventListener('click', () => enjoyInn(b.dataset.innChoice)));
 document.querySelectorAll('[data-dest]').forEach(el => { if (el.tagName === 'BUTTON') { el.addEventListener('click', () => goDest(el.dataset.dest)); el.addEventListener('mouseenter', () => setHl(el.dataset.dest)); el.addEventListener('mouseleave', () => setHl('')); el.addEventListener('focus', () => setHl(el.dataset.dest)); el.addEventListener('blur', () => setHl('')); } });
 document.querySelectorAll('[data-touch]').forEach(b => b.addEventListener('click', () => { startAmbient(); secretTap(b.dataset.touch); }));
 
@@ -2616,6 +2683,11 @@ document.addEventListener('close', e => { if (e.target && e.target.id === 'thank
 
 // ─── しゃしん：きょうの ひろばを 1まいの えに（1080×1920）。なまえ・URLは えに いれない ───
 const svgImage = svg => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+let innImageCapture;
+function loadInnImageCapture() {
+  if (!innImageCapture) innImageCapture = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = BASE + 'img/hiroba/inn-front-v1.png'; });
+  return innImageCapture;
+}
 const svgCache = new Map();   // 動画の 材料づくり用：おなじ 絵を くりかえし 読まない（多すぎたら 空に する）
 const svgImageCached = async svg => { let im = svgCache.get(svg); if (!im) { im = await svgImage(svg); if (svgCache.size > 80) svgCache.clear(); svgCache.set(svg, im); } return im; };
 function svgText(svgEl, cs, w, h) {   // いろの へんすう（var(--x)）を その ばで 実際の いろに して、えに できる かたちに する
@@ -2674,6 +2746,12 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
     const u = unit(el);
     if (el.classList.contains('prop')) {
       const ai = el.querySelector('img.art-prop'); if (ai) { if (hasFilter) ctx.filter = dimF; ctx.drawImage(ai, u.x, u.y, u.w, u.h); ctx.filter = 'none'; continue; }   // 絵に さしかえた 置き物
+      if (el.dataset.id === 'inn') {
+        const im = await loadInnImageCapture(); if (hasFilter) ctx.filter = ((getComputedStyle(el).getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim();
+        ctx.drawImage(im, u.x, u.y, u.w, u.h); ctx.filter = 'none';
+        const sign = el.querySelector('.inn-sign-label'); if (sign) { const su = unit(sign), k = sceneBox.width / W; ctx.save(); ctx.fillStyle = '#503721'; ctx.font = `900 ${parseFloat(getComputedStyle(sign).fontSize) / k}px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = '#f8e7bd'; ctx.shadowOffsetY = 1 / k; ctx.fillText(sign.textContent, su.x + su.w / 2, su.y + su.h / 2); ctx.restore(); }
+        continue;
+      }
       const svg = el.querySelector('svg'); if (!svg) continue;
       const ecs = getComputedStyle(el), lamp = /^lamp/.test(el.dataset.id || '');
       if (hasFilter && !lamp) ctx.filter = ((ecs.getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim();
@@ -3044,10 +3122,11 @@ function paintTsuriba() {
 function openTsuriba() { lastInput = T; paintTsuriba(); const dlg = $('tsuriba'); if (!dlg.open) dlg.showModal(); narrate(S('つりば。どこへ いく？ いけない ところも ならんで いるよ。', 'Fishing spots. Where to? Locked ones are listed too.')); }
 $('tsuriba').addEventListener('click', e => {
   const b = e.target.closest('button[data-area]'); if (!b) return;
+  asKind('ui', () => sfx.tap());
   if (b.getAttribute('aria-disabled') === 'true') { narrate(b.querySelector('small').textContent); return; }
   $('tsuriba').close(); writeMain({ area: b.dataset.area }); leave('tsuri');
 });
-$('close-tsuriba').addEventListener('click', () => { $('tsuriba').close(); narrate(S('つりばの いちらんを とじたよ。', 'You closed the fishing spots.')); });
+$('close-tsuriba').addEventListener('click', () => { asKind('ui', () => sfx.tap()); $('tsuriba').close(); narrate(S('つりばの いちらんを とじたよ。', 'You closed the fishing spots.')); });
 // ─── アプリの おうち（10/2 総司令部：「ここから さきは アプリ」）───
 //   ひろばの 左下の ちいさな 家。入ると アプリの 本物の 画面の しゃしんを ならべる（img/appie/manifest.json の [{src,alt,alt_en}]・まだ 無ければ ことばだけ）。最後に App Store への 小さな ボタン 1つ：おすと「いくよ。いい？」→「いく」で はじめて 外の アドレスを つける（それまで ページの 中に 外への リンクは 無い）。入らなくても なにも かわらない・点滅なし
 const APPSTORE_URL = 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=web_heya&mt=8';
