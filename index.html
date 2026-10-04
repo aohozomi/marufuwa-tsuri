@@ -2502,7 +2502,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]); if (fish.season) tags.push(L('この つきの さかな', 'This month' + String.fromCharCode(39) + 's fish'));
     $('card-tags').replaceChildren(...tagsShown(levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = T(text); return tag; }));   // 英語の ときは さいしょから 英語で わたす（日本語の まま わたすと 外付けの 英語エンジンが <span> を ひとまとめに して タグの ふちが きえる）
     // 「ぴったり」の ごほうび：はんこが おされる
-    if (recDelta > 0) { const dt = document.createElement('span'); dt.className = 'tag'; dt.textContent = L(recDelta + ' cm のびた', '+' + recDelta + ' cm'); $('card-tags').append(dt); tags.push(recDelta + ' cm のびた'); }
+    if (recDelta > 0) { const dt = document.createElement('span'); dt.className = 'tag'; dt.textContent = L(recDelta + ' cm のびた', '+' + recDelta + ' cm'); $('card-tags').append(dt); tags.push(L(recDelta + ' cm のびた', '+' + recDelta + ' cm')); }
     if (perfects >= 2) { const stamp = document.createElement('span'); stamp.className = 'stamp'; stamp.textContent = T('ぴったり ×' + perfects); $('card-tags').append(stamp); tags.push('ぴったり ×' + perfects); }
     // あたらしい つりばが ひらいたら、そのまま いける ボタンを だす
     const opened = AREAS.find(a => a.need > 0 && a.need === save.total), go = $('go-area');
