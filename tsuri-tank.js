@@ -412,8 +412,8 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-app::before{display:none}
 .tk-app svg{flex:none}
 .tk-apptx{display:flex;flex-direction:column;line-height:1.25}
-.tk-apptx b{font-size:max(8.5px,calc(10px * var(--s,1)));white-space:nowrap}
-.tk-apptx small{font-size:max(8px,calc(9px * var(--s,1)));font-weight:800;color:#3d5a68;white-space:nowrap}
+.tk-apptx b{font-size:max(11px,calc(10px * var(--s,1)));white-space:nowrap}
+.tk-apptx small{font-size:max(11px,calc(9px * var(--s,1)));font-weight:800;color:#3d5a68;white-space:nowrap}
 .tk-app.tk-app-off{opacity:.78}
 .tk-appc{position:absolute;left:3%;top:52%;z-index:8;width:62%;padding:8px 10px;border-radius:14px;border:2px solid #5a3a2e;background:#fffdf6;color:#244653;box-shadow:0 4px 12px #0004}
 .tk-appc p{margin:0 0 6px;font-weight:800;font-size:max(.8rem,calc(12px * var(--s,1)))}
