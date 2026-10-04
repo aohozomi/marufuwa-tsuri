@@ -559,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── おと・はいけい・ひらく ───
   if (window.PageSound) PageSound.init({ mount: $('back'), bgm: 'hiroba', time: () => root.dataset.time, ambient: () => {} });
-  if (window.PageBg) PageBg.init('bowling', { blur: 18, tate: true, tint: 'rgba(20,12,6,.5)', panel: 'rgba(250,240,224,.93)', panelNight: 'rgba(244,238,250,.93)', border: '#5a3a22' });
+  // ページの 地は 無地の 壁いろ（body の グラデ＝昼 茶・夜 紺）。10/5 マスター「背景の 背景（レーンが 2本 見える）」：同じ 絵を ぼかして 敷くのを やめた＝別の レーンは 見えない
   loadArt(); drawBallBtn(); drawModeBtn(); resetGame(); setPhase('ready'); draw();
   rafId = requestAnimationFrame(loop);
 
