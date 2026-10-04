@@ -118,6 +118,10 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 #scene[data-time=hiru]{--sky1:#a9defa;--sky2:#eaf8ff;--orb:#fff2a8;--hill:#a9d89a;--hill2:#98cf8b;--tree:#6fbf6a;--ftree:#6fbf6a;--water1:#7fd0f2;--water2:#3b9bd0;--star:0;--grass:#a8dc93;--grass2:#98d385;--paving:#f8eed8;--tone:brightness(1);--win:#bfe3f5;--lamp:0;--lampfill:#fff8dc}
 #scene[data-time=yuu]{--sky1:#ff9e6e;--sky2:#ffd9a8;--orb:#ff7a3d;--hill:#c9a27a;--hill2:#b99468;--tree:#7f9f5a;--ftree:#7f9f5a;--water1:#7aa9d6;--water2:#44779f;--star:0;--grass:#c9d488;--grass2:#b9c67a;--paving:#f2dcb8;--tone:brightness(.96) sepia(.12);--win:#ffe1a0;--lamp:.55;--lampfill:#ffe9a0}
 #scene[data-time=yoru]{--sky1:#1f2f5c;--sky2:#4a5d92;--orb:#fff6cf;--hill:#34507a;--hill2:#2b4468;--tree:#2f6a5a;--ftree:#2f6a5a;--water1:#3f6fa6;--water2:#1d365f;--star:1;--grass:#3f7a6c;--grass2:#356b5e;--paving:#8e9ab0;--tone:brightness(.74) saturate(.9);--win:#ffe9a0;--lamp:.95;--lampfill:#fff0a0}
+#scene[data-time=asa] #bg .path-surface{filter:brightness(1.04) sepia(.04)}
+#scene[data-time=hiru] #bg .path-surface{filter:brightness(1.02)}
+#scene[data-time=yuu] #bg .path-surface{filter:brightness(.94) sepia(.12)}
+#scene[data-time=yoru] #bg .path-surface{filter:brightness(.7) saturate(.72) hue-rotate(165deg)}
 #scene{--dim:brightness(1);--hlf:drop-shadow(0 0 0 #fff0)}
 /* きせつの ひろば（はる・なつ・あき・ふゆ）：じかんごとの 色に きせつの 色を まぜた もの。ftree＝とおくの 丘の 木（はるは さくら いろ）。--blo／--bl1／--bl2＝木の はな（なつは なし・あきは あかい み・ふゆは しろい ゆき）、--cap＝木の ゆきの ぼうし、--fl＝じめんの はな。色の へんすうなので しゃしんにも うつる */
 #scene[data-season=haru][data-time=asa]{--tree:#98cf89;--ftree:#ecbac6;--hill:#bfdcab;--hill2:#b0d39e;--grass:#b9e29e;--grass2:#a9da91}
@@ -328,7 +332,8 @@ button[data-dest=inn]{--c1:#f5e8d2;--c2:#d5b58e;--side:#8d5c35;--ink:#503721}
    /* ポストの 頭を かくさない よう しるしを 上に うかせる */
 .prop[data-id=well] .mark{left:86%;top:2%}
 .prop[data-id=inn] .mark{left:91%;top:2%}
-.inn-sign-label{position:absolute;left:16%;top:45%;width:46%;height:10%;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none;color:#503721;font-size:clamp(5px,1.9vw,8px);font-weight:900;line-height:1;letter-spacing:.02em;text-shadow:0 1px 0 #f8e7bd}
+.plaza-sign-label{font-size:max(5px,calc(11px / var(--u,1)))}   /* 世界の 1たんい＝--u px（syncVW）。画面で 11px いじょう（見た目巡回 10/5） */
+.inn-sign-label{position:absolute;left:16%;top:45%;width:46%;height:10%;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none;color:#503721;font-size:max(11px,clamp(5px,1.9vw,8px));font-weight:900;line-height:1;letter-spacing:.02em;text-shadow:0 1px 0 #f8e7bd}
 @supports (width:1cqw){#viewport{container-type:inline-size}.mark{width:clamp(22px,9.44cqw,34px);height:clamp(22px,9.44cqw,34px);font-size:clamp(.8rem,3.19cqw,1.15rem);border-width:clamp(2px,.83cqw,3px)}}   /* せまい がめんでは しるしを ちいさく（かんばんの もじに かぶらない）。しるしは かざり */
 @keyframes markbob{50%{translate:0 -4px}}
 /* ひとの すがた。かげ・からだの ゆれは JS。じっと している ときは ゆっくり いきを する */
@@ -534,6 +539,7 @@ body.calm .cloud.c2{left:28%}
         <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/></linearGradient>
         <linearGradient id="g-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--water1)"/><stop offset="1" style="stop-color:var(--water2)"/></linearGradient>
         <linearGradient id="g-grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--grass2)"/><stop offset="1" style="stop-color:var(--grass)"/></linearGradient>
+        <pattern id="plaza-pathstone" width="128" height="128" patternUnits="userSpaceOnUse"><image href="../img/hiroba/plaza_pathstone_tile.webp" width="128" height="128" preserveAspectRatio="none"/></pattern>
       </defs>
       <rect width="720" height="300" fill="url(#g-sky)"/>
       <g fill="#fff" style="opacity:var(--star)"><circle cx="30" cy="34" r="1.7"/><circle cx="74" cy="78" r="1.4"/><circle cx="120" cy="26" r="1.8"/><circle cx="168" cy="64" r="1.4"/><circle cx="214" cy="30" r="1.7"/><circle cx="252" cy="92" r="1.4"/><circle cx="330" cy="120" r="1.5"/><circle cx="58" cy="132" r="1.4"/><circle cx="196" cy="118" r="1.3"/><circle cx="290" cy="20" r="1.5"/></g>
@@ -546,14 +552,23 @@ body.calm .cloud.c2{left:28%}
       <g class="waves" stroke="#ffffff99" stroke-width="2" stroke-linecap="round" fill="none"><path d="M22 256 q8 -4 16 0"/><path d="M86 262 q8 -4 16 0"/><path d="M50 268 q8 -4 16 0"/><path d="M92 250 q8 -4 16 0"/></g>
       <ellipse cx="100" cy="258" rx="9" ry="3.6" fill="#7fd6a4" stroke="#fff" stroke-width="1.5"/><ellipse cx="18" cy="262" rx="7" ry="3" fill="#7fd6a4" stroke="#fff" stroke-width="1.5"/>
       <!-- みち と まんなかの ひろば -->
-      <g fill="none" stroke="var(--paving)" stroke-linecap="round">
-        <path d="M181 392 C178 350 181 318 182 274" stroke-width="42"/>
-        <path d="M178 396 C150 356 112 334 90 296" stroke-width="34"/>
-        <path d="M182 396 C214 356 268 336 296 296" stroke-width="34"/>
-        <path d="M152 440 C124 486 92 516 66 538" stroke-width="30"/>
-        <path d="M208 440 C236 486 268 516 296 538" stroke-width="30"/>
+      <g class="path-surface" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g stroke="#6f5b45" opacity=".25">
+          <path d="M181 392 C178 350 181 318 182 274" stroke-width="48"/>
+          <path d="M178 396 C150 356 112 334 90 296" stroke-width="40"/>
+          <path d="M182 396 C214 356 268 336 296 296" stroke-width="40"/>
+          <path d="M152 440 C124 486 92 516 66 538" stroke-width="36"/>
+          <path d="M208 440 C236 486 268 516 296 538" stroke-width="36"/>
+        </g>
+        <g stroke="url(#plaza-pathstone)">
+          <path d="M181 392 C178 350 181 318 182 274" stroke-width="42"/>
+          <path d="M178 396 C150 356 112 334 90 296" stroke-width="34"/>
+          <path d="M182 396 C214 356 268 336 296 296" stroke-width="34"/>
+          <path d="M152 440 C124 486 92 516 66 538" stroke-width="30"/>
+          <path d="M208 440 C236 486 268 516 296 538" stroke-width="30"/>
+        </g>
+        <ellipse cx="180" cy="406" rx="124" ry="54" fill="url(#plaza-pathstone)" stroke="#8a745a" stroke-width="2"/>
       </g>
-      <ellipse cx="180" cy="406" rx="124" ry="54" fill="var(--paving)"/>
       <ellipse cx="180" cy="406" rx="110" ry="46" fill="none" stroke="#ffb3a3" stroke-width="4" stroke-dasharray="1 10" stroke-linecap="round" opacity=".9"/>
       <!-- はな と くさ（じめんの はなは ふゆに きえ、あきは うすく） -->
       <g style="opacity:var(--fl,1)">
@@ -576,10 +591,17 @@ body.calm .cloud.c2{left:28%}
         <path d="M360 214 Q444 198 534 224 T720 210 V290 H360Z" style="fill:var(--hill2)"/>
         <g style="fill:var(--ftree)"><circle cx="402" cy="206" r="17"/><circle cx="474" cy="214" r="14"/><circle cx="566" cy="206" r="18"/><circle cx="640" cy="213" r="15"/><circle cx="702" cy="204" r="19"/></g>
         <path d="M360 246 Q450 240 540 252 T720 244 V560 H360Z" fill="url(#g-grass)"/>
-        <g fill="none" stroke="var(--paving)" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M360 332 C392 336 404 372 436 400" stroke-width="36"/>
-          <path d="M440 340 L440 398" stroke-width="30"/><path d="M542 340 L542 372" stroke-width="30"/><path d="M652 340 L652 384" stroke-width="30"/>
-          <ellipse cx="548" cy="440" rx="148" ry="64" stroke-width="34"/>
+        <g class="path-surface" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <g stroke="#6f5b45" opacity=".25">
+            <path d="M360 332 C392 336 404 372 436 400" stroke-width="42"/>
+            <path d="M440 340 L440 398" stroke-width="36"/><path d="M542 340 L542 372" stroke-width="36"/><path d="M652 340 L652 384" stroke-width="36"/>
+            <ellipse cx="548" cy="440" rx="148" ry="64" stroke-width="40"/>
+          </g>
+          <g stroke="url(#plaza-pathstone)">
+            <path d="M360 332 C392 336 404 372 436 400" stroke-width="36"/>
+            <path d="M440 340 L440 398" stroke-width="30"/><path d="M542 340 L542 372" stroke-width="30"/><path d="M652 340 L652 384" stroke-width="30"/>
+            <ellipse cx="548" cy="440" rx="148" ry="64" stroke-width="34"/>
+          </g>
         </g>
         <ellipse cx="548" cy="440" rx="130" ry="50" fill="none" stroke="#ffb3a3" stroke-width="4" stroke-dasharray="1 10" stroke-linecap="round" opacity=".9"/>
         <g style="opacity:var(--fl,1)">
@@ -1561,7 +1583,7 @@ const viewport = document.getElementById('viewport');
 function parkHello() {   // ゲートを くぐると「まるふわパーク」と 1行（1回だけ・3びょう）
   own.parkHello = 1; saveOwn(); const el = document.getElementById('park-sign'); if (!el) return; el.hidden = false; setTimeout(() => { el.hidden = true; }, 3000);
 }
-function syncVW() { const w = viewport.clientWidth, h = viewport.clientHeight; if (w > 0 && h > 0) VW = Math.min(W, H * w / h); const pct = (W / VW * 100).toFixed(3) + '%'; if (scene.style.width !== pct) scene.style.width = pct; const wu = (w / VW).toFixed(3) + 'px'; if (wu !== wuKey) { wuKey = wu; scene.style.setProperty('--wu', wu); } }
+function syncVW() { const w = viewport.clientWidth, h = viewport.clientHeight; if (w > 0 && h > 0) VW = Math.min(W, H * w / h); const pct = (W / VW * 100).toFixed(3) + '%'; if (scene.style.width !== pct) scene.style.width = pct; const wu = (w / VW).toFixed(3) + 'px'; if (wu !== wuKey) { wuKey = wu; scene.style.setProperty('--wu', wu); scene.style.setProperty('--u', (w / VW).toFixed(3)); } }
 let wuKey = '';   // 世界の はばを 窓に あわせる（PC＝100%＝ぜんぶ 見える／スマホ＝200%）
 function applyCam() { syncVW(); scene.style.transform = 'translate3d(' + (-cam * (viewport.clientWidth / VW)).toFixed(2) + 'px,0,0)'; }
 function camTick(dt, snap) { camTarget = clamp(player.x - VW / 2, 0, W - VW); if (snap || reduce() || Math.abs(camTarget - cam) < .05) cam = camTarget; else cam += (camTarget - cam) * Math.min(1, dt * 4.5); applyCam(); }
@@ -1793,7 +1815,11 @@ function positionCare() {
     const f = byId(b.dataset.id); if (!f) { b.hidden = true; return; }
     b.hidden = f.talking > 0 || f.state === 'leave';   // はなして いる あいだは ふきだしと かさならない よう かくす
     const s = scaleOf(f); b.style.left = (f.x / W * 100).toFixed(3) + '%'; b.style.top = ((f.y - f.h * s - 2) / H * 100).toFixed(3) + '%';
+    b._wx = f.x; b._wy = f.y - f.h * s - 2;
   });
+  // しるしどうしが かさならない ように、ひだり→みぎに ならべて ちかい ものを よこへ ずらす（さわる はんいは 44px のまま・せかい ざひょうで 44px ぶん）
+  { const sc = $('scene'), k = sc && sc.getBoundingClientRect().width ? sc.getBoundingClientRect().width / W : 1, wd = 46 / k, sorted = [...box.querySelectorAll('.care-ico')].filter(b => !b.hidden && b._wx !== undefined).sort((a, b) => a._wx - b._wx), placed = [];
+    sorted.forEach(b => { let x = b._wx; for (let i = 0; i < 8; i++) { const hit = placed.find(p => Math.abs(p.x - x) < wd && Math.abs(p.y - b._wy) < wd); if (!hit) break; x = hit.x + wd; } x = Math.min(x, W - wd / 2); placed.push({ x, y: b._wy }); b.style.left = (x / W * 100).toFixed(3) + '%'; }); }
 }
 function giveCare(f, quiet) {   // 世話を する（しるしを さわる／「なかま」の がめんの ボタン）：きろくは その 日 1かい・へらす ものは ない
   const nd = f && careNeedOf(f.id); if (!nd) return false;

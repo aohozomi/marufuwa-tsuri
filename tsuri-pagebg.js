@@ -20,6 +20,7 @@
   function apply() {
     var my = ++tok, night = timeKey() === 'n', narrow = (window.innerWidth || 1000) < 600, list = [], names = night ? ['yoru', 'hiru'] : ['hiru'];
     names.forEach(function (nm) { if (narrow || opt.tate) list.push({ url: BASE + 'img/bg/' + id + '_' + nm + '_tate.webp', night: night && nm === 'hiru' }); if (!opt.tate) list.push({ url: BASE + 'img/bg/' + id + '_' + nm + '.webp', night: night && nm === 'hiru' }); });
+    if (opt.fb) list = [];   // fb：絵を さがさず かりの 背景（そら・おか・ほし）だけ しく（天の 絵が ほぼ 無地の ページ・絵の ない ページ用・10/5 見た目巡回）
     tryLoad(list, 0, function (hit) {
       if (my !== tok) return;
       var st = document.getElementById('pagebg-style'); if (!st) { st = document.createElement('style'); st.id = 'pagebg-style'; document.head.append(st); }
