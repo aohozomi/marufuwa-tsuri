@@ -1025,7 +1025,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="sleep" type="button">おやすみタイマー：なし</button>
     <button id="fullscreen" type="button">ぜんがめん</button>
   </div>
-  <a class="pill plaza plaza-big" id="plaza-go" href="hiroba/">ひろば（あそびば・おみせ）</a>
+  <a class="pill plaza plaza-big" id="plaza-go" href="hiroba/">ひろば（おへや・水槽・おみせ）</a>
   <p id="status" role="status" aria-live="polite">「なげる」を おしてね。</p>
   <p id="today" class="note today" hidden></p>
   <p id="nosave" class="note" role="status" style="font-weight:800" hidden></p>
@@ -1971,7 +1971,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       b.addEventListener('click', () => { const open = !document.body.classList.contains('howto-open'); document.body.classList.toggle('howto-open', open); row.dataset.howto = open ? 'open' : ''; drawHowto(); }); drawHowto(); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mk); else mk(); addEventListener('load', () => { mk(); drawHowto(); }); setTimeout(drawHowto, 900); }   // おと・BGM・とおく・ながめる・おやすみ・つかいやすく する を 1つの「あそびかた」に まとめる（ふだんは かくす）
   addEventListener('load', () => { try { drawShoreLabel(); } catch {} }); setTimeout(() => { try { drawShoreLabel(); } catch {} }, 900);
-  { const pg = () => { const a = $('plaza-go'); if (a) a.textContent = L('ひろば（あそびば・おみせ）', 'Plaza (games & shop)'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pg); else pg(); addEventListener('load', pg); setTimeout(pg, 900); }
+  { const pg = () => { const a = $('plaza-go'); if (a) a.textContent = L('ひろば（おへや・水槽・おみせ）', 'Plaza (Room, Aquarium & Shops)'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pg); else pg(); addEventListener('load', pg); setTimeout(pg, 900); }
   const bgmWaiting = () => { try { return !!(window.TsuriBgm && TsuriBgm.on() && !TsuriBgm.state().playing); } catch { return false; } };
   const audioLocked = () => !!save.sound && (!(audio && audio.state === 'running') || bgmWaiting());   // ならして くれない（ブラウザ）か、BGM が まだ はじまって いない あいだは「ON」と ひょうじ しない   // おとは ON だが ブラウザが まだ ならして くれない（さわる まえ）
   function drawMute() { const b = $('mute-top'); if (!b) return; const on = !!save.sound, lock = audioLocked(); b.setAttribute('aria-pressed', String(on)); b.dataset.locked = String(lock);
@@ -2139,7 +2139,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, precise = false, periodBase = 1100, period = 1600, ringStart = 0, reelStartAt = 0, perfectStreak = 0, pStreak = 0, charge = 0, lastCyc = -1, pressCyc = -9, fightBest = 0, tameCnt = 0, slips = 0, tension = 0, tensionAt = 0, closeStreak = 0, tStage = 0, escapeRun = 0, escapeHinted = false, lockTimer = 0, waitNoted = false, kickUntil = 0, kickPower = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
-  function setPhase(next) { if (next !== phase) rodPose(next); phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; try { drawSeatLine(); } catch {} try { bustleDraw(); } catch {} { const ph = $('push-hint'); if (ph) { ph.hidden = !(reduce() && button.dataset.pulse === 'true'); if (!ph.hidden) ph.textContent = L('ここを おして', 'Press here'); } } $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { if (next !== phase) rodPose(next); if (next !== 'waiting' && next !== 'bite') orbitStop(false); phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; try { drawSeatLine(); } catch {} try { bustleDraw(); } catch {} { const ph = $('push-hint'); if (ph) { ph.hidden = !(reduce() && button.dataset.pulse === 'true'); if (!ph.hidden) ph.textContent = L('ここを おして', 'Press here'); } } $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
@@ -2294,7 +2294,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     plannedBase = rollSize();   // 影の おおきさ＝これから つれる 実寸（つった あとの サイズと おなじ）
     shadow.style.setProperty('--w', Math.min(34, shadowW(plannedBase) * (nushi || fish.legend ? 1.35 : 1)) + '%');
     shadow.style.setProperty('--swim', '0s'); place(shadow, {x: 112, y: Math.min(95, w.y + 9)}); void shadow.offsetWidth;
-    shadow.style.setProperty('--swim', reduce() ? '0s' : wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)});   // うごきを へらす では かげは うごかない（ウキの そばに すぐ）
+    if (!reduce() && curMode() !== 'easy' && wait >= 5000 && save.total > 0) orbitStart(wait);   // 2〜3びきの 魚影が ウキの まわりを おなじ 速さで まわる（どれが 本命か わからない）
+    else { shadow.style.setProperty('--swim', reduce() ? '0s' : wait + 'ms'); place(shadow, {x: w.x + 4, y: Math.min(95, w.y + 4)}); }   // うごきを へらす・らくちん・みじかい まち は これまでどおり（影は まっすぐ よる）
     // かかる まえの「ちょんちょん」。ウキが ちいさく ゆれて、もうすぐ くると わかる
     const nibN = curMode() === 'easy' ? 1 : save.total >= 5 ? 3 : 2, nibGap = 950, nib = k => { if (phase !== 'waiting') return; const fl = $('float'); delete fl.dataset.nibble; void fl.offsetWidth; fl.dataset.nibble = 'true'; SFX.nibble(); if (k === 1) say('ちょん、ちょん…。なにか いる。'); if (k < nibN) nibbleTimer = setTimeout(() => nib(k + 1), nibGap); };
     nibbleTimer = curMode() === 'hard' ? 0 : setTimeout(() => nib(1), Math.max(flight ? flight + 150 : 0, wait - (nibN - 1) * nibGap - 750));   // ウキが ちょん…ちょん…（2〜3かい。らくちんは 1かい）→ そのあと ほんアタリ「！」
@@ -2320,8 +2321,66 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       plop.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -18px'}], {duration: 800}).onfinish = () => plop.remove();
     };
   }
+  // ─── アタリ前の「寄り」（10/5）：ウキの まわりを 2〜3びきが おなじ 速さで ゆっくり まわる。どれが 本命か 見た目では わからない ───
+  //   ・ぜんいん おなじ 軌道：角度は おなじ 角速度 ω・ウキまでの 距離 r(t)＝Rmin〜Rmax の 波（周期 P・形は おなじ・位相だけ ちがう）→ 速さの 分布が おなじ。
+  //   ・本命(#shadow)は 距離が さいしょに 最小（ウキの 下）に なる 時刻が「まちじかんの おわり」＝アタリ。ダミーは それより まえの べつの 時刻に 最小（ウキを かすめる）。
+  //   ・ダミーの つつき：最小の 時刻に ある 確率で「ぴくっ＋小さな 波紋」→ そのまま はなれる（なにも おきない）。まちじかん・アタリの 確率は かえない。
+  //   ・本命の 色（めずらしさ）は アタリの しゅんかんまで ひみつ（ダミーと おなじ 見た目）。大きさ＝実際の 大きさ は そのまま。
+  const ORB = {on: false, raf: 0, t0: 0, wait: 0, P: 6400, W: 11000, items: [], timers: [], real: null, plan: null, pokes: 0, log: []};
+  function orbitPlan(wait) {   // 計画（純粋に wait から きまる：検査から も よべる）
+    const P = ORB.P, nd = Math.random() < .5 ? 2 : 1, tmins = [wait];   // [0]＝本命
+    const offs = nd === 2 ? [.32 + Math.random() * .1, .66 + Math.random() * .1] : [.45 + Math.random() * .15];
+    offs.forEach(o => tmins.push(wait - P * o));
+    const pokes = []; let lastAt = -1e9;
+    tmins.forEach((tm, who) => {
+      for (let k = who === 0 ? 1 : 0; ; k++) { const m = tm - k * P; if (m < 2600) break; if (m > wait - 2600) continue;   // さいしょの 2.6びょう と おわりの 2.6びょうは つつかない（本命の「ちょん→ぐい」を じゃましない）
+        if (Math.random() < (who === 0 ? .5 : .65) && m - lastAt > 1300 && pokes.length < 3) { pokes.push({t: m, who}); lastAt = m; } }
+    });
+    pokes.sort((a, b) => a.t - b.t);
+    return {P, tmins, pokes, nd};
+  }
+  function orbitStart(wait) {
+    orbitStop(false); const shadow = $('shadow'), w = floatAt(mine), plan = orbitPlan(wait); ORB.plan = plan; ORB.wait = wait; ORB.pokes = 0; ORB.log = [];
+    const cx = w.x + 4, cy = Math.min(95, w.y + 4), box = scene.getBoundingClientRect(), Rmax = 15, ky = box.width / box.height * .55;   // Rmax＝よこ 15%・たては つぶして 遠近
+    ORB.real = {rare: shadow.dataset.rare, nushi: shadow.dataset.nushi}; shadow.dataset.rare = '1'; shadow.dataset.nushi = 'false';   // 本命の 色は アタリまで ひみつ
+    shadow.style.setProperty('--swim', '0s'); shadow.style.opacity = '0'; shadow.style.transition = 'opacity .8s';
+    const pool = poolOf(save.area).filter(f => !f.legend && !f.ext), items = [{el: shadow, who: 0, th0: Math.random() * 6.28, y0: cy - 6}];
+    for (let i = 1; i <= plan.nd; i++) {
+      const f = pool.length ? pool[Math.floor(Math.random() * pool.length)] : FISH[3], el = document.createElement('div'), wd = Math.min(34, shadowW(f.min + (f.max - f.min) * Math.pow(Math.random(), 1.8)));
+      el.className = 'shadow decoy'; el.setAttribute('aria-hidden', 'true'); el.dataset.rare = '1'; el.dataset.nushi = 'false'; el.style.setProperty('--w', wd + '%'); el.style.opacity = '0'; el.style.transition = 'opacity .8s'; el.style.visibility = 'visible';
+      if (ART && ART.shadow && ART.shadowMask && ART.shadow[f.id]) { el.classList.add('art'); el.style.setProperty('--m', ART.shadowMask(f.id)); el.style.setProperty('--ar', String((ART.meta && ART.meta.shadowAspect && ART.meta.shadowAspect[f.id]) || 2.4)); el.style.aspectRatio = 'var(--ar,2.4)'; if (!el.style.getPropertyValue('--ar')) el.style.setProperty('--ar', '2.4'); }
+      el.style.left = '112%'; el.style.top = (cy + (i - 1) * 9) + '%'; scene.insertBefore(el, shadow); items.push({el, who: i, th0: Math.random() * 6.28, y0: cy + (i % 2 ? 9 : -9)});
+    }
+    items.forEach(it => { it.px = null; it.py = null; it.tm = plan.tmins[it.who]; });
+    ORB.items = items; ORB.on = true; ORB.t0 = performance.now(); ORB.dbg = {cx, cy, ky, Rmax, wait, tm: items.map(it => it.tm)};
+    requestAnimationFrame(() => items.forEach(it => { it.el.style.opacity = it.who ? '.72' : ''; if (!it.who) it.el.style.opacity = '1'; }));
+    const step = now => {
+      if (!ORB.on) return; const t = now - ORB.t0, e = Math.min(1, t / 2400), ease = e * e * (3 - 2 * e);
+      items.forEach(it => {
+        const r = (.6 + 14.4 * (.5 - .5 * Math.cos(2 * Math.PI * (t - it.tm) / ORB.P))) / 15 * Rmax, th = it.th0 + 2 * Math.PI * t / ORB.W;   // r：0.6〜15（%）・おなじ 形
+        const ox = cx + r * Math.cos(th), oy = cy + r * Math.sin(th) * ky, x = 112 * (1 - ease) + ox * ease, y = it.y0 * (1 - ease) + oy * ease;
+        const vx = it.px === null ? -1 : x - it.px; it.el.style.left = x.toFixed(2) + '%'; it.el.style.top = Math.min(95, y).toFixed(2) + '%'; it.el.style.transform = 'translate(-50%,-50%) scaleX(' + (vx > .0005 ? -1 : 1) + ')';   /* 向き（個別の scale は translate の あとに かかり ずれる ので transform で） */
+        if (it.px !== null && ORB.log.length < 4000 && query.get('orbitlog')) ORB.log.push([it.who, Math.round(t), +x.toFixed(3), +y.toFixed(3)]);
+        it.px = x; it.py = y;
+      });
+      ORB.raf = requestAnimationFrame(step);
+    };
+    ORB.raf = requestAnimationFrame(step);
+    plan.pokes.forEach(pk => ORB.timers.push(setTimeout(() => { if (!ORB.on || phase !== 'waiting') return; ORB.pokes++; poke(); }, pk.t)));
+  }
+  function poke() {   // ダミーが ウキを つつく：ぴくっ＋ちいさな 波紋（なにも おきずに はなれる）
+    const fl = $('float'); delete fl.dataset.nibble; void fl.offsetWidth; fl.dataset.nibble = 'true'; setTimeout(() => { if (phase === 'waiting') delete fl.dataset.nibble; }, 700); SFX.nibble();
+    if (reduce()) return; const w2 = floatAt(mine), r = document.createElement('i'); r.className = 'ripple'; r.setAttribute('aria-hidden', 'true'); place(r, {x: w2.x, y: w2.y + 1}); scene.append(r); r.animate([{scale: '.2', opacity: .8}, {scale: '1.0', opacity: 0}], {duration: 1100, easing: 'ease-out'}).onfinish = () => r.remove();
+  }
+  function orbitStop(toBite) {
+    if (!ORB.on && !ORB.items.length) return; ORB.on = false; cancelAnimationFrame(ORB.raf); ORB.timers.forEach(clearTimeout); ORB.timers = [];
+    const shadow = $('shadow'); ORB.items.forEach(it => { if (it.who) { const el = it.el; el.style.opacity = '0'; setTimeout(() => el.remove(), 700); } });
+    if (ORB.real) { shadow.dataset.rare = ORB.real.rare; shadow.dataset.nushi = ORB.real.nushi; ORB.real = null; }   // 本命の 色は ここで はじめて 見える
+    shadow.style.transform = ''; shadow.style.opacity = ''; shadow.style.transition = ''; ORB.items = [];
+  }
+  window.__orbit = {dbg: () => ORB.dbg, plan: orbitPlan, pokes: () => ORB.pokes, on: () => ORB.on, n: () => ORB.items.length, P: ORB.P, W: ORB.W};   // 検査用
   function bite() {
-    flying = false; SFX.bite(); buzz([120, 80, 120]);   // ピピッ、ピーン
+    flying = false; orbitStop(true); SFX.bite(); buzz([120, 80, 120]);   // ピピッ、ピーン
     setPhase('bite');
     button.textContent = 'ひく！'; lock(false); button.dataset.hot = 'true';
     say((fish.legend ? 'にじいろに ひかる かげ…。なんだ？' : nushi ? 'おおきな かげ…。ぬしか？' : fish.rare === 4 ? 'きんいろの かげ…。とくべつな いっぴきか？' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
