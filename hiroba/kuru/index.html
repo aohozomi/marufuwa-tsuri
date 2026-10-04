@@ -50,6 +50,38 @@ h1{margin:8px 0 0;font-size:1.4rem;line-height:1.4;text-align:center}
 @keyframes lamp{from{opacity:.55}to{opacity:1}}
 .cab.yokan .lamp{animation-duration:1.3s}   /* よかん：ふわっと はやく（1.3びょうで 1かい＝ 3回/秒 みまん） */
 .win-l .lamp{opacity:1}
+/* 液晶（リールの 上）：まるふわの いろんな えを うつす。そろいそう＝あつい え／そろった＝よろこぶ え */
+.lcd{position:relative;margin:0 0 10px;height:128px;border-radius:14px;overflow:hidden;background:#0c141b;border:3px solid #2a1a10;box-shadow:inset 0 0 0 2px #66798a,inset 0 0 16px #000,0 0 0 1px var(--gold2)}
+.lcd .sc{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 10px 0 8px;opacity:0;transition:opacity .7s;pointer-events:none;overflow:hidden}
+.lcd .sc.on{opacity:1}
+.lcd .sc>img{position:relative;height:118%;width:auto;max-width:44%;object-fit:contain;align-self:flex-end;margin-bottom:-6px;filter:drop-shadow(0 3px 4px #0006)}
+.lcd .sc.full>img{position:absolute;inset:0;width:100%;height:100%;max-width:none;margin:0;object-fit:cover;filter:none}
+.lcd .cap{position:relative;flex:1;text-align:center;font-weight:900;font-size:1.06rem;line-height:1.35;color:#fff;text-shadow:0 2px 0 #0007,0 0 10px #0009;padding:2px 4px}
+.lcd .scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0,#0000 2px,#0000001f 3px);mix-blend-mode:multiply}
+.lcd .shine{position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,#fff3 0,#fff0 30%)}
+.lcd[data-mood=idle] .sc{background:linear-gradient(160deg,#bfe4f5,#fdf0d8)}
+.lcd[data-mood=spin] .sc{background:linear-gradient(160deg,#cdeeda,#f6f3c8)}
+.lcd[data-mood=idle] .cap,.lcd[data-mood=spin] .cap{color:#3b2a1a;text-shadow:0 1px 0 #fff9}
+.lcd[data-mood=yokan] .sc{background:radial-gradient(circle at 30% 60%,#ff9a3c,#c4361a 55%,#4a0f0f)}
+.lcd[data-mood=yokan] .sc.on:before{content:"";position:absolute;inset:-60%;background:repeating-conic-gradient(#ffe08a30 0 7deg,#0000 7deg 20deg);animation:lcdspin 14s linear infinite}
+.lcd[data-mood=yokan] .sc.on>img{animation:lcdpulse 1.6s ease-in-out infinite}
+.lcd[data-mood=near] .sc{background:linear-gradient(160deg,#ffd9b8,#ffe9d0)}
+.lcd[data-mood=near] .cap{color:#5a2f14;text-shadow:0 1px 0 #fff9}
+.lcd[data-mood=win] .sc{background:radial-gradient(circle at 50% 55%,#fff6b8,#ffcf5c 55%,#e08a2a)}
+.lcd[data-mood=win] .cap{color:#7a2a10;text-shadow:0 2px 0 #fff9;font-size:1.2rem}
+.lcd[data-mood=win] .sc.on:before{content:"";position:absolute;inset:-60%;background:repeating-conic-gradient(#ffffff55 0 6deg,#0000 6deg 16deg);animation:lcdspin 18s linear infinite}
+.lcd[data-mood=win] .sc.on>img{animation:lcdhop 1.5s ease-in-out infinite}
+.lcd[data-mood=none] .sc{background:linear-gradient(160deg,#dcd6f2,#f3ecf8)}
+.lcd[data-mood=none] .cap{color:#3d3560;text-shadow:0 1px 0 #fff9}
+.lcd .conf{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.lcd .conf i{position:absolute;top:-10px;width:7px;height:11px;border-radius:2px;animation:lcdfall 3.2s linear infinite}
+@keyframes lcdspin{to{transform:rotate(360deg)}}
+@keyframes lcdpulse{50%{transform:scale(1.05)}}
+@keyframes lcdhop{50%{transform:translateY(-5px)}}
+@keyframes lcdfall{to{transform:translateY(150px) rotate(300deg)}}
+@media(prefers-reduced-motion:reduce){.lcd .sc{transition:none}.lcd .sc:before,.lcd .sc>img,.lcd .conf i{animation:none!important}}
+:root[data-calm=true] .lcd .sc{transition:none}
+:root[data-calm=true] .lcd .sc:before,:root[data-calm=true] .lcd .sc>img,:root[data-calm=true] .lcd .conf i{animation:none!important}
 .window{cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;position:relative;padding:8px;border-radius:18px;background:#1b110b;border:3px solid var(--gold2);box-shadow:inset 0 0 14px #000}
 .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .reels canvas{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:10px;background:var(--glass)}
@@ -103,6 +135,7 @@ h1{margin:8px 0 0;font-size:1.4rem;line-height:1.4;text-align:center}
   <p class="lead" id="lead">ればを ひいて、まどを タップして とめよう。</p>
   <div class="cab" id="cab">
     <div class="marq" aria-hidden="true"><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span></div>
+    <div class="lcd" id="lcd" data-mood="idle" aria-hidden="true"><div class="scan"></div><div class="shine"></div></div>
     <div class="window" id="win">
       <div class="reels"><canvas id="r0" aria-hidden="true"></canvas><canvas id="r1" aria-hidden="true"></canvas><canvas id="r2" aria-hidden="true"></canvas></div>
       <div class="payline" aria-hidden="true"></div>
@@ -144,6 +177,30 @@ const KURU_SYM = [
   { id: 'cake',    ja: 'ケーキ',     en: 'cake',      rj: 'ケーキの シール',     re: 'cake sticker',       k: 'シール', ke: 'sticker' },
   { id: 'cookie',  ja: 'クッキー',   en: 'cookie',    rj: 'クッキーの シール',   re: 'cookie sticker',     k: 'シール', ke: 'sticker' }
 ];
+const KURU_LCD = {   // 液晶の えと ひとこと。f＝えの ばしょ（img/kuru/lcd_<id>.webp が とどけば 画面いっぱいの え に さしかえる＝天）
+  idle: [
+    { id: 'idle1', f: 'img/game-smile.webp', ja: 'きょうも ふわふわ。', en: 'Fluffy again today.' },
+    { id: 'idle2', f: 'img/pose/c/marufuwa_mate.png', ja: 'のんびり まってるよ', en: 'Taking it easy.' },
+    { id: 'idle3', f: 'img/game-blue.webp', ja: 'ればを ひいてみよう！', en: 'Pull the lever!' },
+    { id: 'idle4', f: 'img/pose/c/marufuwa_nage.png', ja: 'えいっ！', en: 'Here goes!' },
+    { id: 'idle5', f: 'img/game-mint.webp', ja: 'いい てんき だね', en: 'Nice weather.' }
+  ],
+  spin: [
+    { id: 'spin1', f: 'img/pose/c/marufuwa_hiki.png', ja: 'ぐるぐる まわれ〜', en: 'Spin, spin, spin!' },
+    { id: 'spin2', f: 'img/game-apricot.webp', ja: 'どきどき…', en: 'Heart pounding…' },
+    { id: 'spin3', f: 'img/pose/c/marufuwa_nage.png', ja: 'なにが でるかな？', en: 'What will it be?' }
+  ],
+  yokan: [
+    { id: 'yokan1', f: 'img/pose/c/marufuwa_hiki.png', ja: 'あつい…！\nいけるかも！', en: 'Hot…!\nMaybe!' },
+    { id: 'yokan2', f: 'img/game-sparkle.webp', ja: 'きた きた きた…！', en: 'Here it comes…!' }
+  ],
+  near: [ { id: 'near1', f: 'img/game-apricot.webp', ja: 'おしい！\nもうすこし！', en: 'So close!\nA little more!' } ],
+  win: [
+    { id: 'win1', f: 'img/pose/c/marufuwa_age.png', ja: 'そろった〜！\nやったー！', en: 'Lined up!\nYay!' },
+    { id: 'win2', f: 'img/game-sparkle.webp', ja: 'だいせいこう！', en: 'Big success!' }
+  ],
+  none: [ { id: 'none1', f: 'img/game-mint.webp', ja: 'つぎは\nきっと だいじょうぶ', en: 'Next time,\nfor sure.' } ]
+};
 const KURU_SIDE = ['ひだり', 'まんなか', 'みぎ'], KURU_SIDE_EN = ['Left', 'Middle', 'Right'];
 const KURU_MSG = {
   idle: 'ればを ひいて はじめよう。',
@@ -176,6 +233,7 @@ const KURU_MSG = {
     'idle': 'Pull the lever to begin.', 'spin': 'Tap the window to stop them one by one, from the left.', 'yokan': 'Oh…? They might line up.',
     'win': 'They lined up! A soft, pretty glow.', 'near': 'So close, two lined up.', 'none': 'They did not line up. Take your time.', 'easy': 'Slow spinning. They stop by themselves, so just wait.'
   })[k]; });
+  Object.values(KURU_LCD).flat().forEach(e => { EX[e.ja] = e.en; e.ja.split('\n').forEach((t, k) => { EX[t] = e.en.split('\n')[k] || e.en; }); });
   KURU_SYM.forEach(s => {
     KURU_SIDE.forEach((side, i) => { EX[side + 'が とまったよ：' + s.ja] = KURU_SIDE_EN[i] + ' stopped: ' + s.en; });
     EX['「' + s.rj + '」を みつけたよ'] = 'You found a “' + s.re + '”';
@@ -262,6 +320,28 @@ document.addEventListener('DOMContentLoaded', () => {
     else loadImg(FILES[s.id], im => { sprites[s.id] = im; dirty(); });
     loadImg('img/kuru/sym_' + s.id + '.webp', im => { sprites[s.id] = im; dirty(); });   // 天の えが とどけば それを つかう
   });
+
+  // ─── 液晶（リールの うえ）：ばめんに あわせて まるふわの えを かえる ───
+  const lcd = $('lcd'), lcdIdx = {}; let lcdMood = '', lcdTimer = 0;
+  const bigOk = {};   // 天の 全面の え（img/kuru/lcd_<id>.webp）が あるか（あれば それを つかう）
+  const probe = id => { if (id in bigOk) return; bigOk[id] = false; const b = new Image(); b.referrerPolicy = 'no-referrer'; b.onload = () => { if (b.naturalWidth >= 200) bigOk[id] = b.src; }; b.src = '../../img/kuru/lcd_' + id + '.webp'; };
+  Object.values(KURU_LCD).flat().forEach(e => probe(e.id));
+  function confetti(sc) { const w = document.createElement('div'); w.className = 'conf'; const cols = ['#ff7a9a', '#ffd34d', '#6fd0ff', '#8be39a', '#fff']; for (let i = 0; i < 14; i++) { const k = document.createElement('i'); k.style.left = (4 + i * 7 + (i % 3) * 2) + '%'; k.style.background = cols[i % cols.length]; k.style.animationDelay = (-(i * .23) % 3.2) + 's'; w.append(k); } sc.append(w); }
+  function setLcd(mood, force) {
+    const list = KURU_LCD[mood]; if (!list || !lcd) return;
+    if (mood === lcdMood && !force && list.length < 2) return;
+    const i = lcdIdx[mood] = ((lcdIdx[mood] === undefined ? Math.floor(Math.random() * list.length) - 1 : lcdIdx[mood]) + 1) % list.length;
+    const e = list[i], sc = document.createElement('div'); sc.className = 'sc';
+    const im = new Image(); im.alt = ''; im.referrerPolicy = 'no-referrer'; im.decoding = 'async';
+    if (bigOk[e.id]) { im.src = bigOk[e.id]; sc.classList.add('full'); } else im.src = '../../' + e.f;
+    const cap = document.createElement('div'); cap.className = 'cap';
+    String(window.TsuriEn && window.TsuriEn.lang === 'en' ? e.en : e.ja).split('\n').forEach((t, k) => { if (k) cap.append(document.createElement('br')); cap.append(document.createTextNode(t)); });
+    sc.append(im, cap); if (mood === 'win' && !calm()) confetti(sc);
+    lcd.dataset.mood = mood; lcdMood = mood; lcd.insertBefore(sc, lcd.querySelector('.scan'));
+    requestAnimationFrame(() => requestAnimationFrame(() => { sc.classList.add('on'); [...lcd.querySelectorAll('.sc')].forEach(o => { if (o !== sc) { o.classList.remove('on'); setTimeout(() => o.remove(), 900); } }); }));
+  }
+  lcdTimer = setInterval(() => { if (document.hidden) return; if (lcdMood === 'idle' || lcdMood === 'spin') setLcd(lcdMood, true); }, 4200);
+  setLcd('idle');
 
   // ─── ようす ───
   const reels = [0, 1, 2].map(i => ({ i, pos: [0, 2, 4][i], st: 'stop', v: 0, p0: 0, p1: 0, te: 0, dur: .15, seek: null, auto: null, k: 1 }));
@@ -351,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (left.length === 1) {
       const [a, b] = reels.filter(x => x.st === 'stop');
       if (a && b && centerSym(a) === centerSym(b) && !yokanOn) {   // よかん：のこりの まどが ゆっくり・ランプが ふわっと
-        yokanOn = true; cab.classList.add('yokan'); left[0].k = .45; say(KURU_MSG.yokan); sfx.yokan();
+        yokanOn = true; setLcd('yokan'); cab.classList.add('yokan'); left[0].k = .45; say(KURU_MSG.yokan); sfx.yokan();
       }
     }
   }
@@ -361,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
     stopsEl.hidden = true; lever.hidden = false;
     const ids = reels.map(centerSym), same = ids[0] === ids[1] && ids[1] === ids[2];
     const two = !same && (ids[0] === ids[1] || ids[1] === ids[2] || ids[0] === ids[2]);
+    setLcd(same ? 'win' : two ? 'near' : 'none');
     if (same) win(ids[0]); else { card.hidden = true; card.classList.remove('win'); say(two ? KURU_MSG.near : KURU_MSG.none); }
     $('hut').dataset.last = same ? 'win' : two ? 'near' : 'none';
   }
@@ -392,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
       r.st = 'spin'; r.pos = Math.random() * N; r.v = BASE[i] * slow * ez; r.k = 1; r.seek = null;
       r.auto = easy ? sim + 2.2 + i * 1.6 : null;
     });
-    sfx.lever(); say(easy ? KURU_MSG.easy : KURU_MSG.spin); live(easy ? KURU_MSG.easy : KURU_MSG.spin);
+    setLcd('spin', true); sfx.lever(); say(easy ? KURU_MSG.easy : KURU_MSG.spin); live(easy ? KURU_MSG.easy : KURU_MSG.spin);
     $('hut').dataset.last = '';
     last = 0; dirty();
   }
@@ -426,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.__kuru = {
     pos: i => reels[i].pos, sym: i => centerSym(reels[i]), symAt: (i, c) => STRIP[i][idx(c)], state: i => reels[i].st, phase: () => phase, easy: () => easy, strip: STRIP,
     sprites: () => Object.fromEntries(Object.entries(sprites).map(([k, v]) => [k, v instanceof HTMLImageElement ? 'img' : (v.width > SZ ? 'canvas-crop' : 'canvas')])),
-    speed: i => reels[i].v * reels[i].k
+    speed: i => reels[i].v * reels[i].k, lcd: () => ({ mood: lcdMood, scenes: [...lcd.querySelectorAll('.sc')].map(x => ({ on: x.classList.contains('on'), full: x.classList.contains('full'), cap: x.querySelector('.cap').textContent, img: (x.querySelector('img') || {}).src })) })
   };
 });
 </script>

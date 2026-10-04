@@ -3050,7 +3050,7 @@ $('tsuriba').addEventListener('click', e => {
 $('close-tsuriba').addEventListener('click', () => { $('tsuriba').close(); narrate(S('つりばの いちらんを とじたよ。', 'You closed the fishing spots.')); });
 // ─── アプリの おうち（10/2 総司令部：「ここから さきは アプリ」）───
 //   ひろばの 左下の ちいさな 家。入ると アプリの 本物の 画面の しゃしんを ならべる（img/appie/manifest.json の [{src,alt,alt_en}]・まだ 無ければ ことばだけ）。最後に App Store への 小さな ボタン 1つ：おすと「いくよ。いい？」→「いく」で はじめて 外の アドレスを つける（それまで ページの 中に 外への リンクは 無い）。入らなくても なにも かわらない・点滅なし
-const APPSTORE_URL = 'https://apps.apple.com/app/apple-store/id6816003504?pt=129401810&ct=web_heya&mt=8';
+const APPSTORE_URL = 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=web_heya&mt=8';
 let appieLoaded = false;
 async function loadAppieShots() {
   if (appieLoaded) return; appieLoaded = true;

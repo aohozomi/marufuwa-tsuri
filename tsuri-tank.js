@@ -1194,7 +1194,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   const miroBtn = $(dlg, '.tk-miro');
   if (miroBtn) miroBtn.addEventListener('click', () => { if (visit) return; say('まるいろへ いくよ。', true); sr.textContent = 'まるいろへ いくよ。'; setTimeout(() => { location.href = new URL(BASE + 'maruiro/index.html', location.href).href; }, 350); });
   // アプリばん まるふわ まるいろ への 入口（そとへ ひらく：「いいですか？」→ひらく。https の App Store だけ・新しい タブ・rel=noopener）。iPhone いがいは うすく「iPhone で あそべるよ」
-  const APP_URL = 'https://apps.apple.com/app/apple-store/id6816003504?pt=129401810&ct=web_heya&mt=8';
+  const APP_URL = 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=web_heya&mt=8';
   const appBtn = $(dlg, '.tk-app'), appC = $(dlg, '.tk-appc');
   const isIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent || '') || (/Macintosh/.test(navigator.userAgent || '') && (navigator.maxTouchPoints || 0) > 1);
   function renderApp() { const on = isIos(); appBtn.classList.toggle('tk-app-off', !on); const sm = appBtn.querySelector('small'); if (sm) sm.textContent = on ? 'タッチで ひらく' : 'iPhone で あそべるよ'; appC.hidden = true; appBtn.setAttribute('aria-expanded', 'false'); }
