@@ -1688,7 +1688,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const low = ctx.createBiquadFilter(), soft = ctx.createWaveShaper(), curve = new Float32Array(2049);
     for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh(i / 1024 - 1);
     low.type = 'lowpass'; low.frequency.value = 1200; low.Q.value = .5; soft.curve = curve;   // 1.2kHz より うえを きる
-    if (ctx.createDynamicsCompressor) { const comp = ctx.createDynamicsCompressor(), post = ctx.createGain(); comp.threshold.value = -24; comp.ratio.value = 6; comp.knee.value = 6; comp.attack.value = .005; comp.release.value = .2; post.gain.value = .35;   // かさなっても ピークが でない（じどうの おおきく なる ぶん −5dB で ちょうせい）
+    if (ctx.createDynamicsCompressor) { const comp = ctx.createDynamicsCompressor(), post = ctx.createGain(); comp.threshold.value = -24; comp.ratio.value = 6; comp.knee.value = 6; comp.attack.value = .005; comp.release.value = .2; post.gain.value = .40;   // かさなっても ピークが でない（じどうの おおきく なる ぶん −5dB で ちょうせい）
       low.connect(comp); comp.connect(post); post.connect(soft); soft.connect(ctx.destination); bus = {ctx, in: low, low, soft, post}; if (probe('sfxmeter')) { const an = ctx.createAnalyser(); an.fftSize = 1024; soft.connect(an); bus.an = an; window.__sfxPeak = 0; setInterval(() => { const d = new Float32Array(an.fftSize); an.getFloatTimeDomainData(d); for (const v of d) window.__sfxPeak = Math.max(window.__sfxPeak, Math.abs(v)); }, 15); } return low; }   // 10/1 2500→1400（三角波の 3倍音の「キン」を 出口で 切る・マスター直・総司令部）
     low.connect(soft); soft.connect(ctx.destination); bus = {ctx, in: low, low}; return low;
   }

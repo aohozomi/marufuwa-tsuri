@@ -46,6 +46,7 @@
   const FILE_DIR = (() => { try { return new URL('snd/bgm/', SELF || location.href).href; } catch { return 'snd/bgm/'; } })();
   const FILE_OF = { a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru' };   // じかんたい → ファイル（おへやは heya・ながめるは gaze）
   // 大きさ：ファイルの K重み LUFS（ffmpeg ebur128 で 測った）＝asa −23.4・hiru −23.9・yuu −23.7・yoru −23.7・heya −23.6・gaze −24.0。なみ（−28）より 6dB 下＝−34 に そろえる ゲイン（10^((−34−L)/20)）
+  const FILE_TAIL = { asa: 7.2, hiru: 2.4, yuu: 3.2, yoru: 8.4, heya: 2.4, gaze: 6.4 };   // 曲の おわりの ほぼ むおんの ながさ（実測）。つぎの ループを その ぶん はやく はじめて「ぷつっと 小さく なる すきま」を なくす
   const FILE_GAIN = { asa: .32, hiru: .313, yuu: .266, yoru: .363, heya: .35, gaze: .18 }, FILE_XF = 3, FILE_GIVEUP = 9000;
   const FILE_EXT = (() => { try { const a = document.createElement('audio'); return !a.canPlayType ? '' : a.canPlayType('audio/ogg; codecs="vorbis"') ? 'ogg' : a.canPlayType('audio/mp4; codecs="mp4a.40.2"') ? 'm4a' : ''; } catch { return ''; } })();   // iPhone など ogg が よめない ときは m4a
   const FILE_OFF = (() => { try { return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && new URLSearchParams(location.search).get('bgmfile') === '0'; } catch { return false; } })();   // 手もとの けんさ用：?bgmfile=0 で ごうせいだけ
@@ -222,24 +223,34 @@
   function rememberPos(p) { try { const o = p.els[p.els.length - 1]; if (o && o.el.currentTime > 1) lastPos[p.file] = { t: o.el.currentTime, at: Date.now() }; } catch {} }
   const QUIET_TSURI = 1;   // 10/4 どの がめんでも おなじ おおきさ（差 2dB いない）。   // つりばの 曲は ひろば・おへやの −6dB（釣りの こうかおんと あんないの おとが きこえる 大きさ）
   // BGM の でぐちは どの がめんも 1つ：ローパス→コンプレッサー（−24dB・6:1）→ぜんたいの ゲイン。かさなっても ピークが でない
-  let yieldUntil = 0;   // ほかの ウィンドウが ならして いる あいだは だまる
+  // 等電力（イコール・パワー）の フェード：つなぎめで 音量の たにが できない（直線だと まんなかで −3dB へこむ）
+  const EQN = 64, EQ_IN = Float32Array.from({ length: EQN }, (_, i) => Math.sin(Math.PI / 2 * i / (EQN - 1))), EQ_OUT = Float32Array.from({ length: EQN }, (_, i) => Math.cos(Math.PI / 2 * i / (EQN - 1)));
+  const eqCurve = (base, up) => Float32Array.from(up ? EQ_IN : EQ_OUT, v => v * base);
+  const fadeEq = (param, t, dur, from, to) => { try { param.cancelScheduledValues(t); if (to >= from) { param.setValueAtTime(0, t); param.setValueCurveAtTime(eqCurve(to, true), t, dur); } else { param.setValueAtTime(from, t); param.setValueCurveAtTime(eqCurve(from, false), t, dur); } } catch { try { param.linearRampToValueAtTime(to, t + dur); } catch {} } };
+  let yieldUntil = 0, lastComp = null, lastLim = null;   // ほかの ウィンドウが ならして いる あいだは だまる
   const buses = new WeakMap();
   function bgmBus(c) {
     let b = buses.get(c); if (b) return b;
-    try { const comp = c.createDynamicsCompressor(), out = c.createGain(); comp.threshold.value = -24; comp.knee.value = 6; comp.ratio.value = 6; comp.attack.value = .005; comp.release.value = .25; out.gain.value = .3; comp.connect(out); out.connect(c.destination); b = comp; } catch { b = c.destination; }
+    try {   // 1だんめ＝ゆるい ならし（曲の うねりを へらす：しきい −50dB・2.5:1・ゆっくり）→ゲイン→2だんめ＝ピークだけ とめる（しきい −15dBFS・12:1・はやい）
+      const lev = c.createDynamicsCompressor(), lim = c.createDynamicsCompressor(), out = c.createGain();   // ならし（ゆるい）→ゲイン→ピークどめ
+      lev.threshold.value = -50; lev.knee.value = 14; lev.ratio.value = 2; lev.attack.value = .12; lev.release.value = 1.6;
+      out.gain.value = .85;
+      lim.threshold.value = -15; lim.knee.value = 2; lim.ratio.value = 12; lim.attack.value = .004; lim.release.value = .3;
+      lev.connect(out); out.connect(lim); lim.connect(c.destination); b = lev; lastComp = lev; lastLim = lim;
+    } catch { b = c.destination; }
     buses.set(c, b); return b;
   }
   function startFilePlayer(c, key, file, scale = 1) {
     if (typeof c.createMediaElementSource !== 'function') throw new Error('no media element source');
     const g = c.createGain(), now = c.currentTime, vol = (FILE_GAIN[file] || .3) * boost * scale;
-    g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(vol, now + 1.5); g.connect(bgmBus(c));   // さいしょは ちいさく 1.5びょうで フェードイン
+    fadeEq(g.gain, now, 1.5, 0, vol); g.connect(bgmBus(c));   // さいしょは ちいさく 1.5びょうで フェードイン
     const p = { key, sig: 'file:' + file, file, ctx: c, gain: g, startPart: 0, ended: false, made: 0, els: [], looping: false, heard: false, born: Date.now(), vol };
     const abandon = why => { if (p.ended) return; p.ended = true; closeFile(p); try { g.disconnect(); } catch {} if (cur === p) cur = null; if (why === 'error' || why === 'slow') failed.add(file); if (why === 'gesture') { gestureBlock = true; wantGesture = true; return; } refresh(); };   // 'gesture'＝ゆびで さわる まで 止められた：よめない とは しない・つぎに さわった 時に もういちど（すぐには よびなおさない）
     p.abandon = abandon;
     const open = (pos, fade) => {
       const el = new Audio(), eg = c.createGain(), o = { el, eg, src: null, dead: false }, t = c.currentTime;
       el.preload = 'auto'; el.loop = false;
-      eg.gain.setValueAtTime(fade ? 0 : 1, t); if (fade) eg.gain.linearRampToValueAtTime(1, t + FILE_XF);
+      if (fade) fadeEq(eg.gain, t, FILE_XF, 0, 1); else eg.gain.setValueAtTime(1, t);
       o.src = c.createMediaElementSource(el); o.src.connect(eg); eg.connect(g);
       el.addEventListener('error', () => { if (!o.dead) abandon('error'); }, { once: true });   // よめない・ない：ごうせいに もどる
       el.addEventListener('ended', () => { if (o.dead || p.ended || p.looping || p.els[p.els.length - 1] !== o) return; p.looping = true; try { open(0, false); } catch { p.looping = false; return; } setTimeout(() => { closeEl(o); p.els = p.els.filter(x => x !== o); p.looping = false; }, 60); });   // ほけん：おわりまで きたら すぐ 0から
@@ -256,10 +267,10 @@
       const el = o.el, d = el.duration;
       if (!p.heard && el.readyState >= 3 && !el.paused && el.currentTime > 0) p.heard = true;
       if (!p.heard && Date.now() - p.born > FILE_GIVEUP) { abandon('slow'); return; }   // 9びょう たっても 鳴らない：ごうせいに もどす
-      if (p.heard && !p.looping && Number.isFinite(d) && d >= 30 && d - el.currentTime < FILE_XF + .6) {   // 長さが わかる（30びょう いじょう）ときだけ。読みこみ中の みかけの 長さで つながない
+      if (p.heard && !p.looping && Number.isFinite(d) && d >= 30 && d - el.currentTime < FILE_XF + .6 + (FILE_TAIL[file] || 0)) {   // 長さが わかる（30びょう いじょう）ときだけ。読みこみ中の みかけの 長さで つながない
          // おわりの 3びょう まえ：2つめを 0から はじめ、1つめを 3びょうで けす
         p.looping = true; const prev = o, t = c.currentTime;
-        try { prev.eg.gain.cancelScheduledValues(t); prev.eg.gain.setValueAtTime(prev.eg.gain.value, t); prev.eg.gain.linearRampToValueAtTime(0, t + FILE_XF); } catch {}
+        try { const v0 = prev.eg.gain.value; fadeEq(prev.eg.gain, t, FILE_XF, v0, 0); } catch {}
         try { open(0, true); } catch { p.looping = false; return; }
         setTimeout(() => { closeEl(prev); p.els = p.els.filter(x => x !== prev); p.looping = false; }, FILE_XF * 1000 + 300);
       }
@@ -299,7 +310,7 @@
   }
   function stopPlayer(p, sec) {
     if (!p || p.ended) return; p.ended = true;
-    try { const n = p.ctx.currentTime; p.gain.gain.cancelScheduledValues(n); p.gain.gain.setValueAtTime(p.gain.gain.value, n); p.gain.gain.linearRampToValueAtTime(0, n + sec); } catch {}
+    try { const n = p.ctx.currentTime; const v = p.gain.gain.value; fadeEq(p.gain.gain, n, sec, v, 0); } catch {}
     if (p.file) rememberPos(p);
     setTimeout(() => { if (p.file) closeFile(p); try { p.gain.disconnect(); } catch {} }, sec * 1000 + 400);
   }
@@ -419,7 +430,7 @@
       });
       subs.add(paint); paint(); b._unsub = () => subs.delete(paint); return b;
     },
-    state: () => ({ on, key: cur ? cur.key : '', playing: !!cur, file: cur && cur.file ? cur.file : '', stack: stack.map(s => s.name), ownCtx: !!ownCtx, volume: VOLUME * boost, trim: { ...TRIM, mix: MIX_TRIM }, part: cur ? cur.startPart : 0, mix: mix ? mix.slice() : null }),
+    state: () => ({ gr: lastComp ? Math.round(lastComp.reduction * 100) / 100 : 0, grLim: lastLim ? Math.round(lastLim.reduction * 100) / 100 : 0, on, key: cur ? cur.key : '', playing: !!cur, file: cur && cur.file ? cur.file : '', stack: stack.map(s => s.name), ownCtx: !!ownCtx, volume: VOLUME * boost, trim: { ...TRIM, mix: MIX_TRIM }, part: cur ? cur.startPart : 0, mix: mix ? mix.slice() : null }),
     _debug: { fileFor, FILE_GAIN, FILE_OF, FILE_EXT, FILE_DIR, failed, startFilePlayer, played: n => { const p = PARTS[n](); return { len: p.len, ev: p.ev.filter(e => PLAY_MELODY || !(e[3] && e[3].role === 'mel')) }; }, PLAY_MELODY, mixLayers, MIX_TRIM, ECHO_DELAY, partName, track, part: n => PARTS[n](), PARTS, KEYS, PART_TRIM, voice, makeAir, pickKey, tick, desired, TRIM, VOLUME, TOP_MIDI, MIN_ATTACK, LP, AIR_LP, get cur() { return cur; }, get stack() { return stack; }, get wantGesture() { return wantGesture; }, get gestureBlock() { return gestureBlock; }, get ticker() { return ticker; } }
   };
   window.TsuriBgm = api;
@@ -439,9 +450,11 @@
   };
   ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'keydown', 'click'].forEach(ev => addEventListener(ev, unlock, { passive: true, capture: true }));
   // ほかの タブ／ウィンドウで BGM が ならされたら こちらは だまる（二重に ならない・ひとつだけ）。見ている ページが 次に さわられた ときに もどる
-  let bc = null, bcMuted = 0; const bcId = Math.random().toString(36).slice(2);
+  // 調停（かんたん）：あとから ひらいた ページが なる。ふるい ページは 1びょうで フェードアウトして だまる（じゅんばんに かんけいなく 往復しない：yield するのは「あいてが あたらしい」ときだけ）
+  let bc = null; const bcId = Math.random().toString(36).slice(2), bcBorn = Date.now() + Math.random() / 1000;
   try { bc = typeof BroadcastChannel === 'function' ? new BroadcastChannel('marufuwa-bgm-owner') : null; } catch { bc = null; }
-  if (bc) { bc.onmessage = e => { const d = e && e.data; if (d && d.id !== bcId && cur) { bcMuted = d.t; yieldUntil = Date.now() + 12000; try { stopPlayer(cur, .8); cur = null; } catch {} } else if (d && d.id !== bcId) { yieldUntil = Date.now() + 12000; } }; setInterval(() => { try { if (cur && !document.hidden) bc.postMessage({ id: bcId, t: Date.now() }); } catch {} }, 5000); }
+  if (bc) { bc.onmessage = e => { const d = e && e.data; if (!d || d.id === bcId || !(d.born > bcBorn)) return; yieldUntil = Date.now() + 12000; if (cur) { try { stopPlayer(cur, 1); cur = null; } catch {} } };
+    setInterval(() => { try { if (cur && !document.hidden) bc.postMessage({ id: bcId, born: bcBorn }); } catch {} }, 5000); }
   document.addEventListener('visibilitychange', refresh);
   addEventListener('pageshow', refresh);
   // 「おと」の ボタンなど、どこかを おした 直後に 見なおす（本体の おとボタンが 記録を かえた あと すぐ 止まる。ほかの ページの 記録の かわりは storage が しらせる）
