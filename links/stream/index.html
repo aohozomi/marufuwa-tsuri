@@ -14,7 +14,7 @@
 try {
   var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d = document.documentElement, qs = new URLSearchParams(location.search);
   var mp = {asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n', a: 'a', h: 'h', y: 'y', n: 'n'}, tt = mp[qs.get('time')] || (typeof sv.time === 'string' && mp[sv.time]) || (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n');
-  if (matchMedia('(prefers-color-scheme: dark)').matches || tt === 'n') { d.dataset.night = 'true'; var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = '#0f1c33'; }
+  if (matchMedia('(prefers-color-scheme: dark)').matches || tt === 'n') { d.dataset.night = 'true'; d.dataset.time = 'n'; var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = '#0f1c33'; }
   if (sv.large === true) d.dataset.large = 'true';
   if (sv.calm === true) d.dataset.calm = 'true';
   if ((qs.get('lang') || localStorage.getItem('marufuwa-lang-v1')) === 'en') { d.lang = 'en'; window.TsuriEn = {lang: 'en'}; }
@@ -59,6 +59,7 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
 @view-transition{navigation:auto}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+.back{position:sticky;top:8px;z-index:20}main{padding-top:8px}
 </style>
 </head>
 <body>
