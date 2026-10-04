@@ -701,6 +701,7 @@ dialog h2{margin:0 0 4px;text-align:center}
 dialog .count{text-align:center;margin:0 0 12px}
 #book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:12px}
 #book-grid div{border:2px solid #d5e6ed;border-radius:14px;padding:8px 4px;text-align:center;font-size:.78rem;background:#fff}
+#book-filter{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 10px}
 #book-grid div[data-seen=false]{background:#eef4f7;color:#566d79}   /* まだ あって ない こ：2.9対1→4.9対1（よめる いろ） */
 #book-grid b{display:block;font-size:1.9rem;line-height:1.2}
 /* あった こは、ぷっくり シールに なって はられる。すこし かたむく */
@@ -1055,6 +1056,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <p class="count" id="book-count"><span id="book-seen">0</span> / <span id="book-base">30</span> しゅるい</p>
     <p class="count" id="book-fresh" hidden></p>
     <p class="count" id="book-myth"></p>
+    <div id="book-filter" role="group" aria-label="ずかんの みかた">
+      <button id="book-filter-all" class="pill" type="button" aria-controls="book-grid" aria-pressed="true">ぜんぶ</button>
+      <button id="book-filter-uncaught" class="pill quiet" type="button" aria-controls="book-grid" aria-pressed="false">まだ つっていない</button>
+    </div>
+    <p class="count" id="book-filter-empty" role="status" hidden></p>
     <div id="book-grid"></div>
     <p id="book-fact" class="book-fact" role="status" hidden></p>
     <div class="photo-actions"><button id="book-photo" type="button">シールちょうを しゃしんに</button></div>
@@ -1776,7 +1782,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   { const REWARD = ['palup', 'trophy', 'party', 'catchLegend', 'catchBig', 'catchNormal', 'loved', 'gift', 'star', 'wish']; let lastReward = -1e9;   // ごほうびの おとは 2びょうに 1つだけ（かさなって ガランガランに ならない・あとの ものは すてる）
     REWARD.forEach(k => { const f = SFX[k]; if (typeof f === 'function') SFX[k] = (...a) => { const now = performance.now(); if (now - lastReward < 2000) return; lastReward = now; return f(...a); }; }); }
   // ===== あたらしい こうかおん 8つだけ（10/2・マスターの OK・総司令部が えらんだ A/B/C）。ふるい こうかおん（tone/chord/zap）は ぜんぶ とめた まま。ファイルは snd/sfx/*.wav（ためしと おなじ 波形・おおきさ ×1）
-  const SFX_NEW = true, SFX_FILES = {nageru: 'snd/sfx/nageru.wav', chakusui: 'snd/sfx/chakusui.wav', chon: 'snd/sfx/chon.wav', atari: 'snd/sfx/atari.wav', hiku: 'snd/sfx/hiku.wav', pittari: 'snd/sfx/pittari.wav', tsureta: 'snd/sfx/tsureta.wav', nogashita: 'snd/sfx/nogashita.wav', pikon: 'snd/sfx/pikon.wav', shu: 'snd/sfx/shu.wav', pocha: 'snd/sfx/pocha.wav'};
+  const SFX_NEW = true, SFX_FILES = {nageru: 'snd/sfx/nageru.wav', chakusui: 'snd/sfx/chakusui.wav', chon: 'snd/sfx/chon.wav', atari: 'snd/sfx/atari.wav', hiku: 'snd/sfx/hiku.wav', pittari: 'snd/sfx/pittari.wav', tsureta: 'snd/sfx/tsureta.wav', nogashita: 'snd/sfx/nogashita.wav', pikon: 'snd/sfx/pikon.wav', shu: 'snd/sfx/shu.wav', pocha: 'snd/sfx/pocha.wav', streak: 'snd/sfx/streak.wav', tame: 'snd/sfx/tame.wav', tamehit: 'snd/sfx/tamehit.wav'};
   const sfxBuf = {}; let sfxLoading = false, sfxLastReward = -1e9;
   function sfxLoad() { if (sfxLoading || !SFX_NEW || !sndOn('fx')) return; sfxLoading = true; try { const ctx = ready(); Object.entries(SFX_FILES).forEach(([k, u]) => { fetch(u).then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b)).then(buf => { sfxBuf[k] = buf; }).catch(() => {}); }); } catch { sfxLoading = false; } }
   addEventListener('load', () => setTimeout(() => { try { if (save.sound) sfxLoad(); } catch {} }, 600));   // おとが ONなら さきに よみこむ（さいしょの 1かい目から なる）
@@ -1793,6 +1799,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     bite: () => sfxPlay('atari'),
     nice: () => sfxPlay('hiku'), close: () => sfxPlay('hiku'),   // ひく（てごたえ）
     perfect: () => sfxReward('pittari'),
+    streak: () => sfxPlay('streak', .25),   // ぴったり 5・8れんぞくの 見せ場（ひくい やわらかい 2おと）
+    tame: () => sfxPlay('tame'),             // ためて いる（1しゅう おさずに まった）
+    tamehit: () => sfxPlay('tamehit'),       // ため引きが きまった
     catchNormal: () => sfxReward('tsureta'), catchBig: () => sfxReward('tsureta'), catchLegend: () => sfxReward('tsureta'),
     snap: () => sfxPlay('nogashita'),
     pikon: () => sfxPlay('pikon', 0, 'guide')   // あんない音（ふつう 既定 ON・せっていで きれる）：わが まとに かさなる しゅんかんの ひくい やわらかい 1おと（294Hz・ごく ちいさく）
@@ -2118,14 +2127,14 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (phase !== 'reel') { spinning = 0; ringStop(); tensionOff(); { const rg = document.querySelector('#reel .ring'); if (rg) rg.style.opacity = ''; } return; }
     const ring = document.querySelector('#reel .ring'), hot = Math.abs(offBeat()) <= windowMs();
     if (!ringAnim) { ring.style.transform = 'scale(' + ringSize().toFixed(4) + ')'; ring.style.opacity = ringAlpha(cycleTime() / period).toFixed(3); }   // animate が ない ふるい ブラウザだけ、いままでの やりかた
-    $('reel').dataset.hot = String(hot); drawTension(); paintTension();
+    $('reel').dataset.hot = String(hot); if (precise && (nushi || (fish && fish.legend))) chargeTick(); drawTension(); paintTension();
     spinning = requestAnimationFrame(spin);
   }
 
   // あめ。ひに よって ふる（4にちに 1かい くらい）。あめの ひは、めずらしい こが でやすい
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
-  let phase = 'idle', fish = null, hp = 0, hpMax = 0, precise = false, periodBase = 1100, period = 1600, ringStart = 0, reelStartAt = 0, perfectStreak = 0, slips = 0, tension = 0, tensionAt = 0, closeStreak = 0, tStage = 0, escapeRun = 0, escapeHinted = false, lockTimer = 0, waitNoted = false, kickUntil = 0, kickPower = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
+  let phase = 'idle', fish = null, hp = 0, hpMax = 0, precise = false, periodBase = 1100, period = 1600, ringStart = 0, reelStartAt = 0, perfectStreak = 0, pStreak = 0, charge = 0, lastCyc = -1, pressCyc = -9, slips = 0, tension = 0, tensionAt = 0, closeStreak = 0, tStage = 0, escapeRun = 0, escapeHinted = false, lockTimer = 0, waitNoted = false, kickUntil = 0, kickPower = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
   function setPhase(next) { if (next !== phase) rodPose(next); phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; try { drawSeatLine(); } catch {} try { bustleDraw(); } catch {} { const ph = $('push-hint'); if (ph) { ph.hidden = !(reduce() && button.dataset.pulse === 'true'); if (!ph.hidden) ph.textContent = L('ここを おして', 'Press here'); } } $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
@@ -2322,7 +2331,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (plannedBase == null) plannedBase = rollSize();   // おおきさは さきに きめる（おおきい ほど わが すこし はやい・±10%）
     if (save.total > 0 && !fish.legend && !query.get('swim')) { const sn = nushi ? 1 : Math.min(1, Math.max(0, (plannedBase - fish.min) / ((fish.max - fish.min) || 1))); period = Math.round(period * (1 - .1 * (2 * sn - 1))); }
     swimBase = SWIMS[SWIMS[query.get('swim')] ? query.get('swim') : specialOf(fish, nushi) || swimOf(fish)]; qk = !query.get('swim') && specialOf(fish, nushi) ? '' : query.has('quirk') ? (QUIRKS[query.get('quirk')] ? query.get('quirk') : '') : (query.get('swim') || save.total === 0 ? '' : quirkOf(fish)); nushiPhase2 = false;   // ?swim=・さいしょの 1ぴきは くせなし   // とくべつな うごきの 子は くせ（せっかち・のんびり・ためる）を つけない
-    swim = withQuirk(swimBase, qk); qk = swim.quirk || ''; perfects = 0; perfectStreak = 0; slips = 0; misses = 0; restUntil = 0;
+    swim = withQuirk(swimBase, qk); qk = swim.quirk || ''; perfects = 0; perfectStreak = 0; pStreak = 0; charge = 0; lastCyc = -1; pressCyc = -9; slips = 0; misses = 0; restUntil = 0;
     // 「いまだ」の とき：わが まとの おおきさに なる さいしょの とき
     hitAt = period; for (let step = 0; step <= 400; step++) if (swim.f(step / 400) <= TARGET) { hitAt = step / 400 * period; break; }
     ringStart = reelStartAt = performance.now(); ringSync(); tension = 0; tensionAt = performance.now(); closeStreak = 0; tStage = 0; $('reel').dataset.tens = tensionOn() ? 'on' : 'off'; paintTension();
@@ -2338,7 +2347,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     say(save.easy || (reduce() && !sndOn('guide')) ? 'おすだけで、つれるよ。' : sndOn('guide') ? '「ピコン」で、おしてね。' : 'ひかったら、おしてね。');
   }
   function pull() {
-    if (precise && performance.now() - reelStartAt >= PRECISE.giveup[curMode() === 'hard' ? 1 : 0]) { escapeNow(); return; }   // ながい あいだ あわない と 糸が きれて にげる（罰は ない・らくちんは つれる）
+    if (precise && performance.now() - reelStartAt >= PRECISE.giveup[curMode() === 'hard' ? 1 : 0]) { escapeNow(); return; }
+    pressCyc = Math.floor((performance.now() - ringStart) / period);   // どの しゅうで おしたか（ため引きの はんてい）   // ながい あいだ あわない と 糸が きれて にげる（罰は ない・らくちんは つれる）
     // 「いまだ」との じかんの ずれで きめる（えがく しくみに たよらない。わの うごきかたが ちがっても、おなじ ものさし）
     // ひいた あとは、みじかい「ぷにっ」やすみ。れんだ しても はやく ならない（ねらう ひとと、おなじ くらいの はやさ）。やすみの あいだの タップは、なにも おきない だけ
     if (performance.now() < restUntil) {   // やすみの 間の おしは なにも おきない だけ。「ぷ」と ちいさく ならして、おした ことは とどいて いると しらせる（つづけて おしても 0.25びょうに 1かい）
@@ -2363,6 +2373,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       hp = Math.max(0, hp - power - (combo >= 3 ? 1 : 0) - (power === 1 && misses >= 3 ? 1 : 0));   // ちかい＝1。3かい つづくと 2（ずれ つづける ひとを またせすぎない）
       if (power === 3 && hp === 1) hp = 0;   // 「ぴったり」で のこりが 1 なら、そのまま つれる
     }
+    let chargedWord = '';
+    if (charge > 0) {   // ため引き：ぴったりで きまると ためた ぶん 深く ひける（確率は かえない）。はずすと ためは きえるだけ
+      if (precise && power === 3 && hp > 0) { hp = Math.max(0, hp - charge); chargedWord = L('ため引き！', 'Charged pull!'); if (!reduce()) sparkle(8 + 6 * charge); SFX.tamehit(); }
+      charge = 0;
+    }
     let snapped = false;
     if (tensionOn()) {   // いとの はり：ちかい＝おおきく・いいね＝ちゅうくらい・ぴったり＝ぬける。かぎりを こえると「ぷつん」（この ひきで つれる ときは つれる ほうが さき）
       const cfg = modeCfg(), gk = (save.slow ? .5 : 1) * Math.max(.5, 1 - .2 * skillMul('chikara')); tickTension();
@@ -2372,14 +2387,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     if (performance.now() - reelStartAt >= (precise ? 1e12 : 5500)) hp = 0;   // どんな ひきかたでも 5.5びょう たてば つれる（さかなが つかれる。ばつは ない・ずれる ひとの さいだい じかんを のばさない）
     $('hp').firstElementChild.style.width = (precise ? hp / hpMax * 100 : Math.ceil(hp / 2) / Math.ceil(hpMax / 2) * 100) + '%';   // めもりに そろえる（1めもり＝あと 1かい）
-    const word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : precise ? '' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
+    let word = center ? L('ぴったり！！！', 'PERFECT!!!') : power === 3 ? 'ぴったり！！' : power === 2 ? 'いいね！' : precise ? '' : 'ちかい！';   // 「おしい」は はずれに きこえる。「ちかい」は もうすこしの ほめ ことば
     if (precise && power < 3 && !reduce()) { const bk = document.querySelector('#reel .back'); if (bk && bk.animate) bk.animate([{scale: '1'}, {scale: '.95'}, {scale: '1'}], {duration: 200, easing: 'ease-out'}); }   // おしい：もじは だした ない ちいさな ぷるん
+    if (chargedWord) word = chargedWord;
     const judge = $('judge'); judge.textContent = word; judge.dataset.power = String(power); judge.dataset.center = center ? '1' : '';
     if (power === 3) { const bk = document.querySelector('#reel .back'); if (bk && bk.animate) bk.animate(reduce() ? [{borderColor: '#ffe27a'}, {borderColor: 'transparent'}] : [{boxShadow: 'inset 0 0 0 2px #ffffff55, 0 0 0 0 #fff0'}, {boxShadow: 'inset 0 0 0 2px #ffffffaa, 0 0 22px 10px #fff7c8cc', offset: .35}, {boxShadow: 'inset 0 0 0 2px #ffffff55, 0 0 0 0 #fff0'}], {duration: 520, easing: 'ease-out'});   // ふわっと 1かい ひかる（うごきを へらす では いろ だけ）
       if (hp > 0) SFX.perfect(); if (center) SFX.center(); buzz(center ? [40, 40, 90] : 40); }   // つれる ひきは「つれた」の おとに ゆずる   // ピロリロッ（ど真ん中は ひくい おとを もう ひとつ）
     else if (power === 2 && !precise) SFX.nice();   // いいね（1おと）。「おしい」は ひくい 1おと（precise では いいね・ちかいも おしい）
     else SFX.close();   // ポフッ
-    $('combo').textContent = combo >= 2 ? combo + ' れんぞく' : '';
+    pStreak = power === 3 ? pStreak + 1 : 0; paintCombo(); if (pStreak === 5 || pStreak === 8) showcase();
     if (!reduce()) {
       // ぐいっと ひく：うしろに のけぞって、もどる
       const big3 = power === 3, small1 = power === 1;   // ぴったり＝おおきく・ちかい＝ちいさく（さが ひとめで わかる）
@@ -2392,9 +2408,25 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }
     if (surfaced) surface();
     if (snapped) { escapeNow(); return; }
-    if (hp > 0 && precise && power === 3 && !reduce()) setTimeout(() => { if (phase !== 'reel') return; period = Math.round(periodBase * (.9 + Math.random() * .2)); hitAt = period; for (let st = 0; st <= 400; st++) if (swim.f(st / 400) <= TARGET) { hitAt = st / 400 * period; break; } ringStart = performance.now(); ringSync(); startGuide(); }, 450);   // さかなが すこし あばれて わの はやさが わずかに かわる（±10%）
+    if (hp > 0 && precise && power === 3 && !reduce()) setTimeout(() => { if (phase !== 'reel') return; period = Math.round(periodBase * (.9 + Math.random() * .2)); hitAt = period; for (let st = 0; st <= 400; st++) if (swim.f(st / 400) <= TARGET) { hitAt = st / 400 * period; break; } ringStart = performance.now(); lastCyc = -1; pressCyc = -9; ringSync(); startGuide(); }, 450);   // さかなが すこし あばれて わの はやさが わずかに かわる（±10%）
     if (hp === 0) caught(); else { const stage = precise ? (hp <= 1 ? 0 : hp <= 2 ? 1 : 2) : hp <= 2 ? 0 : hp <= Math.ceil(hpMax / 2) ? 1 : 2;   // あと 1かい／もうすぐ／もうちょっと（つぎの ひきで さいてい 2つ へるので、のこり 2いかは かならず あと 1かい）
       say(L(word + ' ' + ['あと 1かい！', 'もうすぐ！', 'もうちょっと。'][stage], (center ? 'PERFECT!!!' : (precise && power < 3 ? 'Almost!' : {3: 'Perfect!!', 2: 'Nice!', 1: 'So close!'}[power])) + ' ' + ['One more!', 'Almost there!', 'Keep going.'][stage]), true); if (nushi && !fish.legend && !nushiPhase2 && hp <= Math.ceil(hpMax / 2)) { nushiPhase2 = true; setTimeout(() => { if (phase === 'reel') nushiRally(); }, 350); } }
+  }
+  function paintCombo() {   // れんぞくの ひょうじは 数だけ（くらべない・ほぞんしない）。ためて いる 間は「ため ●●」
+    $('combo').textContent = charge > 0 ? L('ため ' + '●'.repeat(charge), 'Charge ' + '●'.repeat(charge)) : precise ? (pStreak >= 2 ? L('ぴったり ' + pStreak + 'れんぞく', 'Perfect ×' + pStreak) : '') : (combo >= 2 ? combo + ' れんぞく' : '');
+  }
+  function showcase() {   // ぴったり 5・8れんぞくの 見せ場：きらきらと ひくい 2おと・数字が ぽんと ふくらむ（うごきを へらす では おとと もじだけ）
+    SFX.streak(); if (reduce()) return; sparkle(pStreak >= 8 ? 22 : 14);
+    const c = $('combo'); if (c.animate) c.animate([{scale: '.8'}, {scale: '1.5', offset: .5}, {scale: '1'}], {duration: 420, easing: 'ease-out'});
+  }
+  function chargeTick() {   // ぬし・まぼろしの ひきで、わの 1しゅうを まるごと おさずに まつと「ためる」（さいだい 2）。ぬしの 駆け引き＝ためるほど 深く ひけるが、しっかりでは 糸が すこし はる（かぎりまでは いかない）
+    const now = performance.now(), cyc = Math.floor((now - ringStart) / period);
+    if (cyc === lastCyc) return;
+    if (lastCyc >= 0 && cyc === lastCyc + 1 && pressCyc < lastCyc && now > restUntil + 250 && hp > 0 && charge < 2) {
+      charge++; SFX.tame(); if (tensionOn()) { tickTension(); tension = Math.min(.9, tension + .1); }
+      paintCombo(); say(L(charge === 1 ? 'ぐっと ためている…' : 'もっと ためる…！', charge === 1 ? 'Charging…' : 'Charging more…!'), true);
+    }
+    lastCyc = cyc;
   }
   function sparkle(n = 8) {
     const reel = $('reel');
@@ -2507,7 +2539,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintQuit); else paintQuit();
   function endFishing(text) {   // やめる・にげられた の あとしまつ：つり まえに もどる（つれた かず・ずかんは かえない）
     clearTimeout(biteTimer); clearTimeout(nibbleTimer); delete $('float').dataset.nibble;
-    stopGuide(); ringStop(); tensionOff(); flying = false; perfectStreak = 0; tension = 0; tStage = 0;
+    stopGuide(); ringStop(); tensionOff(); flying = false; perfectStreak = 0; pStreak = 0; charge = 0; lastCyc = -1; pressCyc = -9; tension = 0; tStage = 0;
     face('blue'); $('held').hidden = true; button.textContent = 'なげる'; button.dataset.hot = 'false'; lock(false);
     setPhase('idle'); say(text);
     try { button.focus({preventScroll: true}); } catch {}
@@ -4162,6 +4194,36 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { if (avatarPal()) paintAvatar(); });   // English の えいご（alt）は ことばが きまって から もういちど（きまる まえに かいた 日本語は のこる）
 
   const book = $('book');
+  let bookUncaughtOnly = false;
+  const bookGrid = $('book-grid'), bookFilterEmpty = $('book-filter-empty');
+  const bookFilterAll = $('book-filter-all'), bookFilterUncaught = $('book-filter-uncaught');
+  function applyBookFilter() {
+    bookFilterAll.textContent = L('ぜんぶ', 'All fish');
+    bookFilterUncaught.textContent = L('まだ つっていない', 'Not caught yet');
+    $('book-filter').setAttribute('aria-label', L('ずかんの みかた', 'Sticker book view'));
+    bookFilterAll.setAttribute('aria-pressed', String(!bookUncaughtOnly));
+    bookFilterUncaught.setAttribute('aria-pressed', String(bookUncaughtOnly));
+    bookFilterAll.classList.toggle('quiet', bookUncaughtOnly);
+    bookFilterUncaught.classList.toggle('quiet', !bookUncaughtOnly);
+    const cards = [...bookGrid.querySelectorAll('div[data-seen]')];
+    cards.forEach(card => { card.hidden = bookUncaughtOnly && card.dataset.seen === 'true'; });
+    for (const head of bookGrid.querySelectorAll('h3')) {
+      let node = head.nextElementSibling, hasVisibleFish = false;
+      const notes = [];
+      while (node && node.tagName !== 'H3') {
+        if (node.matches('div[data-seen]')) { if (!node.hidden) hasVisibleFish = true; }
+        else notes.push(node);
+        node = node.nextElementSibling;
+      }
+      head.hidden = bookUncaughtOnly && !hasVisibleFish;
+      notes.forEach(note => { note.hidden = bookUncaughtOnly && !hasVisibleFish; });
+    }
+    const fact = $('book-fact'); fact.hidden = true; fact.textContent = ''; fact.removeAttribute('data-for');
+    bookFilterEmpty.textContent = L('この いちらんに、まだ つっていない さかなは いないよ。', 'There are no uncaught fish in this list.');
+    bookFilterEmpty.hidden = !bookUncaughtOnly || cards.some(card => !card.hidden);
+  }
+  bookFilterAll.addEventListener('click', () => { bookUncaughtOnly = false; applyBookFilter(); });
+  bookFilterUncaught.addEventListener('click', () => { bookUncaughtOnly = true; applyBookFilter(); });
   $('open-book').addEventListener('click', () => {
     save.bookSeen = Object.keys(save.fish).filter(id => FISH[id]).length; store(); drawBadge();   // ひらいた → みた ことに なる
     { const myth = FISH.filter(f => f.legend && !f.ext), got = myth.filter(f => save.fish[f.id]).length; $('book-myth').textContent = got >= myth.length ? L('★5の まぼろしの こ：ぜんいんに あえたよ！', '★5 mythical fish: you have met them all!') : L('★5の まぼろしの こが ' + myth.length + 'ひき いるよ（あえた こ：' + got + '）。' + (seenCount() >= BASE ? '' : '30しゅるい ぜんぶ あつめると、あえやすく なるよ。'), '★5 mythical fish: ' + myth.length + ' exist (met: ' + got + ').' + (seenCount() >= BASE ? '' : ' Collect all ' + BASE + ' kinds and you are more likely to meet them.')); }
@@ -4231,7 +4293,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         }));
       }
     }
-    book.showModal();
+    bookUncaughtOnly = false; applyBookFilter(); book.showModal();
   });
   $('close-book').addEventListener('click', () => book.close());
 
