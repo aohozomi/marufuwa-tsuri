@@ -1296,7 +1296,12 @@ SVG.fountain = plazaArt('fountain', 100, 90, null);
 SVG.lamp = plazaArt('streetlamp', 70, 90, null);
 SVG.bench = plazaArt('bench', 70, 38, null);
 SVG.post = plazaArt('mailbox', 40, 60, null, 20, null, 6, `<g class="pflag"><rect x="30" y="20" width="2.4" height="15" fill="#7a4b34"/><rect x="30.2" y="20" width="10" height="7" rx="1.4" fill="#ffd25e" stroke="#7a4b34" stroke-width="1.6"/></g>`);
-SVG.flowerbed = plazaArt('flowerbed', 60, 44, null);
+{ // 天の 花だんの 絵の 上に、小さな SVG の 花（茎・葉・花びら .pt・つぼみ .bd）を かさねる（B-1「べつの 日に 戻ると 花が ふえる 2→5本」を 見える ままに）。色は 絵に なじむ 低彩度・ふちは ぼかさない
+  const old = SVG.flowerbed, k = old.indexOf('<path d="M11 20.4'), end = old.lastIndexOf('</svg>');
+  const SOFT = { '#ff9fb8': '#eab4c2', '#ffe27a': '#ead88f', '#ffffff': '#f7f3ea', '#ff9f5a': '#e8b98f', '#ffd45a': '#e9d08a', '#7fc873': '#8db98a', '#4f9a4a': '#5f8a5c', '#a8d99a': '#a9c9a0' };
+  const over = k > 0 && end > k ? old.slice(k, end).replace(/#[0-9a-f]{6}/gi, c => SOFT[c.toLowerCase()] || c) : '';
+  SVG.flowerbed = plazaArt('flowerbed', 60, 44, null, 30, null, 6, over);
+}
 const PROPS = [
   { id: 'pier', x: 78, y: 286, w: 104, h: 76, svg: SVG.pier, dest: 'tsuri', mark: '🎣' },
   { id: 'house', x: 180, y: 264, w: 122, h: 126, svg: SVG.house, dest: 'oheya', mark: '🐠' },
@@ -1313,7 +1318,7 @@ const PROPS = [
   { id: 'flower-l', x: 30, y: 388, w: 60, h: 44, svg: SVG.flowerbed, secret: 'flower' },   // 木の ねもと（木の 手前に 置く＝かくれない）
   { id: 'flower-r', x: 330, y: 388, w: 60, h: 44, svg: SVG.flowerbed, secret: 'flower' },
   { id: 'post', x: 284, y: 352, w: 34, h: 58, svg: SVG.post, dest: 'post', mark: '✉️', block: { rect: [270, 334, 298, 354] } },
-  { id: 'gate', x: 306, y: 312, w: 132, h: 82, svg: SVG.gate },   // まるふわパークの ゲート（セミリアル・位置と通りぬけを維持）
+  { id: 'gate', x: 294, y: 312, w: 132, h: 82, svg: SVG.gate },   // まるふわパークの ゲート（セミリアル・位置と通りぬけを維持）
   { id: 'appie', x: 470, y: 534, w: 52, h: 50, svg: SVG.appie, dest: 'appie', mark: '📱', block: { rect: [448, 524, 492, 536] } },   // アプリの おうち：パークの 南
   ...(PARK.bowling ? [{ id: 'bowling', x: 440, y: 342, w: 96, h: 77, svg: SVG.bowling, dest: 'bowling', mark: '🎳', block: { rect: [396, 332, 484, 344] } }] : []),
   ...(PARK.kuru ? [{ id: 'kuru', x: 546, y: 342, w: 88, h: 70, svg: SVG.kuru, dest: 'kuru', mark: '🎰', block: { rect: [506, 332, 588, 344] } }] : []),
