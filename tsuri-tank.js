@@ -150,9 +150,13 @@
   // ─── 部屋（かべ・ゆか・たな・ラグ・ちゃぶ台）。360×640 のせかい。色は文字のまま（しゃしんにも使う） ───
   // 部屋は 2組：tall＝縦長 360×640（9:16・スマホ・本線）／wide＝横長 480×360（4:3・PC）。水槽の枠は どちらも 画面の はばの 約8割を 中央に（天への 注文書 10/3）。
   const ROOMS = { tall: { mode: 'tall', w: 360, h: 640, tank: { x: 16, y: 56, w: 328, h: 180 }, mascot: { cx: 140, foot: 574, w: 100, h: 133 }, friend: { w: 66, foot: [572, 582] }, friendX: [60, 296], bubble: { x: 204, y: 430, w: 148 }, guest: { cx: 180, foot: 414, w: 60 }, lamp: { cx: 180 }, rice: { x: 211, y: 491, w: 30, h: 26 }, shelf: { panels: [{ x: 22, y: 264, w: 152, h: 72 }, { x: 186, y: 264, w: 152, h: 72 }], cols: 3, rows: 2, max: 12, btn: [3.9, 39.7, 92.2, 14.4] }, lampBtn: [41.7, 0, 16.7, 8.8], riceBtn: [54.5, 74.5, 16.5, 8.6], app: { left: '3%', top: '52%', appcLeft: '3%', appcTop: '52%', appcW: '62%' } },
-    wide: { mode: 'wide', w: 480, h: 360, tank: { x: 48, y: 65, w: 384, h: 194 }, mascot: { cx: 76, foot: 356, w: 56, h: 74 }, friend: { w: 38, foot: [352, 357] }, friendX: [352, 412], bubble: { x: 30, y: 8, w: 270 }, guest: { cx: 192, foot: 324, w: 40 }, lamp: { cx: 420 }, rice: { x: 268, y: 326, w: 17, h: 15 }, shelf: { panels: [{ x: 50, y: 289, w: 182, h: 27 }, { x: 248, y: 289, w: 182, h: 27 }], cols: 6, rows: 1, max: 12, btn: [8.3, 80.3, 83.4, 10.3] }, lampBtn: [82.3, 0, 10.8, 14.2], riceBtn: [55.8, 90.3, 4.5, 4.2], app: { left: '21%', top: '88%', appcLeft: '19%', appcTop: '44%', appcW: '56%' } } };
+    wide: { mode: 'wide', w: 480, h: 360, tank: { x: 53, y: 68, w: 374, h: 156 }, mascot: { cx: 76, foot: 356, w: 56, h: 74 }, friend: { w: 38, foot: [352, 357] }, friendX: [352, 412], bubble: { x: 30, y: 8, w: 270 }, guest: { cx: 192, foot: 324, w: 40 }, lamp: { cx: 420 }, rice: { x: 268, y: 326, w: 17, h: 15 }, shelf: { panels: [{ x: 60, y: 243, w: 172, h: 28 }, { x: 248, y: 243, w: 172, h: 28 }], cols: 6, rows: 1, max: 12, btn: [12.5, 67.5, 75, 7.8] }, lampBtn: [82.3, 0, 10.8, 14.2], riceBtn: [55.8, 90.3, 4.5, 4.2], app: { left: '21%', top: '88%', appcLeft: '19%', appcTop: '44%', appcW: '56%' } } };
   let ROOM = ROOMS.tall;
-  function roomSvgWide() {   // 横長 480×360（仮の 絵＝コードの 色。天の 部屋絵が とどいたら 差し替え）
+  // 10/4 天の 部屋絵（横長・昼）。data URL にして SVG に 埋める（写真カードにも 出る）。読めるまでは 今の 仮の 絵。
+  let ROOM_ART = '', roomRepaint = null;
+  try { fetch(BASE + 'img/room/room_wide.webp').then(r => r.ok ? r.blob() : null).then(b => { if (!b) return; const fr = new FileReader(); fr.onload = () => { ROOM_ART = String(fr.result); if (roomRepaint) roomRepaint(); }; fr.readAsDataURL(b); }).catch(() => {}); } catch {}
+  function roomSvgWide() {   // 横長 480×360（天の 絵が 読めたら それ・まだなら 仮の 絵＝コードの 色）
+    if (ROOM_ART) return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 480 360" width="480" height="360"><image href="${ROOM_ART}" xlink:href="${ROOM_ART}" x="0" y="0" width="480" height="360" preserveAspectRatio="none"/></svg>`;
     const planks = [334, 344, 352].map(y => `<line x1="0" y1="${y}" x2="480" y2="${y}"/>`).join('');
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360">
       <defs><pattern id="tk-dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="1.7" fill="#f3dcb8"/><circle cx="19" cy="19" r="1.7" fill="#f3dcb8"/></pattern></defs>
@@ -208,6 +212,7 @@
       <circle class="tk-halo" cx="180" cy="40" r="60" fill="url(#tk-halo)"${off ? ' opacity="0"' : ''}/><line x1="180" y1="0" x2="180" y2="16" stroke="#b58c5e" stroke-width="3"/><path d="M156 40 Q156 20 180 18 Q204 20 204 40 Z" fill="#ffd76a" stroke="#e5b542" stroke-width="2"/><ellipse cx="180" cy="42" rx="17" ry="4" fill="#fff6c9"/></svg>`;
   }
   function frameSvg() {
+    if (ROOM.mode === 'wide' && ROOM_ART) return '';   // 天の 絵に 水槽の わくが ある
     const t = ROOM.tank;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ROOM.w} ${ROOM.h}" width="${ROOM.w}" height="${ROOM.h}"><rect x="${t.x - 8}" y="${t.y - 8}" width="${t.w + 16}" height="${t.h + 16}" rx="22" fill="none" stroke="#d6b07a" stroke-width="12"/><rect x="${t.x - 2.5}" y="${t.y - 2.5}" width="${t.w + 5}" height="${t.h + 5}" rx="16" fill="none" stroke="#fff6e4" stroke-width="3"/><rect x="${t.x - 13.5}" y="${t.y - 13.5}" width="${t.w + 27}" height="${t.h + 27}" rx="26" fill="none" stroke="#b98d55" stroke-width="2" stroke-opacity=".7"/></svg>`;
   }
@@ -431,6 +436,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-giftrow small{display:block;font-size:.9rem;color:#506874}
 .tk-giftclose{display:block;margin:0 auto;min-width:160px;min-height:48px}
 .tk-rice{display:flex;align-items:center;justify-content:center;border-radius:14px}
+.tk-wide[data-time="yoru"] .tk-roomsvg{filter:brightness(.5) saturate(.85)}.tk-wide[data-time="yuu"] .tk-roomsvg{filter:brightness(.88) sepia(.18)}[data-time="yoru"] .tk-l-bg img{filter:brightness(.42) saturate(.85)}[data-time="yuu"] .tk-l-bg img{filter:brightness(.82) sepia(.2)}
 .tk-wide .tk-rice{min-width:44px;min-height:44px}   /* 横長は 絵が ちいさい ぶん、さわる ばしょは 44px の まま（見えない ボタンが 右・下へ ひろがる） */
 .tk-wide .tk-lampbtn,.tk-wide .tk-shelfbtn{min-height:44px}
 .tk-rice svg{width:60%;height:auto;display:block;pointer-events:none}
@@ -530,6 +536,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     Object.assign(says.style, { left: pct(ROOM.bubble.x, ROOM.w), top: pct(ROOM.bubble.y, ROOM.h), width: pct(ROOM.bubble.w, ROOM.w), position: 'absolute' });
   }
   placeRoom();
+  roomRepaint = () => { if (ROOM.mode !== 'wide') return; $(dlg, '.tk-roomsvg').innerHTML = roomSvg(); $(dlg, '.tk-frame').innerHTML = frameSvg(); for (const child of [$(dlg, '.tk-roomsvg'), $(dlg, '.tk-frame')]) { const sv = child.querySelector('svg'); if (sv) sv.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;display:block'; } };
   // 縦長（スマホ）／横長（PC）の きりかえ。部屋の 絵・ランプ・枠・たな・ボタンの 場所を 組みなおす（記録・魚・かざりの 中身は かえない）
   function applyMode(mode) {
     const r = ROOMS[mode] || ROOMS.tall; if (r === ROOM) return false;
@@ -585,9 +592,9 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
   // 層ごとの 絵（bg・far・near・glass は 全面の 画像／mid は いまの 砂・流木・小石を かくして 差し替え）。 水草（そだつ）は のこす
   function paintArt() {
     const A = window.TsuriTankArt || {}, put = (cls, key) => { const box = water.querySelector(cls); if (!box) return ''; const u = tkArtUrl(A[key]); const cur = box.firstChild && box.firstChild.getAttribute('src'); if (!u) { if (box.firstChild) box.textContent = ''; return ''; } if (cur !== u) { box.textContent = ''; const im = document.createElement('img'); im.alt = ''; im.decoding = 'async'; im.draggable = false; im.src = u; im.onerror = () => { im.remove(); }; box.append(im); } return u; };
-    put('.tk-l-bg', 'bg'); const f = put('.tk-l-far', 'far'); put('.tk-l-near', 'near'); put('.tk-l-glass', 'glass');
+    const bgU = put('.tk-l-bg', 'bg'); const f = put('.tk-l-far', 'far'); put('.tk-l-near', 'near'); put('.tk-l-glass', 'glass');
     let m = ''; { const box = water.querySelector('.tk-l-mid'); m = tkArtUrl(A.mid); if (m) { let b2 = box; if (!b2) { b2 = document.createElement('div'); b2.className = 'tk-l tk-l-mid'; b2.style.zIndex = '1'; b2.setAttribute('aria-hidden', 'true'); base.before(b2); } if (!b2.firstChild || b2.firstChild.getAttribute('src') !== m) { b2.textContent = ''; const im = document.createElement('img'); im.alt = ''; im.decoding = 'async'; im.draggable = false; im.src = m; im.onerror = () => { im.remove(); room.classList.remove('tk-art-mid'); }; b2.append(im); } } else if (box) box.remove(); }
-    room.classList.toggle('tk-art-far', !!f); room.classList.toggle('tk-art-mid', !!m);
+    room.classList.toggle('tk-art-far', !!f || !!bgU); room.classList.toggle('tk-art-mid', !!m || !!bgU);   // 天の 水の 絵（bg）には 岩・砂・小石が 入って いる ので 仮の を かくす（水草は のこす）
   }
   function paintWater() {
     pal = palette();
