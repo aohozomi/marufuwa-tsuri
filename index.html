@@ -205,6 +205,7 @@ html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.a
 .times button{min-height:44px;font-size:.78rem}
 #keeper{position:absolute;z-index:4;left:93.5%;top:72%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
 #keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
+#scene:is([data-phase=idle],[data-phase=caught]) #marufuwa{cursor:pointer;pointer-events:auto}
 /* 10/5 マスター「お店の キャラが ういてる」：足もとに 接地影と 小さな 屋台（台）。台は きつねの 下半身の 前に ならべて「台の うしろに 立つ」形に する。足の y は なかまと おなじ 地面ライン（58+.16x）*/
 #scene #keeper::before{display:block;content:"";position:absolute;z-index:1;left:50%;bottom:-3%;width:118%;height:27%;transform:translateX(-50%);border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#d9a35e 0 24%,#a8703a 24% 70%,#7d5128 70%);box-shadow:0 2px 0 #00000026;pointer-events:none}
 #scene #keeper::after{content:"";position:absolute;z-index:-1;left:50%;bottom:-9%;width:132%;height:17%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,#00000066 0,#00000033 45%,#0000 72%);pointer-events:none}
@@ -1621,11 +1622,26 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const step = now => { const k = Math.min(1, (now - t0) / ms), e = k * k * (3 - 2 * k); rodK.x = x0 + (x - x0) * e; rodK.y = y0 + (y - y0) * e; rod($('line-me'), mine, 12, $('rod-me')); if (k < 1) rodRaf = requestAnimationFrame(step); };
     rodRaf = requestAnimationFrame(step);
   }
+  // キャラごとの 見た目の ちがい（10/5・えんしゅつだけ）：待ちの ゆれ（amp・T・bump）と、ときどき する しぐさ（idle）。釣れる 確率・判定・待ち時間は キャラで かえない
+  const CHAR_STYLE = {
+    '': {amp: .7, T: 1900, bump: 2.2, idle: null},
+    neko: {amp: .5, T: 2600, bump: 1.4, idle: {every: 11000, dur: 1500, kf: [{rotate: '0deg', translate: '0 0'}, {rotate: '-5deg', translate: '-3px 2px', offset: .45}, {rotate: '0deg', translate: '0 0'}]}},
+    usagi: {amp: 1.1, T: 1300, bump: 3, idle: {every: 6000, dur: 520, kf: [{translate: '0 0'}, {translate: '0 -9px', offset: .4}, {translate: '0 0'}]}},
+    panda: {amp: .4, T: 3200, bump: 1, idle: {every: 9000, dur: 1800, kf: [{rotate: '0deg'}, {rotate: '4deg', offset: .5}, {rotate: '0deg'}]}},
+    risu: {amp: 1.3, T: 1000, bump: 3.4, idle: {every: 4500, dur: 420, kf: [{translate: '0 0'}, {translate: '2px 0', offset: .25}, {translate: '-2px 0', offset: .5}, {translate: '1px 0', offset: .75}, {translate: '0 0'}]}},
+    penguin: {amp: .6, T: 2200, bump: 1.8, idle: {every: 7000, dur: 900, kf: [{rotate: '0deg'}, {rotate: '-3deg', offset: .25}, {rotate: '3deg', offset: .75}, {rotate: '0deg'}]}},
+    tanuki: {amp: .5, T: 2400, bump: 1.2, idle: {every: 12000, dur: 1600, kf: [{rotate: '0deg', translate: '0 0'}, {rotate: '3deg', translate: '0 2px', offset: .5}, {rotate: '0deg', translate: '0 0'}]}},
+    kogitsune: {amp: .9, T: 1700, bump: 2.6, idle: {every: 8000, dur: 1100, kf: [{rotate: '0deg'}, {rotate: '-4deg', offset: .35}, {rotate: '2deg', offset: .7}, {rotate: '0deg'}]}},
+    koinu: {amp: 1, T: 1200, bump: 2.8, idle: {every: 5200, dur: 600, kf: [{translate: '0 0'}, {translate: '0 -6px', offset: .3}, {translate: '0 0', offset: .55}, {translate: '0 -3px', offset: .8}, {translate: '0 0'}]}}
+  };
+  const charStyle = () => CHAR_STYLE[marufuwa.dataset.avatar || ''] || CHAR_STYLE[''];
+  let idleTimer = 0;
+  function charIdle() { clearTimeout(idleTimer); if (reduce()) return; const st = charStyle(); if (!st.idle) return; idleTimer = setTimeout(() => { if (phase === 'waiting' && !document.hidden && !document.body.classList.contains('gazing') && marufuwa.animate) marufuwa.animate(st.idle.kf, {duration: st.idle.dur, easing: 'ease-in-out'}); charIdle(); }, st.idle.every * (.75 + Math.random() * .5)); }
   function rodPose(next) {   // ばめんごとの 竿
     { const was = ownPose; ownPose = {waiting: 'sit', bite: 'sit', caught: 'joy'}[next] || 'front'; if (was !== ownPose) { const a = avatarPal(); if (a && a.own) try { face(curFace); } catch {} } }
     if (POSE_FILES.length && !(next === 'waiting' && performance.now() < poseHold)) { poseNow = {waiting: 'mate', bite: 'mate', reel: 'hiki', caught: 'age'}[next] || ''; try { face(curFace); } catch {} if (next === 'caught') hangHeld(); }   // なげて いる あいだ（0.9びょう）は nage のまま
-    clearInterval(rodSway); clearTimeout(rodHold);
-    if (next === 'waiting') { rodTo(0, 0, 400); if (!reduce()) rodSway = setInterval(() => { if (phase !== 'waiting' || document.body.classList.contains('gazing') || document.hidden) return; const t = performance.now(); rodK.y = Math.sin(t / 1900) * .7 + (Math.sin(t / 5300) > .93 ? 2.2 : 0); rod($('line-me'), mine, 12, $('rod-me')); }, 140); }
+    clearInterval(rodSway); clearTimeout(rodHold); clearTimeout(idleTimer);
+    if (next === 'waiting') { rodTo(0, 0, 400); charIdle(); if (!reduce()) rodSway = setInterval(() => { if (phase !== 'waiting' || document.body.classList.contains('gazing') || document.hidden) return; const t = performance.now(), cs = charStyle(); rodK.y = Math.sin(t / cs.T) * cs.amp + (Math.sin(t / 5300) > .93 ? cs.bump : 0); rod($('line-me'), mine, 12, $('rod-me')); }, 140); }
     else if (next === 'bite') rodTo(0, 6, 140);
     else if (next === 'reel') rodTo(-1, 3, 300);
     else if (next === 'caught') { rodTo(-3, -11, 380); rodHold = setTimeout(() => rodTo(0, -4, 600), 1200); }
@@ -1633,7 +1649,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function rod(line, i, tall, stick) {
     const f = feet(i), w = floatAt(i), kk = stick.id === 'rod-me' ? rodK : {x: 0, y: 0}, tip = {x: f.x + 9 + kk.x, y: f.y - tall - 6 + kk.y}, bx = stick.id === 'rod-me' && !reduce() ? (phase === 'waiting' || phase === 'bite' ? 1.3 : phase === 'reel' ? -1.3 : 0) : 0;   // 根もとは 手の いち（からだが かたむく ほうへ）
-    const pk = stick.id === 'rod-me' ? marufuwa.dataset.poseK : '', pt = pk && POSE_TIP[pk], sc = pt && scene.getBoundingClientRect(), ir = pt && marufuwa.getBoundingClientRect(), pw = POSE_DEF.size[0], ph = POSE_DEF.size[1];
+    const pk = stick.id === 'rod-me' ? marufuwa.dataset.poseK : '', pt = pk && (specOf('tip', pk) || {})[pk], sc = pt && scene.getBoundingClientRect(), ir = pt && marufuwa.getBoundingClientRect(), pw = POSE_DEF.size[0], ph = POSE_DEF.size[1];
     if (pt && sc.width && ir.width) {   // ポーズえの まえは えの なかの 竿を つかう：ゲームの 竿は けし、糸は えの 竿の さきから
       tip.x = (ir.left + pt[0] / pw * ir.width - sc.left) / sc.width * 100; tip.y = (ir.top + pt[1] / ph * ir.height - sc.top) / sc.height * 100; stick.style.visibility = 'hidden';
     } else { if (stick.id === 'rod-me') stick.style.visibility = ''; stick.setAttribute('x1', f.x + 5.5 + bx); stick.setAttribute('y1', f.y - tall * .4);
@@ -1643,7 +1659,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function hangHeld() {   // ポーズえ（つれた）：魚は 竿の さきから ぶらさげる（かおと かさならない・かおより ちいさく）
     const held = $('held'); if (marufuwa.dataset.poseK !== 'age' || held.hidden) return; const big = held.dataset.big === '1';
-    held.style.scale = big ? '.72' : '.6'; const sc = scene.getBoundingClientRect(), w = marufuwa.offsetWidth, h = marufuwa.offsetHeight, l0 = marufuwa.offsetLeft - w / 2, t0 = marufuwa.offsetTop - h, hg = POSE_DEF.hang, tx = l0 + hg[0] * w + 3, ty = t0 + hg[1] * h + hg[2];   // とびはねの うごきに よらない もとの いち（レイアウトの ざひょう）
+    held.style.scale = big ? '.72' : '.6'; const sc = scene.getBoundingClientRect(), w = marufuwa.offsetWidth, h = marufuwa.offsetHeight, l0 = marufuwa.offsetLeft - w / 2, t0 = marufuwa.offsetTop - h, hg = specOf('hang', 'age'), tx = l0 + hg[0] * w + 3, ty = t0 + hg[1] * h + hg[2];   // とびはねの うごきに よらない もとの いち（レイアウトの ざひょう）
     place(held, {x: Math.min(95, Math.max(5, tx / sc.width * 100)), y: Math.min(95, (ty + held.offsetHeight * ((big ? .72 : .6) / 2 + .5)) / sc.height * 100)});
   }
   function fixHits() {   // せきの ボタン（44px いじょう）と なかまの はなす ボタン（44px いじょう）が かさならない：かさなる なかまの ボタンを うえへ ずらす（なかまの あたまの ほうへ）
@@ -2175,12 +2191,26 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     C: {dir: 'c/', w: '23%', ar: '1/1', size: [720, 720], foot: {nage: .957, mate: .957, hiki: .957, age: .957}, tip: {nage: [662, 38], mate: [691, 58], hiki: [691, 129], age: [641, 36]}, face: {nage: [.22, .26, .68, .68], mate: [.17, .12, .74, .74], hiki: [.04, .24, .62, .67], age: [.11, .18, .68, .75]}, hang: [.97, .55, 0]},
     A: {w: '20.4%', ar: '9/10', size: [540, 600], foot: {nage: .995, mate: .995, hiki: .995, age: .993}, tip: null, face: [.12, .04, .88, .62], hang: [.97, .56, 0]},
     B: {w: '23%', ar: '1/1', size: [720, 720], foot: {nage: .94, mate: .929, hiki: .912, age: .957}, tip: {nage: [655, 62], mate: [668, 208], hiki: [683, 152], age: [683, 68]}, face: [210 / 720, 110 / 720, 560 / 720, 520 / 720], hang: [683 / 720, 68 / 720, 28]}
-  }, POSE_DEF = POSE_DEFS[POSE_SET], POSE_TIP = POSE_DEF.tip || {}, POSE_FOOT = POSE_DEF.foot, POSE_DIR = POSE_DEF.dir || '', poseFaceOf = k => { const f = POSE_DEF.face; return Array.isArray(f) ? f : f[k]; };   // tip＝えの 竿の さき（720基準・Bだけ）／foot＝あしもと（したから）／hang＝つれた 魚を ぶらさげる いち（はば・たかさの わりあい・よぶん px）
+  }, POSE_DEF = POSE_DEFS[POSE_SET], POSE_TIP = POSE_DEF.tip || {}, POSE_FOOT = POSE_DEF.foot, POSE_DIR = POSE_DEF.dir || '', poseFaceOf = k => { const f = specOf('face', k); return Array.isArray(f) ? f : f[k]; };   // tip＝えの 竿の さき（720基準・Bだけ）／foot＝あしもと（したから）／hang＝つれた 魚を ぶらさげる いち（はば・たかさの わりあい・よぶん px）
   document.documentElement.style.setProperty('--pose-w', POSE_DEF.w); document.documentElement.style.setProperty('--pose-ar', POSE_DEF.ar);
-  function footFix() { const k = marufuwa.dataset.poseK; marufuwa.style.marginTop = k && POSE_FOOT[k] ? Math.round((1 - POSE_FOOT[k]) * marufuwa.offsetHeight) + 'px' : ''; }   // あしもとを さんばしの たちいちに そろえる
+  function footFix() { const k = marufuwa.dataset.poseK; { const ft = k && specOf('foot', k); marufuwa.style.marginTop = k && ft && ft[k] ? Math.round((1 - ft[k]) * marufuwa.offsetHeight) + 'px' : ''; } }   // あしもとを さんばしの たちいちに そろえる
   const poseLoaded = new Set();   // よみこめた ポーズえだけ つかう（オフラインで こわれた えを だささない）
   POSE_FILES.forEach(k => { const im = new Image(); im.onload = () => poseLoaded.add(k); im.src = 'img/pose/' + POSE_DIR + k + '.png'; });
-  const poseFile = () => { const k = (marufuwa.dataset.avatar || 'marufuwa') + '_' + poseNow; return poseNow && POSE_FILES.includes(k) && poseLoaded.has(k) ? 'img/pose/' + POSE_DIR + k + '.png' : ''; };
+  // なかま ごとの ポーズ（10/5）：img/pose/friend/<id>/{nage,mate,hiki,age}.png（720×720・みぎむき・えに 竿あり＝C と おなじ きまり）。よみこめた ぶんだけ つかい、なければ いまの 顔の え。<id>/spec.json（任意）＝{tip:{pose:[x,y]},foot:{pose:数},face:{pose:[l,t,r,b]},hang:[a,b,c]} で うわがき（なければ C の 数字）
+  const FRIEND_POSE = {};
+  function probeFriendPose(id) {
+    if (!id || FRIEND_POSE[id]) return; const fp = FRIEND_POSE[id] = {loaded: new Set(), spec: null};
+    const redraw = () => { if (marufuwa.dataset.avatar === id) { try { face(curFace); } catch {} } };
+    ['nage', 'mate', 'hiki', 'age'].forEach(k => { const im = new Image(); im.onload = () => { fp.loaded.add(k); redraw(); }; im.src = 'img/pose/friend/' + id + '/' + k + '.png'; });
+    try { fetch('img/pose/friend/' + id + '/spec.json').then(r => r.ok ? r.json() : null).then(j => { if (j && typeof j === 'object') { fp.spec = j; redraw(); } }).catch(() => {}); } catch {}
+  }
+  const friendPoseOn = () => { const id = marufuwa.dataset.avatar, fp = id && FRIEND_POSE[id]; return !!(poseNow && fp && fp.loaded.has(poseNow)); };
+  const specOf = (kind, k) => { const id = marufuwa.dataset.avatar, fp = id && FRIEND_POSE[id], own = fp && fp.loaded.has(k) && fp.spec && fp.spec[kind]; const base = kind === 'tip' ? POSE_TIP : kind === 'foot' ? POSE_FOOT : kind === 'face' ? POSE_DEF.face : POSE_DEF.hang; return own || base; };
+  const poseFile = () => {
+    if (!poseNow) return '';
+    const id = marufuwa.dataset.avatar; if (id && FRIEND_POSE[id]) return friendPoseOn() ? 'img/pose/friend/' + id + '/' + poseNow + '.png' : '';
+    const k = (id || 'marufuwa') + '_' + poseNow; return POSE_FILES.includes(k) && poseLoaded.has(k) ? 'img/pose/' + POSE_DIR + k + '.png' : '';
+  };
   function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.dataset.pose = '1'; marufuwa.dataset.poseK = poseNow; marufuwa.dataset.poseSet = POSE_SET; marufuwa.dataset.poseFace = JSON.stringify(poseFaceOf(poseNow) || []); marufuwa.src = pf; footFix(); rod($('line-me'), mine, 12, $('rod-me')); return; } delete marufuwa.dataset.pose; delete marufuwa.dataset.poseK; footFix(); const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
   function drawToday() {
@@ -4168,6 +4198,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function avatarPal() { if (save.avatar === 'own') return ownOk(save.own) ? window.TsuriOwn.pal(save.own) : null; const p = typeof save.avatar === 'string' ? rosterById(save.avatar) : null; return p && metPal(p) ? p : null; }   // 'own'＝じぶんの こ（tsuri-own.js）。つくって いない・こわれて いる ときは まるふわ
   function paintAvatar() {
     const av = avatarPal(); if (av) marufuwa.dataset.avatar = av.id; else delete marufuwa.dataset.avatar;
+    if (av && !av.own) probeFriendPose(av.id);   // その こ ようの ポーズえが あれば つかう
     face(curFace);
     if (av || marufuwa.dataset.altSet) { marufuwa.dataset.altSet = av ? '1' : ''; marufuwa.alt = av ? (av.own ? L('つりを する ' + window.TsuriOwn.label(save.own), 'Fishing: ' + window.TsuriOwn.label(save.own)) : L('つりを する ' + av.name, 'Fishing: ' + palName(av))) : L('つりを する まるふわ', 'Marufuwa fishing'); }
   }
@@ -4259,6 +4290,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     }));
   }
   $('open-nakama').addEventListener('click', () => { nk.pick = null; drawNakama(); nakama.showModal(); });
+  marufuwa.addEventListener('click', () => { if ((phase === 'idle' || phase === 'caught') && !document.body.classList.contains('gazing') && getComputedStyle($('open-nakama')).display !== 'none' && !nakama.open) { nk.pick = null; drawNakama(); nakama.showModal(); } });   // つる キャラを かえる ちかみち：つりの がめんの キャラを タップ（まつ・つれた あと だけ）
   $('close-nakama').addEventListener('click', () => nakama.close());
   if (avatarPal()) paintAvatar();   // まえに えらんだ こで はじまる
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { if (avatarPal()) paintAvatar(); });   // English の えいご（alt）は ことばが きまって から もういちど（きまる まえに かいた 日本語は のこる）
