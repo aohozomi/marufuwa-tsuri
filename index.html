@@ -2198,7 +2198,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const calcWait = (base, rare, nb) => Math.round((Math.round(base * 1.6 * (1 + .08 * (rare - 1))) + Math.round(3000 + Math.random() * 3000)) * bustleFactor(nb) * (nb === 0 && Math.random() < .25 ? 2.5 : 1));
   const bustleFactor = n => n >= 3 ? 1 : n === 2 ? 2 : n === 1 ? 5.5 : 8;
   function bustleRoll() {
-    const t = scene.dataset.time, w = (t === 'yoru' ? [14, 22, 26, 20, 12, 6] : (t === 'asa' || t === 'yuu') ? [4, 10, 20, 26, 24, 16] : [6, 14, 22, 26, 20, 12]); let r = Math.random() * w.reduce((a, b) => a + b, 0), n = 0;
+    const t = scene.dataset.time, w = (t === 'yoru' ? [14, 22, 26, 20, 12, 6] : (t === 'asa' || t === 'yuu') ? [4, 10, 20, 26, 24, 16] : [6, 14, 22, 26, 20, 12]).map((x, i) => rainy ? x * [.6, .8, 1, 1.15, 1.3, 1.4][i] : x);   // あめの ひは すこし にぎやか（かげが 多めに 出る＝見える） let r = Math.random() * w.reduce((a, b) => a + b, 0), n = 0;
     for (; n < 5; n++) { r -= w[n]; if (r < 0) break; } return n;
   }
   function bustleDraw() {
@@ -2216,9 +2216,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function bustleStart() {
     BUSTLE.els.forEach(e => e.remove()); BUSTLE.els = []; BUSTLE.ws = []; BUSTLE.ars = [];
-    const pool = poolOf(save.area).filter(f => f.rare <= 2 && !f.ext), list = (pool.length ? pool : [FISH[3], FISH[12]]);
+    // 魚影の顔ぶれ（案B・10/5）：その つりばの さかなで、いまの じかんに あえる 子を えらぶ。あめの ひは ★3の 影も 1ひき まじる（あめだと ★3いじょうが 1.5ばい でやすい 本当の 決まりと そろえた＝見える 影と 出やすさが うそに ならない）。かずは bustleRoll・まちの ながさは calcWait の まま
+    const tNow = timeOfDay(), pool0 = poolOf(save.area).filter(f => f.rare <= 2 && !f.ext), pool1 = pool0.filter(f => !f.time || f.time.includes(tNow)), pool = pool1.length >= 3 ? pool1 : pool0, list = (pool.length ? pool : [FISH[3], FISH[12]]);
+    const rareNow = rainy ? poolOf(save.area).filter(f => f.rare === 3 && !f.ext && !f.legend && (!f.time || f.time.includes(tNow))) : [];
     for (let i = 0; i < 5; i++) {
-      const f = list[(i * 2 + 1) % list.length] || list[i % list.length], w0 = shadowW(Math.sqrt(f.min * f.max)), id = f.id;
+      const f = (i === 2 && rareNow.length) ? rareNow[Math.floor(Date.now() / 600000) % rareNow.length] : list[(i * 2 + 1) % list.length] || list[i % list.length], w0 = shadowW(Math.sqrt(f.min * f.max)), id = f.id;
       const el = document.createElement('div'); el.className = 'shadow drift ambient-fish away'; el.setAttribute('aria-hidden', 'true'); el.setAttribute('data-fish', String(id));
       let ar = 2.4; if (ART && ART.shadow && ART.shadowMask && ART.shadow[id]) { ar = (ART.meta && ART.meta.shadowAspect && ART.meta.shadowAspect[id]) || 2.4; el.classList.add('art'); el.style.setProperty('--m', ART.shadowMask(id)); el.style.setProperty('--ar', String(ar)); }
       el.style.cssText += ';top:' + AMB_LANES[i] + '%;--w:' + w0.toFixed(2) + '%;--wn:' + w0.toFixed(2) + ';--lap:' + AMB_LAP + 's;animation-delay:-' + (AMB_LAP * i / 5).toFixed(2) + 's';
