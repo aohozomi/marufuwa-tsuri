@@ -146,6 +146,23 @@
     'きろくはこのたんまつのなかだけにのこります。': 'Your records stay only on this device.', 'あそんでくれたひとのほしが、ならんでいるよ。': 'The stars of people who played are lined up.',
     'これはさんぷるです。': 'This is a sample.', 'ほんとうのなまえではありません。': 'These are not real names.', 'ほしぞら。ほしをさわると、なまえがでるよ': 'Starry sky. Touch a star to see a name.', 'なまえのいちらん': 'List of names',
     'このばしょは、おとなのひとがなまえをえらんでのせています。': 'In this place, grown-ups choose their names to be listed.',
+    // ---- やどや（10/4・ひろばの 宿屋）----
+    'やどや': 'Inn', 'おちゃとしおり': 'Tea & bookmark', 'こげちゃいろのきとふかみどりのやねのやどや': 'An inn with dark brown wood and a deep green roof',
+    'やどやでひとやすみ': 'A little rest at the inn', 'ランプのあかりがぽっとともったよ。なにをたのしむ？': 'The lamp has glowed on. What would you like to enjoy?',
+    'おちゃ、まどべ、しおり。すきなものをえらんでね。': 'Tea, the window, a bookmark. Pick whatever you like.',
+    '🍵おちゃをのむ': '🍵 Have some tea', '🪟まどべをながめる': '🪟 Look out the window', '📖しおりをめくる': '📖 Turn the bookmark',
+    'おちゃをのむ': 'Have some tea', 'まどべをながめる': 'Look out the window', 'しおりをめくる': 'Turn the bookmark', 'ひろばへもどる': 'Back to the plaza',
+    'おちゃのゆげがくるり。ゆげのかたちがさかなになったよ。': 'The tea steam curls up. It took the shape of a fish.',
+    'カップのふちにちいさなほしもよう。ランプがゆれているよ。': 'There is a tiny star pattern on the rim of the cup. The lamp sways softly.',
+    'あまいおちゃをひとくち。ほっぺがふわっとゆるんだ。': 'A sip of sweet tea. Your cheeks relax softly.',
+    'まどからひろばをながめる。ふんすいのみずがきらり。': 'You look at the plaza from the window. The fountain water sparkles.',
+    'はっぱがひとひら、かぜにのってとおりすぎたよ。': 'A single leaf rides the wind and floats by.',
+    'ちいさなとりがやねのうえで、ちょんとおじぎした。': 'A little bird on the roof gives a tiny bow.',
+    'まるふわがまどにほっぺをよせると、まるいあとがついた。': 'When Marufuwa rests a cheek on the window, it leaves a round mark.',
+    'しおりには、ひろばでみつけたはっぱがはさんであった。': 'A leaf found in the plaza was tucked into the bookmark.',
+    'ページのすみに「またここであおう」とちいさくかいてある。': 'In the corner of the page, someone wrote small: "Let us meet here again."',
+    'だれかがおいていったはなびら。あかりにすかすと、ももいろだ。': 'A petal someone left behind. Held to the light, it is pink.',
+    'やどやからひろばへもどったよ': 'Came back to the plaza from the inn', 'またおいでね': 'Come again!',
   };
 
   const pl = s => { const k = norm(s); return EX.get(k) || nmPal(s); };
