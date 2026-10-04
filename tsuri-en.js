@@ -113,8 +113,8 @@
     'かいがら': 'Seashell', 'きれいないし': 'Pretty stone', 'ながれぎ': 'Driftwood', 'みずくさ': 'Water plant', 'ちいさなびん': 'Little bottle', 'ほしのかけら': 'Star fragment',
     // ヒントと つりの ことば
     'ここにしよう。「なげる」をおしてね。': 'Here we go. Press “Cast”.', '「なげる」をおしてね。': 'Press “Cast”.',
-    'ぽちゃん。のんびりまとう。': "Plop. Let's wait, nice and easy.", 'ちょん、ちょん…。なにかきたかも。': 'Nibble, nibble… Something might be coming.',
-    'おすだけで、つれるよ。': "Just press, and you'll catch it.", '「ピコン」で、おしてね。': 'Press at the “ping”.', 'ひかったら、おしてね。': 'Press when it glows.',
+    'ぽちゃん。のんびりまとう。': "Plop. Let's wait, nice and easy.", 'ちょん、ちょん…。なにかいる。': 'Nibble, nibble… Something might be coming.',
+    'おすだけで、つれるよ。': "Just press, and you'll catch it.", '「ピコン」でおす。': 'Press at the “ping”.', 'ひかったらおす。': 'Press when it glows.',
     'ぴったり！！': 'Perfect!!', 'いいね！': 'Nice!', 'おしい！': 'So close!', 'ちかい！': 'So close!',
     'つれた！': 'Got one!', 'のんびりだね': 'Nice and slow.', 'いいかぜ': 'Nice breeze.', 'おおきいのきたかも': 'Maybe a big one is coming.', 'おなかすいたね': "I'm getting hungry.", 'きょうはいいひ': 'Such a nice day.',
     'あめもいいね': 'Rain is nice, too.', 'ぽつぽつきこえる': 'Pitter-patter…', 'かさ、いる？': 'Need an umbrella?', 'あめのひはよくつれるよ': 'You catch more on rainy days.',
@@ -391,9 +391,9 @@
     [/^あたらしくふえたよ：(.*)$/, (_, r) => { const t = tailEn(r); return t == null ? null : `New: ${t}`; }],
     [/^ぴったり×(\d+)$/, (_, n) => `Perfect ×${n}`],
     [/^(ぴったり！！|いいね！|おしい！|ちかい！)あとすこし。$/, (_, w) => `${EX.get(norm(w))} Almost there.`],
-    [/^(にじいろにひかるかげ…！なんだろう。|とてもおおきなかげ…！ぬしかも。|きんいろのかげ…！スペシャルなこかも。|ひかるかげがきた！|きた！)「ひく！」をおしてね。いそがなくてだいじょうぶ。$/, (_, w) => ({
-      'にじいろにひかるかげ…！なんだろう。': 'A rainbow-colored shadow…! What could it be?', 'とてもおおきなかげ…！ぬしかも。': 'A huge shadow…! Could it be the Guardian?',
-      'きんいろのかげ…！スペシャルなこかも。': 'A golden shadow…! Maybe a Special one.', 'ひかるかげがきた！': 'A shining shadow appeared!', 'きた！': 'A bite!' }[w] + ' Press “Reel in!” No rush.')],
+    [/^(にじいろにひかるかげ…。なんだ？|おおきなかげ…。ぬしか？|きんいろのかげ…。とくべつないっぴきか？|ひかるかげがきた！|きた！)「ひく！」をおしてね。いそがなくてだいじょうぶ。$/, (_, w) => ({
+      'にじいろにひかるかげ…。なんだ？': 'A rainbow-colored shadow…! What could it be?', 'おおきなかげ…。ぬしか？': 'A huge shadow…! Could it be the Guardian?',
+      'きんいろのかげ…。とくべつないっぴきか？': 'A golden shadow…! Maybe a Special one.', 'ひかるかげがきた！': 'A shining shadow appeared!', 'きた！': 'A bite!' }[w] + ' Press “Reel in!” No rush.')],
     [/^おとをつけたよ。わがちかづくとおとがたかくなって、「ピコン」でおしてね。(きこえないときは、よこのマナースイッチをみてね。)?$/, (_, s) => 'Sound is on. As the ring closes in, the sound gets higher — press at the “ping”.' + (s ? " Can't hear it? Check the silent switch on the side." : '')],
     [/^にがしたこ：(\d+)ひき。またあえるよ。$/, (_, n) => `Released: ${n}. You can meet them again.`],
     [/^★5のまぼろしのこ：ぜんいんにあえたよ！$/, () => 'Mythical ★5 fish: you met them all!'],
