@@ -39,7 +39,7 @@
       var panel = night ? (opt.panelNight || 'rgba(244,241,252,.84)') : (opt.panel || 'rgba(255,255,255,.82)');
       if (opt.blur) {   // blur：同じ 絵を ぼかして ページの 地に（別の 絵に 見えない）。body の うしろに 敷く（fixed は つかわない）
         st.textContent = 'html.pagebg-on body{position:relative;isolation:isolate;overflow-x:clip;background:' + (night ? '#1a1228' : '#2a1d14') + '}'
-          + 'html.pagebg-on body::before{content:"";position:absolute;inset:-40px;z-index:-1;background:' + over + 'url("' + hit.url + '") center/cover no-repeat;filter:blur(' + (+opt.blur || 18) + 'px);pointer-events:none}'
+          + 'html.pagebg-on body::before{content:"";position:absolute;inset:0;z-index:-1;background:' + over + 'url("' + hit.url + '") center/cover no-repeat;filter:blur(' + (+opt.blur || 18) + 'px);pointer-events:none}'
           + 'html.pagebg-on .room{background:' + panel + '!important;' + (opt.border ? 'border-color:' + opt.border + '!important;' : '') + '-webkit-backdrop-filter:none;backdrop-filter:none}';
         root.classList.add('pagebg-on'); return;
       }
