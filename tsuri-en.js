@@ -390,6 +390,7 @@
     [/^(.+?)をみずにかえしたよ。またあおうね。$/, (_, f) => `${nmFish(f)} went back to the water. See you again.`],
     [/^あたらしくふえたよ：(.*)$/, (_, r) => { const t = tailEn(r); return t == null ? null : `New: ${t}`; }],
     [/^ぴったり×(\d+)$/, (_, n) => `Perfect ×${n}`],
+    [/^(\d+(?:\.\d+)?)cmのびた$/, (_, n) => `+${n} cm`],
     [/^(ぴったり！！|いいね！|おしい！|ちかい！)あとすこし。$/, (_, w) => `${EX.get(norm(w))} Almost there.`],
     [/^(にじいろにひかるかげ…。なんだ？|おおきなかげ…。ぬしか？|きんいろのかげ…。とくべつないっぴきか？|ひかるかげがきた！|きた！)「ひく！」をおしてね。いそがなくてだいじょうぶ。$/, (_, w) => ({
       'にじいろにひかるかげ…。なんだ？': 'A rainbow-colored shadow…! What could it be?', 'おおきなかげ…。ぬしか？': 'A huge shadow…! Could it be the Guardian?',

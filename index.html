@@ -2477,6 +2477,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const aimed = 1 + Math.min(.1, perfects * .025);
     const size = Math.round((plannedBase != null ? plannedBase : nushi ? fish.max * (1.25 + Math.random() * .35) : fish.min + range * Math.pow(Math.random(), save.bait === 2 ? 1.1 : 1.8)) * aimed * 100) / 100; plannedBase = null;   // 「ひく」まえに きめた おおきさ
     const old = save.fish[fish.id], first = !old, record = !first && size > old.best, big = !nushi && size >= fish.min + range * .8, firstNushi = nushi && !(old && old.nushi);
+    const recDelta = !first && size > old.best ? Math.round((size - old.best) * 10) / 10 : 0;   // じぶんの きろくより なんcm のびたか（数だけ・くらべない）
     const had = [...AREAS.filter(a => save.total >= a.need), ...RODS.filter(r => r.open(save)), ...BAITS.filter(b => b.open(save))];
     save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
     const lvBefore = levelOf(save.xp || 0); save.xp = (save.xp || 0) + xpFor(fish, {nushi, first, record, big, perfects}); const lvNow = levelOf(save.xp), leveled = lvNow > lvBefore;
@@ -2501,6 +2502,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (nushi) tags.push('ぬし'); if (first) tags.push('はじめて！'); if (record) tags.push('じぶんの きろく！'); if (big) tags.push('おおもの'); if (RARE_LABEL[fish.rare]) tags.push(RARE_LABEL[fish.rare]); if (fish.season) tags.push(L('この つきの さかな', 'This month' + String.fromCharCode(39) + 's fish'));
     $('card-tags').replaceChildren(...tagsShown(levelInBand ? tags.filter(text => text !== 'レベルアップ！') : tags).map(text => { const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = T(text); return tag; }));   // 英語の ときは さいしょから 英語で わたす（日本語の まま わたすと 外付けの 英語エンジンが <span> を ひとまとめに して タグの ふちが きえる）
     // 「ぴったり」の ごほうび：はんこが おされる
+    if (recDelta > 0) { const dt = document.createElement('span'); dt.className = 'tag'; dt.textContent = L(recDelta + ' cm のびた', '+' + recDelta + ' cm'); $('card-tags').append(dt); tags.push(recDelta + ' cm のびた'); }
     if (perfects >= 2) { const stamp = document.createElement('span'); stamp.className = 'stamp'; stamp.textContent = T('ぴったり ×' + perfects); $('card-tags').append(stamp); tags.push('ぴったり ×' + perfects); }
     // あたらしい つりばが ひらいたら、そのまま いける ボタンを だす
     const opened = AREAS.find(a => a.need > 0 && a.need === save.total), go = $('go-area');
