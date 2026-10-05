@@ -1805,7 +1805,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   { const REWARD = ['palup', 'trophy', 'party', 'catchLegend', 'catchBig', 'catchNormal', 'loved', 'gift', 'star', 'wish']; let lastReward = -1e9;   // ごほうびの おとは 2びょうに 1つだけ（かさなって ガランガランに ならない・あとの ものは すてる）
     REWARD.forEach(k => { const f = SFX[k]; if (typeof f === 'function') SFX[k] = (...a) => { const now = performance.now(); if (now - lastReward < 2000) return; lastReward = now; return f(...a); }; }); }
   // ===== あたらしい こうかおん 8つだけ（10/2・マスターの OK・総司令部が えらんだ A/B/C）。ふるい こうかおん（tone/chord/zap）は ぜんぶ とめた まま。ファイルは snd/sfx/*.wav（ためしと おなじ 波形・おおきさ ×1）
-  const SFX_NEW = true, SFX_FILES = {nageru: 'snd/sfx/nageru.wav', chakusui: 'snd/sfx/chakusui.wav', chon: 'snd/sfx/chon.wav', atari: 'snd/sfx/atari.wav', hiku: 'snd/sfx/hiku.wav', pittari: 'snd/sfx/pittari.wav', tsureta: 'snd/sfx/tsureta.wav', nogashita: 'snd/sfx/nogashita.wav', pikon: 'snd/sfx/pikon.wav', shu: 'snd/sfx/shu.wav', pocha: 'snd/sfx/pocha.wav', streak: 'snd/sfx/streak.wav', tame: 'snd/sfx/tame.wav', tamehit: 'snd/sfx/tamehit.wav'};
+  const SFX_NEW = true, SFX_FILES = {nageru: 'snd/sfx/nageru.wav', chakusui: 'snd/sfx/chakusui.wav', chon: 'snd/sfx/chon.wav', atari: 'snd/sfx/atari.wav', hiku: 'snd/sfx/hiku.wav', pittari: 'snd/sfx/pittari.wav', tsureta: 'snd/sfx/tsureta.wav', nogashita: 'snd/sfx/nogashita.wav', pikon: 'snd/sfx/pikon.wav', shu: 'snd/sfx/shu.wav', pocha: 'snd/sfx/pocha.wav', tsureta_big: 'snd/sfx/tsureta_big.wav', tsureta_legend: 'snd/sfx/tsureta_legend.wav', streak: 'snd/sfx/streak.wav', tame: 'snd/sfx/tame.wav', tamehit: 'snd/sfx/tamehit.wav'};
   const sfxBuf = {}; let sfxLoading = false, sfxLastReward = -1e9;
   function sfxLoad() { if (sfxLoading || !SFX_NEW || !sndOn('fx')) return; sfxLoading = true; try { const ctx = ready(); Object.entries(SFX_FILES).forEach(([k, u]) => { fetch(u).then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b)).then(buf => { sfxBuf[k] = buf; }).catch(() => {}); }); } catch { sfxLoading = false; } }
   addEventListener('load', () => setTimeout(() => { try { if (save.sound) sfxLoad(); } catch {} }, 600));   // おとが ONなら さきに よみこむ（さいしょの 1かい目から なる）
@@ -1825,7 +1825,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     streak: () => sfxPlay('streak', .25),   // ぴったり 5・8れんぞくの 見せ場（ひくい やわらかい 2おと）
     tame: () => sfxPlay('tame'),             // ためて いる（1しゅう おさずに まった）
     tamehit: () => sfxPlay('tamehit'),       // ため引きが きまった
-    catchNormal: () => sfxReward('tsureta'), catchBig: () => sfxReward('tsureta'), catchLegend: () => sfxReward('tsureta'),
+    catchNormal: () => sfxReward('tsureta'), catchBig: () => sfxReward('tsureta_big'), catchLegend: () => sfxReward('tsureta_legend'),   // 大物・ぬし・まぼろしは ひくい 音を 足した 控えめな 音色差
     snap: () => sfxPlay('nogashita'),
     pikon: () => sfxPlay('pikon', 0, 'guide')   // あんない音（ふつう 既定 ON・せっていで きれる）：わが まとに かさなる しゅんかんの ひくい やわらかい 1おと（294Hz・ごく ちいさく）
   });
