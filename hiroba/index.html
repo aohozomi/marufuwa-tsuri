@@ -97,6 +97,7 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 /* せってい（⚙）：さいしょは ⚙ だけ（世界を ぜんめんに）。ひらくと おと・BGM・くみたてる・うごきが ならぶ。がめんの 上に かぶせる だけ（そとの ものが ずれない） */
 .hud-wrap{position:static}   /* ⚙の パネルは 上の 列（.top）の みぎはしに そろえる（列が 2行に おれても がめんの そとへ 出ない） */
 .top{position:relative}
+#tap-hint:not([hidden])~.mutegrp .mutehint{top:calc(100% + 40px)}   /* 「どこかを さわると…」が 出て いる あいだは、ミュートの 案内を 1だん 下に（かさならない・10/6 Claude） */
 .mutegrp{position:relative;display:flex;align-items:center;gap:6px;margin-left:auto}
 .mutehint{position:absolute;right:0;top:calc(100% + 6px);z-index:70;pointer-events:none;padding:3px 10px;border-radius:12px;background:#fffffff2;border:2px solid #bfdce8;font-weight:800;font-size:.8rem;color:#244653;white-space:nowrap}
 #mute{white-space:nowrap;min-height:44px;min-width:44px;padding:4px 9px;font-size:.8rem;border-width:2px;box-shadow:0 3px 0 var(--side),inset 0 -4px 6px #00000012,inset 0 3px 5px #ffffffcc}   /* おとを けす／ならす（いちばん 上・44px いじょう） */
@@ -799,7 +800,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=82"></script>
+<script defer src="../tsuri-ver.js?v=83"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -2408,7 +2409,7 @@ drawSound();
 if (soundOn()) { const th = $('tap-hint'); th.hidden = false; const hide = () => { th.hidden = true; }; ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, hide, { once: true, passive: true })); }   // 音が ON の まま さいしょの タップまで だけ
 { const wake = () => { if (soundOn()) { startAmbient(); if (window.TsuriBgm) window.TsuriBgm.refresh(); } }; ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, wake, { once: true, passive: true })); }
 // はじめて ひらいた ときだけ、🔇の よこに「ミュートボタンは こちら →」を 3びょう（まるいろと おなじ）
-if (!own.muteHint) { const h = $('mutehint'); h.hidden = false; own.muteHint = 1; saveOwn(); setTimeout(() => { h.hidden = true; }, 3000); }
+if (!own.muteHint) { const h = $('mutehint'), th = $('tap-hint'), show = () => { h.hidden = false; setTimeout(() => { h.hidden = true; }, 3000); }; own.muteHint = 1; saveOwn(); if (th.hidden) show(); else ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => setTimeout(show, 80), { once: true, passive: true })); }   // 「どこかを さわると…」が 出て いる ときは、さいしょの タップの あとに 出す（2つが かさならない）
 // ─── BGM（外付け tsuri-bgm.js。はじめは OFF。「おと」が ON の 時だけ ながれる。ひろばの 曲：あさ・ひる・ゆうがた＝A、よる＝C）───
 //   「BGM」ボタンは おとの となり。おとが OFF の まま おしたら、おとも つける。ながす 音の 部品（AudioContext）は、ひろばの ものを かりる
 if (window.TsuriBgm) {
