@@ -315,6 +315,14 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 .prop[data-id=machi]::after,.prop[data-id=house]::after,.prop[data-id=inn]::after,.prop[data-id=cafe]::after{content:"";position:absolute;left:-14%;right:-14%;top:72%;height:52%;z-index:-1;pointer-events:none;
   background:radial-gradient(ellipse 50% 50% at 50% 42%,var(--grass2) 0 56%,var(--grass) 66%,transparent 70%)}
 .prop[data-id=inn]::after{top:80%;height:40%}
+/* 天空の まちかど（10/6 マスター「天空で面白いやん」）：manifest の machi_sky で、まちかどを「白い 天空の城（雲と 浮島つき）」の 絵に 差しかえる。
+   わざと 浮いて いる ことが 分かる よう、ゆっくり 上下に ゆれる（うごきを へらす では 止まる）。足もとの 丘は 消す。押せる 範囲は 絵ぜんたい */
+.prop[data-art=sky]::after{display:none}
+.prop[data-art=sky] img{display:block;width:100%;height:100%;object-fit:contain;object-position:50% 100%;filter:var(--m013-time-filter,none);pointer-events:none}
+.prop[data-art=sky]{animation:skyfloat 6s ease-in-out infinite}
+@keyframes skyfloat{0%,100%{translate:0 0}50%{translate:0 -4px}}
+@media (prefers-reduced-motion:reduce){.prop[data-art=sky]{animation:none}}
+html[data-calm=true] .prop[data-art=sky]{animation:none}
 .prop[data-id=trace-flower]::before{content:"";position:absolute;inset:-14px}
 .canopy{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.6s ease-in-out infinite alternate}
 .jet{stroke-dasharray:4 6;animation:flow .9s linear infinite}
@@ -824,7 +832,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=89"></script>
+<script defer src="../tsuri-ver.js?v=90"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -3278,6 +3286,21 @@ async function applyArt() {
   let list = [];
   let files = {}, man = {};
   try { const r = await fetch(ART_DIR + 'manifest.json', { cache: 'no-cache' }); if (r.ok) { const j = await r.json(); if (j && typeof j === 'object') man = j; if (j && Array.isArray(j.hills)) list = j.hills.filter(x => /^(asa|hiru|yuu|yoru)$/.test(x)); if (j && j.hills_files && typeof j.hills_files === 'object') files = j.hills_files; } } catch {}   // hills_files: { hiru: 'assets/…/yama.png' }＝このページからの 相対パス（png でも よい）。なければ plaza_hills_<名前>.webp
+  // 天空の まちかど：machi_sky = { file:'assets/…/castle.png', w:120, h:140, lift:18 }（hiroba/ からの 相対パス・w/h は 世界の 単位・lift は もとの 足もとから 上げる 高さ）
+  try {
+    const ms = man.machi_sky, el = typeof propEl === 'function' ? propEl('machi') : null, P = (typeof PROPS !== 'undefined') && PROPS.find(x => x.id === 'machi');
+    if (ms && typeof ms.file === 'string' && /^[\w\-./]+$/.test(ms.file) && !/^(\.\.\/)*\.\.\//.test(ms.file.replace(/^\.\.\//, '')) && el && P) {
+      const w = Number.isFinite(ms.w) ? ms.w : 120, h = Number.isFinite(ms.h) ? ms.h : 140, lift = Number.isFinite(ms.lift) ? ms.lift : 18, x = Number.isFinite(ms.x) ? ms.x : P.x, y = P.y - lift;
+      const img = new Image(); img.alt = ''; img.decoding = 'async';
+      img.onload = () => {
+        const keep = el.querySelector('.mark');
+        el.innerHTML = ''; el.append(img); if (keep) el.append(keep);
+        el.dataset.art = 'sky';
+        el.style.left = (x - w / 2) / W * 100 + '%'; el.style.top = (y - h) / H * 100 + '%'; el.style.width = w / W * 100 + '%'; el.style.height = h / H * 100 + '%';
+      };
+      img.src = ms.file;   // 読めなければ 何も 変えない（今の まちかどの まま）
+    }
+  } catch {}
   const bg = document.getElementById('bg'), first = bg && bg.querySelector('.hillpath');
   if (!list.length || !first) return;
   // 置き方（manifest・任意）：hills_box=[x,y,w,h]（viewBox 720×560 の 中・既定は 山の 帯 [0,146,720,150]）／hills_fit='slice'|'meet'|'none'（既定 slice）
