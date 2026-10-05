@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<title>まるふわ いろ診断｜きょうの きもちを 耳の いろで</title>
+<meta name="description" content="3つ こたえると、まるふわの 耳の いろで きょうの きもちが わかる あそび。こたえは この たんまつの なかだけ（おくらない・のこさない）。">
+<meta name="theme-color" content="#b9edf5">
+<link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="まるふわ いろ診断">
+<meta property="og:description" content="3つ こたえると、まるふわの 耳の いろで きょうの きもちが わかる あそび。">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og.png">
+<script>
+/* まるふわ いろ診断（10/6・Claude＝総司令部）。全部 この たんまつの なかだけ：こたえを おくらない・のこさない・かぞえない。
+   よる／もじを おおきく／うごきを へらす は つりびよりの ほぞんを よむだけ。?lang=en で 英語 */
+try {
+  var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d = document.documentElement, qs = new URLSearchParams(location.search);
+  if (matchMedia('(prefers-color-scheme: dark)').matches || h >= 22 || h < 4) { d.dataset.night = 'true'; var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = '#0f1c33'; }
+  if (sv.large === true) d.dataset.large = 'true';
+  if (sv.calm === true) d.dataset.calm = 'true';
+  if ((qs.get('lang') || localStorage.getItem('marufuwa-lang-v1')) === 'en') { d.lang = 'en'; window.TsuriEn = {lang: 'en'}; }
+} catch (e) {}
+</script>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:#244653;background:#edf6fa;color-scheme:light;touch-action:manipulation;--ink:#244653;--soft:#506874;--line:#bfe0ef;--card:#ffffffe6;--accent:#0b4a6b}
+:root[data-night=true]{color:#e8f1f8;background:#0f1c33;color-scheme:dark;--ink:#e8f1f8;--soft:#a9bfd2;--line:#4a6b8c;--card:#1a3250f2;--accent:#cfe6f7}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+main{max-width:480px;margin:0 auto;padding:18px 16px calc(40px + env(safe-area-inset-bottom));word-break:keep-all;overflow-wrap:break-word;text-align:center}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.top a{color:var(--ink);font-weight:800;text-decoration:none;padding:10px 12px;border-radius:999px;border:2px solid var(--line);background:var(--card);min-height:44px;display:inline-flex;align-items:center}
+h1{margin:4px 0 6px;font-size:1.35rem;line-height:1.4}
+.lead{margin:0 0 14px;font-size:.95rem;line-height:1.8;color:var(--soft);text-wrap:balance}
+.q{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:14px 14px 12px;margin:0 0 12px;text-align:left}
+.q h2{margin:0 0 10px;font-size:1.05rem;line-height:1.5}
+.opts{display:grid;gap:8px}
+.opts button{font:inherit;font-size:1.02rem;font-weight:800;color:var(--ink);background:#ffffffcc;border:2px solid var(--line);border-radius:16px;min-height:52px;padding:10px 14px;text-align:left;cursor:pointer}
+:root[data-night=true] .opts button{background:#223a5a}
+.opts button[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.opts button:focus-visible,.go:focus-visible,.acts button:focus-visible,.top a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.go{display:block;width:100%;min-height:64px;margin:6px 0 0;font:inherit;font-size:1.15rem;font-weight:900;color:#fff;background:linear-gradient(180deg,#2a8cc0,#0e5a82);border:3px solid #fff;border-radius:999px;box-shadow:0 5px 0 #0a4262;cursor:pointer}
+.go[disabled]{opacity:.45;cursor:default}
+.res{display:none;background:var(--card);border:2px solid var(--line);border-radius:24px;padding:16px 14px;margin:14px 0}
+.res[data-on=true]{display:block}
+.card{position:relative;width:100%;max-width:300px;aspect-ratio:9/16;margin:0 auto 10px;border-radius:18px;overflow:hidden;border:3px solid #fff;box-shadow:0 8px 20px #24465333}
+.card img{position:absolute;left:18%;top:22%;width:64%;height:auto}
+.card .ears{position:absolute;left:18%;top:22%;width:64%;height:auto;clip-path:polygon(0 0,100% 0,100% 24%,0 24%);filter:hue-rotate(58deg) saturate(.9)}
+.card .cname{position:absolute;left:0;right:0;top:8%;font-weight:900;font-size:1.05rem;color:#244653;text-shadow:0 1px 0 #fff}
+.card .cword{position:absolute;left:8%;right:8%;bottom:14%;font-weight:800;font-size:.9rem;line-height:1.6;color:#244653;background:#ffffffd0;border-radius:12px;padding:8px 10px}
+.card .curl{position:absolute;left:0;right:0;bottom:4%;font-size:.62rem;color:#35566a;letter-spacing:.02em}
+.rname{margin:0 0 4px;font-size:1.2rem}
+.rword{margin:0 0 12px;font-size:1rem;line-height:1.8}
+.acts{display:grid;gap:10px}
+.acts button{font:inherit;font-size:1.02rem;font-weight:800;color:var(--ink);background:#ffffffcc;border:2px solid var(--line);border-radius:999px;min-height:52px;cursor:pointer}
+:root[data-night=true] .acts button{background:#223a5a}
+.next{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.next a{color:var(--ink);font-weight:800;text-decoration:none;padding:10px 14px;border-radius:999px;border:2px solid var(--line);background:var(--card);min-height:44px;display:inline-flex;align-items:center}
+.note{font-size:.8rem;color:var(--soft);line-height:1.7;margin:14px 0 0}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px}
+canvas{display:none}
+:root[data-calm=true] *{transition:none !important;animation:none !important}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><a href="../hiroba/" id="a-back">← ひろばへ</a><a href="?lang=en" id="a-lang" lang="en">English</a></div>
+  <h1 id="title">まるふわ いろ診断</h1>
+  <p class="lead" id="lead">3つ こたえると、まるふわの 耳の いろで、きょうの きもちが わかるよ。あそびだよ。こたえは この たんまつの なかだけ。</p>
+
+  <section class="q" aria-labelledby="q1"><h2 id="q1">1. いまの からだは？</h2><div class="opts" role="group" aria-labelledby="q1" data-q="1">
+    <button type="button" data-v="1" aria-pressed="false">ふわふわ（のんびり）</button>
+    <button type="button" data-v="2" aria-pressed="false">そわそわ（うごきたい）</button>
+    <button type="button" data-v="3" aria-pressed="false">ぼーっと（ねむい）</button></div></section>
+  <section class="q" aria-labelledby="q2"><h2 id="q2">2. いま ほしいものは？</h2><div class="opts" role="group" aria-labelledby="q2" data-q="2">
+    <button type="button" data-v="1" aria-pressed="false">あったかい のみもの</button>
+    <button type="button" data-v="2" aria-pressed="false">おいしい おやつ</button>
+    <button type="button" data-v="3" aria-pressed="false">しずかな じかん</button></div></section>
+  <section class="q" aria-labelledby="q3"><h2 id="q3">3. すきな じかんは？</h2><div class="opts" role="group" aria-labelledby="q3" data-q="3">
+    <button type="button" data-v="1" aria-pressed="false">あさ</button>
+    <button type="button" data-v="2" aria-pressed="false">ひる・ゆうがた</button>
+    <button type="button" data-v="3" aria-pressed="false">よる</button></div></section>
+
+  <button type="button" class="go" id="go" disabled>けっかを みる</button>
+
+  <section class="res" id="res" data-on="false" aria-live="polite" tabindex="-1">
+    <div class="card" id="card">
+      <div class="cname" id="cname"></div>
+      <img id="cimg" src="../img/game-blue.webp" width="240" height="320" alt="">
+      <img id="cears" class="ears" src="../img/game-blue.webp" width="240" height="320" alt="" hidden>
+      <div class="cword" id="cword"></div>
+      <div class="curl">aohozomi.github.io/marufuwa-tsuri</div>
+    </div>
+    <h2 class="rname" id="rname"></h2>
+    <p class="rword" id="rword"></p>
+    <div class="acts">
+      <button type="button" id="b-save">カードを ほぞんする</button>
+      <button type="button" id="b-share">ともだちに おくる</button>
+      <button type="button" id="b-again">もういちど</button>
+    </div>
+    <div class="next"><a href="../" id="a-tsuri">まるふわと つりを する</a><a href="../links/" id="a-app">アプリを みる</a></div>
+  </section>
+  <p class="note" id="note">こたえは おくらない・のこさない・かぞえない。カードを「ほぞん」「おくる」した ときだけ、えが この たんまつの そとに でるよ（あなたが えらんだ ときだけ）。</p>
+  <div class="sr-only" id="live" role="status" aria-live="polite"></div>
+  <canvas id="cv" width="1080" height="1920"></canvas>
+</main>
+<script>
+(function () {
+  'use strict';
+  var EN = !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+  var L = function (ja, en) { return EN ? en : ja; };
+  var $ = function (id) { return document.getElementById(id); };
+  // 採点表（Apps/Marufuwa/診断_まるふわいろ_仕様.md）：[水色, ミント, アプリコット, ラベンダー]
+  var T = { 1: { 1: [1, 1, 0, 0], 2: [0, 0, 1, 0], 3: [0, 0, 0, 1] }, 2: { 1: [1, 0, 0, 0], 2: [0, 0, 1, 0], 3: [0, 1, 0, 1] }, 3: { 1: [0, 1, 0, 0], 2: [1, 0, 1, 0], 3: [0, 0, 0, 1] } };
+  var C = [
+    { key: 'mizu', img: '../img/game-blue.webp', bg: ['#dff3fb', '#bfe6f9'], name: L('ふだんの いろ', 'Everyday blue'), word: L('きょうは、いつもの ペースで いいよ。', 'Today, your usual pace is just right.') },
+    { key: 'mint', img: '../img/game-mint.webp', bg: ['#e4f8ee', '#bfeedb'], name: L('ごきげんの いろ', 'Cheerful mint'), word: L('ごきげん。きょうの いいこと、ひとつ みつけてね。', 'In a good mood. Find one nice thing today.') },
+    { key: 'apricot', img: '../img/game-apricot.webp', bg: ['#fff0e3', '#ffd9bd'], name: L('うれしい いろ', 'Happy apricot'), word: L('なにか いい ことが ありそう。おやつ、たべよ。', 'Something nice may happen. Have a snack.') },
+    { key: 'lavender', img: '../img/game-blue.webp', ears: true, bg: ['#efe9fb', '#d9ccf5'], name: L('ぼんやりの いろ', 'Sleepy lavender'), word: L('ぼんやり してても いいよ。ここに いて いいよ。', 'It is fine to drift. You are welcome here.') }
+  ];
+  if (EN) {
+    document.title = 'Marufuwa Color Check';
+    $('title').textContent = 'Marufuwa Color Check'; $('lead').textContent = 'Answer three questions, and Marufuwa’s ear color shows how today feels. Just for fun. Your answers stay on this device.';
+    $('q1').textContent = '1. How does your body feel right now?'; $('q2').textContent = '2. What do you want right now?'; $('q3').textContent = '3. Your favorite time of day?';
+    var t = { '1': ['Fluffy (relaxed)', 'Restless (want to move)', 'Dreamy (sleepy)'], '2': ['A warm drink', 'A tasty snack', 'Some quiet time'], '3': ['Morning', 'Daytime / evening', 'Night'] };
+    document.querySelectorAll('.opts').forEach(function (g) { g.querySelectorAll('button').forEach(function (b, i) { b.textContent = t[g.dataset.q][i]; }); });
+    $('go').textContent = 'See my color'; $('b-save').textContent = 'Save the card'; $('b-share').textContent = 'Send to a friend'; $('b-again').textContent = 'Try again';
+    $('a-tsuri').textContent = 'Go fishing with Marufuwa'; $('a-app').textContent = 'See the app'; $('a-back').textContent = '← Plaza'; $('a-lang').textContent = '日本語'; $('a-lang').href = '?lang=ja'; $('a-lang').lang = 'ja';
+    $('note').textContent = 'Answers are not sent, stored or counted. The picture leaves this device only when you choose Save or Send.';
+    $('a-tsuri').href = '../en/';
+  }
+  var ans = {};
+  document.querySelectorAll('.opts').forEach(function (g) {
+    g.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      g.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+      b.setAttribute('aria-pressed', 'true'); ans[g.dataset.q] = +b.dataset.v;
+      $('go').disabled = !(ans[1] && ans[2] && ans[3]);
+    });
+  });
+  function pick(a) {   // 合計が いちばん 多い いろ。同点は 2問目の いろを 優先（+0.5）。それでも 同点なら 水色→ミント→アプリコット→ラベンダー の 順
+    var s = [0, 0, 0, 0], q;
+    for (q = 1; q <= 3; q++) T[q][a[q]].forEach(function (v, i) { s[i] += v; });
+    T[2][a[2]].forEach(function (v, i) { if (v) s[i] += .5; });
+    var best = 0; for (var i = 1; i < 4; i++) if (s[i] > s[best]) best = i;
+    return best;
+  }
+  window.__pick = pick;   // 検査用
+  var cur = null;
+  function show(i) {
+    cur = C[i];
+    $('cimg').src = cur.img; $('cears').hidden = !cur.ears; $('cears').src = cur.img;
+    $('card').style.background = 'linear-gradient(180deg,' + cur.bg[0] + ',' + cur.bg[1] + ')';
+    $('cname').textContent = cur.name; $('cword').textContent = cur.word; $('rname').textContent = cur.name; $('rword').textContent = cur.word;
+    $('res').dataset.on = 'true'; $('res').focus(); $('live').textContent = cur.name + '. ' + cur.word;
+  }
+  $('go').addEventListener('click', function () { if (!(ans[1] && ans[2] && ans[3])) return; show(pick(ans)); });
+  $('b-again').addEventListener('click', function () {
+    ans = {}; document.querySelectorAll('.opts button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); }); $('go').disabled = true; $('res').dataset.on = 'false'; $('q1').scrollIntoView({ block: 'start' }); $('q1').focus && $('q1').focus();
+  });
+  // カード（1080×1920・たんまつの なかで えがく）
+  function draw(cb) {
+    var cv = $('cv'), g = cv.getContext('2d'), W = cv.width, H = cv.height, im = new Image();
+    im.onload = function () {
+      var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, cur.bg[0]); gr.addColorStop(1, cur.bg[1]); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      g.fillStyle = '#244653'; g.textAlign = 'center'; g.font = '900 72px system-ui, sans-serif'; g.fillText(cur.name, W / 2, 230);
+      var iw = W * .64, ih = iw * im.height / im.width, ix = (W - iw) / 2, iy = H * .22;
+      g.drawImage(im, ix, iy, iw, ih);
+      if (cur.ears) { g.save(); g.beginPath(); g.rect(ix, iy, iw, ih * .24); g.clip(); g.filter = 'hue-rotate(58deg) saturate(.9)'; g.drawImage(im, ix, iy, iw, ih); g.restore(); }
+      g.fillStyle = '#ffffffd9'; roundRect(g, W * .08, H * .76, W * .84, 220, 28); g.fill();
+      g.fillStyle = '#244653'; g.font = '800 46px system-ui, sans-serif'; wrap(g, cur.word, W / 2, H * .76 + 90, W * .78, 64);
+      g.fillStyle = '#35566a'; g.font = '600 34px system-ui, sans-serif'; g.fillText('aohozomi.github.io/marufuwa-tsuri', W / 2, H - 70);
+      cb(cv);
+    };
+    im.src = cur.img;
+  }
+  function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function wrap(g, text, x, y, maxW, lh) { var line = '', i, ch; for (i = 0; i < text.length; i++) { ch = text[i]; if (g.measureText(line + ch).width > maxW && line) { g.fillText(line, x, y); line = ch; y += lh; } else line += ch; } if (line) g.fillText(line, x, y); }
+  function fileName() { return L('まるふわ_いろ診断', 'marufuwa_color') + '_' + cur.key + '.png'; }
+  $('b-save').addEventListener('click', function () {
+    if (!cur) return;
+    draw(function (cv) { cv.toBlob(function (bl) { var a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = fileName(); document.body.append(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000); $('live').textContent = L('カードを ほぞんしたよ。', 'Saved the card.'); }, 'image/png'); });
+  });
+  $('b-share').addEventListener('click', function () {
+    if (!cur) return;
+    draw(function (cv) { cv.toBlob(function (bl) {
+      var f = new File([bl], fileName(), { type: 'image/png' }), data = { files: [f], title: L('まるふわ いろ診断', 'Marufuwa Color Check'), text: cur.name + ' ' + cur.word + ' https://aohozomi.github.io/marufuwa-tsuri/shindan/' + (EN ? '?lang=en' : '') };
+      if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [f] }))) navigator.share(data).catch(function () {});
+      else { $('b-save').click(); $('live').textContent = L('この たんまつでは おくれないので、ほぞんしたよ。', 'Sharing is not available here, so the card was saved instead.'); }
+    }, 'image/png'); });
+  });
+})();
+</script>
+</body>
+</html>
