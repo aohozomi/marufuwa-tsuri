@@ -799,7 +799,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=80"></script>
+<script defer src="../tsuri-ver.js?v=81"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -3249,7 +3249,8 @@ async function applyArt() {
 (async () => {
   if (q.get('art') === 'off') return;
   let list = [];
-  try { const r = await fetch(ART_DIR + 'manifest.json', { cache: 'no-cache' }); if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.hills)) list = j.hills.filter(x => /^(asa|hiru|yuu|yoru)$/.test(x)); } } catch {}
+  let files = {};
+  try { const r = await fetch(ART_DIR + 'manifest.json', { cache: 'no-cache' }); if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.hills)) list = j.hills.filter(x => /^(asa|hiru|yuu|yoru)$/.test(x)); if (j && j.hills_files && typeof j.hills_files === 'object') files = j.hills_files; } } catch {}   // hills_files: { hiru: 'assets/…/yama.png' }＝このページからの 相対パス（png でも よい）。なければ plaza_hills_<名前>.webp
   const bg = document.getElementById('bg'), first = bg && bg.querySelector('.hillpath');
   if (!list.length || !first) return;
   const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
@@ -3259,7 +3260,8 @@ async function applyArt() {
   const apply = () => {
     const t = scene.dataset.time, use = list.includes(t) ? t : (t !== 'yoru' && list.includes('hiru') ? 'hiru' : null);
     if (!use) { img.style.display = 'none'; bg.classList.remove('hills-art'); return; }
-    img.setAttribute('href', ART_DIR + 'plaza_hills_' + use + '.webp'); img.style.display = ''; bg.classList.add('hills-art');
+    const f = typeof files[use] === 'string' && /^[\w\-./]+$/.test(files[use]) && !/^(\.\.\/)*\.\.\//.test(files[use].replace(/^\.\.\//, '')) ? files[use] : null;
+    img.setAttribute('href', f || (ART_DIR + 'plaza_hills_' + use + '.webp')); img.style.display = ''; bg.classList.add('hills-art');
   };
   apply(); new MutationObserver(apply).observe(scene, { attributes: true, attributeFilter: ['data-time'] });
 })();

@@ -2,5 +2,6 @@
   "ready": false,
   "note": "天が描く『リアル』な背景が届いたら ready を true にして sets に季節×時間の絵を書く（発注書 20_ひろばを「リアル」に_背景の発注書案）。例：sets['aki-hiru'] = { layers: { sky, far, ground, water, front }, props: { house: 'prop-house-hiru.webp' } }。絵が無い間は今の SVG のまま。",
   "hills": [],
-  "hills_note": "セミリアルの山の絵を置いたら、名前（asa/hiru/yuu/yoru）を hills に足す。ファイル名は plaza_hills_<名前>.webp（横長・下半分に山・空は透明か空色）。無ければ今の山のまま。"
+  "hills_note": "セミリアルの山：hills に名前（asa/hiru/yuu/yoru）を書く。絵は img/hiroba/plaza_hills_<名前>.webp か、hills_files に { \"hiru\": \"assets/xxx/yama.png\" }（hiroba/ からの相対パス・png でもよい）。無ければ今の山のまま。",
+  "hills_files": {}
 }
