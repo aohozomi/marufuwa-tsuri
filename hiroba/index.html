@@ -799,7 +799,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=81"></script>
+<script defer src="../tsuri-ver.js?v=82"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -3249,17 +3249,24 @@ async function applyArt() {
 (async () => {
   if (q.get('art') === 'off') return;
   let list = [];
-  let files = {};
-  try { const r = await fetch(ART_DIR + 'manifest.json', { cache: 'no-cache' }); if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.hills)) list = j.hills.filter(x => /^(asa|hiru|yuu|yoru)$/.test(x)); if (j && j.hills_files && typeof j.hills_files === 'object') files = j.hills_files; } } catch {}   // hills_files: { hiru: 'assets/…/yama.png' }＝このページからの 相対パス（png でも よい）。なければ plaza_hills_<名前>.webp
+  let files = {}, man = {};
+  try { const r = await fetch(ART_DIR + 'manifest.json', { cache: 'no-cache' }); if (r.ok) { const j = await r.json(); if (j && typeof j === 'object') man = j; if (j && Array.isArray(j.hills)) list = j.hills.filter(x => /^(asa|hiru|yuu|yoru)$/.test(x)); if (j && j.hills_files && typeof j.hills_files === 'object') files = j.hills_files; } } catch {}   // hills_files: { hiru: 'assets/…/yama.png' }＝このページからの 相対パス（png でも よい）。なければ plaza_hills_<名前>.webp
   const bg = document.getElementById('bg'), first = bg && bg.querySelector('.hillpath');
   if (!list.length || !first) return;
+  // 置き方（manifest・任意）：hills_box=[x,y,w,h]（viewBox 720×560 の 中・既定は 山の 帯 [0,146,720,150]）／hills_fit='slice'|'meet'|'none'（既定 slice）
+  //   天の 実画像（1672×941）は 背景ぜんたい＝ hills_box [0,0,720,405]・fit 'meet' で、絵を 切らずに 出す
+  const box = Array.isArray(man.hills_box) && man.hills_box.length === 4 && man.hills_box.every(n => Number.isFinite(n)) ? man.hills_box : [0, 146, 720, 150];
+  const fit = man.hills_fit === 'meet' ? 'xMidYMax meet' : man.hills_fit === 'none' ? 'none' : 'xMidYMax slice';
   const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-  img.id = 'hills-art'; img.setAttribute('x', '0'); img.setAttribute('y', '146'); img.setAttribute('width', '720'); img.setAttribute('height', '150');
-  img.setAttribute('preserveAspectRatio', 'xMidYMax slice'); img.style.display = 'none'; first.parentNode.insertBefore(img, first);
+  img.id = 'hills-art'; img.setAttribute('x', box[0]); img.setAttribute('y', box[1]); img.setAttribute('width', box[2]); img.setAttribute('height', box[3]);
+  img.setAttribute('preserveAspectRatio', fit); img.style.display = 'none'; first.parentNode.insertBefore(img, first);
   img.addEventListener('error', () => { img.style.display = 'none'; bg.classList.remove('hills-art'); });   // 絵が 読めなければ、平らな 山に もどす（空白に しない）
+  // 時間ごとの 絵が なければ hiru の 絵を かりて、色で 時間を 出す（夜も セミリアルの まま：暗く・青く）。hills_tint=false で 止められる
+  const TINT = { asa: 'brightness(1.04) saturate(.95) sepia(.12)', yuu: 'brightness(.9) saturate(1.1) sepia(.35) hue-rotate(-12deg)', yoru: 'brightness(.42) saturate(.55) hue-rotate(18deg)' };
   const apply = () => {
-    const t = scene.dataset.time, use = list.includes(t) ? t : (t !== 'yoru' && list.includes('hiru') ? 'hiru' : null);
+    const t = scene.dataset.time, own = list.includes(t), use = own ? t : (list.includes('hiru') ? 'hiru' : null);
     if (!use) { img.style.display = 'none'; bg.classList.remove('hills-art'); return; }
+    img.style.filter = !own && man.hills_tint !== false && TINT[t] ? TINT[t] : '';
     const f = typeof files[use] === 'string' && /^[\w\-./]+$/.test(files[use]) && !/^(\.\.\/)*\.\.\//.test(files[use].replace(/^\.\.\//, '')) ? files[use] : null;
     img.setAttribute('href', f || (ART_DIR + 'plaza_hills_' + use + '.webp')); img.style.display = ''; bg.classList.add('hills-art');
   };
