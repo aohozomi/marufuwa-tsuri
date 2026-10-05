@@ -819,7 +819,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=86"></script>
+<script defer src="../tsuri-ver.js?v=87"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -1621,8 +1621,10 @@ function narrate(text, soft) { if (soft && T - lastHard < 10) return; if (!soft)
 let factsKey = '';
 function paintFacts() {   // いま・てんき・ともだち を 1ぎょうに（10/3：🌤 はれ・ひる・1にん）
   const ul = document.getElementById('facts'); if (!ul) return; let line;
-  try { const en = { a: 'Morning', h: 'Day', y: 'Evening', n: 'Night' }, wl = q.has('rain') || !dailyW ? (rainy ? 'rain' : 'clear') : dailyW, ico = { clear: '☀️', cloudy: '☁️', rain: '🌧️', snow: '❄️' }[wl] || '🌤', lab = { clear: S('はれ', 'Clear'), cloudy: S('くもり', 'Cloudy'), rain: S('あめ', 'Rainy'), snow: S('ゆき', 'Snowy') }[wl];
-    line = ico + ' ' + lab + '・' + S(TIME_LABEL[curTime], en[curTime]) + '・' + S(friends.length + 'にん', String(friends.length)); } catch { return; }
+  try { const en = { a: 'Morning', h: 'Day', y: 'Evening', n: 'Night' }, wl = q.has('rain') || !dailyW ? (rainy ? 'rain' : 'clear') : dailyW;
+    // 10/6：時間と天気を分けて出す（夜に ☀ が出ていた）。時間の絵＝🌅🌞🌇🌙／天気の絵＝はれは昼は☀️・夜は✨（星空）、くもり☁️・あめ🌧️・ゆき❄️。英語も同じ並び
+    const tIco = { a: '🌅', h: '🌞', y: '🌇', n: '🌙' }[curTime] || '', wIco = ({ clear: curTime === 'n' ? '✨' : '☀️', cloudy: '☁️', rain: '🌧️', snow: '❄️' })[wl] || '🌤', lab = { clear: S('はれ', 'Clear'), cloudy: S('くもり', 'Cloudy'), rain: S('あめ', 'Rainy'), snow: S('ゆき', 'Snowy') }[wl];
+    line = tIco + ' ' + S(TIME_LABEL[curTime], en[curTime]) + '・' + wIco + ' ' + lab + '・' + S(friends.length + 'にん', String(friends.length)); } catch { return; }
   if (line === factsKey) return; factsKey = line; ul.textContent = ''; const li = document.createElement('li'); li.textContent = line; ul.append(li);
 }
 function removeBubble(b) { b.el.remove(); const i = bubbles.indexOf(b); if (i >= 0) bubbles.splice(i, 1); }
