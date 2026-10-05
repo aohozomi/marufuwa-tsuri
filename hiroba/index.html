@@ -114,6 +114,7 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 .hud button[disabled]{opacity:1}
 
 /* じかんごとの いろ（つりびよりと おなじ いろ ＋ ひろばの くさ・みち） */
+#bg.hills-art .hillpath{display:none}   /* セミリアルの 山の 絵（img/hiroba/plaza_hills_<時間>.webp）が ある ときだけ、平らな SVG の 山を かくす */
 #scene[data-time=asa]{--sky1:#ffd9b8;--sky2:#fff3e2;--orb:#ffb45e;--hill:#b9d8a8;--hill2:#a9cf9a;--tree:#7fbf7a;--ftree:#7fbf7a;--water1:#8fd3ee;--water2:#4aa3cf;--star:0;--grass:#b6e0a0;--grass2:#a5d893;--paving:#f6ead2;--tone:brightness(1);--win:#bfe3f5;--lamp:0;--lampfill:#fff8dc}
 #scene[data-time=hiru]{--sky1:#a9defa;--sky2:#eaf8ff;--orb:#fff2a8;--hill:#a9d89a;--hill2:#98cf8b;--tree:#6fbf6a;--ftree:#6fbf6a;--water1:#7fd0f2;--water2:#3b9bd0;--star:0;--grass:#a8dc93;--grass2:#98d385;--paving:#f8eed8;--tone:brightness(1);--win:#bfe3f5;--lamp:0;--lampfill:#fff8dc}
 #scene[data-time=yuu]{--sky1:#ff9e6e;--sky2:#ffd9a8;--orb:#ff7a3d;--hill:#c9a27a;--hill2:#b99468;--tree:#7f9f5a;--ftree:#7f9f5a;--water1:#7aa9d6;--water2:#44779f;--star:0;--grass:#c9d488;--grass2:#b9c67a;--paving:#f2dcb8;--tone:brightness(.96) sepia(.12);--win:#ffe1a0;--lamp:.55;--lampfill:#ffe9a0}
@@ -566,11 +567,17 @@ body.calm .cloud.c2{left:28%}
       <image id="m013-hills" class="m013-hills" href="assets/m013_20261006/semireal_mountain_20261006_v2.png" x="0" y="0" width="720" height="405" preserveAspectRatio="none"/>
       <rect class="m013-nightveil" x="0" y="0" width="720" height="405" fill="#1f2f5c" pointer-events="none"/>
       <g fill="#fff" style="opacity:var(--star)"><circle cx="30" cy="34" r="1.7"/><circle cx="74" cy="78" r="1.4"/><circle cx="120" cy="26" r="1.8"/><circle cx="168" cy="64" r="1.4"/><circle cx="214" cy="30" r="1.7"/><circle cx="252" cy="92" r="1.4"/><circle cx="330" cy="120" r="1.5"/><circle cx="58" cy="132" r="1.4"/><circle cx="196" cy="118" r="1.3"/><circle cx="290" cy="20" r="1.5"/></g>
+<<<<<<< HEAD
       <image class="m013-sun" href="assets/m013_20261005/semi_real_sun_20261005.png" x="250" y="4" width="100" height="100" preserveAspectRatio="none" pointer-events="none"/>
       <image class="m013-tree" href="assets/m013_20261005/semi_real_tree_20261005.png" x="52" y="166" width="58" height="80" preserveAspectRatio="none" pointer-events="none"/>
       <image class="m013-tree" href="assets/m013_20261005/semi_real_tree_20261005.png" x="222" y="176" width="50" height="70" preserveAspectRatio="none" pointer-events="none"/>
       <image class="m013-tree" href="assets/m013_20261005/semi_real_tree_20261005.png" x="452" y="171" width="54" height="75" preserveAspectRatio="none" pointer-events="none"/>
       <image class="m013-tree" href="assets/m013_20261005/semi_real_tree_20261005.png" x="603" y="164" width="60" height="82" preserveAspectRatio="none" pointer-events="none"/>
+=======
+      <path class="hillpath" d="M0 206 Q52 158 118 196 T250 186 T360 168 V276 H0Z" style="fill:var(--hill)"/>
+      <path class="hillpath" d="M0 232 Q84 196 176 226 T360 214 V290 H0Z" style="fill:var(--hill2)"/>
+      <g style="fill:var(--ftree)"><circle cx="22" cy="212" r="19"/><circle cx="52" cy="220" r="15"/><circle cx="118" cy="214" r="14"/><circle cx="250" cy="210" r="16"/><circle cx="330" cy="204" r="21"/><circle cx="346" cy="224" r="15"/></g>
+>>>>>>> origin/main
       <path d="M0 252 Q90 240 180 252 T360 246 V560 H0Z" fill="url(#g-grass)"/>
       <!-- いけ -->
       <ellipse cx="62" cy="258" rx="58" ry="17" fill="url(#g-water)" stroke="#fff" stroke-width="3"/>
@@ -612,6 +619,12 @@ body.calm .cloud.c2{left:28%}
       <!-- ═ まるふわパーク（右半分・x 360〜720）：仮の 絵（天の 広い 背景が 届いたら さしかえ） ═ -->
       <g id="park-bg">
         <g fill="#fff" style="opacity:var(--star)"><circle cx="392" cy="40" r="1.7"/><circle cx="436" cy="82" r="1.4"/><circle cx="486" cy="28" r="1.8"/><circle cx="540" cy="70" r="1.4"/><circle cx="590" cy="34" r="1.7"/><circle cx="640" cy="90" r="1.4"/><circle cx="690" cy="48" r="1.8"/><circle cx="708" cy="120" r="1.4"/></g>
+<<<<<<< HEAD
+=======
+        <path class="hillpath" d="M360 168 Q420 150 484 178 T610 160 T720 172 V276 H360Z" style="fill:var(--hill)"/>
+        <path class="hillpath" d="M360 214 Q444 198 534 224 T720 210 V290 H360Z" style="fill:var(--hill2)"/>
+        <g style="fill:var(--ftree)"><circle cx="402" cy="206" r="17"/><circle cx="474" cy="214" r="14"/><circle cx="566" cy="206" r="18"/><circle cx="640" cy="213" r="15"/><circle cx="702" cy="204" r="19"/></g>
+>>>>>>> origin/main
         <path d="M360 246 Q450 240 540 252 T720 244 V560 H360Z" fill="url(#g-grass)"/>
         <g class="path-surface" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <g stroke="#667078" opacity=".28">
@@ -816,6 +829,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
+<script defer src="../tsuri-ver.js?v=80"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -3259,6 +3273,26 @@ async function applyArt() {
   }
 }
 (async () => { if (q.get('art') === 'off') return; try { const r = await fetch(ART_DIR + 'manifest.json', { cache: 'no-cache' }); if (!r.ok) return; const man = await r.json(); if (man && man.ready === true && man.sets && typeof man.sets === 'object') { artState.man = man; applyArt(); } } catch {} })();
+
+// ─── 山（セミリアル）の 差し口（10/5・Claude）：img/hiroba/manifest.json の "hills": ["asa","hiru","yuu","yoru"] に 名前が あれば、
+//     plaza_hills_<名前>.webp を 山の 位置に しく。なければ いまの 平らな SVG の 山の まま（404 を 出さない）。asa・yuu の 絵が なければ hiru を かりる。yoru は yoru だけ ───
+(async () => {
+  if (q.get('art') === 'off') return;
+  let list = [];
+  try { const r = await fetch(ART_DIR + 'manifest.json', { cache: 'no-cache' }); if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.hills)) list = j.hills.filter(x => /^(asa|hiru|yuu|yoru)$/.test(x)); } } catch {}
+  const bg = document.getElementById('bg'), first = bg && bg.querySelector('.hillpath');
+  if (!list.length || !first) return;
+  const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+  img.id = 'hills-art'; img.setAttribute('x', '0'); img.setAttribute('y', '146'); img.setAttribute('width', '720'); img.setAttribute('height', '150');
+  img.setAttribute('preserveAspectRatio', 'xMidYMax slice'); img.style.display = 'none'; first.parentNode.insertBefore(img, first);
+  img.addEventListener('error', () => { img.style.display = 'none'; bg.classList.remove('hills-art'); });   // 絵が 読めなければ、平らな 山に もどす（空白に しない）
+  const apply = () => {
+    const t = scene.dataset.time, use = list.includes(t) ? t : (t !== 'yoru' && list.includes('hiru') ? 'hiru' : null);
+    if (!use) { img.style.display = 'none'; bg.classList.remove('hills-art'); return; }
+    img.setAttribute('href', ART_DIR + 'plaza_hills_' + use + '.webp'); img.style.display = ''; bg.classList.add('hills-art');
+  };
+  apply(); new MutationObserver(apply).observe(scene, { attributes: true, attributeFilter: ['data-time'] });
+})();
 
 // ─── はじまり ───
 buildProps(); paintLitter(); paintLamps(); { const sh = propEl('shelter'); if (sh) sh.style.zIndex = String(100 + 474); } paintPost(); applyTime(); drawSound(); drawMotion(); renderPalRow(); renderPlush(); loadThanks();
