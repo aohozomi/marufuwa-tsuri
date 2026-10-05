@@ -310,6 +310,11 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 #scene[data-time=yoru] .prop[data-id^=lamp]:not([data-lit=true]){--lamp:.5;--lampfill:#efe6c4}   /* 夜の 街灯は はじめ ひかえめ（さわって ともすと あかるく） */
 #scene[data-time=yoru] .prop[data-id^=lamp][data-lit=true]{--lamppool:.55}
 .prop[hidden]{display:none}
+/* 建物の 敷地（10/6 Claude）：まちかど・おへや・やどや・カフェの 足もとに、草の 小さな 丘を 建物じしんに つける。
+   どんな 画面の 大きさでも、絵の 下に 透明な 余白が あっても、建物と いっしょに 動くので「空の 上に 浮く」ことが ない。色は 時間の 草の 色 */
+.prop[data-id=machi]::after,.prop[data-id=house]::after,.prop[data-id=inn]::after,.prop[data-id=cafe]::after{content:"";position:absolute;left:-14%;right:-14%;top:72%;height:52%;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 50% 50% at 50% 42%,var(--grass2) 0 56%,var(--grass) 66%,transparent 70%)}
+.prop[data-id=inn]::after{top:80%;height:40%}
 .prop[data-id=trace-flower]::before{content:"";position:absolute;inset:-14px}
 .canopy{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.6s ease-in-out infinite alternate}
 .jet{stroke-dasharray:4 6;animation:flow .9s linear infinite}
@@ -819,7 +824,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=88"></script>
+<script defer src="../tsuri-ver.js?v=89"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
