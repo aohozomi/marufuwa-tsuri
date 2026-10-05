@@ -136,7 +136,8 @@
     'ミルク': 'Milk', 'ほしぞら': 'Starry Sky', 'もも': 'Momo', 'ラムネ': 'Ramune', 'ゆき': 'Yuki', 'そら': 'Sora', 'はな': 'Hana', 'ことり': 'Kotori', 'くるみ': 'Walnut', 'あずき': 'Azuki', 'みかん': 'Mikan', 'ひなた': 'Hinata',
     'たんぽぽ': 'Dandelion', 'こむぎ': 'Komugi', 'あめだま': 'Candy Drop', 'すずらん': 'Lily of the Valley', 'ハート': 'Heart', 'ふわり': 'Fuwari', 'ぽっぽ': 'Poppo', 'マロン': 'Marron', 'ちょこ': 'Choco', 'ゆず': 'Yuzu', 'きなこ': 'Kinako', 'ぱんだ': 'Panda', 'ほたる': 'Hotaru',
     // ---- ページの せつめい・ボタン・かんばん ----
-    'やじるしキーでまるふわがあるくよ。スペースキーでちかくのともだちにはなしかけたり、ばしょにはいったりできるよ。エスケープキーでやめるよ。したのボタンでもおなじことができるよ。': 'Use the arrow keys to walk Marufuwa. Press Space to talk to a nearby friend or enter a place. Press Escape to cancel. The buttons below do the same things.',
+    'やじるしキーでまるふわがあるくよ。スペースキーでちかくのともだちにはなしかけたり、ばしょにはいったりできるよ。エスケープキーでやめるよ。したのボタンでもおなじことができるよ。スマホではしたへスクロールして、いきさきのボタンをえらんでね。': 'Use the arrow keys to walk Marufuwa. Press Space to talk to a nearby friend or enter a place. Press Escape to cancel. The buttons below do the same things. On a phone, scroll down to choose a destination.',
+    'スマホではしたへスクロールして、いきさきのボタンをえらんでね。': 'On a phone, scroll down to choose a destination.', 'スマホはしたへスクロールして「いきさき」をえらんでね。': 'On a phone, scroll down to choose a destination.',
     'ひろば。まるふわがあるくばしょ': 'The plaza: where Marufuwa walks', 'おへや': 'Room', 'ありがとう': 'Thanks', 'じゅんびちゅう': 'Getting ready',
     'いきさき': 'Where to go', 'つりびより': 'Fishing Days', 'すいそう': 'Aquarium', 'まだできていないばしょ': 'Places not ready yet', 'ちかぢかあそべます': 'Coming soon',
     'ともだちにあいにいく': 'Visit friends', 'まわりをきく': 'Listen around', 'さわれるもの': 'Things to touch', 'くも': 'Cloud', 'き': 'Tree', 'あそびかた': 'How to play',
