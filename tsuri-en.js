@@ -84,6 +84,7 @@
     'けしきのいきもの：ON': 'Wildlife: ON', 'けしきのいきもの：OFF': 'Wildlife: OFF',
     'みる・いく': 'Look & Visit', 'バケツ': 'Bucket', 'ずかん': 'Fish Book', 'どうぐ': 'Gear', 'ひろば': 'Plaza', 'きろく': 'Records',
     'いまのじかん': 'Current time', 'あさ': 'Morning', 'ひる': 'Day', 'ゆうがた': 'Evening', 'よる': 'Night',
+    'ちがうじかんのさかなも、たまにくるよ。': 'Fish from other times still come by, just less often.',
     'みずうみ': 'Lake', 'かわ': 'River', 'みなとまち': 'Harbor Town', 'ふねのうえ': 'On the Boat', 'もりのいけ': 'Forest Pond', 'ゆきのみずうみ': 'Snowy Lake', 'にじのたき': 'Rainbow Falls',
     'じかんででやすいさかながかわるよ（あさ・ひる・ゆうがた・よる）。きろくはこのたんまつのなかだけにのこります。ログインもインストールもいりません。はいけいとさかなのえは、いまはかりのものです。':
       'Which fish appear changes with the time (morning, day, evening, night). Your records stay only on this device. No login or install needed. The backgrounds and fish art are placeholders for now.',
