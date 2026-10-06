@@ -301,8 +301,11 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 #care .care-ico:focus-visible{outline:3px solid #286b88;outline-offset:1px}
 #care .care-ico[hidden]{display:none}
 .prop{position:absolute;pointer-events:none;filter:var(--tone) var(--dim) var(--hlf);transition:filter .15s}
-.prop svg{display:block;width:100%;height:100%;overflow:visible;pointer-events:none}
-.prop[data-dest],.prop[data-secret]{pointer-events:auto;cursor:pointer}
+.prop svg{display:block;width:100%;height:100%;overflow:visible;pointer-events:none}   /* data-dest／data-secret の svg は 下で visiblePainted に */
+.prop[data-dest],.prop[data-secret]{pointer-events:none;cursor:pointer}   /* 10/6 Claude：当たり判定は「描かれている所」だけ（箱ぜんたいでは、つりばの箱が まちかどの下に かぶっていた） */
+.prop[data-dest] svg,.prop[data-secret] svg{pointer-events:none}   /* 外がわの svg の 箱は 当てない */
+.prop[data-dest] svg *,.prop[data-secret] svg *,.prop[data-dest] img{pointer-events:visiblePainted;cursor:pointer}   /* なかの 形（描かれている 所）だけ 当てる */
+.prop[data-dest] .mark,.prop[data-secret] .mark,.prop .inn-sign-label{pointer-events:auto;cursor:pointer}
 .prop[data-secret=tree]{pointer-events:none}
 .prop[data-secret=tree]::before{content:"";position:absolute;left:8%;right:8%;top:0;height:62%;pointer-events:auto;cursor:pointer}
 .prop.hl{--hlf:drop-shadow(0 0 7px #fff) drop-shadow(0 0 3px #fff)}
@@ -832,7 +835,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=91"></script>
+<script defer src="../tsuri-ver.js?v=92"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -1611,6 +1614,7 @@ function buildProps() {
     frag.append(el);
   });
   layerProps.append(frag);
+  try { layerProps.querySelectorAll('.prop[data-dest] image').forEach(i => alphaCanvas(i.getAttribute('href'))); } catch {}   // 当たり判定用に 絵を 先に 読む
 }
 const propEl = id => layerProps.querySelector(`[data-id="${id}"]`);
 
@@ -2473,6 +2477,35 @@ document.querySelectorAll('[data-touch]').forEach(b => b.addEventListener('click
 
 // ─── さわる・キーボード ───
 function worldPoint(e) { measure(); return { x: (e.clientX - box.left) / k, y: (e.clientY - box.top) / k }; }
+// 建物の 当たり判定（10/6 Claude）：建物の 絵（<image>）の 透明な 所を おしたら、その 下に ある 建物に 当てる（つりばの 絵の 上の 透明な 余白が、まちかどの 下半分に かぶっていた）。
+//   絵を こっそり canvas に 写して、おした 画素の 不透明度を 見る。絵は 同じ サイトの ものだけ。読めない ときは 今まで どおり（箱で 当てる）
+const alphaCache = new Map();
+function alphaCanvas(href) {
+  if (!href) return null; if (alphaCache.has(href)) return alphaCache.get(href);
+  alphaCache.set(href, null); const im = new Image(); im.decoding = 'async';
+  im.onload = () => { try { const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const g = cv.getContext('2d', { willReadFrequently: true }); g.drawImage(im, 0, 0); alphaCache.set(href, { g, w: cv.width, h: cv.height }); } catch { alphaCache.set(href, false); } };
+  im.onerror = () => alphaCache.set(href, false); im.src = href; return null;
+}
+function imgOpaqueAt(el, cx, cy) {
+  const href = el.getAttribute('href') || el.getAttribute('xlink:href') || el.currentSrc || el.src, a = alphaCanvas(href); if (!a) return true;
+  const r = el.getBoundingClientRect(); if (!r.width || !r.height) return true;
+  const par = el.getAttribute('preserveAspectRatio') || 'xMidYMid meet'; let dw = r.width, dh = r.height, dx = 0, dy = 0;
+  if (!/none/.test(par)) { const sc = Math.min(r.width / a.w, r.height / a.h); dw = a.w * sc; dh = a.h * sc; dx = /xMin/.test(par) ? 0 : /xMax/.test(par) ? r.width - dw : (r.width - dw) / 2; dy = /YMin/.test(par) ? 0 : /YMax/.test(par) ? r.height - dh : (r.height - dh) / 2; }
+  const u = (cx - r.left - dx) / dw, v = (cy - r.top - dy) / dh; if (u < 0 || v < 0 || u >= 1 || v >= 1) return false;
+  try { return a.g.getImageData(Math.floor(u * a.w), Math.floor(v * a.h), 1, 1).data[3] > 24; } catch { return true; }
+}
+function pickDest(e, t) {
+  const first = t.closest('[data-dest]');
+  if (!Number.isFinite(e.clientX)) return first;
+  const els = document.elementsFromPoint(e.clientX, e.clientY);
+  for (const el of els) {
+    const pr = el.closest && el.closest('[data-dest]'); if (!pr) continue;
+    const tag = el.tagName.toLowerCase();
+    if ((tag === 'image' || tag === 'img') && !imgOpaqueAt(el, e.clientX, e.clientY)) continue;   // 透明な 所 → 下を 見る
+    return pr;
+  }
+  return first;   // 下に 描かれた 建物が なければ、今まで どおり（おした 建物の 箱）
+}
 function startOnGesture() { if (soundOn()) startAmbient(); }
 scene.addEventListener('click', e => {
   lastInput = T; startOnGesture();
@@ -2481,7 +2514,7 @@ scene.addEventListener('click', e => {
   const careEl = t.closest('.care-ico'); if (careEl) { e.stopPropagation(); careTo(byId(careEl.dataset.id)); return; }
   const actorEl = t.closest('.actor');
   if (actorEl) { if (actorEl.dataset.id === 'me') tapMascot(); else talkTo(byId(actorEl.dataset.id)); return; }
-  const destEl = t.closest('[data-dest]'); if (destEl) { goDest(destEl.dataset.dest); return; }
+  const destEl = t.closest('[data-dest]') ? pickDest(e, t) : null; if (destEl) { goDest(destEl.dataset.dest); return; }
   const secretEl = t.closest('[data-secret]'); if (secretEl) { secretTap(secretEl.dataset.secret, secretEl); return; }
   cancelTrip(false);
   const p = worldPoint(e), spot = nearestFree(clamp(p.x, 8, W - 8), clamp(p.y, 267, 550));
