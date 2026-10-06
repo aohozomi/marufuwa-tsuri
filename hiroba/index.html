@@ -835,7 +835,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=96"></script>
+<script defer src="../tsuri-ver.js?v=97"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -3145,7 +3145,7 @@ document.addEventListener('close', e => { if (e.target && e.target.id === 'zukan
 //     ふくの いろは その場で きがえる（本体の きろく my.wear）。もちものは おへやで もたせる（おへやの きろくは おへやだけが 書く）。
 //   ・たなの 中身は data/shop.json（なければ この 表）。マスターが 決めて ファイルを かえる だけで ふえる。自由入力・外への 通信は なし（おなじ サイトの ファイル 1つだけ）。
 const isEnNow = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en'), S = (ja, en) => isEnNow() ? en : ja;
-const RARE_OF = [...Array(8).fill(1), ...Array(10).fill(2), ...Array(10).fill(3), 4, 4, 5, 5, 5, 5, ...Array(12).fill(3), 2, 1, 3, 3, 1, 2, 2, 3], COIN_OF = [0, 1, 2, 4, 8, 20];   // 本体の FISH と おなじ ならび（0〜53＝30しゅ・まぼろし・きせつ・ひろがる）。ふやす ときは うしろへ
+const RARE_OF = [...Array(8).fill(1), ...Array(10).fill(2), ...Array(10).fill(3), 4, 4, 5, 5, 5, 5, ...Array(12).fill(3), 2, 1, 3, 3, 1, 2, 2, 3, 3, 4, 3, 5], COIN_OF = [0, 1, 2, 4, 8, 20];   // 本体の FISH と おなじ ならび（0〜57＝30しゅ・まぼろし・きせつ・ひろがる・たき）。ふやす ときは うしろへ。54〜57（にじますの こ・たきのぼりごい・しぶきうなぎ・にじのりゅうぎょ）が ぬけて ★2 あつかい だったのを 直す（天 M-035・10/7）
 function coinsNow() { const f = readMain().fish; let c = 0; if (f && typeof f === 'object') for (const [id, g] of Object.entries(f)) { const n = Math.max(0, Math.floor(Number(g && g.count) || 0)), r = RARE_OF[Number(id)] || 2; c += n * COIN_OF[r] + (g && g.nushi ? 10 : 0); } return c; }   // ★1＝1・★2＝2・★3＝4・★4＝8・まぼろし＝20・ぬし＋10。ふえる だけ（へらさない）
 const SHOP_DEFAULT = { shelves: [
   { id: 'wear', kind: 'wear', ja: 'ふくの いろ', en: 'Colors', items: [
