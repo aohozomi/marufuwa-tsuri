@@ -240,6 +240,10 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 #card-word:empty{display:none}
 #card h2{display:inline}
 #photo-img{display:block;width:100%;height:auto;border-radius:14px;border:2px solid #d5e6ed;margin-bottom:10px}
+#photo-img[data-tall="1"]{width:auto;max-width:100%;max-height:min(58vh,560px);margin-left:auto;margin-right:auto}
+#photo-clip{display:block;width:100%;height:auto;border-radius:14px;margin:0 auto 10px}
+#photo-clip[hidden]{display:none}
+#photo-img[hidden]{display:none}
 .photo-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
 .pill{--c1:#3495c5;--c2:#10587e;--side:#0b425f;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #083a55}   /* 白い 字の コントラスト 4.5対1 いじょう（まえは 2.7対1） */
 .pill[hidden]{display:none}
@@ -3182,6 +3186,54 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ctx.fillStyle = '#fffffff0'; ctx.font = 'bold 44px system-ui,sans-serif'; ctx.shadowColor = '#0008'; ctx.shadowBlur = 8; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 540, 2250, 900); ctx.shadowBlur = 0;
     return canvas;
   }
+  // 「見せる」カード：スマホの がめん いっぱいの たて 1080×1920。どの さかなでも つくれる（10/6・総司令部）。
+  // ことばは 1ぎょうだけ（日本語／English・画面に ある 文と おなじ）。足もとに ゲームの なまえと あそべる ばしょ（英語は en/）。さくしゃの なまえ・バケツの なまえ・かずの じゅんいは いれない。この たんまつの なかで つくる
+  const ONE_LINE = () => L('いそがなくて だいじょうぶ。にがしても、へらないよ。', 'No rush. Nothing is lost if one escapes.');
+  async function tateCard(l) {
+    const W = 1080, H = 1920, canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d'), color = name => getComputedStyle(scene).getPropertyValue(name).trim() || '#fff', night = !!l.nushi && !l.fish.legend, dark = night || color('--star') === '1';
+    const sky = ctx.createLinearGradient(0, 0, 0, 1450); sky.addColorStop(0, night ? '#081733' : color('--sky1')); sky.addColorStop(1, night ? '#16386b' : color('--sky2')); ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+    let seed = (l.fish.id * 131 + 17) >>> 0; const rnd = () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    if (dark) { for (let i = 0; i < 90; i++) { ctx.fillStyle = 'rgba(255,255,255,' + (.35 + rnd() * .6).toFixed(2) + ')'; ctx.beginPath(); ctx.arc(rnd() * W, 60 + rnd() * 900, .9 + rnd() * 2.2, 0, Math.PI * 2); ctx.fill(); } ctx.fillStyle = '#fff6cf'; ctx.beginPath(); ctx.arc(880, 250, 54, 0, Math.PI * 2); ctx.fill(); }
+    else { ctx.fillStyle = color('--orb'); ctx.beginPath(); ctx.arc(860, 260, 96, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.85)'; [[180, 330, 96, 32], [280, 310, 66, 26], [760, 420, 110, 36], [870, 450, 72, 28], [420, 520, 80, 26]].forEach(([x, y, rx, ry]) => { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }); }
+    ctx.fillStyle = dark ? 'rgba(24,58,84,.7)' : 'rgba(126,190,160,.55)'; ctx.beginPath(); ctx.moveTo(0, 1400); ctx.quadraticCurveTo(180, 1290, 380, 1370); ctx.quadraticCurveTo(560, 1300, 740, 1380); ctx.quadraticCurveTo(920, 1310, W, 1385); ctx.lineTo(W, 1460); ctx.lineTo(0, 1460); ctx.fill();   // とおくの やま
+    ctx.fillStyle = dark ? 'rgba(18,44,68,.8)' : 'rgba(92,160,128,.6)'; ctx.beginPath(); ctx.moveTo(0, 1420); ctx.quadraticCurveTo(240, 1350, 480, 1402); ctx.quadraticCurveTo(720, 1352, W, 1408); ctx.lineTo(W, 1470); ctx.lineTo(0, 1470); ctx.fill();
+    ctx.fillStyle = color('--ground'); ctx.beginPath(); ctx.moveTo(0, 1470); ctx.quadraticCurveTo(540, 1420, W, 1462); ctx.lineTo(W, 1660); ctx.quadraticCurveTo(540, 1610, 0, 1660); ctx.fill();   // じめん
+    const water = ctx.createLinearGradient(0, 1620, 0, H); water.addColorStop(0, color('--water1')); water.addColorStop(1, color('--water2')); ctx.fillStyle = water; ctx.beginPath(); ctx.moveTo(0, 1650); ctx.quadraticCurveTo(540, 1600, W, 1650); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();   // みず
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; [[90, 1720, 70], [330, 1760, 90], [620, 1730, 60], [880, 1770, 80]].forEach(([x, y, w]) => { ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + w / 2, y - 7, x + w, y); ctx.stroke(); });
+    if (night) { ctx.save(); ctx.globalCompositeOperation = 'screen'; const halo = ctx.createRadialGradient(540, 700, 30, 540, 700, 520); halo.addColorStop(0, '#ffe08acc'); halo.addColorStop(.5, '#ffd34d44'); halo.addColorStop(1, '#ffd34d00'); ctx.fillStyle = halo; ctx.fillRect(0, 150, W, 1150); ctx.restore(); }   // ぬし：金の ひかり
+    const seasonal = !!l.fish.season && !l.fish.legend && !l.nushi;
+    const special = seasonal ? L('この つきの さかなを つりました', 'Caught this month' + String.fromCharCode(39) + 's fish!') : T(l.fish.legend ? 'まぼろしに あえました' : l.nushi ? (l.firstNushi ? L('はじめての ぬしを つりました', 'Caught my first Guardian!') : 'ぬしを つりました') : '') || l.badge;
+    if (special) { const edge = ctx.createLinearGradient(0, 0, W, H); (l.fish.legend ? ['#ff8fa3', '#ffd34d', '#8fe3a8', '#7fd0f2', '#b79cf0'] : (!l.nushi && !seasonal && l.badge) ? ['#b9f0d0', '#8fe3a8', '#fff6c9', '#8fe3a8', '#b9f0d0'] : seasonal ? ['#ffb3c8', '#ffe27a', '#b9f0d0', '#a9d8ff', '#e3c6ff'] : ['#ffe27a', '#d39a1c', '#fff1b8', '#d39a1c', '#ffe27a']).forEach((tone, i) => edge.addColorStop(i / 4, tone)); ctx.strokeStyle = edge; ctx.lineWidth = 26; ctx.strokeRect(13, 13, W - 26, H - 26); }   // きねんの わく
+    // うえ：ゲームの なまえ・ひづけ（きねんの ときは その おび）
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0007'; ctx.shadowBlur = 10;
+    ctx.font = 'bold 56px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 540, 140, 960);
+    ctx.font = '34px system-ui,sans-serif'; ctx.fillText((l.at.getMonth() + 1) + '/' + l.at.getDate() + '　' + T(l.area), 540, 196, 960); ctx.shadowBlur = 0;
+    if (special) { ctx.fillStyle = l.fish.legend ? '#6a4bc4' : night ? '#f0b429' : seasonal ? '#e0679a' : (!l.nushi && l.badge) ? '#1f7a66' : '#a5481c'; roundRect(ctx, 240, 232, 600, 78, 39); ctx.fill(); ctx.fillStyle = night ? '#4a2a00' : '#fff'; ctx.textBaseline = 'middle'; ctx.font = 'bold 40px system-ui,sans-serif'; ctx.fillText(special, 540, 272, 560); ctx.textBaseline = 'alphabetic'; }
+    // まんなか：さかな（おおきく）
+    const art = artOf(l.fish) ? await loadImg(artOf(l.fish)) : null;
+    ctx.save(); if ('filter' in ctx) ctx.filter = night ? 'drop-shadow(0 0 40px #ffd34d)' : l.fish.legend ? 'drop-shadow(0 0 40px #fff) drop-shadow(0 0 60px #ffd34d)' : l.fish.rare === 4 ? (art ? 'drop-shadow(0 0 28px #ffd34d)' : 'sepia(1) saturate(5) hue-rotate(-15deg) drop-shadow(0 0 28px #ffd34d)') : 'drop-shadow(0 10px 18px rgba(8,34,56,.25))';
+    ctx.translate(540, 700); if (l.nushi) ctx.scale(1.18, 1.18);
+    if (art) ctx.drawImage(art, -270, -270, 540, 540); else { ctx.font = '420px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText(l.fish.icon, 0, 0); }
+    ctx.restore();
+    if (l.tags.includes('はじめて！') && !night) { ctx.save(); ctx.translate(820, 420); ctx.rotate(-.12); ctx.fillStyle = '#e0679a'; roundRect(ctx, -120, -36, 240, 72, 36); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = 'bold 40px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(T('はじめて！'), 0, 2, 220); ctx.restore(); }
+    if (night) nushiSeal(ctx, 930, 950, T('ぬし'));   // ふだの そと（みぎうえ）
+    // なまえの ふだ
+    ctx.fillStyle = night ? '#0f2447f2' : '#fffffff0'; roundRect(ctx, 100, 1010, 880, 320, 48); ctx.fill(); ctx.strokeStyle = night ? '#ffd34d' : '#bfdce8'; ctx.lineWidth = 6; ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = night ? '#fff4c9' : '#244653'; ctx.font = 'bold 86px system-ui,sans-serif'; ctx.fillText(l.fish.name, 540, 1118, 820);
+    ctx.fillStyle = night ? '#fff' : '#244653'; ctx.font = 'bold 62px system-ui,sans-serif'; ctx.fillText(EN() ? cm(l.size) + ' cm' : cm(l.size) + ' センチ', 540, 1206, 820);
+    ctx.fillStyle = night ? '#ffd34d' : '#b07a00'; ctx.font = '66px system-ui,sans-serif'; ctx.fillText(starsOf(l.fish, l.nushi), 540, 1292, 820);
+    // した：まるふわ（と なかま）が じめんに たつ
+    const me = await loadImg(marufuwa.src); if (me) { const tall = me.naturalWidth / me.naturalHeight > .9 ? 360 : 410, wide = tall * me.naturalWidth / me.naturalHeight; ctx.drawImage(me, 250 - wide / 2, 1640 - tall, wide, tall); }
+    { const bd = buddyPal(); if (bd) { const im = await loadImg('img/friend-' + bd.id + '-s.webp'); if (im) { const tall = 190, wide = tall * im.naturalWidth / im.naturalHeight; ctx.drawImage(im, 560 - wide / 2, 1646 - tall, wide, tall); } } }
+    // 足もと：1ぎょうの ことば・あそべる ばしょ（くらい おびの うえに 白い もじ）
+    const shade = ctx.createLinearGradient(0, 1660, 0, H); shade.addColorStop(0, 'rgba(8,34,56,0)'); shade.addColorStop(.35, 'rgba(8,34,56,.55)'); shade.addColorStop(1, 'rgba(8,34,56,.8)'); ctx.fillStyle = shade; ctx.fillRect(0, 1660, W, H - 1660);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0008'; ctx.shadowBlur = 8;
+    ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText(ONE_LINE(), 540, 1770, 1000);
+    ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillStyle = '#e6f3fa'; ctx.fillText(TAG(), 540, 1826, 1000);
+    ctx.font = 'bold 40px system-ui,sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(HOME_HOST + (EN() ? '/en/' : ''), 540, 1884, 1000); ctx.shadowBlur = 0;   // あそべる ばしょ（英語の カードは 英語の 入口）
+    return canvas;
+  }
   // しゃしんの けしき：うしろの くも・とおくの やま（ひると よるで いろが かわる）／まえの き・みずの きらめき。かたちは いつも おなじ（さかなごとに ずれない）
   function photoBack(ctx, color) {
     const dark = color('--star') === '1';
@@ -3272,7 +3324,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + (last.lucky ? '\nEveryone has the same lucky fish today!' : '') + '\n' + TAG() + '\n' + HOME_SHARE()
       : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + (last.lucky ? '\nきょうの ラッキーさかな、みんな おなじ！' : '') + '\n#まるふわつりびより\n' + HOME;
     const snap = last;   // ぬし・まぼろし・ずかん かんせい の しゃしんだけ「かべがみ」が つくれる
-    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of ' + (avatarPal() ? palName(avatarPal()) : 'Marufuwa') + ' holding up ' + last.fish.name : last.fish.name + 'を かかげる ' + (avatarPal() ? avatarPal().name : 'まるふわ') + 'の しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null, () => takePhoto(), (snap.nushi || snap.fish.legend || snap.fish.rare >= 4) ? () => makeVideo(snap) : null);
+    await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of ' + (avatarPal() ? palName(avatarPal()) : 'Marufuwa') + ' holding up ' + last.fish.name : last.fish.name + 'を かかげる ' + (avatarPal() ? avatarPal().name : 'まるふわ') + 'の しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null, () => takePhoto(), (snap.nushi || snap.fish.legend || snap.fish.rare >= 4) ? () => makeVideo(snap) : null, () => tateCard(snap));
   }
   // どうが（3びょう）：ぬし・★5・まぼろしを かかげる しゅんかん。canvas を MediaRecorder で ろく画（この たんまつの なかだけ・外へは おくらない）。
   // もじは ゲームの なまえと URL だけ（さかなの なまえ・おおきさ・さくしゃの なまえは いれない）。ちかちかは しない（うす暗い ところから ゆっくり あかるく・さいごに ゆっくり くらく・ほしは ゆっくり ちる）
@@ -3416,6 +3468,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     await showPhoto(canvas, 'marufuwa-tsuri-seal-' + seen + '.png', EN() ? 'A photo of the sticker album with ' + seen + (seen === 1 ? ' kind' : ' kinds') + ' of stickers.' : 'あつめた シールが ならんだ シールちょうの しゃしん。' + seen + 'しゅるい', words);
   }
   let wallMaker = null, photoRegen = null, paintPhotoName = () => {}, videoMaker = null, videoUrl = '', resetClip = () => {}, videoOk = () => false;   // しゃしんの まど（かべがみ・なまえ）の じょうたい
+  let tallMaker = null, tallCanvas = null, photoBase = null, paintPhotoTall = () => {};   // たての「見せる」カード：つくる 関数・つくった え・よこの しゃしん（もどす よう）
   {   // しゃしんの まどの ボタン：がぞうを コピー／ともだちに おしえる（どちらも 自分で おした ときだけ・かってに おくらない）
     const row = $('photo-x').parentElement, copy = document.createElement('button'), invite = document.createElement('button');
     const nameBtn = document.createElement('button'); nameBtn.id = 'photo-name'; nameBtn.type = 'button'; nameBtn.className = 'pill'; nameBtn.hidden = true; nameBtn.setAttribute('aria-pressed', 'false');
@@ -3427,7 +3480,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       if (photoRegen) { try { await photoRegen(); } catch {} st.textContent = save.nameOnCard ? L('バケツの なまえを のせたよ。ほんとうの なまえは のせないでね。', 'Added the bucket name. Please do not use your real name.') : L('バケツの なまえを はずしたよ。', 'Removed the bucket name.'); }
     });
     const wall = document.createElement('button'); wall.id = 'photo-wall'; wall.type = 'button'; wall.className = 'pill'; wall.hidden = true;
-    copy.id = 'photo-copy'; invite.id = 'photo-invite'; copy.type = invite.type = 'button'; copy.className = invite.className = 'pill'; copy.hidden = true; row.append(copy, invite, wall, nameBtn);
+    const tall = document.createElement('button'); tall.id = 'photo-tall'; tall.type = 'button'; tall.className = 'pill'; tall.hidden = true; tall.setAttribute('aria-pressed', 'false');
+    copy.id = 'photo-copy'; invite.id = 'photo-invite'; copy.type = invite.type = 'button'; copy.className = invite.className = 'pill'; copy.hidden = true; row.append(copy, invite, tall, wall, nameBtn);
+    const paintTall = () => { const on = $('photo-img').dataset.tall === '1'; tall.textContent = on ? L('よこに もどす', 'Back to wide') : L('たての カードに する', 'Make a tall card'); tall.setAttribute('aria-pressed', String(on)); tall.setAttribute('aria-label', on ? L('よこの しゃしんに もどす', 'Back to the wide photo') : L('たての カードに する。スマホの がめん いっぱいの 1まい。この たんまつの なかで つくるよ', 'Make a tall card that fills a phone screen. It is made on this device')); };
+    paintPhotoTall = paintTall;
+    tall.addEventListener('click', async () => {   // よこ ⇄ たて。ほぞん・みせる・コピー・X は いま みえている ほうの えを つかう
+      const st = $('photo-status'); if (!tallMaker || !photoBase || tall.disabled) return; tall.disabled = true;
+      try {
+        if ($('photo-img').dataset.tall !== '1') { if (!tallCanvas) tallCanvas = await tallMaker(); await applyPhoto(tallCanvas, photoBase.fileName.replace(/[.]png$/, '-tate.png'), photoBase.alt + L('（たて）', ' (tall)'), photoBase.words); $('photo-img').dataset.tall = '1'; st.textContent = L('たての カードに したよ。「ほぞんする」か「みせる」で おくれるよ。かってに とうこうは しません。', 'Made the tall card. Use Save or Share. Nothing is posted automatically.'); }
+        else { await applyPhoto(photoBase.canvas, photoBase.fileName, photoBase.alt, photoBase.words); delete $('photo-img').dataset.tall; st.textContent = L('よこの しゃしんに もどしたよ。', 'Back to the wide photo.'); }
+        paintTall();
+      } catch { st.textContent = L('たての カードを つくれなかったよ。', 'Could not make the tall card.'); }
+      tall.disabled = false;
+    });
     wall.addEventListener('click', async () => {
       const st = $('photo-status'); if (!wallMaker) return;
       try {
@@ -3438,7 +3503,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     });
     const vid = document.createElement('button'), clip = document.createElement('video'), vsave = document.createElement('a'), vshare = document.createElement('button');
     vid.id = 'photo-video'; vid.type = 'button'; vid.className = 'pill'; vid.hidden = true;
-    clip.id = 'photo-clip'; clip.hidden = true; clip.controls = true; clip.loop = true; clip.muted = true; clip.setAttribute('playsinline', ''); clip.style.cssText = 'display:block;width:100%;height:auto;border-radius:14px;margin:0 auto'; $('photo-img').after(clip);
+    clip.id = 'photo-clip'; clip.hidden = true; clip.controls = true; clip.loop = true; clip.muted = true; clip.setAttribute('playsinline', ''); $('photo-img').after(clip);   // 見た目は CSS（#photo-clip）。inline の display:block が hidden に 勝って、どうがの 黒い はこが いつも 見えていた（10/6 直し）
     vsave.id = 'photo-clip-save'; vsave.className = 'pill'; vsave.hidden = true; vshare.id = 'photo-clip-share'; vshare.type = 'button'; vshare.className = 'pill'; vshare.hidden = true; row.append(vid, vsave, vshare);
     videoOk = () => typeof MediaRecorder === 'function' && !!HTMLCanvasElement.prototype.captureStream && !reduce();   // 対応ブラウザだけ・「うごきを へらす」では 出さない
     resetClip = () => { paintVideo(); clip.hidden = true; try { clip.pause(); } catch {} clip.removeAttribute('src'); if (videoUrl) { URL.revokeObjectURL(videoUrl); videoUrl = ''; } $('photo-img').hidden = false; vsave.hidden = vshare.hidden = true; vid.disabled = false; };
@@ -3456,7 +3521,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         st.textContent = L('どうがが できたよ。この たんまつの なかだけで つくったよ。かってに とうこうは しません。', 'Your video is ready. It was made on this device only. Nothing is posted automatically.');
       } catch { vid.disabled = false; st.textContent = L('どうがを つくれなかったよ。', 'Could not make the video.'); }
     });
-    const paint = () => { paintVideo(); paintName(); wall.textContent = L('かべがみに する', 'Make a wallpaper'); copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
+    const paint = () => { paintVideo(); paintName(); paintTall(); wall.textContent = L('かべがみに する', 'Make a wallpaper'); copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint); else paint();
     copy.addEventListener('click', async () => {
       const st = $('photo-status');
@@ -3470,10 +3535,16 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       } catch (error) { st.textContent = error && error.name === 'AbortError' ? L('やめました。', 'Cancelled.') : L('リンクを おくれなかったよ。', 'Could not share the link.'); }
     });
   }
-  async function showPhoto(canvas, fileName, alt, words, nushiCard, wall, regen, video) {
+  async function showPhoto(canvas, fileName, alt, words, nushiCard, wall, regen, video, tallFn) {
     const status = $('photo-status'); $('photo').dataset.nushi = String(!!nushiCard); wallMaker = wall || null; $('photo-wall').hidden = !wallMaker;
     videoMaker = video || null; resetClip(); $('photo-video').hidden = !(videoMaker && videoOk());   // どうがで おしえる：ぬし・★5・まぼろしの しゃしんの ときだけ
     photoRegen = regen || null; $('photo-name').hidden = !(photoRegen && bucketName()); paintPhotoName();   // なまえを のせる ボタンは つれた しゃしんで、バケツに なまえが ある ときだけ
+    tallMaker = tallFn || null; tallCanvas = null; photoBase = {canvas, fileName, alt, words}; delete $('photo-img').dataset.tall; $('photo-tall').hidden = !tallMaker; paintPhotoTall();   // たての カードは つれた しゃしんだけ（おして つくる・はじめは よこ）
+    await applyPhoto(canvas, fileName, alt, words);
+    status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。Xは、おうちの ひと（おとな）と いっしょに つかってね。';
+  }
+  async function applyPhoto(canvas, fileName, alt, words) {   // まどの え・ほぞん・みせる・X・コピーを、この えに そろえる（よこ／たての きりかえでも つかう）
+    const status = $('photo-status');
     const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(Error('png')), 'image/png'));
     if (photoURL) URL.revokeObjectURL(photoURL);
     photoFile = new File([blob], fileName, {type: 'image/png'}); photoURL = URL.createObjectURL(blob);
@@ -3484,7 +3555,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('photo-copy').hidden = !(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write);   // がぞうを コピー：つかえる たんまつだけ
     if (!$('photo-share').hidden) $('photo-share').parentElement.prepend($('photo-share'));   // スマホは「きょうゆう」（しゃしん つき・1タップ）を いちばん さきに。「ほぞんして から Xに そえる」は うしろ
     $('photo-share').onclick = async () => { try { await navigator.share({files: [photoFile], text: KJ(words)}); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (error) { status.textContent = error.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
-    status.textContent = 'かってに とうこうは しません。Xに のせる ときは、ほぞんした えを そえてね。Xは、おうちの ひと（おとな）と いっしょに つかってね。';
   }
   $('take-photo').addEventListener('click', async () => {
     try { await takePhoto(); photo.showModal(); save.photoN = (save.photoN || 0) + 1; store(); checkTrophies(false); } catch { say('しゃしんを つくれなかったよ。もういちど ためしてね。'); }
@@ -4649,6 +4719,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-ruby-dict.js"></script>
 <script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
-<script defer src="tsuri-ver.js?v=93"></script>
+<script defer src="tsuri-ver.js?v=94"></script>
 </body>
 </html>
