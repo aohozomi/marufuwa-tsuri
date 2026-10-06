@@ -206,7 +206,7 @@ html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.a
 #scene[data-dim=true] > svg:first-of-type{filter:brightness(.62) saturate(.85)}
 .times{grid-template-columns:1.5fr repeat(4,1fr)}
 .times button{min-height:44px;font-size:.78rem}
-#keeper{position:absolute;z-index:4;left:93.5%;top:72%;width:13%;min-height:0;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
+#keeper{position:absolute;z-index:4;left:93.5%;top:72%;width:13%;min-width:44px;min-height:44px;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
 #keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
 #scene:is([data-phase=idle],[data-phase=caught]) #marufuwa{cursor:pointer;pointer-events:auto}
 /* 10/5 マスター「お店の キャラが ういてる」：足もとに 接地影と 小さな 屋台（台）。台は きつねの 下半身の 前に ならべて「台の うしろに 立つ」形に する。足の y は なかまと おなじ 地面ライン（58+.16x）*/
@@ -1526,7 +1526,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
 
   // ばしょ。すうじは がめんの なかの わりあい（%）。みずぎわは ひだりから みぎへ さがる
-  const SPOT_X = [18, 46, 76];
+  const SPOT_X = [18, 46, 66];   // 10/6：みぎの バケツを 10% ひだりへ（おみせの きつねの ボタンと 当たりが 18px かさなって いた。375／390／1280 で かさなり 0 を 実測）
   const shore = x => 58 + .16 * x;
   const feet = i => ({x: SPOT_X[i], y: shore(SPOT_X[i]) - 1});
   const floatAt = i => ({x: SPOT_X[i] + 7, y: shore(SPOT_X[i] + 7) + 13});
@@ -4649,6 +4649,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-ruby-dict.js"></script>
 <script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
-<script defer src="tsuri-ver.js?v=92"></script>
+<script defer src="tsuri-ver.js?v=93"></script>
 </body>
 </html>
