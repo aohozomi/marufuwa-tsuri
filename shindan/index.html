@@ -53,6 +53,10 @@ h1{margin:4px 0 6px;font-size:1.35rem;line-height:1.4}
 .card .cname{position:absolute;left:0;right:0;top:8%;font-weight:900;font-size:1.05rem;color:#244653;text-shadow:0 1px 0 #fff}
 .card .cword{position:absolute;left:8%;right:8%;bottom:14%;font-weight:800;font-size:.9rem;line-height:1.6;color:#244653;background:#ffffffd0;border-radius:12px;padding:8px 10px}
 .card .curl{position:absolute;left:0;right:0;bottom:4%;font-size:.62rem;color:#35566a;letter-spacing:.02em}
+/* 天の 9:16 の絵（10/7・水色 v2・ミント v1）：絵を カード いっぱいに。うえの 空いた所に 名前。ことばは 下の 白い箱（いままで どおり） */
+.card[data-tall=true] img#cimg{left:0;top:0;width:100%;height:100%;object-fit:cover}
+.card[data-tall=true] .cname{top:6%;font-size:1.15rem;color:#fff;text-shadow:0 1px 2px #24465399,0 0 10px #24465366}
+.card[data-tall=true] .curl{color:#fff;text-shadow:0 1px 2px #24465399}
 .rname{margin:0 0 4px;font-size:1.2rem}
 .rword{margin:0 0 12px;font-size:1rem;line-height:1.8}
 .acts{display:grid;gap:10px}
@@ -117,8 +121,8 @@ canvas{display:none}
   // 採点表（Apps/Marufuwa/診断_まるふわいろ_仕様.md）：[水色, ミント, アプリコット, ラベンダー]
   var T = { 1: { 1: [1, 1, 0, 0], 2: [0, 0, 1, 0], 3: [0, 0, 0, 1] }, 2: { 1: [1, 0, 0, 0], 2: [0, 0, 1, 0], 3: [0, 1, 0, 1] }, 3: { 1: [0, 1, 0, 0], 2: [1, 0, 1, 0], 3: [0, 0, 0, 1] } };
   var C = [
-    { key: 'mizu', img: '../img/game-blue.webp', bg: ['#dff3fb', '#bfe6f9'], name: L('ふだんの いろ', 'Everyday blue'), word: L('きょうは、いつもの ペースで いいよ。', 'Today, your usual pace is just right.') },
-    { key: 'mint', img: '../img/game-mint.webp', bg: ['#e4f8ee', '#bfeedb'], name: L('ごきげんの いろ', 'Cheerful mint'), word: L('ごきげん。きょうの いいこと、ひとつ みつけてね。', 'In a good mood. Find one nice thing today.') },
+    { key: 'mizu', img: '../img/shindan/mizu.webp', tall: true, bg: ['#dff3fb', '#bfe6f9'], name: L('ふだんの いろ', 'Everyday blue'), word: L('きょうは、いつもの ペースで いいよ。', 'Today, your usual pace is just right.') },   // tall＝天の 9:16 の絵（10/7）。無い色は まえの 3:4 の絵
+    { key: 'mint', img: '../img/shindan/mint.webp', tall: true, bg: ['#e4f8ee', '#bfeedb'], name: L('ごきげんの いろ', 'Cheerful mint'), word: L('ごきげん。きょうの いいこと、ひとつ みつけてね。', 'In a good mood. Find one nice thing today.') },
     { key: 'apricot', img: '../img/game-apricot.webp', bg: ['#fff0e3', '#ffd9bd'], name: L('うれしい いろ', 'Happy apricot'), word: L('なにか いい ことが ありそう。おやつ、たべよ。', 'Something nice may happen. Have a snack.') },
     { key: 'lavender', img: '../img/game-blue.webp', ears: true, bg: ['#efe9fb', '#d9ccf5'], name: L('ぼんやりの いろ', 'Sleepy lavender'), word: L('ぼんやり してても いいよ。ここに いて いいよ。', 'It is fine to drift. You are welcome here.') }
   ];
@@ -153,7 +157,7 @@ canvas{display:none}
   var cur = null;
   function show(i) {
     cur = C[i];
-    $('cimg').src = cur.img; $('cears').hidden = !cur.ears; $('cears').src = cur.img;
+    $('cimg').src = cur.img; $('cears').hidden = !cur.ears; $('cears').src = cur.img; $('card').dataset.tall = cur.tall ? 'true' : 'false';
     $('card').style.background = 'linear-gradient(180deg,' + cur.bg[0] + ',' + cur.bg[1] + ')';
     $('cname').textContent = cur.name; $('cword').textContent = cur.word; $('rname').textContent = cur.name; $('rword').textContent = cur.word;
     $('res').dataset.on = 'true'; $('res').focus(); $('live').textContent = cur.name + '. ' + cur.word;
@@ -167,10 +171,15 @@ canvas{display:none}
     var cv = $('cv'), g = cv.getContext('2d'), W = cv.width, H = cv.height, im = new Image();
     im.onload = function () {
       var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, cur.bg[0]); gr.addColorStop(1, cur.bg[1]); g.fillStyle = gr; g.fillRect(0, 0, W, H);
-      g.fillStyle = '#244653'; g.textAlign = 'center'; g.font = '900 72px system-ui, sans-serif'; g.fillText(cur.name, W / 2, 230);
-      var iw = W * .64, ih = iw * im.height / im.width, ix = (W - iw) / 2, iy = H * .22;
-      g.drawImage(im, ix, iy, iw, ih);
-      if (cur.ears) { g.save(); g.beginPath(); g.rect(ix, iy, iw, ih * .24); g.clip(); g.filter = 'hue-rotate(58deg) saturate(.9)'; g.drawImage(im, ix, iy, iw, ih); g.restore(); }
+      if (cur.tall) {   // 9:16 の絵：カード いっぱいに（cover）。名前は 白で うえに
+        var sc = Math.max(W / im.width, H / im.height), dw = im.width * sc, dh = im.height * sc; g.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh);
+        g.textAlign = 'center'; g.save(); g.fillStyle = '#fff'; g.font = '900 76px system-ui, sans-serif'; g.shadowColor = '#24465399'; g.shadowBlur = 14; g.shadowOffsetY = 2; g.fillText(cur.name, W / 2, 190); g.restore();   // textAlign は save の そとで（したの ことば・URL も まんなか）
+      } else {
+        g.fillStyle = '#244653'; g.textAlign = 'center'; g.font = '900 72px system-ui, sans-serif'; g.fillText(cur.name, W / 2, 230);
+        var iw = W * .64, ih = iw * im.height / im.width, ix = (W - iw) / 2, iy = H * .22;
+        g.drawImage(im, ix, iy, iw, ih);
+        if (cur.ears) { g.save(); g.beginPath(); g.rect(ix, iy, iw, ih * .24); g.clip(); g.filter = 'hue-rotate(58deg) saturate(.9)'; g.drawImage(im, ix, iy, iw, ih); g.restore(); }
+      }
       g.fillStyle = '#ffffffd9'; roundRect(g, W * .08, H * .76, W * .84, 220, 28); g.fill();
       g.fillStyle = '#244653'; g.font = '800 46px system-ui, sans-serif'; wrap(g, cur.word, W / 2, H * .76 + 90, W * .78, 64);
       g.fillStyle = '#35566a'; g.font = '600 34px system-ui, sans-serif'; g.fillText('aohozomi.github.io/marufuwa-tsuri', W / 2, H - 70);
@@ -179,7 +188,10 @@ canvas{display:none}
     im.src = cur.img;
   }
   function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
-  function wrap(g, text, x, y, maxW, lh) { var line = '', i, ch; for (i = 0; i < text.length; i++) { ch = text[i]; if (g.measureText(line + ch).width > maxW && line) { g.fillText(line, x, y); line = ch; y += lh; } else line += ch; } if (line) g.fillText(line, x, y); }
+  function wrap(g, text, x, y, maxW, lh) {   // 英語（空白あり）は 単語で 折り返す。日本語は 1文字ずつ（10/7：「Ha/ve」の ように 単語の 途中で 切れていた）
+    var units = text.indexOf(' ') >= 0 ? text.split(' ').map(function (w, i, a) { return i < a.length - 1 ? w + ' ' : w; }) : text.split('');
+    var line = '', i, u; for (i = 0; i < units.length; i++) { u = units[i]; if (g.measureText((line + u).replace(/ $/, '')).width > maxW && line) { g.fillText(line.replace(/ $/, ''), x, y); line = u; y += lh; } else line += u; } if (line) g.fillText(line.replace(/ $/, ''), x, y);
+  }
   function fileName() { return L('まるふわ_いろ診断', 'marufuwa_color') + '_' + cur.key + '.png'; }
   $('b-save').addEventListener('click', function () {
     if (!cur) return;
