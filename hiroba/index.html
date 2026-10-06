@@ -304,7 +304,8 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 .prop svg{display:block;width:100%;height:100%;overflow:visible;pointer-events:none}   /* data-dest／data-secret の svg は 下で visiblePainted に */
 .prop[data-dest],.prop[data-secret]{pointer-events:none;cursor:pointer}   /* 10/6 Claude：当たり判定は「描かれている所」だけ（箱ぜんたいでは、つりばの箱が まちかどの下に かぶっていた） */
 .prop[data-dest] svg,.prop[data-secret] svg{pointer-events:none}   /* 外がわの svg の 箱は 当てない */
-.prop[data-dest] svg *,.prop[data-secret] svg *,.prop[data-dest] img{pointer-events:visiblePainted;cursor:pointer}   /* なかの 形（描かれている 所）だけ 当てる */
+.prop[data-dest] svg *,.prop[data-secret] svg *{pointer-events:visiblePainted;cursor:pointer}   /* なかの 形（描かれている 所）だけ 当てる */
+.prop[data-dest] img{pointer-events:auto;cursor:pointer}   /* HTML の img に visiblePainted は きかず none の まま だった（天空の城が 押せなかった・10/7）。すきとおった 所は JS の alpha 判定で 下へ */
 .prop[data-dest] .mark,.prop[data-secret] .mark,.prop .inn-sign-label{pointer-events:auto;cursor:pointer}
 .prop[data-secret=tree]{pointer-events:none}
 .prop[data-secret=tree]::before{content:"";position:absolute;left:8%;right:8%;top:0;height:62%;pointer-events:auto;cursor:pointer}
@@ -321,7 +322,7 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 /* 天空の まちかど（10/6 マスター「天空で面白いやん」）：manifest の machi_sky で、まちかどを「白い 天空の城（雲と 浮島つき）」の 絵に 差しかえる。
    わざと 浮いて いる ことが 分かる よう、ゆっくり 上下に ゆれる（うごきを へらす では 止まる）。足もとの 丘は 消す。押せる 範囲は 絵ぜんたい */
 .prop[data-art=sky]::after{display:none}
-.prop[data-art=sky] img{display:block;width:100%;height:100%;object-fit:contain;object-position:50% 100%;filter:var(--m013-time-filter,none);pointer-events:none}
+.prop[data-art=sky] img{display:block;width:100%;height:100%;object-fit:contain;object-position:50% 100%;filter:var(--m013-time-filter,none);pointer-events:auto}   /* v90 で none に して いたため 城が 押せなかった（10/7 直し）。すきとおった 所は alpha 判定で 下へ */
 .prop[data-art=sky]{animation:skyfloat 6s ease-in-out infinite}
 @keyframes skyfloat{0%,100%{translate:0 0}50%{translate:0 -4px}}
 @media (prefers-reduced-motion:reduce){.prop[data-art=sky]{animation:none}}
@@ -835,7 +836,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=97"></script>
+<script defer src="../tsuri-ver.js?v=98"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>

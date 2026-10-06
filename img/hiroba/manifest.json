@@ -4,5 +4,6 @@
   "hills": [],
   "hills_note": "セミリアルの山：hills に名前（asa/hiru/yuu/yoru）。絵は img/hiroba/plaza_hills_<名前>.webp か hills_files {\"hiru\":\"assets/…/yama.png\"}（hiroba/ からの相対パス・png 可）。置き方は hills_box [x,y,w,h]（viewBox 720×560・既定 [0,146,720,150]）と hills_fit slice|meet|none。時間の絵が無ければ hiru を色で変えて使う（夜も暗くしてセミリアルのまま。hills_tint:false で止める）。",
   "hills_files": {},
-  "machi_sky_note": "天空のまちかど：machi_sky に {\"file\":\"assets/m014_sky_castle/machi_sky_castle.png\",\"w\":120,\"h\":140,\"lift\":18} を書くと、まちかどがその絵（白い城＋雲＋浮島・透明背景・下端が浮島の底）に替わる。無ければ今のまちかど。"
+  "machi_sky_note": "天空のまちかど：machi_sky に {\"file\":\"assets/m014_sky_castle/machi_sky_castle.png\",\"w\":120,\"h\":140,\"lift\":18} を書くと、まちかどがその絵（白い城＋雲＋浮島・透明背景・下端が浮島の底）に替わる。無ければ今のまちかど。絵は天の v2（1161×1355・原本は branch art/sky-castle）を 720×840 に縮小したもの（10/7）。",
+  "machi_sky": { "file": "assets/m014_sky_castle/machi_sky_castle.png", "x": 82, "w": 150, "h": 175, "lift": 22 }
 }
