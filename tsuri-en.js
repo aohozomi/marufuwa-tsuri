@@ -1,4 +1,4 @@
-/* まるふわ つりびより：English mode（外付け・総司令部）
+/* まるふわ びより：English mode（外付け・総司令部）
    ・日本語のままでは何も変えない。?lang=en か、ブラウザの言語に日本語が1つも無い時だけ英語にする
    ・画面の日本語（ふりがなの「読み」を正規化した文字）を、訳表・ルール・かけらの置きかえで英語にする（本体には手を入れない）
    ・訳せなかった文は日本語のまま残し、TsuriEn.missing() に出す（未訳の検査）
@@ -299,7 +299,7 @@
     'とじる（もう だしません）': 'Close (won’t show again)',
     'ホームがめんに おく': 'Add to home screen', 'いま ホームがめんに おく': 'Add it now',
     '🐠 すいそう': '🐠 Aquarium',   // すいそうの ボタン（バッジの span は ゲームが かえる ので のこす）
-    'まるふわ つりびより': 'Marufuwa Fishing Days',   // おへやの しゃしん（canvas）の ふだ
+    'まるふわ びより': 'Marufuwa Days',   // おへやの しゃしん（canvas）の ふだ
   }).forEach(([k, v]) => EX.set(k, v));
   for (const [k, v] of [...EX]) { const nk = norm(k); if (nk !== k) { EX.delete(k); EX.set(nk, v); } }   // かぎの すきまを そろえる
   try { ((window.TsuriTown && window.TsuriTown.list) || []).forEach(t => { if (t && t.name && t.en) { const nk = norm(t.name); if (!EX.has(nk)) EX.set(nk, t.en); if (!PAL_MAP.has(nk)) PAL_MAP.set(nk, t.en); } }); } catch {}   // 街人（tsuri-town.js・天の なかま）の 名前は 一覧から 自動で（108人に なっても 表を 足さない）
@@ -577,13 +577,13 @@
   // ロゴ：英語に つくりなおす（🎣の <i> は のこす＝ウキの えが はいる）
   function logo() {
     const h = document.querySelector('h1.logo'); if (!h || h.dataset.en) return;
-    h.dataset.en = '1'; h.setAttribute('aria-label', 'Marufuwa Fishing Days');
+    h.dataset.en = '1'; h.setAttribute('aria-label', 'Marufuwa Days');
     const mk = (ch, n) => { const s = document.createElement('span'); s.setAttribute('aria-hidden', 'true'); s.style.setProperty('--n', String(n)); s.textContent = ch === ' ' ? ' ' : ch; return s; };
     const icon = h.querySelector('i'); [...h.querySelectorAll('span')].forEach(s => s.remove());
     // ことばの はしで だけ 折り返す（「Fishing Day / s」のように 1文字だけ 落ちない）。色は 日本語の ロゴと おなじ 4色を 1文字ずつ 書く（ことばごとの まとまりに すると nth-of-type が ふりだしに もどって 色の ならびが かわる ため）
     const K = ['#4bb3e0', '#46c79a', '#ff9a6b', '#a98be8'], D = ['#2a86b3', '#2a9a72', '#d96f40', '#7c5fc4'];
     const word = (text, from) => { const w = document.createElement('b'); w.setAttribute('aria-hidden', 'true'); w.style.cssText = 'display:inline-flex;align-items:flex-end;gap:1px;font:inherit;white-space:nowrap'; [...text].forEach((c, i) => { const s = mk(c, from + i); s.style.setProperty('--k', K[(from + i) % 4]); s.style.setProperty('--d', D[(from + i) % 4]); w.append(s); }); return w; };
-    h.insertBefore(word('Marufuwa', 0), icon); h.append(word('Fishing', 8)); h.append(word('Days', 15));
+    h.insertBefore(word('Marufuwa', 0), icon); h.append(word('Days', 8));   // 10/7 なまえ「まるふわ びより」＝ Marufuwa Days
     h.style.fontSize = 'clamp(1.1rem,5.6vw,2.1rem)'; h.style.flexWrap = 'wrap'; h.style.columnGap = '.3em';
   }
   // データ：魚の なまえを 英語に（あとで つくる ふだ・バケツ・ずかんが 英語で でる）
@@ -602,9 +602,9 @@
   // ホームがめんに おく 時の なまえも 英語に（iPhone は apple-mobile-web-app-title、Android(Chrome) は manifest）。manifest の あるページ（釣りの 本体）だけ
   { const mf = document.querySelector('link[rel=manifest]'), at = document.querySelector('meta[name=apple-mobile-web-app-title]');
     if (mf && /(^|\/)manifest\.webmanifest$/.test(mf.getAttribute('href') || '')) mf.setAttribute('href', mf.getAttribute('href').replace('manifest.webmanifest', 'manifest-en.webmanifest'));
-    if (at) at.setAttribute('content', 'Fishing Days'); }
+    if (at) at.setAttribute('content', 'Marufuwa Days'); }
   window.TsuriEn.page = ({ title, description } = {}) => { if (title) document.title = title; if (description && meta) meta.content = description; };
-  if (!document.documentElement.hasAttribute('data-en-page')) window.TsuriEn.page({ title: 'Marufuwa Fishing Days — a no-rush fishing game', description: "No rush. Let one go, and nothing is lost. A cozy fishing game that runs in your browser — free, no login, no install." });
+  if (!document.documentElement.hasAttribute('data-en-page')) window.TsuriEn.page({ title: 'Marufuwa Days — a no-rush fishing game', description: "No rush. Let one go, and nothing is lost. A cozy fishing game that runs in your browser — free, no login, no install." });
   function start() {
     logo(); patchData(); walk(document.body);
     let queue = new Set(), scheduled = false;

@@ -837,7 +837,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=101"></script>
+<script defer src="../tsuri-ver.js?v=102"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -2077,7 +2077,7 @@ async function openCard() {
   }
   $('card-img').src = cardURL; $('card-img').alt = S('きょうの おてがみの カード。', 'Your letter card for today.'); $('card-save').href = cardURL; $('card-save').download = cardFile.name;
   $('card-share').hidden = !(navigator.share && navigator.canShare && navigator.canShare({ files: [cardFile] }));
-  $('card-share').onclick = async () => { try { await navigator.share({ files: [cardFile], text: TE('まるふわの ひろばの おてがみ　#まるふわつりびより') }); st.textContent = S('きょうゆうの がめんを とじました。', 'Closed the share screen.'); } catch (e) { st.textContent = e.name === 'AbortError' ? S('やめました。', 'Cancelled.') : S('「ほぞんする」を つかってね。', 'Please use “Save”.'); } };
+  $('card-share').onclick = async () => { try { await navigator.share({ files: [cardFile], text: TE('まるふわの ひろばの おてがみ　#まるふわびより') }); st.textContent = S('きょうゆうの がめんを とじました。', 'Closed the share screen.'); } catch (e) { st.textContent = e.name === 'AbortError' ? S('やめました。', 'Cancelled.') : S('「ほぞんする」を つかってね。', 'Please use “Save”.'); } };
   st.textContent = S('かってに とうこうは しません。「ほぞんする」で のこせるよ。', 'Nothing is posted by itself. Use “Save” to keep it.'); sfx.tap();
 }
 $('post-card').addEventListener('click', openCard);
@@ -2970,7 +2970,7 @@ async function openPhoto() {
     photoFile = new File([blob], 'marufuwa-hiroba.png', { type: 'image/png' }); photoURL = URL.createObjectURL(blob);
     $('photo-img').src = photoURL; $('photo-img').alt = 'きょうの ひろばの しゃしん。まるふわと ともだちが いるよ。'; $('photo-save').href = photoURL; $('photo-save').download = photoFile.name;
     const canShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [photoFile] })); $('photo-share').hidden = !canShare;
-    $('photo-share').onclick = async () => { try { await navigator.share({ files: [photoFile], text: TE('まるふわの ひろばで あそんだよ　#まるふわつりびより') }); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (e) { status.textContent = e.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
+    $('photo-share').onclick = async () => { try { await navigator.share({ files: [photoFile], text: TE('まるふわの ひろばで あそんだよ　#まるふわびより') }); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (e) { status.textContent = e.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
     status.textContent = 'かってに とうこうは しません。「ほぞんする」で のこせるよ。';
     if (!photoDlg.open) photoDlg.showModal(); sfx.tap();
   } catch { narrate('しゃしんを つくれなかったよ。もういちど ためしてね。'); status.textContent = 'つくれなかったよ。もういちど ためしてね。'; }
@@ -3400,7 +3400,7 @@ const api = window.Hiroba = {
 //   tsuri-en.js は ページの 題・ロゴを 「つりびより」に して しまうので、load の あとに ひろば用に 直す（h1 に data-en を つけて、ロゴの 作りかえを ふせいで ある）
 addEventListener('load', () => {
   const E = window.TsuriEn; if (!E || E.lang !== 'en') return;
-  document.title = "Marufuwa's Plaza — Marufuwa Fishing Days";
+  document.title = "Marufuwa's Plaza — Marufuwa Days";
   const meta = document.querySelector('meta[name=description]'); if (meta) meta.content = "A little town to play in. Marufuwa and friends walk around the plaza. Go fishing or visit Marufuwa's Room. No rush.";
   const mobileHint = document.querySelector('.mobile-destination-hint'); if (mobileHint) mobileHint.textContent = 'On a phone, scroll down to choose a destination.';
   const mobileInstruction = document.querySelector('.mobile-destination-instruction'); if (mobileInstruction) mobileInstruction.textContent = 'On a phone, scroll down to choose a destination.';
@@ -3475,7 +3475,7 @@ addEventListener('load', () => {
     ] });
   }
   const withA = s => (/^[aeiou]/i.test(s) ? 'an ' : 'a ') + s, capA = s => withA(s).replace(/^./, c => c.toUpperCase());   // a／an（acorn は an）
-  if (E.add) E.add({ ex: Object.assign({ 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in Fishing Days)' }, window.TsuriMame ? Object.fromEntries(window.TsuriMame.lines.map(l => [l.ja, l.en])) : {}, { 'ベンチ': 'Bench', 'ベンチへ あるいて いくよ': 'Walking to the bench.', 'ベンチに すわったよ。ゆっくり やすもう': 'You sat on the bench. Let’s rest slowly.', 'きょうも きてくれて、うれしいな': 'Thank you for coming again today. I’m happy!', 'いっしょに ひとやすみ、いいね': 'Resting together is nice.', 'ねがいの ほし': 'Wishing Star', 'つりばで ねがった ほしだよ': 'A star from a wish you made at the fishing spot.', 'なかまが あつまって きたよ。「しゃしんを とる」を おしてね': 'Everyone gathered around. Press “Take a photo”!', 'もうすこし まってね': 'Coming soon. Please wait a little!', 'かんばんの うらに、なにか かいて あったよ。「もうすこし まってね」': 'There was something written on the back of the sign: “Coming soon. Please wait a little!”' }, SEASON_EN), rules: [
+  if (E.add) E.add({ ex: Object.assign({ 'うごき：すくない（つりびよりの「うごきを へらす」に あわせて いるよ）': 'Motion: Less (matches the setting in the fishing game)' }, window.TsuriMame ? Object.fromEntries(window.TsuriMame.lines.map(l => [l.ja, l.en])) : {}, { 'ベンチ': 'Bench', 'ベンチへ あるいて いくよ': 'Walking to the bench.', 'ベンチに すわったよ。ゆっくり やすもう': 'You sat on the bench. Let’s rest slowly.', 'きょうも きてくれて、うれしいな': 'Thank you for coming again today. I’m happy!', 'いっしょに ひとやすみ、いいね': 'Resting together is nice.', 'ねがいの ほし': 'Wishing Star', 'つりばで ねがった ほしだよ': 'A star from a wish you made at the fishing spot.', 'なかまが あつまって きたよ。「しゃしんを とる」を おしてね': 'Everyone gathered around. Press “Take a photo”!', 'もうすこし まってね': 'Coming soon. Please wait a little!', 'かんばんの うらに、なにか かいて あったよ。「もうすこし まってね」': 'There was something written on the back of the sign: “Coming soon. Please wait a little!”' }, SEASON_EN), rules: [
     [/^きょうのラッキーさかなは「(.+)」。みんなおなじだよ$/, (_, f) => "Today's lucky fish is the " + (E.h && E.h.nmFish ? E.h.nmFish(f) : f) + '. Everyone has the same one!'],   // ありがとうの ほしぞら：名前は そのまま（「さん」は 英語に ない）。月は 月の なまえ
     // 釣りで あった 子の さいしょの ひとこと＝「あいさつ！ さっき ○○が つれたんだね…」。表の あいさつの きまりは 決まった 文だけ 引く ので、あとの 文（さっきの 魚）は E.t で 訳して あいさつを つなぐ
     [/^(おはよう|こんにちは|こんばんは)！(さっき.+)$/, (_, g, rest) => { const r = E.t(rest); return r === rest ? null : ({ 'おはよう': 'Good morning', 'こんにちは': 'Hello', 'こんばんは': 'Good evening' })[g] + '! ' + r; }],

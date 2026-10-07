@@ -4,21 +4,21 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>まるふわ つりびより</title>
+<title>まるふわ びより</title>
 <meta name="description" content="まるふわと なかまと、のんびり つり。いそがなくて だいじょうぶ。にがしても、へらない。">
 <meta name="theme-color" content="#b9edf5">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png">
 <link rel="apple-touch-icon" href="img/icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="apple-mobile-web-app-title" content="つりびより">
+<meta name="apple-mobile-web-app-title" content="まるふわびより">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="canonical" href="https://aohozomi.github.io/marufuwa-tsuri/">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="まるふわ つりびより">
+<meta property="og:site_name" content="まるふわ びより">
 <meta property="og:locale" content="ja_JP">
-<meta property="og:title" content="まるふわ つりびより">
+<meta property="og:title" content="まるふわ びより">
 <meta property="og:description" content="いそがなくて、だいじょうぶ。にがしても、へらないよ。まるふわと なかまと、のんびり つり。むりょう・インストールなし。">
 <meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/">
 <meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og.png">
@@ -886,7 +886,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <g fill="#8a5a2b"><rect x="60" y="660" width="20" height="120"/><rect x="202" y="690" width="16" height="100"/><rect x="1402" y="660" width="18" height="120"/><rect x="1532" y="700" width="20" height="110"/></g>
     <path d="M0 780 Q400 730 800 790 T1600 770 V900 H0Z" fill="#a7dba0"/>
   </svg>
-  <h1 class="logo" aria-label="まるふわ つりびより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">つ</span><span aria-hidden="true">り</span><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
+  <h1 class="logo" aria-label="まるふわ びより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
   <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <ruby>急<rt aria-hidden="true">いそ</rt></ruby>がなくて <ruby>大丈夫<rt aria-hidden="true">だいじょうぶ</rt></ruby>・<ruby>逃<rt aria-hidden="true">に</rt></ruby>がしても <ruby>減<rt aria-hidden="true">へ</rt></ruby>らない<br><small><span class="ic" aria-hidden="true">⏱</span> 1ぴき 10〜20<ruby>秒<rt aria-hidden="true">びょう</rt></ruby>・<ruby>無料<rt aria-hidden="true">むりょう</rt></ruby></small></p>
   <div id="ibasho" role="region">
     <p id="ibasho-text"><span class="ib-morning">おはよう。きょうも、ここに いて いいよ。</span><span class="ib-night">ねむれない？　ゆっくり ながめよう。</span></p>
@@ -1386,7 +1386,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const T = text => window.TsuriEn && TsuriEn.t ? TsuriEn.t(text) : text;   // ひょうに ある ことばは 英語に、ない ものは そのまま
   const L = (ja, en) => EN() ? en : ja;   // 日本語と 英語を その場で えらぶ（ここに おくと、どの 書きかたの 前でも つかえる）
   const KJ = t => (window.TsuriRuby && typeof TsuriRuby.kanji === 'function') ? TsuriRuby.kanji(t) : t;   // ふりがなを つけられない ところ（きょうゆうの 文・画像の もじ）は 漢字だけに（ふりがな なし／English は そのまま）
-  const TAG = () => EN() ? '#MarufuwaFishing' : '#まるふわつりびより';
+  const TAG = () => EN() ? '#MarufuwaDays' : '#まるふわびより';
   const HOME_SHARE = () => EN() ? HOME + 'en/' : HOME;   // 英語の リンクカードを もつ 入口
   const KEY = 'marufuwa-tsuri-v1';
   let save = {fish: {}, total: 0};
@@ -3185,7 +3185,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#fff'; ctx.font = 'bold 104px system-ui,sans-serif'; ctx.fillText(l.fish.name, 540, 1310, 840);
     ctx.font = 'bold 64px system-ui,sans-serif'; ctx.fillText(EN() ? cm(l.size) + ' cm' : cm(l.size) + ' センチ', 540, 1400, 840);
     ctx.fillStyle = night ? '#ffd34d' : '#fff6c9'; ctx.font = '70px system-ui,sans-serif'; ctx.fillText(starsOf(l.fish, l.nushi), 540, 1482, 840);
-    ctx.fillStyle = '#fffffff0'; ctx.font = 'bold 44px system-ui,sans-serif'; ctx.shadowColor = '#0008'; ctx.shadowBlur = 8; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 540, 2250, 900); ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fffffff0'; ctx.font = 'bold 44px system-ui,sans-serif'; ctx.shadowColor = '#0008'; ctx.shadowBlur = 8; ctx.fillText(EN() ? 'Marufuwa Days' : 'まるふわ びより', 540, 2250, 900); ctx.shadowBlur = 0;
     return canvas;
   }
   // 「見せる」カード：スマホの がめん いっぱいの たて 1080×1920。どの さかなでも つくれる（10/6・総司令部）。
@@ -3209,7 +3209,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (special) { const edge = ctx.createLinearGradient(0, 0, W, H); (l.fish.legend ? ['#ff8fa3', '#ffd34d', '#8fe3a8', '#7fd0f2', '#b79cf0'] : (!l.nushi && !seasonal && l.badge) ? ['#b9f0d0', '#8fe3a8', '#fff6c9', '#8fe3a8', '#b9f0d0'] : seasonal ? ['#ffb3c8', '#ffe27a', '#b9f0d0', '#a9d8ff', '#e3c6ff'] : ['#ffe27a', '#d39a1c', '#fff1b8', '#d39a1c', '#ffe27a']).forEach((tone, i) => edge.addColorStop(i / 4, tone)); ctx.strokeStyle = edge; ctx.lineWidth = 26; ctx.strokeRect(13, 13, W - 26, H - 26); }   // きねんの わく
     // うえ：ゲームの なまえ・ひづけ（きねんの ときは その おび）
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0007'; ctx.shadowBlur = 10;
-    ctx.font = 'bold 56px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 540, 140, 960);
+    ctx.font = 'bold 56px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Days' : 'まるふわ びより', 540, 140, 960);
     ctx.font = '34px system-ui,sans-serif'; ctx.fillText((l.at.getMonth() + 1) + '/' + l.at.getDate() + '　' + T(l.area), 540, 196, 960); ctx.shadowBlur = 0;
     if (special) { ctx.fillStyle = l.fish.legend ? '#6a4bc4' : night ? '#f0b429' : seasonal ? '#e0679a' : (!l.nushi && l.badge) ? '#1f7a66' : '#a5481c'; roundRect(ctx, 240, 232, 600, 78, 39); ctx.fill(); ctx.fillStyle = night ? '#4a2a00' : '#fff'; ctx.textBaseline = 'middle'; ctx.font = 'bold 40px system-ui,sans-serif'; ctx.fillText(special, 540, 272, 560); ctx.textBaseline = 'alphabetic'; }
     // まんなか：さかな（おおきく）
@@ -3296,7 +3296,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ctx.fillStyle = night ? '#fff' : '#244653'; ctx.font = 'bold 50px system-ui,sans-serif'; ctx.fillText(EN() ? cm(last.size) + ' cm' : cm(last.size) + ' センチ', 920, 370, 420);
     ctx.fillStyle = night ? '#ffd34d' : '#b07a00'; ctx.font = '50px system-ui,sans-serif'; ctx.fillText(starsOf(last.fish, last.nushi), 920, 440, 420);
     ctx.fillStyle = night ? '#cfe0ff' : color('--star') === '1' ? '#fff' : '#244653'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 920, 112, 440);   // ゲームの なまえ。みた ひとが、さがして これる ように
+    ctx.font = 'bold 46px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Days' : 'まるふわ びより', 920, 112, 440);   // ゲームの なまえ。みた ひとが、さがして これる ように
     ctx.font = '28px system-ui,sans-serif'; ctx.fillText((last.at.getMonth() + 1) + '/' + last.at.getDate() + '　' + T(last.area), 920, 160, 440);
     if (save.nameOnCard === true && bucketName()) { ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText(L('バケツ：', 'Bucket: ') + bucketName(), 920, 198, 440); }   // 本人が えらんだ ときだけ（はじめは OFF）。なまえは この 画像の なかだけ。URL・ひとことの もじには いれない
     { const bd = buddyPal(); if (bd && !night) { const im = await loadImg('img/friend-' + bd.id + '-s.webp'); if (im) { const tall = 130, wide = tall * im.naturalWidth / im.naturalHeight; ctx.drawImage(im, 625 - wide / 2, 505 - tall, wide, tall); } } }   // いっしょに いく なかま（1にんまで）も うつる
@@ -3324,7 +3324,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     ctx.shadowBlur = 0;
     const words = EN()
       ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + (last.lucky ? '\nEveryone has the same lucky fish today!' : '') + '\n' + TAG() + '\n' + HOME_SHARE()
-      : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + (last.lucky ? '\nきょうの ラッキーさかな、みんな おなじ！' : '') + '\n#まるふわつりびより\n' + HOME;
+      : 'まるふわと つりを したよ。\n' + last.fish.name + '　' + cm(last.size) + 'センチ ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.join('・') : '') + (last.lucky ? '\nきょうの ラッキーさかな、みんな おなじ！' : '') + '\n#まるふわびより\n' + HOME;
     const snap = last;   // ぬし・まぼろし・ずかん かんせい の しゃしんだけ「かべがみ」が つくれる
     await showPhoto(canvas, 'marufuwa-tsuri-' + last.fish.id + '.png', EN() ? 'Photo of ' + (avatarPal() ? palName(avatarPal()) : 'Marufuwa') + ' holding up ' + last.fish.name : last.fish.name + 'を かかげる ' + (avatarPal() ? avatarPal().name : 'まるふわ') + 'の しゃしん', words, night, (snap.nushi || snap.fish.legend || snap.album) ? () => wallPhoto(snap) : null, () => takePhoto(), (snap.nushi || snap.fish.legend || snap.fish.rare >= 4) ? () => makeVideo(snap) : null, () => tateCard(snap));
   }
@@ -3344,7 +3344,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const type = VIDEO_TYPES.find(t => MediaRecorder.isTypeSupported(t)), stream = canvas.captureStream(30), rec = new MediaRecorder(stream, type ? {mimeType: type, videoBitsPerSecond: 2500000} : {}), chunks = [];
     rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
     const stopped = new Promise(res => { rec.onstop = res; });
-    const fx = night ? 455 : 480, fy = 300, sc = night ? 1.45 : l.nushi ? 1.4 : 1, hx = night ? 200 : 230, name = EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより';
+    const fx = night ? 455 : 480, fy = 300, sc = night ? 1.45 : l.nushi ? 1.4 : 1, hx = night ? 200 : 230, name = EN() ? 'Marufuwa Days' : 'まるふわ びより';
     const stars = Array.from({length: 14}, (_, i) => ({a: i * Math.PI * 2 / 14 + .3, d: 190 + (i % 3) * 50, r: 7 + (i % 4) * 2}));
     const frame = t => {
       ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalAlpha = 1; ctx.drawImage(bg, 0, 0);
@@ -3422,11 +3422,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (tops) ctx.fillText(EN() ? 'Rarest: ' + tops.name : 'いちばん めずらしい こ：' + tops.name, 780, 552, 680);
     const CLOSING = [['ゆっくり いこうね。', 'Nice and slow.'], ['のんびり、のんびり。', 'Easy does it.'], ['おつかれさま。また あおうね。', 'See you again soon.'], ['きょうも いい かぜ。', 'A gentle breeze today.'], ['そこに いて くれて ありがとう。', 'Glad you are here.']];
     const pick = CLOSING[w.k % CLOSING.length]; ctx.fillStyle = '#3a5a68'; ctx.font = '32px system-ui,sans-serif'; ctx.fillText(L(pick[0], pick[1]), 780, 592, 680);
-    ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6; ctx.font = 'bold 26px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days' : 'まるふわ つりびより', 36, 640); ctx.font = 'bold 24px system-ui,sans-serif'; ctx.fillText(TAG() + (EN() ? '  ·  ' : '　') + LV(), 36, 610);
+    ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6; ctx.font = 'bold 26px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Days' : 'まるふわ びより', 36, 640); ctx.font = 'bold 24px system-ui,sans-serif'; ctx.fillText(TAG() + (EN() ? '  ·  ' : '　') + LV(), 36, 610);
     ctx.textAlign = 'right'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, ''), 1160, 648); ctx.shadowBlur = 0;
     const words = EN()
       ? (now ? 'This week' + String.fromCharCode(39) + 's fishing: ' : 'A fishing week: ') + w.n + (w.n === 1 ? ' fish' : ' fish') + ', ' + ids.length + (ids.length === 1 ? ' kind' : ' kinds') + '.\nWent fishing with Marufuwa!\n' + TAG() + '\n' + HOME_SHARE()
-      : (now ? 'こんしゅうの つり：' : 'ある しゅうの つり：') + w.n + 'ひき・' + ids.length + 'しゅるい。\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
+      : (now ? 'こんしゅうの つり：' : 'ある しゅうの つり：') + w.n + 'ひき・' + ids.length + 'しゅるい。\nまるふわと つりを したよ。\n#まるふわびより\n' + HOME;
     await showPhoto(canvas, 'marufuwa-tsuri-week-' + w.k + '.png', EN() ? 'A card of one fishing week: ' + w.n + ' caught, ' + ids.length + ' kinds' : 'いっしゅうかんの つりの カード。' + w.n + 'ひき・' + ids.length + 'しゅるい', words);
     return true;
   }
@@ -3461,12 +3461,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ctx.restore();
       ctx.fillStyle = got ? '#244653' : '#9fb3bd'; ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 21px system-ui,sans-serif'; ctx.fillText(got ? f.name : '', cx, cy + nameDy, cell - 10);
     });
-    ctx.fillStyle = '#244653'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Fishing Days  ·  Caught ' + save.total + '  ·  ' + LV() : 'まるふわ つりびより　つれた かず ' + save.total + '　' + LV(), 600, 1262);
+    ctx.fillStyle = '#244653'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(EN() ? 'Marufuwa Days  ·  Caught ' + save.total + '  ·  ' + LV() : 'まるふわ びより　つれた かず ' + save.total + '　' + LV(), 600, 1262);
     ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillStyle = '#3a5a68'; ctx.textAlign = 'left'; ctx.fillText(TAG(), 46, 1317);
     ctx.textAlign = 'right'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(HOME_HOST, 1160, 1319);   // すみに ちいさく、あそべる ばしょ（つれた しゃしんと おなじ いち・おなじ おおきさ・さくしゃの なまえは いれない）
     const words = EN()
       ? (full ? 'Sticker album complete! ' : 'Sticker album ' + seen + '/' + BASE + '.') + '\nWent fishing with Marufuwa!\n' + TAG() + '\n' + HOME_SHARE()
-      : (full ? 'シールちょう、ぜんぶ あつめた！ ' : 'シールちょう ' + seen + ' / ' + BASE + '。') + '\nまるふわと つりを したよ。\n#まるふわつりびより\n' + HOME;
+      : (full ? 'シールちょう、ぜんぶ あつめた！ ' : 'シールちょう ' + seen + ' / ' + BASE + '。') + '\nまるふわと つりを したよ。\n#まるふわびより\n' + HOME;
     await showPhoto(canvas, 'marufuwa-tsuri-seal-' + seen + '.png', EN() ? 'A photo of the sticker album with ' + seen + (seen === 1 ? ' kind' : ' kinds') + ' of stickers.' : 'あつめた シールが ならんだ シールちょうの しゃしん。' + seen + 'しゅるい', words);
   }
   let wallMaker = null, photoRegen = null, paintPhotoName = () => {}, videoMaker = null, videoUrl = '', resetClip = () => {}, videoOk = () => false;   // しゃしんの まど（かべがみ・なまえ）の じょうたい
@@ -3519,7 +3519,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         clip.src = videoUrl; clip.hidden = false; $('photo-img').hidden = true; try { const pl = clip.play(); if (pl && pl.catch) pl.catch(() => {}); } catch {}
         vsave.href = videoUrl; vsave.download = file.name; vsave.hidden = false; vid.hidden = true;
         vshare.hidden = !(navigator.share && navigator.canShare && navigator.canShare({files: [file]}));
-        vshare.onclick = async () => { try { await navigator.share({files: [file], title: L('まるふわ つりびより', 'Marufuwa Fishing Days')}); st.textContent = L('きょうゆうの がめんを とじました。', 'Closed the share screen.'); } catch (error) { st.textContent = error && error.name === 'AbortError' ? L('やめました。', 'Cancelled.') : L('「どうがを ほぞんする」を つかってね。', 'Please use Save the video.'); } };
+        vshare.onclick = async () => { try { await navigator.share({files: [file], title: L('まるふわ びより', 'Marufuwa Days')}); st.textContent = L('きょうゆうの がめんを とじました。', 'Closed the share screen.'); } catch (error) { st.textContent = error && error.name === 'AbortError' ? L('やめました。', 'Cancelled.') : L('「どうがを ほぞんする」を つかってね。', 'Please use Save the video.'); } };
         st.textContent = L('どうがが できたよ。この たんまつの なかだけで つくったよ。かってに とうこうは しません。', 'Your video is ready. It was made on this device only. Nothing is posted automatically.');
       } catch { vid.disabled = false; st.textContent = L('どうがを つくれなかったよ。', 'Could not make the video.'); }
     });
@@ -3532,7 +3532,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     invite.addEventListener('click', async () => {
       const st = $('photo-status'), url = HOME_SHARE();
       try {
-        if (navigator.share) { await navigator.share({title: L('まるふわ つりびより', 'Marufuwa Fishing Days'), text: L('ゆっくり たのしめる つりゲームだよ。', 'A relaxing fishing game.'), url}); st.textContent = L('きょうゆうの がめんを とじました。', 'Closed the share screen.'); }
+        if (navigator.share) { await navigator.share({title: L('まるふわ びより', 'Marufuwa Days'), text: L('ゆっくり たのしめる つりゲームだよ。', 'A relaxing fishing game.'), url}); st.textContent = L('きょうゆうの がめんを とじました。', 'Closed the share screen.'); }
         else st.textContent = (await copyText(url)) ? L('リンクを コピー したよ。ともだちに おくってね。（おうちの ひとと いっしょに）', 'Copied the link. Send it to a friend (with a grown-up).') : L('コピーが できなかったよ。', 'Could not copy the link.');
       } catch (error) { st.textContent = error && error.name === 'AbortError' ? L('やめました。', 'Cancelled.') : L('リンクを おくれなかったよ。', 'Could not share the link.'); }
     });
@@ -3691,7 +3691,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   $('give-go').addEventListener('click', async () => {
     if (!giving) return;
     const {f, size} = giving, code = [f.id, Math.min(9999, Math.round(size * 10)), Math.max(0, PALS.indexOf(giverOf())), givingWord, newSeal()].join('.');
-    const url = HOME_SHARE() + '?gift=' + code, text = EN() ? 'I caught a ' + f.name + ' (' + cm(size) + ' cm) in Marufuwa Fishing Days. This one is for you! ' + TAG() : 'まるふわ つりびよりで ' + f.name + ' ' + cm(size) + 'センチ、つったよ。あげる！ #まるふわつりびより';
+    const url = HOME_SHARE() + '?gift=' + code, text = EN() ? 'I caught a ' + f.name + ' (' + cm(size) + ' cm) in Marufuwa Days. This one is for you! ' + TAG() : 'まるふわ びよりで ' + f.name + ' ' + cm(size) + 'センチ、つったよ。あげる！ #まるふわびより';
     if (navigator.share) {
       try { await navigator.share({text, url}); giveSay('きょうゆうの がめんを とじました。'); return; }
       catch (error) { if (error.name === 'AbortError') { giveSay('やめました。'); return; } }
@@ -4721,6 +4721,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-ruby-dict.js"></script>
 <script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
-<script defer src="tsuri-ver.js?v=101"></script>
+<script defer src="tsuri-ver.js?v=102"></script>
 </body>
 </html>

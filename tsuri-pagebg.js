@@ -1,4 +1,4 @@
-/* まるふわ つりびより：ページの はいけい（tsuri-pagebg.js）（ゲーム開発司令部２・2026-10-02）
+/* まるふわ びより：ページの はいけい（tsuri-pagebg.js）（ゲーム開発司令部２・2026-10-02）
    カフェ・びじゅつかん・おすすめの へや・まるいろ の ページの 地に「天の イラスト」を しく。ファイルを img/bg/ に 置くだけで 出る：
      img/bg/<id>_hiru.webp（ひる・よこ）／<id>_yoru.webp（よる・よこ）／<id>_hiru_tate.webp／<id>_yoru_tate.webp（はば 600px みまんの たてながの 版）
    ・よる（?time=n・data-time=n）は yoru が あれば それを。なければ hiru に「くらい かさね（rgba の 紺 .55）」を かける。

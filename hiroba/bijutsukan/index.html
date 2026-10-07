@@ -91,7 +91,7 @@ dialog .acts button[disabled]{opacity:1;color:#5b7480;background:#eef3f5;border-
     '← ひろばへ': '← Back to the Plaza',
     'まるふわと なかま、さかな、ポスターの えを、がくに いれて ならべました。すきな えを おすと、おおきく みられるよ。いそがなくて だいじょうぶ。': 'Marufuwa, her friends, the fish and posters are framed and lined up here. Press a picture you like to see it larger. No need to rush.',
     'かべの いちらん': 'Walls', 'すきな えを おすと、おおきく みられるよ。': 'Tap a picture to see it larger.', 'おうちの かたへ': 'For grown-ups',
-    'まるふわ': 'Marufuwa', 'まるふわの いろいろな かお': 'Marufuwa’s many faces', 'なかま': 'Friends', 'ひろばに いる なかまたち': 'The friends who live in the plaza', 'さかな': 'Fish', 'つりびよりの さかなの え': 'Fish art from Fishing Days',
+    'まるふわ': 'Marufuwa', 'まるふわの いろいろな かお': 'Marufuwa’s many faces', 'なかま': 'Friends', 'ひろばに いる なかまたち': 'The friends who live in the plaza', 'さかな': 'Fish', 'つりびよりの さかなの え': 'Fish art from the fishing game',
     'ポスター': 'Posters', 'ゲームを しょうかいする え': 'Pictures that introduce the game', 'てんの え': 'New art', 'あたらしく とどいた え': 'Newly delivered art',
     'じぶんの こ（かりの え）': 'My own friend (provisional art)', 'いろと いきものを くみあわせた「じぶんの こ」の みほん。ほんものの えが とどいたら かわります': 'Samples of “my own friend”, mixing a color and an animal. They will change when the final art arrives',
     '🎀 まるふわ': '🎀 Marufuwa', '🐾 なかま': '🐾 Friends', '🐟 さかな': '🐟 Fish', '🖼️ ポスター': '🖼️ Posters', '✨ てんの え': '✨ New art', '🌈 じぶんの こ（かりの え）': '🌈 My own friend (provisional art)',
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── English ───
   function applyEn() {
     if (!isEn()) return;
-    const W2 = { mascot: ['Marufuwa', 'Marufuwa’s many faces'], nakama: ['Friends', 'The friends who live in the plaza'], sakana: ['Fish', 'Fish art from Fishing Days'], poster: ['Posters', 'Pictures that introduce the game'], tennoe: ['New art', 'Newly delivered art'], jibun: ['My own friend (provisional art)', 'Samples of “my own friend”, mixing a color and an animal. They will change when the final art arrives'] };
+    const W2 = { mascot: ['Marufuwa', 'Marufuwa’s many faces'], nakama: ['Friends', 'The friends who live in the plaza'], sakana: ['Fish', 'Fish art from the fishing game'], poster: ['Posters', 'Pictures that introduce the game'], tennoe: ['New art', 'Newly delivered art'], jibun: ['My own friend (provisional art)', 'Samples of “my own friend”, mixing a color and an animal. They will change when the final art arrives'] };
     document.querySelectorAll('.wall').forEach(s => { const e = W2[s.dataset.kind]; if (e) { s.querySelector('h2').textContent = e[0]; s.querySelector('.sub').textContent = e[1]; } });
     document.querySelectorAll('#nav a').forEach(a => { const W = WALLS.find(x => x.k === a.dataset.kind); if (W) a.textContent = W.ic + ' ' + W2[W.k][0]; });
     document.querySelectorAll('.frame .cap[data-en]').forEach(c => { c.textContent = c.dataset.en; });

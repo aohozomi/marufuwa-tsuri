@@ -1,4 +1,4 @@
-// まるふわ つりびより：本物の 魚の絵（天）。build_real_art.py が 作る（てで かえない）。あるだけ、かりの え（tsuri-art.js）を さしかえる
+// まるふわ びより：本物の 魚の絵（天）。build_real_art.py が 作る（てで かえない）。あるだけ、かりの え（tsuri-art.js）を さしかえる
 // TsuriArt[番号]＝画像の 場所（WebP 512×512・透明）／TsuriArt.shadow[番号]＝あり／TsuriArt.shadowMask(番号)＝影の マスク（外接矩形で きりだした 黒の シルエット）
 (function () {
   var A = window.TsuriArt; if (!A || !A.fish || !A.meta) return;

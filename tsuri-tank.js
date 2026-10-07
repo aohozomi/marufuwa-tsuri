@@ -1,4 +1,4 @@
-// まるふわ つりびより「まるふわの おへや」（かべの すいそう）
+// まるふわ びより「まるふわの おへや」（かべの すいそう）
 // 釣った魚を、部屋の壁の水槽に集めて、まるふわと一緒に眺める。何もしなくていい時間のための、外付け1ファイル。
 //   ・本体（index.html）は書き換えない。読むのは localStorage['marufuwa-tsuri-v1']（fish・decor）と #scene（data-time・色）と #open-book の隣だけ。
 //   ・置くだけで動く：<script defer src="tsuri-tank.js"></script> を本体の末尾に1行。外すには、その1行を消す。
@@ -1327,7 +1327,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
     //   URL は「しゃしんカード」だけの れいがい（マスター 許可）。動画の コマ（o.video）には URL・レベルを いれず、まえと おなじ ふだ。レベルは へらない・くらべない
     //   はばは もじに あわせて ひろげる（英語でも 切れない）。ふだの 右はしは 日づけ（右下）に かからない ところまで
     const sv = readSave(), total = Number(sv.total) || 0, baseN = fishList().filter(f => !f.legend).length, gotN = residents().filter(inBook).length, full = !o.video;
-    const ttl = TE('まるふわ つりびより'), cnt = TE('つれた かず ' + total + '　シールちょう ' + gotN + ' / ' + baseN), lvTx = full ? 'Lv. ' + levelOfXp(sv.xp) : '';   // 本体の しゃしんカードと おなじ 書きかた「Lv. N」（どの ことばでも おなじ）
+    const ttl = TE('まるふわ びより'), cnt = TE('つれた かず ' + total + '　シールちょう ' + gotN + ' / ' + baseN), lvTx = full ? 'Lv. ' + levelOfXp(sv.xp) : '';   // 本体の しゃしんカードと おなじ 書きかた「Lv. N」（どの ことばでも おなじ）
     ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     let cw = 190;
     if (full) {

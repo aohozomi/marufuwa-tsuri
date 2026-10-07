@@ -1,4 +1,4 @@
-/* まるふわ つりびより：ひろばの English（訳表・外付け・総司令部）
+/* まるふわ びより：ひろばの English（訳表・外付け・総司令部）
    ・tsuri-en.js の あとに よむ（ひろばの ページ）。日本語の ときは 何も しない（TsuriEn.add は なにも しない）
    ・なかまの せりふは、その子の くちぐせ（釣りの tsuri-en.js の PAL_WORD）と おなじ ひびきに そろえた
    ・ほほきずの ねこ・がんたいの くま の せりふは、つらい ひとに よりそう もの。英語でも、はげまし すぎず、せめず、そのまま */
@@ -37,7 +37,7 @@
     'ありがとうのいしは、まだじゅんびちゅうだよ。': "The thank-you stone isn't ready yet.", 'ほしをさわってみてね。': 'Try touching a star.',
     'ありがとうのほしぞらをひらいたよ。あそんでくれたひとのほしがならんでいるよ。': 'Opened the thank-you starry sky. The stars of people who played are lined up.', 'ありがとうのほしぞらをとじたよ。': 'Closed the thank-you starry sky.',
     'しゃしんをつくっているよ…': 'Making a photo…', 'きょうのひろばのしゃしん。まるふわとともだちがいるよ。': "Today's plaza photo. Marufuwa and friends are here.",
-    'まるふわのひろばであそんだよ　#まるふわつりびより': "I played in Marufuwa's Plaza #MarufuwaFishing",
+    'まるふわのひろばであそんだよ　#まるふわびより': "I played in Marufuwa's Plaza #MarufuwaDays",
     'きょうゆうのがめんをとじました。': 'Closed the share window.', 'やめました。': 'Cancelled.', '「ほぞんする」をつかってね。': 'Please use “Save”.',
     'かってにとうこうはしません。「ほぞんする」でのこせるよ。': 'Nothing is posted without you. Use “Save” to keep it.', 'つくれなかったよ。もういちどためしてね。': "Couldn't make it. Please try again.",
     'ひろばへようこそ。ゆびでさわると、まるふわがあるくよ。したのボタンで、いきたいところへいけるよ。': 'Welcome to the plaza. Tap, and Marufuwa will walk there. Use the buttons below to go where you like.',
@@ -139,11 +139,11 @@
     'やじるしキーでまるふわがあるくよ。スペースキーでちかくのともだちにはなしかけたり、ばしょにはいったりできるよ。エスケープキーでやめるよ。したのボタンでもおなじことができるよ。スマホではしたへスクロールして、いきさきのボタンをえらんでね。': 'Use the arrow keys to walk Marufuwa. Press Space to talk to a nearby friend or enter a place. Press Escape to cancel. The buttons below do the same things. On a phone, scroll down to choose a destination.',
     'スマホではしたへスクロールして、いきさきのボタンをえらんでね。': 'On a phone, scroll down to choose a destination.', 'スマホはしたへスクロールして「いきさき」をえらんでね。': 'On a phone, scroll down to choose a destination.',
     'ひろば。まるふわがあるくばしょ': 'The plaza: where Marufuwa walks', 'おへや': 'Room', 'ありがとう': 'Thanks', 'じゅんびちゅう': 'Getting ready',
-    'いきさき': 'Where to go', 'つりびより': 'Fishing Days', 'すいそう': 'Aquarium', 'まだできていないばしょ': 'Places not ready yet', 'ちかぢかあそべます': 'Coming soon',
+    'いきさき': 'Where to go', 'つりびより': 'Fishing', 'すいそう': 'Aquarium', 'まだできていないばしょ': 'Places not ready yet', 'ちかぢかあそべます': 'Coming soon',
     'ともだちにあいにいく': 'Visit friends', 'まわりをきく': 'Listen around', 'さわれるもの': 'Things to touch', 'くも': 'Cloud', 'き': 'Tree', 'あそびかた': 'How to play',
     'ゆびでさわったところへ、まるふわがあるいていくよ。かんばんやたてものをさわると、そこへいって、あそびにいけるよ。ともだちにちかづくと、ひとことはなしかけてくれるよ。': "Tap a spot and Marufuwa will walk there. Touch a sign or building to go and play. Get close to a friend, and they'll say a word to you.",
     'キーボードは、やじるしキーであるいて、スペースキーではなす・はいる。エスケープキーでやめるよ。': 'On a keyboard: walk with the arrow keys, talk or enter with Space, and cancel with Escape.',
-    'いそがなくてだいじょうぶ。まちがえても、なにもへらないよ。': "No rush. If you make a mistake, nothing is lost.", 'おとのせっていは、つりびよりとおなじものをつかうよ。': 'The sound setting is shared with Fishing Days.',
+    'いそがなくてだいじょうぶ。まちがえても、なにもへらないよ。': "No rush. If you make a mistake, nothing is lost.", 'おとのせっていは、つりびよりとおなじものをつかうよ。': 'The sound setting is shared with the fishing game.',
     'きろくはこのたんまつのなかだけにのこります。': 'Your records stay only on this device.', 'あそんでくれたひとのほしが、ならんでいるよ。': 'The stars of people who played are lined up.',
     'これはさんぷるです。': 'This is a sample.', 'ほんとうのなまえではありません。': 'These are not real names.', 'ほしぞら。ほしをさわると、なまえがでるよ': 'Starry sky. Touch a star to see a name.', 'なまえのいちらん': 'List of names',
     'このばしょは、おとなのひとがなまえをえらんでのせています。': 'In this place, grown-ups choose their names to be listed.',

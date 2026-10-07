@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="google" content="notranslate">
-<title>まるふわの いりぐち｜まるふわ つりびより</title>
+<title>まるふわの いりぐち｜まるふわ びより</title>
 <meta name="description" content="まるふわに あえる ところ：ブラウザで つり（むりょう・ログインなし）・iPhone アプリ・LINE スタンプ。">
 <meta name="theme-color" content="#b9edf5">
 <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
@@ -72,7 +72,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   <h1 id="title" tabindex="-1">まるふわの いりぐち</h1>
   <p class="lead" id="lead">まるふわに あえる ところは みっつ。すきな ところから どうぞ。</p>
   <div class="go">
-    <a class="big play" id="play" href="../"><span class="ic" aria-hidden="true">🎣</span><span><span id="t-play">ブラウザで あそぶ</span><small id="s-play">つりびより・むりょう・ログインなし</small></span></a>
+    <a class="big play" id="play" href="../"><span class="ic" aria-hidden="true">🎣</span><span><span id="t-play">ブラウザで あそぶ</span><small id="s-play">まるふわ びより・むりょう・ログインなし</small></span></a>
     <button type="button" class="big" id="b-app" data-k="app" aria-expanded="false" aria-controls="c-app"><span class="ic" aria-hidden="true">🍃</span><span><span id="t-app">iPhone アプリ</span><small id="s-app">まるふわまるいろ・むりょう</small></span></button>
     <div class="confirm" id="c-app" hidden role="group" aria-labelledby="q-app"><p id="q-app">そとの ページ（App Store）を ひらきます。いいですか？</p><div class="row"><a id="a-app" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-app">やめる</button></div></div>
     <button type="button" class="big" id="b-line" data-k="line" aria-expanded="false" aria-controls="c-line"><span class="ic" aria-hidden="true">💬</span><span><span id="t-line">LINE スタンプ</span><small id="s-line">まるふわの スタンプ</small></span></button>
@@ -98,9 +98,9 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   const T = (ja, en) => EN ? en : ja;
   const $ = id => document.getElementById(id);
   const set = (id, ja, en) => { const e = $(id); if (e) e.textContent = T(ja, en); };
-  document.title = T('まるふわの いりぐち｜まるふわ つりびより', 'Marufuwa’s Doorway | Marufuwa Fishing Days');
+  document.title = T('まるふわの いりぐち｜まるふわ びより', 'Marufuwa’s Doorway | Marufuwa Days');
   set('skip', 'いりぐちへ とぶ', 'Skip to the links'); set('title', 'まるふわの いりぐち', 'Meet Marufuwa'); set('lead', 'まるふわに あえる ところは みっつ。すきな ところから どうぞ。', 'There are three places to meet Marufuwa. Pick any one.');
-  set('t-play', 'ブラウザで あそぶ', 'Play in your browser'); set('s-play', 'つりびより・むりょう・ログインなし', 'Fishing Days · free · no login');
+  set('t-play', 'ブラウザで あそぶ', 'Play in your browser'); set('s-play', 'まるふわ びより・むりょう・ログインなし', 'Marufuwa Days · free · no login');
   set('t-app', 'iPhone アプリ', 'iPhone app'); set('s-app', 'まるふわまるいろ・むりょう', 'Marufuwa Maruiro · free');
   set('t-line', 'LINE スタンプ', 'LINE stickers'); set('s-line', 'まるふわの スタンプ', 'Marufuwa stickers');
   set('q-app', 'そとの ページ（App Store）を ひらきます。いいですか？', 'This opens an outside page (the App Store). Is that OK?'); set('q-line', 'そとの ページ（LINE ストア）を ひらきます。いいですか？', 'This opens an outside page (the LINE Store). Is that OK?');

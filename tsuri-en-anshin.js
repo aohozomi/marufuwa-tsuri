@@ -1,4 +1,4 @@
-/* まるふわ つりびより：「おうちの かたへ」（anshin/）の English（外付け・総司令部）
+/* まるふわ びより：「おうちの かたへ」（anshin/）の English（外付け・総司令部）
    ・tsuri-en.js が 英語の ときだけ 読みこむ（anshin/ の HTML には さわらない）。日本語では 何も 起きない
    ・かぎは「ふりがなの よみで そろえた 日本語」。⟦0⟧⟦1⟧ は <code> の はめこみ（英語の 語順で 元の 要素を はめなおす）
    ・ページの 文が かわったら：?lang=en で ひらき、TsuriEn.missing() に 出た 文を ここに 足す（英語対応\00_読んでください.md）
@@ -9,7 +9,7 @@
   const MONTH = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   E.add({
     ex: {
-      "「まるふわつりびより」「まるふわのひろば」について": "About “Marufuwa Fishing Days” and “Marufuwa’s Plaza”",
+      "「まるふわびより」「まるふわのひろば」について": "About “Marufuwa Days” and “Marufuwa’s Plaza”",
       "じぶんでおしたときだけはたらくボタン": "Buttons that work only when you press them",
       "「ともだちにおしえる」…たんまつのきょうゆうメニューがひらきます（つかえないたんまつでは、リンクをコピーします）。おくるなかみは、ゲームのなまえと、ひとことのしょうかいと、リンクだけです。あそんだきろくははいりません。おくりさきは、おつかいのかたがえらびます。": "“Tell a friend”… Opens your device’s share menu (on devices without one, it copies the link). What is sent is only the game’s name, a short line of introduction, and the link. Your play record is not included. The person using the device chooses who to send it to.",
       "「おへやをおくる」…たんまつのきょうゆうメニューがひらきます（つかえないたんまつでは、リンクをコピーします）。リンクにのるのは、すうじだけです（さかなのばんごうと、かざりのばんごうといち、そのときのじかん、あそびにきているなかまのばんごう）。なまえ・ひとこと・あいじるしははいりません。リンクをひらいたひとは、おへやをみるだけで、そのひとのきろくにはなにものこりません。おくりさきは、おつかいのかたがえらびます。": "“Send my room” … Opens your device’s share menu (on devices that can’t, the link is copied). The link contains numbers only (fish numbers, decoration numbers and positions, the time of day, and the number of a visiting friend). It contains no names, messages or device marks. A person who opens the link just looks at the room, and nothing is saved to their own records. The person using the device chooses where to send it.",
@@ -37,7 +37,7 @@
       "2026-09-30：こうかい。English。オフラインでもあそべる。ひろば・おへや・ひみつ。BGMをおだやかに。": "2026-09-30: Released. English mode. Works offline. Plaza, Room and secrets. Calmer music.",
       "アプリ「まるふわまるいろ」のApp Storeのページ": "App Store page of the “Marufuwa Maruiro” app",
       "ひとこと": "In short",
-      "「まるふわつりびより」は、いそがなくてもだいじょうぶな、のんびりつりのゲームです。にがしても、なにもへりません。": "“Marufuwa Fishing Days” is a relaxed fishing game where there is no need to hurry. Even if you let a fish go, nothing is lost.",
+      "「まるふわびより」は、いそがなくてもだいじょうぶな、のんびりつりのゲームです。にがしても、なにもへりません。": "“Marufuwa Days” is a relaxed fishing game where there is no need to hurry. Even if you let a fish go, nothing is lost.",
       "ちいさなおこさんもあんしんしてあそべるように、おかね・こうこく・ログイン・ほかのひととのやりとりを、さいしょからいれていません。": "So that even small children can play with peace of mind, we did not include money, ads, logins, or interaction with other people from the start.",
       "このゲームに「ない」もの": "What this game does NOT have",
       "おかね": "Money",

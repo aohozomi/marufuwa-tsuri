@@ -5,8 +5,8 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="google" content="notranslate">
-<title>はいしん・どうがで つかう かたへ｜まるふわ つりびより</title>
-<meta name="description" content="まるふわ つりびよりを はいしん・どうがで つかう かたへ：つかって OK です。BGM の きまりも まとめました。">
+<title>はいしん・どうがで つかう かたへ｜まるふわ びより</title>
+<meta name="description" content="まるふわ びよりを はいしん・どうがで つかう かたへ：つかって OK です。BGM の きまりも まとめました。">
 <meta name="theme-color" content="#b9edf5">
 <link rel="icon" type="image/png" sizes="32x32" href="../../img/favicon-32.png">
 <link rel="apple-touch-icon" href="../../img/icon-180.png">
@@ -67,7 +67,7 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
 <main id="main">
   <a class="back" id="back" href="../">いりぐちに もどる</a>
   <h1 id="title" tabindex="-1">はいしん・どうがで つかう かたへ</h1>
-  <p class="lead" id="lead">まるふわ つりびよりは、はいしんや どうがで つかって だいじょうぶです。れんらくも いりません。きまりは この ページに まとめました。</p>
+  <p class="lead" id="lead">まるふわ びよりは、はいしんや どうがで つかって だいじょうぶです。れんらくも いりません。きまりは この ページに まとめました。</p>
 
   <section aria-labelledby="h-ok"><h2 id="h-ok">つかって OK</h2><ul>
     <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only" id="sr-ok1">OK：</span><span id="t-ok1">ゲームの がめんと おとを、はいしん・どうが（ゲームじっきょう・つりはいしん・さぎょうはいしん など）で うつして OK。</span></li>
@@ -77,7 +77,7 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
 
   <section aria-labelledby="h-name"><h2 id="h-name">がいようらんに かいて もらえると うれしい（にんい）</h2>
     <p class="small" id="t-name">かかなくても かまいません。かいて くれる ときは、ゲームの なまえと URL を。</p>
-    <div class="copybox" id="copytext" tabindex="0" data-noruby>まるふわ つりびより（むりょう・ログインなし）https://aohozomi.github.io/marufuwa-tsuri/</div>
+    <div class="copybox" id="copytext" tabindex="0" data-noruby>まるふわ びより（むりょう・ログインなし）https://aohozomi.github.io/marufuwa-tsuri/</div>
     <button type="button" class="btn" id="copy">コピーする</button>
     <div class="sr-only" id="live" role="status" aria-live="polite"></div>
   </section>
@@ -106,21 +106,21 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
 (function () {
   'use strict';
   const LICENSE = 'https://opentracks.com/help/articles/license/';
-  const GAME = 'まるふわ つりびより（むりょう・ログインなし）https://aohozomi.github.io/marufuwa-tsuri/';
+  const GAME = 'まるふわ びより（むりょう・ログインなし）https://aohozomi.github.io/marufuwa-tsuri/';
   const EN = new URLSearchParams(location.search).get('lang') === 'en' || (() => { try { return localStorage.getItem('marufuwa-lang-v1') === 'en'; } catch (e) { return false; } })();
   const T = (ja, en) => EN ? en : ja;
   const $ = id => document.getElementById(id);
   const set = (id, ja, en) => { const e = $(id); if (e) e.textContent = T(ja, en); };
-  document.title = T('はいしん・どうがで つかう かたへ｜まるふわ つりびより', 'For streamers and video makers | Marufuwa Fishing Days');
+  document.title = T('はいしん・どうがで つかう かたへ｜まるふわ びより', 'For streamers and video makers | Marufuwa Days');
   set('skip', 'ほんぶんへ とぶ', 'Skip to the content'); set('back', 'いりぐちに もどる', 'Back'); set('title', 'はいしん・どうがで つかう かたへ', 'For streamers and video makers');
-  set('lead', 'まるふわ つりびよりは、はいしんや どうがで つかって だいじょうぶです。れんらくも いりません。きまりは この ページに まとめました。', 'You are welcome to use Marufuwa Fishing Days in streams and videos. No need to ask. The rules are below.');
+  set('lead', 'まるふわ びよりは、はいしんや どうがで つかって だいじょうぶです。れんらくも いりません。きまりは この ページに まとめました。', 'You are welcome to use Marufuwa Days in streams and videos. No need to ask. The rules are below.');
   set('h-ok', 'つかって OK', 'Go ahead'); set('sr-ok1', 'OK：', 'OK: '); set('sr-ok2', 'OK：', 'OK: '); set('sr-ok3', 'OK：', 'OK: ');
   set('t-ok1', 'ゲームの がめんと おとを、はいしん・どうが（ゲームじっきょう・つりはいしん・さぎょうはいしん など）で うつして OK。', 'Show the game screen and sound in streams and videos (let’s plays, fishing streams, work streams…).');
   set('t-ok2', 'ゲームの しゃしんカードの がぞうは、じゆうに はって OK（ブログ・SNS・どうがの サムネイル など）。', 'Photo-card images from the game are free to post anywhere (blogs, social media, thumbnails…).');
   set('t-ok3', 'なみの おとは ほんものの みずうみの ろくおん（パブリックドメイン）です。', 'The wave sound is a real lake recording (public domain).');
   set('h-name', 'がいようらんに かいて もらえると うれしい（にんい）', 'A credit in the description would be lovely (optional)');
   set('t-name', 'かかなくても かまいません。かいて くれる ときは、ゲームの なまえと URL を。', 'You don’t have to. If you do, the game’s name and URL are enough.');
-  $('copytext').textContent = T(GAME, 'Marufuwa Fishing Days (free, no login) https://aohozomi.github.io/marufuwa-tsuri/');
+  $('copytext').textContent = T(GAME, 'Marufuwa Days (free, no login) https://aohozomi.github.io/marufuwa-tsuri/');
   set('copy', 'コピーする', 'Copy');
   set('h-bgm', 'BGM の きまり', 'About the music');
   set('t-bgm0', 'ゲームの BGM は フリーおんがくそざい「OpenTracks（きゅう DOVA-SYNDROME）」の きょくです。', 'The game’s music is from the free music library “OpenTracks (formerly DOVA-SYNDROME)”.');

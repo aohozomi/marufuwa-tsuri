@@ -1,4 +1,4 @@
-/* まるふわ つりびより：つりびと ノート（外付け・総司令部）
+/* まるふわ びより：つりびと ノート（外付け・総司令部）
    ・あそんだ きろくが、1ぎょうずつ じどうで にっきに なる。よみかえす ための もの（Dispatch の 案 D・10/1）
        9/30 よる・みずうみ ／ レモンの ひよこと いっしょに ／ きんのまるごい 54.5センチ を つった
    ・よむ もの：本体の save.note（{at, id, size, spot, time, nushi, party, avatar, kind}の 配列・新しい ものが 先頭）。
@@ -145,7 +145,7 @@
       if (l3) wrap(l3, 120, W - 240, 40, ink, true);
       y += 18;
     }
-    c.fillStyle = soft; c.font = font(28, false); c.textAlign = 'center'; c.fillText(T('まるふわ つりびより', 'Marufuwa Fishing Days'), W / 2, H - 90);
+    c.fillStyle = soft; c.font = font(28, false); c.textAlign = 'center'; c.fillText(T('まるふわ びより', 'Marufuwa Days'), W / 2, H - 90);
     cv.toBlob(blob => {
       if (!blob) return;
       const file = new File([blob], 'marufuwa-note.png', { type: 'image/png' });

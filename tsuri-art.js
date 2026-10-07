@@ -1,4 +1,4 @@
-// まるふわ つりびより：魚・かげ・さお・えさ・ウキの え（仮）。ジョブズ1がコードで描いた物。天の絵が来たら、同じ名前で差し替える。
+// まるふわ びより：魚・かげ・さお・えさ・ウキの え（仮）。ジョブズ1がコードで描いた物。天の絵が来たら、同じ名前で差し替える。
 // 使い方：window.TsuriArt[番号]＝画像の住所（水槽と同じ）／TsuriArt.fish[番号]＝生のSVG（頭は左・正方形240）／TsuriArt.shadow[番号]＝影（黒一色・CSS mask 用）／rod・rodLong・bait・float＝道具／uri(svg)＝住所に直す／meta＝約束事
 (function () {
   var A = window.TsuriArt = window.TsuriArt || {};

@@ -1,4 +1,4 @@
-// まるふわ つりびより「ひみつ」（外付け1ファイル）
+// まるふわ びより「ひみつ」（外付け1ファイル）
 //   つりの がめんの ひみつ：あさぎりの こじか／みなとまちの とうだい／ふねの まるまど／ねこの ひるね／つきの うさぎ。＋ ひみつノート。
 //   ・本体（index.html）は書き換えない。本体の さいごに 1行：<script defer src="tsuri-himitsu.js"></script>（外すには その1行を消す）。
 //   ・読むだけ：#scene の data-phase・data-time・data-area、#friend-a・#friend-b の 絵、localStorage['marufuwa-tsuri-v1'] の sound。
