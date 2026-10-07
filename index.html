@@ -46,7 +46,9 @@ try { var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('maruf
 try { var sv0 = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d0 = new Date(), q0 = new URLSearchParams(location.search), loc0 = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:', hq0 = loc0 ? q0.get('hour') : null,
     hr0 = hq0 !== null && hq0 !== '' && isFinite(Number(hq0)) ? Number(hq0) : d0.getHours(), lv0 = Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, Number(sv0.xp) || 0) / 20))), de0 = document.documentElement.dataset;
   de0.mTank = String(lv0 >= 3); de0.mNakama = String(lv0 >= 5); de0.mGear = String(lv0 >= 8);
-  de0.ib = hr0 >= 22 || hr0 < 4 ? 'night' : hr0 < 12 && sv0.hello !== d0.getFullYear() + '-' + (d0.getMonth() + 1) + '-' + d0.getDate() ? 'morning' : '';
+  // よるの 帯は、この たんまつで 1ぴき つった あと か、2かいめ いこうの おとずれ から（はじめての 夜は「なげる」だけが さいしょの ボタン。10/8 会議 K-033：人物の はんてい では なく「この たんまつに 初回完了の きろくが あるか」。あたらしい ついせきは ふやさない）
+  var back0 = false; try { back0 = (sv0.total | 0) > 0 || localStorage.getItem('marufuwa-tsuri-visited') === '1'; localStorage.setItem('marufuwa-tsuri-visited', '1'); } catch (e) {}
+  de0.ib = hr0 >= 22 || hr0 < 4 ? (back0 ? 'night' : '') : hr0 < 12 && sv0.hello !== d0.getFullYear() + '-' + (d0.getMonth() + 1) + '-' + d0.getDate() ? 'morning' : '';
   de0.plaza = String((Number(sv0.total) || 0) >= 3); } catch (e) {}
 setTimeout(function () { document.documentElement.dataset.arranged = document.documentElement.dataset.arranged || '1'; }, 8000);   // ほけん：本体の script が とまっても 8びょうで かくす ものを 出す
 </script>
@@ -2596,6 +2598,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     save.fish[fish.id] = {count: (old ? old.count : 0) + 1, best: Math.max(size, old ? old.best : 0), nushi: nushi || !!(old && old.nushi)};
     const lvBefore = levelOf(save.xp || 0); save.xp = (save.xp || 0) + xpFor(fish, {nushi, first, record, big, perfects}); const lvNow = levelOf(save.xp), leveled = lvNow > lvBefore;
     save.total++; save.streak = first ? 0 : (save.streak || 0) + 1; bumpWeek(fish, size);
+    if (save.total === 1) { try { const hh = new Date().getHours(); if ((hh >= 22 || hh < 4) && !document.documentElement.dataset.ib) { document.documentElement.dataset.ib = 'night'; drawIbasho(); } } catch {} }   // はじめての 1ぴきの あと、よるなら 居場所の 帯を ここで 出す（K-033）
     save.bucket = [{id: fish.id, size, at: Date.now(), nushi}, ...(Array.isArray(save.bucket) ? save.bucket : [])].slice(0, 10); noteAdd('catch', fish, size, nushi);
     // ときどき、さかなが かざりを もって いる。すいそうに おける
     const found = Math.random() < (Number(probe('decor')) || .15) ? DECOR[Math.floor(Math.random() * DECOR.length)] : '';
@@ -4721,6 +4724,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-ruby-dict.js"></script>
 <script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
-<script defer src="tsuri-ver.js?v=105"></script>
+<script defer src="tsuri-ver.js?v=106"></script>
 </body>
 </html>
