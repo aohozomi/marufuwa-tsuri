@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function arm() { if (timer) return; const n = clock(); lastTalk = n - 30000; lastSip = n - 40000; nextVisit = n + 120000 + Math.random() * 180000; timer = setInterval(tickAll, 1000); }
 
   // おと：はじめから ON・うえに 🔇 1つ・BGM（heya）・かんきょうおん（カップの ひくい おと）＝tsuri-pagesound.js
-  if (window.PageSound) PageSound.init({ tap: true, mount: $('back'), bgm: 'tank', time: () => time, ambient: api => { api.voice(262, 220, .24, .05); api.voice(330, 330, .14, .03, .1); } });
+  if (window.PageSound) PageSound.init({ tap: true, mount: $('back'), bgm: 'cafe', time: () => time, ambient: api => { api.voice(262, 220, .24, .05); api.voice(330, 330, .14, .03, .1); } });
 
   window.Cafe = { state: () => ({ seated: state.seated, drink: state.drink, left: state.left, said: state.said.slice(), guests: guests.map(g => g.id), time, rain, drinks: DRINKS.length, visits: state.visits, sips: state.sips, taps: state.taps, visiting: !!visiting, bubbles: over.children.length }), choose, tap, visit, skew: ms => { skew += ms; }, noNav: () => { state.testNoNav = true; }, talk, DRINKS: DRINKS.map(d => d.id) };
 });

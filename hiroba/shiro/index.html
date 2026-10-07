@@ -213,5 +213,9 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
   window.__shiro = { me, NPC, MAP, walk: moveTo, action, msg: () => $('mtext').textContent };   // 検査用
 })();
 </script>
+<script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-pagesound.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ tap: true, mount: document.getElementById('back'), bgm: 'shiro', time: () => document.documentElement.dataset.time }); });</script>   <!-- おと：ばしょの 曲（shiro。ファイルが 来るまで gaze）・🔇 は「← ひろば」の となり -->
+
 </body>
 </html>

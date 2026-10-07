@@ -33,11 +33,13 @@
   const mainSound = () => { const m = readJSON(MAIN); return !(m && m.sound === false); };
   const soundOk = fn => { try { return typeof fn === 'function' ? !!fn() : mainSound(); } catch { return false; } };
   const norm = t => ({ asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n' }[t] || t);
+  // ばしょ → 曲の ならび（さきに ある ファイルを つかう）。10/7 マスター「場所によって 曲を 変えて」：しろ・カフェ・びじゅつかんは 専用の ファイルが 来たら HAVE に 足すだけで 切りかわる（それまでは 代用）
+  const HAVE = ['asa', 'hiru', 'yuu', 'yoru', 'heya', 'gaze'];   // snd/bgm/ に 実際に ある ファイル（無い 名前を ここに 書くと 404 で 9びょう 待つので 書かない）
+  const PLACE = { gaze: ['gaze'], tank: ['heya'], cafe: ['cafe', 'heya'], bijutsukan: ['bijutsukan', 'heya'], shiro: ['shiro', 'gaze'] };
   function fileFor(name, o) {   // この ばしょ・じかんで ながす ファイル（なければ ''）
     o = o || {};
     let f = '';
-    if (name === 'gaze') f = 'gaze';
-    else if (name === 'tank') f = 'heya';
+    if (PLACE[name]) f = PLACE[name].find(x => HAVE.includes(x)) || '';
     else if (name === 'hiroba' || name === 'tsuri') { const t = norm(val(o.time)); f = FILE_OF[t] || FILE_OF.h; }
     return f && !failed.has(f) ? f : '';
   }
