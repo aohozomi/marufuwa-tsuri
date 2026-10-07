@@ -778,6 +778,7 @@ body.calm .cloud.c2{left:28%}
   <h2 id="machi-title">まちかど</h2>
   <p class="count">どこへ いく？ いそがなくて だいじょうぶ。</p>
   <div class="machi-list">
+    <button type="button" data-machi="shiro"><b aria-hidden="true">🏰</b>しろの なかを たんけん<small>むかしの ゲームみたいに あるいて、なかまと はなそう</small></button>
     <button type="button" data-machi="omise"><b aria-hidden="true">🛍️</b>おみせ<small>ふくの いろや もちものを もらえるよ</small></button>
     <button type="button" data-machi="bijutsu"><b aria-hidden="true">🖼️</b>びじゅつかん<small>えを ながめよう</small></button>
     <button type="button" data-machi="cafe"><b aria-hidden="true">☕</b>カフェ<small>ひとやすみ</small></button>
@@ -836,7 +837,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=99"></script>
+<script defer src="../tsuri-ver.js?v=100"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -3240,9 +3241,11 @@ function checkOsusume() {   // data/osusume.json に 1人でも 入ったら 入
   if (osusumeChecked) return; osusumeChecked = true;
   fetch(BASE + 'data/osusume.json').then(r => r.ok ? r.json() : []).then(a => { const b = document.querySelector('#machi button[data-machi=osusume]'); if (b && Array.isArray(a) && a.length) b.hidden = false; }).catch(() => {});
 }
-function openMachi() { checkOsusume(); lastInput = T; const dlg = $('machi'); if (!dlg.open) dlg.showModal(); narrate(S('まちかど。どこへ いく？ おみせ・びじゅつかん・おすすめの へや。', 'Town corner. Where to? The shop, the art gallery or the recommended room.')); }
-$('machi').addEventListener('click', e => { const b = e.target.closest('button[data-machi]'); if (!b) return; const w = b.dataset.machi; $('machi').close(); if (w === 'omise') openOmise(); else goDest(w); });
-$('close-machi').addEventListener('click', () => { $('machi').close(); narrate(S('まちかどを とじたよ。', 'You closed the town corner.')); });
+const machiName = () => { const el = typeof propEl === 'function' ? propEl('machi') : null; return el && el.dataset.art === 'sky' ? S('てんくうの しろ', 'Sky castle') : S('まちかど', 'Town corner'); };   // 白い城の 絵の ときは 窓も「てんくうの しろ」（10/7 マスター「天空の城が まちかど やぞ」）
+function openMachi() { checkOsusume(); lastInput = T; const dlg = $('machi'); $('machi-title').textContent = machiName(); if (!dlg.open) dlg.showModal(); narrate(machiName() + S('。どこへ いく？ おみせ・びじゅつかん・おすすめの へや。', '. Where to? The shop, the art gallery or the recommended room.')); }
+$('machi').addEventListener('click', e => { const b = e.target.closest('button[data-machi]'); if (!b) return; const w = b.dataset.machi; $('machi').close(); if (w === 'shiro') { location.href = 'shiro/'; return; } if (w === 'omise') openOmise(); else goDest(w); });   // しろの なか（10/7 マスター「ドラクエみたいに 城内を たんけん」）
+if (new URLSearchParams(location.search).get('go') === 'omise') addEventListener('load', () => setTimeout(() => { try { openOmise(); } catch (e) {} }, 700));   // しろの なかの とびらから おみせへ
+$('close-machi').addEventListener('click', () => { $('machi').close(); narrate(machiName() + S('を とじたよ。', ' closed.')); });
 // ─── つりばの 一覧（10/1 マスター直：「釣り場は 一応 見せておく。行くには 条件だけ 書いて」）───
 //   7つ（TsuriWorld.AREAS）。あいて いない ところは 絵を うすく＋🔒＋「あと ◯ひき つったら いけるよ」（本体の save.total を よむだけ）。あいて いる ところを おすと 本体の save.area に かいて つりばへ（本体が おなじ きまりで ひらく）
 const TSURIBA_ICON = { L: '🏞️', R: '🌊', H: '⚓', B: '🚢', M: '🌲', S: '❄️', T: '🌈' };
@@ -3330,6 +3333,7 @@ async function applyArt() {
         const keep = el.querySelector('.mark');
         el.innerHTML = ''; el.append(img); if (keep) el.append(keep);
         el.dataset.art = 'sky';
+        if (typeof DEST !== 'undefined' && DEST.machi) DEST.machi.name = S('てんくうの しろ', 'Sky castle');   // 「〜へ あるいて いくよ」も 城の 名前で
         el.style.left = (x - w / 2) / W * 100 + '%'; el.style.top = (y - h) / H * 100 + '%'; el.style.width = w / W * 100 + '%'; el.style.height = h / H * 100 + '%';
       };
       img.src = ms.file;   // 読めなければ 何も 変えない（今の まちかどの まま）

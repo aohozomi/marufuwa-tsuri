@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>てんくうの しろ｜まるふわの ひろば</title>
+<meta name="description" content="まるふわが、くもの うえの しろい おしろを たんけん。むかしの ゲームみたいに、ますめを あるいて、なかまと はなそう。いそがなくて だいじょうぶ。">
+<meta name="theme-color" content="#1b2a44">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231b2a44'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle'%3E%F0%9F%8F%B0%3C/text%3E%3C/svg%3E">
+<script>
+// つかいやすく する（もじを おおきく・うごきを へらす）と 時間帯に したがう（本体の 記録を よむだけ・書かない）
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement, q = new URLSearchParams(location.search);
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+  var tf = q.get('time'), t = /^[ahyn]$/.test(tf || '') ? tf : /^[ahyn]$/.test(early.time || '') ? early.time : null;
+  if (!t) { var h = new Date().getHours(); t = h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n'; }
+  root.dataset.time = t;
+  if ((q.get('lang') || localStorage.getItem('marufuwa-lang-v1')) === 'en') { root.lang = 'en'; window.TsuriEn = { lang: 'en' }; }
+} catch (e) { document.documentElement.dataset.time = 'h'; }
+</script>
+<style>
+:root{--ink:#eaf1ff;--bg:#1b2a44;--bg2:#243a5e;--win:#000;--winline:#fff;--btn:#2e4670;--btn2:#1d2f4e;--btnline:#8fb3ff;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:var(--ink);background:var(--bg);color-scheme:dark;touch-action:manipulation}
+:root[data-large=true]{font-size:118%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,var(--bg2),var(--bg) 70%)}
+.top{display:flex;align-items:center;gap:10px;padding:10px 12px 4px;max-width:560px;margin:0 auto}
+.top a{display:inline-flex;align-items:center;min-height:44px;padding:4px 14px;border-radius:999px;border:2px solid var(--btnline);color:var(--ink);text-decoration:none;font-weight:800;background:var(--btn)}
+.top h1{margin:0;font-size:1.05rem;flex:1;text-align:center;letter-spacing:.04em}
+main{max-width:560px;margin:0 auto;padding:4px 12px calc(28px + env(safe-area-inset-bottom))}
+.stage{position:relative;width:100%;aspect-ratio:16/14;background:#000;border:4px solid #fff;outline:4px solid #000;border-radius:4px;overflow:hidden}
+canvas#g{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+.msg{margin:14px 0 0;min-height:4.6em;padding:10px 14px;background:var(--win);color:#fff;border:3px solid #fff;outline:3px solid #000;border-radius:4px;font-size:1rem;line-height:1.75;white-space:pre-wrap;font-weight:700;position:relative}
+.msg[hidden]{display:none}
+.msg .cur{position:absolute;right:12px;bottom:6px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.msg .who{color:#ffe27a;margin-right:.4em}
+.ask{display:flex;gap:10px;margin-top:8px}
+.ask[hidden]{display:none}
+.ask button{flex:1}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;justify-content:center;margin:14px auto 0}
+.pad button,.ask button,.act button{font:inherit;font-weight:900;font-size:1.1rem;color:var(--ink);background:linear-gradient(180deg,var(--btn),var(--btn2));border:2px solid var(--btnline);border-radius:14px;min-height:48px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.pad button:active,.ask button:active,.act button:active{transform:translateY(2px)}
+.pad .u{grid-column:2;grid-row:1}.pad .l{grid-column:1;grid-row:2}.pad .r{grid-column:3;grid-row:2}.pad .d{grid-column:2;grid-row:3}.pad .a{grid-column:2;grid-row:2;border-radius:50%;background:linear-gradient(180deg,#ffd25e,#d39a1c);color:#4a2a00;border-color:#fff1b8}
+.act{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.act button{padding:6px 16px}
+.hint{margin:12px 0 0;text-align:center;font-size:.85rem;color:#b9c8e6;line-height:1.8}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.msg .cur{animation:none}}
+:root[data-calm=true] .msg .cur{animation:none}
+</style>
+</head>
+<body>
+<div class="top"><a href="../" id="back">← ひろば</a><h1 id="title">てんくうの しろ</h1></div>
+<main>
+  <div class="stage"><canvas id="g" width="256" height="224" aria-label="おしろの なか" role="img"></canvas></div>
+  <div class="msg" id="msg" hidden><span id="mtext"></span><span class="cur" id="cur" aria-hidden="true">▼</span></div>
+  <div class="ask" id="ask" hidden><button type="button" id="yes">はい</button><button type="button" id="no">いいえ</button></div>
+  <div class="pad" aria-label="あるく">
+    <button type="button" class="u" data-dir="0,-1" aria-label="うえへ">▲</button>
+    <button type="button" class="l" data-dir="-1,0" aria-label="ひだりへ">◀</button>
+    <button type="button" class="a" id="abtn" aria-label="はなす・しらべる">A</button>
+    <button type="button" class="r" data-dir="1,0" aria-label="みぎへ">▶</button>
+    <button type="button" class="d" data-dir="0,1" aria-label="したへ">▼</button>
+  </div>
+  <p class="hint" id="hint">やじるしで あるく。だれかの まえで A（はなす）。とびらに のると、いけるよ。<br>きろくは なにも のこさないよ。</p>
+  <div class="sr-only" id="live" role="status" aria-live="polite"></div>
+</main>
+<script>
+(function () {
+  'use strict';
+  const EN = !!(window.TsuriEn && window.TsuriEn.lang === 'en'), S = (ja, en) => EN ? en : ja, $ = id => document.getElementById(id);
+  const root = document.documentElement, calm = () => root.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches, time = root.dataset.time || 'h';
+  if (EN) { document.title = 'Sky Castle | Marufuwa Plaza'; $('title').textContent = 'Sky Castle'; $('back').textContent = '← Plaza'; $('hint').innerHTML = 'Arrows to walk. Press A in front of someone to talk. Step on a door to go through.<br>Nothing is saved.'; $('yes').textContent = 'Yes'; $('no').textContent = 'No'; $('abtn').setAttribute('aria-label', 'Talk / Look'); }
+  // ── ちず（20×16・1ます 16px）。W=かべ . =ゆか c=じゅうたん P=はしら T=ぎょくざ w=まど p=はな D=とびら（左＝おみせ 右＝びじゅつかん 左下＝カフェ 下＝ひろばへ） ──
+  const MAP = [
+    'WWWWwWWWWWWwWWWW',
+    'W......TT......W',
+    'W..P...cc...P..W',
+    'W......cc......W',
+    'W.p....cc....p.W',
+    'D......cc......D',
+    'W......cc......W',
+    'W..P...cc...P..W',
+    'W......cc......W',
+    'D.p....cc....p.W',
+    'W......cc......W',
+    'W..P...cc...P..W',
+    'W......cc......W',
+    'WWWWWWWDDWWWWWWW'
+  ];
+  const COLS = 16, ROWS = 14, TS = 16;   // むかしの ゲームと おなじ 16ます（スマホでも 1ます 24px くらい）
+  const DOORS = { '0,5': { to: '../?go=omise', name: S('おみせ', 'the shop') }, '15,5': { to: '../bijutsukan/', name: S('びじゅつかん', 'the art gallery') }, '0,9': { to: '../cafe/', name: S('カフェ', 'the cafe') }, '7,13': { to: '../', name: S('ひろば', 'the plaza') }, '8,13': { to: '../', name: S('ひろば', 'the plaza') } };
+  // ── スプライト（16×16・文字＝いろ） ──
+  const PAL = { '.': null, 'w': '#ffffff', 'k': '#2a1a12', 'b': '#5fb3ea', 'B': '#2d7fc0', 'p': '#ffb3c8', 'o': '#f0a04a', 'O': '#c9792a', 'g': '#8a6a44', 'G': '#5a4328', 'y': '#ffe27a', 'c': '#d9d9d9', 'C': '#9aa0a8', 'm': '#5fcf8a', 'r': '#e05a4a', 'n': '#7a5aa8', 'N': '#4a3470', 't': '#b98a5a' };
+  const SPR = {
+    maru: ['....wwwwwwww....', '...wbwwwwwwbw...', '..wbbwwwwwwbbw..', '..wwwwwwwwwwww..', '.wwwwkwwwwkwwww.', '.wwwwkwwwwkwwww.', '.wwpwwwwwwwwpww.', '.wwwwwwkkwwwwww.', '..wwwwwwwwwwww..', '...bbbbbbbbbb...', '..bbbbBBBBbbbb..', '..bbbbbbbbbbbb..', '..bbbbbbbbbbbb..', '...wwww..wwww...', '...wwww..wwww...', '................'],
+    kitsune: ['..o..........o..', '..oo........oo..', '..ooo......ooo..', '..oooooooooooo..', '.oooooooooooooo.', '.oowkooooookwoo.', '.oooooooooooooo.', '..ooowwwwwwooo..', '...oowwkkwwoo...', '....OOOOOOOO....', '...OOrrrrrrOO...', '...OOrrrrrrOO...', '...OOrrrrrrOO...', '....oo....oo....', '....oo....oo....', '................'],
+    kawauso: ['....tttttttt....', '...tttttttttt...', '..tttttttttttt..', '..ttkttttttktt..', '..tttttttttttt..', '..tttwwwwwwttt..', '...ttwwkkwwtt...', '....tttttttt....', '...ttttttttttt..', '..tttmmmmmmttt..', '..tttmmmmmmttt..', '..tttmmmmmmttt..', '...tttttttttt...', '....tt....tt....', '....tt....tt....', '................'],
+    fukuro: ['....GGGGGGGG....', '...GGGGGGGGGG...', '..GGwwGGGGwwGG..', '..GwkwGGGGwkwG..', '..GGwwGGGGwwGG..', '..GGGGGyyGGGGG..', '...GGGGggGGGG...', '....GGGGGGGG....', '...GGggggggGG...', '..GGggggggggGG..', '..GGggggggggGG..', '...GGggggggGG...', '....GGGGGGGG....', '.....yy..yy.....', '.....yy..yy.....', '................'],
+    neko: ['..c..........c..', '..cc........cc..', '..cccccccccccc..', '.cccccccccccccc.', '.cckccccccccckc.', '.cccccccccccccc.', '..ccccpccpcccc..', '...cccccccccc...', '....CCCCCCCC....', '...CCnnnnnnCC...', '...CCnnnnnnCC...', '...CCnnnnnnCC...', '....CCCCCCCC....', '....cc....cc....', '....cc....cc....', '................'],
+    hime: ['....nnnnnnnn....', '...nnnnnnnnnn...', '..nnwwwwwwwwnn..', '..nwwwwwwwwwwn..', '..nwwkwwwwkwwn..', '..nwwwwwwwwwwn..', '...wwpwwwwpww...', '....wwwwwwww....', '...NNNyyyyNNN...', '..NNNNyyyyNNNN..', '..NNNNNNNNNNNN..', '..NNNNNNNNNNNN..', '.NNNNNNNNNNNNNN.', '.NNNNNNNNNNNNNN.', '................', '................']
+  };
+  // ── なかま（ますめ・むき・ことば）。ことばは みじかく・ほんとうの ことだけ ──
+  const NPC = [
+    { id: 'kitsune', x: 2, y: 4, name: S('きつね', 'Fox'), lines: [S('いらっしゃい。おみせは この とびらの むこう。\nおさかなコインで、ふくの いろを もらえるよ。', 'Welcome. The shop is through this door.\nFish coins get you new colors for your hoodie.')] },
+    { id: 'fukuro', x: 13, y: 4, name: S('ふくろう', 'Owl'), lines: [S('ほう。びじゅつかんは こちら。\nえを ながめる だけの、しずかな へや じゃ。', 'Hoo. The art gallery is this way.\nA quiet room, just for looking at pictures.')] },
+    { id: 'kawauso', x: 2, y: 8, name: S('ラテの かわうそ', 'Latte the Otter'), lines: [S('カフェは この とびら。\nのみものを えらんで、まどの そとを ながめよう。', 'The cafe is through this door.\nPick a drink and look out the window.')] },
+    { id: 'hime', x: 8, y: 3, name: S('しろの ひと', 'Castle keeper'), lines: [S('この しろは、くもの うえに うかんで いるの。\nいそがなくて だいじょうぶ。ゆっくり みて いってね。', 'This castle floats above the clouds.\nNo rush. Take your time looking around.'), S('したの とびらから、ひろばに もどれるよ。', 'The door at the bottom takes you back to the plaza.')] },
+    { id: 'neko', x: 11, y: 9, name: S('ねこ', 'Cat'), lines: [S('にゃ。ここから みると、やまが ちいさいにゃ。', 'Meow. From up here, the mountains look tiny.')] }
+  ];
+  const me = { x: 7, y: 12, step: 0, moving: null };
+  const g = $('g').getContext('2d'); g.imageSmoothingEnabled = false;
+  const night = time === 'n', dusk = time === 'y', morn = time === 'a';
+  const FLOOR = night ? ['#5a5f7a', '#50546d'] : dusk ? ['#9a8c86', '#8c7f79'] : ['#b9bcc4', '#aaadb6'], CARPET = night ? ['#8a2e3a', '#a53a48'] : ['#c43a4a', '#d84a5a'], WALL = night ? ['#6d6f86', '#4e5068', '#8a8ca6'] : ['#d8d9e0', '#a9abb6', '#ffffff'], WINDOW = night ? '#1b2a44' : morn ? '#ffd9b8' : dusk ? '#ff9e6e' : '#8fd3ee';
+  function tile(ch, x, y, i) {
+    const px = x * TS, py = y * TS;
+    g.fillStyle = FLOOR[(x + y) % 2]; g.fillRect(px, py, TS, TS);
+    if (ch === 'W' || ch === 'w') { g.fillStyle = WALL[1]; g.fillRect(px, py, TS, TS); g.fillStyle = WALL[0]; g.fillRect(px + 1, py + 1, 6, 6); g.fillRect(px + 9, py + 1, 6, 6); g.fillRect(px + 1, py + 9, 14, 6); g.fillStyle = WALL[2]; g.fillRect(px + 1, py + 1, 6, 1); g.fillRect(px + 9, py + 1, 6, 1); g.fillRect(px + 1, py + 9, 14, 1);
+      if (ch === 'w') { g.fillStyle = '#3a3040'; g.fillRect(px + 4, py + 2, 8, 11); g.fillStyle = WINDOW; g.fillRect(px + 5, py + 3, 6, 9); if (night) { g.fillStyle = '#fff'; g.fillRect(px + 7, py + 5, 1, 1); g.fillRect(px + 9, py + 8, 1, 1); } }
+      return; }
+    if (ch === 'c') { g.fillStyle = CARPET[(x + y) % 2]; g.fillRect(px, py, TS, TS); g.fillStyle = '#e9b84a'; if (x === 9) g.fillRect(px, py, 2, TS); if (x === 10) g.fillRect(px + 14, py, 2, TS); return; }
+    if (ch === 'T') { g.fillStyle = CARPET[0]; g.fillRect(px, py, TS, TS); g.fillStyle = '#e9b84a'; g.fillRect(px + 2, py + 1, 12, 14); g.fillStyle = '#c43a4a'; g.fillRect(px + 4, py + 5, 8, 9); g.fillStyle = '#fff6c9'; g.fillRect(px + 7, py + 2, 2, 2); return; }
+    if (ch === 'P') { g.fillStyle = WALL[1]; g.fillRect(px + 3, py, 10, TS); g.fillStyle = WALL[2]; g.fillRect(px + 4, py, 2, TS); g.fillStyle = WALL[0]; g.fillRect(px + 2, py, 12, 2); g.fillRect(px + 2, py + 14, 12, 2); return; }
+    if (ch === 'p') { g.fillStyle = '#b98a5a'; g.fillRect(px + 5, py + 10, 6, 5); g.fillStyle = '#5fcf8a'; g.fillRect(px + 3, py + 4, 10, 6); g.fillRect(px + 6, py + 2, 4, 3); g.fillStyle = '#ffb3c8'; g.fillRect(px + 5, py + 5, 2, 2); g.fillRect(px + 10, py + 6, 2, 2); return; }
+    if (ch === 'D') { g.fillStyle = '#5a4328'; g.fillRect(px, py, TS, TS); g.fillStyle = '#b98a5a'; g.fillRect(px + 2, py + 1, 12, 15); g.fillStyle = '#8a6a44'; g.fillRect(px + 7, py + 1, 2, 15); g.fillStyle = '#ffe27a'; g.fillRect(px + 10, py + 8, 2, 2); return; }
+  }
+  function sprite(name, px, py, bob) {
+    const rows = SPR[name]; for (let y = 0; y < 16; y++) { const r = rows[y]; for (let x = 0; x < 16; x++) { const c = PAL[r[x]]; if (c) { g.fillStyle = c; g.fillRect(px + x, py + y + (bob || 0), 1, 1); } } }
+  }
+  let frame = 0;
+  function draw() {
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) tile(MAP[y][x], x, y);
+    for (const n of NPC) sprite(n.id, n.x * TS, n.y * TS, calm() ? 0 : (Math.floor(frame / 30) + n.x) % 2);
+    const mv = me.moving, px = mv ? (mv.fx + (mv.tx - mv.fx) * mv.t) * TS : me.x * TS, py = mv ? (mv.fy + (mv.ty - mv.fy) * mv.t) * TS : me.y * TS;
+    sprite('maru', Math.round(px), Math.round(py) - 1, mv && !calm() ? (Math.floor(mv.t * 4) % 2) : 0);
+  }
+  const walkable = (x, y) => x >= 0 && y >= 0 && x < COLS && y < ROWS && /[.cTD]/.test(MAP[y][x]) && MAP[y][x] !== 'T' && !NPC.some(n => n.x === x && n.y === y);
+  let busy = false, queue = [];
+  function moveTo(dx, dy) {
+    if (busy || me.moving || $('msg').hidden === false) return false;
+    const tx = me.x + dx, ty = me.y + dy; if (!walkable(tx, ty)) return false;
+    me.moving = { fx: me.x, fy: me.y, tx, ty, t: 0 }; return true;
+  }
+  function tick() {
+    frame++;
+    if (me.moving) { me.moving.t += calm() ? 1 : 1 / 7; if (me.moving.t >= 1) { me.x = me.moving.tx; me.y = me.moving.ty; me.moving = null; onArrive(); } }
+    else if (queue.length && $('msg').hidden) { const [dx, dy] = queue.shift(); moveTo(dx, dy); }
+    draw(); requestAnimationFrame(tick);
+  }
+  function onArrive() {
+    const d = DOORS[me.x + ',' + me.y]; if (d) { queue = []; ask(S(d.name + 'へ いく？', 'Go to ' + d.name + '?'), () => { location.href = d.to; }, () => { stepBack(); }); return; }
+    say('', S('', ''), true);
+  }
+  function stepBack() { const back = me.y === ROWS - 1 ? [0, -1] : me.x === 0 ? [1, 0] : [-1, 0]; moveTo(back[0], back[1]); }
+  // ── ことばの まど ──
+  let typing = null, onDone = null;
+  function say(who, text, silent) {
+    if (silent) return;
+    const m = $('msg'), t = $('mtext'); m.hidden = false; $('ask').hidden = true; t.innerHTML = ''; if (who) { const w = document.createElement('span'); w.className = 'who'; w.textContent = who; t.append(w); }
+    const span = document.createElement('span'); t.append(span); $('live').textContent = (who ? who + '：' : '') + text.replace(/\n/g, ' ');
+    if (typing) clearInterval(typing);
+    if (calm()) { span.textContent = text; $('cur').hidden = false; return; }
+    let i = 0; $('cur').hidden = true; typing = setInterval(() => { span.textContent = text.slice(0, ++i); if (i >= text.length) { clearInterval(typing); typing = null; $('cur').hidden = false; } }, 28);
+  }
+  function closeMsg() { $('msg').hidden = true; $('ask').hidden = true; if (typing) { clearInterval(typing); typing = null; } }
+  function ask(text, yes, no) { say('', text); $('ask').hidden = false; $('yes').onclick = () => { closeMsg(); yes(); }; $('no').onclick = () => { closeMsg(); no(); }; $('yes').focus(); }
+  const talkIdx = {};
+  function action() {
+    if (!$('msg').hidden) { if (typing) { clearInterval(typing); typing = null; $('mtext').lastChild.textContent = $('mtext').lastChild.textContent; } if ($('ask').hidden) closeMsg(); return; }
+    const near = NPC.find(n => Math.abs(n.x - me.x) + Math.abs(n.y - me.y) === 1);
+    if (near) { const i = talkIdx[near.id] || 0; say(near.name, near.lines[i % near.lines.length]); talkIdx[near.id] = i + 1; return; }
+    const here = MAP[me.y][me.x];
+    if (me.y === 1 || (me.y === 2 && (me.x === 7 || me.x === 8))) { say('', S('ぎょくざ。だれも すわって いない。\nまるふわが すわると、ちょっと おおきく みえる。', 'The throne. Nobody is sitting on it.\nMarufuwa would look a little bigger up there.')); return; }
+    say('', here === 'c' ? S('あかい じゅうたん。ふかふか。', 'A red carpet. Soft and fluffy.') : S('いしの ゆか。ひんやり して いる。', 'A stone floor. It feels cool.'));
+  }
+  // ── そうさ：キー・ボタン・タップ ──
+  const DIRS = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] };
+  addEventListener('keydown', e => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; if (DIRS[e.key]) { e.preventDefault(); if (!$('msg').hidden) return; queue = [DIRS[e.key]]; } else if (e.key === 'Enter' || e.key === ' ' || e.key === 'z' || e.key === 'Escape') { e.preventDefault(); action(); } });
+  document.querySelectorAll('.pad button[data-dir]').forEach(b => {
+    const d = b.dataset.dir.split(',').map(Number); let hold = null;
+    const start = e => { e.preventDefault(); queue = [d]; hold = setInterval(() => { queue = [d]; }, 120); };
+    const stop = () => { clearInterval(hold); hold = null; };
+    b.addEventListener('pointerdown', start); b.addEventListener('pointerup', stop); b.addEventListener('pointercancel', stop); b.addEventListener('pointerleave', stop);
+    b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); queue = [d]; } });
+  });
+  $('abtn').addEventListener('click', action);
+  $('msg').addEventListener('click', () => { if ($('ask').hidden) action(); });
+  // タップした ますへ あるく（かんたんな みちさがし）
+  $('g').addEventListener('click', e => {
+    if (!$('msg').hidden) return;
+    const r = $('g').getBoundingClientRect(), tx = Math.floor((e.clientX - r.left) / r.width * COLS), ty = Math.floor((e.clientY - r.top) / r.height * ROWS);
+    const npc = NPC.find(n => n.x === tx && n.y === ty); const goal = npc ? [[tx + 1, ty], [tx - 1, ty], [tx, ty + 1], [tx, ty - 1]].find(([x, y]) => walkable(x, y)) : [tx, ty];
+    if (!goal || !walkable(goal[0], goal[1])) return;
+    const path = bfs([me.x, me.y], goal); if (path) { queue = path; if (npc) queue.push('talk:' + npc.id); }
+  });
+  function bfs(from, to) {
+    const key = (x, y) => x + ',' + y, prev = {}; prev[key(from[0], from[1])] = null; const q = [from];
+    while (q.length) { const [x, y] = q.shift(); if (x === to[0] && y === to[1]) break; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (walkable(nx, ny) && !(key(nx, ny) in prev)) { prev[key(nx, ny)] = [x, y, dx, dy]; q.push([nx, ny]); } } }
+    if (!(key(to[0], to[1]) in prev)) return null; const steps = []; let cur = to; while (prev[key(cur[0], cur[1])]) { const [px, py, dx, dy] = prev[key(cur[0], cur[1])]; steps.unshift([dx, dy]); cur = [px, py]; } return steps;
+  }
+  // 「talk:」が ならびの さいごに あれば、ついたら はなす
+  const _tick = tick; tick = function () {};
+  (function loop() { frame++;
+    if (me.moving) { me.moving.t += calm() ? 1 : 1 / 7; if (me.moving.t >= 1) { me.x = me.moving.tx; me.y = me.moving.ty; me.moving = null; onArrive(); } }
+    else if (queue.length && $('msg').hidden) { const n = queue.shift(); if (typeof n === 'string') { action(); } else moveTo(n[0], n[1]); }
+    draw(); requestAnimationFrame(loop); })();
+  say(S('しろの ひと', 'Castle keeper'), S('ようこそ、てんくうの しろへ。\nやじるしで あるいて、だれかの まえで A を おしてね。', 'Welcome to the Sky Castle.\nWalk with the arrows and press A in front of someone.'));
+  window.__shiro = { me, NPC, MAP, walk: moveTo, action, msg: () => $('mtext').textContent };   // 検査用
+})();
+</script>
+</body>
+</html>
