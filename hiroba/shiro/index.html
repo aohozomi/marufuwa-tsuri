@@ -168,7 +168,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
     let i = 0; $('cur').hidden = true; typing = setInterval(() => { span.textContent = text.slice(0, ++i); if (i >= text.length) { clearInterval(typing); typing = null; $('cur').hidden = false; } }, 28);
   }
   function closeMsg() { $('msg').hidden = true; $('ask').hidden = true; if (typing) { clearInterval(typing); typing = null; } }
-  function ask(text, yes, no) { say('', text); $('ask').hidden = false; $('yes').onclick = () => { closeMsg(); yes(); }; $('no').onclick = () => { closeMsg(); no(); }; $('yes').focus(); }
+  function ask(text, yes, no) { say('', text); $('ask').hidden = false; $('yes').onclick = () => { closeMsg(); yes(); }; $('no').onclick = () => { closeMsg(); no(); }; if (document.hasFocus()) $('yes').focus(); }
   const talkIdx = {};
   function action() {
     if (!$('msg').hidden) { if (typing) { clearInterval(typing); typing = null; $('mtext').lastChild.textContent = $('mtext').lastChild.textContent; } if ($('ask').hidden) closeMsg(); return; }

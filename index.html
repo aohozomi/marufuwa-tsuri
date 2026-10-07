@@ -2439,7 +2439,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     setPhase('bite');
     button.textContent = 'ひく！'; lock(false); button.dataset.hot = 'true';
     say((fish.legend ? 'にじいろに ひかる かげ…。なんだ？' : nushi ? 'おおきな かげ…。ぬしか？' : fish.rare === 4 ? 'きんいろの かげ…。とくべつな いっぴきか？' : fish.rare === 3 ? 'ひかる かげが きた！' : 'きた！') + ' 「ひく！」を おしてね。いそがなくて だいじょうぶ。');
-    button.focus();
+    if (document.hasFocus()) button.focus();   // ほかの まどで もじを 打って いる ときは フォーカスを 取らない（10/7 マスター「インストールすると ほかの まどで もじが 打てん」の 用心）
   }
   function startReel() {
     hpMax = hp = Math.min(12, 3 + fish.rare * 2 + (nushi ? 5 : 0)); period = Math.round(1100 * (nushi || fish.legend ? .7 : [1.45, 1.45, 1.25, 1, .85, .7][Math.min(5, fish.rare)]));   // ぬしでも さいだい 12。わの はやさ：★1 ゆっくり（×1.45）〜★4（×.85）・ぬし／まぼろし（×.7）
@@ -4105,7 +4105,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       gazeTimer = setInterval(() => { const line = gazeLine(); say(line); setTimeout(() => { if (gazing()) gazeCap($('status').textContent, 8000); }, 80); }, 40000);   // 40びょうに 1かい、ぽつりと ことば
       gzFirstDone = false; gzTalkAt = performance.now(); clearTimeout(gzLifeTimer); gzLifeTimer = setTimeout(gzLifeTick, 2500);
       clearInterval(gzSwayT); gzSwayT = setInterval(gzSway, 130); [0, 1, 'me'].forEach(gzBlink); clearTimeout(gzCatchT); gzCatchT = setTimeout(gzCatchTick, 16000 + Math.random() * 8000);
-      try { if (document.fullscreenEnabled && !document.fullscreenElement) { const fr = document.documentElement.requestFullscreen({navigationUI: 'hide'}); if (fr && fr.catch) fr.catch(() => {}); } } catch {}   // つかえる ブラウザでは ぜんがめんに（もどれば 自動で もとに）
+      try { if (!STANDALONE && document.hasFocus() && document.fullscreenEnabled && !document.fullscreenElement) { const fr = document.documentElement.requestFullscreen({navigationUI: 'hide'}); if (fr && fr.catch) fr.catch(() => {}); } } catch {}   // つかえる ブラウザでは ぜんがめんに（もどれば 自動で もとに）。インストールした アプリ（standalone）や、ほかの まどを つかって いる ときは ぜんがめんに しない（10/7）
       if (window.TsuriBgm) TsuriBgm.enter('gaze', {ctx: () => save.sound ? ready() : null, sound: () => !!save.sound, time: () => timeOfDay()});
     } else {
       clearTimeout(gzLifeTimer); gzLifeTimer = 0; clearTimeout(gzCapTimer); { const cap = $('gaze-cap'); if (cap) cap.dataset.on = 'false'; }
@@ -4721,6 +4721,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-ruby-dict.js"></script>
 <script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
-<script defer src="tsuri-ver.js?v=104"></script>
+<script defer src="tsuri-ver.js?v=105"></script>
 </body>
 </html>
