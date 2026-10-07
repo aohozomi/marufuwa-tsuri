@@ -215,7 +215,45 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
 </script>
 <script defer src="../../tsuri-bgm.js"></script>
 <script defer src="../../tsuri-pagesound.js"></script>
-<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ tap: true, mount: document.getElementById('back'), bgm: 'shiro', time: () => document.documentElement.dataset.time }); });</script>   <!-- おと：ばしょの 曲（shiro。ファイルが 来るまで gaze）・🔇 は「← ひろば」の となり -->
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ tap: true, mount: document.getElementById('back'), time: () => document.documentElement.dataset.time }); });</script>   <!-- おと：🔇 は「← ひろば」の となり。曲は ファイルでは なく、したの ピコピコ（WebAudio）で ならす（10/7 マスター「昔の ファミコンみたいな ピコピコ音で」） -->
+<script>
+// ─── ピコピコの 曲（むかしの ゲームき ふう）。四角い なみ 2つ＋さんかくの ベース。曲は 本部の 自作（8小節・A minor・112 BPM・ループ）。
+//   おとが OFF（PageSound.soundOn()）の あいだは ならさない。さいしょの タップで はじまる。かくれた タブでは 止まる。高い 音は 1.8kHz で 切る（耳に ささらない ように）。
+(function () {
+  'use strict';
+  const BPM = 112, STEP = 60 / BPM / 2;   // 8ぶおんぷ 1つの ながさ
+  const N = { C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.0, Gs4: 415.3, A4: 440.0, B4: 493.88, C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, A2: 110.0, B2: 123.47, C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.0, E2: 82.41, F2: 87.31, G2: 98.0 };
+  // 「-」＝のばす 「.」＝やすみ
+  const MEL = 'A4 C5 E5 C5 A4 C5 E5 C5  G4 B4 D5 B4 G4 B4 D5 B4  F4 A4 C5 A4 F4 A4 C5 A4  E4 Gs4 B4 Gs4 E4 Gs4 B4 E5  A4 . C5 . E5 . D5 C5  B4 . G4 . B4 . D5 .  C5 . A4 . F4 . A4 C5  E5 D5 B4 Gs4 A4 - - .'.split(/\s+/);
+  const BAS = 'A2 - E3 - A2 - E3 -  G2 - D3 - G2 - D3 -  F2 - C3 - F2 - C3 -  E2 - E3 - E2 - E3 -  A2 - E3 - A2 - E3 -  G2 - D3 - G2 - D3 -  F2 - C3 - F2 - C3 -  E2 - E3 - A2 - - .'.split(/\s+/);
+  const ARP = 'E4 A4 C5 A4 E4 A4 C5 A4  D4 G4 B4 G4 D4 G4 B4 G4  C4 F4 A4 F4 C4 F4 A4 F4  B4 E4 Gs4 E4 B4 E4 Gs4 E4  E4 A4 C5 A4 E4 A4 C5 A4  D4 G4 B4 G4 D4 G4 B4 G4  C4 F4 A4 F4 C4 F4 A4 F4  E4 Gs4 B4 E4 A4 - - .'.split(/\s+/);
+  let ac = null, master = null, lp = null, step = 0, nextT = 0, timer = 0, on = false;
+  const soundOn = () => !!(window.PageSound && PageSound.soundOn && PageSound.soundOn());
+  function ensure() { if (ac) return true; try { ac = new (window.AudioContext || window.webkitAudioContext)(); lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; master = ac.createGain(); master.gain.value = 0; master.connect(lp); lp.connect(ac.destination); return true; } catch (e) { return false; } }
+  function voice(type, hz, t, len, vol) {
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.setValueAtTime(hz, t);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .006); g.gain.setValueAtTime(vol, t + Math.max(.02, len - .04)); g.gain.linearRampToValueAtTime(0, t + len);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + len + .02);
+  }
+  function note(seq, i, type, vol, octDown) {   // のばす（-）を まとめて 1つの 音に
+    const v = seq[i % seq.length]; if (v === '-' || v === '.') return;
+    let len = 1; while (seq[(i + len) % seq.length] === '-') len++;
+    voice(type, N[v] / (octDown ? 2 : 1), nextT, STEP * len * .95, vol);
+  }
+  function tick() {
+    if (!ac) return;
+    while (nextT < ac.currentTime + .3) { note(MEL, step, 'square', .035); note(ARP, step, 'square', .012); note(BAS, step, 'triangle', .05); step = (step + 1) % 64; nextT += STEP; }
+  }
+  function start() { if (on || !ensure()) return; if (ac.state === 'suspended') ac.resume(); on = true; nextT = ac.currentTime + .05; master.gain.cancelScheduledValues(ac.currentTime); master.gain.setTargetAtTime(1, ac.currentTime, .4); timer = setInterval(tick, 100); }
+  function stop() { if (!on) return; on = false; clearInterval(timer); if (master) master.gain.setTargetAtTime(0, ac.currentTime, .25); }
+  function sync() { if (document.hidden || !soundOn()) stop(); else start(); }
+  let armed = false; const arm = () => { armed = true; sync(); };
+  addEventListener('pointerdown', arm, { passive: true }); addEventListener('keydown', arm);
+  setInterval(() => { if (armed) sync(); }, 500);
+  document.addEventListener('visibilitychange', sync);
+  window.__chip = { state: () => ({ on, ctx: !!ac, step, running: ac ? ac.state : '' }) };   // 検査用
+})();
+</script>
 
 </body>
 </html>
