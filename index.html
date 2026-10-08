@@ -2238,7 +2238,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const id = marufuwa.dataset.avatar; if (id && FRIEND_POSE[id]) return friendPoseOn() ? 'img/pose/friend/' + id + '/' + poseNow + '.png' : '';
     const k = (id || 'marufuwa') + '_' + poseNow; return POSE_FILES.includes(k) && poseLoaded.has(k) ? 'img/pose/' + POSE_DIR + k + '.png' : '';
   };
-  function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.dataset.pose = '1'; marufuwa.dataset.poseK = poseNow; marufuwa.dataset.poseSet = POSE_SET; marufuwa.dataset.poseFace = JSON.stringify(poseFaceOf(poseNow) || []); marufuwa.src = pf; footFix(); rod($('line-me'), mine, 12, $('rod-me')); return; } delete marufuwa.dataset.pose; delete marufuwa.dataset.poseK; footFix(); const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
+  function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.dataset.pose = '1'; marufuwa.dataset.poseK = poseNow; marufuwa.dataset.poseSet = POSE_SET; marufuwa.dataset.poseFace = JSON.stringify(poseFaceOf(poseNow) || []); marufuwa.src = (marufuwa.dataset.avatar ? '' : wearUrl('pose:' + pf, pf)) || pf; footFix(); rod($('line-me'), mine, 12, $('rod-me')); return; } delete marufuwa.dataset.pose; delete marufuwa.dataset.poseK; footFix(); const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
   function drawToday() {
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
@@ -3031,9 +3031,10 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const rodSvg = i => { const o = gearOpt('rod'), svg = ART && ART.rod && ART.rod[i]; return svg && o.pal ? swap(svg, GEAR.rod.from[i], o.pal) : svg || ''; };
   const svgImg = (svg, cls) => { const im = new Image(); im.src = ART.uri(svg); im.alt = ''; im.draggable = false; if (cls) im.className = cls; return im; };
   // まるふわの ふく：あおい ぶぶんの いろあいだけ かえる（しろ・ほほ・め・かばんは そのまま）
-  function wearUrl(name) {
+  let wearWant = '';   // いま 出したい 絵（よみこみが おわった とき、まだ それなら さしかえる）
+  function wearUrl(name, src) {   // src を わたすと ポーズの 絵（なげる・まつ・ひく・あげる）にも おなじ いろを つける（10/8 マスター「釣り始めたら 水色に もどる」）
     const o = gearOpt('wear'); if (o.k === 'ao' || !o.h) return '';
-    const key = o.k + '|' + name; if (wearCache.has(key)) return wearCache.get(key);
+    const key = o.k + '|' + name; wearWant = key; if (wearCache.has(key)) return wearCache.get(key);
     wearCache.set(key, '');
     const im = new Image(); im.onload = () => {
       try {
@@ -3048,11 +3049,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
           px[i] = Math.round((rr + m) * 255); px[i + 1] = Math.round((gg + m) * 255); px[i + 2] = Math.round((bb + m) * 255);
         }
         x.putImageData(d, 0, 0); wearCache.set(key, c.toDataURL('image/png'));
-        if (curFace === name && gearOpt('wear').k === o.k) marufuwa.src = wearCache.get(key);
+        if (wearWant === key && gearOpt('wear').k === o.k) marufuwa.src = wearCache.get(key);
         if ($('gear').open) drawGear();
       } catch (e) {}
     };
-    im.src = 'img/game-' + name + '.webp'; return '';
+    im.src = src || ('img/game-' + name + '.webp'); return '';
   }
   const bucketName = () => (save.my && typeof save.my.bucket === 'string') ? save.my.bucket.slice(0, 8) : '';
   function applyMy() {   // どうぐの いろを がめんに あわせる
@@ -4724,6 +4725,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-ruby-dict.js"></script>
 <script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
-<script defer src="tsuri-ver.js?v=106"></script>
+<script defer src="tsuri-ver.js?v=107"></script>
 </body>
 </html>

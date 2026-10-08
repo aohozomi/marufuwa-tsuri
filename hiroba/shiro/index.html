@@ -219,6 +219,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
 <script>
 // ─── ピコピコの 曲（むかしの ゲームき ふう）。四角い なみ 2つ＋さんかくの ベース。曲は 本部の 自作（8小節・A minor・112 BPM・ループ）。
 //   おとが OFF（PageSound.soundOn()）の あいだは ならさない。さいしょの タップで はじまる。かくれた タブでは 止まる。高い 音は 1.8kHz で 切る（耳に ささらない ように）。
+//   v107：WAV に 描いて <audio> で ならす（マナースイッチ 対策）。
 (function () {
   'use strict';
   const BPM = 112, STEP = 60 / BPM / 2;   // 8ぶおんぷ 1つの ながさ
@@ -227,31 +228,46 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
   const MEL = 'A4 C5 E5 C5 A4 C5 E5 C5  G4 B4 D5 B4 G4 B4 D5 B4  F4 A4 C5 A4 F4 A4 C5 A4  E4 Gs4 B4 Gs4 E4 Gs4 B4 E5  A4 . C5 . E5 . D5 C5  B4 . G4 . B4 . D5 .  C5 . A4 . F4 . A4 C5  E5 D5 B4 Gs4 A4 - - .'.split(/\s+/);
   const BAS = 'A2 - E3 - A2 - E3 -  G2 - D3 - G2 - D3 -  F2 - C3 - F2 - C3 -  E2 - E3 - E2 - E3 -  A2 - E3 - A2 - E3 -  G2 - D3 - G2 - D3 -  F2 - C3 - F2 - C3 -  E2 - E3 - A2 - - .'.split(/\s+/);
   const ARP = 'E4 A4 C5 A4 E4 A4 C5 A4  D4 G4 B4 G4 D4 G4 B4 G4  C4 F4 A4 F4 C4 F4 A4 F4  B4 E4 Gs4 E4 B4 E4 Gs4 E4  E4 A4 C5 A4 E4 A4 C5 A4  D4 G4 B4 G4 D4 G4 B4 G4  C4 F4 A4 F4 C4 F4 A4 F4  E4 Gs4 B4 E4 A4 - - .'.split(/\s+/);
-  let ac = null, master = null, lp = null, step = 0, nextT = 0, timer = 0, on = false;
+  // 10/8 マスター「お城に 入っても 曲が ながれへん・無音」：WebAudio で 直に ならすと iPhone の マナースイッチ（消音）で きこえない。
+  //   → 曲を 一度 OfflineAudioContext で WAV に 描いて、<audio loop> で ならす（ファイルの BGM と おなじ 道・マナースイッチでも きこえる）。描くのは 1回だけ（約17びょう・22.05kHz・モノラル）。
+  const LEN = 64, DUR = LEN * STEP, RATE = 22050;
+  let el = null, url = '', on = false, building = false;
   const soundOn = () => !!(window.PageSound && PageSound.soundOn && PageSound.soundOn());
-  function ensure() { if (ac) return true; try { ac = new (window.AudioContext || window.webkitAudioContext)(); lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; master = ac.createGain(); master.gain.value = 0; master.connect(lp); lp.connect(ac.destination); return true; } catch (e) { return false; } }
-  function voice(type, hz, t, len, vol) {
-    const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.setValueAtTime(hz, t);
+  function voice(oc, dest, type, hz, t, len, vol) {
+    const o = oc.createOscillator(), g = oc.createGain(); o.type = type; o.frequency.setValueAtTime(hz, t);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .006); g.gain.setValueAtTime(vol, t + Math.max(.02, len - .04)); g.gain.linearRampToValueAtTime(0, t + len);
-    o.connect(g); g.connect(master); o.start(t); o.stop(t + len + .02);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + len + .02);
   }
-  function note(seq, i, type, vol, octDown) {   // のばす（-）を まとめて 1つの 音に
+  function note(oc, dest, seq, i, type, vol) {   // のばす（-）を まとめて 1つの 音に
     const v = seq[i % seq.length]; if (v === '-' || v === '.') return;
     let len = 1; while (seq[(i + len) % seq.length] === '-') len++;
-    voice(type, N[v] / (octDown ? 2 : 1), nextT, STEP * len * .95, vol);
+    voice(oc, dest, type, N[v], i * STEP, STEP * len * .95, vol);
   }
-  function tick() {
-    if (!ac) return;
-    while (nextT < ac.currentTime + .3) { note(MEL, step, 'square', .035); note(ARP, step, 'square', .012); note(BAS, step, 'triangle', .05); step = (step + 1) % 64; nextT += STEP; }
+  function wav(buf) {   // AudioBuffer → WAV（16bit・モノラル）
+    const n = buf.length, d = buf.getChannelData(0), out = new DataView(new ArrayBuffer(44 + n * 2));
+    const str = (o, t) => { for (let i = 0; i < t.length; i++) out.setUint8(o + i, t.charCodeAt(i)); };
+    str(0, 'RIFF'); out.setUint32(4, 36 + n * 2, true); str(8, 'WAVE'); str(12, 'fmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true); out.setUint32(24, RATE, true); out.setUint32(28, RATE * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true); str(36, 'data'); out.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) { const v = Math.max(-1, Math.min(1, d[i])); out.setInt16(44 + i * 2, v < 0 ? v * 32768 : v * 32767, true); }
+    return new Blob([out], { type: 'audio/wav' });
   }
-  function start() { if (on || !ensure()) return; if (ac.state === 'suspended') ac.resume(); on = true; nextT = ac.currentTime + .05; master.gain.cancelScheduledValues(ac.currentTime); master.gain.setTargetAtTime(1, ac.currentTime, .4); timer = setInterval(tick, 100); }
-  function stop() { if (!on) return; on = false; clearInterval(timer); if (master) master.gain.setTargetAtTime(0, ac.currentTime, .25); }
+  function build(cb) {
+    if (url) return cb(); if (building) return; building = true;
+    try {
+      const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext, oc = new OC(1, Math.round(DUR * RATE), RATE);
+      const lp = oc.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; const master = oc.createGain(); master.gain.value = 1; master.connect(lp); lp.connect(oc.destination);
+      for (let i = 0; i < LEN; i++) { note(oc, master, MEL, i, 'square', .035); note(oc, master, ARP, i, 'square', .012); note(oc, master, BAS, i, 'triangle', .05); }
+      const done = buf => { url = URL.createObjectURL(wav(buf)); el = new Audio(); el.src = url; el.loop = true; el.preload = 'auto'; el.setAttribute('playsinline', ''); el.volume = 1; building = false; cb(); };
+      const r = oc.startRendering(); if (r && r.then) r.then(done); else oc.oncomplete = e => done(e.renderedBuffer);
+    } catch (e) { building = false; }
+  }
+  function start() { if (on) return; on = true; build(() => { if (!on || !el) return; const p = el.play(); if (p && p.catch) p.catch(() => {}); }); }
+  function stop() { if (!on) return; on = false; if (el) { try { el.pause(); } catch (e) {} } }
   function sync() { if (document.hidden || !soundOn()) stop(); else start(); }
   let armed = false; const arm = () => { armed = true; sync(); };
   addEventListener('pointerdown', arm, { passive: true }); addEventListener('keydown', arm);
   setInterval(() => { if (armed) sync(); }, 500);
   document.addEventListener('visibilitychange', sync);
-  window.__chip = { state: () => ({ on, ctx: !!ac, step, running: ac ? ac.state : '' }) };   // 検査用
+  window.__chip = { state: () => ({ on, ctx: !!el, step: el ? Math.floor((el.currentTime % DUR) / STEP) : 0, running: el ? (el.paused ? 'paused' : 'running') : '', t: el ? el.currentTime : 0, dur: DUR, file: !!url }) };   // 検査用
 })();
 </script>
 
