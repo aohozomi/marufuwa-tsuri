@@ -314,6 +314,8 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 .prop[data-dest] svg *,.prop[data-secret] svg *{pointer-events:visiblePainted;cursor:pointer}   /* なかの 形（描かれている 所）だけ 当てる */
 .prop[data-dest] img{pointer-events:auto;cursor:pointer}   /* HTML の img に visiblePainted は きかず none の まま だった（天空の城が 押せなかった・10/7）。すきとおった 所は JS の alpha 判定で 下へ */
 .prop[data-dest] .mark,.prop[data-secret] .mark,.prop .inn-sign-label{pointer-events:auto;cursor:pointer}
+.prop[data-art][data-secret] img.art-prop{pointer-events:auto;cursor:pointer}
+.prop[data-art=semi] img.art-prop{object-position:50% 100%}   /* 足もとを 置き物の 底に そろえる */   /* 10/9：セミリアルの 木（絵）。すきとおった 所は click で alpha を 見て 下へ（imgOpaqueAt） */
 .prop[data-secret=tree]{pointer-events:none}
 .prop[data-secret=tree]::before{content:"";position:absolute;left:8%;right:8%;top:0;height:62%;pointer-events:auto;cursor:pointer}
 .prop.hl{--hlf:drop-shadow(0 0 7px #fff) drop-shadow(0 0 3px #fff)}
@@ -851,7 +853,7 @@ body.calm .cloud.c2{left:28%}
 <div hidden><img id="friend-a" alt="" src="../img/friend-neko-s.webp"><img id="friend-b" alt="" src="../img/friend-usagi-s.webp"></div>
 <script>window.TsuriTankConfig = { base: '../', noButton: true };</script>
 <script src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-ver.js?v=107"></script>
+<script defer src="../tsuri-ver.js?v=108"></script>
 <script src="../tsuri-daily.js"></script>
 <script src="../tsuri-wear.js"></script>
 <script src="../tsuri-mame.js"></script>
@@ -2567,7 +2569,7 @@ scene.addEventListener('click', e => {
   const actorEl = t.closest('.actor');
   if (actorEl) { if (actorEl.dataset.id === 'me') tapMascot(); else talkTo(byId(actorEl.dataset.id)); return; }
   const destEl = t.closest('[data-dest]') ? pickDest(e, t) : null; if (destEl) { goDest(destEl.dataset.dest); return; }
-  const secretEl = t.closest('[data-secret]'); if (secretEl) { secretTap(secretEl.dataset.secret, secretEl); return; }
+  const secretEl = t.closest('[data-secret]'); if (secretEl && !(t.tagName === 'IMG' && Number.isFinite(e.clientX) && !imgOpaqueAt(t, e.clientX, e.clientY))) { secretTap(secretEl.dataset.secret, secretEl); return; }   // 絵の 木は 描かれて いる 所だけ（すきとおった 所は 歩く）
   cancelTrip(false);
   const p = worldPoint(e), spot = nearestFree(clamp(p.x, 8, W - 8), clamp(p.y, 267, 550));
   sfx.tap(); tapRing(spot.x, spot.y);
@@ -3389,6 +3391,26 @@ async function applyArt() {
         el.style.left = (x - w / 2) / W * 100 + '%'; el.style.top = (y - h) / H * 100 + '%'; el.style.width = w / W * 100 + '%'; el.style.height = h / H * 100 + '%';
       };
       img.src = ms.file;   // 読めなければ 何も 変えない（今の まちかどの まま）
+    }
+  } catch {}
+  // セミリアルの 木（10/9・天の 絵・マスター「いつ セミリアルの 木に なるんや」）：manifest.semi_props = { hedge: {file,w,h,lift}, tree: {file,w,h,lift} }
+  //   hedge → 置き物 hedge（丸葉の 低木）、tree → tree-l・tree-r（前景の 木・タップの ひみつは そのまま）。w/h は 世界の 単位（足もとは 変えない・lift で 上げる）。絵が 読めなければ SVG の まま。
+  try {
+    const sp = man.semi_props; const okFile = f => typeof f === 'string' && /^[\w\-./]+$/.test(f) && !/^(\.\.\/)*\.\.\//.test(f.replace(/^\.\.\//, ''));
+    if (sp && typeof sp === 'object' && typeof propEl === 'function' && typeof PROPS !== 'undefined') {
+      const put = (id, spec) => {
+        const el = propEl(id), P = PROPS.find(x => x.id === id); if (!el || !P || !spec || !okFile(spec.file)) return;
+        const w = Number.isFinite(spec.w) ? spec.w : P.w, h = Number.isFinite(spec.h) ? spec.h : P.h, lift = Number.isFinite(spec.lift) ? spec.lift : 0;
+        const img = new Image(); img.alt = ''; img.decoding = 'async'; img.draggable = false; img.className = 'art-prop'; img.setAttribute('preserveAspectRatio', 'xMidYMax meet');   // imgOpaqueAt が 同じ 置き方で alpha を 読む
+        img.onload = () => {
+          const keep = el.querySelector('.mark'); el.innerHTML = ''; el.append(img); if (keep) el.append(keep); el.dataset.art = 'semi';
+          el.style.left = (P.x - w / 2) / W * 100 + '%'; el.style.top = (P.y - lift - h) / H * 100 + '%'; el.style.width = w / W * 100 + '%'; el.style.height = h / H * 100 + '%';
+          try { alphaCanvas(img.currentSrc || img.src); } catch {}   // タップの 当たり判定用（すきとおった 所は 下へ）
+        };
+        img.src = spec.file;
+      };
+      if (sp.hedge) put('hedge', sp.hedge);
+      if (sp.tree) { put('tree-l', sp.tree); put('tree-r', sp.tree); }
     }
   } catch {}
   const bg = document.getElementById('bg'), first = bg && bg.querySelector('.hillpath');
