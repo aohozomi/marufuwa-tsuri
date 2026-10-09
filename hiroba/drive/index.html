@@ -14,6 +14,7 @@
   のんびり ドライブ（ゆっくり のる カートの ドライブ・じゅんい／タイム／てんすう／じかんぎれ なし）
   【仮の え】いまの 絵は ぜんぶ コード（canvas）で えがいた「仮の え」です。
   天の ほんものの え（img/drive/*.webp）が とどいたら、読めた ものから 自動で さしかわります（読めなければ 仮の えの まま）。
+  走行画面の 遠景は `img/bg/drive_hiru.webp` / `drive_yoru.webp` を 時間帯に 合わせて つかいます。
     img/drive/cart_back.webp            … まるふわの カート（うしろ すがた・透明・480x480）
     img/drive/friend_cart_0..2.webp     … ともだちの カート（うしろ すがた・透明・384x384）
     img/drive/deco_flower|friend|fountain|tree|lamp|balloon|house.webp … みちばたの 小物（透明・256x256）
@@ -191,6 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const IMG = {};
   ['cart_back', 'friend_cart_0', 'friend_cart_1', 'friend_cart_2', 'deco_flower', 'deco_friend', 'deco_fountain', 'deco_tree', 'deco_lamp', 'deco_balloon', 'deco_house', 'nushi_lake', 'nushi_plaza', 'bg_lake', 'bg_plaza', 'reward_lake', 'reward_plaza'].forEach(n => {
     const im = new Image(); im.onload = () => { IMG[n] = im; }; im.src = '../../img/drive/' + n + '.webp';
+  });
+  ['drive_hiru', 'drive_yoru'].forEach(n => {
+    const im = new Image(); im.onload = () => { IMG[n] = im; }; im.src = '../../img/bg/' + n + '.webp';
   });
 
   // ─── ようす ───
@@ -436,7 +440,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const C = course(), cm = calm(), G = grads();
     // そら・とおくの けしき
     const bg = IMG['bg_' + C.id];
-    if (bg) {
+    const scenery = IMG[night() ? 'drive_yoru' : 'drive_hiru'];
+    if (scenery) {
+      // 16:9の 遠景から 上の 空・水平線・海を きりだす。下の 走行路は そのまま うごかす。
+      const sw = scenery.naturalWidth || scenery.width, sh = scenery.naturalHeight || scenery.height;
+      const cropH = Math.min(sh, Math.max(1, Math.round(sw * (h + 3) / W)));
+      const cropY = Math.max(0, Math.min(sh - cropH, Math.round((sh - cropH) * .24)));
+      g.drawImage(scenery, 0, cropY, sw, cropH, 0, 0, W, h + 3);
+    } else if (bg) {
       const pw = W * 2, x0 = -(((S.scroll * .3) % pw) + pw) % pw; g.drawImage(bg, x0, 0, pw, h + 3); g.drawImage(bg, x0 + pw, 0, pw, h + 3);
     } else {
       g.fillStyle = G.sky; g.fillRect(0, 0, W, h + 4);
