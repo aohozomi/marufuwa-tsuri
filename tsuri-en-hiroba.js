@@ -148,6 +148,8 @@
     'これはさんぷるです。': 'This is a sample.', 'ほんとうのなまえではありません。': 'These are not real names.', 'ほしぞら。ほしをさわると、なまえがでるよ': 'Starry sky. Touch a star to see a name.', 'なまえのいちらん': 'List of names',
     'このばしょは、おとなのひとがなまえをえらんでのせています。': 'In this place, grown-ups choose their names to be listed.',
     // ---- やどや（10/4・ひろばの 宿屋）----
+    // ---- まちレベル・てんくうの しろ（10/7〜）----
+    'まちレベル':'Town level','しろのなかをたんけん':'Explore inside the castle','むかしのゲームみたいにあるいて、なかまとはなそう':'Walk around like an old-style game and talk with your friends','あそんだぶんだけ、すこしずつあがるよ。ほかのひととくらべない。へらない。':'It rises little by little as you play. No comparing with others. It never goes down.',
     'やどや': 'Inn', 'おちゃとしおり': 'Tea & bookmark', 'こげちゃいろのきとふかみどりのやねのやどや': 'An inn with dark brown wood and a deep green roof',
     'やどやでひとやすみ': 'A little rest at the inn', 'ランプのあかりがぽっとともったよ。なにをたのしむ？': 'The lamp has glowed on. What would you like to enjoy?',
     'おちゃ、まどべ、しおり。すきなものをえらんでね。': 'Tea, the window, a bookmark. Pick whatever you like.',
