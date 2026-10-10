@@ -47,7 +47,7 @@ try { var sv0 = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d0 
     hr0 = hq0 !== null && hq0 !== '' && isFinite(Number(hq0)) ? Number(hq0) : d0.getHours(), lv0 = Math.max(1, Math.floor(Math.sqrt(1 + Math.max(0, Number(sv0.xp) || 0) / 20))), de0 = document.documentElement.dataset;
   de0.mTank = String(lv0 >= 3); de0.mNakama = String(lv0 >= 5); de0.mGear = String(lv0 >= 8);
   // よるの 帯は、この たんまつで 1ぴき つった あと か、2かいめ いこうの おとずれ から（はじめての 夜は「なげる」だけが さいしょの ボタン。10/8 会議 K-033：人物の はんてい では なく「この たんまつに 初回完了の きろくが あるか」。あたらしい ついせきは ふやさない）
-  var back0 = false; try { back0 = (sv0.total | 0) > 0 || !!sv0.hello;   // 新しい 保存の 鍵は 作らない（既存の あいさつ記録 hello で 「前に 来た」を 見る） } catch (e) {}
+  var back0 = false; try { back0 = (sv0.total | 0) > 0 || !!sv0.hello; /* 新しい 保存の 鍵は 作らない（既存の あいさつ記録 hello で 「前に 来た」を 見る） */ } catch (e) {}
   de0.ib = hr0 >= 22 || hr0 < 4 ? (back0 ? 'night' : '') : hr0 < 12 && sv0.hello !== d0.getFullYear() + '-' + (d0.getMonth() + 1) + '-' + d0.getDate() ? 'morning' : '';
   de0.plaza = String((Number(sv0.total) || 0) >= 3); } catch (e) {}
 setTimeout(function () { document.documentElement.dataset.arranged = document.documentElement.dataset.arranged || '1'; }, 8000);   // ほけん：本体の script が とまっても 8びょうで かくす ものを 出す
