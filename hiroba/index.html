@@ -222,6 +222,8 @@ button.zk{--c1:#ffffffe6;--c2:#e6f6fdcc;border-radius:16px;font-weight:800;min-h
 button.zk img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 2px 0 #ffd25e)}
 button.zk.on{--c1:#fff4c2;--c2:#ffe27a99}
 .zk.not{border:3px dotted #9cc9e0;background:#f4fbff;color:#506874;font-size:1.3rem;font-weight:900;justify-content:center}
+.zk.preview{border:3px solid #fff;background:linear-gradient(180deg,#ffffffe6,#e6f6fdcc);box-shadow:0 4px 0 #9cc9e0,0 8px 14px #2446531f;color:#244653}
+.zk.preview img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 2px 0 #d7eaf2)}
 #zukan-cap{min-height:7.6em;margin:6px 0 10px;text-align:center;font-weight:800;line-height:1.7;color:#244653}
 #zukan-cap small{display:block;font-weight:700;color:#506874}
 /* なかまの がめん（10/1 マスター直）：名前は 2ぎょう（色・味／いきもの）で 単語の 途中では 割らない・「いっしょ」の しるしは 上の かどに ちいさく（文字の 行を とらない）・ドラッグ／2タップ */
@@ -905,7 +907,7 @@ const soundOn = () => soundFlag;
 //   あんない＝「まわりを きく」の ばしょの おと／なみと あめ＝ふんすいの みず・あめ・とり・こおろぎ／のこりは こうかおん。「おとを つけたよ」の かくにんの おと（sfx.on）は いつも ならす（'ui'）。
 //   やさしい おと（soft）：かくばった なみは まるい なみに・1.8kHz より たかい おとは 1オクターブ さげる。「おと」ぜんたいが OFF なら 今までどおり ならさない
 let sndKind = 'fx';
-const FX_QUIET = !(/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && q.get('fx') === 'on');   // ?fx=on は 手もとの けんさ用（localhost だけ・音の つくりを 検査 する ため）。ふだんは かならず true
+const FX_QUIET = false;   // 10/10 マスター「広場いったら おと ならんぞ」：効果音を 本番で 復活（FX_QUIET を 廃止＝つねに false）。「おと」が OFF なら sndOk() が 偽で AudioContext も 作らない
 // 〜（つづき）   // 10/2 マスター直「効果音 一旦 ぜんぶ とめてくれ・ザー（ずっと ながれる 環境音）と BGM だけで いい」：tone／zap（こうかおん・ui・あんない・とり・むし）は ぜんぶ ならさない。もどす ときは false に
 const sndOk = () => !FX_QUIET && soundOn() && (sndKind === 'ui' || !main || !audioChosen() || main[sndKind === 'guide' ? 'sndGuide' : sndKind === 'amb' ? 'sndAmb' : 'sndFx'] !== false);
 const asKind = (k, fn) => { const p = sndKind; sndKind = k; try { return fn(); } finally { sndKind = p; } };
@@ -955,6 +957,7 @@ const SPECIAL_LINES = {
   omisoka: ['ことしも おつかれさま。ゆっくり やすんでね', 'ことしも いろいろ あったね。ここに いて いいんだよ']
 };
 let curTime = timeOfDay();
+let timeGuestPending = false, nextTimeGuestCheck = 0;
 function setTime(t) { if (!TIME_LABEL[t]) return false; q.set('time', t); applyTime(); return true; }   // 検査・動画の 材料づくり用：じかんを かえる（アドレスは かえない）
 function rehome() {   // 住人（通りすがりを のぞく）の いる ところを いまの 時間・天気の ならびに つけかえる
   let fl; try { fl = friends; } catch { return; }
@@ -964,7 +967,9 @@ function rehome() {   // 住人（通りすがりを のぞく）の いる と�
   });
 }
 function applyTime() {
-  curTime = timeOfDay(); rehome();
+  const previousTime = curTime; curTime = timeOfDay();
+  if (previousTime && previousTime !== curTime) timeGuestPending = true;
+  rehome();
   scene.dataset.time = TIME_NAME[curTime]; scene.dataset.rain = String(rainy); scene.dataset.season = SEASON;
   const hour = new Date().getHours(), night = hour >= 19 || hour < 5;
   scene.dataset.dim = String(night && curTime !== 'n');
@@ -1036,11 +1041,11 @@ function renderSeason() {
 
 // ─── おと（むかしの ゲームき ふう：かくばった なみ・さんかくの なみ・みじかい ざっ だけ）───
 let ac = null, noiseBuf = null, amb = null;
-function ready() { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
+function ready() { if (!ac) toneEnds.length = 0; ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
 // やさしい 出口（聴覚過敏の 人の ため・9/30 夜 マスター直「キンキン 高い おとは 不向き」）：この ファイルの 音は ぜんぶ ここを 通る。
 //   ・基音は 900Hz まで（もっと 高い おとは 1オクターブ ずつ さげる）／アタックは 15ms いじょう／かくばった なみは 使わない（まるい さんかく波に）／
 //     ざつおん（ぽちゃん・ざわざわ）は ローパス 1500Hz／出口は ローパス 1300Hz → やわらかい 頭打ち（tanh）。ピークは −12dBFS（0.25）を こえない。
-const GENTLE = { top: 900, attack: .015, lp: 1300, noiseLp: 1500, cap: .25, noiseGain: 2.4 };   // 10/1 lp 2500→1400（三角波の 3倍音の「キン」を 出口で 切る・マスター直）
+const GENTLE = { top: 440, attack: .03, lp: 900, noiseLp: 600, cap: .18, noiseGain: 2.4 };   // 10/10：基音 80〜440Hz・アタック 30ms 以上・ざつおんは ローパス 600Hz・ピーク −14.9dBFS（BGM の ピーク −8〜−11dBFS より 3dB いじょう ちいさく）   // 10/1 lp 2500→1400（三角波の 3倍音の「キン」を 出口で 切る・マスター直）
 function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が 無い（ふるい 環境・検査の 見本）ときは あるものだけ つなぐ
   if (c._gentle) return c._gentle;
   let head = c.destination;
@@ -1050,16 +1055,21 @@ function gentleBus(c) {   // 出口は ローパス → 頭打ち。部品が �
 }
 const lowerTo = (freq, slideTo) => { const hi = Math.max(freq, slideTo || 0); if (!(hi > GENTLE.top)) return [freq, slideTo || 0]; const k = 2 ** Math.ceil(Math.log2(hi / GENTLE.top)); return [freq / k, slideTo ? slideTo / k : 0]; };
 function route(c, node, pan) { const bus = gentleBus(c); if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); node.connect(p); p.connect(bus); } else node.connect(bus); }
+const toneEnds = [];   // 鳴っている 音の おわり（同時 2つまで）
 function tone(freq, len = .09, type = 'round', delay = 0, loud = .05, slideTo = 0, pan = 0, atk = 0) {   // atk＝立ち上がりの さいていの 長さ（ふだんより ゆっくり したい 音だけ）
   if (!sndOk()) return;
   try {
+    len = Math.max(len, .09);
     const c = ready(), at = c.currentTime + delay, osc = c.createOscillator(), vol = c.createGain();
+    for (let i = toneEnds.length - 1; i >= 0; i--) if (toneEnds[i] <= at) toneEnds.splice(i, 1);
+    if (toneEnds.filter(e => e > at).length >= 2) return;   // 同時 2つまで
+    toneEnds.push(at + len + .05);
     let rounded = false; if (type !== 'triangle' && type !== 'sine') { type = 'triangle'; rounded = true; }   // 'round'＝まるい さんかく波（かくばった なみは 使わない）
     if (soft() && freq >= 1800) { freq /= 2; if (slideTo) slideTo /= 2; }   // 「やさしい おと」の せってい（むかしから ある）
     [freq, slideTo] = lowerTo(freq, slideTo);
-    osc.type = type === 'sine' ? 'triangle' : type; osc.frequency.setValueAtTime(freq, at);
+    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, at);   // 10/10：丸い sine だけ（三角波の 倍音を 出さない）
     if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, at + len);
-    const level = osc.type === 'triangle' ? loud * (rounded ? 1.75 : 2.2) : loud, A = Math.max(GENTLE.attack, atk), mid = Math.max(A + .002, len * .5), end = Math.max(mid + .002, len);
+    const level = Math.min(loud * 5, .25), A = Math.max(GENTLE.attack, atk), mid = Math.max(A + .002, len * .5), end = Math.max(mid + .002, len);
     vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(level, at + A); vol.gain.linearRampToValueAtTime(level * .6, at + mid); vol.gain.linearRampToValueAtTime(0, at + end);
     osc.connect(vol); route(c, vol, pan); osc.start(at); osc.stop(at + end + .02);
   } catch {}
@@ -1071,26 +1081,26 @@ function zap(len = .1, delay = 0, loud = .06, pan = 0, atk = 0) {   // atk＝立
     if (!noiseBuf) { noiseBuf = c.createBuffer(1, c.sampleRate * .5, c.sampleRate); const d = noiseBuf.getChannelData(0); let hold = 0; for (let i = 0; i < d.length; i++) { if (i % 6 === 0) hold = Math.random() * 2 - 1; d[i] = hold; } }
     const src = c.createBufferSource(), lp = c.createBiquadFilter(), vol = c.createGain(); src.buffer = noiseBuf; lp.type = 'lowpass'; lp.frequency.value = GENTLE.noiseLp; if (lp.Q) lp.Q.value = .5;
     const A = Math.max(GENTLE.attack, atk), end = Math.max(A + .005, len);
-    vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(loud * GENTLE.noiseGain, at + A); vol.gain.linearRampToValueAtTime(0, at + end);
+    vol.gain.setValueAtTime(0, at); vol.gain.linearRampToValueAtTime(Math.min(loud * GENTLE.noiseGain, .05), at + A); vol.gain.linearRampToValueAtTime(0, at + end);
     src.connect(lp); lp.connect(vol); route(c, vol, pan); src.start(at); src.stop(at + end + .02);
   } catch {}
 }
 const chord = (notes, gap = .07, type = 'round', pan = 0, loud = .05) => notes.forEach((note, i) => tone(note, gap * 1.05, type, i * gap, loud, 0, pan));
 const panRel = x => clamp((x - player.x) / 150, -1, 1) * .85;
 const sfx = {
-  ui: () => tone(1175, .04, 'round', 0, .035),
+  ui: () => tone(196, .12, 'sine', 0, .035, 175, 0, .03),
   on: () => chord([988, 1319], .08),
   step: a => tone(a.stepFlip ? 196 : 165, .035, 'triangle', 0, .014),
   tap: () => tone(880, .04, 'triangle', 0, .04, 1175),
   arrive: () => chord([523, 659], .07, 'sine'),
   enter: () => chord([523, 659, 784, 1047, 1319], .06),
-  door: () => { tone(220, .12, 'triangle', 0, .05, 330); tone(660, .06, 'round', .1, .03); },
+  door: () => { tone(196, .14, 'sine', 0, .05, 0, 0, .03); tone(262, .16, 'sine', .15, .05, 0, 0, .03); },   // 10/10：たてものに はいる＝ひくい やわらかな 2おと（196→262Hz）
   greet: f => chord(PALS[f.id].pitch, .08, 'round', panRel(f.x), .04),
   kouji: () => { tone(150, .07, 'sine', 0, .04, 90, 0, .03); tone(392, .07, 'sine', .2, .04); tone(523, .07, 'sine', .3, .04); tone(660, .14, 'sine', .4, .04); },   // 10/1：ノイズ（ぱちっ）を やめ、ぜんぶ やわらかい sine に
   group: () => { [392, 494, 587].forEach((n, i) => tone(n, .14, 'sine', i * .12, .03, 0, 0, .04)); },   // 10/2：鐘の「ガランガラン」を やめ、ひくい sine 3つを ゆっくり（ざっ・1568 も なし）
   sit: () => chord([392, 523], .09, 'triangle'),
-  drop: () => { tone(1568, .05, 'triangle', 0, .03, 1319); tone(1319, .06, 'triangle', .13, .03, 1047); },
-  pick: () => chord([1047, 1319, 1568], .06, 'triangle'),
+  drop: () => { tone(220, .18, 'sine', 0, .04, 196, 0, .03); },   // 10/10：おとしものが おちる＝ひくい 1おと
+  pick: () => { tone(262, .2, 'sine', 0, .05, 330, 0, .03); },   // 10/10：おとしものを ひろう＝ひくい 1おと
   plush: () => tone(294, .09, 'triangle', 0, .05, 247),
   hammer: () => { for (let i = 0; i < 3; i++) tone(110, .12, 'sine', i * .22, .035, 70, 0, .03); },   // 10/1：「とん」3回（ノイズなし・ひくい sine）
   wish: () => { chord([1047, 1319, 1568, 2093, 2637], .07); tone(3136, .3, 'round', .4, .02); },
@@ -1105,6 +1115,9 @@ const sfx = {
   bird: pan => asKind('amb', () => { tone(587, .09, 'sine', 0, .008, 0, pan, .04); }),   // 10/2：ひくい sine 1おと（ピッ を やめた）
   cricket: pan => asKind('amb', () => { tone(523, .08, 'sine', 0, .008, 0, pan, .04); })
 };
+// 10/10：ボタン・リンク・折りたたみを おした 操作音（すでに sfx.tap を 鳴らす 所は かさねない）
+let lastTapAt = 0; { const t0 = sfx.tap; sfx.tap = function () { lastTapAt = performance.now(); return t0.apply(this, arguments); }; }
+document.addEventListener('click', e => { const el = e.target && e.target.closest && e.target.closest('button, summary, a[href], [role=button]'); if (!el || el.disabled || performance.now() - lastTapAt < 80) return; sfx.tap(); });
 // おとの ずっと ながれる ぶぶん：ふんすいの みず（ちかづくと おおきく）、あめの ひは あめの おと
 function startAmbient() {
   if (FX_QUIET || !soundOn() || (main && audioChosen() && main.sndAmb === false) || amb || document.hidden) return;
@@ -1127,7 +1140,7 @@ function stopAmbient() { if (amb) amb.nodes.forEach(n => { try { n.stop(); } cat
 function updateAmbient() {
   if (!amb || !ac) return;
   const d = Math.hypot(player.x - 180, player.y - 396), near = clamp(1 - d / 260, 0, 1);
-  const vol = .004 + .05 * near * near, pan = clamp((180 - player.x) / 180, -1, 1) * .8;
+  const burst = (performance.now() / 1000) % 8 < 3, vol = burst ? .002 + .018 * near * near : 0, pan = clamp((180 - player.x) / 180, -1, 1) * .8;   // 10/10：連続しない（3びょう ならして 5びょう やすむ）・ローパス 600Hz・ごく ちいさい
   try { amb.gain.gain.setTargetAtTime(vol, ac.currentTime, .12); if (amb.pan) amb.pan.pan.setTargetAtTime(pan, ac.currentTime, .12); } catch {}
 }
 
@@ -1225,7 +1238,7 @@ function writeMain(patch) {   // つりびよりの きろくに、♡（fav）�
 // ─── なかま（10/1 マスター直：「自分の 広場が 埋まって いく」）───
 //   ひろばの 住人＝なかま＝つりびより本体の save.palXp[id]>0（釣りで いっしょに すごした 子）か ♡ か save.party の 子（＋ ひろばで「なかまに なる？」に「はい」した 子）。
 //   レベルは 本体と おなじ しき（Lv＝floor(√(1＋けいけんち÷12))）。けいけんちの すうじは 出さない。主人公（save.avatar）は まるふわの かわりに ひろばを あるく ので、なかまの 住人には ならない
-const PARTY_MAX = 3, WALK_MAX = 8, ACTOR_MAX = 10, NO_PARTY = new Set(['penguin', 'kogitsune']);   // あんない・おみせの 子は さそわない
+const PARTY_MAX = 3, MIN_WALKERS = 5, WALK_MAX = 8, ACTOR_MAX = 10, NO_PARTY = new Set(['penguin', 'kogitsune']);   // ふだんも 5にんは ひろばに（さいだい 8にん＋通りすがり 2にん）
 const avatarId = () => { const a = readMain().avatar; return typeof a === 'string' && PALS[a] ? a : ''; };
 const palXpOf = id => { const v = readMain().palXp; return v && typeof v === 'object' && Number.isFinite(v[id]) ? Math.max(0, v[id]) : 0; };
 const palLv = id => Math.max(1, Math.floor(Math.sqrt(1 + palXpOf(id) / 12)));
@@ -1320,11 +1333,11 @@ const SVG = {
   appie: `<svg viewBox="0 0 80 76" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="72" rx="34" ry="4" fill="#0b2a4a" opacity=".15"/><rect x="10" y="32" width="60" height="38" rx="8" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.4"/><path d="M4 36 Q8 10 40 8 Q72 10 76 36z" fill="#8fd0f5" stroke="#7a4b34" stroke-width="2.4" stroke-linejoin="round"/><rect x="32" y="46" width="16" height="24" rx="8" fill="#ffb8a8" stroke="#7a4b34" stroke-width="2"/><circle cx="44" cy="59" r="1.6" fill="#7a4b34"/><rect x="14" y="44" width="12" height="18" rx="4" fill="#bfe3f5" stroke="#7a4b34" stroke-width="2"/><rect x="54" y="44" width="12" height="18" rx="4" fill="#bfe3f5" stroke="#7a4b34" stroke-width="2"/><rect x="32" y="16" width="16" height="16" rx="5" fill="#fff6cf" stroke="#7a4b34" stroke-width="2"/><rect x="37" y="19" width="6" height="10" rx="2" fill="#8fd0f5"/></svg>`,   // アプリの おうち（10/2）：ドアの ある ちいさな 家
   cafe: `<svg viewBox="0 0 112 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="95" rx="49" ry="4" fill="#0b2a4a" opacity=".18"/><image class="bd-h" href="../img/hiroba/cafe_hiru.webp" x="0" y="0" width="112" height="100" preserveAspectRatio="xMidYMax meet"/><image class="bd-n" href="../img/hiroba/cafe_yoru.webp" x="0" y="0" width="112" height="100" preserveAspectRatio="xMidYMax meet"/></svg>`,   // カフェ（10/1 マスター「カフェ作って」）：ひろばの 右の おくの 丘。ぬくもりの まど（夜は ひかる）
   machi: `<svg viewBox="0 0 112 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="95" rx="52" ry="5" fill="#0b2a4a" opacity=".15"/><rect x="8" y="38" width="96" height="56" rx="10" fill="#fff4e0" stroke="#7a4b34" stroke-width="2.5"/><rect x="4" y="12" width="104" height="32" rx="9" fill="#f6dcae" stroke="#7a4b34" stroke-width="2.5"/><path d="M12 19 Q56 3 100 19" fill="none" stroke="#fff4e0" stroke-width="4" stroke-linecap="round" opacity=".75"/><text x="56" y="34" text-anchor="middle" font-size="15" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">まちかど</text><g stroke="#7a4b34" stroke-width="2.2" stroke-linejoin="round"><path d="M11 47 h28 v10 a5 5 0 0 1 -5 5 h-18 a5 5 0 0 1 -5 -5z" fill="#ff9fb5"/><path d="M43 47 h28 v10 a5 5 0 0 1 -5 5 h-18 a5 5 0 0 1 -5 -5z" fill="#8fd0f5"/><path d="M75 47 h28 v10 a5 5 0 0 1 -5 5 h-18 a5 5 0 0 1 -5 -5z" fill="#ffd25e"/></g><g stroke="#ffffffcc" stroke-width="3"><path d="M19 48 v13M27 48 v13M35 48 v13"/><path d="M51 48 v13M59 48 v13M67 48 v13"/><path d="M83 48 v13M91 48 v13M99 48 v13"/></g><g stroke="#7a4b34" stroke-width="2.2"><rect x="14" y="66" width="22" height="22" rx="4" fill="#bfe3f5"/><rect x="46" y="66" width="22" height="22" rx="4" fill="#bfe3f5"/><rect x="78" y="66" width="22" height="22" rx="4" fill="#bfe3f5"/></g><g stroke="#7a4b34" stroke-width="1.6" stroke-linejoin="round"><path d="M20 76 h10 l1.5 8 h-13z" fill="#ffe3ec"/><path d="M22 76 q3 -6 6 0" fill="none"/><rect x="50" y="70" width="14" height="13" fill="#fff"/><path d="M51.5 81 l4 -5 3 3 2.5 -2.5 3 4.5z" fill="#9fd6a8" stroke="none"/><polygon points="89,70 91.2,75 96.5,75.4 92.4,78.8 93.8,84 89,81.2 84.2,84 85.6,78.8 81.5,75.4 86.8,75" fill="#ffd25e"/></g></svg>`,
-  hedge: `<svg viewBox="0 0 112 66" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="62" rx="52" ry="4.5" fill="#0b2a4a" opacity=".14"/><g style="fill:var(--tree)" stroke="#3f7a4a" stroke-opacity=".5" stroke-width="2"><circle cx="22" cy="44" r="18"/><circle cx="52" cy="38" r="24"/><circle cx="86" cy="44" r="20"/></g><g fill="#fff" opacity=".18" stroke="none"><circle cx="44" cy="28" r="9"/><circle cx="16" cy="38" r="6"/><circle cx="82" cy="36" r="6"/></g><g stroke="none" style="opacity:var(--blo,1)"><circle cx="14" cy="46" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="30" cy="52" r="3" style="fill:var(--bl2,#ffd25e)"/><circle cx="44" cy="34" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="60" cy="44" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="72" cy="30" r="3" style="fill:var(--bl2,#ffd25e)"/><circle cx="80" cy="52" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="96" cy="42" r="2.6" style="fill:var(--bl2,#ffd25e)"/><circle cx="52" cy="56" r="2.6" style="fill:var(--bl1,#ff9ab8)"/></g><path d="M33 29 Q43 10 56 11 Q71 13 77 30 Q66 22 54 22 Q42 22 33 29Z" fill="#fff" stroke="none" style="opacity:var(--cap,0)"/></svg>`,
+  hedge: `<svg viewBox="0 0 112 66" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="62" rx="52" ry="4.5" fill="#0b2a4a" opacity=".14"/><image class="canopy" href="assets/m013_20261007/semi_real_hedge_20261007_v1.png" x="0" y="0" width="112" height="66" preserveAspectRatio="xMidYMax meet" style="filter:var(--m013-time-filter) var(--m013-season-filter)"/><g stroke="none" style="opacity:var(--blo,1)"><circle cx="14" cy="46" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="30" cy="52" r="3" style="fill:var(--bl2,#ffd25e)"/><circle cx="44" cy="34" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="60" cy="44" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="72" cy="30" r="3" style="fill:var(--bl2,#ffd25e)"/><circle cx="80" cy="52" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="96" cy="42" r="2.6" style="fill:var(--bl2,#ffd25e)"/><circle cx="52" cy="56" r="2.6" style="fill:var(--bl1,#ff9ab8)"/></g><path d="M33 29 Q43 10 56 11 Q71 13 77 30 Q66 22 54 22 Q42 22 33 29Z" fill="#fff" stroke="none" style="opacity:var(--cap,0)"/></svg>`,
   pier: `<svg viewBox="0 0 104 76" xmlns="http://www.w3.org/2000/svg"><ellipse cx="52" cy="72" rx="46" ry="4" fill="#0b2a4a" opacity=".14"/><polygon points="20,74 46,74 41,34 25,34" fill="#d9b07c" stroke="#7a4b34" stroke-width="2.2" stroke-linejoin="round"/><g stroke="#a9794a" stroke-width="1.6"><line x1="22" y1="62" x2="44" y2="62"/><line x1="23.5" y1="50" x2="42.5" y2="50"/><line x1="25" y1="41" x2="41" y2="41"/></g><line x1="27" y1="46" x2="10" y2="6" stroke="#8a5a2b" stroke-width="3" stroke-linecap="round"/><path d="M10 6 Q2 22 6 33" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="6" cy="36" r="4" fill="#fff" stroke="#e8543f" stroke-width="2.2"/><rect x="78" y="14" width="5" height="60" rx="1.5" fill="#8a6a52"/><rect x="54" y="24" width="52" height="26" rx="7" fill="#e3f6ff" stroke="#7a4b34" stroke-width="2.5"/><text x="80" y="42" text-anchor="middle" font-size="14" font-weight="900" fill="#0d3d57" font-family="system-ui,sans-serif">つりば</text></svg>`,
   fountain: `<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg"><ellipse cx="60" cy="84" rx="54" ry="6" fill="#0b2a4a" opacity=".16"/><ellipse cx="60" cy="66" rx="52" ry="18" fill="#f3ead8" stroke="#7a4b34" stroke-width="2.5"/><ellipse cx="60" cy="63" rx="43" ry="12.5" style="fill:var(--water1)" stroke="#7a4b34" stroke-opacity=".5" stroke-width="1.5"/><path d="M22 68 Q60 86 98 68" fill="none" stroke="#e3d3b8" stroke-width="2"/><rect x="53" y="32" width="14" height="32" rx="5" fill="#f3ead8" stroke="#7a4b34" stroke-width="2.2"/><ellipse cx="60" cy="36" rx="22" ry="7" fill="#f3ead8" stroke="#7a4b34" stroke-width="2.2"/><ellipse cx="60" cy="35" rx="17" ry="4.5" style="fill:var(--water1)"/><g fill="none" stroke="#f4fcff" stroke-width="3" stroke-linecap="round"><path class="jet" d="M60 30 Q46 6 32 42"/><path class="jet" d="M60 30 L60 8"/><path class="jet" d="M60 30 Q74 6 88 42"/></g><g fill="#f4fcff"><circle cx="60" cy="6" r="2.4"/><circle cx="31" cy="44" r="2"/><circle cx="89" cy="44" r="2"/></g></svg>`,
   lamp: `<svg viewBox="0 0 70 90" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="lg"><stop offset="0" stop-color="#fff3b8" stop-opacity=".95"/><stop offset="1" stop-color="#fff3b8" stop-opacity="0"/></radialGradient></defs><circle cx="35" cy="24" r="34" fill="url(#lg)" style="opacity:var(--lamp)"/><ellipse cx="35" cy="85" rx="31" ry="7.5" fill="url(#lg)" style="opacity:var(--lamppool,0)"/><rect x="33" y="38" width="4" height="46" fill="#8a6a52"/><ellipse cx="35" cy="86" rx="9" ry="3.5" fill="#7a5a44"/><rect x="26" y="14" width="18" height="24" rx="7" style="fill:var(--lampfill,#fff8dc)" stroke="#7a4b34" stroke-width="2"/><path d="M24 16h22l-4-7h-14z" fill="#ffb18f" stroke="#7a4b34" stroke-width="2" stroke-linejoin="round"/></svg>`,
-  tree: `<svg viewBox="0 0 80 116" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="112" rx="26" ry="4.5" fill="#0b2a4a" opacity=".16"/><rect x="34" y="64" width="12" height="46" rx="4" fill="#b98a5a" stroke="#7a4b34" stroke-width="2"/><g class="canopy" style="fill:var(--tree)" stroke="#3f7a4a" stroke-opacity=".5" stroke-width="2"><circle cx="40" cy="40" r="32"/><circle cx="18" cy="56" r="20"/><circle cx="62" cy="56" r="20"/><circle cx="40" cy="20" r="20"/><g fill="#fff" opacity=".18" stroke="none"><circle cx="30" cy="30" r="11"/><circle cx="52" cy="46" r="7"/></g><g stroke="none" style="opacity:var(--blo,1)"><circle cx="24" cy="46" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="52" cy="30" r="3" style="fill:var(--bl1,#ff9ab8)"/><circle cx="40" cy="56" r="3" style="fill:var(--bl2,#ffd25e)"/><circle cx="60" cy="58" r="2.6" style="fill:var(--bl1,#ff9ab8)"/></g><path d="M11 36 Q16 13 40 9 Q64 13 69 36 Q57 25 40 26 Q23 25 11 36Z" fill="#fff" stroke="none" style="opacity:var(--cap,0)"/></g></svg>`,
+  tree: `<svg viewBox="0 0 80 116" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="112" rx="26" ry="4.5" fill="#0b2a4a" opacity=".14"/><image class="canopy" href="assets/m013_20261005/semi_real_tree_20261005.png" x="-14" y="0" width="108" height="108" preserveAspectRatio="xMidYMid meet" pointer-events="none"/></svg>`,
   bench: `<svg viewBox="0 0 70 38" xmlns="http://www.w3.org/2000/svg"><ellipse cx="35" cy="34" rx="30" ry="3.5" fill="#0b2a4a" opacity=".14"/><rect x="8" y="24" width="6" height="10" rx="2" fill="#a9794a" stroke="#7a4b34" stroke-width="1.6"/><rect x="56" y="24" width="6" height="10" rx="2" fill="#a9794a" stroke="#7a4b34" stroke-width="1.6"/><rect x="4" y="14" width="62" height="12" rx="5" fill="#e5bf8c" stroke="#7a4b34" stroke-width="2.2"/><rect x="6" y="2" width="58" height="10" rx="5" fill="#f0d29e" stroke="#7a4b34" stroke-width="2.2"/></svg>`,
   maruiro: `<svg viewBox="0 0 122 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="61" cy="76" rx="56" ry="5" fill="#0b2a4a" opacity=".15"/><ellipse cx="60" cy="62" rx="54" ry="14" fill="#bfe6a8" stroke="#7a4b34" stroke-width="2"/><g stroke="#7a4b34" stroke-width="2"><circle cx="34" cy="58" r="12" fill="#ff9fb5"/><circle cx="62" cy="54" r="15" fill="#8fd0f5"/><circle cx="90" cy="60" r="10" fill="#ffd25e"/></g><g fill="#fff" opacity=".8"><circle cx="30" cy="54" r="3"/><circle cx="57" cy="48" r="3.6"/><circle cx="87" cy="57" r="2.4"/></g><g stroke="#7a4b34" stroke-width="2"><rect x="30" y="24" width="4" height="26" fill="#8a6a52"/><rect x="88" y="24" width="4" height="26" fill="#8a6a52"/></g><rect x="22" y="2" width="78" height="24" rx="7" fill="#fff6cf" stroke="#7a4b34" stroke-width="2.5"/><text x="61" y="19" text-anchor="middle" font-size="12" font-weight="900" fill="#593700" font-family="system-ui,sans-serif">まるいろ</text></svg>`,   // まるいろの あそびば（10/1 レビュー17：工事中の 板を 小さな あそびばに）
   stone: `<svg viewBox="0 0 34 52" xmlns="http://www.w3.org/2000/svg"><ellipse cx="17" cy="49" rx="15" ry="3.4" fill="#0b2a4a" opacity=".16"/><path d="M5 48 L5 22 Q5 10 17 10 Q29 10 29 22 L29 48Z" fill="#e9e2d4" stroke="#7a4b34" stroke-width="2" stroke-linejoin="round"/><path d="M9 44 V23 Q9 15 15 14" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".8"/><path d="M17 1 l2.6 5.6 l6 .7 l-4.5 4 l1.3 6 l-5.4 -3.1 l-5.4 3.1 l1.3 -6 l-4.5 -4 l6 -.7z" fill="#ffe27a" stroke="#e0a61c" stroke-width="1.3" stroke-linejoin="round" transform="translate(0 -1)"/><rect x="9" y="28" width="16" height="10" rx="3" fill="#fff6cf" stroke="#c99a62" stroke-width="1.2"/><text x="17" y="35.6" text-anchor="middle" font-size="4.6" font-weight="900" fill="#7a4b34" font-family="system-ui,sans-serif">ありがとう</text></svg>`,
@@ -1585,7 +1598,7 @@ function chooseFriends() {
   if (favs.length && !forced.some(id => favs.includes(id))) forced.push(castOrder(env, favs)[0]);   // ♡の 子は かならず 1にん あるいて いる（2にん いじょう なら さいきん あって いない 子）
   for (const id of metInFishingToday().slice(0, 2)) if (PALS[id] && !forced.includes(id)) forced.push(id);   // 釣りで あった 子を、ひろばにも（さいだい 2ひき）。すいそうの となりにも 同じ 子が くる
   if (LAYERS.guests.length && forced.length < 3) { const g = castOrder(env, LAYERS.guests.filter(id => !forced.includes(id)))[0]; if (g) forced.push(g); }   // お正月・たなばた・おおみそかの 日は、とくべつな おきゃくが 1にん はじめから いる
-  const comp = companionIds(), target = Math.min(WALK_MAX, Math.max(3, comp.length)), out = [];   // 住人＝なかま（さいだい 8にん・おおい 時は 入れかわり）。なかまが 3にん みまんの 間は ほかの 子で 3にんに する
+  const comp = companionIds(), target = Math.min(WALK_MAX, Math.max(MIN_WALKERS, comp.length)), out = [];   // 住人＝なかま（さいだい 8にん・おおい 時は 入れかわり）。なかまが 5にん みまんの 間は ほかの 子も ひろばへ
   const envC = { ...env, local: () => true };
   for (const id of forced) if (!out.includes(id) && out.length < target) out.push(id);
   for (const id of castInitial(envC, comp, Math.min(target, comp.length), out)) if (!out.includes(id) && out.length < target) out.push(id);
@@ -1595,11 +1608,11 @@ function chooseFriends() {
 // 生活の リズム：ともだちが いる ところは 時間で かわる（あさ＝おへやの 前・ポスト・つりばの あたり／ひる＝ひろばの まんなか（ふんすい）／ゆうがた＝ベンチの まえ／よる＝あかりの した・ベンチ）。雨の 日は さいしょの 4にんが おおきな かさの 下に あつまる。
 // 人が「いる」ように 見せる うその 表示・夜ふけの ひきとめ・れんぞく ログインの ごほうびは 入れない（ただの ならびかた）
 const SLOTS_BY_TIME = {
-  a: [{ x: 150, y: 306 }, { x: 214, y: 306 }, { x: 282, y: 376 }, { x: 104, y: 318 }, { x: 64, y: 378 }, { x: 180, y: 340 }, { x: 120, y: 350 }, { x: 240, y: 350 }, { x: 84, y: 400 }, { x: 250, y: 322 }],
-  h: [{ x: 180, y: 424 }, { x: 126, y: 424 }, { x: 234, y: 424 }, { x: 104, y: 394 }, { x: 256, y: 394 }, { x: 180, y: 336 }, { x: 150, y: 316 }, { x: 214, y: 316 }, { x: 84, y: 368 }, { x: 276, y: 368 }],
-  y: [{ x: 64, y: 446 }, { x: 296, y: 442 }, { x: 180, y: 426 }, { x: 118, y: 426 }, { x: 242, y: 426 }, { x: 84, y: 368 }, { x: 276, y: 368 }, { x: 150, y: 316 }, { x: 214, y: 316 }, { x: 84, y: 400 }],
-  n: [{ x: 126, y: 368 }, { x: 234, y: 368 }, { x: 64, y: 446 }, { x: 296, y: 442 }, { x: 180, y: 426 }, { x: 102, y: 402 }, { x: 258, y: 402 }, { x: 150, y: 316 }, { x: 214, y: 316 }, { x: 84, y: 400 }]
-};   // ならびの ルール：はじまりの 位置（まるふわ 180,520）から 100px いじょう はなす（はじめから あいさつが 始まって「みんなが あつまる」が すぐ 起きない よう）・ふさがった ところには おかない
+  a: [{ x: 150, y: 306 }, { x: 214, y: 306 }, { x: 282, y: 376 }, { x: 430, y: 402 }, { x: 610, y: 402 }, { x: 104, y: 318 }, { x: 256, y: 394 }, { x: 510, y: 470 }, { x: 680, y: 468 }, { x: 370, y: 488 }],
+  h: [{ x: 180, y: 424 }, { x: 126, y: 424 }, { x: 234, y: 424 }, { x: 430, y: 404 }, { x: 620, y: 404 }, { x: 104, y: 394 }, { x: 256, y: 394 }, { x: 510, y: 470 }, { x: 680, y: 468 }, { x: 370, y: 488 }],
+  y: [{ x: 64, y: 446 }, { x: 296, y: 442 }, { x: 180, y: 426 }, { x: 430, y: 412 }, { x: 620, y: 412 }, { x: 118, y: 426 }, { x: 242, y: 426 }, { x: 520, y: 476 }, { x: 680, y: 472 }, { x: 380, y: 500 }],
+  n: [{ x: 126, y: 368 }, { x: 234, y: 368 }, { x: 64, y: 446 }, { x: 430, y: 408 }, { x: 620, y: 408 }, { x: 102, y: 402 }, { x: 258, y: 402 }, { x: 510, y: 470 }, { x: 680, y: 468 }, { x: 370, y: 490 }]
+};   // さいしょの 3にんは ひろばの ちかく、つぎの 子は 右の パークまで ひろがる。時間が かわると ならびも かわる
 const SHELTER_SLOTS = [{ x: 48, y: 528, rx: 10, ry: 5 }, { x: 110, y: 528, rx: 10, ry: 5 }, { x: 66, y: 546, rx: 8, ry: 3 }, { x: 98, y: 546, rx: 8, ry: 3 }];
 const SHELTER_LINES = ['かさの した、ぽかぽかだね', 'ここなら ぬれないね', 'いっしょに あまやどり、いいね', 'あめを ながめて いよう', 'せまいけど、なかよく しようね'];
 let shelterIn = false, shelterSayAt = -999;
@@ -2506,6 +2519,10 @@ if (!own.muteHint) { const h = $('mutehint'), th = $('tap-hint'), show = () => {
 //   「BGM」ボタンは おとの となり。おとが OFF の まま おしたら、おとも つける。ながす 音の 部品（AudioContext）は、ひろばの ものを かりる
 if (window.TsuriBgm) {
   let soundWasOff = false;
+  const plazaBgmArea = () => {
+    const cafe = dist(player, DEST.cafe.at), water = dist(player, DEST.tsuri.at);
+    return Math.min(cafe, water) <= 50 ? (cafe <= water ? 'cafe' : 'water') : 'plaza';
+  };
   const bgmHost = {
     sound: soundOn,
     enableSound: () => { soundWasOff = true; setSoundOn(true); },
@@ -2513,7 +2530,7 @@ if (window.TsuriBgm) {
   };
   $('sound').after(window.TsuriBgm.button({ id: 'bgm', ...bgmHost }));
   if (window.TsuriBgm.mixButton) $('bgm').after(window.TsuriBgm.mixButton({ id: 'bgm-mix', ...bgmHost }));   // 「くみたてる」（ひくい おと・うた・こだま を えらぶ）
-  window.TsuriBgm.enter('hiroba', { ctx: ready, sound: soundOn, time: () => curTime });
+  window.TsuriBgm.enter('hiroba', { ctx: ready, sound: soundOn, time: () => curTime, area: plazaBgmArea });
 }
 const hudGear = $('hud-gear'), hudPanel = $('hud-panel'), hudWrap = hudGear.parentElement;
 function hudOpen(on, focus) { hudPanel.hidden = !on; hudGear.setAttribute('aria-expanded', String(on)); if (on && focus) { const b = hudPanel.querySelector('button:not([disabled])'); if (b) b.focus(); } }
@@ -2724,6 +2741,20 @@ function spawnPasser() {
   if (reduce()) { f.x = spot.x; f.y = spot.y; f.state = 'idle'; f.path = []; } else { f.path = findPath(f, spot); f.speed = 46; }
   narrate('だれか とおりかかったよ。はなしかけて みてね。'); renderPalRow(); return f;
 }
+function rotateGuestForTimeChange() {   // あさ・ひる・ゆうがた・よるの かわりめに、ひろばの ゲストを 1にんだけ 入れかえる
+  if (PASSER_OFF || q.has('friends')) return 'skip';
+  if (document.hidden) return 'wait';
+  const present = new Set(friends.map(f => f.id));
+  const pool = castPool().filter(id => !present.has(id) && !NO_PARTY.has(id) && !isCompanion(id));
+  if (!pool.length) return swapFriend() ? 'done' : 'none';   // ゲスト候補が いなければ、ひろばの なかまから 1にん かわる
+  const incoming = castOrder(castEnv(), pool)[0];
+  const outgoing = friends.map((f, i) => ({ f, i }))
+    .filter(x => !x.f.passer && !isCompanion(x.f.id) && !isFav(x.f.id) && !x.f.party && x.f.state === 'idle' && x.f.talking <= 0 && !bubbles.some(b => b.actor === x.f))
+    .sort((a, b) => (a.f.since || 0) - (b.f.since || 0))[0];
+  if (outgoing) return swapFriend(outgoing.i, false, incoming) ? 'done' : 'wait';
+  if (friends.filter(f => f.passer).length < 2 && friends.length < ACTOR_MAX) return spawnPasser() ? 'done' : 'wait';
+  return 'wait';
+}
 function leavePasser(f) {
   if (reduce()) { removeFriend(f); return; }
   const e = nearestFree(f.x < 180 ? 14 : W - 14, clamp(f.y, 300, 540)) || { x: f.x < 180 ? 14 : W - 14, y: f.y };
@@ -2813,6 +2844,11 @@ function update(dt) {
   { const u = inShelter(player); if (u && !shelterIn) { shelterIn = true; if (T > shelterSayAt) { shelterSayAt = T + 90; narrate('おおきな かさの した。ここだけ あめが ふらないよ'); } } else if (!u) shelterIn = false; }   // 自分が かさの 下に はいった とき（1かい・90びょうは くりかえさない）
   traceTick();
   if (T > nextClock) { nextClock = T + 30; if (timeOfDay() !== curTime) { applyTime(); narrate(TIME_LABEL[curTime] + 'に なったよ'); } }
+  if (timeGuestPending && T >= nextTimeGuestCheck) {
+    nextTimeGuestCheck = T + 20;
+    const result = rotateGuestForTimeChange();
+    if (result === 'done' || result === 'none' || result === 'skip') { timeGuestPending = false; if (result === 'done') nextSwap = T + swapGap(); }
+  }
   // ひとりで ながく いると、ともだちが あいに くる
   if (!reduce() && T - lastInput > 30 && T > nextVisitAt && !trip && !player.path.length) {
     nextVisitAt = T + 40; const f = nearestFriend(true);
@@ -3054,12 +3090,17 @@ function drawPartySlots() {
   }
   box.replaceChildren(...kids);
 }
-function drawZukan() {   // ぜんいん（あった 子＝ひろばで あった 子・つりで あった 子・なかま）
+function drawZukan() {   // ぜんいん（未遭遇の子も立ち絵と名前を表示。出会い記録はそのまま）
   const met = id => metEver(id) || isCompanion(id), ids = Object.keys(PALS);
   $('zukan-list').replaceChildren(...ids.map(id => {
     const li = document.createElement('li');
     if (met(id)) li.append(palButton(id, ''));
-    else { const s = document.createElement('span'); s.className = 'zk not'; s.setAttribute('aria-hidden', 'true'); s.textContent = '？'; li.append(s); }
+    else {
+      const p = PALS[id], card = document.createElement('span'), im = document.createElement('img'), nm = document.createElement('span');
+      card.className = 'zk preview'; card.setAttribute('role', 'group'); card.setAttribute('aria-label', p.name + '。まだ あって いない なかま。');
+      im.src = BASE + 'img/friend-' + id + '-s.webp'; im.alt = ''; im.width = im.height = 46; im.loading = 'lazy'; im.decoding = 'async';
+      nm.className = 'zk-n'; nm.textContent = p.name; card.append(im, nm); li.append(card);
+    }
     return li;
   }));
   return ids.some(met);
