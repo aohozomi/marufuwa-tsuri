@@ -104,6 +104,8 @@ footer{margin-top:14px;font-size:.8rem;line-height:1.7;color:var(--soft)}
 @view-transition{navigation:auto}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+html.pagebg-fb main{background:rgba(255,255,255,.9);border-radius:22px;box-shadow:0 6px 22px #24465333;margin-top:14px}
+html.pagebg-fb[data-night=true] main{background:rgba(15,28,51,.92);box-shadow:0 6px 22px #00000066}
 </style>
 </head>
 <body>
