@@ -2374,7 +2374,7 @@ function goDest(id) {
   lastInput = T; trip = { id }; sfx.ui(); setHl(id); if (id === 'oheya') loadArt();   // おへやへ いく 前に 魚の 絵を 用意
   narrate(d.name + 'へ あるいて いくよ');
   walkTo(d.at.x, d.at.y, () => arrive(id));
-  if (player.path.length && !reduce()) player.speed = 140;   // 10/11：行き先への移動は 少し はやく（6秒 まっても つかない、の 声）
+  if (player.path.length && !reduce()) player.speed = 200;   // 10/11：行き先への移動は 少し はやく（6秒 まっても つかない、の 声）
 }
 // ─── まちレベル（10/7 マスター「レベルの概念・やり込んでる感じを 右上に。まるいろ 1回で 1あがる。全部まわったら あがる。釣りを 全部そろえたら 20あがる。上がると 新しい ばしょが ひらく」）───
 //   この たんまつの なかだけ（own.lv）。ほかの ひとと くらべない・へらない。
