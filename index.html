@@ -210,6 +210,9 @@ html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.a
 .times button{min-height:44px;font-size:.78rem}
 #keeper{position:absolute;z-index:4;left:93.5%;top:72%;width:13%;min-width:44px;min-height:44px;aspect-ratio:1/1;padding:0;border:0;background:none;transform:translate(-50%,-100%);border-radius:50%}
 #keeper img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
+.gshadow{position:absolute;z-index:1;height:3.2%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,#00000052 0,#00000030 46%,#0000 74%);pointer-events:none}
+.gshadow[hidden]{display:none}
+#scene[data-area=B] #keeper{top:68%}
 #scene:is([data-phase=idle],[data-phase=caught]) #marufuwa{cursor:pointer;pointer-events:auto}
 /* 10/5 マスター「お店の キャラが ういてる」：足もとに 接地影と 小さな 屋台（台）。台は きつねの 下半身の 前に ならべて「台の うしろに 立つ」形に する。足の y は なかまと おなじ 地面ライン（58+.16x）*/
 #scene #keeper::before{display:block;content:"";position:absolute;z-index:1;left:50%;bottom:-3%;width:118%;height:27%;transform:translateX(-50%);border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#d9a35e 0 24%,#a8703a 24% 70%,#7d5128 70%);box-shadow:0 2px 0 #00000026;pointer-events:none}
@@ -1535,7 +1538,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // ばしょ。すうじは がめんの なかの わりあい（%）。みずぎわは ひだりから みぎへ さがる
   const SPOT_X = [18, 46, 66];   // 10/6：みぎの バケツを 10% ひだりへ（おみせの きつねの ボタンと 当たりが 18px かさなって いた。375／390／1280 で かさなり 0 を 実測）
   const shore = x => 58 + .16 * x;
-  const feet = i => ({x: SPOT_X[i], y: shore(SPOT_X[i]) - 1});
+  const deckUp = () => save.area === 'B' ? 4 : 0;   // B（ふねの うえ）は 甲板の ふち（白い 帯）が 足の ラインと かさなる ため 4% うえへ（10/12 足もと巡回）
+  const feet = i => ({x: SPOT_X[i], y: shore(SPOT_X[i]) - 1 - deckUp()});
   const floatAt = i => ({x: SPOT_X[i] + 7, y: shore(SPOT_X[i] + 7) + 13});
   const place = (node, p) => { node.style.left = p.x + '%'; node.style.top = p.y + '%'; };
   const spots = [...document.querySelectorAll('.spot')];
@@ -1696,8 +1700,17 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       spotsEl.forEach(sp => { const q = sp.getBoundingClientRect(); if (r.left < q.right && r.right > q.left && r.top - dy < q.bottom && r.bottom - dy > q.top) dy = Math.max(dy, r.bottom - q.top + 1); });
       if (dy > 0) t.style.marginTop = (-dy) + 'px'; });
   }
+  // 接地影（10/12）：まるふわ・なかま2人の 足もとに だ円の かげ（地面に のっている ことが 見える）。きつねは #keeper::after
+  function groundShadows() {
+    const defs = [['gs-me', marufuwa, mine, 15], ['gs-a', $('friend-a'), friends[0], 11], ['gs-b', $('friend-b'), friends[1], 11]];
+    defs.forEach(([id, el, i, w]) => {
+      let g = $(id); if (!g) { g = document.createElement('i'); g.id = id; g.className = 'gshadow'; g.setAttribute('aria-hidden', 'true'); el.parentNode.insertBefore(g, el); }
+      const f = feet(i); g.style.left = f.x + '%'; g.style.top = (f.y - .3) + '%'; g.style.width = w + '%'; g.hidden = !!el.hidden || getComputedStyle(el).display === 'none';
+    });
+  }
   function layout() {
     place(marufuwa, feet(mine)); footFix(); place($('friend-a'), feet(friends[0])); place($('friend-b'), feet(friends[1]));
+    groundShadows();
     place($('talk-a'), {x: feet(friends[0]).x, y: feet(friends[0]).y - 6}); place($('talk-b'), {x: feet(friends[1]).x, y: feet(friends[1]).y - 6});
     place($('float-a'), floatAt(friends[0])); place($('float-b'), floatAt(friends[1]));
     rod($('line-a'), friends[0], 9, $('rod-a')); rod($('line-b'), friends[1], 9, $('rod-b'));
@@ -1706,7 +1719,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const casting = phase === 'waiting' || phase === 'bite' || phase === 'reel';
     rod($('line-me'), mine, 12, $('rod-me'));
     $('line-me').style.display = casting && !flying ? '' : 'none';
-    spots.forEach((spot, i) => { spot.setAttribute('aria-pressed', String(i === mine)); place(spot, {x: SPOT_X[i] + 10, y: shore(SPOT_X[i] + 10) - 6}); });   // バケツは りくの うえ（みずぎわより うえ）
+    spots.forEach((spot, i) => { spot.setAttribute('aria-pressed', String(i === mine)); place(spot, {x: SPOT_X[i] + 10, y: shore(SPOT_X[i] + 10) - 6 - deckUp()}); });   // バケツは りくの うえ（みずぎわより うえ）
     try { fixHits(); } catch {}
     if ((phase === 'idle' || phase === 'caught') && typeof placeNav === 'function') { try { placeNav(); } catch {} }
   }
