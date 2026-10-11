@@ -70,13 +70,15 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
 <main id="main">
   <img class="face" src="../img/icon-192.png" width="120" height="120" alt="">
   <h1 id="title" tabindex="-1">まるふわの いりぐち</h1>
-  <p class="lead" id="lead">まるふわに あえる ところは みっつ。すきな ところから どうぞ。</p>
+  <p class="lead" id="lead">まるふわに あえる ところは よっつ。すきな ところから どうぞ。</p>
   <div class="go">
     <a class="big play" id="play" href="../"><span class="ic" aria-hidden="true">🎣</span><span><span id="t-play">ブラウザで あそぶ</span><small id="s-play">まるふわ びより・むりょう・ログインなし</small></span></a>
     <button type="button" class="big" id="b-app" data-k="app" aria-expanded="false" aria-controls="c-app"><span class="ic" aria-hidden="true">🍃</span><span><span id="t-app">iPhone アプリ</span><small id="s-app">まるふわまるいろ・むりょう</small></span></button>
     <div class="confirm" id="c-app" hidden role="group" aria-labelledby="q-app"><p id="q-app">そとの ページ（App Store）を ひらきます。いいですか？</p><div class="row"><a id="a-app" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-app">やめる</button></div></div>
     <button type="button" class="big" id="b-line" data-k="line" aria-expanded="false" aria-controls="c-line"><span class="ic" aria-hidden="true">💬</span><span><span id="t-line">LINE スタンプ</span><small id="s-line">まるふわの スタンプ</small></span></button>
     <div class="confirm" id="c-line" hidden role="group" aria-labelledby="q-line"><p id="q-line">そとの ページ（LINE ストア）を ひらきます。いいですか？</p><div class="row"><a id="a-line" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-line">やめる</button></div></div>
+    <button type="button" class="big" id="b-booth" data-k="booth" aria-expanded="false" aria-controls="c-booth"><span class="ic" aria-hidden="true">🎁</span><span><span id="t-booth">BOOTH</span><small id="s-booth">まるふわの グッズと そざい</small></span></button>
+    <div class="confirm" id="c-booth" hidden role="group" aria-labelledby="q-booth"><p id="q-booth">そとの ページ（BOOTH）を ひらきます。いいですか？</p><div class="row"><a id="a-booth" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-booth">やめる</button></div></div>
   </div>
   <p class="sub"><a id="a-stream" href="stream/">はいしん・どうがで つかう かたへ</a></p>
   <p class="note" id="note">そとへ ひらく ときは かならず きくよ。</p>
@@ -92,17 +94,19 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   'use strict';
   const LINKS = {
     app: 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=web_links&mt=8',
-    line: 'https://line.me/S/sticker/36906448'
+    line: 'https://line.me/S/sticker/36906448',
+    booth: 'https://hozumi-ao.booth.pm/'
   };
   const EN = new URLSearchParams(location.search).get('lang') === 'en' || (() => { try { return localStorage.getItem('marufuwa-lang-v1') === 'en'; } catch (e) { return false; } })();
   const T = (ja, en) => EN ? en : ja;
   const $ = id => document.getElementById(id);
   const set = (id, ja, en) => { const e = $(id); if (e) e.textContent = T(ja, en); };
   document.title = T('まるふわの いりぐち｜まるふわ びより', 'Marufuwa’s Doorway | Marufuwa Days');
-  set('skip', 'いりぐちへ とぶ', 'Skip to the links'); set('title', 'まるふわの いりぐち', 'Meet Marufuwa'); set('lead', 'まるふわに あえる ところは みっつ。すきな ところから どうぞ。', 'There are three places to meet Marufuwa. Pick any one.');
+  set('skip', 'いりぐちへ とぶ', 'Skip to the links'); set('title', 'まるふわの いりぐち', 'Meet Marufuwa'); set('lead', 'まるふわに あえる ところは よっつ。すきな ところから どうぞ。', 'There are four places to meet Marufuwa. Pick any one.');
   set('t-play', 'ブラウザで あそぶ', 'Play in your browser'); set('s-play', 'まるふわ びより・むりょう・ログインなし', 'Marufuwa Days · free · no login');
   set('t-app', 'iPhone アプリ', 'iPhone app'); set('s-app', 'まるふわまるいろ・むりょう', 'Marufuwa Maruiro · free');
   set('t-line', 'LINE スタンプ', 'LINE stickers'); set('s-line', 'まるふわの スタンプ', 'Marufuwa stickers');
+  set('t-booth', 'BOOTH', 'BOOTH shop'); set('s-booth', 'まるふわの グッズと そざい', 'Marufuwa goods and assets'); set('q-booth', 'そとの ページ（BOOTH）を ひらきます。いいですか？', 'This opens an outside page (BOOTH). Is that OK?'); set('a-booth', 'ひらく', 'Open'); set('n-booth', 'やめる', 'Cancel');
   set('q-app', 'そとの ページ（App Store）を ひらきます。いいですか？', 'This opens an outside page (the App Store). Is that OK?'); set('q-line', 'そとの ページ（LINE ストア）を ひらきます。いいですか？', 'This opens an outside page (the LINE Store). Is that OK?');
   set('a-app', 'ひらく', 'Open'); set('a-line', 'ひらく', 'Open'); set('n-app', 'やめる', 'Cancel'); set('n-line', 'やめる', 'Cancel');
   set('a-stream', 'はいしん・どうがで つかう かたへ', 'For streamers and video makers');
@@ -112,11 +116,11 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
     const box = $('c-' + k), a = $('a-' + k), b = $('b-' + k); box.hidden = true; a.removeAttribute('href'); b.setAttribute('aria-expanded', 'false'); if (focusBack) b.focus();
   }
   function open(k) {
-    ['app', 'line'].forEach(x => { if (x !== k) close(x, false); });
+    ['app', 'line', 'booth'].forEach(x => { if (x !== k) close(x, false); });
     const box = $('c-' + k), a = $('a-' + k), b = $('b-' + k); a.href = LINKS[k]; box.hidden = false; b.setAttribute('aria-expanded', 'true');   // リンクは「いいですか？」を 出した とき はじめて つく
     a.focus({preventScroll: false}); say($('q-' + k).textContent);
   }
-  ['app', 'line'].forEach(k => {
+  ['app', 'line', 'booth'].forEach(k => {
     $('b-' + k).addEventListener('click', () => { if ($('c-' + k).hidden) open(k); else close(k, false); });
     $('n-' + k).addEventListener('click', () => close(k, true));
     $('a-' + k).addEventListener('click', () => { setTimeout(() => close(k, false), 50); });   // ひらいたら もとに もどす
