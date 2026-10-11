@@ -1417,7 +1417,7 @@ const PROPS = [
   { id: 'gate', x: 294, y: 312, w: 132, h: 82, svg: SVG.gate },   // まるふわパークの ゲート（セミリアル・位置と通りぬけを維持）
   { id: 'appie', x: 470, y: 534, w: 52, h: 50, svg: SVG.appie, dest: 'appie', mark: '📱', block: { rect: [448, 524, 492, 536] } },   // アプリの おうち：パークの 南
   ...(PARK.bowling ? [{ id: 'bowling', x: 440, y: 342, w: 96, h: 77, svg: SVG.bowling, dest: 'bowling', mark: '🎳', block: { rect: [396, 332, 484, 344] } }] : []),
-  ...(PARK.kuru ? [{ id: 'kuru', x: 546, y: 342, w: 88, h: 70, svg: SVG.kuru, dest: 'kuru', mark: '🎰', block: { rect: [506, 332, 588, 344] } }] : []),
+  ...(PARK.kuru ? [{ id: 'kuru', x: 546, y: 342, w: 88, h: 70, svg: SVG.kuru, dest: 'kuru', mark: '🎡', block: { rect: [506, 332, 588, 344] } }] : []),
   ...(PARK.stream ? [{ id: 'gym', x: 652, y: 342, w: 104, h: 76, svg: SVG.gym, dest: 'gym', mark: '🎙️', block: { rect: [600, 332, 704, 344] } }] : []),
   ...(PARK.drive === 1 ? [{ id: 'drive', x: 676, y: 440, w: 80, h: 58, svg: SVG.driveHouse, dest: 'drive', mark: '🚗', block: { rect: [640, 430, 692, 442] } }] : []),
   ...(PARK.tug ? [{ id: 'tug', x: 590, y: 442, w: 92, h: 60, svg: SVG.tug, dest: 'tug', mark: '🪢', block: { rect: [548, 432, 632, 444] } }] : []),
@@ -2374,6 +2374,7 @@ function goDest(id) {
   lastInput = T; trip = { id }; sfx.ui(); setHl(id); if (id === 'oheya') loadArt();   // おへやへ いく 前に 魚の 絵を 用意
   narrate(d.name + 'へ あるいて いくよ');
   walkTo(d.at.x, d.at.y, () => arrive(id));
+  if (player.path.length && !reduce()) player.speed = 140;   // 10/11：行き先への移動は 少し はやく（6秒 まっても つかない、の 声）
 }
 // ─── まちレベル（10/7 マスター「レベルの概念・やり込んでる感じを 右上に。まるいろ 1回で 1あがる。全部まわったら あがる。釣りを 全部そろえたら 20あがる。上がると 新しい ばしょが ひらく」）───
 //   この たんまつの なかだけ（own.lv）。ほかの ひとと くらべない・へらない。
