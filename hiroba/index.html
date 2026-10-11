@@ -100,7 +100,7 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 #tap-hint:not([hidden])~.mutegrp .mutehint{top:calc(100% + 40px)}   /* 「どこかを さわると…」が 出て いる あいだは、ミュートの 案内を 1だん 下に（かさならない・10/6 Claude） */
 .mutegrp{position:relative;display:flex;align-items:center;gap:6px;margin-left:auto}
 /* まちレベル（10/7 マスター「レベルの概念を 右上に」）：ちいさな 金の ふだ。おすと くわしく */
-.lvbtn{font:inherit;font-weight:900;font-size:.82rem;min-height:36px;padding:4px 12px;border-radius:999px;color:#4a2a00;background:linear-gradient(180deg,#fff1b8,#ffd25e);border:2px solid #fff;box-shadow:0 3px 0 #d39a1c;cursor:pointer;white-space:nowrap}
+.lvbtn{font:inherit;font-weight:900;font-size:.82rem;min-height:44px;min-width:44px;padding:4px 12px;border-radius:999px;color:#4a2a00;background:linear-gradient(180deg,#fff1b8,#ffd25e);border:2px solid #fff;box-shadow:0 3px 0 #d39a1c;cursor:pointer;white-space:nowrap}
 .lvbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #d39a1c}
 .lvbtn[data-up=true]{animation:lvpop .6s ease-out}
 @keyframes lvpop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
@@ -576,7 +576,7 @@ body.calm .cloud.c2{left:28%}
       </div>
     </div>
   </div>
-  <p class="mobile-destination-hint">スマホは 下へ スクロールして「いきさき」を えらんでね。</p>
+  <p class="mobile-destination-hint">スマホは <ruby>下<rp>(</rp><rt aria-hidden="true">した</rt><rp>)</rp></ruby>へ スクロールして「いきさき」を えらんでね。</p>
   <p id="keys-help" class="sr">やじるしキーで まるふわが あるくよ。スペースキーで ちかくの ともだちに はなしかけたり、ばしょに はいったり できるよ。エスケープキーで やめるよ。したの ボタンでも おなじ ことが できるよ。スマホでは 下へ スクロールして、いきさきの ボタンを えらんでね。</p>
 
   <script src="../tsuri-world.js"></script>   <!-- 世界の まど：scene の まえに（はじめの 一瞬の 雨も TsuriWorld.daily() で きめる） -->
