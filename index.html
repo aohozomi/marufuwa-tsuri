@@ -474,6 +474,12 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 /* みず：けいさんで えがく みなも。なみの ゆらぎ、ひかりの きらめき、たいようや つきの うつりこみ */
 /* そら：けいさんで えがく。くもが ながれ、ほしが またたき、たいようや つきが ぼんやり ひかる */
 #sky{position:absolute;left:0;top:0;width:100%;height:50%;z-index:0;pointer-events:none}
+/* 天の 手描き 背景（10/12）：L・R・H・B。絵の みずぎわは ゲームの 地面ライン（58〜73%）と おなじ なので そのまま しく。足は 3.5% うえへ（陸がわ） */
+.bgart{position:absolute;inset:0;overflow:hidden;z-index:1;pointer-events:none;opacity:0;transition:opacity .5s}
+#scene[data-art="1"] .bgart{opacity:1}
+#scene[data-art="1"] svg.land{visibility:hidden}
+.bgart img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:fill}
+#scene[data-art="1"] #keeper{top:68.5%}
 #scene svg.land > rect:first-of-type,#scene svg.land > circle,#scene svg.land > .clouds,#scene svg.land > g[fill="#fff"]{display:none}
 /* じめん：つちや くさの むら、いたの もくめ。うえから うすく かさねる */
 #soil{position:absolute;left:0;top:41.3%;width:100%;height:35.8%;z-index:0;pointer-events:none;mix-blend-mode:multiply;opacity:.6;clip-path:polygon(0 8.7%,100% 0,100% 91.3%,0 46.6%)}
@@ -982,6 +988,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       <g class="waves" stroke="#ffffff66" stroke-width="3" stroke-linecap="round" fill="none"><path d="M60 350 q14 -6 28 0"/><path d="M220 400 q14 -6 28 0"/><path d="M410 410 q14 -6 28 0"/><path d="M520 380 q14 -6 28 0"/><path d="M130 430 q14 -6 28 0"/><path d="M330 370 q14 -6 28 0"/></g>
     </svg>
 
+    <div class="bgart" id="bgart" aria-hidden="true"><img alt="" decoding="async"></div>
     <canvas id="pond" width="200" height="88" aria-hidden="true"></canvas>
     <canvas id="soil" width="300" height="120" aria-hidden="true"></canvas>
     <div id="light" aria-hidden="true"></div>
@@ -1542,7 +1549,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // ばしょ。すうじは がめんの なかの わりあい（%）。みずぎわは ひだりから みぎへ さがる
   const SPOT_X = [18, 46, 66];   // 10/6：みぎの バケツを 10% ひだりへ（おみせの きつねの ボタンと 当たりが 18px かさなって いた。375／390／1280 で かさなり 0 を 実測）
   const shore = x => 58 + .16 * x;
-  const deckUp = () => save.area === 'B' ? 4 : 0;   // B（ふねの うえ）は 甲板の ふち（白い 帯）が 足の ラインと かさなる ため 4% うえへ（10/12 足もと巡回）
+  const deckUp = () => scene.dataset.art === '1' ? 3.5 : save.area === 'B' ? 4 : 0;   // B（ふねの うえ）は 甲板の ふち（白い 帯）が 足の ラインと かさなる ため 4% うえへ（10/12 足もと巡回）
   const feet = i => ({x: SPOT_X[i], y: shore(SPOT_X[i]) - 1 - deckUp()});
   const floatAt = i => ({x: SPOT_X[i] + 7, y: shore(SPOT_X[i] + 7) + 13});
   const place = (node, p) => { node.style.left = p.x + '%'; node.style.top = p.y + '%'; };
@@ -1712,6 +1719,19 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const f = feet(i); g.style.left = f.x + '%'; g.style.top = (f.y - .3) + '%'; g.style.width = w + '%'; g.hidden = !!el.hidden || getComputedStyle(el).display === 'none';
     });
   }
+  // 天の 手描き 背景（L・R・H・B × 朝昼夕夜）：scene の data-area・data-time が かわったら えを よみ、よめたら data-art=1。よめない・S/M/T は SVG の まま
+  { const art = $('bgart'), img = art && art.querySelector('img'), AREAS_ART = {L: 1, R: 1, H: 1, B: 1}; let artKey = '';
+    const syncArt = () => {
+      if (!art) return; const a = scene.dataset.area || 'L', t = scene.dataset.time || 'hiru', key = AREAS_ART[a] ? a + '_' + t : '';
+      if (key === artKey) return; artKey = key;
+      if (!key) { delete scene.dataset.art; try { layout(); } catch {} return; }
+      const url = 'img/bg/tsuri_' + key + '.webp', im = new Image();
+      im.onload = () => { if (artKey !== key) return; img.src = url; scene.dataset.art = '1'; try { layout(); } catch {} };
+      im.onerror = () => { if (artKey === key) { delete scene.dataset.art; try { layout(); } catch {} } };
+      im.src = url;
+    };
+    new MutationObserver(syncArt).observe(scene, {attributes: true, attributeFilter: ['data-area', 'data-time']});
+    syncArt(); addEventListener('load', syncArt); }
   function layout() {
     place(marufuwa, feet(mine)); footFix(); place($('friend-a'), feet(friends[0])); place($('friend-b'), feet(friends[1]));
     groundShadows();
