@@ -349,6 +349,7 @@ html.tk-running body>*:not(#tk),html.tk-running body>*:not(#tk) *,html.tk-runnin
 .tk-card[hidden],.tk-empty[hidden],.tk-tray[hidden],.tk-photo[hidden]{display:none}
 .tk-empty{z-index:8;left:0;top:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:#fff;font-weight:800;line-height:1.7;text-shadow:0 1px 4px #0a3a5599;padding:12px;pointer-events:none;white-space:pre-line;font-size:.9rem}
 .tk-empty button{pointer-events:auto;text-shadow:none;min-height:44px;padding:4px 14px}
+.tk-empty span{background:#0b3a55e6;color:#fff;border-radius:14px;padding:6px 14px;max-width:92%;text-shadow:none}   /* 10/12 見た目巡回：明るい 水の うえの 白字が 2.1対1 → 濃い 板（白字は 9対1 いじょう） */
 .tk-mascot{transform-origin:50% 100%;animation:tk-breathe 4.4s ease-in-out infinite;object-fit:contain;pointer-events:none}
 .tk-friend{object-fit:contain;pointer-events:none;transform-origin:50% 100%}
 .tk-guest{position:absolute;object-fit:contain;pointer-events:none;transform-origin:50% 100%;z-index:2}   /* ♡の 子が あそびに くる（水槽の だいの 前） */

@@ -289,7 +289,7 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 #scene{position:absolute;left:0;top:0;width:200%;height:100%;will-change:transform}   /* 世界は 窓の 2倍幅（W=720）・かめらが よこに うごかす（--cam） */
 #park-sign{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:60;pointer-events:none;padding:4px 14px;border-radius:14px;background:#fffffff2;border:2px solid #ffd9e6;font-weight:900;font-size:.9rem;color:#244653;white-space:nowrap}
 #scene:focus-visible{outline:none}
-#viewport:has(#scene:focus-visible){outline:3px solid #286b88;outline-offset:3px}
+#viewport:has(#scene:focus-visible){outline:4px solid #286b88;outline-offset:-8px}   /* 10/12 見た目巡回：#viewport の clip-path が そとがわの わくを 切るため うちがわに（キーボードの 人に 場所を 見せる） */
 #bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;filter:var(--dim)}
 #scene[data-rain=true] #bg{filter:var(--dim) brightness(.93) saturate(.9)}   /* 雨の 日も くらく しすぎない（10/1）*/
 .waves path{animation:wave 3.4s ease-in-out infinite alternate}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!--
-  ボーリング場（まるふわの ひろば）／ゲーム開発3／構想書 39_ボーリング場_構想_総司令部.md が 仕様。
+  ボーリングじょう（まるふわの ひろば）／ゲーム開発3／構想書 39_ボーリングじょう_構想_総司令部.md が 仕様。
   【絵】天の 縦長の 絵（img/bg/bowling_hiru_tate.webp／bowling_yoru_tate.webp・900×1600）が そのまま 舞台。canvas（450×800＝絵の 半分）に 絵を 敷き、レーンの 遠近は 絵から 実測：
   消失点 y=215.5・レーンの 半幅＝0.795×(y−215.5)・中心 x=225・ピン甲板（奥）y=266・投げる 位置 y=545。コードで 描く レーン・壁・看板・床は ない。
   いろいろ 仮：ピンと ボールと まるふわと なかま（絵の 上に 重ねる 部品）は コード描き／既存の 絵。絵の 7本の ピンは 10本の 並びに 合わせて 薄く 塗り隠し（buildBg）。
@@ -13,7 +13,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google" content="notranslate">
-<title>ボーリング場｜まるふわの ひろば</title>
+<title>ボーリングじょう｜まるふわの ひろば</title>
 <meta name="description" content="ねらって、ちからを きめて、ころがす。5ふれーむの ボーリング。ふつうは タイミング、らくちんは みぞが ふさがる。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#3a2a1e">
 <meta name="robots" content="noindex">
@@ -70,7 +70,7 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
 <body>
 <main class="room" id="room">
   <div class="top"><a class="back" id="back" href="../index.html">← ひろばへ</a>
-  <h1>ボーリング場</h1></div>
+  <h1>ボーリングじょう</h1></div>
   <p class="lead" id="lead">めじるしを タップで とめて、ちからを きめて、ころがそう。</p>
   <ol class="score" id="score" aria-label="フレームごとの たおした ほん"></ol>
   <div class="stagewrap"><canvas id="cv" width="450" height="720" tabindex="0" aria-label="ボーリングの レーン。スペースキーか タップで とめます"></canvas></div>
@@ -101,7 +101,7 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
 // English：この ページの ことば（tsuri-en.js の TsuriEn.add）。うごく ことばは ゲームの なかで T(ja,en) で えらぶ。
 (() => {
   const EX = {
-    'ボーリング場｜まるふわの ひろば': 'Bowling Alley | Marufuwa Plaza', 'ボーリング場': 'Bowling Alley', '← ひろばへ': '← Back to the Plaza',
+    'ボーリングじょう｜まるふわの ひろば': 'Bowling Alley | Marufuwa Plaza', 'ボーリングじょう': 'Bowling Alley', '← ひろばへ': '← Back to the Plaza',
     'めじるしを タップで とめて、ちからを きめて、ころがそう。': 'Tap to stop the marker, set the power, and roll.',
     'フレームごとの たおした ほん': 'Pins knocked down per frame',
     'ボーリングの レーン。スペースキーか タップで とめます': 'The bowling lane. Press Space or tap to stop.',

@@ -1065,7 +1065,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="sleep" type="button">おやすみタイマー：なし</button>
     <button id="fullscreen" type="button">ぜんがめん</button>
   </div>
-  <a class="pill plaza plaza-big" id="plaza-go" href="hiroba/">ひろば（おへや・水槽・おみせ）</a>
+  <a class="pill plaza plaza-big" id="plaza-go" href="hiroba/">ひろば（おへや・すいそう・おみせ）</a>
   <script>/* 10/6（Claude）：「つりばを かえる」「水ぎわの ラベル」「おしえる 一行」を「なげる」の したへ。さいしょの 1がめんに けしきと なげる が いっしょに はいる。よみあげ・タブの じゅんばんも この じゅん（ページを ひらいた ときに 1かい だけ・あとで うごかさない） */
   (function(){var a=document.querySelector('.actions');if(!a)return;var ref=a.nextSibling;['area-open','shore-label','mini-progress','quiet-hint','seat-hint','push-hint'].forEach(function(id){var e=document.getElementById(id);if(e)a.parentNode.insertBefore(e,ref);});})();</script>
   <p id="status" role="status" aria-live="polite">「なげる」を おしてね。</p>
@@ -2051,7 +2051,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       b.addEventListener('click', () => { const open = !document.body.classList.contains('howto-open'); document.body.classList.toggle('howto-open', open); row.dataset.howto = open ? 'open' : ''; drawHowto(); }); drawHowto(); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mk); else mk(); addEventListener('load', () => { mk(); drawHowto(); }); setTimeout(drawHowto, 900); }   // おと・BGM・とおく・ながめる・おやすみ・つかいやすく する を 1つの「あそびかた」に まとめる（ふだんは かくす）
   addEventListener('load', () => { try { drawShoreLabel(); } catch {} }); setTimeout(() => { try { drawShoreLabel(); } catch {} }, 900);
-  { const pg = () => { const a = $('plaza-go'); if (a) a.textContent = L('ひろば（おへや・水槽・おみせ）', 'Plaza (Room, Aquarium & Shops)'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pg); else pg(); addEventListener('load', pg); setTimeout(pg, 900); }
+  { const pg = () => { const a = $('plaza-go'); if (a) a.textContent = L('ひろば（おへや・すいそう・おみせ）', 'Plaza (Room, Aquarium & Shops)'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pg); else pg(); addEventListener('load', pg); setTimeout(pg, 900); }
   const bgmWaiting = () => { try { return !!(window.TsuriBgm && TsuriBgm.on() && !TsuriBgm.state().playing); } catch { return false; } };
   const audioLocked = () => !!save.sound && (!(audio && audio.state === 'running') || bgmWaiting());   // ならして くれない（ブラウザ）か、BGM が まだ はじまって いない あいだは「ON」と ひょうじ しない   // おとは ON だが ブラウザが まだ ならして くれない（さわる まえ）
   function drawMute() { const b = $('mute-top'); if (!b) return; const on = !!save.sound, lock = audioLocked(); b.setAttribute('aria-pressed', String(on)); b.dataset.locked = String(lock);
