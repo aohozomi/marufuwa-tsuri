@@ -12,6 +12,11 @@
 <meta property="og:title" content="まるふわの いりぐち｜のんびり つり・ブラウザゲーム｜まるふわ びより">
 <meta property="og:description" content="ブラウザで あそぶ（むりょう・ログインなし）・iPhone アプリ・LINE スタンプ・BOOTH。すきな ところから どうぞ。">
 <meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/links/">
+<link rel="alternate" hreflang="ja" href="https://aohozomi.github.io/marufuwa-tsuri/links/">
+<link rel="alternate" hreflang="en" href="https://aohozomi.github.io/marufuwa-tsuri/links/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://aohozomi.github.io/marufuwa-tsuri/links/">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v2.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -139,5 +144,25 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
 })();
 </script>
 <script>document.addEventListener('DOMContentLoaded', function () { if (window.PageBg) PageBg.init('iriguchi', { fb: 1, time: function () { return document.documentElement.dataset.night === 'true' ? 'n' : 'h'; } }); });</script>
+<script>
+/* 言語の きりかえボタン（tsuri-en.js の ボタンと おなじ 形・おなじ 保存の 鍵 marufuwa-lang-v1・10/12 英語対応）。この ページは tsuri-en.js を 読まない ため、ここで 足す */
+(function () {
+  try {
+    var en = document.documentElement.lang === 'en', KEY = 'marufuwa-lang-v1';
+    var go = function () {
+      var row = document.createElement('div'); row.className = 'lang-row'; row.setAttribute('data-en-skip', '1'); row.style.cssText = 'text-align:center;margin:14px 0 8px';
+      var b = document.createElement('button'); b.type = 'button'; b.id = 'lang-toggle';
+      b.textContent = en ? '日本語（にほんご）' : 'English'; b.setAttribute('lang', en ? 'ja' : 'en');
+      b.style.cssText = 'font-size:.85rem;min-height:44px;padding:8px 18px;border-radius:999px;border:1.5px solid currentColor;background:transparent;color:inherit;opacity:.85;cursor:pointer';
+      b.addEventListener('click', function () {
+        try { localStorage.setItem(KEY, en ? 'ja' : 'en'); } catch (e) {}
+        var u = new URL(location.href); u.searchParams.delete('lang'); location.replace(u.toString());
+      });
+      row.appendChild(b); (document.querySelector('main') || document.body).appendChild(row);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

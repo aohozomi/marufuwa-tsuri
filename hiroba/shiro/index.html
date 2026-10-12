@@ -271,5 +271,25 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
 })();
 </script>
 
+<script>
+/* 言語の きりかえボタン（tsuri-en.js の ボタンと おなじ 形・おなじ 保存の 鍵 marufuwa-lang-v1・10/12 英語対応）。この ページは tsuri-en.js を 読まない ため、ここで 足す */
+(function () {
+  try {
+    var en = document.documentElement.lang === 'en', KEY = 'marufuwa-lang-v1';
+    var go = function () {
+      var row = document.createElement('div'); row.className = 'lang-row'; row.setAttribute('data-en-skip', '1'); row.style.cssText = 'text-align:center;margin:14px 0 8px';
+      var b = document.createElement('button'); b.type = 'button'; b.id = 'lang-toggle';
+      b.textContent = en ? '日本語（にほんご）' : 'English'; b.setAttribute('lang', en ? 'ja' : 'en');
+      b.style.cssText = 'font-size:.85rem;min-height:44px;padding:8px 18px;border-radius:999px;border:1.5px solid currentColor;background:transparent;color:inherit;opacity:.85;cursor:pointer';
+      b.addEventListener('click', function () {
+        try { localStorage.setItem(KEY, en ? 'ja' : 'en'); } catch (e) {}
+        var u = new URL(location.href); u.searchParams.delete('lang'); location.replace(u.toString());
+      });
+      row.appendChild(b); (document.querySelector('main') || document.body).appendChild(row);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
