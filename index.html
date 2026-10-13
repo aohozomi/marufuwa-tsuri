@@ -7,6 +7,7 @@
 <title>まるふわ びより｜のんびり つり・ブラウザゲーム</title>
 <meta name="description" content="まるふわと なかまと、のんびり つり。いそがなくて だいじょうぶ。にがしても、へらない。">
 <meta name="theme-color" content="#b9edf5">
+<meta name="apple-itunes-app" content="app-id=6816003504, affiliate-data=pt=129401810&amp;ct=smartbanner_game">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png">
 <link rel="apple-touch-icon" href="img/icon-180.png">
@@ -595,6 +596,12 @@ html.dlg-open :not(dialog[open]):not(dialog[open] *),html.dlg-open :not(dialog[o
 /* つれた しらせは うえに ちいさく。けしきと、さかなを かかげる まるふわが みえる ように */
 /* つれた しらせ：けしきの そらの ところに かさねる。スクロール しなくても、つぎの ボタンが みえる */
 #card{position:absolute;z-index:6;left:3%;right:3%;top:2.5%;display:flex;flex-direction:column;align-items:center;text-align:center;background:#ffffffeb;border:2px solid #bfdce8;border-radius:18px;padding:4px 10px 5px;box-shadow:0 4px 12px #24465326}
+.app-nudge{margin:6px auto 0;max-width:520px;padding:8px 12px;border-radius:14px;background:#ffffffd9;border:1px solid #9ec8d6;color:#244653;font-size:.85rem;line-height:1.6;text-align:center}
+.app-nudge[hidden],.app-nudge [hidden]{display:none}
+.app-nudge p{margin:0 0 4px}
+.app-nudge-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.app-nudge .pill{min-height:44px;min-width:44px;font-size:.85rem;padding:4px 14px;text-decoration:none}
+:root[data-night=true] .app-nudge{background:#1a3250e6;border-color:#4a6b8c;color:#e8f1f8}
 #card[hidden]{display:none}
 /* つれた 直後は まるふわと さかなが しゅやく。カードは 1.5びょう あとに ふわっと（タップで すぐ）。うごきを へらす 人には ぱっと */
 #card{transition:opacity .5s ease,translate .5s ease}
@@ -1040,6 +1047,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       <p id="card-tags"></p>
       <button id="go-area" type="button" hidden></button>
       <p id="card-word"></p>
+    </div>
+  </div>
+
+  <div id="app-nudge" class="app-nudge" role="region" hidden>
+    <p id="app-nudge-text"></p>
+    <div class="app-nudge-row"><button type="button" id="app-nudge-see" class="pill"></button><button type="button" id="app-nudge-close" class="pill quiet"></button></div>
+    <div id="app-nudge-confirm" hidden>
+      <p id="app-nudge-q"></p><p id="app-nudge-home"></p>
+      <div class="app-nudge-row"><a id="app-nudge-go" class="pill" target="_blank" rel="noopener noreferrer"></a><button type="button" id="app-nudge-no" class="pill quiet"></button></div>
     </div>
   </div>
 
@@ -1732,6 +1748,31 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     };
     new MutationObserver(syncArt).observe(scene, {attributes: true, attributeFilter: ['data-area', 'data-time']});
     syncArt(); addEventListener('load', syncArt); }
+  // ─── アプリへの ごあんない（10/13・収益の導線）：釣れた 直後に、カードの 下へ ひかえめに 1行。1回の 訪問に 最大1回・すぐ とじられる・せかす ことば／数字なし・外へ ひらく まえに かくにん（href は「ひらく」を 出す まで つけない）・動きは つけない ───
+  const nudge = { shown: false, el: $('app-nudge'), url: 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=fishing_result&mt=8' };
+  function nudgePaint() {
+    const n = nudge.el; if (!n) return;
+    n.setAttribute('aria-label', L('アプリの ごあんない', 'About the app'));
+    $('app-nudge-text').textContent = L('同じ 世界の、べつの 子に あえるよ（アプリ）', 'Meet another friend from the same world (app)');
+    $('app-nudge-see').textContent = L('アプリを みる', 'See the app'); $('app-nudge-close').textContent = L('とじる', 'Close');
+    $('app-nudge-q').textContent = L('そとの ページ（App Store）を ひらきます。いいですか？', 'This opens an outside page (the App Store). Is that OK?');
+    $('app-nudge-home').textContent = L('ダウンロードや かいものは、おうちの ひとと いっしょに。', 'Please download and buy things together with a grown-up.');
+    $('app-nudge-go').textContent = L('ひらく', 'Open'); $('app-nudge-no').textContent = L('やめる', 'Cancel');
+  }
+  function nudgeHide() { const n = nudge.el; if (!n || n.hidden) return; n.hidden = true; $('app-nudge-confirm').hidden = true; $('app-nudge-go').removeAttribute('href'); $('app-nudge-see').setAttribute('aria-expanded', 'false'); }
+  function nudgeAfterCatch() {
+    if (!nudge.el || nudge.shown || save.total < 3 || document.body.classList.contains('gazing')) return;   // さいしょの 2ひきは だしない・ながめる 中は だしない
+    try { if (sessionStorage.getItem('marufuwa-app-nudge')) { nudge.shown = true; return; } } catch {}
+    nudge.shown = true; try { sessionStorage.setItem('marufuwa-app-nudge', '1'); } catch {}
+    nudgePaint(); nudge.el.hidden = false;
+  }
+  if (nudge.el) {
+    $('app-nudge-see').setAttribute('aria-expanded', 'false'); $('app-nudge-see').setAttribute('aria-controls', 'app-nudge-confirm');
+    $('app-nudge-see').addEventListener('click', () => { const c = $('app-nudge-confirm'); c.hidden = !c.hidden; $('app-nudge-see').setAttribute('aria-expanded', String(!c.hidden)); if (c.hidden) $('app-nudge-go').removeAttribute('href'); else { $('app-nudge-go').setAttribute('href', nudge.url); $('app-nudge-no').focus(); } });
+    $('app-nudge-no').addEventListener('click', () => { $('app-nudge-confirm').hidden = true; $('app-nudge-go').removeAttribute('href'); $('app-nudge-see').setAttribute('aria-expanded', 'false'); $('app-nudge-see').focus(); });
+    $('app-nudge-close').addEventListener('click', nudgeHide);
+    $('app-nudge-go').addEventListener('click', () => { setTimeout(nudgeHide, 50); });
+  }
   function layout() {
     place(marufuwa, feet(mine)); footFix(); place($('friend-a'), feet(friends[0])); place($('friend-b'), feet(friends[1]));
     groundShadows();
@@ -2219,7 +2260,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const today = new Date(), rainy = query.has('rain') ? query.get('rain') === '1' : (today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate()) * 7 % 4 === 0;
 
   let phase = 'idle', fish = null, hp = 0, hpMax = 0, precise = false, periodBase = 1100, period = 1600, ringStart = 0, reelStartAt = 0, perfectStreak = 0, pStreak = 0, charge = 0, lastCyc = -1, pressCyc = -9, fightBest = 0, tameCnt = 0, slips = 0, tension = 0, tensionAt = 0, closeStreak = 0, tStage = 0, escapeRun = 0, escapeHinted = false, lockTimer = 0, waitNoted = false, kickUntil = 0, kickPower = 0, wanderStart = 0, combo = 0, nushi = false, caughtAt = 0, flying = false, wish = false, cardTimer = 0, cardShownAt = 0, biteTimer = 0, nibbleTimer = 0, resultAck = true, resultSpecial = false, ackAt = 0, lastPressAt = 0;
-  function setPhase(next) { if (next !== phase) rodPose(next); if (next !== 'waiting' && next !== 'bite') orbitStop(false); phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; try { drawSeatLine(); } catch {} try { bustleDraw(); } catch {} { const ph = $('push-hint'); if (ph) { ph.hidden = !(reduce() && button.dataset.pulse === 'true'); if (!ph.hidden) ph.textContent = L('ここを おして', 'Press here'); } } $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
+  function setPhase(next) { if (next !== phase && next !== 'caught') { try { nudgeHide(); } catch {} } if (next !== phase) rodPose(next); if (next !== 'waiting' && next !== 'bite') orbitStop(false); phase = next; document.body.dataset.phase = next; if (next !== 'caught') { clearTimeout(lockTimer); } if (next !== 'caught') cardShow(); if (next === 'idle') lock(false); scene.dataset.phase = next; if (save.total === 0 && next === 'idle') button.dataset.pulse = 'true'; else delete button.dataset.pulse; try { drawSeatLine(); } catch {} try { bustleDraw(); } catch {} { const ph = $('push-hint'); if (ph) { ph.hidden = !(reduce() && button.dataset.pulse === 'true'); if (!ph.hidden) ph.textContent = L('ここを おして', 'Press here'); } } $('take-photo').hidden = $('card').hidden = $('release').hidden = $('show-pal').hidden = $('more-catch').hidden = next !== 'caught'; if (next !== 'caught') $('more-catch').open = false; $('send-gift').hidden = next !== 'caught' || !(last && giftable(last.fish, last.nushi)); spots.forEach(spot => { spot.disabled = !(next === 'idle' || next === 'caught'); }); $('keeper').disabled = document.body.classList.contains('gazing') || !(next === 'idle' || next === 'caught'); layout(); drawAreas(); drawTimes(); }
   const showModal0 = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function () {   // ひいて いる 間は まどを ひらかない（ゆびを はなすと わの タイミングを のがす）。おわってから
     if (phase === 'reel') { say(L('つりが おわってから ひらこうね。', 'Let’s open this after the fishing is done.')); return; }
@@ -2670,6 +2711,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const hintWord = plopHintDue && save.sound !== true && save.sndFx !== false ? L('おとを つけると、もっと きもちいいよ。', 'Turn on sound for an even nicer feel.') : ''; plopHintDue = false;   // さいしょの ぽちゃんの あと 1かいだけ
     if (hintWord) { const hint = document.createElement('span'); hint.className = 'guide-hint'; hint.textContent = hintWord; $('guide-word').replaceChildren(guideWord, hint); } else $('guide-word').textContent = guideWord;
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
+    try { nudgeAfterCatch(); } catch {}
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
     last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY, album: !!(first && left === 0), badge: (first && left === 0 ? L('ずかん かんせい！', 'Sticker book complete!') : mile ? L(save.total + 'ひきめ！', 'Catch #' + save.total + '!') : '') , firstNushi};   // 節目：ずかん かんせい／10・30・50…ひきめ／はじめての ぬし
     $('more-summary').textContent = L('ほかの こと', 'More'); $('more-catch').open = false;   // つれた あとの ボタンは 主役 2つだけ。ほかは たたむ

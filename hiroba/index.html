@@ -7,6 +7,7 @@
 <title>まるふわの ひろば</title>
 <meta name="description" content="ちいさな まちで あそべます。まるふわと ともだちが あるく ひろば。つりばへ、まるふわの おへやへ。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#b9edf5">
+<meta name="apple-itunes-app" content="app-id=6816003504, affiliate-data=pt=129401810&amp;ct=smartbanner_hiroba">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23a8dc93'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%F0%9F%8C%B3%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="まるふわの ひろば">
@@ -3373,7 +3374,7 @@ $('tsuriba').addEventListener('click', e => {
 $('close-tsuriba').addEventListener('click', () => { asKind('ui', () => sfx.tap()); $('tsuriba').close(); narrate(S('つりばの いちらんを とじたよ。', 'You closed the fishing spots.')); });
 // ─── アプリの おうち（10/2 総司令部：「ここから さきは アプリ」）───
 //   ひろばの 左下の ちいさな 家。入ると アプリの 本物の 画面の しゃしんを ならべる（img/appie/manifest.json の [{src,alt,alt_en}]・まだ 無ければ ことばだけ）。最後に App Store への 小さな ボタン 1つ：おすと「いくよ。いい？」→「いく」で はじめて 外の アドレスを つける（それまで ページの 中に 外への リンクは 無い）。入らなくても なにも かわらない・点滅なし
-const APPSTORE_URL = 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=web_heya&mt=8';
+const APPSTORE_URL = 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=hiroba&mt=8';
 let appieLoaded = false;
 async function loadAppieShots() {
   if (appieLoaded) return; appieLoaded = true;
