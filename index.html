@@ -2302,21 +2302,21 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   document.documentElement.style.setProperty('--pose-w', POSE_DEF.w); document.documentElement.style.setProperty('--pose-ar', POSE_DEF.ar);
   function footFix() { const k = marufuwa.dataset.poseK; { const ft = k && specOf('foot', k); marufuwa.style.marginTop = k && ft && ft[k] ? Math.round((1 - ft[k]) * marufuwa.offsetHeight) + 'px' : ''; } }   // あしもとを さんばしの たちいちに そろえる
   const poseLoaded = new Set();   // よみこめた ポーズえだけ つかう（オフラインで こわれた えを だささない）
-  POSE_FILES.forEach(k => { const im = new Image(); im.onload = () => poseLoaded.add(k); im.src = 'img/pose/' + POSE_DIR + k + '.png'; });
+  POSE_FILES.forEach(k => { const im = new Image(); im.onload = () => poseLoaded.add(k); im.src = 'img/pose/' + POSE_DIR + k + '.webp'; });
   // なかま ごとの ポーズ（10/5）：img/pose/friend/<id>/{nage,mate,hiki,age}.png（720×720・みぎむき・えに 竿あり＝C と おなじ きまり）。よみこめた ぶんだけ つかい、なければ いまの 顔の え。<id>/spec.json（任意）＝{tip:{pose:[x,y]},foot:{pose:数},face:{pose:[l,t,r,b]},hang:[a,b,c]} で うわがき（なければ C の 数字）
   const FRIEND_POSE = {};
   function probeFriendPose(id) {
     if (!id || FRIEND_POSE[id]) return; const fp = FRIEND_POSE[id] = {loaded: new Set(), spec: null};
     const redraw = () => { if (marufuwa.dataset.avatar === id) { try { face(curFace); } catch {} } };
-    ['nage', 'mate', 'hiki', 'age'].forEach(k => { const im = new Image(); im.onload = () => { fp.loaded.add(k); redraw(); }; im.src = 'img/pose/friend/' + id + '/' + k + '.png'; });
+    ['nage', 'mate', 'hiki', 'age'].forEach(k => { const im = new Image(); im.onload = () => { fp.loaded.add(k); redraw(); }; im.src = 'img/pose/friend/' + id + '/' + k + '.webp'; });
     try { fetch('img/pose/friend/' + id + '/spec.json').then(r => r.ok ? r.json() : null).then(j => { if (j && typeof j === 'object') { fp.spec = j; redraw(); } }).catch(() => {}); } catch {}
   }
   const friendPoseOn = () => { const id = marufuwa.dataset.avatar, fp = id && FRIEND_POSE[id]; return !!(poseNow && fp && fp.loaded.has(poseNow)); };
   const specOf = (kind, k) => { const id = marufuwa.dataset.avatar, fp = id && FRIEND_POSE[id], own = fp && fp.loaded.has(k) && fp.spec && fp.spec[kind]; const base = kind === 'tip' ? POSE_TIP : kind === 'foot' ? POSE_FOOT : kind === 'face' ? POSE_DEF.face : POSE_DEF.hang; return own || base; };
   const poseFile = () => {
     if (!poseNow) return '';
-    const id = marufuwa.dataset.avatar; if (id && FRIEND_POSE[id]) return friendPoseOn() ? 'img/pose/friend/' + id + '/' + poseNow + '.png' : '';
-    const k = (id || 'marufuwa') + '_' + poseNow; return POSE_FILES.includes(k) && poseLoaded.has(k) ? 'img/pose/' + POSE_DIR + k + '.png' : '';
+    const id = marufuwa.dataset.avatar; if (id && FRIEND_POSE[id]) return friendPoseOn() ? 'img/pose/friend/' + id + '/' + poseNow + '.webp' : '';
+    const k = (id || 'marufuwa') + '_' + poseNow; return POSE_FILES.includes(k) && poseLoaded.has(k) ? 'img/pose/' + POSE_DIR + k + '.webp' : '';
   };
   function face(name) { curFace = name; const pf = poseFile(); if (pf) { marufuwa.dataset.pose = '1'; marufuwa.dataset.poseK = poseNow; marufuwa.dataset.poseSet = POSE_SET; marufuwa.dataset.poseFace = JSON.stringify(poseFaceOf(poseNow) || []); marufuwa.src = (marufuwa.dataset.avatar ? '' : wearUrl('pose:' + pf, pf)) || pf; footFix(); rod($('line-me'), mine, 12, $('rod-me')); return; } delete marufuwa.dataset.pose; delete marufuwa.dataset.poseK; footFix(); const av = avatarPal(); marufuwa.src = av ? (av.own ? ownFaceSrc() : 'img/friend-' + av.id + '-s.webp') : (wearUrl(name) || 'img/game-' + name + '.webp'); }   // じぶんの キャラを えらんだ ときは、その こ（ひょうじょうの ちがいは うごきで）
   // きょうの ラッキーさかな・ぬし は ひづけで きまる（サーバー なしで、せかいじゅう おなじ ひは おなじ）。「みんな おなじ」を がめんに 書いて、はなしの たねに する
