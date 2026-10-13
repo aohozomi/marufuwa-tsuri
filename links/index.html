@@ -109,7 +109,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
 (function () {
   'use strict';
   const LINKS = {
-    app: 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=web_links&mt=8',
+    app: 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=' + (function () { var f = new URLSearchParams(location.search).get('from'); return /^(tiktok|x|youtube|instagram)$/.test(f || '') ? 'web_links_' + f : 'web_links'; })() + '&mt=8',   /* どこから 来たかを App Store の キャンペーン名で わける（?from=tiktok など・許可した 4つだけ・個人は とくていしない） */
     line: 'https://line.me/S/sticker/36906448',
     booth: 'https://hozumi-ao.booth.pm/'
   };
