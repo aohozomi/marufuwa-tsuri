@@ -75,7 +75,7 @@
     drawBtn();
     // さいしょの タップ／キーまで だけ「どこかを さわると おとが なるよ」（おとが ONの ときだけ・すぐ きえる）
     save();   // 古い mute を むしして migrated:1 に そろえる
-    if (soundOn()) { hintEl.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); hintEl.hidden = false; const hide = () => { hintEl.hidden = true; }; addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
+    if (soundOn()) { hintEl.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); hintEl.hidden = false; const hide = () => { hintEl.style.visibility = 'hidden'; };   /* 10/14：hidden（display:none）だと 帯の 高さ分 中身が つまり、最初の タップが 空ぶりする。場所は のこして 透明に */ addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
     const E = window.TsuriEn; const reg = () => { const T = window.TsuriEn; if (T && T.lang === 'en' && typeof T.add === 'function' && !reg.done) { reg.done = true; T.add({ ex: { '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', 'どこかを さわると おとが なるよ': 'Tap anywhere to hear sounds' } }); } };
     reg(); addEventListener('load', reg);
     addEventListener('pointerdown', () => { if (soundOn()) mkAc(); }, { once: true }); addEventListener('keydown', () => { if (soundOn()) mkAc(); }, { once: true });

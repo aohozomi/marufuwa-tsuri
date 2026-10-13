@@ -738,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   initBgm();
   // はじめて ひらいた ときだけ、🔇の よこに「ミュートボタンは こちら →」を 3びょう（てんめつなし・おさなくても きえる・2回めからは 出さない）
-  save(); if (rec.snd) { const h = $('mutehint'); h.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); h.hidden = false; const hide = () => { h.hidden = true; }; addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
+  save(); if (rec.snd) { const h = $('mutehint'); h.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); h.hidden = false; const hide = () => { h.style.visibility = 'hidden'; }; addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
   addEventListener('pointerdown', () => { if (rec.snd) mkAc(); }, { once: true });
   if (rec.play === 3) tsReset();
   drawPlay(); drawBest(); drawSnd(); drawMode(); setAim(W / 2); requestAnimationFrame(frame);
