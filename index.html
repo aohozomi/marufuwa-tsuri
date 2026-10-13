@@ -3910,7 +3910,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   let tint = null, tintKey = '', lastDraw = 0;
   function rgb(text) { const hex = text.trim().replace('#', ''); const full = hex.length === 3 ? [...hex].map(c => c + c).join('') : hex; return [0, 2, 4].map(i => parseInt(full.slice(i, i + 2), 16) || 0); }
   function drawWater(now) {
-    if (now - lastDraw < (document.body.classList.contains('sleepy') ? 1000 : document.body.classList.contains('quiet') ? 170 : phase === 'reel' ? 200 : document.body.classList.contains('gazing') ? 84 : 42) && lastDraw) return; lastDraw = now;   // ながめる 中は 12こま/びょう・なにも しない と 6こま/びょう（でんちを へらす）
+    if (now - lastDraw < (document.body.classList.contains('sleepy') ? 1000 : document.body.classList.contains('quiet') ? 170 : phase === 'reel' ? 200 : document.body.classList.contains('gazing') ? 84 : 66) && lastDraw) return; lastDraw = now;   // ながめる 中は 12こま/びょう・なにも しない と 6こま/びょう（でんちを へらす）
     const key = scene.dataset.time + scene.dataset.area;
     if (key !== tintKey) { const css = getComputedStyle(scene); tint = {near: rgb(css.getPropertyValue('--water2')), far: rgb(css.getPropertyValue('--water1')), sky: rgb(css.getPropertyValue('--sky2')), orb: rgb(css.getPropertyValue('--orb')), sand: rgb(css.getPropertyValue('--ground')), leaf: rgb(css.getPropertyValue('--tree')), woods: scene.dataset.area === 'L' || scene.dataset.area === 'R' ? 1 : 0}; tintKey = key; }
     const W = pond.width, H = pond.height, px = sheet.data, t = now / 1000, calm = rainy ? .45 : 1, sun = rainy ? .15 : .75;
@@ -3963,7 +3963,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     return moonCache;
   }
   function drawSky(now) {
-    if (now - lastSky < (document.body.classList.contains('sleepy') ? 2000 : document.body.classList.contains('quiet') ? 500 : phase === 'reel' ? 600 : document.body.classList.contains('gazing') ? 250 : 125) && lastSky) return; lastSky = now;
+    if (now - lastSky < (document.body.classList.contains('sleepy') ? 2000 : document.body.classList.contains('quiet') ? 500 : phase === 'reel' ? 600 : document.body.classList.contains('gazing') ? 250 : scene.dataset.time === 'yoru' ? 200 : 400) && lastSky) return; lastSky = now;   // 10/14 3-6：くもは 1びょうで 1ピクセルほどしか うごかない→ひるは 8→2.5こま/びょう（ほしの またたく よるは 5こま）
     const sk = scene.dataset.time + '|' + document.documentElement.dataset.time;   // そらの 色は 時間だけで きまる：まいかい getComputedStyle を よばない（スタイルの 強制 さいけいさんを へらす）
     if (sk !== skyKey || !skyTint) { const css = getComputedStyle(scene); skyTint = {top: rgb(css.getPropertyValue('--sky1')), low: rgb(css.getPropertyValue('--sky2')), orb: rgb(css.getPropertyValue('--orb'))}; skyKey = sk; }
     const top = skyTint.top, low = skyTint.low, orb = skyTint.orb;
