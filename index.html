@@ -127,13 +127,14 @@ button:focus-visible,.pill:focus-visible,summary:focus-visible{outline:3px solid
 main{max-width:640px;margin:auto;padding:16px}
 h1{font-size:clamp(1.4rem,6vw,1.9rem);text-align:center;margin:8px 0 4px}
 #backdrop{position:fixed;inset:0;width:100%;height:100%;z-index:-1}
-.bd-trees circle{transform-box:fill-box;transform-origin:50% 100%;animation:sway 6s ease-in-out infinite alternate}
+.bd-trees circle{transform-box:fill-box;transform-origin:50% 100%}
+.bd-trees circle:nth-child(3n){animation:sway 6s ease-in-out infinite alternate}   /* 10/14 3-5：6こ→2こ（画面ぎわの 小さな ゆれ。ぜんぶ うごかすと スタイル再計算が ふえる） */
 .bd-trees circle:nth-child(2n){animation-delay:-3s}
 main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;margin-bottom:24px;box-shadow:0 12px 30px #2446531f}
 /* だいめい：ぷっくりした もじ。1もじずつ、なみの ように ゆれる */
 .logo{display:flex;justify-content:center;align-items:flex-end;gap:1px;font-size:clamp(1.7rem,8.4vw,2.6rem);font-weight:900;margin:6px 0 2px;line-height:1.1}
-.logo span{display:inline-block;color:#fff;-webkit-text-stroke:6px var(--k);paint-order:stroke fill;text-shadow:0 4px 0 var(--d),0 7px 8px #24465340;animation:bounce 2.6s ease-in-out infinite;animation-delay:calc(var(--n)*-.26s)}
-.logo i{font-style:normal;font-size:.8em;margin:0 3px;animation:bounce 2.6s ease-in-out infinite;animation-delay:-1.1s}
+.logo span{display:inline-block;color:#fff;-webkit-text-stroke:6px var(--k);paint-order:stroke fill;text-shadow:0 4px 0 var(--d),0 7px 8px #24465340;animation:bounce 2.6s ease-in-out 4;animation-delay:calc(var(--n)*-.26s)}   /* 10/14 3-5：ロゴは さいしょの 4かい（約10びょう）はずんで、あとは おちつく（テキストの ふち・かげが おもく、ずっと はずむと 常時 スタイル再計算） */
+.logo i{font-style:normal;font-size:.8em;margin:0 3px;animation:bounce 2.6s ease-in-out 4;animation-delay:-1.1s}
 .logo span:nth-of-type(4n+1){--k:#4bb3e0;--d:#2a86b3}.logo span:nth-of-type(4n+2){--k:#46c79a;--d:#2a9a72}.logo span:nth-of-type(4n+3){--k:#ff9a6b;--d:#d96f40}.logo span:nth-of-type(4n){--k:#a98be8;--d:#7c5fc4}
 .logo span:nth-of-type(1){--n:0}.logo span:nth-of-type(2){--n:1}.logo span:nth-of-type(3){--n:2}.logo span:nth-of-type(4){--n:3}.logo span:nth-of-type(5){--n:4}.logo span:nth-of-type(6){--n:5}.logo span:nth-of-type(7){--n:6}.logo span:nth-of-type(8){--n:7}.logo span:nth-of-type(9){--n:8}
 @keyframes bounce{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -5px;rotate:3deg}}
@@ -451,7 +452,8 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 .spot:disabled{opacity:1}
 @keyframes nudge{50%{translate:0 -3px}}
 /* かぜ：き・くさ・くも・みず・はたが、ゆっくり なびく */
-#scene svg g[style*="--tree"] circle,.grass path{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.6s ease-in-out infinite alternate}
+#scene svg g[style*="--tree"] circle,.grass path{transform-box:fill-box;transform-origin:50% 100%}
+#scene svg g[style*="--tree"] circle:nth-child(2n),.grass path:nth-child(3n+1){animation:sway 4.6s ease-in-out infinite alternate}   /* 10/14 3-5：木の 丸 14→7・草の は 47→約16（ゆれは のこす・見た目は やさしい まま） */
 #scene svg g[style*="--tree"] circle:nth-child(2n){animation-duration:5.4s;animation-delay:-2s}
 .grass path:nth-child(2n){animation-duration:3.2s;animation-delay:-1.2s}
 .grass path{animation-duration:2.8s}
@@ -464,6 +466,9 @@ body[data-seathint=true] .spot:not([aria-pressed=true]) svg{animation:seatbob 1.
 .who{animation:breathe 3.2s ease-in-out infinite}
 .friend{animation-duration:2.7s;animation-delay:-1s}
 @keyframes sway{from{rotate:-2.2deg}to{rotate:2.2deg}}
+/* 10/14 3-5：タブが うらの とき・45びょう さわらない ときは、景色の かざりの ゆれ（草・木・なみ・くも・ロゴ）を 止める（さわれば すぐ もどる。うごきを へらす の ふるまいは かえない） */
+html[data-vis="0"] *,html[data-vis="0"] *::before,html[data-vis="0"] *::after{animation-play-state:paused !important}
+html[data-idle="1"] .grass path,html[data-idle="1"] #scene svg g[style*="--tree"] circle,html[data-idle="1"] .bd-trees circle,html[data-idle="1"] .waves path,html[data-idle="1"] .cloud,html[data-idle="1"] .flag,html[data-idle="1"] .logo i{animation-play-state:paused}
 @keyframes flutter{from{transform:skewY(-7deg) scaleX(1)}to{transform:skewY(8deg) scaleX(.9)}}
 @keyframes cloud{from{transform:translateX(-160px)}to{transform:translateX(640px)}}
 @keyframes wave{from{transform:translateX(-7px)}to{transform:translateX(7px)}}
@@ -2808,6 +2813,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // わや みずを じかに おしても、ひける
   scene.addEventListener('click', event => { if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); else if (phase === 'caught' && $('card').dataset.wait && !event.target.closest('button')) cardShow(); });   // つれた 直後の 1.5びょうの あいだ、けしきを タップしても すぐ カードが 出る
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') { ringStart = performance.now(); ringSync(); } });
+  // 10/14 3-5：うらに まわった／45びょう さわらない（つりの まちぶせ いがい）ときは 飾りの ゆれを 止める（CSS: html[data-vis=0]／html[data-idle=1]）
+  { const root = document.documentElement; let lastIn = Date.now();
+    const setVis = () => { root.dataset.vis = document.hidden ? '0' : '1'; }; setVis(); document.addEventListener('visibilitychange', setVis);
+    const touch = () => { lastIn = Date.now(); if (root.dataset.idle === '1') root.dataset.idle = '0'; };
+    ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(t => addEventListener(t, touch, { passive: true, capture: true }));
+    setInterval(() => { const idle = Date.now() - lastIn > 45000 && (phase === 'idle' || phase === 'caught'); const v = idle ? '1' : '0'; if (root.dataset.idle !== v) root.dataset.idle = v; }, 5000); }
 
   // なかまの ひとこと。となりに だれかが いる かんじを だす（よみあげは しない）
   const WORDS = rainy ? ['つれた！', 'あめも いいね', 'ぽつぽつ きこえる', 'おおきいの きたかも', 'かさ、いる？', 'あめの ひは よく つれるよ'] : ['つれた！', 'のんびりだね', 'いい かぜ', 'おおきいの きたかも', 'おなか すいたね', 'きょうは いい ひ'];
