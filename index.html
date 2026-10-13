@@ -1753,7 +1753,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function nudgePaint() {
     const n = nudge.el; if (!n) return;
     n.setAttribute('aria-label', L('アプリの ごあんない', 'About the app'));
-    $('app-nudge-text').textContent = L('同じ 世界の、べつの 子に あえるよ（アプリ）', 'Meet another friend from the same world (app)');
+    { const t = $('app-nudge-text'), ja = L('JA', 'EN') === 'JA';   // 日本語は 漢字に ふりがな（ほかの 文と おなじ きまり）
+      if (!ja) t.textContent = 'Meet another friend from the same world (app)';
+      else { t.replaceChildren(); [['同', 'おな'], 'じ ', ['世界', 'せかい'], 'の、べつの ', ['子', 'こ'], 'に あえるよ（アプリ）'].forEach(x => { if (typeof x === 'string') { t.append(x); return; } const r = document.createElement('ruby'), rt = document.createElement('rt'); rt.setAttribute('aria-hidden', 'true'); rt.textContent = x[1]; r.append(x[0], rt); t.append(r); }); } }
     $('app-nudge-see').textContent = L('アプリを みる', 'See the app'); $('app-nudge-close').textContent = L('とじる', 'Close');
     $('app-nudge-q').textContent = L('そとの ページ（App Store）を ひらきます。いいですか？', 'This opens an outside page (the App Store). Is that OK?');
     $('app-nudge-home').textContent = L('ダウンロードや かいものは、おうちの ひとと いっしょに。', 'Please download and buy things together with a grown-up.');
