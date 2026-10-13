@@ -221,7 +221,7 @@ html[data-clean=true] #backdrop,html[data-clean=true] main > :not(#scene):not(.a
 #scene[data-area=B] #keeper{top:68%}
 #scene:is([data-phase=idle],[data-phase=caught]) #marufuwa{cursor:pointer;pointer-events:auto}
 /* 10/5 マスター「お店の キャラが ういてる」：足もとに 接地影と 小さな 屋台（台）。台は きつねの 下半身の 前に ならべて「台の うしろに 立つ」形に する。足の y は なかまと おなじ 地面ライン（58+.16x）*/
-#scene #keeper::before{display:block;content:"";position:absolute;z-index:1;left:50%;bottom:-3%;width:118%;height:27%;transform:translateX(-50%);border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#d9a35e 0 24%,#a8703a 24% 70%,#7d5128 70%);box-shadow:0 2px 0 #00000026;pointer-events:none}
+#scene #keeper::before{display:block;content:"";position:absolute;z-index:1;left:50%;right:auto;top:auto;bottom:-3%;width:118%;height:27%;   /* 10/14 マスター「お店の頭の木なんなん」：button::before（ツヤ・top:7%）が 台の 位置を 上書きして 頭の うえに 出ていた。top/right を もどす */transform:translateX(-50%);border-radius:5px 5px 3px 3px;background:linear-gradient(180deg,#d9a35e 0 24%,#a8703a 24% 70%,#7d5128 70%);box-shadow:0 2px 0 #00000026;pointer-events:none}
 #scene #keeper::after{content:"";position:absolute;z-index:-1;left:50%;bottom:-9%;width:132%;height:17%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,#00000066 0,#00000033 45%,#0000 72%);pointer-events:none}
 #keeper span{position:absolute;z-index:2;left:50%;top:auto;bottom:100%;margin-bottom:2px;transform:translateX(-50%);white-space:nowrap;font-size:.75rem;font-weight:900;color:#fff;background:#e8543f;border-radius:8px;padding:0 7px;border:2px solid #fff}
 #equip{position:absolute;z-index:4;left:2.5%;bottom:3%;font-size:.8rem;font-weight:800;line-height:1.5;background:#ffffffd9;border:2px solid #b9d1db;border-radius:12px;padding:3px 9px;pointer-events:none}
