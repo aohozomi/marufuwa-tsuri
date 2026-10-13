@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>キャンプば｜まるふわ ひろば</title>
+<meta name="description" content="まるふわと なかまが、よるの キャンプで たきびを かこんで います。さわると、たきびが ぱちっ。マシュマロが こんがり。てんすう・じかんは ありません。">
+<meta name="theme-color" content="#141c3e">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%232a3a66'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<script>
+// キャンプばは いつでも よる。「もじを おおきく」「うごきを へらす」だけ 本体の きろく marufuwa-tsuri-v1 から 読む（書かない）。
+try {
+  var early = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, root = document.documentElement;
+  if (early.large === true) root.dataset.large = 'true';
+  if (early.calm === true) root.dataset.calm = 'true';
+} catch (e) {}
+document.documentElement.dataset.time = 'n';
+</script>
+<style>
+:root{--ink:#2a2430;--ink2:#4a4358;--plate:#fffaf0;--line:#d9b27a;--btn1:#fff6e3;--btn2:#ffd9a8;--btn-line:#d99a55;--link:#7a3a14;--fire:#ffb347}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;padding:12px 12px 36px;
+  background:radial-gradient(1.5px 1.5px at 12% 10%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 34% 6%,#fffc 0 60%,#0000),radial-gradient(2px 2px at 58% 14%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 78% 7%,#fffc 0 60%,#0000),radial-gradient(2px 2px at 91% 20%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 22% 24%,#fffb 0 60%,#0000),linear-gradient(#141c3e,#2a3a66 60%,#1d3326);background-color:#1c2750}
+:root[data-inapp=x] body{padding-bottom:84px}
+.room{max-width:760px;margin:0 auto}
+.back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
+h1{margin:8px 0 2px;font-size:1.45rem;line-height:1.4;color:#fff6e3}
+.lead{margin:2px 0 10px;font-size:.95rem;color:#f1e9ff}
+.scene{position:relative;width:100%;aspect-ratio:600/380;border-radius:20px;overflow:hidden;border:3px solid #6b5a8a;box-shadow:0 8px 24px #0006;background:#141c3e}
+.scene svg{display:block;width:100%;height:100%}
+.hot{position:absolute;display:block;padding:0;margin:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#hot-fire{left:42%;top:46%;width:22%;height:34%}
+#hot-marsh{left:56%;top:58%;width:16%;height:22%}
+#hot-f1{left:15%;top:62%;width:16%;height:26%}
+#hot-f2{left:77%;top:62%;width:16%;height:26%}
+.say{margin:10px 0 8px;min-height:3.4em;padding:8px 14px;border-radius:16px;background:var(--plate);border:2px solid var(--line);font-size:1rem;font-weight:700;color:var(--ink)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.acts button{flex:1 1 150px;min-height:48px;min-width:44px;padding:6px 14px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer}
+.acts button:active{transform:translateY(1px)}
+button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a}
+.more{margin:14px 0 0}
+.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font-weight:800;cursor:pointer;list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.note{margin:8px 0 0;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.88rem;color:var(--ink2)}
+.note a{color:var(--link)}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* たきびの ゆらぎ：ゆっくり・ちいさく（いちばん 軽い CSS だけ）。うごきを へらす・calm では とめる */
+#flame{transform-box:fill-box;transform-origin:50% 100%;animation:flick 2.6s ease-in-out infinite alternate}
+@keyframes flick{from{transform:scale(1,.95)}to{transform:scale(1,1.04)}}
+#glow{transition:opacity .25s}
+.fire-pop #glow{opacity:1}
+.spark{animation:rise 1.1s ease-out forwards}
+@keyframes rise{from{opacity:.95;transform:translateY(0)}to{opacity:0;transform:translateY(-46px)}}
+#marsh-g{transition:transform .5s}
+#marsh{transition:fill .8s}
+.marsh-near #marsh-g{transform:translate(-44px,-26px)}
+.marsh-toast #marsh{fill:#d89a52}
+.marsh-gone #marsh-g{opacity:0}
+.talk{transform-box:fill-box;transform-origin:50% 100%;transform:scale(1.07)}
+@media(prefers-reduced-motion:reduce){#flame,.spark{animation:none!important}*{transition:none!important}}
+:root[data-calm=true] #flame,:root[data-calm=true] .spark{animation:none!important}
+:root[data-calm=true] *{transition:none!important}
+</style>
+</head>
+<body>
+<main class="room" id="room">
+  <a class="back" id="back" href="../index.html">← ひろば</a>
+  <h1>キャンプば</h1>
+  <p class="lead">よるの キャンプ。ゆっくり していって ね。</p>
+  <div class="scene" id="scene">
+    <svg id="svg" viewBox="0 0 600 380" role="img" aria-labelledby="svg-t">
+      <title id="svg-t">よるの キャンプば。たきびと テント、ゆれる みずうみ、まるいの こが 3にん、まるたに すわって います。</title>
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101736"/><stop offset=".6" stop-color="#2b3a6e"/><stop offset="1" stop-color="#46598f"/></linearGradient>
+        <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c4678"/><stop offset="1" stop-color="#1a2d52"/></linearGradient>
+        <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#24402f"/><stop offset="1" stop-color="#16281f"/></linearGradient>
+        <radialGradient id="gl" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffb347" stop-opacity=".62"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="600" height="380" fill="url(#sky)"/>
+      <g fill="#fffdf0">
+        <circle cx="50" cy="40" r="1.6"/><circle cx="120" cy="22" r="1.4"/><circle cx="190" cy="58" r="1.8"/><circle cx="262" cy="26" r="1.4"/><circle cx="330" cy="62" r="1.6"/><circle cx="395" cy="30" r="1.8"/><circle cx="548" cy="52" r="1.5"/><circle cx="575" cy="110" r="1.4"/><circle cx="85" cy="105" r="1.4"/><circle cx="235" cy="108" r="1.5"/><circle cx="305" cy="118" r="1.3"/><circle cx="510" cy="132" r="1.4"/>
+      </g>
+      <circle cx="470" cy="70" r="40" fill="#fff6c8" opacity=".12"/><circle cx="470" cy="70" r="22" fill="#fff6c8"/><circle cx="478" cy="64" r="22" fill="#2a3a6e" opacity=".0"/>
+      <path d="M0 168 Q70 128 150 160 T300 150 T450 158 T600 140 V210 H0Z" fill="#1c3345"/>
+      <rect y="190" width="600" height="70" fill="url(#lake)"/>
+      <ellipse cx="470" cy="204" rx="22" ry="3.4" fill="#fff6c8" opacity=".55"/><ellipse cx="470" cy="214" rx="14" ry="2.4" fill="#fff6c8" opacity=".32"/><ellipse cx="470" cy="223" rx="8" ry="1.8" fill="#fff6c8" opacity=".2"/>
+      <path d="M60 222 q22 -4 44 0 M210 234 q26 -4 52 0 M340 218 q18 -3 36 0" stroke="#7aa0d8" stroke-width="1.6" fill="none" opacity=".5" stroke-linecap="round"/>
+      <path d="M0 252 Q150 238 300 248 T600 244 V380 H0Z" fill="url(#grass)"/>
+      <!-- テント（art-tent：天の 絵が とどいたら img/camp/tent.webp に かわる） -->
+      <g id="art-tent">
+        <polygon points="130,178 40,290 230,290" fill="#e9a36a"/>
+        <polygon points="130,178 130,290 230,290" fill="#d38b52"/>
+        <polygon points="130,214 98,290 162,290" fill="#4b2f26"/>
+        <path d="M130 178 V290" stroke="#6b3d22" stroke-width="2"/>
+        <circle cx="130" cy="176" r="3" fill="#fff6c8"/>
+      </g>
+      <!-- たきび -->
+      <circle id="glow" cx="330" cy="262" r="118" fill="url(#gl)" opacity=".8"/>
+      <g id="art-fire">
+        <g stroke="#3b2418" stroke-width="1.5"><rect x="292" y="278" width="76" height="14" rx="7" fill="#7a4a2a" transform="rotate(-8 330 285)"/><rect x="292" y="278" width="76" height="14" rx="7" fill="#8a5632" transform="rotate(8 330 285)"/></g>
+        <g id="flame">
+          <path d="M330 214 C 354 240 362 262 348 282 C 340 292 320 292 312 282 C 298 262 308 240 330 214Z" fill="#ff9a3c"/>
+          <path d="M330 236 C 345 254 348 268 340 280 C 334 288 326 288 320 280 C 312 268 316 254 330 236Z" fill="#ffc94d"/>
+          <path d="M330 258 C 338 268 338 276 333 282 C 330 285 328 285 326 282 C 321 276 322 268 330 258Z" fill="#fff3b0"/>
+        </g>
+        <g id="sparks"></g>
+      </g>
+      <!-- まるた（art-log） -->
+      <g id="art-log" stroke="#3b2418" stroke-width="1.5">
+        <rect x="92" y="326" width="120" height="26" rx="13" fill="#8a5a34"/><ellipse cx="96" cy="339" rx="6" ry="12" fill="#c99a6a"/>
+        <rect x="270" y="346" width="120" height="26" rx="13" fill="#7a4a2a"/><ellipse cx="274" cy="359" rx="6" ry="12" fill="#c99a6a"/>
+        <rect x="448" y="326" width="120" height="26" rx="13" fill="#8a5a34"/><ellipse cx="452" cy="339" rx="6" ry="12" fill="#c99a6a"/>
+      </g>
+      <!-- なかま（かりの え：まるい からだ・ひとふでの えがお） -->
+      <g id="f1" transform="translate(152 312)"><circle r="30" fill="#ffd9e0" stroke="#d08aa0" stroke-width="2"/><circle cx="-10" cy="-4" r="3" fill="#3b2a30"/><circle cx="10" cy="-4" r="3" fill="#3b2a30"/><path d="M-7 8 Q0 15 7 8" stroke="#3b2a30" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="-19" cy="6" r="4.5" fill="#ff9fb0" opacity=".6"/><circle cx="19" cy="6" r="4.5" fill="#ff9fb0" opacity=".6"/></g>
+      <g id="f0" transform="translate(330 330)"><circle r="32" fill="#fff8ec" stroke="#cdb994" stroke-width="2"/><circle cx="-10" cy="-4" r="3.2" fill="#3b2a30"/><circle cx="10" cy="-4" r="3.2" fill="#3b2a30"/><path d="M-7 9 Q0 16 7 9" stroke="#3b2a30" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="-20" cy="6" r="4.8" fill="#ffb0a0" opacity=".6"/><circle cx="20" cy="6" r="4.8" fill="#ffb0a0" opacity=".6"/></g>
+      <g id="f2" transform="translate(508 312)"><circle r="30" fill="#d8f0d0" stroke="#8cbf84" stroke-width="2"/><circle cx="-10" cy="-4" r="3" fill="#2a3a2a"/><circle cx="10" cy="-4" r="3" fill="#2a3a2a"/><path d="M-7 8 Q0 15 7 8" stroke="#2a3a2a" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="-19" cy="6" r="4.5" fill="#a8d89c" opacity=".7"/><circle cx="19" cy="6" r="4.5" fill="#a8d89c" opacity=".7"/></g>
+      <!-- マシュマロの ぼう（art-marsh） -->
+      <g id="art-marsh"><g id="marsh-g">
+        <line x1="352" y1="318" x2="404" y2="270" stroke="#7a4a2a" stroke-width="3" stroke-linecap="round"/>
+        <rect id="marsh" x="392" y="256" width="26" height="22" rx="9" fill="#ffffff" stroke="#c9b9a0" stroke-width="1.5" transform="rotate(-38 405 267)"/>
+      </g></g>
+    </svg>
+    <button class="hot" id="hot-fire" type="button" tabindex="-1" aria-hidden="true"></button>
+    <button class="hot" id="hot-marsh" type="button" tabindex="-1" aria-hidden="true"></button>
+    <button class="hot" id="hot-f1" type="button" tabindex="-1" aria-hidden="true"></button>
+    <button class="hot" id="hot-f2" type="button" tabindex="-1" aria-hidden="true"></button>
+  </div>
+  <p class="say" id="say" role="status" aria-live="polite">たきびが、ぱち ぱち。ゆっくり していって ね。</p>
+  <div class="acts">
+    <button type="button" id="b-fire">🔥 たきびに さわる</button>
+    <button type="button" id="b-marsh">🍡 マシュマロを やく</button>
+    <button type="button" id="b-talk">💬 なかまと はなす</button>
+  </div>
+  <details class="more"><summary>おうちの かたへ</summary><p class="note" id="note">ここは、のんびり すごすための ばしょです。てんすう・じかん・ランキングは ありません。さわっても、なにも へらず、しっぱいも ありません。うごきを へらす せっていでは、たきびの ゆらぎを とめます。えは かりの ものです（あとで かわります）。<a href="../../anshin/">おうちの かたへ</a></p></details>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const isEn = () => !!(window.TsuriEn && window.TsuriEn.lang === 'en');
+  const L = (ja, en) => isEn() ? en : ja;
+  const calm = () => document.documentElement.dataset.calm === 'true' || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const say = $('say');
+  const LINES = [
+    ['まつ じかんも、おいしいね', 'Even the waiting is yummy.'],
+    ['ほしが きれいだね', 'The stars are lovely.'],
+    ['あったかいね', 'It’s so warm.'],
+    ['ゆっくりで いいよ', 'Slow is just fine.'],
+    ['また いつでも', 'Come back anytime.']
+  ];
+  let li = Math.floor(Math.random() * LINES.length), speaker = 0;
+  const setSay = (ja, en) => { say.textContent = L(ja, en); };
+  // ちいさな ぱちっ（低め・みじかい。つりびよりの「おと」を きって いたら ならさない）
+  let ac = null;
+  function pop() {
+    try {
+      const st = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}; if (st.sound === false) return;
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
+      const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(240, t); o.frequency.exponentialRampToValueAtTime(110, t + .07);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.09, t + .005); g.gain.exponentialRampToValueAtTime(.0001, t + .09);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + .1);
+    } catch (e) {}
+  }
+  const popFire = () => {
+    pop();
+    const sc = $('scene'); sc.classList.add('fire-pop'); setTimeout(() => sc.classList.remove('fire-pop'), 450);
+    if (!calm()) {
+      const g = $('sparks'); const ns = 'http://www.w3.org/2000/svg';
+      for (let i = 0; i < 5; i++) {
+        const c = document.createElementNS(ns, 'circle'); c.setAttribute('class', 'spark');
+        c.setAttribute('cx', String(318 + Math.round(Math.random() * 24))); c.setAttribute('cy', String(228 + Math.round(Math.random() * 18)));
+        c.setAttribute('r', '2.2'); c.setAttribute('fill', '#ffd27a'); g.append(c); setTimeout(() => c.remove(), 1200);
+      }
+    }
+    setSay('ぱちっ。あったかいね', 'Pop! So warm.');
+  };
+  // マシュマロ：0=まえ（ぼうの さき・しろい）→1=たきびに かざす（こんがり）→2=ぱくっ→0。やけすぎ・しっぱいは ない
+  let ms = 0, msTimer = 0;
+  function marsh() {
+    const sc = $('scene'); clearTimeout(msTimer);
+    if (ms === 0) { ms = 1; sc.classList.add('marsh-near'); sc.classList.add('marsh-toast'); setSay('こんがり。いい においが するね。もういちど さわると、たべられるよ', 'Golden brown. Smells so good. Touch again to eat it.'); }
+    else if (ms === 1) { ms = 2; sc.classList.add('marsh-gone'); setSay('ぱくっ。あまくて おいしいね', 'Munch! Sweet and yummy.'); msTimer = setTimeout(reset, 1600); }
+    else { reset(); }
+  }
+  function reset() { clearTimeout(msTimer); ms = 0; const sc = $('scene'); sc.classList.remove('marsh-near', 'marsh-toast', 'marsh-gone'); }
+  function talk(who) {
+    document.querySelectorAll('#f0,#f1,#f2').forEach(e => e.classList.remove('talk'));
+    speaker = typeof who === 'number' ? who : (speaker + 1) % 3;
+    const el = $('f' + speaker); if (el) el.classList.add('talk');
+    const l = LINES[li % LINES.length]; li++;
+    setSay(l[0], l[1]);
+  }
+  $('b-fire').addEventListener('click', popFire); $('hot-fire').addEventListener('click', popFire);
+  $('b-marsh').addEventListener('click', marsh); $('hot-marsh').addEventListener('click', marsh);
+  $('b-talk').addEventListener('click', () => talk());
+  $('hot-f1').addEventListener('click', () => talk(1)); $('hot-f2').addEventListener('click', () => talk(2));
+  $('f0').addEventListener('click', () => talk(0));
+  // 天の 絵の さしかえ口：../../img/camp/<tent|fire|log|marsh>.webp が あれば コードの かりの 絵と いれかえる
+  const SLOTS = { tent: ['art-tent', 20, 160, 230, 140], fire: ['art-fire', 280, 200, 100, 100], log: ['art-log', 80, 316, 500, 60], marsh: ['art-marsh', 380, 244, 60, 80] };
+  Object.keys(SLOTS).forEach(k => {
+    const im = new Image(); im.onload = () => {
+      const s = SLOTS[k], g = $(s[0]); if (!g) return; const svgi = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+      svgi.setAttribute('href', im.src); svgi.setAttribute('x', s[1]); svgi.setAttribute('y', s[2]); svgi.setAttribute('width', s[3]); svgi.setAttribute('height', s[4]);
+      svgi.setAttribute('preserveAspectRatio', 'xMidYMid meet'); g.style.display = 'none'; g.parentNode.insertBefore(svgi, g);
+    };
+    im.src = '../../img/camp/' + k + '.webp';
+  });
+  // English
+  const EX = {
+    'キャンプば｜まるふわ ひろば': 'Campsite | Marufuwa Plaza', 'キャンプば': 'Campsite', '← ひろば': '← Plaza',
+    'よるの キャンプ。ゆっくり していって ね。': 'A night at the campsite. Take your time.',
+    'たきびが、ぱち ぱち。ゆっくり していって ね。': 'The fire goes crackle, crackle. Take your time.',
+    '🔥 たきびに さわる': '🔥 Touch the fire', '🍡 マシュマロを やく': '🍡 Toast a marshmallow', '💬 なかまと はなす': '💬 Talk with friends',
+    'おうちの かたへ': 'For grown-ups',
+    'ここは、のんびり すごすための ばしょです。てんすう・じかん・ランキングは ありません。さわっても、なにも へらず、しっぱいも ありません。うごきを へらす せっていでは、たきびの ゆらぎを とめます。えは かりの ものです（あとで かわります）。': 'This is a place to relax. There are no scores, timers or rankings. Nothing is lost by touching, and nothing can go wrong. With “less motion” turned on, the flicker of the fire stops. The pictures are temporary (they will change later).',
+    'よるの キャンプば。たきびと テント、ゆれる みずうみ、まるいの こが 3にん、まるたに すわって います。': 'A night campsite: a campfire, a tent, a shimmering lake, and three round friends sitting on logs.'
+  };
+  const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
+  const title = () => { if (isEn()) { document.title = 'Campsite | Marufuwa Plaza'; if (say.dataset.first !== '1' && ms === 0) say.textContent = 'The fire goes crackle, crackle. Take your time.'; } };
+  document.addEventListener('DOMContentLoaded', () => { reg(); title(); setTimeout(title, 300); });
+  addEventListener('load', () => { reg(); title(); });
+  window.Camp = { fire: popFire, marsh, talk, state: () => ({ ms, speaker }), lines: LINES.length };
+})();
+</script>
+<script src="../../tsuri-town.js"></script>
+<script defer src="../../tsuri-bgm.js"></script>
+<script defer src="../../tsuri-pagesound.js"></script>
+<script defer src="../../tsuri-en.js"></script>
+<script defer src="../../tsuri-en-hiroba.js"></script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageSound) PageSound.init({ tap: true, mount: document.getElementById('back'), bgm: 'camp', time: () => 'n' }); });</script>
+</body>
+</html>
