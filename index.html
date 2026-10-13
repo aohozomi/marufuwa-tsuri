@@ -255,6 +255,11 @@ body.gazing main{min-height:100dvh;display:flex;flex-direction:column;justify-co
 #photo-clip[hidden]{display:none}
 #photo-img[hidden]{display:none}
 .photo-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:8px}
+.photo-more{margin:0 0 8px}
+.photo-more>summary{display:flex;align-items:center;justify-content:center;min-height:44px;width:max-content;max-width:100%;margin:0 auto;padding:4px 18px;border:2px solid currentColor;border-radius:999px;font-weight:800;cursor:pointer;color:inherit;list-style:none}
+.photo-more>summary::-webkit-details-marker{display:none}
+.photo-more>summary::after{content:" ▾"}.photo-more[open]>summary::after{content:" ▴"}
+.photo-more[open]>summary{margin-bottom:6px}
 .pill{--c1:#3495c5;--c2:#10587e;--side:#0b425f;--ink:#fff;display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:6px 16px;font-size:.95rem;text-decoration:none;text-shadow:0 2px 0 #083a55}   /* 白い 字の コントラスト 4.5対1 いじょう（まえは 2.7対1） */
 .pill[hidden]{display:none}
 .pill.quiet{--c1:#ffffffd9;--c2:#bfe6f9b3;--side:#9cc9e0;--ink:#244653;text-shadow:none}   /* ひかえめな リンク（おうちの かたへ）。ふつうの ボタンと おなじ 色 */
@@ -3406,9 +3411,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       ctx.fillStyle = '#ff5a3c'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 42px system-ui,sans-serif'; ctx.fillText('!?', 622, 264); ctx.restore();
     }
     ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.shadowColor = '#0006'; ctx.shadowBlur = 6;
-    ctx.font = 'bold 32px system-ui,sans-serif'; ctx.fillText(EN() ? 'Caught ' + save.total + '  ·  Stickers ' + seenCount() + '/' + BASE + '  ·  ' + LV() : 'つれた かず ' + save.total + '　シールちょう ' + seenCount() + ' / ' + BASE + '　' + LV(), 46, 596);
-    ctx.font = 'bold 28px system-ui,sans-serif'; ctx.fillText(TAG(), 46, 642);   // えの なかには さくしゃの なまえは いれない
-    ctx.textAlign = 'right'; ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, ''), 1160, 644);   // すみに ちいさく、あそべる ばしょ（この 1まいだけの れいがい・マスター 許可）
+    ctx.font = 'bold 40px system-ui,sans-serif'; ctx.fillText(EN() ? 'Caught ' + save.total + '  ·  Stickers ' + seenCount() + '/' + BASE + '  ·  ' + LV() : 'つれた かず ' + save.total + '　シールちょう ' + seenCount() + ' / ' + BASE + '　' + LV(), 46, 590);   // 10/14：下の おびの 文字を 大きく（スマホで 見て 約 15px 相当）
+    ctx.font = 'bold 34px system-ui,sans-serif'; ctx.fillText(TAG(), 46, 640);   // えの なかには さくしゃの なまえは いれない
+    ctx.textAlign = 'right'; ctx.font = 'bold 38px system-ui,sans-serif'; ctx.fillText(HOME.replace(/^https?:[/][/]/, '').replace(/[/]$/, '') + (EN() ? '/en/' : ''), 1160, 642);   // 英語の カードは 英語の 入口（/en/）   // すみに ちいさく、あそべる ばしょ（この 1まいだけの れいがい・マスター 許可）
     ctx.shadowBlur = 0;
     const words = EN()
       ? 'Went fishing with Marufuwa!\n' + last.fish.name + '  ' + cm(last.size) + ' cm ' + starsOf(last.fish, last.nushi) + (last.tags.length ? '\n' + last.tags.map(T).join(' · ') : '') + (last.lucky ? '\nEveryone has the same lucky fish today!' : '') + '\n' + TAG() + '\n' + HOME_SHARE()
@@ -3595,6 +3600,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     vid.id = 'photo-video'; vid.type = 'button'; vid.className = 'pill'; vid.hidden = true;
     clip.id = 'photo-clip'; clip.hidden = true; clip.controls = true; clip.loop = true; clip.muted = true; clip.setAttribute('playsinline', ''); $('photo-img').after(clip);   // 見た目は CSS（#photo-clip）。inline の display:block が hidden に 勝って、どうがの 黒い はこが いつも 見えていた（10/6 直し）
     vsave.id = 'photo-clip-save'; vsave.className = 'pill'; vsave.hidden = true; vshare.id = 'photo-clip-share'; vshare.type = 'button'; vshare.className = 'pill'; vshare.hidden = true; row.append(vid, vsave, vshare);
+    // 10/14 写真カードの 1次操作：見える ボタンを 1〜2こ（みせる／ほぞん）にして、ほかは「ほかの ほうほう」に たたむ（12こ → 見えるのは 2〜3こ）。PC（きょうゆう なし）は ひらいた まま（いままでと おなじ）
+    const more = document.createElement('details'), moreSum = document.createElement('summary'), moreRow = document.createElement('div'); more.className = 'photo-more'; more.id = 'photo-more'; moreSum.id = 'photo-more-sum'; moreRow.className = 'photo-actions'; more.append(moreSum, moreRow); row.after(more);
+    ['photo-x', 'photo-copy', 'photo-invite', 'photo-tall', 'photo-wall', 'photo-name', 'photo-video'].forEach(id => { const e = $(id); if (e) moreRow.append(e); });   // どうがを つくった あとの「ほぞん／みせる」は 1次の ぎょうに のこす
     videoOk = () => typeof MediaRecorder === 'function' && !!HTMLCanvasElement.prototype.captureStream && !reduce();   // 対応ブラウザだけ・「うごきを へらす」では 出さない
     resetClip = () => { paintVideo(); clip.hidden = true; try { clip.pause(); } catch {} clip.removeAttribute('src'); if (videoUrl) { URL.revokeObjectURL(videoUrl); videoUrl = ''; } $('photo-img').hidden = false; vsave.hidden = vshare.hidden = true; vid.disabled = false; };
     const paintVideo = () => { clip.setAttribute('aria-label', L('どうが', 'Video')); vid.textContent = L('どうがで おしえる', 'Share as a video'); vid.setAttribute('aria-label', L('どうがで おしえる。3びょうの どうがを この たんまつの なかで つくるよ', 'Share as a video. A 3-second video is made on this device')); vsave.textContent = L('どうがを ほぞんする', 'Save the video'); vshare.textContent = L('どうがを みせる（きょうゆう）', 'Share the video'); };
@@ -3611,7 +3619,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         st.textContent = L('どうがが できたよ。この たんまつの なかだけで つくったよ。かってに とうこうは しません。', 'Your video is ready. It was made on this device only. Nothing is posted automatically.');
       } catch { vid.disabled = false; st.textContent = L('どうがを つくれなかったよ。', 'Could not make the video.'); }
     });
-    const paint = () => { paintVideo(); paintName(); paintTall(); wall.textContent = L('かべがみに する', 'Make a wallpaper'); copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
+    const paint = () => { moreSum.textContent = L('ほかの ほうほう', 'More ways'); paintVideo(); paintName(); paintTall(); wall.textContent = L('かべがみに する', 'Make a wallpaper'); copy.textContent = L('がぞうを コピー', 'Copy the picture'); invite.textContent = L('ともだちに おしえる', 'Tell a friend'); invite.setAttribute('aria-label', L('ともだちに おしえる。おうちの ひとと いっしょに つかってね', 'Tell a friend. Please use it together with a grown-up')); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint); else paint();
     copy.addEventListener('click', async () => {
       const st = $('photo-status');
@@ -3643,6 +3651,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('photo-x').href = 'https://x.com/intent/tweet?' + new URLSearchParams({text: KJ(words)});
     $('photo-share').hidden = !(navigator.share && navigator.canShare && navigator.canShare({files: [photoFile]}));
     $('photo-copy').hidden = !(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write);   // がぞうを コピー：つかえる たんまつだけ
+    $('photo-more').open = $('photo-share').hidden;   // きょうゆうが つかえない（PC）ときは ひらいた まま
     if (!$('photo-share').hidden) $('photo-share').parentElement.prepend($('photo-share'));   // スマホは「きょうゆう」（しゃしん つき・1タップ）を いちばん さきに。「ほぞんして から Xに そえる」は うしろ
     $('photo-share').onclick = async () => { try { await navigator.share({files: [photoFile], text: KJ(words)}); status.textContent = 'きょうゆうの がめんを とじました。'; } catch (error) { status.textContent = error.name === 'AbortError' ? 'やめました。' : '「ほぞんする」を つかってね。'; } };
   }
