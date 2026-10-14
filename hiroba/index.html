@@ -3525,7 +3525,7 @@ const api = window.Hiroba = {
 //   tsuri-en.js は ページの 題・ロゴを 「つりびより」に して しまうので、load の あとに ひろば用に 直す（h1 に data-en を つけて、ロゴの 作りかえを ふせいで ある）
 addEventListener('load', () => {
   const E = window.TsuriEn; if (!E || E.lang !== 'en') return;
-  document.title = "Marufuwa's Plaza — Marufuwa Days";
+  document.title = "Marufuwa's Plaza — Marufuwa Fishing Days";
   const meta = document.querySelector('meta[name=description]'); if (meta) meta.content = "A little town to play in. Marufuwa and friends walk around the plaza. Go fishing or visit Marufuwa's Room. No rush.";
   const mobileHint = document.querySelector('.mobile-destination-hint'); if (mobileHint) mobileHint.textContent = 'On a phone, scroll down to choose a destination.';
   const mobileInstruction = document.querySelector('.mobile-destination-instruction'); if (mobileInstruction) mobileInstruction.textContent = 'On a phone, scroll down to choose a destination.';
