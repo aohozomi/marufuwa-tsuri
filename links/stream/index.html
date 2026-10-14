@@ -96,7 +96,16 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   </section>
 
   <section aria-labelledby="h-se"><h2 id="h-se">こうかおん</h2>
-    <p class="small" id="t-se" style="margin-top:0">こうかおんは いま おやすみちゅう です。つかえる ように なったら、ここに かきます。</p>
+    <p class="small" id="t-se" style="margin-top:0">ゲームの こうかおん（なげる・ぴったり・つれた など）は、BGM と おなじ きまりで つかえます。</p>
+  </section>
+  <!-- 10/14 参謀：このページに来るのは配信者。BOOTH の配信ツールをここから繋ぐ -->
+  <section aria-labelledby="h-booth"><h2 id="h-booth">はいしんで つかえる そざいも あります</h2>
+    <ul>
+      <li id="t-bo1">うごく りせきがめん（むりょう あり）</li>
+      <li id="t-bo2">とうひょうボード・じゅんばんまちボード（OBS・わんコメ たいおう）</li>
+      <li id="t-bo3">うたわく セトリ がぞう メーカー（むりょう）</li>
+    </ul>
+    <p class="small"><a id="a-booth" href="https://hozumi-ao.booth.pm/" target="_blank" rel="noopener noreferrer">BOOTH で みる（そとの ページ）</a></p>
   </section>
 </main>
 <script defer src="../../tsuri-ruby-dict.js"></script>
@@ -132,7 +141,8 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   set('t-bgm1', 'くわしくは OpenTracks の ライセンスを みてね。', 'See the OpenTracks license for details.');
   set('b-lic', 'ライセンスの ページ（そと）', 'License page (outside)');
   set('q-lic', 'そとの ページを ひらきます。いいですか？', 'This opens an outside page. Is that OK?'); set('a-lic', 'ひらく', 'Open'); set('n-lic', 'やめる', 'Cancel');
-  set('h-se', 'こうかおん', 'Sound effects'); set('t-se', 'こうかおんは いま おやすみちゅう です。つかえる ように なったら、ここに かきます。', 'Sound effects are paused for now. We will write here when they are available.');
+  set('h-se', 'こうかおん', 'Sound effects'); set('t-se', 'ゲームの こうかおん（なげる・ぴったり・つれた など）は、BGM と おなじ きまりで つかえます。', 'The game’s sound effects (cast, “just right”, caught, and so on) can be used under the same rules as the BGM.');
+  set('h-booth', 'はいしんで つかえる そざいも あります', 'Stream assets are available too'); set('t-bo1', 'うごく りせきがめん（むりょう あり）', 'Animated “be right back” screens (free ones available)'); set('t-bo2', 'とうひょうボード・じゅんばんまちボード（OBS・わんコメ たいおう）', 'Poll board and queue board (OBS / OneComme)'); set('t-bo3', 'うたわく セトリ がぞう メーカー（むりょう）', 'Karaoke setlist image maker (free)'); set('a-booth', 'BOOTH で みる（そとの ページ）', 'See them on BOOTH (outside page)');
   const say = t => { const l = $('live'); l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); };
   $('copy').addEventListener('click', async () => {
     const text = $('copytext').textContent; let ok = false;
