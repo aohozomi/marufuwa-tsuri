@@ -145,7 +145,7 @@
       if (l3) wrap(l3, 120, W - 240, 40, ink, true);
       y += 18;
     }
-    c.fillStyle = soft; c.font = font(28, false); c.textAlign = 'center'; c.fillText(T('まるふわ びより', 'Marufuwa Days'), W / 2, H - 90);
+    c.fillStyle = soft; c.font = font(28, false); c.textAlign = 'center'; c.fillText(T('まるふわ びより', 'Marufuwa Fishing Days'), W / 2, H - 90);
     cv.toBlob(blob => {
       if (!blob) return;
       const file = new File([blob], 'marufuwa-note.png', { type: 'image/png' });
