@@ -95,13 +95,24 @@
     });
     return frag;
   }
+  // よみあげ名の まもり（10/15 参謀の 指摘）：ボタン・リンクの 文字を ふりがな付きに かえると、よみあげ道具に よっては 漢字と よみが 落ちて「げる」「りをかえる」に なる
+  // → ボタン・リンク・summary には、もとの ひらがなの 文を aria-label に 入れる（作者が 自分で aria-label を 書いた ものは さわらない）。文字が かわる たびに 入れなおす（古い 名前が のこらない）
+  const LABELED = 'button,a,summary,[role=button],[role=link],[role=tab]';
+  function plainOf(el) { let s = ''; for (const n of el.childNodes) { if (n.nodeType === 3) s += n.data; else if (n.nodeType === 1) { if (n.getAttribute('aria-hidden') === 'true') continue; if (n.tagName === 'RUBY') { const rt = n.querySelector('rt'); s += rt ? rt.textContent : n.textContent; } else if (n.tagName !== 'RT' && n.tagName !== 'RP') s += plainOf(n); } } return s; }
+  function relabel(par) {
+    const el = par && par.nodeType === 1 && par.closest ? par.closest(LABELED) : null; if (!el) return;
+    if (el.hasAttribute('aria-label') && !el.hasAttribute('data-rubylabel')) return;   // 作者の aria-label は そのまま
+    const label = plainOf(el).replace(/\s+/g, ' ').trim(); if (!label) return;
+    if (el.getAttribute('aria-label') !== label) { el.setAttribute('aria-label', label); el.setAttribute('data-rubylabel', '1'); }
+  }
   function processText(tn) {
     if (made.has(tn) || !tn.parentNode || skip(tn)) return;
-    const parts = convert(tn.data, ensureDict()); if (!parts) return;
+    const parts = convert(tn.data, ensureDict()); if (!parts) { relabel(tn.parentNode); return; }
     const frag = build(tighten(parts)), par = tn.parentNode;
     // ふくろが flex／grid（.pill など）だと ruby が ひとつずつ ばらばらの 箱に なり、折り返しや ふりがなの 位置が くずれる → ひとつの span に まとめて 1つの 箱に する
     let box = false; try { box = par.nodeType === 1 && (par.classList.contains('pill') || /flex|grid/.test(getComputedStyle(par).display)); } catch {}
     if (box) { const w = document.createElement('span'); w.className = 'rbw'; w.append(frag); par.replaceChild(w, tn); } else par.replaceChild(frag, tn);
+    relabel(par);
   }
   function walk(rootNode) {
     if (!rootNode || skip(rootNode)) return;

@@ -574,7 +574,7 @@ body.calm .cloud.c2{left:28%}
   <div class="top">
     <h1 class="logo" data-noruby data-en="1" aria-label="まるふわの ひろば"><span style="--n:0" aria-hidden="true">ま</span><span style="--n:1" aria-hidden="true">る</span><span style="--n:2" aria-hidden="true">ふ</span><span style="--n:3" aria-hidden="true">わ</span><span style="--n:4" aria-hidden="true">の</span><i aria-hidden="true"></i><span style="--n:5" aria-hidden="true">ひ</span><span style="--n:6" aria-hidden="true">ろ</span><span style="--n:7" aria-hidden="true">ば</span></h1>
     <p id="tap-hint" class="mutehint" style="left:0;right:auto" role="status" hidden>どこかを さわると おとが なるよ</p>
-    <span class="mutegrp"><button type="button" id="lv-btn" class="lvbtn" aria-label="まちレベル。くわしく みる" title="まちレベル">Lv.1</button><span class="mutehint" id="mutehint" hidden aria-hidden="true">ミュートボタンは こちら →</span><button type="button" id="mute" class="mutebtn" aria-pressed="true" aria-label="おとを けす（いまは ON）"><span aria-hidden="true" style="margin-right:.3em">🔊</span>おと：ON</button></span>
+    <span class="mutegrp"><button type="button" id="lv-btn" class="lvbtn" aria-label="まちレベル。くわしく みる" title="まちレベル">まち Lv.1</button><span class="mutehint" id="mutehint" hidden aria-hidden="true">ミュートボタンは こちら →</span><button type="button" id="mute" class="mutebtn" aria-pressed="true" aria-label="おとを けす（いまは ON）"><span aria-hidden="true" style="margin-right:.3em">🔊</span>おと：ON</button></span>
     <div class="hud-wrap">
       <button id="hud-gear" class="hud-gear" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="hud-panel"><b aria-hidden="true">⚙</b><span>せってい</span></button>
       <div class="hud" id="hud-panel" role="group" aria-label="おと・BGM・うごきの せってい" hidden>
@@ -2399,7 +2399,7 @@ function lvParts() {
   return { fish, first, visits, all, stickers, full, total: fish + first + visits + (all ? 5 : 0) + (full ? 20 : 0) };
 }
 let lvShown = 0;
-function lvPaint(up) { const b = $('lv-btn'); if (!b) return; const p = lvParts(); b.textContent = 'Lv.' + p.total; b.setAttribute('aria-label', S('まちレベル ' + p.total + '。くわしく みる', 'Town level ' + p.total + '. Details')); if (up) { b.dataset.up = 'true'; setTimeout(() => { delete b.dataset.up; }, 700); } lvShown = p.total; }
+function lvPaint(up) { const b = $('lv-btn'); if (!b) return; const p = lvParts(); b.textContent = S('まち Lv.', 'Town Lv.') + p.total; /* 10/15 参謀：つりの「つりびと レベル」と 区別が つくように 名前を つける */ b.setAttribute('aria-label', S('まちレベル ' + p.total + '。くわしく みる', 'Town level ' + p.total + '. Details')); if (up) { b.dataset.up = 'true'; setTimeout(() => { delete b.dataset.up; }, 700); } lvShown = p.total; }
 function lvVisit(id) {
   if (!LV_PLACES.includes(id)) return;
   const r = lvRec(), before = lvParts().total, today = new Date().toISOString().slice(0, 10);
@@ -2929,15 +2929,35 @@ function loadInnImageCapture() {
 }
 const svgCache = new Map();   // 動画の 材料づくり用：おなじ 絵を くりかえし 読まない（多すぎたら 空に する）
 const svgImageCached = async svg => { let im = svgCache.get(svg); if (!im) { im = await svgImage(svg); if (svgCache.size > 80) svgCache.clear(); svgCache.set(svg, im); } return im; };
+// しゃしんの 絵の 中の 写真（<image href="assets/…png">：しろ・いえ・やま・き）：SVG を 絵に する とき、そとの ファイルは よみこめず 空に なる（10/15 参謀「カードに しろも いえも 写って いない」の 原因）
+// → さきに ファイルを よんで data: の 文字に して、SVG の 中に うめこむ。おなじ サイトの ファイルだけ・1回 よんだら おぼえる
+const svgImgData = new Map();
+async function inlineSvgImages(rootEl) {
+  const jobs = [];
+  for (const im of (rootEl || scene).querySelectorAll('image')) {
+    const href = im.getAttribute('href') || im.getAttribute('xlink:href'); if (!href || href.startsWith('data:') || svgImgData.has(href)) continue;
+    svgImgData.set(href, '');   // よみこみ中の 印（2回 よまない）
+    const mime = /\.webp(\?|$)/i.test(href) ? 'image/webp' : /\.png(\?|$)/i.test(href) ? 'image/png' : /\.jpe?g(\?|$)/i.test(href) ? 'image/jpeg' : /\.svg(\?|$)/i.test(href) ? 'image/svg+xml' : '';   // 種類は 名前から（サーバーの 申告に たよらない）
+    jobs.push(fetch(new URL(href, location.href)).then(r => r.ok ? r.blob() : Promise.reject(r.status)).then(b => new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(''); fr.readAsDataURL(b); })).then(d => { if (d && mime) d = d.replace(/^data:[^;]*;/, 'data:' + mime + ';'); svgImgData.set(href, d || ''); }).catch(() => {}));
+  }
+  if (jobs.length) await Promise.all(jobs);
+}
 function svgText(svgEl, cs, w, h) {   // いろの へんすう（var(--x)）を その ばで 実際の いろに して、えに できる かたちに する
   const c = svgEl.cloneNode(true); c.setAttribute('width', String(Math.round(w))); c.setAttribute('height', String(Math.round(h)));
+  // 中の 写真：いま 見えて いない もの（ひる／よるの 片方・かげ）は 外す（ページの CSS は 絵に ついて いかない ので、ここで 決める）。見えて いる ものは data: の 文字に する
+  const origs = svgEl.querySelectorAll('image'), clones = c.querySelectorAll('image');
+  clones.forEach((im, i) => {
+    const o = origs[i]; if (o) { let hid = false; try { const s = getComputedStyle(o); hid = s.display === 'none' || s.visibility === 'hidden' || parseFloat(s.opacity) === 0; if (!hid && parseFloat(s.opacity) < 1) im.setAttribute('opacity', s.opacity); } catch {} if (hid) { im.remove(); return; } }
+    const href = im.getAttribute('href') || im.getAttribute('xlink:href'), d = href && svgImgData.get(href); if (d) { im.setAttribute('href', d); im.removeAttribute('xlink:href'); }
+  });
   return new XMLSerializer().serializeToString(c).replace(/var\(--([a-z0-9-]+)\s*(?:,\s*([^)]*))?\)/gi, (m, name, fallback) => cs.getPropertyValue('--' + name).trim() || (fallback || '').trim() || 'none');
 }
 function roundPath(ctx, x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); }
 async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cache }。ふだんの しゃしんは 引数なし（PNG）。動画の 材料づくりでは JPEG・おびを 時間の 名前に・ぴょん／ながれぼしも 描く
   measure();
+  try { await inlineSvgImages(scene); } catch {}
   const svgImg = o.cache ? svgImageCached : svgImage;
-  const OW = 1080, OH = 1920, S = o.video ? 2.9 : 2.78, PVW = 360, PX = (OW - PVW * S) / 2, PY = 104, K3 = 3, CAMX = clamp(player.x - PVW / 2, 0, W - PVW);   // しゃしんは 窓に 見えて いる 範囲（VW）だけ・かめらの 分 ずらして 世界を えがく   // しゃしんは ひろばを 少し 小さく して、いちばん 下に ひづけと あそべる ばしょ（URL）の 1行の 場所を あける（動画の 材料は 今まで どおり）
+  const OW = 1080, OH = 1920, S = o.video ? 2.9 : 2.70, PVW = 360, PX = (OW - PVW * S) / 2, PY = 104, K3 = 3, CAMX = clamp(player.x - PVW / 2, 0, W - PVW);   // しゃしんは 窓に 見えて いる 範囲（VW）だけ・かめらの 分 ずらして 世界を えがく   // しゃしんは ひろばを 少し 小さく して、いちばん 下に ひづけと あそべる ばしょ（URL）の 1行の 場所を あける（動画の 材料は 今まで どおり）
   const cvs = document.createElement('canvas'); cvs.width = OW; cvs.height = OH;
   const ctx = cvs.getContext('2d'), css = getComputedStyle(scene), hasFilter = 'filter' in ctx;
   const grad = ctx.createLinearGradient(0, 0, 0, OH); grad.addColorStop(0, '#dff2fb'); grad.addColorStop(1, '#f4fbff'); ctx.fillStyle = grad; ctx.fillRect(0, 0, OW, OH);
@@ -2984,7 +3004,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
     if (el.classList.contains('plush')) { drawPlush(el); continue; }
     const u = unit(el);
     if (el.classList.contains('prop')) {
-      const ai = el.querySelector('img.art-prop'); if (ai) { if (hasFilter) ctx.filter = dimF; ctx.drawImage(ai, u.x, u.y, u.w, u.h); ctx.filter = 'none'; continue; }   // 絵に さしかえた 置き物
+      const ai = el.querySelector('img.art-prop') || (!el.querySelector('svg') ? el.querySelector('img') : null); if (ai && ai.complete && ai.naturalWidth) { /* 絵だけの 置き物（てんくうの しろ など）も 写す（10/15 参謀「しろが 写って いない」） */ if (hasFilter) ctx.filter = dimF; ctx.drawImage(ai, u.x, u.y, u.w, u.h); ctx.filter = 'none'; continue; }   // 絵に さしかえた 置き物
       if (el.dataset.id === 'inn') {
         const im = await loadInnImageCapture(); if (hasFilter) ctx.filter = ((getComputedStyle(el).getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim();
         ctx.drawImage(im, u.x, u.y, u.w, u.h); ctx.filter = 'none';
@@ -3054,9 +3074,11 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   const d = new Date(), dateText = d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(), FY = OH - 30;
   ctx.fillStyle = '#506874'; ctx.font = '700 30px system-ui,"Yu Gothic UI",sans-serif'; ctx.textAlign = 'left'; ctx.fillText(dateText, 40, FY);
   const dateW = ctx.measureText(dateText).width, urlMax = OW - 40 - (40 + dateW + 32);
-  let ufs = 26; const uFont = n => '700 ' + n + 'px system-ui,"Yu Gothic UI",sans-serif'; ctx.font = uFont(ufs);
-  while (ufs > 16 && ctx.measureText(SHARE_URL).width > urlMax) { ufs -= 1; ctx.font = uFont(ufs); }
-  ctx.fillStyle = '#5a6a73'; ctx.textAlign = 'right'; ctx.fillText(SHARE_URL, OW - 40, FY, urlMax);
+  // 10/15 参謀：URL が 小さく うすくて スマホで よめない → 36px・こい いろ。TikTok の @ も 1行 うえに（マスター 許可の れいがい・作者名では なく 店の 名前）
+  let ufs = 36; const uFont = n => '800 ' + n + 'px system-ui,"Yu Gothic UI",sans-serif'; ctx.font = uFont(ufs);
+  while (ufs > 20 && ctx.measureText(SHARE_URL).width > urlMax) { ufs -= 1; ctx.font = uFont(ufs); }
+  ctx.fillStyle = '#244653'; ctx.textAlign = 'right'; ctx.fillText(SHARE_URL, OW - 40, FY, urlMax);
+  ctx.fillStyle = '#3f5a68'; ctx.font = '700 30px system-ui,"Yu Gothic UI",sans-serif'; ctx.fillText('TikTok @ao.hozumi.ai.visu', OW - 40, FY - 50);
   ctx.restore();
   return new Promise((res, rej) => cvs.toBlob(b => b ? res(b) : rej(Error('png')), o.type || 'image/png', o.quality));
 }
