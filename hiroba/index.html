@@ -427,6 +427,8 @@ button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ff
 #status{min-height:3.4em;margin:10px 4px 6px;text-align:center;font-size:1.15rem;line-height:1.6;font-weight:700}
 /* いきさき */
 #places{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:6px 0 12px}
+#trip-banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:900;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 20px;border-radius:18px;background:#ffffffe8;border:3px solid #fff;box-shadow:0 6px 18px #24465333;color:#244653;text-align:center;max-width:86%}   /* 10/16 参謀：あるいて いる あいだ、まんなかに 大きく */
+#trip-banner b{font-size:1.25rem;line-height:1.4}#trip-banner small{font-size:.85rem;color:#506874}#trip-banner[hidden]{display:none}
 #places button,#places-wait button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:82px;padding:8px 6px;font-size:1.25rem;line-height:1.3;border-radius:26px;text-align:center}
 #places button::before,#places-wait button::before{left:8%;right:8%;height:30%}
 #places button b,#places-wait button b{font-size:1.75rem;line-height:1}
@@ -2377,14 +2379,24 @@ function wellPeek() {
 // ─── いきさき ───
 let trip = null;
 const hooks = { navigate: url => location.assign(url) };
-function cancelTrip(say) { if (trip || player.then) { trip = null; player.then = null; player.path = []; if (say) narrate('やめたよ。すきな ところへ いこう'); } }
+function cancelTrip(say) { if (trip || player.then) { trip = null; player.then = null; player.path = []; tripBanner(''); if (say) narrate('やめたよ。すきな ところへ いこう'); } }
 function goDest(id) {
   const d = DEST[id]; if (!d) return;
   closeInvite();
+  if (trip && trip.id === id && player.path.length) { player.path = []; player.then = null; player.moving = false; player.x = d.at.x; player.y = d.at.y; tripBanner(''); arrive(id); return; }   // 10/16 参謀：もういちど おしたら すぐ つく（まてない ひとの にげみち）
   lastInput = T; trip = { id }; sfx.ui(); setHl(id); if (id === 'oheya') loadArt();   // おへやへ いく 前に 魚の 絵を 用意
   narrate(d.name + 'へ あるいて いくよ');
-  walkTo(d.at.x, d.at.y, () => arrive(id));
-  if (player.path.length && !reduce()) player.speed = 140;   // 10/11：行き先への移動は 少し はやく（6秒 まっても つかない、の 声）
+  tripBanner(S(d.name + 'へ むかって いるよ…', 'Heading to ' + ((LV_NAME[id] && LV_NAME[id][1]) || d.name) + '…') + '\n' + S('もういちど おすと すぐ つくよ', 'Press again to arrive now'));   // 10/16 参謀：押した あとの 反応が 右上の 小さい 文字だけで、初見は「反応が ない」と 思う → まんなかに 大きく
+  walkTo(d.at.x, d.at.y, () => { tripBanner(''); arrive(id); });
+  if (player.path.length && !reduce()) player.speed = 190;   // 10/11：行き先への移動は 少し はやく（6秒 まっても つかない、の 声）。10/16 参謀「5秒は 長い」→ 140 から 190 に
+}
+// あるいて いる あいだの 大きな しらせ（まんなか・押せない・よみあげは narrate が する）
+function tripBanner(text) {
+  let b = document.getElementById('trip-banner');
+  if (!text) { if (b) b.hidden = true; return; }
+  if (!b) { b = document.createElement('div'); b.id = 'trip-banner'; b.setAttribute('aria-hidden', 'true'); scene.appendChild(b); }
+  b.textContent = ''; text.split('\n').forEach((ln, i) => { const p = document.createElement(i ? 'small' : 'b'); p.textContent = ln; b.appendChild(p); });
+  b.hidden = false;
 }
 // ─── まちレベル（10/7 マスター「レベルの概念・やり込んでる感じを 右上に。まるいろ 1回で 1あがる。全部まわったら あがる。釣りを 全部そろえたら 20あがる。上がると 新しい ばしょが ひらく」）───
 //   この たんまつの なかだけ（own.lv）。ほかの ひとと くらべない・へらない。

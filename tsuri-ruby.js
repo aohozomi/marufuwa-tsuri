@@ -98,7 +98,7 @@
   // よみあげ名の まもり（10/15 参謀の 指摘）：ボタン・リンクの 文字を ふりがな付きに かえると、よみあげ道具に よっては 漢字と よみが 落ちて「げる」「りをかえる」に なる
   // → ボタン・リンク・summary には、もとの ひらがなの 文を aria-label に 入れる（作者が 自分で aria-label を 書いた ものは さわらない）。文字が かわる たびに 入れなおす（古い 名前が のこらない）
   const LABELED = 'button,a,summary,[role=button],[role=link],[role=tab]';
-  function plainOf(el) { let s = ''; for (const n of el.childNodes) { if (n.nodeType === 3) s += n.data; else if (n.nodeType === 1) { if (n.getAttribute('aria-hidden') === 'true') continue; if (n.tagName === 'RUBY') { const rt = n.querySelector('rt'); s += rt ? rt.textContent : n.textContent; } else if (n.tagName !== 'RT' && n.tagName !== 'RP') s += plainOf(n); } } return s; }
+  function plainOf(el) { let s = ''; for (const n of el.childNodes) { if (n.nodeType === 3) s += n.data; else if (n.nodeType === 1) { if (n.getAttribute('aria-hidden') === 'true') continue; if (n.tagName === 'RUBY') { const rt = n.querySelector('rt'); s += rt ? rt.textContent : n.textContent; } else if (n.tagName === 'SMALL') { const t = plainOf(n).trim(); if (t) s += '。' + t; } else if (n.tagName !== 'RT' && n.tagName !== 'RP') s += plainOf(n); } } return s; }   // 主ラベルと 副ラベル（small）の あいだに「。」（10/16 参謀：「つりばつりびより」と 一息で 読まれる）
   function relabel(par) {
     const el = par && par.nodeType === 1 && par.closest ? par.closest(LABELED) : null; if (!el) return;
     if (el.hasAttribute('aria-label') && !el.hasAttribute('data-rubylabel')) return;   // 作者の aria-label は そのまま
