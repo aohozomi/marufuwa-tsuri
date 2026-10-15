@@ -11,7 +11,7 @@
     // ---- 時間・あいさつ・ものの なまえ ----
     'おはよう': 'Good morning', 'こんにちは': 'Hello', 'こんばんは': 'Good evening', 'おつきさま': 'Moon', 'おひさま': 'Sun',
     'まるふわ': 'Marufuwa', 'あんないのペンギン': 'Guide Penguin', 'おみせのこぎつね': 'Shop Fox',
-    'つりば': 'Fishing Spot', 'ありがとうのいし': 'Thank-You Stone',
+    'つりば': 'Fishing Spot', 'ありがとうのいし': 'Thank-You Stone', 'いろしんだん': 'Color Check', '3もんできょうのきもち': 'How today feels, in 3 questions',
     'じゅんびちゅうのばしょ': 'Getting ready', 'じゅんびちゅうのばしょ（ちかぢか）': 'Getting ready (coming soon)',
     'ここはまだじゅんびちゅう。ちかぢかあそべるよ。たのしみにまっててね': "Still getting ready. You'll be able to play soon. Look forward to it!",
     'ここもじゅんびちゅう。ちかぢかあそべるよ。おたのしみに': 'This one is getting ready, too. Coming soon. Stay tuned!',
