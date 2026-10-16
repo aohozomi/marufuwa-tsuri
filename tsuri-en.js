@@ -102,7 +102,7 @@
     'きつねのおみせ': "Fox's Shop", 'おかねはいらないよ。あそぶと、どうぐがふえるよ。': 'No money needed. Play, and your gear grows.',
     'まるふわのおへや': "Marufuwa's Room", 'つりにいく': 'Go fishing', 'ぜんぶもどす': 'Put everything back', 'おわる': 'Done', 'ごはんをあげる': 'Feed', 'かざる': 'Decorate', 'みみでながめる': 'Listen', 'ひとにみせる': 'Show someone',
     // ふりがな・ラベル
-    'ウキのいろ': 'Float color', 'ルアーのいろ（きらきらえさ）': 'Lure color (sparkle bait)', 'さおのいろ': 'Rod color', 'まるふわのふくのいろ': "Marufuwa's outfit color", 'そのまま': 'As is',
+    'ウキのいろ': 'Float color', 'ルアーのいろ（きらきらえさ）': 'Lure color (sparkle bait)', 'さおのいろ': 'Rod color', 'まるふわのいろ': "Marufuwa's color", 'まるふわのふくのいろ': "Marufuwa's outfit color", 'そのまま': 'As is',
     'あか': 'Red', 'あお': 'Blue', 'きいろ': 'Yellow', 'もも': 'Pink', 'みどり': 'Green', 'むらさき': 'Purple', 'きん': 'Gold', 'にじ': 'Rainbow', 'ぎん': 'Silver', 'よぞら': 'Night sky', 'しろ': 'White', 'くろ': 'Black', 'オレンジ': 'Orange',
     // さお・えさ
     'きのえだのさお': 'Twig Rod', 'さいしょのさお': 'Your first rod', 'たけのさお': 'Bamboo Rod', 'すこしあわせやすい': 'A little easier to time', 'ずかんのみかた': 'Sticker book view', 'ぜんぶ': 'All fish', 'まだつっていない': 'Not caught yet', 'ぴったりのはばが8%ひろい': 'Perfect window 8% wider', 'ぴったりのはばが15%ひろい': 'Perfect window 15% wider', '10ぴきつるともらえる': 'Unlocks at 10 catches',

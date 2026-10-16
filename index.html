@@ -144,6 +144,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 /* つりびと レベル：つった さかなで ふえる。へらない・くらべない・じょうげん なし */
 .hud.record{flex-wrap:wrap}
 .level{flex:1 1 100%;display:flex;align-items:center;gap:12px;font-size:.95rem;margin-top:2px}
+.level-next{font-size:.78rem;color:#5a7a8a;font-weight:700;margin-left:4px}   /* 10/16 参謀：「あと◯匹」 */
 .level-bar{flex:1;height:10px;border-radius:6px;background:#d5e6ed;overflow:hidden}
 .level-bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#7fd0f2,#ffd34d);transition:width .6s ease}
 @media(prefers-reduced-motion:reduce){.level-bar i{transition:none}}
@@ -934,7 +935,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
     <span>つれた かず <strong id="total">0</strong></span>
     <span><i id="seen-ring" class="seen-ring" aria-hidden="true"></i>ずかん <strong id="seen">0</strong> / <span id="all">30</span></span>
-    <div class="level" id="level-box" role="group" aria-label="つりびと レベル"><span>つりびと レベル <strong id="level">1</strong></span><span class="level-bar" aria-hidden="true"><i id="level-fill"></i></span></div>
+    <div class="level" id="level-box" role="group" aria-label="つりびと レベル"><span>つりびと レベル <strong id="level">1</strong> <small id="level-next" class="level-next"></small></span><span class="level-bar" aria-hidden="true"><i id="level-fill"></i></span></div>
   </div>
   <div class="hud menu">
     <button id="open-bucket" type="button" style="flex:1">バケツ</button>
@@ -2414,7 +2415,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     drawToday(); drawBadge(); drawSeatHint();
     $('seen').textContent = $('book-seen').textContent = String(seenCount()); $('seen-ring').style.setProperty('--p', Math.round(Math.min(1, seenCount() / BASE) * 100) + '%');
     const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
-    $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%';
+    $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%'; { const nx = $('level-next'), m = Math.max(1, Math.ceil((b - xp) / 10)); if (nx) nx.textContent = L('つぎまで あと 約' + m + 'ひき', 'about ' + m + ' more fish'); } /* 10/16 参謀：「あと◯匹」の数字（1ぴき=10xp で換算） */
     drawMini();   // さいしょの 1ぴきまでは 出さない（かずを みせない）
   }
 
@@ -3116,9 +3117,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       {k: 'moto', n: 'そのまま', lv: 1, c: '#a5723e'}, {k: 'shiro', n: 'しろ', lv: 1, c: '#f2f2f8', pal: ['#f4f4f8', '#b8bcc8', '#ffffff'], line: '#b8bcc8'}, {k: 'kuro', n: 'くろ', lv: 1, c: '#3a3a48', pal: ['#3a3a48', '#1e1e28', '#7a7a90'], line: '#2a2a34'},
       {k: 'ao', n: 'あお', lv: 8, c: '#3a8ee0', pal: ['#6db8ff', '#2a7fd4', '#cfe8ff'], line: '#2a7fd4'}, {k: 'momo', n: 'もも', lv: 12, c: '#f0709f', pal: ['#ffb0cc', '#e0609a', '#ffe0ee'], line: '#e0609a'},
       {k: 'kin', n: 'きん', lv: 20, c: 'linear-gradient(135deg,#fff0a0,#e6b325)', pal: ['#e6b325', '#a87a10', '#fff0a0'], line: '#d9a520'}, {k: 'niji', n: 'にじ', lv: 30, c: 'linear-gradient(135deg,#ff8fa3,#ffd34d,#8fe3a8,#7fd0f2,#b79cf0)', pal: ['#ff8fc1', '#b79cf0', '#ffe9a8'], line: '#b79cf0'}]},
-    wear: {title: 'まるふわの ふくの いろ', list: [
+    wear: {title: 'まるふわの いろ', list: [
       {k: 'ao', n: 'あお', lv: 1, c: '#7fbcff'}, {k: 'momo', n: 'もも', lv: 1, c: '#ff9fc4', h: 335, s: 1, v: 1.04}, {k: 'midori', n: 'みどり', lv: 1, c: '#7fd6a0', h: 140, s: .95, v: 1},
-      {k: 'kiiro', n: 'きいろ', lv: 8, c: '#ffd45a', h: 45, s: 1.05, v: 1.08}, {k: 'murasaki', n: 'むらさき', lv: 15, c: '#b79cf0', h: 265, s: .9, v: 1.02},
+      {k: 'kiiro', n: 'きいろ', lv: 5, c: '#ffd45a', h: 45, s: 1.05, v: 1.08}, {k: 'murasaki', n: 'むらさき', lv: 15, c: '#b79cf0', h: 265, s: .9, v: 1.02},
       {k: 'aka', n: 'あか', lv: 20, c: '#ff7a68', h: 5, s: 1.05, v: 1.05}, {k: 'orenji', n: 'オレンジ', lv: 25, c: '#ffab5a', h: 28, s: 1.05, v: 1.06}, {k: 'shiro', n: 'しろ', lv: 30, c: '#eef2f8', h: 215, s: .18, v: 1.12},
       {k: 'kuro', n: 'くろ', lv: 40, c: '#4a5060', h: 220, s: .25, v: .5}]}
   };

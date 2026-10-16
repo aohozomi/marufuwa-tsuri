@@ -13,7 +13,7 @@
   // 本体の GEAR.wear.list と おなじ ならび（k・レベル・色あい h・こさ s・あかるさ v）。水色（ao）は 元の 絵の まま
   var LIST = [
     { k: 'ao', lv: 1 }, { k: 'momo', lv: 1, h: 335, s: 1, v: 1.04 }, { k: 'midori', lv: 1, h: 140, s: .95, v: 1 },
-    { k: 'kiiro', lv: 8, h: 45, s: 1.05, v: 1.08 }, { k: 'murasaki', lv: 15, h: 265, s: .9, v: 1.02 },
+    { k: 'kiiro', lv: 5, h: 45, s: 1.05, v: 1.08 }, { k: 'murasaki', lv: 15, h: 265, s: .9, v: 1.02 },
     { k: 'aka', lv: 20, h: 5, s: 1.05, v: 1.05 }, { k: 'orenji', lv: 25, h: 28, s: 1.05, v: 1.06 },
     { k: 'shiro', lv: 30, h: 215, s: .18, v: 1.12 }, { k: 'kuro', lv: 40, h: 220, s: .25, v: .5 }
   ];
