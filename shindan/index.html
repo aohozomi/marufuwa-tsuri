@@ -48,7 +48,7 @@ h1{margin:4px 0 6px;font-size:1.35rem;line-height:1.4}
 :root[data-night=true] .opts button{background:#223a5a}
 .opts button[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
 .opts button:focus-visible,.go:focus-visible,.acts button:focus-visible,.top a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.go{display:block;width:100%;min-height:64px;margin:6px 0 0;font:inherit;font-size:1.15rem;font-weight:900;color:#fff;background:linear-gradient(180deg,#2a8cc0,#0e5a82);border:3px solid #fff;border-radius:999px;box-shadow:0 5px 0 #0a4262;cursor:pointer}
+.go{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;box-shadow:0 6px 18px #0003;display:block;width:100%;min-height:64px;margin:6px 0 0;font:inherit;font-size:1.15rem;font-weight:900;color:#fff;background:linear-gradient(180deg,#2a8cc0,#0e5a82);border:3px solid #fff;border-radius:999px;box-shadow:0 5px 0 #0a4262;cursor:pointer}.go:disabled{position:static;box-shadow:none}
 .go[disabled]{opacity:.45;cursor:default}
 .res{display:none;background:var(--card);border:2px solid var(--line);border-radius:24px;padding:16px 14px;margin:14px 0}
 .res[data-on=true]{display:block}

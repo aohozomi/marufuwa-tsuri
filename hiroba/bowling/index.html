@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
       li.append(n, v); li.setAttribute('aria-label', T((i + 1) + 'ふれーむ ' + (f.t1 === null ? 'まだ' : ((f.t1 + (f.t2 || 0)) + 'ほん')), 'Frame ' + (i + 1) + ': ' + (f.t1 === null ? 'not yet' : (f.t1 + (f.t2 || 0)) + ' pins'))); ol.append(li);
       tot += (f.t1 || 0) + (f.t2 || 0);
     });
-    const t = document.createElement('li'); t.className = 'tot'; const a = document.createElement('span'); a.textContent = T('ぜんぶ', 'Total'); const b = document.createElement('b'); b.textContent = tot + T('ほん', ''); t.append(a, b); ol.append(t); S.total = tot;
+    const t = document.createElement('li'); t.className = 'tot'; const a = document.createElement('span'); a.textContent = T('ぜんぶ', 'Total'); const b = document.createElement('b'); b.textContent = tot + T('ほん', ' pins'); t.append(a, b); ol.append(t); S.total = tot;
   }
   function stopPressed() {
     if (S.lock > 0) return;
