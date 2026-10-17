@@ -579,6 +579,8 @@ html.dlg-open :not(dialog[open]):not(dialog[open] *),html.dlg-open :not(dialog[o
 #catch-pop.out{animation:cpOut .35s ease-in both}
 #char-tip{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);z-index:25;margin:0;padding:8px 14px;border-radius:14px;background:#fffdf3f2;color:#17323d;font-weight:800;font-size:.86rem;line-height:1.5;text-align:center;width:max-content;max-width:86%;box-shadow:0 4px 12px #0003;pointer-events:none;transition:opacity .35s}
 #char-tip.out{opacity:0}
+#got-away{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:25;margin:0;padding:10px 18px;border-radius:16px;background:#fffdf3f2;color:#17323d;font-weight:800;font-size:1rem;line-height:1.5;text-align:center;width:max-content;max-width:86%;box-shadow:0 4px 12px #0003;pointer-events:none;transition:opacity .4s}
+#got-away.out{opacity:0}
 @keyframes cpIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
 @keyframes cpOut{to{opacity:0;transform:scale(1.08)}}
 @keyframes cpFish{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-4%)}100%{transform:rotate(0)}}
@@ -2188,7 +2190,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   // ほんとうの タイミング ゲーム（ふつう・しっかり）：まどの はば（±ms）は 魚の ★で かわる（★1 ひろめ→★5・ぬし せまい）。ぴったり＝まどの なか／いいね＝まどの PNEAR ばい いない／それ いがいは すすまない。らくちん・さいしょの 1ぴきは まえの ゆるさ
   const PRECISE = {win: [0, 100, 125, 100, 85, 70], boss: 60, near: 1.8, nice: 0, hard: .8, slow: 1.25, giveup: [75000, 150000]};   // giveup＝この じかん たつと さかなが つかれる（ふつう／しっかり）。むやみな れんだでは ほとんど つれない
   const MODE_CFG = {normal: {min: 3, g1: .27, g2: .14, g3: .2, gtap: .105, decay: .12, win: 1, step: 45, cap: 360, take: 2}, hard: {min: 1, g1: .35, g2: .18, g3: .2, gtap: .15, decay: .12, win: .8, step: 15, cap: 150, take: 7}};
-  function curMode() { return save.mode === 'hard' || save.mode === 'normal' || save.mode === 'easy' ? save.mode : (save.easy ? 'easy' : 'normal'); }
+  function curMode() { if (!save.mode && !save.easy && !(save.total > 0)) { save.mode = 'easy'; save.easy = true; }   /* 10/18 参謀18弾：はじめての ひとは「らくちん」から（3びき つると えらべる あんないが でる） */
+    return save.mode === 'hard' || save.mode === 'normal' || save.mode === 'easy' ? save.mode : (save.easy ? 'easy' : 'normal'); }
   const modeCfg = () => MODE_CFG[curMode() === 'hard' ? 'hard' : 'normal'];
   const blindNow = () => curMode() === 'easy' || (reduce() && !sndOn('guide'));   // タイミングを みない（わが みえない・きこえない）人には はりも かけない
   const tensionOn = () => !!fish && curMode() === 'hard' && save.total >= 5 && !blindNow() && (fish.rare >= modeCfg().min || nushi || !!fish.legend);   // はりは「しっかり」だけ（ふつう＝タイミングを あわせて「つれた！」・にげない：マスター直 10/1 夜）。はじめの 1ぴきは かならず つれる
@@ -2269,6 +2272,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (f && !f.legend) { save.seenFish = save.seenFish && typeof save.seenFish === 'object' ? save.seenFish : {}; save.seenFish[f.id] = true; if (nushi) { save.again = 'nushi'; save.againLeft = 8; } else if (f.rare === 4) { save.again = 'rare4'; save.againLeft = 8; } store(); }   // にげた ぬし・スペシャルは「また くるよ」＝つぎの 8かいの あいだ でやすく（ほんとうに また くる）
     if (!reduce()) { const w = floatAt(mine), el = document.createElement('span'); el.className = 'hop plop'; el.setAttribute('aria-hidden', 'true'); el.style.fontWeight = '900'; el.style.color = '#fff'; el.textContent = L('ぷつん…', 'Snap…'); place(el, {x: w.x + 2, y: w.y - 8}); scene.append(el); el.animate([{opacity: 1, translate: '0 0'}, {opacity: 0, translate: '0 -22px'}], {duration: 1100}).onfinish = () => el.remove(); marufuwa.animate([{rotate: '0deg'}, {rotate: '9deg'}, {rotate: '-4deg'}, {rotate: '0deg'}], {duration: 520, easing: 'ease-out'}); }
     endFishing(L('にげられた… また くるよ。', 'It got away… it will come back.'));
+    try { const o = $('got-away'); if (o) o.remove(); const t = document.createElement('p'); t.id = 'got-away'; t.textContent = L('するりと いっちゃった。また あえるよ', 'It slipped away. You will meet again.'); scene.append(t); setTimeout(() => t.classList.add('out'), 2400); setTimeout(() => t.remove(), 2800); } catch {}   /* 10/18 参謀18弾：にげた ことを けしきの まんなかに（せめない ことばで） */
     escapeRun++;
     if (escapeRun >= 3 && !escapeHinted && curMode() !== 'easy') { escapeHinted = true; if ($('assist')) $('assist').open = true; setTimeout(() => say(L('むずかしい ときは、「あそびかた」で「らくちん」も えらべるよ。', 'If it feels hard, you can choose Easy in Play style.')), 2200); }   // 3かい つづいたら 1かいだけ、やさしく（せめない）
   }
@@ -2712,6 +2716,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const gone = () => { t.classList.add('out'); setTimeout(() => t.remove(), 400); removeEventListener('pointerdown', gone, true); };
     setTimeout(() => addEventListener('pointerdown', gone, true), 300); setTimeout(gone, 7000);
   }
+  let popUntil = 0;
   function catchPop(f, big) {
     const old = $('catch-pop'); if (old) old.remove(); if (query.get('clip') === '1') return;
     const box = document.createElement('div'); box.id = 'catch-pop'; box.setAttribute('aria-hidden', 'true'); if (big || f.rare >= 4 || f.legend) box.dataset.big = '1';
@@ -2719,7 +2724,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const fw = document.createElement('div'); fw.className = 'cp-fish'; fw.append(fishImg(f));
     const tx = document.createElement('b'); tx.textContent = L('つれた！', 'Caught!');
     box.append(me, fw, tx); scene.append(box);
-    setTimeout(() => box.classList.add('out'), reduce() ? 900 : 1150); setTimeout(() => box.remove(), reduce() ? 1200 : 1500);
+    popUntil = performance.now() + 1300; setTimeout(() => box.classList.add('out'), 1200); setTimeout(() => box.remove(), 1500);   /* 10/18 参謀18弾：1.3びょう とめる（その あいだ おしても すすまない） */
   }
   function caught() {
     stopGuide(); escapeRun = 0;
@@ -2822,6 +2827,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     startAmbient();   // おとを ON に して いた ひとは、さいしょに おした ときから なみの おと
     // つれた 直後：カードが まだ なら、さいしょの 1回の おしは カードを すぐ 出す（なげない）。カードが 出て から 1びょうは なげない（れんだ しても 結果が きえない）
     const now = performance.now(), gap = now - lastPressAt; lastPressAt = now;   // まえの おしから どれだけ あいたか（れんだの ながれの みわけ）
+    if (phase === 'caught' && now < popUntil) { holdNote(); return; }   /* つれた しゅんかんの おおきな え の あいだは すすまない */
     if (phase === 'caught' && (!cardShownAt || now - cardShownAt < 1000)) { if (!cardShownAt) cardShow(); else holdNote(); return; }
     if (phase === 'caught' && now - caughtAt < 1000) { holdNote(); return; }
     // けっかを 見た「1かい」で わける：カードが 出て から さいしょの おしは「つぎへ」＝カードを とじる だけ（なげない）。そのあとの おしで なげる
@@ -2868,7 +2874,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     pressStamp = e.timeStamp || performance.now(); clickBlockUntil = performance.now() + 700; sceneTapAt = performance.now(); act();
   });
   let sceneTapAt = 0;
-  scene.addEventListener('click', event => { if (phase === 'reel' && performance.now() - sceneTapAt < 700) return; if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); else if (phase === 'caught' && $('card').dataset.wait && !event.target.closest('button')) cardShow(); });   // つれた 直後の 1.5びょうの あいだ、けしきを タップしても すぐ カードが 出る
+  scene.addEventListener('click', event => { if (phase === 'reel' && performance.now() - sceneTapAt < 700) return; if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); else if (phase === 'caught' && $('card').dataset.wait && !event.target.closest('button') && performance.now() >= popUntil) cardShow(); });   // つれた 直後の 1.5びょうの あいだ、けしきを タップしても すぐ カードが 出る
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') { ringStart = performance.now(); ringSync(); } });
   // 10/14 3-5：うらに まわった／45びょう さわらない（つりの まちぶせ いがい）ときは 飾りの ゆれを 止める（CSS: html[data-vis=0]／html[data-idle=1]）
   { const root = document.documentElement; let lastIn = Date.now();

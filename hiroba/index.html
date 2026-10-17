@@ -478,6 +478,7 @@ dialog{border:2px solid #bfdce8;border-radius:24px;padding:16px;color:#244653;ma
 #inn-dialog::backdrop{background:#182629a6;backdrop-filter:blur(3px)}
 .inn-panel{padding:18px;text-align:center}
 .inn-topline{margin:0 0 4px;color:#846949;font-size:.78rem;font-weight:900;letter-spacing:.08em}
+.inn-art{display:block;width:calc(100% + 36px);margin:-18px -18px 10px;height:min(46vh,380px);object-fit:cover;object-position:50% 46%;border-radius:23px 23px 0 0}
 .inn-mascot{display:block;width:86px;height:86px;object-fit:contain;margin:2px auto 6px;border-radius:26px;background:radial-gradient(circle at 50% 42%,#fffaf0,#d8c7a7);box-shadow:0 3px 0 #b49b73}
 #inn-title{margin:4px 0 6px;font-size:1.25rem;line-height:1.35}
 #inn-intro{margin:0 0 12px;font-size:.92rem;line-height:1.65}
@@ -852,8 +853,9 @@ body.calm .cloud.c2{left:28%}
 </dialog>
 <dialog id="inn-dialog" aria-labelledby="inn-title" aria-describedby="inn-intro">
   <section class="inn-panel">
+    <img class="inn-art" src="../img/hiroba/inn_yuube.webp" alt="やどやの なか。ランプの あかりの したで、まるふわが えほんを よんで いる" width="720" height="1280" decoding="async">   <!-- 10/18 天の絵（参謀「やどやに 絵が ない」） -->
     <p class="inn-topline">まるふわの ひろば</p>
-    <img id="inn-mascot" class="inn-mascot" src="../img/game-blue.webp" alt="まるふわ" width="86" height="86">
+    <img id="inn-mascot" class="inn-mascot" src="../img/game-blue.webp" alt="" width="86" height="86" hidden>
     <h2 id="inn-title">やどやで ひとやすみ</h2>
     <p id="inn-intro">ランプの あかりが ぽっと ともったよ。なにを たのしむ？</p>
     <p id="inn-message" role="status" aria-live="polite">おちゃ、まどべ、しおり。すきな ものを えらんでね。</p>
