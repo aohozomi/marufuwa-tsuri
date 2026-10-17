@@ -65,6 +65,13 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
 .more .note p{margin:2px 0}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 :root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+/* 10/18 参謀20弾：パソコンでは レーンを ひだりに おおきく・ボタンを みぎに */
+@media (min-width:1000px) and (min-height:560px) and (hover:hover) and (pointer:fine){
+  main.room{max-width:min(1100px,calc(100vw - 32px));display:grid;grid-template-columns:auto minmax(320px,420px);column-gap:28px;align-items:start;justify-content:center}
+  main.room > .stagewrap{grid-column:1;grid-row:1 / span 30;position:sticky;top:12px}
+  main.room > :not(.stagewrap){grid-column:2}
+  canvas#cv{width:min(calc((100dvh - 60px) * 5 / 8),56vw)}
+}
 </style>
 </head>
 <body>

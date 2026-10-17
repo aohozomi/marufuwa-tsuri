@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>まるふわ びより｜のんびり つり・ブラウザゲーム</title>
+<title>まるふわ びより｜のんびり つりと ちいさな まち・ブラウザゲーム</title>
 <meta name="description" content="まるふわと なかまと、のんびり つり。いそがなくて だいじょうぶ。にがしても、へらない。">
 <meta name="theme-color" content="#b9edf5">
 <meta name="apple-itunes-app" content="app-id=6816003504, affiliate-data=pt=129401810&amp;ct=smartbanner_game">
@@ -19,7 +19,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="まるふわ びより">
 <meta property="og:locale" content="ja_JP">
-<meta property="og:title" content="まるふわ びより｜のんびり つり・ブラウザゲーム">
+<meta property="og:title" content="まるふわ びより｜のんびり つりと ちいさな まち・ブラウザゲーム">
 <meta property="og:description" content="いそがなくて、だいじょうぶ。にがしても、へらないよ。まるふわと なかまと、のんびり つり。むりょう・インストールなし。">
 <meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/">
 <link rel="alternate" hreflang="ja" href="https://aohozomi.github.io/marufuwa-tsuri/">
@@ -363,7 +363,7 @@ body:not(.gazing) details.time-box:has(#areas){display:none !important}   /* 10/
 body.gazing #watch-row,body[data-phase=waiting] #watch-row,body[data-phase=bite] #watch-row,body[data-phase=reel] #watch-row{display:none}
 /* さいしょの がめんを シンプルに（37_）：「あそびかた」1つに まとめ、ふだんは かくす（おと・BGM・とおく・ながめる・おやすみ・ぜんがめん・つかいやすく する）。ながめる 中は ぜんぶ みえる */
 body:not(.gazing) .sub-actions:not([data-howto=open]) > :not(#take-photo):not(#more-catch):not(#howto-toggle){display:none !important}
-body:not(.gazing):not(.howto-open) details.time-box:has(#areas),body:not(.gazing):not(.howto-open) #plaza-note,body:not(.gazing):not(.howto-open) #lead-text small,body:not(.gazing):not(.howto-open) #today{display:none !important}
+body:not(.gazing):not(.howto-open) details.time-box:has(#areas),body:not(.gazing):not(.howto-open) #plaza-note,body:not(.gazing):not(.howto-open) #lead-text small .lead-time,body:not(.gazing):not(.howto-open) #today{display:none !important}
 body.gazing #howto-toggle,body[data-phase=waiting] #howto-toggle,body[data-phase=bite] #howto-toggle,body[data-phase=reel] #howto-toggle{display:none !important}
 #howto-toggle{flex:1 1 100%;min-height:48px}
 /* さいしょの 1がめん（10/6・Claude）：375×667 でも「けしき」と「なげる」が いっしょに みえる よう、うえの つみかさねを へらす。ボタンは ちいさく しない（44px いじょう） */
@@ -945,7 +945,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <path d="M0 780 Q400 730 800 790 T1600 770 V900 H0Z" fill="#a7dba0"/>
   </svg>
   <h1 class="logo" aria-label="まるふわ びより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
-  <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <ruby>急<rt aria-hidden="true">いそ</rt></ruby>がなくて <ruby>大丈夫<rt aria-hidden="true">だいじょうぶ</rt></ruby>・<ruby>逃<rt aria-hidden="true">に</rt></ruby>がしても <ruby>減<rt aria-hidden="true">へ</rt></ruby>らない<br><small><span class="ic" aria-hidden="true">⏱</span> 1ぴき 10〜20<ruby>秒<rt aria-hidden="true">びょう</rt></ruby>・<ruby>無料<rt aria-hidden="true">むりょう</rt></ruby></small></p>
+  <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <ruby>急<rt aria-hidden="true">いそ</rt></ruby>がなくて <ruby>大丈夫<rt aria-hidden="true">だいじょうぶ</rt></ruby>・<ruby>逃<rt aria-hidden="true">に</rt></ruby>がしても <ruby>減<rt aria-hidden="true">へ</rt></ruby>らない<br><small><span class="lead-town"><span class="ic" aria-hidden="true">🏘</span> つり・おさんぽ・ミニゲームの ちいさな まち</span><span class="lead-time"><br><span class="ic" aria-hidden="true">⏱</span> 1ぴき 10〜20<ruby>秒<rt aria-hidden="true">びょう</rt></ruby>・<ruby>無料<rt aria-hidden="true">むりょう</rt></ruby></span></small></p>
   <div id="ibasho" role="region">
     <p id="ibasho-text"><span class="ib-morning">おはよう。きょうも、ここに いて いいよ。</span><span class="ib-night">ねむれない？　ゆっくり ながめよう。</span></p>
     <div class="ibasho-actions">
