@@ -115,7 +115,7 @@
       "こころのけんこうそうだんとういつダイヤル … 0570-064-556（つうわりょうが かかります。うけつけじかんは、おすまいのちいきに よって ちがいます）": "Mental Health Consultation Unified Dial … 0570-064-556 (call charges apply; hours vary by the region you live in)",
       "おこさんむけ：24じかんこどもSOSダイヤル … 0120-0-78310（24じかん・つうわりょうは かかりません）／チャイルドライン … 0120-99-7777（18さいまで・まいにち16じ〜21じ・12がつ29にち〜1がつ3にちは おやすみ・つうわりょうは かかりません）": "For children: 24-Hour Kids SOS Dial … 0120-0-78310 (24 hours; toll-free) / Childline … 0120-99-7777 (up to age 18; daily 16:00–21:00, closed December 29 to January 3; toll-free)",
       "にほんのそとに いる ときは、その くにの きんきゅうばんごうや、そうだんまどぐちに れんらくして ください。": "If you are outside Japan, please contact your local emergency number or a local crisis line.",
-      "ばんごうと じかんは、こうせいろうどうしょうの「まもろうよ こころ」の でんわそうだんの ページに のって いる ものです（かくにんび：2026ねん10がつ1にち）。かわる ことが あるので、かけて つながらない ときは、その ページで たしかめて ください。この ページから そとへは つながりません（ばんごうを かいて あるだけです）。": "The numbers and hours come from the “Mamorou yo Kokoro” telephone consultation page of the Ministry of Health, Labour and Welfare (checked October 1, 2026). They may change, so if you cannot get through, please check that page. Nothing on this page connects to the outside; the numbers are only written here."
+      "ばんごうと じかんは、こうせいろうどうしょうの「まもろうよ こころ」の でんわそうだんの ページに のって いる ものです（かくにんび：2026ねん10がつ18にち）。かわる ことが あるので、かけて つながらない ときは、その ページで たしかめて ください。この ページから そとへは つながりません（ばんごうを かいて あるだけです）。": "The numbers and hours come from the “Mamorou yo Kokoro” telephone consultation page of the Ministry of Health, Labour and Welfare (checked October 18, 2026). They may change, so if you cannot get through, please check that page. Nothing on this page connects to the outside; the numbers are only written here."
     },
     rules: [
       // たしかめた 日づけ（毎日 かわる ため ルールで）

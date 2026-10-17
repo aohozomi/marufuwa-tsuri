@@ -357,6 +357,9 @@ html[data-plaza=false] #plaza-note{display:none}
 #scene:not([data-phase=idle]):not([data-phase=caught]) :is(.next-go,.edge-go),body.gazing :is(.next-go,.edge-go),#scene[data-tooku=true] :is(.next-go,.edge-go){display:none}
 #areago-q{font-weight:800;text-align:center;margin:8px 0 14px}.areago-btns{display:flex;gap:12px}.areago-btns button{flex:1;min-height:48px}
 body.gazing .area-open{display:none}
+body:not(.gazing) details.time-box:has(#areas){display:none !important}   /* 10/18 参謀A-3：「つりばを かえる」が 2か所 → せっていの 中の ほうは けす（ながめる中だけ のこす＝そのとき 上の ボタンは かくれる） */
+#watch-row{display:flex;gap:10px;margin:10px 0 0}#watch-row .pill{flex:1;min-height:46px;font-weight:800}
+body.gazing #watch-row,body[data-phase=waiting] #watch-row,body[data-phase=bite] #watch-row,body[data-phase=reel] #watch-row{display:none}
 /* さいしょの がめんを シンプルに（37_）：「あそびかた」1つに まとめ、ふだんは かくす（おと・BGM・とおく・ながめる・おやすみ・ぜんがめん・つかいやすく する）。ながめる 中は ぜんぶ みえる */
 body:not(.gazing) .sub-actions:not([data-howto=open]) > :not(#take-photo):not(#more-catch):not(#howto-toggle){display:none !important}
 body:not(.gazing):not(.howto-open) details.time-box:has(#areas),body:not(.gazing):not(.howto-open) #plaza-note,body:not(.gazing):not(.howto-open) #lead-text small,body:not(.gazing):not(.howto-open) #today{display:none !important}
@@ -566,6 +569,19 @@ html.dlg-open :not(dialog[open]):not(dialog[open] *),html.dlg-open :not(dialog[o
 #scene[data-phase=bite] #float,#scene[data-phase=reel] #float{animation:dip .45s ease-in-out infinite}
 #bang{position:absolute;z-index:5;transform:translate(-50%,-50%);font-size:1.8rem;font-weight:900;color:#fff;background:#e8543f;border-radius:50%;width:46px;height:46px;display:none;align-items:center;justify-content:center;border:3px solid #fff}
 #scene[data-phase=bite] #bang{display:flex}
+#catch-pop{position:absolute;inset:0;z-index:30;pointer-events:none;display:flex;align-items:center;justify-content:center;gap:2%;background:radial-gradient(circle at 50% 50%,#fff8e0ee 0,#fff3c8aa 38%,#0000 72%);animation:cpIn .32s cubic-bezier(.2,1.6,.4,1) both}
+#catch-pop .cp-me{width:42%;max-width:240px;filter:drop-shadow(0 6px 10px #0004)}
+#catch-pop .cp-fish{width:36%;max-width:210px;display:flex;align-items:center;justify-content:center;font-size:clamp(3rem,16vw,7rem);animation:cpFish .9s ease-in-out .2s both}
+#catch-pop .cp-fish img{width:100%;height:auto;filter:drop-shadow(0 6px 10px #0004)}
+#catch-pop b{position:absolute;top:8%;left:50%;transform:translateX(-50%);font-size:clamp(1.6rem,8vw,2.8rem);font-weight:900;color:#e8543f;-webkit-text-stroke:2px #fff;paint-order:stroke;letter-spacing:.06em;white-space:nowrap}
+#catch-pop[data-big="1"] b{color:#d99a00}
+#catch-pop.out{animation:cpOut .35s ease-in both}
+#char-tip{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);z-index:25;margin:0;padding:8px 14px;border-radius:14px;background:#fffdf3f2;color:#17323d;font-weight:800;font-size:.86rem;line-height:1.5;text-align:center;width:max-content;max-width:86%;box-shadow:0 4px 12px #0003;pointer-events:none;transition:opacity .35s}
+#char-tip.out{opacity:0}
+@keyframes cpIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes cpOut{to{opacity:0;transform:scale(1.08)}}
+@keyframes cpFish{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg) translateY(-4%)}100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){#catch-pop,#catch-pop .cp-fish,#catch-pop.out{animation:none}}
 @keyframes bob{50%{translate:0 4px}}
 @keyframes dip{50%{translate:0 9px}}
 
@@ -902,6 +918,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   main > :not(#scene):not(#backdrop){grid-column:2}
   main > .logo{font-size:min(1.75rem,3.2vw)}
 }
+/* パソコンの ひろい がめん（10/18 参謀A-3「釣り画面も PC の 横幅を つかう」）：景色を 左に 大きく、ボタンを 右に。ながめる中は 今まで どおり */
+@media (min-width:1100px) and (min-height:600px) and (hover:hover) and (pointer:fine){
+  body:not(.gazing) main{max-width:min(1400px,calc(100vw - 32px));display:grid;grid-template-columns:min(calc((100vh - 40px)*1.25),64vw) minmax(300px,1fr);column-gap:24px;align-content:start;align-items:start}
+  body:not(.gazing) main > #scene{grid-column:1;grid-row:1 / span 30;position:sticky;top:12px;align-self:start;width:100%}
+  body:not(.gazing) main > :not(#scene):not(#backdrop){grid-column:2}
+}
 </style>
 </head>
 <body>
@@ -1095,8 +1117,9 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="fullscreen" type="button">ぜんがめん</button>
   </div>
   <a class="pill plaza plaza-big" id="plaza-go" href="hiroba/">ひろばへ いく</a>
+  <div id="watch-row" role="group" aria-label="ながめる・おやすみ"><button type="button" id="watch-gaze" class="pill">🌙 ながめる</button><button type="button" id="watch-sleep" class="pill">⏲️ おやすみタイマー</button></div>   <!-- 10/18 参謀A-2：ねる まえに ながす 画面を トップに -->
   <script>/* 10/6（Claude）：「つりばを かえる」「水ぎわの ラベル」「おしえる 一行」を「なげる」の したへ。さいしょの 1がめんに けしきと なげる が いっしょに はいる。よみあげ・タブの じゅんばんも この じゅん（ページを ひらいた ときに 1かい だけ・あとで うごかさない） */
-  (function(){var a=document.querySelector('.actions');if(!a)return;var ref=a.nextSibling;['plaza-go','area-open','shore-label','mini-progress','quiet-hint','seat-hint','push-hint'].forEach(function(id){var e=document.getElementById(id);if(e)a.parentNode.insertBefore(e,ref);});})();</script>
+  (function(){var a=document.querySelector('.actions');if(!a)return;var ref=a.nextSibling;['plaza-go','watch-row','area-open','shore-label','mini-progress','quiet-hint','seat-hint','push-hint'].forEach(function(id){var e=document.getElementById(id);if(e)a.parentNode.insertBefore(e,ref);});})();</script>
   <p id="status" role="status" aria-live="polite">「なげる」を おしてね。</p>
   <p id="today" class="note today" hidden></p>
   <p id="nosave" class="note" role="status" style="font-weight:800" hidden></p>
@@ -1136,6 +1159,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     </div>
     <p class="count" id="book-filter-empty" role="status" hidden></p>
     <div id="book-grid"></div>
+    <p class="count" id="book-tap" style="font-size:.82rem;margin:2px 0 6px">つった こを おすと、はやさ・うごき・くせと まめちしきが みられるよ。</p>
     <p id="book-fact" class="book-fact" role="status" hidden></p>
     <div class="photo-actions"><button id="book-photo" type="button">シールちょうを しゃしんに</button></div>
     <button class="close" type="button" id="close-book">とじる</button>
@@ -2539,7 +2563,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function startReel() {
     hpMax = hp = Math.min(12, 3 + fish.rare * 2 + (nushi ? 5 : 0)); period = Math.round(1100 * (nushi || fish.legend ? .7 : [1.45, 1.45, 1.25, 1, .85, .7][Math.min(5, fish.rare)]));   // ぬしでも さいだい 12。わの はやさ：★1 ゆっくり（×1.45）〜★4（×.85）・ぬし／まぼろし（×.7）
     precise = !blindNow() && save.total > 0;   // ぴったり／ど真ん中だけが すすむ しくみ（らくちん・ぬし・まぼろし・さいしょの 1ぴきは まえの まま）
-    if (precise) hpMax = hp = (nushi || fish.legend ? 6 : fish.rare <= 1 ? 4 : fish.rare === 2 ? 3 : fish.rare === 3 ? 4 : fish.rare === 4 ? 5 : 6) + (curMode() === 'hard' ? 1 : 0);   // ふつう ★1〜2＝2かい・★3＝3かい・★4＝4かい（しっかり +1）
+    if (precise) hpMax = hp = (nushi || fish.legend ? 5 : fish.rare <= 2 ? 2 : fish.rare === 3 ? 3 : fish.rare === 4 ? 4 : 5) + (curMode() === 'hard' ? 1 : 0);   /* 10/18 参謀A-1：ひきあいを みじかく（★1〜2＝2かい・★3＝3かい・★4＝4かい・ぬし 5かい） */   // ふつう ★1〜2＝2かい・★3＝3かい・★4＝4かい（しっかり +1）
     if (save.total === 0) { hpMax = hp = 3; period = 1700; }   // さいしょの 1ぴきは、かならず すぐ つれる
     $('reel').dataset.first = save.total === 0 ? 'true' : 'false';   // 「いま！」の ことばを さいしょの 1ぴきだけ（CSS）
     periodBase = period;
@@ -2675,6 +2699,22 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const PLAIN_WORDS = [['いい こが つれたね。', 'A nice one!'], ['ゆっくり つれたね。', 'Nice and easy.'], ['いい かんじ！', 'That felt nice!'], ['また あえたね。', 'We met again!'], ['のんびり いこうね。', 'Let' + String.fromCharCode(39) + 's take it easy.'], ['つぎは どんな こかな。', 'I wonder who is next.'], ['きょうも たのしいね。', 'Fun again today.'], ['ぷかぷか、いい きもち。', 'Floating along, feels nice.']];
   let plainLast = -1;
   function plainWord() { let i; do { i = Math.floor(Math.random() * PLAIN_WORDS.length); } while (i === plainLast && PLAIN_WORDS.length > 1); plainLast = i; return L(...PLAIN_WORDS[i]); }
+  function charTip() {
+    if (save.charTip === 1 || $('char-tip') || document.body.classList.contains('gazing')) return;
+    const t = document.createElement('p'); t.id = 'char-tip'; t.textContent = L('まるふわを おすと、いっしょに つる こを かえられるよ', 'Tap Marufuwa to change who fishes with you'); scene.append(t);
+    save.charTip = 1; store();
+    const gone = () => { t.classList.add('out'); setTimeout(() => t.remove(), 400); removeEventListener('pointerdown', gone, true); };
+    setTimeout(() => addEventListener('pointerdown', gone, true), 300); setTimeout(gone, 7000);
+  }
+  function catchPop(f, big) {
+    const old = $('catch-pop'); if (old) old.remove(); if (query.get('clip') === '1') return;
+    const box = document.createElement('div'); box.id = 'catch-pop'; box.setAttribute('aria-hidden', 'true'); if (big || f.rare >= 4 || f.legend) box.dataset.big = '1';
+    const me = new Image(); me.alt = ''; me.src = marufuwa.currentSrc || marufuwa.src; me.className = 'cp-me';
+    const fw = document.createElement('div'); fw.className = 'cp-fish'; fw.append(fishImg(f));
+    const tx = document.createElement('b'); tx.textContent = L('つれた！', 'Caught!');
+    box.append(me, fw, tx); scene.append(box);
+    setTimeout(() => box.classList.add('out'), reduce() ? 900 : 1150); setTimeout(() => box.remove(), reduce() ? 1200 : 1500);
+  }
   function caught() {
     stopGuide(); escapeRun = 0;
     // つれた：むかしの ゲームの「てに いれた！」ふう。ぬしと スペシャルは、ながい ファンファーレ
@@ -2729,6 +2769,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     $('card-word').textContent = gift.length ? 'あたらしく ふえたよ：' + gift.join('、') : '';
     try { nudgeAfterCatch(); } catch {}
     face(nushi || fish.rare >= 4 ? 'sparkle' : fish.rare === 3 ? 'apricot' : first ? 'mint' : 'smile');
+    try { catchPop(fish, nushi); } catch {}
+    if (save.charTip !== 1 && lvNow >= MENU_LV.nakama) setTimeout(charTip, 2600);   /* 10/18 参謀A-3：キャラが おせる ことを 1かいだけ */   /* 10/18 参謀A-1：つれた しゅんかんを おおきく（かおと さかなを まんなかに 1.3びょう） */
     last = {fish, size, nushi, tags: [...tags], area: areaName(save.area), at: new Date(), lucky: fish === LUCKY, album: !!(first && left === 0), badge: (first && left === 0 ? L('ずかん かんせい！', 'Sticker book complete!') : mile ? L(save.total + 'ひきめ！', 'Catch #' + save.total + '!') : '') , firstNushi};   // 節目：ずかん かんせい／10・30・50…ひきめ／はじめての ぬし
     $('more-summary').textContent = L('ほかの こと', 'More'); $('more-catch').open = false;   // つれた あとの ボタンは 主役 2つだけ。ほかは たたむ
     resultSpecial = !!(leveled || first || nushi || record || fish.rare >= 4 || mile || fish.legend); resultAck = save.total === 1; ackAt = 0;   // けっかを みた「1かい」で わける（さいしょの 1ぴきだけは そのまま なげる）
@@ -2812,7 +2854,15 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (event.key === 'Escape' && document.body.classList.contains('gazing')) $('gaze').click();
   });
   // わや みずを じかに おしても、ひける
-  scene.addEventListener('click', event => { if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); else if (phase === 'caught' && $('card').dataset.wait && !event.target.closest('button')) cardShow(); });   // つれた 直後の 1.5びょうの あいだ、けしきを タップしても すぐ カードが 出る
+  { const wg = $('watch-gaze'), ws = $('watch-sleep'), g = $('gaze'), sl = $('sleep');
+    if (wg && g) { wg.addEventListener('click', () => g.click()); wg.textContent = '🌙 ' + L('ながめる', 'Just watch'); }
+    if (ws && sl) { ws.addEventListener('click', () => sl.click()); let lastV = ''; const sync = () => { const m = (sl.getAttribute('aria-label') || sl.textContent).match(/[：:]\s*(.+)$/), v = m ? m[1].trim() : ''; if (v === lastV) return; lastV = v; ws.textContent = '⏲️ ' + L('おやすみ', 'Sleep') + (v ? '：' + v : ''); }; sync(); new MutationObserver(sync).observe(sl, {childList: true, characterData: true, subtree: true}); } }
+  scene.addEventListener('pointerdown', e => {   /* 10/18 参謀A-1：けしきの どこを さわっても、ふれた しゅんかんに ひける（ボタンと おなじ） */
+    if (phase !== 'reel' || e.button !== 0 || e.isPrimary === false || e.target.closest('button,a,input,select,details')) return;
+    pressStamp = e.timeStamp || performance.now(); clickBlockUntil = performance.now() + 700; sceneTapAt = performance.now(); act();
+  });
+  let sceneTapAt = 0;
+  scene.addEventListener('click', event => { if (phase === 'reel' && performance.now() - sceneTapAt < 700) return; if ((phase === 'bite' || phase === 'reel') && !event.target.closest('button')) act(); else if (phase === 'caught' && $('card').dataset.wait && !event.target.closest('button')) cardShow(); });   // つれた 直後の 1.5びょうの あいだ、けしきを タップしても すぐ カードが 出る
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase === 'reel') { ringStart = performance.now(); ringSync(); } });
   // 10/14 3-5：うらに まわった／45びょう さわらない（つりの まちぶせ いがい）ときは 飾りの ゆれを 止める（CSS: html[data-vis=0]／html[data-idle=1]）
   { const root = document.documentElement; let lastIn = Date.now();
@@ -4539,10 +4589,12 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
       const met = !got && !!(save.seenFish && save.seenFish[f.id]);   // にげられた こ：あえた（まだ つれて いない）
       cell.dataset.seen = String(!!got); cell.dataset.met = String(met); cell.dataset.rare = String(f.rare); cell.dataset.nushi = String(!!(got && got.nushi));
       const fact = got && !f.legend ? factOf(f) : null;   // まぼろしには つけない（いる ことを ほのめかさない）
-      if (fact) { cell.tabIndex = 0; cell.setAttribute('role', 'button'); cell.dataset.fact = '1'; const showFact = () => { const box = $('book-fact'); box.hidden = false; const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'pill'; cb.style.cssText = 'display:block;margin:8px auto 0;min-height:44px'; cb.textContent = L('とじて いちらんへ', 'Close and back to the list'); cb.addEventListener('click', e => { e.stopPropagation(); box.hidden = true; box.textContent = ''; box.removeAttribute('data-for'); try { cell.focus(); } catch {} }); box.replaceChildren(L(f.name + '　' + fact.ja, T(f.name) + ' — ' + fact.en), cb); box.dataset.for = String(f.id); }; cell.addEventListener('click', showFact); cell.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showFact(); } }); }   // おすと まめちしき
+      if (fact) { cell.tabIndex = 0; cell.setAttribute('role', 'button'); cell.dataset.fact = '1'; const showFact = () => { const box = $('book-fact'); box.hidden = false; const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'pill'; cb.style.cssText = 'display:block;margin:8px auto 0;min-height:44px'; cb.textContent = L('とじて いちらんへ', 'Close and back to the list'); cb.addEventListener('click', e => { e.stopPropagation(); box.hidden = true; box.textContent = ''; box.removeAttribute('data-for'); try { cell.focus(); } catch {} }); const det = document.createElement('span'); det.style.cssText = 'display:block;margin:8px 0 0;font-size:.86rem;line-height:1.8;text-align:left'; const q = quirkOf(f);
+          det.textContent = L('はやさ：' + speedOf(f)[0] + '（わが まわる はやさ）　うごき：' + swimOf2(f).name + '（わの ちぢみかた）' + (q ? '　くせ：' + QUIRKS[q].ja + '（' + QUIRKS[q].tip[0] + '）' : ''), 'Speed: ' + speedOf(f)[1] + ' (how fast the ring turns)  Motion: ' + swimText(swimOf2(f)) + ' (how the ring shrinks)' + (q ? '  Quirk: ' + QUIRKS[q].en + ' (' + QUIRKS[q].tip[1] + ')' : ''));
+          box.replaceChildren(L(f.name + '　' + fact.ja, T(f.name) + ' — ' + fact.en), det, cb); box.dataset.for = String(f.id); }; cell.addEventListener('click', showFact); cell.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showFact(); } }); }   // おすと まめちしき
       const icon = document.createElement('b'); if (got || met) { icon.append(fishImg(f)); icon.dataset.art = artOf(f) ? '1' : ''; } else icon.textContent = '？'; icon.setAttribute('aria-hidden', 'true');
       const when = areaName(f.area) + '・' + (f.time ? [...f.time].map(t => TIME_LABEL[t]).join('・') + 'に おおい' : 'いつでも');
-      cell.append(icon, got || met ? ruby(f.kanji) : 'まだ あってない', ...(met ? [document.createElement('br'), L('あえたよ（まだ つれてない）', 'Met it (not caught yet)')] : []), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(got ? [document.createElement('br'), L('はやさ：' + speedOf(f)[0] + '　うごき：' + swimOf2(f).name, 'Speed: ' + speedOf(f)[1] + '  Motion: ' + swimText(swimOf2(f)))] : []), ...(got && quirkOf(f) ? [document.createElement('br'), L('くせ：' + QUIRKS[quirkOf(f)].ja + '（' + QUIRKS[quirkOf(f)].tip[0] + '）', 'Quirk: ' + QUIRKS[quirkOf(f)].en + ' (' + QUIRKS[quirkOf(f)].tip[1] + ')')] : []), ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
+      cell.append(icon, got || met ? ruby(f.kanji) : 'まだ あってない', ...(met ? [document.createElement('br'), L('あえたよ（まだ つれてない）', 'Met it (not caught yet)')] : []), document.createElement('br'), ...(got ? [starEl(f, got.nushi), document.createElement('br')] : []), got ? 'さいだい ' + cm(got.best) + 'センチ（' + got.count + 'ひき）' + (got.nushi ? ' ぬし' : '') : when, ...(!got && Array.isArray(save.gifts) && save.gifts.some(g => g.id === f.id) ? [document.createElement('br'), EN() ? '🎁 Received' : '🎁 もらったよ'] : []));   // もらった だけの こには 🎁（ずかんの かずには いれない）
       return cell;
     };
     {   // つりばごとに ならべる（みずうみ・かわ・みなとまち・ふねの うえ）。「くらべる」では なく、じぶんの あつめぐあいが わかる
