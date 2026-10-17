@@ -357,6 +357,7 @@ html[data-plaza=false] #plaza-note{display:none}
 #scene:not([data-phase=idle]):not([data-phase=caught]) :is(.next-go,.edge-go),body.gazing :is(.next-go,.edge-go),#scene[data-tooku=true] :is(.next-go,.edge-go){display:none}
 #areago-q{font-weight:800;text-align:center;margin:8px 0 14px}.areago-btns{display:flex;gap:12px}.areago-btns button{flex:1;min-height:48px}
 body.gazing .area-open{display:none}
+.bag-box{margin:10px 0 0}.bag-box > summary{display:flex;align-items:center;justify-content:center;min-height:46px;font-weight:800;list-style:none;cursor:pointer}.bag-box > summary::-webkit-details-marker{display:none}.bag-box[open] > summary{margin-bottom:8px}.bag-box > summary[data-new]:not([data-new=""])::after{content:attr(data-new);margin-left:8px;min-width:22px;height:22px;border-radius:11px;background:#e8543f;color:#fff;font-size:.8rem;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
 body:not(.gazing) details.time-box:has(#areas){display:none !important}   /* 10/18 参謀A-3：「つりばを かえる」が 2か所 → せっていの 中の ほうは けす（ながめる中だけ のこす＝そのとき 上の ボタンは かくれる） */
 #watch-row{display:flex;gap:10px;margin:10px 0 0}#watch-row .pill{flex:1;min-height:46px;font-weight:800}
 body.gazing #watch-row,body[data-phase=waiting] #watch-row,body[data-phase=bite] #watch-row,body[data-phase=reel] #watch-row{display:none}
@@ -2361,9 +2362,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     const box = $('today'); if (!box || document.readyState === 'loading') return;   // ことばが きまる（英語の ひょうを よみこむ）まで まつ
     const boss = save.total >= AREAS.find(a => a.id === BOSS.area).need, sf = seasonFish(), luckyLeft = Math.max(0, AREAS.find(a => a.id === LUCKY.area).need - save.total);   // ラッキーの つりばが まだ いけない ときの のこり
     box.hidden = false; const sunday = new Date().getDay() === 0 && weekShown() && weekShown().now;
-    box.textContent = (sunday ? L('きょうは にちようび。こんしゅうの きろくを、ずかんの まどから しゃしんに できるよ。', 'It is Sunday. You can make this week' + String.fromCharCode(39) + 's photo from the sticker book.') + ' ' : '') + (sf ? L('こんげつ：「' + sf.name + '」。', 'Now: ' + sf.name + '. ') : '') + (EN()
-      ? 'Everyone' + String.fromCharCode(39) + 's lucky fish: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ').' + (luckyLeft ? ' ' + luckyLeft + ' more to unlock.' : '') + (boss ? ' Guardian: ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ').' : '')
-      : 'みんな おなじ ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）。' + (luckyLeft ? 'あと ' + luckyLeft + 'ひき。' : '') + (boss ? 'ぬし：「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」。' : ''));
+    /* 10/18 参謀：1ぎょうに 3つ つめこまない → 1こ 1ぎょう（こんげつ／みんなの ラッキー／ぬし） */
+    const lines = [];
+    if (sunday) lines.push(L('きょうは にちようび。こんしゅうの きろくを、ずかんの まどから しゃしんに できるよ。', 'It is Sunday. You can make this week' + String.fromCharCode(39) + 's photo from the sticker book.'));
+    if (sf) lines.push(L('🌙 こんげつの さかな：「' + sf.name + '」', '🌙 This month: ' + sf.name));
+    lines.push(EN() ? '🍀 Everyone' + String.fromCharCode(39) + 's lucky fish: ' + LUCKY.name + ' (' + T(areaName(LUCKY.area)) + ')' + (luckyLeft ? ' — ' + luckyLeft + ' more to unlock' : '') : '🍀 みんな おなじ ラッキー：「' + LUCKY.name + '」（' + areaName(LUCKY.area) + '）' + (luckyLeft ? '　あと ' + luckyLeft + 'ひき' : ''));
+    if (boss) lines.push(EN() ? '👑 Guardian: ' + T(areaName(BOSS.area)) + ' (' + T(TIME_LABEL[BOSS.time]) + ')' : '👑 ぬし：「' + areaName(BOSS.area) + 'の ' + TIME_LABEL[BOSS.time] + '」');
+    box.replaceChildren(...lines.map(t => { const sp = document.createElement('span'); sp.style.display = 'block'; sp.textContent = t; return sp; }));
   }
   // ===== にぎわい（水の なかの 魚かげの かず 0〜5）：ゆっくり 入れかわる（3〜8分）。ふつう／しっかり は アタリまでの まちじかんが かげの かずに ひれい（らくちんは つねに 3いじょう）。かずは 画面に みえる かげと おなじ（うその まちを つくらない）
   // 影の おおきさ＝その魚の 実寸（cm）に ひれい（対数）：いちばん ちいさい 魚＝今の 約25%・いちばん おおきい 魚＝100%。ぬし・まぼろしは 1.35ばい（べっかく）
@@ -2418,6 +2423,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (!badge) { badge = document.createElement('b'); badge.id = 'book-badge'; badge.className = 'book-badge'; badge.setAttribute('aria-hidden', 'true'); badge.hidden = true; b.append(badge); }
     const have = Object.keys(save.fish).filter(id => FISH[id]).length, n = Number.isInteger(save.bookSeen) ? Math.max(0, have - save.bookSeen) : 0;
     badge.hidden = !n; badge.textContent = String(n);
+    { const bs = document.querySelector('#bag > summary'); if (bs) bs.dataset.new = n ? String(n) : ''; }   /* まとめた ボタンの そとにも あたらしい しるし */
     if (n) b.setAttribute('aria-label', L('ずかん。あたらしい ' + n + ' しゅるい', 'Sticker book. ' + n + ' new')); else b.removeAttribute('aria-label');
   }
   function drawPlazaNote() {   // 「ひろば」って なに？：3びき つって なれてから、ひとこと（せかさない・かならず ではない）
@@ -4691,7 +4697,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     drawAudioSize();
     const where = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span');
     where.className = 'time-box'; now.id = 'area-now'; head.append('つりばを かえる（いま：', now, '）'); where.append(head, $('areas'));
-    status.after($('today'), where, label('みる・いく'), rows[1], label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
+    const bag = document.createElement('details'), bagHead = document.createElement('summary'); bag.className = 'bag-box'; bag.id = 'bag'; bagHead.className = 'pill'; bagHead.textContent = L('🎒 あつめた もの・どうぐ ▸', '🎒 Collection & gear ▸'); bag.append(bagHead, rows[1]);   /* 10/18 参謀：みる・いく の ボタン（バケツ・ずかん・きねん・どうぐ・なかま）を 1つに まとめる */
+    status.after($('today'), where, bag, label('きろく'), rows[0], [...document.querySelectorAll('main > .time-box')].find(box => !box.querySelector('#areas')));
     document.documentElement.dataset.arranged = '1';   // ならびが おわった（それまで きろく・みる・いく は 景色の うえで ばしょを とらない）
   }
   // つかいやすく する（ふだんは とじて いる 折りたたみ）：らくちん・ふるえ。名前で 年れいを わけない（おとなも えらべる）
