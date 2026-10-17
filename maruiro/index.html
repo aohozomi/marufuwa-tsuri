@@ -50,8 +50,17 @@ h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
 .best{display:flex;align-items:center;gap:6px;font-size:.9rem;font-weight:800;margin:0}
 .field{display:flex;justify-content:center}
 [hidden]{display:none!important}
-#cv{display:block;width:min(100%,calc((100dvh - 250px)*300/420));min-width:200px;aspect-ratio:300/420;border-radius:18px;border:3px solid var(--fieldline);background:var(--field);touch-action:none;cursor:pointer}
+#cv{display:block;width:min(100%,calc((100dvh - 380px)*300/420));min-width:200px;aspect-ratio:300/420;border-radius:18px;border:3px solid var(--fieldline);background:var(--field);touch-action:none;cursor:pointer}
 #cv:focus-visible{outline:4px solid #286b88;outline-offset:3px}
+/* 10/18 参謀19弾：パソコンでは ばんを ひだりに おおきく・ボタンを みぎに（1がめんに ぜんぶ はいる） */
+@media (min-width:1000px) and (min-height:560px) and (hover:hover) and (pointer:fine){
+  main.room{max-width:min(1180px,calc(100vw - 32px));display:grid;grid-template-columns:auto minmax(320px,420px);column-gap:28px;align-items:start;justify-content:center}
+  main.room > .field,main.room > #flood{grid-column:1;grid-row:1 / span 30;position:sticky;top:12px}
+  main.room > :not(.field):not(#flood){grid-column:2}
+  #cv{width:calc((100dvh - 70px)*300/420);max-width:62vw}
+  #fl{width:min(calc(100dvh - 120px),62vw)!important}
+  .ctl button{min-height:56px;font-size:1.05rem}
+}
 .watch{display:flex;align-items:center;gap:8px;min-height:38px;margin:2px 0 4px}
 .watch span{padding:2px 10px;border-radius:12px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.85rem}
 .fbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 6px}
@@ -817,5 +826,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <script defer src="../tsuri-ruby-dict.js"></script>
 <script defer src="../tsuri-ruby.js"></script>
 <script>document.addEventListener('DOMContentLoaded', () => { if (window.PageBg) PageBg.init('maruiro', { blur: 22 }); });</script>
+<script>/* 10/18 参謀19弾：スマホで ボタンが がめんの そとに でる ときは、ひらいた とき ばんと ボタンが ちょうど はいる ところまで そっと ずらす（いちどだけ） */
+addEventListener('load', () => setTimeout(() => { try { const d = document.getElementById('bd'), f = document.querySelector('main > .field'); if (!d || !f || innerWidth >= 1000 || location.hash) return; const db = d.getBoundingClientRect().bottom; if (db <= innerHeight) return; const top = f.getBoundingClientRect().top + scrollY - 8; if (scrollY > 40) return; scrollTo({top: Math.min(top, db + scrollY - innerHeight + 12), behavior: 'auto'}); } catch (e) {} }, 450));
+</script>
 </body>
 </html>
