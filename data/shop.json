@@ -42,7 +42,7 @@
      "k": "murasaki",
      "ja": "むらさき",
      "en": "Purple",
-     "lv": 15,
+     "lv": 10,
      "coin": 80,
      "c": "#b79cf0"
     },
@@ -50,7 +50,7 @@
      "k": "aka",
      "ja": "あか",
      "en": "Red",
-     "lv": 20,
+     "lv": 13,
      "coin": 130,
      "c": "#ff8a80"
     },
@@ -58,7 +58,7 @@
      "k": "orenji",
      "ja": "オレンジ",
      "en": "Orange",
-     "lv": 25,
+     "lv": 18,
      "coin": 190,
      "c": "#ffb366"
     },
@@ -66,7 +66,7 @@
      "k": "shiro",
      "ja": "しろ",
      "en": "White",
-     "lv": 30,
+     "lv": 24,
      "coin": 260,
      "c": "#f4f4f8"
     },
@@ -74,7 +74,7 @@
      "k": "kuro",
      "ja": "くろ",
      "en": "Black",
-     "lv": 40,
+     "lv": 30,
      "coin": 360,
      "c": "#4a4a58"
     }
@@ -135,14 +135,6 @@
      "c": "☂️"
     }
    ]
-  },
-  {
-   "id": "kazari",
-   "kind": "deco",
-   "ja": "かざり",
-   "en": "Accessories",
-   "soon": true,
-   "items": []
   }
  ],
  "v": 1

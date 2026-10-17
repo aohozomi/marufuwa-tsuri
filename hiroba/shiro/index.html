@@ -5,6 +5,13 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>てんくうの しろ｜まるふわの ひろば</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="てんくうの しろ｜まるふわの ひろば">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/shiro/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="まるふわが、くもの うえの しろい おしろを たんけん。むかしの ゲームみたいに、ますめを あるいて、なかまと はなそう。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#1b2a44">
 <meta name="robots" content="noindex">
@@ -37,7 +44,7 @@ canvas#g{display:block;width:100%;height:100%;image-rendering:pixelated;image-re
 .msg[hidden]{display:none}
 .msg .cur{position:absolute;right:12px;bottom:6px;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
-.msg .who{color:#ffe27a;margin-right:.4em}
+.msg .who{color:#ffe27a;margin-right:.2em}
 .ask{display:flex;gap:10px;margin-top:8px}
 .ask[hidden]{display:none}
 .ask button{flex:1}
@@ -161,7 +168,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
   let typing = null, onDone = null;
   function say(who, text, silent) {
     if (silent) return;
-    const m = $('msg'), t = $('mtext'); m.hidden = false; $('ask').hidden = true; t.innerHTML = ''; if (who) { const w = document.createElement('span'); w.className = 'who'; w.textContent = who; t.append(w); }
+    const m = $('msg'), t = $('mtext'); m.hidden = false; $('ask').hidden = true; t.innerHTML = ''; if (who) { const w = document.createElement('span'); w.className = 'who'; w.textContent = who + S('：', ': '); t.append(w); }
     const span = document.createElement('span'); t.append(span); $('live').textContent = (who ? who + '：' : '') + text.replace(/\n/g, ' ');
     if (typing) clearInterval(typing);
     if (calm()) { span.textContent = text; $('cur').hidden = false; return; }

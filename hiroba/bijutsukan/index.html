@@ -5,6 +5,13 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>びじゅつかん｜まるふわの ひろば</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="びじゅつかん｜まるふわの ひろば">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/bijutsukan/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="まるふわと なかまたち、さかな、ポスターの えを、がくに いれて ゆっくり みる びじゅつかん。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#b9edf5">
 <meta name="robots" content="noindex">
@@ -45,6 +52,8 @@ h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
 .frame .gaku{display:grid;place-items:center;width:100%;aspect-ratio:1/1;padding:8px;border:7px solid var(--wood2);border-radius:6px;background:var(--mat);box-shadow:inset 0 0 0 2px var(--wood),0 3px 0 #0b2a4a22;overflow:hidden}
 .frame .gaku img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .frame.wide{grid-column:span 2}
+/* まだ つって いない さかなは かげだけ（なまえは ？？？） */
+.frame.locked .gaku img,dialog .stage img.locked{filter:brightness(0) opacity(.25)}
 .frame .cap{display:block;padding:1px 6px;border-radius:8px;background:var(--plate);border:1px solid var(--line);font-size:.78rem;line-height:1.45;overflow-wrap:anywhere}
 .frame:focus-visible,.nav a:focus-visible,.back:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a;border-radius:8px}
 .empty{margin:0;padding:10px 12px;border-radius:14px;background:var(--plate);border:2px dashed var(--line);font-size:.92rem}
@@ -64,6 +73,8 @@ dialog .acts button[disabled]{opacity:1;color:#5b7480;background:#eef3f5;border-
 :root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 .more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}.more[open] summary{margin-bottom:6px}.more summary:focus-visible{outline:4px solid #286b88;outline-offset:2px}
 .nav{display:none}   /* かべの いちらん（5つの ボタン）は かくす：えを タップで おおきく・スクロールで みられる */
+.anshin-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;margin:6px 0 0;padding:6px 18px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b)!important;font-weight:800;text-decoration:none}
+.anshin-link:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a}
 </style>
 </head>
 <body>
@@ -73,7 +84,7 @@ dialog .acts button[disabled]{opacity:1;color:#5b7480;background:#eef3f5;border-
   <p class="lead">すきな えを おすと、おおきく みられるよ。</p>
   <ul class="nav" id="nav" aria-label="かべの いちらん"></ul>
   <div id="walls"></div>
-  <details class="more"><summary>おうちの かたへ</summary><p class="note" id="note">えは ぜんぶ、この ゲームの なかに ある ものです（そとへ つながりません）。おおきく みる ときは、えの ほんとうの おおきさまで みせます（むりに ひきのばさないので、ぼやけません）。<a href="../../anshin/" style="color:var(--link)">おうちの かたへ</a></p></details>
+  <details class="more"><summary>おうちの かたへ</summary><p class="note" id="note">えは ぜんぶ、この ゲームの なかに ある ものです（そとへ つながりません）。おおきく みる ときは、えの ほんとうの おおきさまで みせます（むりに ひきのばさないので、ぼやけません）。<a class="anshin-link" href="../../anshin/">おうちの かたへ</a></p></details>
 </main>
 <dialog id="viewer" aria-labelledby="v-title">
   <h2 id="v-title"></h2>
@@ -98,6 +109,7 @@ dialog .acts button[disabled]{opacity:1;color:#5b7480;background:#eef3f5;border-
     'まだ ならんで いないよ。': 'Nothing here yet.', 'おおきく みる': 'View larger',
     'えは ぜんぶ、この ゲームの なかに ある ものです（そとへ つながりません）。おおきく みる ときは、えの ほんとうの おおきさまで みせます（むりに ひきのばさないので、ぼやけません）。': 'All the pictures are inside this game (nothing connects to the outside). When you view one larger, it is shown at its true size (it is never stretched, so it stays sharp).',
     'おうちの かたへ': 'For grown-ups',
+    'つると みられるよ': 'Catch it to see it', '？？？': '???',
     '← まえ': '← Previous', 'つぎ →': 'Next →', 'とじる': 'Close'
   };
   const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };
@@ -133,17 +145,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return out;
   }
   let shown = [];   // いま ならんで いる 作品（かべの じゅんに）[{src,title,en,kind,url}]
-  const label = it => (isEn() && it.en) ? it.en : it.title;
+  /* さかなの え（img/fish/<ばんごう>.webp）は、つりびよりで つった さかなだけ みせる。きろく（marufuwa-tsuri-v1 の fish[ばんごう]）を よむだけ */
+  const caughtSet = () => { try { const sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, f = sv && typeof sv.fish === 'object' && sv.fish ? sv.fish : {}; return new Set(Object.keys(f).filter(k => f[k])); } catch (e) { return new Set(); } };
+  const fishNo = it => { const m = it.kind === 'sakana' && typeof it.src === 'string' ? /^img\/fish\/(\d{1,3})\.(?:webp|png|jpe?g)$/i.exec(it.src) : null; return m ? String(Number(m[1])) : null; };
+  const LOCK_NAME = '？？？';
+  const label = it => it.locked ? (isEn() ? '???' : LOCK_NAME) : (isEn() && it.en) ? it.en : it.title;
   function frame(it, idx, wall) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'frame' + (it.kind === 'poster' ? ' wide' : ''); b.dataset.i = String(idx);
     const g = document.createElement('span'); g.className = 'gaku';
+    if (it.locked) b.classList.add('locked');
     const im = new Image(); im.alt = ''; im.decoding = 'async'; im.referrerPolicy = 'no-referrer'; im.src = it.url; g.append(im);
-    const c = document.createElement('span'); c.className = 'cap'; c.textContent = label(it); if (it.en) c.dataset.en = it.en;
+    const c = document.createElement('span'); c.className = 'cap'; c.textContent = label(it); if (it.en && !it.locked) c.dataset.en = it.en;
     const hint = document.createElement('span'); hint.className = 'sr'; hint.textContent = 'おおきく みる'; b.append(g, c, hint);   // よみあげは「なまえ おおきく みる」（aria-label を つかわない＝えいごの ひょうも そのまま きく）
     b.addEventListener('click', () => view(idx, b)); return b;
   }
   function render(items, own) {
-    const data = clean(items).map(e => ({ ...e, url: BASE + e.src }));
+    const got = caughtSet(), data = clean(items).map(e => { const no = fishNo(e); return { ...e, url: BASE + e.src, locked: no !== null && !got.has(no) }; });
     shown = []; walls.replaceChildren(); nav.replaceChildren();
     WALLS.forEach(W => {
       const list = W.live ? (own || []) : data.filter(e => e.kind === W.k);
@@ -161,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let cur = -1, from = null;
   function view(i, btn) {
     if (i < 0 || i >= shown.length) return; cur = i; if (btn) from = btn;
-    const it = shown[i]; vTitle.textContent = label(it); vImg.alt = label(it); vImg.onload = () => { vMeta.textContent = metaText(it, vImg.naturalWidth, vImg.naturalHeight); };   // おおきさは ほんとうの ピクセルまで（CSS は width:auto・max-width:100% だけ＝ひきのばさない）
+    const it = shown[i]; vTitle.textContent = label(it); vImg.alt = label(it); vImg.classList.toggle('locked', !!it.locked); vImg.onload = () => { vMeta.textContent = metaText(it, vImg.naturalWidth, vImg.naturalHeight); };   // おおきさは ほんとうの ピクセルまで（CSS は width:auto・max-width:100% だけ＝ひきのばさない）
     vImg.src = it.url; vMeta.textContent = metaText(it, 0, 0);
     vPrev.disabled = i === 0; vNext.disabled = i === shown.length - 1;
     if (!dlg.open) dlg.showModal(); (vNext.disabled ? vClose : vNext).focus(); live.textContent = label(it);
@@ -170,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const WALL_NAME = Object.fromEntries(WALLS.map(w => [w.k, w.h]));
   const metaText = (it, w, h) => {
     const pos = (cur + 1) + ' / ' + shown.length;
+    if (it.locked) return (isEn() ? 'Catch it to see it · ' : 'つると みられるよ・') + pos;
     return isEn() ? (EN_WALL[it.kind] || it.kind) + (w ? ' · ' + w + '×' + h + ' px (shown at its true size)' : '') + ' · ' + pos
       : WALL_NAME[it.kind] + (w ? '・えの おおきさ ' + w + '×' + h + ' ピクセル（ほんとうの おおきさで みせて います）' : '') + '・' + pos;
   };

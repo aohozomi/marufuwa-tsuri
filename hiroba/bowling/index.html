@@ -14,6 +14,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google" content="notranslate">
 <title>ボーリングじょう｜まるふわの ひろば</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="ボーリングじょう｜まるふわの ひろば">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/bowling/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="ねらって、ちからを きめて、ころがす。5ふれーむの ボーリング。ふつうは タイミング、らくちんは みぞが ふさがる。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#3a2a1e">
 <meta name="robots" content="noindex">
@@ -52,6 +59,9 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
 .say{margin:6px 0 2px;min-height:2.7em;padding:6px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.98rem}
 .friend{margin:2px 0 6px;font-size:.85rem;color:var(--ink2);min-height:1.7em}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+#mode{white-space:nowrap;flex:1 0 auto}
+#mode[aria-pressed=true]{background:linear-gradient(#fff3c4,#ffd66b);border-color:#c8963a}
+#mode[aria-pressed=true]::before{content:"✓ "}
 .acts button{min-height:48px;min-width:44px;padding:4px 12px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;flex:1 1 84px}
 .acts button.big{flex:2 1 130px;min-height:56px;font-size:1.1rem;background:linear-gradient(#fff6d8,#ffd98a);border-color:#b3812f;color:#4a2f06}
 .acts button[aria-disabled=true]{opacity:1;color:#51606a;background:#eef2f4;border-style:dashed;cursor:default}
@@ -85,7 +95,7 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
   <p class="friend" id="friend" data-noruby></p>
   <div class="acts" id="acts">
     <button type="button" id="ball"><span class="swatch" id="ball-sw"></span><span id="ball-t">ボール</span></button>
-    <button type="button" id="mode"><span id="mode-t">ふつう</span></button>
+    <button type="button" id="mode" aria-pressed="false"><span id="mode-t">らくちん</span></button>
     <button type="button" id="go" class="big">はじめる</button>
   </div>
   <div class="end" id="end" hidden>
@@ -100,6 +110,7 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
     <p>3. ちからの ゲージを タップで とめる。ちょうど いい ところが ねらいめ。</p>
     <p>4. ころがって、ピンが たおれる。5ふれーむ（2なげずつ）で おわり。</p>
     <p>「らくちん」だと みぞが ふさがって、めじるしも ゆっくり。キーボードは スペースで とめる。</p>
+    <p>「らくちん」の ボタンを おすと ✓ が ついて らくちんに なるよ。もう いちど おすと ふつうに もどるよ。</p>
     <p>てんすうは たおした ピンの かずだけ。ランキングも ほぞんも ありません。</p>
   </div></details>
 </main>
@@ -109,6 +120,8 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
 (() => {
   const EX = {
     'ボーリングじょう｜まるふわの ひろば': 'Bowling Alley | Marufuwa Plaza', 'ボーリングじょう': 'Bowling Alley', '← ひろばへ': '← Back to the Plaza',
+    'らくちん': 'Easy',
+    '「らくちん」の ボタンを おすと ✓ が ついて らくちんに なるよ。もう いちど おすと ふつうに もどるよ。': 'Press the “Easy” button and a ✓ appears: Easy mode is on. Press it again to go back to Normal.',
     'めじるしを タップで とめて、ちからを きめて、ころがそう。': 'Tap to stop the marker, set the power, and roll.',
     'フレームごとの たおした ほん': 'Pins knocked down per frame',
     'ボーリングの レーン。スペースキーか タップで とめます': 'The bowling lane. Press Space or tap to stop.',
@@ -530,7 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── もの・ボタン ───
   function drawBallBtn() { const b = BALLS[S.ball]; $('ball-sw').style.background = b.c; $('ball-t').textContent = T('ボール：' + b.ja, 'Ball: ' + b.en); $('ball').setAttribute('aria-label', T('ボールを かえる。いまは ' + b.ja, 'Change ball. Now: ' + b.en)); }
-  function drawModeBtn() { const e = S.mode === 'easy'; $('mode-t').textContent = e ? T('らくちん', 'Easy') : T('ふつう', 'Normal'); $('mode').setAttribute('aria-label', T('あそびかた：いまは ' + (e ? 'らくちん（みぞが ふさがる）' : 'ふつう（タイミング）') + '。おすと かわる', 'Mode: now ' + (e ? 'Easy (gutters blocked)' : 'Normal (timing)') + '. Press to switch')); }
+  function drawModeBtn() { const e = S.mode === 'easy'; $('mode-t').textContent = T('らくちん', 'Easy'); $('mode').setAttribute('aria-pressed', String(e)); $('mode').title = T('おすと らくちん（みぞが ふさがる・ゆっくり）と ふつうが かわるよ', 'Press to switch between Easy (gutters blocked, slower) and Normal'); }
   $('ball').addEventListener('click', () => { S.ball = (S.ball + 1) % BALLS.length; drawBallBtn(); });
   $('mode').addEventListener('click', () => { S.mode = S.mode === 'easy' ? 'normal' : 'easy'; drawModeBtn(); if (S.phase === 'aim') { S.tA = 0; } if (S.phase === 'power') { S.tP = 0; } say(S.mode === 'easy' ? T('らくちん：みぞが ふさがって、めじるしも ゆっくり。', 'Easy: gutters are blocked and the marker is slower.') : T('ふつう：タイミングで ねらおう。', 'Normal: aim with your timing.')); });
   goBtn.addEventListener('click', () => { if (goBtn.getAttribute('aria-disabled') === 'true') return; stopPressed(); });

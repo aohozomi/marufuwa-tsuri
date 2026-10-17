@@ -5,6 +5,14 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>まるふわ まるいろ</title>
+<meta name="description" content="まるい おやつを おとして、おなじ もの どうしを ぷにっと あわせる、のんびり おちもの。むりょう・ログインなし。">
+<link rel="canonical" href="https://aohozomi.github.io/marufuwa-tsuri/maruiro/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="まるふわ まるいろ｜のんびり おちもの（ブラウザ）">
+<meta property="og:description" content="まるい おやつを おとして、ぷにっと あわせよう。じかんぎれ なし・むりょう。">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/maruiro/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="まるい子を おとして、おなじ いろを くっつけて、ひとつ おおきい まるに。じかんぎれも ゲームオーバーも ない、のんびりの パズル。">
 <meta name="theme-color" content="#b9edf5">
 <meta name="robots" content="noindex">
@@ -112,6 +120,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     <button type="button" id="rst">さいしょから</button>
   </div>
   <p class="msg" id="msg" role="status" aria-live="polite"></p>
+  <p class="note" id="app-note" style="font-size:.8rem;margin:6px 0 0">ここは ブラウザの おちもの「まるいろ」。iPhone の「まるふわまるいろ」は、まるい こを そだてる べつの ゲームだよ。</p>
   <details class="more" id="howto"><summary>あそびかた・おうちの かたへ</summary><p class="note" id="howto-tx"></p><p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの 子が ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。</p></details>
 </main>
 <script>
@@ -140,7 +149,8 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     'ゆびを はなすと おちるよ。': 'Let go to drop.',
     'さいしょから はじめたよ。': 'Starting over.',
     'おとを ならすよ。': 'Sound is on.', 'おとを けしたよ。': 'Sound is off.',
-    'ぜんぶの いろを あわせたよ。すごい！': 'You joined every color. Wonderful!'
+    'ぜんぶの いろを あわせたよ。すごい！': 'You joined every color. Wonderful!',
+    'ここは ブラウザの おちもの「まるいろ」。iPhone の「まるふわまるいろ」は、まるい こを そだてる べつの ゲームだよ。': 'This is Maruiro, a browser drop-and-merge game. The iPhone app “Marufuwa Maruiro” is a different game where you raise round friends.'
   };
   const NAMES_EN = ['pink', 'orange', 'yellow', 'green', 'sky blue', 'blue-violet', 'lilac'];
   window.MaruiroEN = { names: NAMES_EN };

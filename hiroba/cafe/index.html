@@ -5,6 +5,13 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>カフェ ラテ｜まるふわの ひろば</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="カフェ ラテ｜まるふわの ひろば">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/cafe/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="ラテの かわうそが ひらいている、ゆっくり できる カフェ。のみものを えらんで、せきに すわって、まどの そとを ながめよう。">
 <meta name="theme-color" content="#b9edf5">
 <meta name="robots" content="noindex">
@@ -130,6 +137,7 @@ h2{margin:10px 0 4px;font-size:1.05rem}
     <h2 id="h-seat">ゆっくり すわって いるよ</h2>
     <div class="acts"><button type="button" id="again">べつの のみものに する</button><button type="button" id="leave">かえる</button></div>
   </section>
+  <details class="more"><summary>あそびかた</summary><p class="note">1. のみものを えらぶと、まるふわが カウンターの せきに すわって、カップが でてくるよ。</p><p class="note">2. あとは のんびり。なかまが ときどき ひとこと はなすよ。まるふわも ときどき「おいしい」って いうよ。</p><p class="note">3. すわって いる なかまを タップすると、おしゃべり するよ。</p><p class="note">4. ながく いると、おきゃくさんが きて コーヒーを たのむ ことも あるよ。</p><p class="note">5.「べつの のみものに する」で のみものを かえられるよ。「かえる」で ひろばに もどるよ。</p></details>
   <details class="more"><summary>おうちの かたへ</summary><p class="note">おかねも じゅんいも なにも へりません。のみものを えらんで すわる だけの へやです。ことばは「ゆっくり していってね」「また きてね」の ふたつだけで、ひきとめません。なかまの ひとことは 1ぷんに 1かい いかです。きろくも つうしんも ありません。てんめつは しません。</p></details>
 </main>
 <script>
@@ -140,6 +148,12 @@ h2{margin:10px 0 4px;font-size:1.05rem}
     'ラテの かわうそが ひらいている、ゆっくり できる カフェ。のみものを えらんで、せきに すわって、まどの そとを ながめよう。いそがなくて だいじょうぶ。': 'A calm café run by the Latte Otter. Pick a drink, sit down, and look out the window. No need to hurry.',
     'カフェの なか。まどの そとは いまの じかん。ラテの かわうそが カウンターに いて、なかまが すわって いるよ': 'Inside the café. The window shows the time outside. The Latte Otter is at the counter and friends are sitting.',
     'ラテの かわうそ：のみものを えらんでね。': 'Latte Otter: Please pick a drink.',
+    'あそびかた': 'How to play',
+    '1. のみものを えらぶと、まるふわが カウンターの せきに すわって、カップが でてくるよ。': '1. Pick a drink and Marufuwa sits at the counter and gets a cup.',
+    '2. あとは のんびり。なかまが ときどき ひとこと はなすよ。まるふわも ときどき「おいしい」って いうよ。': '2. Then just relax. Friends say something now and then, and Marufuwa sometimes says “Yummy.”',
+    '3. すわって いる なかまを タップすると、おしゃべり するよ。': '3. Tap a friend in a seat to have a little chat.',
+    '4. ながく いると、おきゃくさんが きて コーヒーを たのむ ことも あるよ。': '4. If you stay a while, a customer may come in and order coffee.',
+    '5.「べつの のみものに する」で のみものを かえられるよ。「かえる」で ひろばに もどるよ。': '5. “Pick another drink” lets you change drinks. “Head home” takes you back to the Plaza.',
     'のみものを えらぶ': 'Pick a drink', 'ゆっくり すわって いるよ': 'Sitting back and relaxing',
     'ココア': 'Hot cocoa', 'ミルクティー': 'Milk tea', 'りんごジュース': 'Apple juice', 'おちゃ': 'Tea',  'はちみつレモン': 'Honey lemon',
     'べつの のみものに する': 'Pick another drink', 'かえる': 'Head home',

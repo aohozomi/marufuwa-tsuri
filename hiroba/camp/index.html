@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>キャンプば｜まるふわ ひろば</title>
+<title>キャンプば｜まるふわの ひろば</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="キャンプば｜まるふわの ひろば">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/camp/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="まるふわと なかまが、よるの キャンプで たきびを かこんで います。さわると、たきびが ぱちっ。マシュマロが こんがり。てんすう・じかんは ありません。">
 <meta name="theme-color" content="#141c3e">
 <meta name="robots" content="noindex">
@@ -35,6 +42,13 @@ h1{margin:8px 0 2px;font-size:1.45rem;line-height:1.4;color:#fff6e3}
 .ch,.prop{position:absolute;display:block;padding:0;margin:0;border:0;background:none;-webkit-tap-highlight-color:transparent}
 .ch{cursor:pointer;transform-origin:50% 100%}
 .ch img,.prop img{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none}
+/* さわれる なかま・たきび・マシュマロは 44px いじょうの おおきさに（えの おおきさは そのまま） */
+.scene{container-type:inline-size}
+button.ch,button.prop{display:flex;align-items:flex-start;justify-content:center;min-width:44px;min-height:44px}
+button.prop[hidden]{display:none}
+#c-neko img{width:13cqw}#c-maru img{width:15cqw}#c-usagi img{width:11cqw}#p-fire img{width:13cqw}#p-marsh img{width:9cqw}
+/* ボタンが えより ひろく なった ぶん、ひだりへ ずらして えの いちを もとの まま に */
+#c-neko{margin-left:min(0px,calc((13cqw - 44px) / 2))}#c-maru{margin-left:min(0px,calc((15cqw - 44px) / 2))}#c-usagi{margin-left:min(0px,calc((11cqw - 44px) / 2))}#p-fire{margin-left:min(0px,calc((13cqw - 44px) / 2))}#p-marsh{margin-left:min(0px,calc((9cqw - 44px) / 2))}
 #c-neko{left:25%;top:38%;width:13%}
 #c-maru{left:57%;top:33%;width:15%}
 #c-usagi{left:73%;top:39%;width:11%}
@@ -67,6 +81,7 @@ button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{o
 .more summary::-webkit-details-marker{display:none}
 .note{margin:8px 0 0;padding:8px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.88rem;color:var(--ink2)}
 .note a{color:var(--link)}
+.anshin-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;margin:6px 0 0;padding:6px 18px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b)!important;font-weight:800;text-decoration:none}
 .sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 </head>
@@ -80,11 +95,11 @@ button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{o
     <div class="glow" id="glow" hidden></div>
     <div class="prop" id="p-tent" hidden><img alt="" src=""></div>
     <div class="prop" id="p-log" hidden><img alt="" src=""></div>
-    <button class="ch" id="c-neko" type="button" tabindex="-1" aria-hidden="true"><img alt="" src="../../img/friend-neko-s.webp"></button>
-    <button class="ch" id="c-maru" type="button" tabindex="-1" aria-hidden="true"><img alt="" src="../../img/game-blue.webp"></button>
-    <button class="ch" id="c-usagi" type="button" tabindex="-1" aria-hidden="true"><img alt="" src="../../img/friend-usagi-s.webp"></button>
-    <button class="prop" id="p-fire" type="button" tabindex="-1" aria-hidden="true" hidden><img alt="" src=""></button>
-    <button class="prop" id="p-marsh" type="button" tabindex="-1" aria-hidden="true" hidden><img alt="" src=""></button>
+    <button class="ch" id="c-neko" type="button" tabindex="-1" aria-hidden="true" aria-label="ねこ"><img alt="" src="../../img/friend-neko-s.webp"></button>
+    <button class="ch" id="c-maru" type="button" tabindex="-1" aria-hidden="true" aria-label="まるふわ"><img alt="" src="../../img/game-blue.webp"></button>
+    <button class="ch" id="c-usagi" type="button" tabindex="-1" aria-hidden="true" aria-label="うさぎ"><img alt="" src="../../img/friend-usagi-s.webp"></button>
+    <button class="prop" id="p-fire" type="button" tabindex="-1" aria-hidden="true" aria-label="たきび" hidden><img alt="" src=""></button>
+    <button class="prop" id="p-marsh" type="button" tabindex="-1" aria-hidden="true" aria-label="マシュマロ" hidden><img alt="" src=""></button>
   </div>
   <p class="wait" id="wait">キャンプの じゅんびを しているよ。もうすこし まってね。</p>
   <p class="say ready-only" id="say" role="status" aria-live="polite" hidden>たきびが、ぱち ぱち。ゆっくり していって ね。</p>
@@ -93,7 +108,7 @@ button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{o
     <button type="button" id="b-marsh">🍡 マシュマロを やく</button>
     <button type="button" id="b-talk">💬 なかまと はなす</button>
   </div>
-  <details class="more"><summary>おうちの かたへ</summary><p class="note" id="note">ここは、のんびり すごすための ばしょです。てんすう・じかん・ランキングは ありません。さわっても、なにも へらず、しっぱいも ありません。うごきを へらす せっていでは、ひのこを だしません。<a href="../../anshin/">おうちの かたへ</a></p></details>
+  <details class="more"><summary>おうちの かたへ</summary><p class="note" id="note">ここは、のんびり すごすための ばしょです。てんすう・じかん・ランキングは ありません。さわっても、なにも へらず、しっぱいも ありません。うごきを へらす せっていでは、ひのこを だしません。<a class="anshin-link" href="../../anshin/">おうちの かたへ</a></p></details>
 </main>
 <script>
 (() => {
@@ -173,11 +188,11 @@ button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{o
   });
   // English
   const EX = {
-    'キャンプば｜まるふわ ひろば': 'Campsite | Marufuwa Plaza', 'キャンプば': 'Campsite', '← ひろば': '← Plaza',
+    'キャンプば｜まるふわの ひろば': 'Campsite | Marufuwa Plaza', 'キャンプば': 'Campsite', '← ひろば': '← Plaza',
     'よるの キャンプ。ゆっくり していって ね。': 'A night at the campsite. Take your time.',
     'キャンプの じゅんびを しているよ。もうすこし まってね。': 'We are getting the campsite ready. Please wait a little.',
     '🔥 たきびに さわる': '🔥 Touch the fire', '🍡 マシュマロを やく': '🍡 Toast a marshmallow', '💬 なかまと はなす': '💬 Talk with friends',
-    'おうちの かたへ': 'For grown-ups',
+    'おうちの かたへ': 'For grown-ups', 'ねこ': 'Cat', 'まるふわ': 'Marufuwa', 'うさぎ': 'Bunny', 'たきび': 'Campfire', 'マシュマロ': 'Marshmallow',
     'ここは、のんびり すごすための ばしょです。てんすう・じかん・ランキングは ありません。さわっても、なにも へらず、しっぱいも ありません。うごきを へらす せっていでは、ひのこを だしません。': 'This is a place to relax. There are no scores, timers or rankings. Nothing is lost by touching, and nothing can go wrong. With “less motion” turned on, sparks are not shown.'
   };
   const reg = () => { const E = window.TsuriEn; if (E && E.lang === 'en' && typeof E.add === 'function' && !reg.done) { reg.done = true; E.add({ ex: EX }); } };

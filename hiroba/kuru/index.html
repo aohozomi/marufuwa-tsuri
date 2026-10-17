@@ -6,6 +6,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google" content="notranslate">
 <title>くるくる まるふわ｜まるふわの ひろば</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="くるくる まるふわ｜まるふわの ひろば">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/kuru/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="3つの まるい まどが くるくる まわる、まるふわの かわいい きかい。ボタンで じぶんで とめて、えが そろったら ふわっと おいわい。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#2b1d15">
 <meta name="robots" content="noindex">
@@ -84,6 +91,9 @@ h1,.lead{background:#2a1a24d9;color:#fff4e6 !important;border-radius:14px;paddin
 :root[data-calm=true] .lcd .sc{transition:none}
 :root[data-calm=true] .lcd .sc:before,:root[data-calm=true] .lcd .sc>img,:root[data-calm=true] .lcd .conf i{animation:none!important}
 .window{cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;position:relative;padding:8px;border-radius:18px;background:#1b110b;border:3px solid var(--gold2);box-shadow:inset 0 0 14px #000}
+/* 1がめんに おさめる：まど（たて＝よこ ほぼ おなじ）の はばを、がめんの たかさから ほかの ぶんを ひいた ぶんに する */
+.window{width:min(100%,max(200px,calc(100vh - var(--kuru-other,520px))));width:min(100%,max(200px,calc(100dvh - var(--kuru-other,520px))));margin:0 auto}
+@media(max-height:860px){.lcd{height:96px}.marq{margin-bottom:6px;padding:4px 10px}.lamp{width:16px;height:16px}.lcd{margin-bottom:6px}.msg{min-height:0;margin:8px 0 6px;padding:6px 12px}h1{font-size:1.25rem}}
 .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .reels canvas{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:10px;background:var(--glass)}
 .payline{position:absolute;left:2px;right:2px;top:50%;height:0;border-top:3px solid #e0555a;transform:translateY(-1.5px);pointer-events:none;opacity:.8}
@@ -116,6 +126,8 @@ h1,.lead{background:#2a1a24d9;color:#fff4e6 !important;border-radius:14px;paddin
 .card h2{margin:0;font-size:1.1rem;line-height:1.5}
 .card p{margin:2px 0;font-size:.9rem;color:var(--ink2)}
 .foot{margin:14px 0 0;text-align:center;font-size:.8rem;color:var(--ink2);word-break:break-all}
+.foot-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:6px 18px;border-radius:22px;background:linear-gradient(#fff,#dff1f7);border:2px solid #9bc9da;color:#14506b;font-weight:800;font-size:.95rem;text-decoration:none}
+.foot-link:focus-visible{outline:4px solid #fff;outline-offset:3px;box-shadow:0 0 0 8px #17658a}
 .more{margin:12px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--line);background:var(--plate);color:var(--ink);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}
 .more .inner{margin:8px 0 0;padding:10px 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:.88rem}
 .more .inner p{margin:0 0 6px}
@@ -133,7 +145,7 @@ h1,.lead{background:#2a1a24d9;color:#fff4e6 !important;border-radius:14px;paddin
 <main class="hut" id="hut">
   <a class="back" id="back" href="../index.html">← ひろばへ</a>
   <h1>くるくる まるふわ</h1>
-  <p class="lead" id="lead">ればを ひいて、まどを タップして とめよう。</p>
+  <p class="lead" id="lead">レバーを ひいて、まどを タップして とめよう。</p>
   <div class="cab" id="cab">
     <div class="marq" aria-hidden="true"><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span></div>
     <div class="lcd" id="lcd" data-mood="idle" aria-hidden="true"><div class="scan"></div><div class="shine"></div></div>
@@ -143,8 +155,8 @@ h1,.lead{background:#2a1a24d9;color:#fff4e6 !important;border-radius:14px;paddin
     </div>
     <div class="glow" aria-hidden="true"></div>
   </div>
-  <p class="msg" id="msg" role="status" aria-live="polite">ればを ひいて はじめよう。</p>
-  <button type="button" class="btn lever" id="lever"><i aria-hidden="true"></i>ればを ひく</button>
+  <p class="msg" id="msg" role="status" aria-live="polite">レバーを ひいて はじめよう。</p>
+  <button type="button" class="btn lever" id="lever"><i aria-hidden="true"></i>レバーを ひく</button>
   <div class="stops" id="stops" hidden>
     <button type="button" class="btn" data-r="0">とめる<small>1</small><span class="sr">ひだりの まど</span></button>
     <button type="button" class="btn" data-r="1">とめる<small>2</small><span class="sr">まんなかの まど</span></button>
@@ -158,14 +170,14 @@ h1,.lead{background:#2a1a24d9;color:#fff4e6 !important;border-radius:14px;paddin
   </section>
   <details class="more" id="more"><summary>あそびかた・らくちん</summary>
     <div class="inner">
-      <p>ればを ひくと 3つの まどが まわるよ。まどを タップ（クリック・スペース）すると、ひだり・まんなか・みぎの じゅんに とまるよ。したの ボタンでも とめられるよ。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。</p>
+      <p>レバーを ひくと 3つの まどが まわるよ。まどを タップ（クリック・スペース）すると、ひだり・まんなか・みぎの じゅんに とまるよ。したの ボタンでも とめられるよ。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。</p>
       <p>ふつう：おした しゅんかんの えで とまるよ（れんだ しても そろわないよ）。</p>
       <p>らくちん：ゆっくり まわって、じどうで とまって、ちゃんと そろうよ。</p>
       <p>おかねも てんすうも ありません。きろくも しません。ごほうびは みるだけです。</p>
       <button type="button" class="btn mode" id="mode" aria-pressed="false">いまは ふつう</button>
     </div>
   </details>
-  <p class="foot" id="foot">ほかの ばしょ：aohozomi.github.io/marufuwa-tsuri/links/</p>
+  <p class="foot" id="foot"><a class="foot-link" href="../../links/">まるふわの いりぐち</a></p>
 </main>
 <div class="sr" id="live" role="status" aria-live="polite"></div>
 <script>
@@ -182,7 +194,7 @@ const KURU_LCD = {   // 液晶の えと ひとこと。f＝えの ばしょ（i
   idle: [
     { id: 'idle1', f: 'img/game-smile.webp', ja: 'きょうも ふわふわ。', en: 'Fluffy again today.' },
     { id: 'idle2', f: 'img/pose/c/marufuwa_mate.webp', ja: 'のんびり まってるよ', en: 'Taking it easy.' },
-    { id: 'idle3', f: 'img/game-blue.webp', ja: 'ればを ひいてみよう！', en: 'Pull the lever!' },
+    { id: 'idle3', f: 'img/game-blue.webp', ja: 'レバーを ひいてみよう！', en: 'Pull the lever!' },
     { id: 'idle4', f: 'img/pose/c/marufuwa_nage.webp', ja: 'えいっ！', en: 'Here goes!' },
     { id: 'idle5', f: 'img/game-mint.webp', ja: 'いい てんき だね', en: 'Nice weather.' }
   ],
@@ -204,7 +216,7 @@ const KURU_LCD = {   // 液晶の えと ひとこと。f＝えの ばしょ（i
 };
 const KURU_SIDE = ['ひだり', 'まんなか', 'みぎ'], KURU_SIDE_EN = ['Left', 'Middle', 'Right'];
 const KURU_MSG = {
-  idle: 'ればを ひいて はじめよう。',
+  idle: 'レバーを ひいて はじめよう。',
   spin: 'まどを タップして、ひだりから ひとつずつ とめてね。',
   yokan: 'おや…？ そろいそう。',
   win: 'そろったよ！ ふわっと きれい。',
@@ -217,16 +229,16 @@ const KURU_MSG = {
     'くるくる まるふわ｜まるふわの ひろば': 'Round and Round Marufuwa | Marufuwa Plaza',
     'くるくる まるふわ': 'Round and Round Marufuwa',
     '← ひろばへ': '← Back to the Plaza',
-    'ればを ひいて、まどを タップして とめよう。': 'Pull the lever, then tap the windows to stop them.',
-    'ればを ひく': 'Pull the lever',
+    'レバーを ひいて、まどを タップして とめよう。': 'Pull the lever, then tap the windows to stop them.',
+    'レバーを ひく': 'Pull the lever',
     'とめる': 'Stop', 'ひだりの まど': 'left window', 'まんなかの まど': 'middle window', 'みぎの まど': 'right window',
     'あそびかた・らくちん': 'How to play / Easy mode',
-    'ればを ひくと 3つの まどが まわるよ。まどを タップ（クリック・スペース）すると、ひだり・まんなか・みぎの じゅんに とまるよ。したの ボタンでも とめられるよ。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。': 'Pull the lever and three windows spin. Tap the window (or click, or press Space) to stop them left, middle, right. The buttons below work too. When three of the same picture line up on the red line, we celebrate.',
+    'レバーを ひくと 3つの まどが まわるよ。まどを タップ（クリック・スペース）すると、ひだり・まんなか・みぎの じゅんに とまるよ。したの ボタンでも とめられるよ。まんなかの あかい せんに おなじ えが 3つ そろうと おいわい。': 'Pull the lever and three windows spin. Tap the window (or click, or press Space) to stop them left, middle, right. The buttons below work too. When three of the same picture line up on the red line, we celebrate.',
     'ふつう：おした しゅんかんの えで とまるよ（れんだ しても そろわないよ）。': 'Normal: it stops on the picture you see the moment you press (mashing the buttons will not line them up).',
     'らくちん：ゆっくり まわって、じどうで とまって、ちゃんと そろうよ。': 'Easy: it spins slowly, stops by itself, and always lines up.',
     'おかねも てんすうも ありません。きろくも しません。ごほうびは みるだけです。': 'There is no money and no points. Nothing is saved. The treat is just to look at.',
     'いまは ふつう': 'Now: Normal', 'いまは らくちん': 'Now: Easy',
-    'ほかの ばしょ：aohozomi.github.io/marufuwa-tsuri/links/': 'More places: aohozomi.github.io/marufuwa-tsuri/links/',
+    'まるふわの いりぐち': 'Marufuwa’s Doorway',
     'いまは みるだけです。ずかんや おへやには まだ おくれません。': 'For now it is just to look at. It cannot be sent to a book or a room yet.',
     'おうちの かたへ': 'For grown-ups'
   };
