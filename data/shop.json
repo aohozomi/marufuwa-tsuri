@@ -3,7 +3,7 @@
   {
    "id": "wear",
    "kind": "wear",
-   "ja": "ふくの いろ",
+   "ja": "まるふわの いろ",
    "en": "Colors",
    "items": [
     {
@@ -34,7 +34,7 @@
      "k": "kiiro",
      "ja": "きいろ",
      "en": "Yellow",
-     "lv": 8,
+     "lv": 5,
      "coin": 40,
      "c": "#ffd25e"
     },
