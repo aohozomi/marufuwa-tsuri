@@ -699,6 +699,7 @@ body.calm .cloud.c2{left:28%}
     <button type="button" data-dest="inn"><b aria-hidden="true">🏡</b>やどや<small>おちゃと しおり</small></button>
     <button type="button" data-dest="park"><b aria-hidden="true">🎡</b>パークへ<small>あそびば</small></button>
     <button type="button" data-dest="machi"><b aria-hidden="true">🛍️</b>まちかど<small>おみせ・まるいろ・いど</small></button>
+    <button type="button" data-dest="maruiro"><b aria-hidden="true">🔵</b>まるいろ<small>まるい こを おとして あそぼう</small></button>   <!-- 10/17 参謀15弾：おちもの パズルを ひろばから 1回で -->
     <button type="button" id="go-shindan" onclick="location.href='../shindan/'"><b aria-hidden="true">🎨</b>いろしんだん<small>3もんで きょうの きもち</small></button>   <!-- 10/15 参謀：診断への 入口が 見当たらない → ひろばの いきさきに -->
   </nav>
 
@@ -3396,12 +3397,20 @@ function checkOsusume() {   // data/osusume.json に 1人でも 入ったら 入
 }
 const machiName = () => { const el = typeof propEl === 'function' ? propEl('machi') : null; return el && el.dataset.art === 'sky' ? S('てんくうの しろ', 'Sky castle') : S('まちかど', 'Town corner'); };   // 白い城の 絵の ときは 窓も「てんくうの しろ」（10/7 マスター「天空の城が まちかど やぞ」）
 function openMachi() { checkOsusume(); lastInput = T; const dlg = $('machi'); $('machi-title').textContent = machiName(); if (!dlg.open) dlg.showModal(); narrate(machiName() + S('。どこへ いく？ おみせ・びじゅつかん・おすすめの へや。', '. Where to? The shop, the art gallery or the recommended room.')); }
-$('machi').addEventListener('click', e => { const b = e.target.closest('button[data-machi]'); if (!b) return; const w = b.dataset.machi; $('machi').close(); if (w === 'shiro' || w === 'omise') lvVisit(w); if (w === 'shiro') { location.href = 'shiro/'; return; } if (w === 'omise') openOmise(); else goDest(w); });
+$('machi').addEventListener('click', e => { const b = e.target.closest('button[data-machi]'); if (!b) return; const w = b.dataset.machi; $('machi').close(); if (w === 'shiro' || w === 'omise') lvVisit(w); if (w === 'shiro') { location.href = 'shiro/'; return; } if (w === 'omise') openOmise(); else goInside(w); });
 $('lv-btn').addEventListener('click', openLv); $('close-lv').addEventListener('click', () => $('lvdlg').close());
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => lvPaint(false)); else lvPaint(false);   // しろの なか（10/7 マスター「ドラクエみたいに 城内を たんけん」）
 if (new URLSearchParams(location.search).get('go') === 'omise') addEventListener('load', () => setTimeout(() => { try { openOmise(); } catch (e) {} }, 700));   // しろの なかの とびらから おみせへ
+/* 2段目（しろ・パークの まどの 中）は 歩かずに すぐ はいる（10/17 参謀15弾：まどが 閉じると「もう一度 おす」ボタンが 無く、歩いても つかなかった） */
+function goInside(id) {
+  const d = DEST[id]; if (!d) return; trip = null;
+  if (d.kind === 'go') { lvVisit(id); sfx.arrive(); setFace('sparkle', 3000); leave(id); return; }
+  if (d.kind === 'well') { lvVisit(id); wellPeek(); return; }
+  if (d.kind === 'wait') { trip = { id }; arrive(id); return; }
+  goDest(id);
+}
 function openPark() { lastInput = T; const dlg = $('parkdlg'); if (!dlg.open) dlg.showModal(); narrate(S('まるふわパークへ ようこそ。どこで あそぶ？', 'Welcome to Marufuwa Park. Where do you want to play?')); }
-$('parkdlg').addEventListener('click', e => { const b = e.target.closest('button[data-park]'); if (!b) return; $('parkdlg').close(); goDest(b.dataset.park); });
+$('parkdlg').addEventListener('click', e => { const b = e.target.closest('button[data-park]'); if (!b) return; $('parkdlg').close(); goInside(b.dataset.park); });
 $('close-park').addEventListener('click', () => { $('parkdlg').close(); narrate(S('パークを とじたよ。', 'Park closed.')); });
 $('close-machi').addEventListener('click', () => { $('machi').close(); narrate(machiName() + S('を とじたよ。', ' closed.')); });
 // ─── つりばの 一覧（10/1 マスター直：「釣り場は 一応 見せておく。行くには 条件だけ 書いて」）───
