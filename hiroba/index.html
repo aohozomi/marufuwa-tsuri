@@ -878,7 +878,7 @@ body.calm .cloud.c2{left:28%}
     <div class="inn-choices">
       <button type="button" data-inn-choice="tea">🍵 おちゃを のむ</button>
       <button type="button" data-inn-choice="window">🪟 まどべを ながめる</button>
-      <button type="button" data-inn-choice="bookmark">📖 しおりを めくる</button>
+      <button type="button" data-inn-choice="bookmark">📖 しおりの ページを ひらく</button>
     </div>
     <button id="inn-exit" class="inn-exit" type="button">ひろばへ もどる</button>
   </section>
@@ -1736,7 +1736,8 @@ function paintFacts() {   // いま・てんき・ともだち を 1ぎょうに
 function removeBubble(b) { b.el.remove(); const i = bubbles.indexOf(b); if (i >= 0) bubbles.splice(i, 1); }
 function computeBubble(b) {
   const a = b.actor, s = scaleOf(a), px = a.x * k, py = (a.y - a.h * s) * k - 6;
-  b.px = px; b.left = clamp(px - b.w / 2, 4, Math.max(4, box.width - b.w - 4)); b.top = Math.max(4, py - b.h - 8);
+  const lo = Math.max(0, cam * k), hi = Math.min(box.width, lo + (viewport.clientWidth || box.width));   /* 見えて いる 窓の 中に おさめる（かめらで よこに ずれて いても 右で きれない） */
+  b.px = px; b.left = clamp(px - b.w / 2, lo + 4, Math.max(lo + 4, hi - b.w - 4)); b.top = Math.max(4, py - b.h - 8);
 }
 // ふきだしを ならべる。まえに いる ひとの ふきだしを そのまま、うしろの ひとの ふきだしが かさなったら うえへ ずらす
 function layoutBubbles() {

@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="google" content="notranslate">
 <title>つりの れんしゅうじょ｜まるふわ びより</title>
-<meta name="description" content="まるふわ びよりの、わあわせの れんしゅうじょ。さかなは へらないし、ばつも ないよ。なんども れんしゅう できるよ。">
+<meta name="description" content="まるふわ びよりの、わっかを あわせる れんしゅうじょ。さかなは へらないし、ばつも ないよ。なんども れんしゅう できるよ。">
 <meta name="theme-color" content="#b9edf5">
 <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
 <link rel="apple-touch-icon" href="../img/icon-180.png">
@@ -115,7 +115,7 @@ html.pagebg-fb[data-night=true] main{background:rgba(15,28,51,.92);box-shadow:0 
     <a class="btn quiet" id="back" href="../">つりに もどる</a>
     <h1 id="title" tabindex="-1">つりの れんしゅうじょ</h1>
   </header>
-  <p class="lead" id="lead">わあわせの れんしゅうを しよう。さかなは へらないし、ばつも ないよ。なんども できるよ。</p>
+  <p class="lead" id="lead">わっかを あわせる れんしゅうを しよう。さかなは へらないし、ばつも ないよ。なんども できるよ。</p>
 
   <div class="row" id="levels" role="group" aria-labelledby="title-lv">
     <h2 id="title-lv" class="sr-only">あそびかた</h2>
@@ -350,7 +350,7 @@ html.pagebg-fb[data-night=true] main{background:rgba(15,28,51,.92);box-shadow:0 
     document.title = T('つりの れんしゅうじょ｜まるふわ びより', 'Fishing Practice | Marufuwa Fishing Days');
     const set = (id, ja, en) => { const e = $(id); if (e) e.textContent = T(ja, en); };
     set('back', 'つりに もどる', 'Back to fishing'); set('title', 'つりの れんしゅうじょ', 'Fishing Practice');
-    set('lead', 'わあわせの れんしゅうを しよう。さかなは へらないし、ばつも ないよ。なんども できるよ。', 'Practice the ring timing. No fish are used up and nothing bad happens. Try as many times as you like.');
+    set('lead', 'わっかを あわせる れんしゅうを しよう。さかなは へらないし、ばつも ないよ。なんども できるよ。', 'Practice the ring timing. No fish are used up and nothing bad happens. Try as many times as you like.');
     set('title-lv', 'あそびかた', 'How to play');
     const small = {easy: ['ゆっくり・まどが ひろい', 'Slow · wide window'], normal: ['ほんとうの つりと おなじ', 'Same as real fishing'], hard: ['まどが せまい', 'Narrow window']};
     document.querySelectorAll('#levels button').forEach(b => { const m = b.dataset.mode; b.querySelector('span').textContent = T(LEVELS[m].ja, LEVELS[m].en); b.querySelector('small').textContent = T(small[m][0], small[m][1]); b.setAttribute('aria-pressed', String(S.mode === m)); });

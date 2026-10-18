@@ -89,7 +89,7 @@ button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{o
 <main class="room" id="room">
   <a class="back" id="back" href="../index.html">← ひろば</a>
   <h1>キャンプば</h1>
-  <p class="lead">よるの キャンプ。ゆっくり していって ね。</p>
+  <p class="lead">よるの キャンプ。ゆっくり していってね。</p>
   <div class="scene" id="scene">
     <img class="bg" src="../../img/bg/tsuri_L_yoru.webp" alt="" decoding="async">
     <div class="glow" id="glow" hidden></div>
@@ -102,7 +102,7 @@ button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{o
     <button class="prop" id="p-marsh" type="button" tabindex="-1" aria-hidden="true" aria-label="マシュマロ" hidden><img alt="" src=""></button>
   </div>
   <p class="wait" id="wait">キャンプの じゅんびを しているよ。もうすこし まってね。</p>
-  <p class="say ready-only" id="say" role="status" aria-live="polite" hidden>たきびが、ぱち ぱち。ゆっくり していって ね。</p>
+  <p class="say ready-only" id="say" role="status" aria-live="polite" hidden>たきびが、ぱち ぱち。ゆっくり していってね。</p>
   <div class="acts ready-only" id="acts" hidden>
     <button type="button" id="b-fire">🔥 たきびに さわる</button>
     <button type="button" id="b-marsh">🍡 マシュマロを やく</button>
@@ -181,7 +181,7 @@ button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{o
       if (++got === need) {
         Object.values(PROPS).forEach(id => { $(id).hidden = false; });
         $('glow').hidden = false; $('wait').hidden = true; say.hidden = false; $('acts').hidden = false;
-        document.documentElement.dataset.ready = '1'; setSay('たきびが、ぱち ぱち。ゆっくり していって ね。', 'The fire goes crackle, crackle. Take your time.');
+        document.documentElement.dataset.ready = '1'; setSay('たきびが、ぱち ぱち。ゆっくり していってね。', 'The fire goes crackle, crackle. Take your time.');
       }
     };
     im.src = '../../img/camp/' + k + '.webp';
@@ -189,7 +189,7 @@ button:focus-visible,.back:focus-visible,a:focus-visible,summary:focus-visible{o
   // English
   const EX = {
     'キャンプば｜まるふわの ひろば': 'Campsite | Marufuwa Plaza', 'キャンプば': 'Campsite', '← ひろば': '← Plaza',
-    'よるの キャンプ。ゆっくり していって ね。': 'A night at the campsite. Take your time.',
+    'よるの キャンプ。ゆっくり していってね。': 'A night at the campsite. Take your time.',
     'キャンプの じゅんびを しているよ。もうすこし まってね。': 'We are getting the campsite ready. Please wait a little.',
     '🔥 たきびに さわる': '🔥 Touch the fire', '🍡 マシュマロを やく': '🍡 Toast a marshmallow', '💬 なかまと はなす': '💬 Talk with friends',
     'おうちの かたへ': 'For grown-ups', 'ねこ': 'Cat', 'まるふわ': 'Marufuwa', 'うさぎ': 'Bunny', 'たきび': 'Campfire', 'マシュマロ': 'Marshmallow',

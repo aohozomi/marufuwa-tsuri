@@ -21,7 +21,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="description" content="ねらって、ちからを きめて、ころがす。5ふれーむの ボーリング。ふつうは タイミング、らくちんは みぞが ふさがる。いそがなくて だいじょうぶ。">
+<meta name="description" content="ねらって、ちからを きめて、ころがす。5フレームの ボーリング。ふつうは タイミング、らくちんは みぞが ふさがる。いそがなくて だいじょうぶ。">
 <meta name="theme-color" content="#3a2a1e">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23d9a066'/%3E%3Ccircle cx='50' cy='56' r='24' fill='%233a5fa8'/%3E%3C/svg%3E">
@@ -108,7 +108,7 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
     <p>1. ボールを えらぶ。</p>
     <p>2. ゆれる めじるしを タップで とめて、ねらう ばしょを きめる。</p>
     <p>3. ちからの ゲージを タップで とめる。ちょうど いい ところが ねらいめ。</p>
-    <p>4. ころがって、ピンが たおれる。5ふれーむ（2なげずつ）で おわり。</p>
+    <p>4. ころがって、ピンが たおれる。5フレーム（2なげずつ）で おわり。</p>
     <p>「らくちん」だと みぞが ふさがって、めじるしも ゆっくり。キーボードは スペースで とめる。</p>
     <p>「らくちん」の ボタンを おすと ✓ が ついて らくちんに なるよ。もう いちど おすと ふつうに もどるよ。</p>
     <p>てんすうは たおした ピンの かずだけ。ランキングも ほぞんも ありません。</p>
@@ -130,7 +130,7 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
     'あそびかた': 'How to play', '1. ボールを えらぶ。': '1. Pick a ball.',
     '2. ゆれる めじるしを タップで とめて、ねらう ばしょを きめる。': '2. Tap to stop the moving marker and choose where to aim.',
     '3. ちからの ゲージを タップで とめる。ちょうど いい ところが ねらいめ。': '3. Tap to stop the power gauge. The green part is the sweet spot.',
-    '4. ころがって、ピンが たおれる。5ふれーむ（2なげずつ）で おわり。': '4. The ball rolls and the pins fall. The game is 5 frames (2 throws each).',
+    '4. ころがって、ピンが たおれる。5フレーム（2なげずつ）で おわり。': '4. The ball rolls and the pins fall. The game is 5 frames (2 throws each).',
     '「らくちん」だと みぞが ふさがって、めじるしも ゆっくり。キーボードは スペースで とめる。': 'In “Easy” the gutters are blocked and the marker is slower. On a keyboard, press Space to stop.',
     'てんすうは たおした ピンの かずだけ。ランキングも ほぞんも ありません。': 'The score is just the number of pins. No rankings, nothing saved.',
     'もういちど': 'Play again', 'カードに する': 'Make a card', 'はじめる': 'Start'
@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const n = document.createElement('span'); n.textContent = (i + 1);
       const v = document.createElement('b');
       if (f.t1 === null) v.textContent = '－'; else if (f.t1 === 10) v.textContent = '★'; else v.textContent = f.t1 + (f.t2 !== null ? '・' + f.t2 : '');
-      li.append(n, v); li.setAttribute('aria-label', T((i + 1) + 'ふれーむ ' + (f.t1 === null ? 'まだ' : ((f.t1 + (f.t2 || 0)) + 'ほん')), 'Frame ' + (i + 1) + ': ' + (f.t1 === null ? 'not yet' : (f.t1 + (f.t2 || 0)) + ' pins'))); ol.append(li);
+      li.append(n, v); li.setAttribute('aria-label', T((i + 1) + 'フレーム ' + (f.t1 === null ? 'まだ' : ((f.t1 + (f.t2 || 0)) + 'ほん')), 'Frame ' + (i + 1) + ': ' + (f.t1 === null ? 'not yet' : (f.t1 + (f.t2 || 0)) + ' pins'))); ol.append(li);
       tot += (f.t1 || 0) + (f.t2 || 0);
     });
     const t = document.createElement('li'); t.className = 'tot'; const a = document.createElement('span'); a.textContent = T('ぜんぶ', 'Total'); const b = document.createElement('b'); b.textContent = tot + T('ほん', ' pins'); t.append(a, b); ol.append(t); S.total = tot;
