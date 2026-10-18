@@ -74,8 +74,12 @@
     el.addEventListener('error', () => fail(p), { once: true });
     cur = p; play(p); return p;
   }
+  /* 10/18 参謀22弾：さいしょに さわる まで BGM の ファイルを よまない（ブラウザは さわる まで ならせない。さわらずに とじる ひとに 1.4MB を おくらない） */
+  let touched = false;
+  try { const go = () => { if (touched) return; touched = true; ['pointerdown', 'keydown', 'touchstart'].forEach(ev => removeEventListener(ev, go, true)); refresh(); }; ['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, go, true)); } catch (e) { touched = true; }
   function refresh() {
     try {
+      if (!touched) return;
       if (document.hidden) { if (cur && !cur.el.paused) { const p = cur; fadeTo(p.el, 0, 300, () => { if (document.hidden) try { p.el.pause(); } catch {} }); } return; }   // かくれた タブは 止める（あとから ひらいた タブが ならす）
       const file = desired();
       if (!file) { if (cur) { retire(cur); cur = null; notify(); } return; }
