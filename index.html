@@ -927,6 +927,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   body:not(.gazing) main > #scene{grid-column:1;grid-row:1 / span 30;position:sticky;top:12px;align-self:start;width:100%}
   body:not(.gazing) main > :not(#scene):not(#backdrop){grid-column:2}
 }
+/* 10/18 天の台帳 U06：ながい いちらんでも うえで とじられる */
+.x-close{position:sticky;top:0;float:right;z-index:3;min-width:44px;min-height:44px;margin:-4px -4px 0 8px;border-radius:22px;font-size:1.3rem;font-weight:900;line-height:1;padding:0}
 </style>
 </head>
 <body>
@@ -1204,7 +1206,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   </dialog>
 
   <dialog id="nakama" aria-labelledby="nakama-title">
-    <h2 id="nakama-title"></h2>
+    <button class="x-close" type="button" id="close-nakama-top" aria-label="とじる">×</button>
+  <h2 id="nakama-title"></h2>
     <p class="count" id="nakama-lead"></p>
     <div id="nakama-me"></div>
     <div id="nakama-party"></div>
@@ -4897,5 +4900,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 <script defer src="tsuri-ruby.js"></script>
 <script defer src="tsuri-sw-register.js"></script>
 <script defer src="tsuri-ver.js?v=108"></script>
+<script>(function(){var t=document.getElementById('close-nakama-top'),c=document.getElementById('close-nakama');if(t&&c)t.addEventListener('click',function(){c.click();});})();</script>
 </body>
 </html>

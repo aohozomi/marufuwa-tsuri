@@ -571,6 +571,8 @@ body.calm .cloud.c2{left:28%}
 #bg .m013-sun{filter:var(--m013-time-filter);opacity:1}
 #scene[data-time=yoru] #bg .m013-sun{opacity:0}
 #scene .orb{opacity:0!important;box-shadow:none!important}
+/* 10/18 天の台帳 U06：ながい いちらんでも うえで とじられる */
+.x-close{position:sticky;top:0;float:right;z-index:3;min-width:44px;min-height:44px;margin:-4px -4px 0 8px;border-radius:22px;font-size:1.3rem;font-weight:900;line-height:1;padding:0}
 </style>
 </head>
 <body>
@@ -798,6 +800,7 @@ body.calm .cloud.c2{left:28%}
   <button class="close" type="button" id="close-card">とじる</button>
 </dialog>
 <dialog id="zukan" aria-labelledby="zukan-title">
+  <button class="x-close" type="button" id="close-zukan-top" aria-label="とじる">×</button>
   <h2 id="zukan-title">なかま</h2>
   <p class="count">ひろばに いる なかまと、いっしょに いく なかまが ここに ならぶよ。すうじは じぶんの ぶんだけ。いそがなくて だいじょうぶ。</p>
   <h3 id="zn-now-h">いま ひろばに いる なかま</h3>
@@ -1424,7 +1427,7 @@ function syncDayNight() {
 const plazaArt = (key, width, height, label, x = width / 2, y = null, size = 6, extra = '') => {
   const image = (cls, time, layer = '') => `<image class="${cls}" data-href="../img/hiroba/plaza_${key}_${time}${layer}.webp" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMax meet"/>`;
   const sign = label ? `<text class="plaza-sign-label" x="${x}" y="${y ?? height * .5}" text-anchor="middle" dominant-baseline="middle" font-family="system-ui,sans-serif" font-size="${size}" font-weight="900" fill="#573923" stroke="#f5e5c5" stroke-width=".45" paint-order="stroke fill">${label}</text>` : '';
-  const aria = label || key;
+  const aria = label || ({ bench: 'ベンチ', flowerbed: 'かだん', fountain: 'ふんすい', gate: 'もん', mailbox: 'ポスト', streetlamp: 'がいとう', well: 'いど' })[key] || '';   /* 10/18 天の台帳 U07：よみあげに 開発用の 英語名（bench など）を ださない */
   return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${aria}">${image('bd-shadow-h', 'hiru', '_shadow')}${image('bd-shadow-n', 'yoru', '_shadow')}${image('bd-h', 'hiru')}${image('bd-n', 'yoru')}${extra}${sign}</svg>`;
 };
 SVG.gate = plazaArt('gate', 160, 100, null);
@@ -3717,5 +3720,6 @@ addEventListener('load', () => {
 <script defer src="../tsuri-en-hiroba.js"></script>
 <script defer src="../tsuri-ruby-dict.js"></script>
 <script defer src="../tsuri-ruby.js"></script>   <!-- ふりがな：にほんごの ひらがなの ことばを 漢字＋ふりがなに（ジョブズ1の エンジン。本体の「ふりがな」ボタン・?noruby=1 と おなじ スイッチ） -->
+<script>(function(){var t=document.getElementById('close-zukan-top'),c=document.getElementById('close-zukan');if(t&&c)t.addEventListener('click',function(){c.click();});})();</script>
 </body>
 </html>

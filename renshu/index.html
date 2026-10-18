@@ -333,6 +333,8 @@ html.pagebg-fb[data-night=true] main{background:rgba(15,28,51,.92);box-shadow:0 
     const h = S.hist; if (h.length) {
       const mean = h.reduce((a, x) => a + x[0], 0) / h.length, mabs = h.reduce((a, x) => a + Math.abs(x[0]), 0) / h.length;
       $('st-avg').textContent = Math.round(mabs) + 'ms';
+      const lastOk = Math.abs(h[h.length - 1][0]) <= 60;   /* 10/18 天の台帳 U14：ぴったりの すぐ あとは「まってみよう」を ださない。くせの アドバイスは 5かい いじょう たまってから */
+      if (h.length < 5 || lastOk) { $('avg').textContent = lastOk ? T('いまの、ぴったり。その かんじ！', 'That one was spot on. Just like that!') : ''; return; }
       $('avg').textContent = Math.abs(mean) < 25 ? T('さいきんは、はやくも おそくも ならず、ちょうど いい ところに おしてるよ。', 'Lately you are pressing right where you should.') : mean < 0 ? T('さいきんは、すこし はやめに おしがち（' + fmtMs(mean) + '）。ほんの ちょっと まってみよう。', 'Lately you press a bit early (' + fmtMs(mean) + '). Try waiting a moment.') : T('さいきんは、すこし おそめに おしがち（' + fmtMs(mean) + '）。ほんの ちょっと はやく おしてみよう。', 'Lately you press a bit late (' + fmtMs(mean) + '). Try pressing a touch sooner.');
     } else { $('st-avg').textContent = '–'; $('avg').textContent = ''; }
   }
