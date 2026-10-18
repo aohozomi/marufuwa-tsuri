@@ -212,7 +212,7 @@
       const nm = T(name(d), en(d)); pname.firstChild.textContent = nm; pimg.alt = '';
       const s = api.src(d, lv, u => { if (host.isConnected && root.isConnected) pimg.src = u; }); if (s) pimg.src = s;
       go.textContent = T('これに きめる', 'Choose this'); cancel.textContent = T('やめる', 'Cancel');
-      const prov = api.PROVISIONAL && !isReal(d.a); note.textContent = prov ? T('えは じゅんばんに ほんものに いれかえちゅう。', 'The pictures are being swapped for the real thing, one by one.') : ''; note.hidden = !prov;
+      const prov = false && api.PROVISIONAL && !isReal(d.a);   /* 10/19 天の台帳 U11：「いれかえちゅう」を ださない（かんせいした がめんを かりに みせない） */ note.textContent = prov ? T('えは じゅんばんに ほんものに いれかえちゅう。', 'The pictures are being swapped for the real thing, one by one.') : ''; note.hidden = !prov;
     }
     function pick(k, v, b) {
       if (k === 'item' && ITEM_LV[v] > lv) { speak(T('こもの「' + ITEMS[v][0] + '」は レベル ' + ITEM_LV[v] + ' で ひらくよ。', 'The accessory “' + ITEMS[v][1] + '” unlocks at level ' + ITEM_LV[v] + '.')); return; }

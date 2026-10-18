@@ -366,6 +366,7 @@ body:not(.gazing) .sub-actions:not([data-howto=open]) > :not(#take-photo):not(#m
 body:not(.gazing):not(.howto-open) details.time-box:has(#areas),body:not(.gazing):not(.howto-open) #plaza-note,body:not(.gazing):not(.howto-open) #lead-text small .lead-time,body:not(.gazing):not(.howto-open) #today{display:none !important}
 body.gazing #howto-toggle,body[data-phase=waiting] #howto-toggle,body[data-phase=bite] #howto-toggle,body[data-phase=reel] #howto-toggle{display:none !important}
 #howto-toggle{flex:1 1 100%;min-height:48px}
+.quick-howto{flex:1 1 100%;margin:4px 0 8px;font-size:.92rem;line-height:1.7;text-align:center}.quick-howto .pill{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;margin-top:4px}
 /* さいしょの 1がめん（10/6・Claude）：375×667 でも「けしき」と「なげる」が いっしょに みえる よう、うえの つみかさねを へらす。ボタンは ちいさく しない（44px いじょう） */
 .tap-hint{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px;padding:0}   /* 「どこかを さわると…」は よみあげ だけ（おとボタンの もじが おなじ ことを いう） */
 .topmute{padding-top:4px}
@@ -780,6 +781,7 @@ dialog::backdrop{background:#17323d66}
 dialog h2{margin:0 0 4px;text-align:center}
 dialog .count{text-align:center;margin:0 0 12px}
 #book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:12px}
+@media (max-width:420px){#book-grid{grid-template-columns:repeat(2,1fr)}}   /* 10/19 天の台帳 U13：ちいさい がめんは 2れつ（ことばを こまぎれに しない） */
 #book-grid div{border:2px solid #d5e6ed;border-radius:14px;padding:8px 4px;text-align:center;font-size:.78rem;background:#fff}
 #book-filter{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 10px}
 #book-grid div[data-seen=false]{background:#eef4f7;color:#566d79}   /* まだ あって ない こ：2.9対1→4.9対1（よめる いろ） */
@@ -2133,7 +2135,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function audioChosen() { if (save.audioSet !== true) { save.audioSet = true; store(); } }
   function drawAudioSize() { const row = document.querySelector('.sub-actions'); if (row) row.dataset.audio = audioDecided() ? 'set' : ''; drawSound(); }   // ちいさく するのは ひらき なおした とき／つれた とき（おした ゆびの したで ボタンが うごかない ように）
   function drawHowto() { const b = $('howto-toggle'); if (!b) return; const open = document.body.classList.contains('howto-open'); b.setAttribute('aria-expanded', String(open)); b.textContent = L(open ? 'せっていを とじる ▴' : 'せってい ▾', open ? 'Close options ▴' : 'Options ▾'); } /* 10/16 参謀：中身は 音・BGM・ながめる などの 設定なので「あそびかた」では なく「せってい」（英語の Options と そろえる） */
-  { const mk = () => { const row = document.querySelector('.sub-actions'); if (!row || $('howto-toggle')) return; const b = document.createElement('button'); b.type = 'button'; b.id = 'howto-toggle'; b.className = 'pill'; b.setAttribute('aria-controls', 'sound'); row.append(b);
+  { const mk = () => { const row = document.querySelector('.sub-actions'); if (!row || $('howto-toggle')) return; const b = document.createElement('button'); b.type = 'button'; b.id = 'howto-toggle'; b.className = 'pill'; b.setAttribute('aria-controls', 'sound'); row.append(b); { const q = document.createElement('p'); q.id = 'quick-howto'; q.className = 'quick-howto'; q.textContent = L('あそびかたは 3つだけ：「なげる」→ わが ひかったら おす → あわなくても へらないよ。', 'How to play in 3 steps: Cast → press when the ring glows → missing costs you nothing.'); const g = document.createElement('a'); g.href = 'renshu/'; g.className = 'pill'; g.textContent = L('れんしゅうしてみる ▸', 'Try the practice pond ▸'); q.append(' ', g); b.after(q); }   /* 10/19 天の台帳 U12：せっていを ひらくと、まず みじかい あそびかた。せっていは そのあと */
       b.addEventListener('click', () => { const open = !document.body.classList.contains('howto-open'); document.body.classList.toggle('howto-open', open); row.dataset.howto = open ? 'open' : ''; drawHowto(); }); drawHowto(); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mk); else mk(); addEventListener('load', () => { mk(); drawHowto(); }); setTimeout(drawHowto, 900); }   // おと・BGM・とおく・ながめる・おやすみ・つかいやすく する を 1つの「あそびかた」に まとめる（ふだんは かくす）
   addEventListener('load', () => { try { drawShoreLabel(); } catch {} }); setTimeout(() => { try { drawShoreLabel(); } catch {} }, 900);
@@ -4625,7 +4627,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     {   // きせつの さかな（月ごと 1しゅ）。ずかんの 30しゅるいには かぞえない。「また らいねん あえるよ」だけ。せかさない・かずを くらべない
       const now = monthNow(), head = document.createElement('h3'), note = document.createElement('p');
       head.style.cssText = 'grid-column:1/-1;margin:10px 0 0;font-size:1rem;text-align:center'; head.textContent = L('きせつの さかな', 'Seasonal fish');
-      note.style.cssText = 'grid-column:1/-1;margin:0;text-align:center;font-size:.82rem;line-height:1.7'; note.textContent = L('つき ごとに 1しゅ。ずかんの 30しゅるいには かぞえないよ。あえなくても、また らいねん あえるよ。（えは じゅんばんに ほんものに いれかえちゅう）', 'One kind each month. They are not part of the 30 kinds. If you miss one, you can meet it again next year. (The pictures are being swapped for the real thing, one by one.)');
+      note.style.cssText = 'grid-column:1/-1;margin:0;text-align:center;font-size:.82rem;line-height:1.7'; note.textContent = L('つき ごとに 1しゅ。ずかんの 30しゅるいには かぞえないよ。あえなくても、また らいねん あえるよ。', 'One kind each month. They are not part of the 30 kinds. If you miss one, you can meet it again next year.');
       $('book-grid').append(head, note, ...FISH.filter(f => f.season).map(f => {
         const got = save.fish[f.id], cell = document.createElement('div');
         cell.dataset.seen = String(!!got); cell.dataset.rare = '3'; cell.dataset.nushi = String(!!(got && got.nushi));
