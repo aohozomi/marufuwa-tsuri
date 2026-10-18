@@ -79,7 +79,7 @@
     '1ぴき30びょうくらい。むりょうであそべます。': 'About 30 seconds a fish. Free to play.',
     'おみせ': 'Shop', 'なげる': 'Cast', 'もういちどなげる': 'Cast again', 'まってる…': 'Waiting…', 'ひく！': 'Reel in!', 'いまだ！': 'Now!',
     'おと：OFF（つけるのがおすすめ）': 'Sound: OFF (better with sound)', 'おと：ON': 'Sound: ON', 'おと：OFF': 'Sound: OFF', 'おと': 'Sound',
-    'しゃしんをとる': 'Take a photo', 'そっとにがす': 'Release gently', 'とおく：ON': 'Far view: ON', 'とおく：OFF': 'Far view: OFF', 'ながめる': 'Just watch', '🌙ながめる': '🌙 Just watch', 'つったこをおすと、はやさ・うごき・くせとまめちしきがみられるよ。': 'Tap a fish you caught to see its speed, motion, quirk and a fun fact.', 'つれた！': 'Caught!', 'つり・おさんぽ・ミニゲームのちいさなまち': 'A little town: fishing, strolls and mini games', 'いろつき＝きょうあえたこ': 'Colored = met today', 'もどる': 'Back',
+    'しゃしんをとる': 'Take a photo', 'そっとにがす': 'Release gently', 'とおく：ON': 'Far view: ON', 'とおく：OFF': 'Far view: OFF', 'ながめる': 'Just watch', 'おやすみ': 'Sleep', '⏲️おやすみ': '⏲️ Sleep', 'あつめたもの・どうぐ▸': 'Collection & gear ▸', '🎒あつめたもの・どうぐ▸': '🎒 Collection & gear ▸', '🌙ながめる': '🌙 Just watch', 'つったこをおすと、はやさ・うごき・くせとまめちしきがみられるよ。': 'Tap a fish you caught to see its speed, motion, quirk and a fun fact.', 'つれた！': 'Caught!', 'つり・おさんぽ・ミニゲームのちいさなまち': 'A little town: fishing, strolls and mini games', 'いろつき＝きょうあえたこ': 'Colored = met today', 'もどる': 'Back',
     'ふつう': 'Normal', 'らくちん': 'Easy mode', 'よみあげ：ON': 'Read aloud: ON', 'よみあげ：OFF': 'Read aloud: OFF', 'よみあげ：ON。': 'Read aloud: ON.', 'よみあげ：OFF。': 'Read aloud: OFF.', 'がめんのことばをこえでよむよ': 'It reads the words on the screen aloud', 'がめんのことばをこえでよむよ。': 'It reads the words on the screen aloud.', 'このたんまつのなかだけでよむよ': 'It reads only inside this device', 'このたんまつのなかだけでよむよ。': 'It reads only inside this device.', 'スクリーンリーダーをつかっているひとは、OFFのままがおすすめ': 'If you use a screen reader, we recommend leaving it OFF', 'らくちん：ON': 'Easy mode: ON', 'らくちん：OFF': 'Easy mode: OFF', 'ふるえ：ON': 'Vibration: ON', 'ふるえ：OFF': 'Vibration: OFF',
     'けしきのいきもの：ON': 'Wildlife: ON', 'けしきのいきもの：OFF': 'Wildlife: OFF',
     'みる・いく': 'Look & Visit', 'バケツ': 'Bucket', 'ずかん': 'Fish Book', 'どうぐ': 'Gear', 'ひろば': 'Plaza', 'きろく': 'Records',
@@ -334,6 +334,7 @@
     [/^(.+?)をもどしたよ。$/, (_, n) => { const t = tailEn(n); return t == null ? null : `Put back ${t}.`; }],
     [/^(.+?)をおいたよ。$/, (_, n) => { const t = tailEn(n); return t == null ? null : `Placed ${t}.`; }],
     [/^(\d+)ひき$/, (_, n) => `${n} fish`],
+    [/^つぎまであと約(\d+)ひき$/, (_, n) => `about ${n} more fish`],
     [/^もどすきろく：つれたかず(\d+)ひき・シールちょう(\d+)\s*\/\s*(\d+)・レベル(\d+)$/, (_, a, b, c, d) => `Record to restore: caught ${a} · Fish Book ${b} / ${c} · Lv. ${d}`],
     [/^いまのきろく：つれたかず(\d+)ひき$/, (_, a) => `Current record: caught ${a}`],
     [/^つれたかず(\d+)シールちょう(\d+)\s*\/\s*(\d+)$/, (_, a, b, c) => `Caught ${a} · Stickers ${b} / ${c}`],   // おへやの しゃしんの ふだ（canvas）

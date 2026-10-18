@@ -82,8 +82,8 @@ canvas{display:none}
 <main>
   <div class="top"><a href="../hiroba/" id="a-back">← ひろばへ</a><a href="?lang=en" id="a-lang" lang="en">English</a></div>
   <img class="hero" src="../img/game-smile.webp" width="120" height="160" alt="" decoding="async">
-  <h1 id="title">まるふわ いろ診断</h1>
-  <p class="lead" id="lead">3つ こたえると、まるふわの 耳の いろで、きょうの きもちが わかるよ。あそびだよ。こたえは この たんまつの なかだけ。</p>
+  <h1 id="title">まるふわ いろ しんだん</h1>
+  <p class="lead" id="lead">3つ こたえると、まるふわの みみの いろで、きょうの きもちが わかるよ。あそびだよ。こたえは この たんまつの なかだけ。</p>
 
   <section class="q" aria-labelledby="q1"><h2 id="q1">1. いまの からだは？</h2><div class="opts" role="group" aria-labelledby="q1" data-q="1">
     <button type="button" data-v="1" aria-pressed="false">ふわふわ（のんびり）</button>
@@ -204,7 +204,7 @@ canvas{display:none}
     var units = text.indexOf(' ') >= 0 ? text.split(' ').map(function (w, i, a) { return i < a.length - 1 ? w + ' ' : w; }) : text.split('');
     var line = '', i, u; for (i = 0; i < units.length; i++) { u = units[i]; if (g.measureText((line + u).replace(/ $/, '')).width > maxW && line) { g.fillText(line.replace(/ $/, ''), x, y); line = u; y += lh; } else line += u; } if (line) g.fillText(line.replace(/ $/, ''), x, y);
   }
-  function fileName() { return L('まるふわ_いろ診断', 'marufuwa_color') + '_' + cur.key + '.png'; }
+  function fileName() { return L('まるふわ_いろしんだん', 'marufuwa_color') + '_' + cur.key + '.png'; }
   $('b-save').addEventListener('click', function () {
     if (!cur) return;
     draw(function (cv) { cv.toBlob(function (bl) { var a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = fileName(); document.body.append(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000); $('live').textContent = L('カードを ほぞんしたよ。', 'Saved the card.'); }, 'image/png'); });
@@ -212,7 +212,7 @@ canvas{display:none}
   $('b-share').addEventListener('click', function () {
     if (!cur) return;
     draw(function (cv) { cv.toBlob(function (bl) {
-      var f = new File([bl], fileName(), { type: 'image/png' }), data = { files: [f], title: L('まるふわ いろ診断', 'Marufuwa Color Check'), text: cur.name + ' ' + cur.word + ' https://aohozomi.github.io/marufuwa-tsuri/shindan/' + (EN ? '?lang=en' : '') };
+      var f = new File([bl], fileName(), { type: 'image/png' }), data = { files: [f], title: L('まるふわ いろ しんだん', 'Marufuwa Color Check'), text: cur.name + ' ' + cur.word + ' https://aohozomi.github.io/marufuwa-tsuri/shindan/' + (EN ? '?lang=en' : '') };
       if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [f] }))) navigator.share(data).catch(function () {});
       else { $('b-save').click(); $('live').textContent = L('この たんまつでは おくれないので、ほぞんしたよ。', 'Sharing is not available here, so the card was saved instead.'); }
     }, 'image/png'); });
