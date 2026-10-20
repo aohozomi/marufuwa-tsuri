@@ -3138,7 +3138,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   let ufs = 36; const uFont = n => '800 ' + n + 'px system-ui,"Yu Gothic UI",sans-serif'; ctx.font = uFont(ufs);
   while (ufs > 20 && ctx.measureText(SHARE_URL).width > urlMax) { ufs -= 1; ctx.font = uFont(ufs); }
   ctx.fillStyle = '#244653'; ctx.textAlign = 'right'; ctx.fillText(SHARE_URL, OW - 40, FY, urlMax);
-  ctx.fillStyle = '#3f5a68'; ctx.font = '700 30px system-ui,"Yu Gothic UI",sans-serif'; ctx.fillText('TikTok @ao.hozumi.ai.visu', OW - 40, FY - 50);
+  ctx.fillStyle = '#3f5a68'; ctx.font = '700 30px system-ui,"Yu Gothic UI",sans-serif'; ctx.fillText('TikTok @marufuwa_no_machi', OW - 40, FY - 50);
   ctx.restore();
   return new Promise((res, rej) => cvs.toBlob(b => b ? res(b) : rej(Error('png')), o.type || 'image/png', o.quality));
 }
