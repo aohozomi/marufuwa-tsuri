@@ -117,8 +117,8 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
    ・通信なし・ほぞんなし（つりびより本体の せっていは よむだけ）。外へ ひらく 2つは「いいですか？」を 出して から（リンクは その とき はじめて つく）。 */
 (function () {
   'use strict';
-  /* どこから 来たかを App Store の キャンペーン名で わける（?from=tiktok など・許可した 4つだけ・個人は とくていしない）。JSなしでも ct=web_links で ひらく */
-  try { var f = new URLSearchParams(location.search).get('from'), ct = f === 'tiktok' ? 'tiktok_bio' : /^(x|youtube|instagram)$/.test(f || '') ? 'web_links_' + f : 'web_links'; document.getElementById('b-app').href = 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=' + ct + '&mt=8'; } catch (e) {}
+  /* どこから 来たかを App Store の キャンペーン名で わける（TikTok の プロフィールは ?from=tiktok_bio・許可した ものだけ・個人は とくていしない）。JSなしでも ct=web_links で ひらく */
+  try { var f = new URLSearchParams(location.search).get('from'), ct = f === 'tiktok_bio' || f === 'tiktok' ? 'tiktok_bio' : /^(x|youtube|instagram)$/.test(f || '') ? 'web_links_' + f : 'web_links'; document.getElementById('b-app').href = 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=' + ct + '&mt=8'; } catch (e) {}
   const EN = new URLSearchParams(location.search).get('lang') === 'en' || (() => { try { return localStorage.getItem('marufuwa-lang-v1') === 'en'; } catch (e) { return false; } })();
   const T = (ja, en) => EN ? en : ja;
   const $ = id => document.getElementById(id);
