@@ -73,6 +73,24 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
 .more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}.more[open] summary{margin-bottom:6px}.more summary:focus-visible{outline:4px solid #286b88;outline-offset:2px}
 .anshin-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;margin:6px 0 0;padding:6px 18px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b)!important;font-weight:800;text-decoration:none}
 .anshin-link:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #17658a}
+/* へやに いる ひと（月城ノア など）：絵＋きょうの おはなし（日がわり） */
+.resident{margin:14px 0 6px}
+.resident h2{display:inline-block;margin:0 0 8px;padding:3px 14px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:1.05rem;line-height:1.5}
+.res-box{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:14px;align-items:center;padding:12px;border-radius:18px;background:var(--plate);border:2px solid var(--line)}
+.res-pic{margin:0;border-radius:16px;overflow:hidden;border:3px solid var(--wood2);background:#e6e0f6;aspect-ratio:480/673}
+.res-pic img{display:block;width:100%;height:100%;object-fit:cover}
+.res-name{margin:0;font-size:1.2rem;line-height:1.5}
+.res-name ruby rt{font-size:.6em;font-weight:700;color:var(--ink2)}
+.res-role{margin:0 0 8px;font-size:.88rem;color:var(--ink2)}
+.res-label{margin:0 0 4px;font-size:.8rem;font-weight:800;color:var(--ink2)}
+.res-say{position:relative;margin:0;padding:12px 14px;min-height:5.2em;border-radius:16px;background:#fff;border:2px solid var(--line);font-size:1.05rem;line-height:1.75;word-break:keep-all;overflow-wrap:anywhere}
+.res-say::before{content:"";position:absolute;left:-10px;top:22px;width:14px;height:14px;background:#fff;border-left:2px solid var(--line);border-bottom:2px solid var(--line);transform:rotate(45deg)}
+.res-say.fresh{animation:res-in .5s ease-out}
+@keyframes res-in{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
+.res-more{display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin:10px 0 0;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer}
+.res-tomorrow{margin:8px 0 0;font-size:.85rem;color:var(--ink2)}
+:root[data-time=n] .res-say,:root[data-time=n] .res-say::before{background:#fbf9ff}
+@media(max-width:520px){.res-box{grid-template-columns:1fr;justify-items:center}.res-pic{width:min(180px,56%)}.res-text{width:100%}.res-say::before{left:calc(50% - 7px);top:-9px;transform:rotate(135deg)}}
 </style>
 </head>
 <body>
@@ -89,6 +107,7 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
   <div class="acts"><a id="go-open" href="#" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="go-cancel">やめる</button></div>
 </dialog>
 <div class="sr" id="live" role="status" aria-live="polite"></div>
+<script src="../../tsuri-daily.js"></script>
 <script>
 (() => {
   'use strict';
@@ -124,12 +143,80 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
     }
     return out;
   }
+  // ─── へやに いる ひと（kind:'resident'＝月城ノア など）：外へ ひらく ボタンは ない。絵（この フォルダの ファイル名だけ）と「きょうの おはなし」（日がわり）を 出す ───
+  //   data/osusume.json に {kind:'resident', id, name, kana, name_en, role, role_en, img, lines:[{ja,en}…]}。lines は 7こ いじょう（いまは 30こ）
+  //   どの 文に するかは 日づけだけで きまる（tsuri-daily.js の day()＝みんな おなじ・つぎの 日は かならず ちがう 文）。保存・通信は しない
+  const RES_IMG = './', MAX_RES = 3;
+  function cleanResidents(list) {
+    const out = [];
+    if (!Array.isArray(list)) return out;
+    for (const e of list.slice(0, 200)) {
+      if (!e || typeof e !== 'object' || e.kind !== 'resident' || out.length >= MAX_RES) continue;
+      if (!okText(e.name, 40) || !okText(e.name_en, 60) || !okText(e.role, 40) || !okText(e.role_en, 60) || !Array.isArray(e.lines)) continue;
+      const lines = e.lines.slice(0, 60).filter(l => l && typeof l === 'object' && okText(l.ja, 80) && okText(l.en, 200)).map(l => ({ ja: l.ja, en: l.en }));
+      if (lines.length < 7) continue;
+      const img = typeof e.img === 'string' && /^[a-z0-9][a-z0-9_-]{0,40}\.(webp|png|jpg|jpeg)$/i.test(e.img) ? e.img : '';
+      const id = typeof e.id === 'string' && /^[a-z0-9_-]{1,20}$/.test(e.id) ? e.id : 'r' + out.length;
+      out.push({ id, name: e.name, kana: okText(e.kana, 40) ? e.kana : '', nameEn: e.name_en, role: e.role, roleEn: e.role_en, img, lines });
+    }
+    return out;
+  }
+  // ためしの 日づけ：?day=YYYY-MM-DD（手元＝localhost の ときだけ。公開の ページでは きかない）
+  const testDay = (() => {
+    try {
+      if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return null;
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(new URLSearchParams(location.search).get('day') || '');
+      return m ? new Date(+m[1], +m[2] - 1, +m[3], 12) : null;
+    } catch (e) { return null; }
+  })();
+  const dayNum = d => (window.TsuriDaily && typeof window.TsuriDaily.day === 'function') ? window.TsuriDaily.day(d) : d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate();
+  // 7 と 30 は わりきれない ので、つづいた 30日で 30この 文が 1かいずつ 出る（つぎの 日は かならず ちがう 文）
+  const pickLine = (n, d) => ((dayNum(d || testDay || new Date()) * 7) % n + n) % n;
+  const resState = [];
+  function paintResident(st) {
+    const r = st.r, en = isEn(), n = r.lines.length, i = st.extra ? (pickLine(n) + Math.floor(n / 2)) % n : pickLine(n), line = r.lines[i];
+    st.h.textContent = en ? 'Who lives here' : 'へやに いる ひと';
+    if (en) st.name.textContent = r.nameEn;
+    else { const rb = document.createElement('ruby'); rb.append(r.name); if (r.kana) { const rt = document.createElement('rt'); rt.textContent = r.kana; rb.append(rt); } st.name.replaceChildren(rb); }
+    st.role.textContent = en ? r.roleEn : r.role;
+    st.label.textContent = en ? (st.extra ? 'One more thing' : 'Today’s words') : (st.extra ? 'もう ひとこと' : 'きょうの おはなし');
+    const say = en ? line.en : line.ja;
+    if (st.say.textContent !== say) st.say.textContent = say;
+    st.say.lang = en ? 'en' : 'ja';
+    st.more.textContent = en ? (st.extra ? 'Back to today’s words' : 'One more word, please') : (st.extra ? 'きょうの おはなしに もどる' : 'もう ひとこと きく');
+    st.tomorrow.textContent = en ? 'Tomorrow, I’ll have something new to tell you.' : 'あしたも ちがう おはなしを するね。';
+    if (st.im) st.im.alt = en ? r.nameEn + ', a girl in a black cap and uniform with a purple ribbon' : r.name + '（' + (r.kana || r.name) + '）。くろい ぼうしと せいふく、むらさきの リボンの おんなの こ';
+  }
+  function renderResident(r) {
+    const sec = document.createElement('section'); sec.className = 'resident'; sec.dataset.enSkip = '1'; sec.dataset.noruby = '';   // ことばは この ページが 自分で きりかえる（tsuri-en.js・ふりがなは さわらない）
+    const h = document.createElement('h2'); h.id = 'res-h-' + r.id; sec.setAttribute('aria-labelledby', h.id);
+    const box = document.createElement('div'); box.className = 'res-box';
+    const st = { r, extra: false, h };
+    if (r.img) {
+      const fig = document.createElement('figure'); fig.className = 'res-pic';
+      const im = new Image(); im.width = 480; im.height = 673; im.decoding = 'async'; im.referrerPolicy = 'no-referrer'; im.onerror = () => { fig.remove(); box.style.gridTemplateColumns = '1fr'; }; im.src = RES_IMG + r.img;
+      fig.append(im); box.append(fig); st.im = im;
+    }
+    const tx = document.createElement('div'); tx.className = 'res-text';
+    st.name = document.createElement('h3'); st.name.className = 'res-name';
+    st.role = document.createElement('p'); st.role.className = 'res-role';
+    st.label = document.createElement('p'); st.label.className = 'res-label'; st.label.id = 'res-l-' + r.id;
+    st.say = document.createElement('p'); st.say.className = 'res-say'; st.say.setAttribute('role', 'status'); st.say.setAttribute('aria-live', 'polite');
+    st.more = document.createElement('button'); st.more.type = 'button'; st.more.className = 'res-more';
+    st.more.addEventListener('click', () => { st.extra = !st.extra; paintResident(st); st.say.classList.remove('fresh'); void st.say.offsetWidth; st.say.classList.add('fresh'); });
+    st.tomorrow = document.createElement('p'); st.tomorrow.className = 'res-tomorrow';
+    tx.append(st.name, st.role, st.label, st.say, st.more, st.tomorrow); box.append(tx);
+    sec.append(h, box);
+    resState.push(st); paintResident(st);
+    return sec;
+  }
   // ─── 棚を えがく（textContent だけ・innerHTML は つかわない）───
   const T = (ja, en) => isEn() ? en : ja;
   const EN_KIND = { illustrator: ['Illustrators', 'People who draw'], streamer: ['Streamers', 'People who stream'], follower: ['Growing creators', 'People who are just getting started'], ganbaru: ['Working hard', 'People who keep going day by day'] };
   function render(list) {
-    const data = clean(list); shelves.replaceChildren();
-    if (data.every(d => !d.length)) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'いまは じゅんびちゅう。ひろばで まってね。'; const a = document.createElement('a'); a.className = 'home'; a.href = '../index.html'; a.textContent = 'ひろばに もどる'; shelves.append(p, a); }
+    const data = clean(list), res = cleanResidents(list); shelves.replaceChildren(); resState.length = 0;
+    res.forEach(r => shelves.append(renderResident(r)));
+    if (!res.length && data.every(d => !d.length)) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'いまは じゅんびちゅう。ひろばで まってね。'; const a = document.createElement('a'); a.className = 'home'; a.href = '../index.html'; a.textContent = 'ひろばに もどる'; shelves.append(p, a); }
     KINDS.forEach((K, i) => {
       const sec = document.createElement('section'); sec.className = 'shelf'; sec.dataset.kind = K.k;
       const h = document.createElement('h2'); h.id = 'h-' + K.k; h.textContent = K.h;
@@ -167,6 +254,7 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
   // ─── English（tsuri-en.js が 英語の ときだけ。ひとりひとりの なまえは そのまま・ひとことは hitokoto_en が あれば それ）───
   function applyEn() {
+    resState.forEach(paintResident);   // へやに いる ひとの ことば（日本語でも よぶ：tsuri-en.js が あとから 読みこまれる ため）
     if (!isEn()) return;
     document.querySelectorAll('.card p[data-en]').forEach(p => { p.textContent = p.dataset.en; });
     document.querySelectorAll('.shelf').forEach(s => { const e = EN_KIND[s.dataset.kind]; if (e) { s.querySelector('h2').textContent = e[0]; s.querySelector('.sub').textContent = e[1]; } });
@@ -176,8 +264,9 @@ dialog .acts a,dialog .acts button{flex:1 1 120px;display:inline-flex;align-item
     try { const r = await fetch(DATA, { cache: 'no-store' }); if (r.ok) list = await r.json(); } catch (e) { list = []; }
     render(list);
   };
-  window.Osusume = { render, clean, cleanUrl, kinds: KINDS.map(k => k.k), ask: (it) => ask(it, null), reload: loadData };
-  render([]); loadData();
+  window.Osusume = { render, clean, cleanUrl, cleanResidents, pickLine, kinds: KINDS.map(k => k.k), ask: (it) => ask(it, null), reload: loadData };
+  loadData();   // 中身が とどく まえに「じゅんびちゅう」を 出さない（へやに いる ひとが いる とき 一しゅん まちがった 文が 見える）
+  document.addEventListener('DOMContentLoaded', () => resState.forEach(paintResident));
   window.addEventListener('load', () => setTimeout(applyEn, 400));
 })();
 </script>

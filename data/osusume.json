@@ -1,1 +1,134 @@
-[]
+[
+  {
+    "kind": "resident",
+    "id": "noa",
+    "name": "月城ノア",
+    "kana": "つきしろ のあ",
+    "name_en": "Noa Tsukishiro",
+    "role": "おはなしを きく ひと",
+    "role_en": "a listener",
+    "img": "noa_tsukishiro.webp",
+    "lines": [
+      {
+        "ja": "いらっしゃい。きょうは どんな いちにち だった？ はなさなくても いいよ。",
+        "en": "Welcome. How was your day? You don't have to tell me if you don't want to."
+      },
+      {
+        "ja": "ここに すわって、すこし やすんで いこう。わたしは となりで きいて いるね。",
+        "en": "Sit here and rest a little. I'll be right beside you, listening."
+      },
+      {
+        "ja": "つきは まいばん かたちが ちがうけど、いつも おなじ つき なんだよ。",
+        "en": "The moon looks different every night, but it's always the same moon."
+      },
+      {
+        "ja": "うまく いかない ひも あるよね。それでも ここまで きた あなたは えらいよ。",
+        "en": "Some days just don't go well. Still, you made it here, and that counts."
+      },
+      {
+        "ja": "いけの さかなたち、きょうは のんびり およいで いたよ。あなたも のんびりで いいからね。",
+        "en": "The fish in the pond were drifting slowly today. You can take it slow, too."
+      },
+      {
+        "ja": "ひろばの みんなの こえ、きこえる？ ちいさな わらいごえって、いいよね。",
+        "en": "Can you hear everyone in the plaza? Little bits of laughter are nice, aren't they?"
+      },
+      {
+        "ja": "つらい ときは、だれかに はなしてね。ちいさな ことでも いいんだよ。",
+        "en": "When things feel hard, please talk to someone. Even small things are worth sharing."
+      },
+      {
+        "ja": "よるの そらを みあげると、ほしが ひとつ ふえて いる きが するの。",
+        "en": "When I look up at the night sky, it feels like there's one more star than before."
+      },
+      {
+        "ja": "きょう できた こと、ひとつだけ おもいだして みて。こころの なかで いいよ。",
+        "en": "Think of one thing you did today. You can keep it in your heart."
+      },
+      {
+        "ja": "あめの ひは、あめの おとを きくのが すき。しずかで、やさしい おとだよね。",
+        "en": "On rainy days, I like listening to the rain. It's such a quiet, gentle sound."
+      },
+      {
+        "ja": "つりは、まつ じかんも たのしいんだって。まつのって、ちょっと つきみに にてるね。",
+        "en": "They say waiting is part of the fun of fishing. Waiting is a bit like moon-watching, isn't it?"
+      },
+      {
+        "ja": "いそがなくて だいじょうぶ。ここでは、じかんが ゆっくり ながれるから。",
+        "en": "No need to hurry. Time moves slowly here."
+      },
+      {
+        "ja": "きょうは かぜの おとが やさしいね。めを とじて、すこし きいて みよう。",
+        "en": "The wind sounds gentle today. Let's close our eyes and listen for a moment."
+      },
+      {
+        "ja": "なにも しない じかんも、たいせつな じかん なんだよ。",
+        "en": "Time spent doing nothing is precious time, too."
+      },
+      {
+        "ja": "ひろばを ぐるっと さんぽして みてね。きのうと ちがう なにかが あるかも。",
+        "en": "Try a little walk around the plaza. Something might be different from yesterday."
+      },
+      {
+        "ja": "はなしたく なったら、いつでも どうぞ。だまって いる じかんも だいじだよ。",
+        "en": "Whenever you feel like talking, go ahead. Quiet time matters, too."
+      },
+      {
+        "ja": "つきが みえない よるも、つきは ちゃんと そこに いるよ。",
+        "en": "Even on nights when you can't see the moon, it's still right there."
+      },
+      {
+        "ja": "がんばった ひも、がんばれなかった ひも、どっちも あなたの だいじな いちにち。",
+        "en": "Days you did your best and days you couldn't — both are precious."
+      },
+      {
+        "ja": "びじゅつかんの え、みた？ わたしは いろを ながめるのが すきなの。",
+        "en": "Have you seen the pictures in the museum? I love just gazing at the colors."
+      },
+      {
+        "ja": "ふうっと いきを はいて みて。……うん、すこし かるく なったかな。",
+        "en": "Try letting out a long, slow breath. ...There. Maybe you feel a little lighter."
+      },
+      {
+        "ja": "きょうの そらは なにいろ だった？ そらの いろって、まいにち ちがうね。",
+        "en": "What color was the sky today? The sky is a different color every day."
+      },
+      {
+        "ja": "ちいさな さかなも、おおきな さかなも、みんな いっしょうけんめい およいで いるね。",
+        "en": "Little fish and big fish, they're all swimming their very best."
+      },
+      {
+        "ja": "ねむれない よるは、めを とじて いるだけでも いいよ。からだは ちゃんと やすめて いるからね。",
+        "en": "On nights you can't sleep, just closing your eyes is enough. Your body is still resting."
+      },
+      {
+        "ja": "ひろばの なかまたち、きょうも なかよし みたい。みて いると ほっと するね。",
+        "en": "The plaza friends seem to be getting along today, too. Watching them feels so calming."
+      },
+      {
+        "ja": "きょうも きて くれたんだね。ゆっくり して いってね。",
+        "en": "You came by again today. Take your time here."
+      },
+      {
+        "ja": "まどの そとの おと、なにが きこえる？ とりかな、かぜかな。",
+        "en": "What can you hear outside the window? Birds, maybe, or the wind?"
+      },
+      {
+        "ja": "いいたい ことが ことばに ならない ひも あるよね。それで いいんだよ。",
+        "en": "Some days, what you want to say just won't turn into words. That's okay."
+      },
+      {
+        "ja": "カフェから いい においが するね。あたたかい のみものって、こころも あたためて くれるね。",
+        "en": "Something smells nice over at the cafe. A warm drink warms your heart, too."
+      },
+      {
+        "ja": "ほしを ひとつ えらんで、なまえを つけて みない？ こっそりで いいよ。",
+        "en": "Want to pick a star and give it a name? You can keep it a secret."
+      },
+      {
+        "ja": "きょうの あなたも、きのうの あなたも、ちゃんと がんばって きたんだね。",
+        "en": "You today and you yesterday — you've both been doing your best."
+      }
+    ]
+  }
+]
