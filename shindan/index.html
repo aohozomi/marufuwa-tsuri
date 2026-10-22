@@ -154,6 +154,13 @@ canvas{display:none}
       g.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
       b.setAttribute('aria-pressed', 'true'); ans[g.dataset.q] = +b.dataset.v;
       $('go').disabled = !(ans[1] && ans[2] && ans[3]);
+      // 10/23 参謀：スマホで「けっかを みる」が 画面の そとに あり、さがす ことに なっていた。こたえたら つぎの しつもんへ／ぜんぶ こたえたら ボタンへ 自動で すすむ
+      var smooth = 'auto';   // smooth は 押した直後の 画面の 変化で とちゅうで 止まる ことが あった
+      var next = [1, 2, 3].filter(function (q) { return !ans[q]; })[0];
+      setTimeout(function () {
+        if (next) { var ng = document.querySelector('.opts[data-q="' + next + '"]'); if (ng) (ng.closest('fieldset, section, .q') || ng).scrollIntoView({ behavior: smooth, block: 'start' }); }
+        else $('go').scrollIntoView({ behavior: smooth, block: 'end' });
+      }, 220);
     });
   });
   function pick(a) {   // 合計が いちばん 多い いろ。同点は 2問目の いろを 優先（+0.5）。それでも 同点なら 水色→ミント→アプリコット→ラベンダー の 順
