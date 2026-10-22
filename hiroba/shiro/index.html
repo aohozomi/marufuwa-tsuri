@@ -216,7 +216,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
     if (me.moving) { me.moving.t += calm() ? 1 : 1 / 7; if (me.moving.t >= 1) { me.x = me.moving.tx; me.y = me.moving.ty; me.moving = null; onArrive(); } }
     else if (queue.length && $('msg').hidden) { const n = queue.shift(); if (typeof n === 'string') { action(); } else moveTo(n[0], n[1]); }
     draw(); requestAnimationFrame(loop); })();
-  say(S('しろの ひと', 'Castle keeper'), S('ようこそ、てんくうの しろへ。\nやじるしで あるいて、だれかの まえで A を おしてね。', 'Welcome to the Sky Castle.\nWalk with the arrows and press A in front of someone.'));
+  say(S('しろの ひと', 'Castle keeper'), S('ようこそ、てんくうの しろへ。\nA を おして つづける。やじるしで あるく。だれかの まえで A。', 'Welcome to the Sky Castle.\nPress A to continue. Walk with the arrows. Press A in front of someone.'));
   window.__shiro = { me, NPC, MAP, walk: moveTo, action, msg: () => $('mtext').textContent };   // 検査用
 })();
 </script>
