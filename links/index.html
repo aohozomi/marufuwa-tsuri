@@ -156,5 +156,17 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   } catch (e) {}
 })();
 </script>
+<script>
+/* TikTok などの アプリの なかの ブラウザで、よこに はらうと すぐ もとの アプリへ もどって しまう（10/23 マスター）。
+   その ブラウザの ときだけ、おなじ ページの 履歴を 1つ たす。うっかり はらっても 1かいめは ここに のこる（とじる「×」は いつでも つかえる）。ふつうの ブラウザでは なにも しない */
+(function () {
+  try {
+    if (!/TikTok|musical_ly|Bytedance|trill|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent)) return;
+    if (history.state && history.state.marufuwaGuard) return;
+    history.replaceState(Object.assign({}, history.state || {}, { marufuwaBase: 1 }), '');
+    history.pushState({ marufuwaGuard: 1 }, '');
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

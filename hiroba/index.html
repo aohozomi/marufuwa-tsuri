@@ -544,7 +544,7 @@ body.calm .cloud.c2{left:28%}
 @media(max-width:899px){
   .mobile-destination-hint{display:none}
   #viewport{width:min(100%,calc((100vh - 300px)*.6429));width:min(100%,calc((100dvh - 300px)*.6429))}
-  #places{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:8px;overflow-x:auto;margin:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#fffdf3f2;box-shadow:0 -4px 14px #0003;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  #places{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;margin:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom)) 28px;scroll-padding-left:28px;background:#fffdf3f2;box-shadow:0 -4px 14px #0003;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
   #places button{flex:0 0 auto;min-width:96px;min-height:60px;padding:6px 10px;font-size:.95rem;border-radius:18px;scroll-snap-align:start}
   #places button b{font-size:1.3rem}
   #places button small{display:none}
@@ -3739,5 +3739,17 @@ addEventListener('load', () => {
 <script defer src="../tsuri-ruby-dict.js"></script>
 <script defer src="../tsuri-ruby.js"></script>   <!-- ふりがな：にほんごの ひらがなの ことばを 漢字＋ふりがなに（ジョブズ1の エンジン。本体の「ふりがな」ボタン・?noruby=1 と おなじ スイッチ） -->
 <script>(function(){var t=document.getElementById('close-zukan-top'),c=document.getElementById('close-zukan');if(t&&c)t.addEventListener('click',function(){c.click();});})();</script>
+<script>
+/* TikTok などの アプリの なかの ブラウザで、よこに はらうと すぐ もとの アプリへ もどって しまう（10/23 マスター）。
+   その ブラウザの ときだけ、おなじ ページの 履歴を 1つ たす。うっかり はらっても 1かいめは ここに のこる（とじる「×」は いつでも つかえる）。ふつうの ブラウザでは なにも しない */
+(function () {
+  try {
+    if (!/TikTok|musical_ly|Bytedance|trill|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent)) return;
+    if (history.state && history.state.marufuwaGuard) return;
+    history.replaceState(Object.assign({}, history.state || {}, { marufuwaBase: 1 }), '');
+    history.pushState({ marufuwaGuard: 1 }, '');
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
