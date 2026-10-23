@@ -170,8 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const FRIENDS = [{ id: 'neko', ja: 'ねこ', en: 'Cat' }, { id: 'usagi', ja: 'うさぎ', en: 'Rabbit' }, { id: 'tanuki', ja: 'たぬき', en: 'Tanuki' }, { id: 'komugi', ja: 'こむぎ', en: 'Komugi' }, { id: 'koinu', ja: 'こいぬ', en: 'Puppy' }, { id: 'panda', ja: 'パンダ', en: 'Panda' }, { id: 'penguin', ja: 'ペンギン', en: 'Penguin' }, { id: 'risu', ja: 'りす', en: 'Squirrel' }];
   const dayN = Math.floor(Date.now() / 864e5), CAST = [];
   for (let i = 0; CAST.length < 4; i++) { const f = FRIENDS[(dayN * 3 + i * 2 + (i > 3 ? 1 : 0)) % FRIENDS.length]; if (!CAST.includes(f)) CAST.push(f); }
-  const SEATS_DAY = [{ x: 52, y: 270 }, { x: 78, y: 273 }, { x: 394, y: 277 }, { x: 428, y: 284 }];   // 絵の ベンチの 座面（昼）
-  const SEATS_NIGHT = [{ x: 46, y: 281 }, { x: 72, y: 284 }, { x: 394, y: 289 }, { x: 430, y: 296 }];   // 絵の ベンチの 座面（夜）
+  // 10/23 マスター「観客の子達が椅子から落ちてる」：うさぎが ベンチの はしと まえに はみ出し、パンダが 絵の みぎはしで 切れていた。座面の うえに よせる
+  //   うさぎ（2ばんめ）は 足が ながい ぶん 下に さがって 見えるので、ほかより 8〜9 うえに おく
+  const SEATS_DAY = [{ x: 50, y: 270 }, { x: 74, y: 262 }, { x: 392, y: 277 }, { x: 420, y: 283 }];   // 絵の ベンチの 座面（昼）
+  const SEATS_NIGHT = [{ x: 42, y: 281 }, { x: 64, y: 272 }, { x: 392, y: 289 }, { x: 420, y: 294 }];   // 絵の ベンチの 座面（夜）
   const seats = () => root.dataset.time === 'n' ? SEATS_NIGHT : SEATS_DAY;
   const MARU = { w: 104, h: 138, x: CX, y: 772 };
   // ─── ピンの ならび（ひとつの フレームに 10本）：row 0＝あたまの ピン（いちばん てまえ）───
