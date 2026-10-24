@@ -60,6 +60,10 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
 .first{--c1:#1d6a99;--c2:#06314c;--side:#032236;min-height:104px;padding:14px 18px;font-size:1.28rem;border-width:4px;box-shadow:0 7px 0 var(--side),0 14px 22px #06314c55,inset 0 -8px 12px #00000026,inset 0 6px 8px #ffffff55}   /* 10/23 マスター：いちばん上は ほかより 大きく・こく、さいしょに 目が いく ように */
 .first .ic{font-size:1.8rem;flex:none}
 #t-play{white-space:pre-line}
+.goods{--c1:#fff3f7;--c2:#ffc4d8;--side:#c96a8e;--ink2:#6b2140;min-height:100px;padding:8px 16px 8px 8px;border-color:#f7b6cc;justify-content:flex-start;text-align:left;border-radius:28px}   /* 10/24 マスター：一点集中（アクスタを売る）。いちばん上に 商品の しゃしんつきで */
+.goods img{flex:none;width:92px;height:92px;border-radius:18px;background:#fff;object-fit:contain}
+.goods .ship{font-size:.72rem;opacity:.85;white-space:nowrap}
+.goods .price{display:inline-block;margin-top:3px;padding:1px 10px;border-radius:999px;background:#a83a63;color:#fff;font-size:.82rem}
 .big>span:last-child{min-width:0}
 .first small{font-size:.86rem}
 .confirm{margin:-6px 0 0;padding:14px 14px 12px;border-radius:20px;background:var(--card);border:3px solid var(--line);text-align:center}
@@ -71,6 +75,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
 .confirm button{background:#fff;color:#244653;border:3px solid #b9cbd4}
 :root[data-night=true] .big{filter:brightness(.9)}
 :root[data-night=true] .play{filter:none}
+:root[data-night=true] .goods{filter:none}
 :root[data-night=true] .confirm button{background:#1a3250;color:#e8f1f8;border-color:#4a6b8c}
 .sub{margin:0;text-align:center}
 .sub a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;font-size:.9rem;font-weight:700;color:#0b4a6b;text-decoration:underline}
@@ -88,15 +93,18 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
 </style>
 </head>
 <body>
-<a class="skip" id="skip" href="#play">いりぐちへ とぶ</a>
+<a class="skip" id="skip" href="#b-acsta-noa">いりぐちへ とぶ</a>
 <main id="main">
   <img class="face" src="../img/icon-192.png" width="168" height="168" alt="">
   <h1 id="title" tabindex="-1">まるふわの いりぐち</h1>
-  <p class="lead" id="lead">「まるふわ」は、まるい ほっぺの こたち。ブラウザの ちいさな まちと、iPhone の そだてるゲームと、LINE スタンプに でてくるよ。すきな ところから どうぞ。</p>
+  <p class="lead" id="lead">「まるふわ」は、まるい ほっぺの こたち。ブラウザの ちいさな まちと、iPhone の そだてるゲームと、LINE スタンプと、アクスタに でてくるよ。すきな ところから どうぞ。</p>
   <div class="go">
     <!-- 10/23 参謀：来る人は「かわいい子を もっと見たい」人。1番目の 行き先は つりば ではなく ひろば（まるふわと なかまが あるく 画面）。?from=links は 訪問数の くらべに つかうので けさない。 -->
-    <!-- 10/23 マスター：TikTok から 来た人が 見る ページ。いちばん上は ブラウザで すぐ あそべる「まるふわ びより」（大きく・こい色）。TikTok へのリンクは 来た人に 意味が ないので けした。 -->
+    <!-- 10/23 マスター：TikTok から 来た人が 見る ページ。ブラウザで すぐ あそべる「まるふわ びより」は 大きく・こい色（10/24 から その上に アクスタ2つ）。TikTok へのリンクは 来た人に 意味が ないので けした。 -->
     <!-- 外へ行く ボタンは ふつうの リンク（a href）。押した人は もう 決めている。JSが止まっても リンクは 生きる。 -->
+    <!-- 10/24 マスター「おけ」：一点集中（アクスタを TikTok から買える1本道）。いちばん上に BOOTH の アクスタ2つ。utm_source=links で BOOTH 側の 流入を くらべる。 -->
+    <a class="big goods" id="b-acsta-noa" href="https://hozumi-ao.booth.pm/items/9036945?utm_source=links" target="_blank" rel="noopener noreferrer"><img src="../img/acsta_noa.webp" width="92" height="92" alt=""><span><span id="t-acsta-noa">アクスタ「ノアと まるふわ」</span><small id="s-acsta-noa">70mm・BOOTH へ <span class="price">¥3,500</span> <span class="ship">＋そうりょう</span></small></span></a>
+    <a class="big goods" id="b-acsta-maru" href="https://hozumi-ao.booth.pm/items/9036508?utm_source=links" target="_blank" rel="noopener noreferrer"><img src="../img/acsta_nakayoshi.webp" width="92" height="92" alt=""><span><span id="t-acsta-maru">アクスタ「まるふわと ねこ」</span><small id="s-acsta-maru">50mm・BOOTH へ <span class="price">¥2,500</span> <span class="ship">＋そうりょう</span></small></span></a>
     <a class="big play first" id="play" href="../hiroba/?from=links"><span class="ic" aria-hidden="true">🏡</span><span><span id="t-play">ちいさな まちを あるく
 「まるふわ びより」</span><small id="s-play">まるふわと なかまの まち・むりょう・ログインなし</small></span></a>
     <a class="big" id="b-app" href="https://apps.apple.com/jp/app/id6816003504?pt=129401810&amp;ct=web_links&amp;mt=8" target="_blank" rel="noopener noreferrer"><span class="ic" aria-hidden="true">🍃</span><span><span id="t-app">iPhone アプリ「まるふわまるいろ」</span><small id="s-app">みみの いろで きもちが わかる こ・むりょう・App Store へ</small></span></a>
@@ -106,7 +114,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
     <a class="big" id="b-x" href="https://x.com/hozumi_ao_" target="_blank" rel="noopener noreferrer"><span class="ic" aria-hidden="true">📣</span><span><span id="t-x">X（@hozumi_ao_）</span><small id="s-x">まるふわの え と おしらせ</small></span></a>
     <a class="big" id="a-stream" href="stream/"><span class="ic" aria-hidden="true">🎥</span><span><span id="t-stream">はいしん・どうがで つかう かたへ</span><small id="s-stream">つかいかたと おねがい</small></span></a>
   </div>
-  <p class="note" id="note">アプリ・BOOTH・LINE・X は、そとの ページが ひらくよ。</p>
+  <p class="note" id="note">アクスタ・アプリ・BOOTH・LINE・X は、そとの ページが ひらくよ。</p>
   <div class="sr-only" id="live" role="status" aria-live="polite"></div>
 </main>
 <script defer src="../tsuri-pagebg.js"></script>
@@ -124,15 +132,17 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   const $ = id => document.getElementById(id);
   const set = (id, ja, en) => { const e = $(id); if (e) e.textContent = T(ja, en); };
   document.title = T('まるふわの いりぐち｜まるふわ びより', 'Marufuwa’s Doorway | Marufuwa Fishing Days');
-  set('skip', 'いりぐちへ とぶ', 'Skip to the links'); set('title', 'まるふわの いりぐち', 'Meet Marufuwa'); set('lead', '「まるふわ」は、まるい ほっぺの こたち。ブラウザの ちいさな まちと、iPhone の そだてるゲームと、LINE スタンプに でてくるよ。すきな ところから どうぞ。', 'Marufuwa are the round-cheeked friends from the little browser town (fishing, a plaza and mini games), the iPhone care game and the LINE stickers. Pick any door you like.');
+  set('skip', 'いりぐちへ とぶ', 'Skip to the links'); set('title', 'まるふわの いりぐち', 'Meet Marufuwa'); set('lead', '「まるふわ」は、まるい ほっぺの こたち。ブラウザの ちいさな まちと、iPhone の そだてるゲームと、LINE スタンプと、アクスタに でてくるよ。すきな ところから どうぞ。', 'Marufuwa are the round-cheeked friends from the little browser town (fishing, a plaza and mini games), the iPhone care game, the LINE stickers and acrylic stands. Pick any door you like.');
   set('t-play', 'ちいさな まちを あるく\n「まるふわ びより」', 'Walk the little town: Marufuwa Days'); set('s-play', 'まるふわと なかまの まち・むりょう・ログインなし', 'Marufuwa and friends’ town · free · no login');
   set('t-app', 'iPhone アプリ「まるふわまるいろ」', 'iPhone app: Marufuwa Maruiro'); set('s-app', 'みみの いろで きもちが わかる こ・むりょう・App Store へ', 'a little friend whose ears show its mood · free · App Store');
   set('t-x', 'X（@hozumi_ao_）', 'X (@hozumi_ao_)'); set('s-x', 'まるふわの え と おしらせ', 'Marufuwa art and news');
   set('t-line', 'LINE スタンプ', 'LINE stickers'); set('s-line', 'まるふわの スタンプ・LINE ストアへ', 'Marufuwa stickers · LINE Store');
+  set('t-acsta-noa', 'アクスタ「ノアと まるふわ」', 'Acrylic stand: Noa & Marufuwa'); set('t-acsta-maru', 'アクスタ「まるふわと ねこ」', 'Acrylic stand: Marufuwa & Cat');
+  if (EN) ['s-acsta-noa', 's-acsta-maru'].forEach(id => { const e = $(id); if (e && e.firstChild) e.firstChild.nodeValue = e.firstChild.nodeValue.replace('BOOTH へ', 'BOOTH').replace('・', ' · '); const sh = e && e.querySelector('.ship'); if (sh) sh.textContent = '+ shipping · ships from Japan'; });   /* 値段の 札（span）は のこす */
   set('t-booth', 'BOOTH', 'BOOTH shop'); set('s-booth', 'まるふわの そざいと、はいしんで つかう どうぐ・BOOTH へ', 'Marufuwa assets and streaming tools · BOOTH');
   set('t-shindan', '3もんで わかる「まるふわ いろ しんだん」', 'Marufuwa Color Check: 3 questions'); set('s-shindan', 'きょうの きもちを みみの いろで・むりょう', 'how today feels, in ear colors · free');
   set('t-stream', 'はいしん・どうがで つかう かたへ', 'For streamers and video makers'); set('s-stream', 'つかいかたと おねがい', 'how to use it, and a small request');
-  set('note', 'アプリ・BOOTH・LINE・X は、そとの ページが ひらくよ。', 'The app, BOOTH, LINE and X buttons open outside pages.');
+  set('note', 'アクスタ・アプリ・BOOTH・LINE・X は、そとの ページが ひらくよ。', 'The acrylic stand, app, BOOTH, LINE and X buttons open outside pages.');
 })();
 </script>
 <script>document.addEventListener('DOMContentLoaded', function () { if (window.PageBg) PageBg.init('iriguchi', { fb: 1, time: function () { return document.documentElement.dataset.night === 'true' ? 'n' : 'h'; } }); });</script>
