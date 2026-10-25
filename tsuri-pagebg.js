@@ -27,9 +27,11 @@
       if (!hit) {   // 絵が まだ ない ページ：かりの 背景（そら・おか・ほし）を コードで しく。「うしろが なにも ない」を つくらない（10/4 マスター）。天の 絵が とどけば そちらに かわる
         root.classList.remove('pagebg-on'); cur = null;
         var hill = function (c1, c2) { return 'radial-gradient(130% 34% at 18% 100%,' + c1 + ' 0 62%,#0000 63%),radial-gradient(120% 40% at 88% 104%,' + c2 + ' 0 62%,#0000 63%)'; };
+        // moon：{at:'92% 44px', r:34}（月・お日さまの 位置と 半径px）。たての ながい ページでは % だと 月が 大きく なり 文字に かさなる（10/25 links）。ない ときは これまでどおり
+        var mo = opt.moon, orb = function (c, at, r1, r2) { return mo ? 'radial-gradient(circle at ' + mo.at + ',' + c + ' 0 ' + mo.r + 'px,' + c + '00 ' + (mo.r + 4) + 'px)' : 'radial-gradient(circle at ' + at + ',' + c + ' 0 ' + r1 + ',' + c + '00 ' + r2 + ')'; };
         var bg = night
-          ? 'radial-gradient(1.5px 1.5px at 12% 14%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 34% 8%,#fffc 0 60%,#0000),radial-gradient(2px 2px at 58% 18%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 78% 9%,#fffc 0 60%,#0000),radial-gradient(2px 2px at 90% 24%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 22% 30%,#fffb 0 60%,#0000),radial-gradient(circle at 82% 14%,#fff6c8 0 3.2%,#fff6c800 3.6%),' + hill('#1d3a4a', '#16303f') + ',linear-gradient(#141c3e,#2a3a66 75%,#3b4d7c)'
-          : 'radial-gradient(circle at 84% 12%,#fff9cf 0 4%,#fff9cf00 4.6%),radial-gradient(ellipse 22% 5% at 22% 16%,#fffc 0 60%,#0000),radial-gradient(ellipse 18% 4% at 58% 26%,#fffa 0 60%,#0000),' + hill('#9bd6a2', '#78c595') + ',linear-gradient(#b7e1f5,#e9f6fa 72%,#f6f0d8)';
+          ? 'radial-gradient(1.5px 1.5px at 12% 14%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 34% 8%,#fffc 0 60%,#0000),radial-gradient(2px 2px at 58% 18%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 78% 9%,#fffc 0 60%,#0000),radial-gradient(2px 2px at 90% 24%,#fffd 0 60%,#0000),radial-gradient(1.5px 1.5px at 22% 30%,#fffb 0 60%,#0000),' + orb('#fff6c8', '82% 14%', '3.2%', '3.6%') + ',' + hill('#1d3a4a', '#16303f') + ',linear-gradient(#141c3e,#2a3a66 75%,#3b4d7c)'
+          : orb('#fff9cf', '84% 12%', '4%', '4.6%') + ',radial-gradient(ellipse 22% 5% at 22% 16%,#fffc 0 60%,#0000),radial-gradient(ellipse 18% 4% at 58% 26%,#fffa 0 60%,#0000),' + hill('#9bd6a2', '#78c595') + ',linear-gradient(#b7e1f5,#e9f6fa 72%,#f6f0d8)';
         st.textContent = 'html.pagebg-fb body{background:' + bg + ';background-color:' + (night ? '#1c2750' : '#cfeaf4') + '}'; root.classList.add('pagebg-fb'); return;
       }
       root.classList.remove('pagebg-fb');
