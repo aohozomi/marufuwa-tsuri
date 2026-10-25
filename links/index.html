@@ -104,6 +104,8 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
     <!-- 外へ行く ボタンは ふつうの リンク（a href）。押した人は もう 決めている。JSが止まっても リンクは 生きる。 -->
     <!-- 10/24 マスター「おけ」：一点集中（アクスタを TikTok から買える1本道）。いちばん上に BOOTH の アクスタ2つ。utm_source=links で BOOTH 側の 流入を くらべる。 -->
     <a class="big goods" id="b-acsta-noa" href="https://hozumi-ao.booth.pm/items/9036945?utm_source=links" target="_blank" rel="noopener noreferrer"><img src="../img/acsta_noa.webp" width="92" height="92" alt=""><span><span id="t-acsta-noa">アクスタ「ノアと まるふわ」</span><small id="s-acsta-noa">70mm・BOOTH へ <span class="price">¥3,500</span> <span class="ship">＋そうりょう</span></small></span></a>
+    <!-- 10/25 マスター「つぎ」：ノア 立ち絵の アクスタ（70mm・穴なし版）を 3つめに。160mm（¥7,500）は 商品ページに 書いてある。 -->
+    <a class="big goods" id="b-acsta-stand" href="https://hozumi-ao.booth.pm/items/9038917?utm_source=links" target="_blank" rel="noopener noreferrer"><img src="../img/acsta_noa_stand.webp" width="92" height="92" alt=""><span><span id="t-acsta-stand">アクスタ「月城ノア 立ち絵」</span><small id="s-acsta-stand">70mm・BOOTH へ <span class="price">¥3,500</span> <span class="ship">＋そうりょう</span></small></span></a>
     <a class="big goods" id="b-acsta-maru" href="https://hozumi-ao.booth.pm/items/9036508?utm_source=links" target="_blank" rel="noopener noreferrer"><img src="../img/acsta_nakayoshi.webp" width="92" height="92" alt=""><span><span id="t-acsta-maru">アクスタ「まるふわと ねこ」</span><small id="s-acsta-maru">50mm・BOOTH へ <span class="price">¥2,500</span> <span class="ship">＋そうりょう</span></small></span></a>
     <a class="big play first" id="play" href="../hiroba/?from=links"><span class="ic" aria-hidden="true">🏡</span><span><span id="t-play">ちいさな まちを あるく
 「まるふわ びより」</span><small id="s-play">まるふわと なかまの まち・むりょう・ログインなし</small></span></a>
@@ -138,7 +140,8 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   set('t-x', 'X（@hozumi_ao_）', 'X (@hozumi_ao_)'); set('s-x', 'まるふわの え と おしらせ', 'Marufuwa art and news');
   set('t-line', 'LINE スタンプ', 'LINE stickers'); set('s-line', 'まるふわの スタンプ・LINE ストアへ', 'Marufuwa stickers · LINE Store');
   set('t-acsta-noa', 'アクスタ「ノアと まるふわ」', 'Acrylic stand: Noa & Marufuwa'); set('t-acsta-maru', 'アクスタ「まるふわと ねこ」', 'Acrylic stand: Marufuwa & Cat');
-  if (EN) ['s-acsta-noa', 's-acsta-maru'].forEach(id => { const e = $(id); if (e && e.firstChild) e.firstChild.nodeValue = e.firstChild.nodeValue.replace('BOOTH へ', 'BOOTH').replace('・', ' · '); const sh = e && e.querySelector('.ship'); if (sh) sh.textContent = '+ shipping · ships from Japan'; });   /* 値段の 札（span）は のこす */
+  set('t-acsta-stand', 'アクスタ「月城ノア 立ち絵」', 'Acrylic stand: Noa (standing)');
+  if (EN) ['s-acsta-noa', 's-acsta-stand', 's-acsta-maru'].forEach(id => { const e = $(id); if (e && e.firstChild) e.firstChild.nodeValue = e.firstChild.nodeValue.replace('BOOTH へ', 'BOOTH').replace('・', ' · '); const sh = e && e.querySelector('.ship'); if (sh) sh.textContent = '+ shipping · ships from Japan'; });   /* 値段の 札（span）は のこす */
   set('t-booth', 'BOOTH', 'BOOTH shop'); set('s-booth', 'まるふわの そざいと、はいしんで つかう どうぐ・BOOTH へ', 'Marufuwa assets and streaming tools · BOOTH');
   set('t-shindan', '3もんで わかる「まるふわ いろ しんだん」', 'Marufuwa Color Check: 3 questions'); set('s-shindan', 'きょうの きもちを みみの いろで・むりょう', 'how today feels, in ear colors · free');
   set('t-stream', 'はいしん・どうがで つかう かたへ', 'For streamers and video makers'); set('s-stream', 'つかいかたと おねがい', 'how to use it, and a small request');
