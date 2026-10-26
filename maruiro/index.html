@@ -87,6 +87,18 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
 .sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 :root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+/* 10/27 参謀：「きょうの まるいろ」（1日1回・てんが のこる・カードで みせられる）と「れんしゅう」（なんかいでも） */
+.dayrow{display:flex;gap:8px;margin:2px 0 8px}.dayrow button{flex:1 1 0;min-height:48px;padding:4px 10px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;line-height:1.3}.dayrow button[aria-pressed=true]{background:#14506b;color:#fff;border-color:#14506b}#b-day{border-color:#e58aa6}#b-day[aria-pressed=true]{background:#c9466e;border-color:#c9466e}.dayrow small{display:block;font-size:.72rem;font-weight:700}
+.dayhud{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 0 6px;font-weight:800;font-size:1rem}.dayhud span{display:inline-flex;align-items:baseline;gap:6px;flex-wrap:wrap;justify-content:center}.dayhud b{display:inline-block;min-width:2.6em;padding:0 12px;border-radius:14px;background:var(--plate);border:2px solid var(--line);font-size:1.7rem;line-height:1.35;text-align:center}.dayhud i{font-style:normal;font-size:.95rem}
+.menubtn{min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer}
+/* ③ あそんで いる あいだは「てん」と「ひだり・おとす・みぎ」だけ（おわったら・メニューで もどる）。#msg は よみあげ用に のこす */
+body.playing .toprow,body.playing h1,body.playing .lead,body.playing .dayrow,body.playing .plays,body.playing .hud,body.playing .watch,body.playing .ctl2,body.playing #app-note,body.playing #howto,body.playing .lang-row{display:none!important}
+@media (max-width:999px){body.playing #cv{width:min(100%,calc((100dvh - 200px)*300/420))}}
+body.playing #msg{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+dialog.daydlg{border:3px solid var(--wood2);border-radius:20px;padding:12px 14px 14px;width:min(92vw,420px);max-height:94vh;overflow:auto;background:var(--wall);color:var(--ink);text-align:center}dialog.daydlg::backdrop{background:#0b2a4a66}
+.daydlg h2{margin:0 0 4px;font-size:1.15rem}#day-img{display:block;width:100%;height:auto;max-height:44vh;object-fit:contain;border-radius:12px;border:2px solid var(--line);margin:4px auto 8px}
+.daytext{margin:0 0 8px;padding:8px 12px;border-radius:12px;background:var(--plate);border:2px solid var(--line);text-align:left;font:inherit;font-size:.9rem;font-weight:700;line-height:1.5;white-space:pre-wrap;word-break:break-all;-webkit-user-select:text;user-select:text}
+.dayacts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.daypill{display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:96px;padding:4px 18px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;text-decoration:none}
 .more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}.more[open] summary{margin-bottom:6px}.more summary:focus-visible{outline:4px solid #286b88;outline-offset:2px}
 </style>
 </head>
@@ -95,12 +107,14 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
   <div class="toprow"><a class="back" id="back" href="../hiroba/index.html">← ひろばへ</a><span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">どこかを さわると おとが なるよ</span><button type="button" id="mute" class="mutebtn" aria-pressed="true">🔊 おと：ON</button></span></div>
   <h1>まるふわ まるいろ</h1>
   <p class="lead">ふたつ くみを まわして、ならべよう。</p>
+  <div class="dayrow" id="dayrow" role="group" aria-label="きょうの まるいろ と れんしゅう"><button type="button" id="b-day" aria-pressed="false">きょうの まるいろ</button><button type="button" id="b-prac" aria-pressed="true">れんしゅう</button></div>
   <div id="plays" class="plays" role="group" aria-label="あそびかた"></div>
   <div class="hud">
     <div class="zukan" id="zukan" aria-hidden="true"></div>
     <p class="best" id="best-wrap"><canvas id="best-cv" width="88" height="88" style="width:44px;height:44px" aria-hidden="true"></canvas><span id="best-tx">いちばん おおきい まる：まだ ないよ</span></p>
   </div>
   <div class="watch" id="watch" aria-hidden="true"><img alt="" width="34" height="34" style="object-fit:contain"><span id="watch-tx" hidden></span></div>
+  <div class="dayhud" id="dayhud"><span id="score-tx"></span><button type="button" id="b-menu" class="menubtn" hidden>メニュー</button></div>
   <div class="field" style="position:relative"><div id="cheer" hidden style="position:absolute;left:8px;top:8px;z-index:2;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:22px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.85rem;pointer-events:none"><img alt="" width="36" height="36" style="object-fit:contain"><span></span></div><canvas id="cv" tabindex="0" role="application" aria-label="まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ"></canvas></div>
   <section id="flood" hidden aria-labelledby="h-fl">
     <h2 id="h-fl" class="sr">いろひろげ</h2>
@@ -121,14 +135,28 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
   </div>
   <p class="msg" id="msg" role="status" aria-live="polite"></p>
   <p class="note" id="app-note" style="font-size:.8rem;margin:6px 0 0">ここは ブラウザの おちもの「まるいろ」。iPhone の「まるふわまるいろ」は、まるい こを そだてる べつの ゲームだよ。</p>
-  <details class="more" id="howto"><summary>あそびかた・おうちの かたへ</summary><p class="note" id="howto-tx"></p><p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。</p></details>
+  <details class="more" id="howto"><summary>あそびかた・おうちの かたへ</summary><p class="note" id="howto-tx"></p><p class="note" id="day-note"></p><p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」と「きょうの まるいろ」の てんだけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。</p></details>
 </main>
+<dialog id="quitdlg" class="daydlg" aria-labelledby="quitdlg-t">
+  <h2 id="quitdlg-t">きょうの まるいろを やめる？</h2>
+  <p class="note" id="quit-tx">いまの てんで おしまいに なるよ（あしたまで あそべないよ）。</p>
+  <div class="dayacts"><button type="button" id="quit-yes" class="daypill" data-noruby>やめる</button><button type="button" id="quit-no" class="daypill" data-noruby>つづける</button></div>
+</dialog>
+<dialog id="daydlg" class="daydlg" aria-labelledby="daydlg-t">
+  <h2 id="daydlg-t">きょうの まるいろ</h2>
+  <img id="day-img" alt="" width="540" height="675">
+  <pre id="day-text" class="daytext" data-noruby translate="no"></pre>
+  <div class="dayacts"><button id="day-copy" type="button" class="daypill" data-noruby>コピー</button><a id="day-save" class="daypill" download="maruiro.png" data-noruby>ほぞん</a><button id="day-share" type="button" class="daypill" hidden data-noruby>おくる</button></div>
+  <p class="note" id="day-st" role="status"></p>
+  <button type="button" id="day-close" class="daypill" data-noruby>とじる</button>
+</dialog>
 <script>
 // English（tsuri-en.js の E.add）
 (() => {
   const EX = {
     'まるふわ まるいろ': 'Marufuwa Maruiro', 'あそびかた': 'How to play', 'まわす': 'Rotate', 'あそびかた・おうちの かたへ': 'How to play / For grown-ups', 'どこかを さわると おとが なるよ': 'Tap anywhere to hear sounds',
     '← ひろばへ': '← Back to the Plaza',
+    'きょうの まるいろ': 'Today’s Maruiro', 'れんしゅう': 'Practice', 'メニュー': 'Menu', 'コピー': 'Copy', 'ほぞん': 'Save', 'おくる': 'Share', 'とじる': 'Close', 'きょうの まるいろ と れんしゅう': 'Today’s Maruiro and practice', 'れんしゅうの てん': 'Practice score', 'きょうの てん': 'Today’s score', 'きょうの まるいろを やめる？': 'Stop today’s Maruiro?', 'いまの てんで おしまいに なるよ（あしたまで あそべないよ）。': 'It will end with your current score (you can play again tomorrow).', 'やめる': 'Stop', 'つづける': 'Keep playing',
     'うえから まるい どんぐり・かいがら・おにぎりなどを おとして、おなじ ものが ふれあうと、ひとつ おおきく なるよ。つんで、あわせて、のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。': 'Drop round acorns, shells, rice balls and more from the top. When two of the same touch, they become one bigger piece. Stack and join at your own pace — no time limit, no game over.',
     'あそびかた：そだてる': 'How to play: Grow', 'あそびかた：そろえる': 'How to play: Match', 'いちばん ながい れんさ：まだ ないよ': 'Longest chain so far: none yet',
     'あそびかた：いろひろげ': 'How to play: Spread', 'つぎの ばん': 'Next board', 'いろひろげ': 'Color Spread', 'みずいろ': 'Sky blue', 'ミント': 'Mint', 'アプリコット': 'Apricot', 'ラベンダー': 'Lavender',
@@ -142,7 +170,7 @@ button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2p
     '◀ ひだり': '◀ Left', 'みぎ ▶': 'Right ▶', 'おとす': 'Drop', 'ひだりへ': 'Move left', 'みぎへ': 'Move right',
     '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', 'おと：OFF': 'Sound: OFF', 'おと：ON': 'Sound: ON', 'さいしょから': 'Start over',
     'まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ': 'The Maruiro board. Move with the left and right arrow keys and drop with Space or Enter. With a finger, slide and let go to drop.',
-    'おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」だけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。': 'For grown-ups: there is no time limit, no game over and no ranking. If it fills up past the red line, the topmost friend floats up to the sky (“See you!”) and play goes on. The only record is “the biggest circle so far”, kept on this device only (nothing is sent anywhere). Sounds are soft and under 1200 Hz, and start ON (the “Mute sound” button at the top stops everything; with “reduce motion” they start OFF). Nothing flashes.',
+    'おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」と「きょうの まるいろ」の てんだけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。': 'For grown-ups: there is no time limit, no game over and no ranking. If it fills up past the red line, the topmost friend floats up to the sky (“See you!”) and play goes on. The only records are “the biggest circle so far” and the “Today’s Maruiro” score, kept on this device only (nothing is sent anywhere). Sounds are soft and under 1200 Hz, and start ON (the “Mute sound” button at the top stops everything; with “reduce motion” they start OFF). Nothing flashes.',
     'いっぱいに なったので、いちばん うえの こが ぷかぷか そらへ とんでいくよ。「またね」。そのまま つづけて だいじょうぶ。': 'It filled up, so the topmost friend floated up to the sky. “See you!” Keep going — it’s okay.',
     'いちばん おおきい まるが ふたつ あわさって、ふわっと きえたよ。また はじめよう。': 'Two of the biggest circles joined and floated away. Let’s begin again.',
     'おおきく なったよ！': 'It got bigger!',
@@ -175,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
   //   あめ＝歩（まっすぐ うえ）／クッキー＝桂馬（ななめ うえに おおきく・ひだり みぎ 二分の一）／マカロン＝角（ななめ・二分の一）／ドーナツ＝飛車（うえ か よこ）／プリン＝ひだり か みぎ だけ／ケーキ＝王（ちいさく ごほうこう）／ソフト＝香車（まっすぐ たかく 1かいだけ）
   const MOVE_SETS = [['u'], ['kn'], ['dg'], ['u', 'sd'], ['pd'], ['u', 'ul', 'ur', 'l', 'r'], ['kyo']];
   const MOVE_ARROW = ['↑', '↖ ↗', '↖ ↗', '↑ ← →', '← →', '↑ ↖ ↗ ← →', '↑'];
-  const jr = () => (Number(q.get('seed')) ? rnd() : Math.random());   // ほんばんは Math.random・けんさ（?seed=）では たねから
+  const jr = () => (Number(q.get('seed')) ? rnd() : dly.on ? dly.r() : Math.random());   // ほんばんは Math.random・けんさ（?seed=）では たねから・「きょうの まるいろ」は 日づけの たねから（はね方も みんな おなじ＝てんの さは うでの さ）
   function applyMove(b, V) {
     const set = MOVE_SETS[b.l], k = set[Math.floor(jr() * set.length)], sg = jr() < .5 ? -1 : 1; let vx = 0, vy = -V;
     if (k === 'kn') { vx = sg * .55 * V; vy = -.95 * V; } else if (k === 'dg') { vx = sg * .7 * V; vy = -.7 * V; } else if (k === 'sd') { vx = sg * .9 * V; vy = -.25 * V; }
@@ -197,10 +225,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let rec = { v: 2, hint: 0, best: -1, snd: !(document.documentElement.dataset.calm === 'true' || matchMedia('(prefers-reduced-motion: reduce)').matches), mode: 1, play: 4, chain: 0, fly: 0, big: -1 };
   try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && typeof d === 'object') { const b = Math.floor(Number(d.best)); rec.best = Number.isFinite(b) && b >= -1 && b <= 6 ? b : -1; if (d.migrated === 1 && typeof d.mute === 'boolean') rec.snd = !d.mute;   /* 古い きろくの mute は 一度だけ むし（10/3） */ rec.hint = d.hint === 1 ? 1 : 0; rec.mode = d.mode === 0 ? 0 : d.mode === 2 ? 2 : 1; { const g = Math.floor(Number(d.big)); rec.big = d.big !== null && d.big !== undefined && Number.isFinite(g) && g >= 0 && g <= 33 ? g : -1; } { const f = Math.floor(Number(d.fly)); rec.fly = Number.isFinite(f) && f >= 0 && f <= 127 ? f : 0; } rec.migrated = d.migrated === 1 ? 1 : 0; rec.play = d.migrated !== 1 ? 4 : d.v !== 2 ? 3 : d.play === 1 ? 1 : d.play === 2 ? 2 : d.play === 3 ? 3 : d.play === 4 ? 4 : 0; const c = Math.floor(Number(d.chain)); rec.chain = Number.isFinite(c) && c >= 0 && c <= 99 ? c : 0; } } catch (e) {}
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: 2, hint: rec.hint, best: rec.best, mute: !rec.snd, mode: rec.mode, play: rec.play, migrated: 1, chain: rec.chain, fly: rec.fly, big: rec.big })); } catch (e) {} };
+  // 「きょうの まるいろ」：1日1回（たんまつの 日づけ）・おやつ 40こ・てんは この たんまつの なかだけ（そとへは おくらない）
+  const KEY_D = 'marufuwa-maruiro-day-v1', DAY_N = 40, DAY_PTS = [0, 1, 3, 6, 10, 15, 21], DAY_TOP = 28;   // あわさって できた おおきさ ごとの てん（おつきさま どうしは 28）
+  const ymd = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  const dayRec = () => { try { const d = JSON.parse(localStorage.getItem(KEY_D)); if (d && d.d === ymd() && Number.isFinite(Number(d.score))) return { d: d.d, score: Math.max(0, Math.floor(Number(d.score))), big: Number.isFinite(Number(d.big)) ? Math.max(-1, Math.min(6, Math.floor(Number(d.big)))) : -1 }; } catch (e) {} return null; };
+  const hashStr = t => { let h = 2166136261; for (const ch of t) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };   // 日づけの 文字（たんまつの その日）から たね＝おなじ 日づけの 人は おなじ じゅんばん（じさが あっても なりたつ・Wordle と おなじ）
+  const dly = { on: false, d: '', done: false, left: DAY_N, score: 0, maxL: -1, calm: 0, lastT: 0, r: Math.random };
+  let pracPts = 0, playing = false, lastDropT = 0;   // れんしゅうの てん（のこさない）・あそんで いる あいだ（よけいな ものを かくす）
 
   // ─── 乱数（?seed=数字 で ならべを そろえられる）───
   const dayKey = () => { const d = new Date(); return d.getFullYear() * 400 + (d.getMonth() + 1) * 32 + d.getDate(); };
-  const orderSeed = () => (Number(q.get('seed')) || dayKey()) + rec.play * 977;   // きょうは みんな おなじ じゅんばん（サーバーなし）
+  const orderSeed = () => Number(q.get('seed')) ? Number(q.get('seed')) + rec.play * 977 : dly.on ? hashStr('maruiro-order:' + dly.d) : rec.play === 4 ? (Math.random() * 1e9) | 0 : dayKey() + rec.play * 977;   // きょうは みんな おなじ じゅんばん（サーバーなし）。おやつの「れんしゅう」だけは まいかい ちがう じゅんばん（きょうの じゅんばんを れんしゅうで おぼえられない ように）
   let seed = orderSeed();
   const mul = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   let rnd = mul(seed); const reorder = () => { seed = orderSeed(); rnd = mul(seed); };
@@ -340,8 +375,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function addBall(x, y, l, vx = 0, vy = 0, pop = 0) { const b = { id: ++uid, x, y, vx, vy, l, r: rOf(l), m: rOf(l) * rOf(l), age: 0, melt: 0, pop, still: 0, sq: -1, amp: 1 }; balls.push(b); return b; }
   function dropBall(x) {
     if (!canDrop) return false;
+    if (dly.on && (dly.done || dly.left <= 0)) { say(L('きょうの おやつは ぜんぶ おとしたよ。', 'You have dropped all of today’s treats.')); return false; }
     const l = nextL; setAim(x === undefined ? aimX : x);
     addBall(aimX, rOf(l) + 46, l, 0, 20); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; lastDrop = balls[balls.length - 1]; nextL = pickLevel(); setAim(aimX); tone(0, 'drop');
+    if (dly.on) { dly.left--; dly.lastT = stats.t; dly.calm = 0; drawNums(); }
+    lastDropT = stats.t; if (!playing && rec.play === 4) setPlaying(true);
     return true;
   }
 
@@ -592,6 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const a = act[i], c = act[j]; if (!mergeOn || dbgNoMerge || gone.has(a) || gone.has(c) || a.l !== c.l) continue;
       if (Math.hypot(c.x - a.x, c.y - a.y) <= a.r + c.r + .8) {
         gone.add(a); gone.add(c); stats.merges++;
+        addPts(a.l >= 6 ? DAY_TOP : DAY_PTS[a.l + 1], a.l >= 6 ? 6 : a.l + 1);
         if (a.l >= 6) { stats.top++; tone(6, 'merge'); say(L('いちばん おおきい まるが ふたつ あわさって、ふわっと きえたよ。また はじめよう。', 'Two of the biggest circles joined and floated away. Let’s begin again.')); }
         else { const nl = a.l + 1; born.push({ x: (a.x + c.x) / 2, y: (a.y + c.y) / 2, l: nl, vx: (a.vx + c.vx) / 2, vy: (a.vy + c.vy) / 2 }); }
       }
@@ -605,6 +644,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (n.l > rec.best) { rec.best = n.l; save(); drawBest(); say(L('おおきく なったよ！ ' + nm(n.l), 'It got bigger! ' + nm(n.l))); if (n.l === 6) say(L('ぜんぶの いろを あわせたよ。すごい！', 'You joined every color. Wonderful!')); }
     }
     balls = balls.filter(b => b.melt < 1);
+    // きょうの まるいろ：40こ おとしきって、みんな おちついたら（または 8びょう たったら）おしまい
+    if (dly.on && !dly.done && dly.left <= 0 && canDrop) {
+      dly.calm = balls.every(b => b.melt > 0 || Math.hypot(b.vx, b.vy) < 20) ? dly.calm + dt : 0;
+      if (dly.calm > 1.2 || stats.t - dly.lastT > 8) finishDaily();
+    }
+    if (playing && !dly.on && stats.t - lastDropT > 15) setPlaying(false);   // れんしゅうで しばらく おとさない ときは メニューを もどす
     // いっぱい：あかい せんの うえで じっと して いる まるが つづく と、したの だんが ふわっと とける（ゲームオーバーは ない）
     const crowded = balls.some(b => b.melt === 0 && b.age > 1.5 && ((b.still > .4 && b.y - b.r < LINE) || b.y < b.r * .5)) || balls.length > 60;   // おしあって うえまで つまった ときも
     over = crowded ? over + dt : Math.max(0, over - dt * 2);
@@ -631,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fi = fieldImg();
     if (fi) { const k = Math.max(W / fi.naturalWidth, H / fi.naturalHeight), w = fi.naturalWidth * k, h = fi.naturalHeight * k; ctx.drawImage(fi, (W - w) / 2, (H - h) / 2, w, h);
       if (fieldFallback) { const t = timeKey(), warm = t === 'y' ? 'rgba(255,226,196,.42)' : t === 'a' ? 'rgba(255,236,208,.45)' : 'rgba(255,248,232,.2)', sky = t === 'y' ? 'rgba(255,170,120,' : t === 'a' ? 'rgba(255,200,150,' : 'rgba(169,222,250,'; ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = t === 'y' ? 'rgba(255,170,120,.85)' : t === 'a' ? 'rgba(255,200,150,.8)' : 'rgba(150,205,240,.58)'; ctx.fillRect(0, 0, W, H); ctx.restore(); ctx.fillStyle = warm; ctx.fillRect(0, 0, W, H); const g2 = ctx.createLinearGradient(0, 0, 0, H * .62); g2.addColorStop(0, sky + '.3)'); g2.addColorStop(1, sky + '0)'); ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H * .62); }
-      if (HAZE > 0) { ctx.fillStyle = 'rgba(255,255,255,' + HAZE + ')'; ctx.fillRect(0, 0, W, H); } return; }
+      if (HAZE > 0) { ctx.fillStyle = 'rgba(255,255,255,' + HAZE + ')'; ctx.fillRect(0, 0, W, H); } boardVeil(); return; }
     const t = timeKey(), sky1 = cssv('--sky1') || '#a9defa', sky2 = cssv('--sky2') || '#eaf8ff';
     const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, sky1); g.addColorStop(.7, sky2); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     if (t === 'n') { ctx.fillStyle = 'rgba(255,255,255,.85)'; [[30, 20], [90, 50], [150, 14], [210, 40], [270, 24], [60, 80], [240, 90]].forEach(([x, y]) => { ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill(); }); ctx.fillStyle = '#fff6cf'; ctx.beginPath(); ctx.arc(250, 38, 13, 0, 7); ctx.fill(); }
@@ -639,6 +684,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = t === 'n' ? '#2f5a52' : '#8fcf8e'; ctx.beginPath(); ctx.moveTo(0, 250); ctx.quadraticCurveTo(80, 190, 170, 240); ctx.quadraticCurveTo(240, 200, W, 232); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
     ctx.fillStyle = t === 'n' ? '#1f3f3a' : '#6fb87a'; [[22, 238, 16], [270, 226, 18]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); });
     ctx.fillStyle = t === 'n' ? 'rgba(40,50,90,.55)' : 'rgba(255,250,235,.55)'; ctx.fillRect(4, LINE - 20, W - 8, H - LINE + 16);   // かごの なか（すこし あかるく）
+    boardVeil();
+  }
+  // 10/27 参謀 ②：ばんの なかだけ うすく あかるい そうを しいて、おやつを うきたたせる（じかんたいの せは そのまま・よるほど こく）
+  function boardVeil() {
+    const t = timeKey(), a = t === 'n' ? .22 : t === 'y' ? .16 : .12, g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, 'rgba(255,253,246,' + (a * .55) + ')'); g.addColorStop(.25, 'rgba(255,253,246,' + a + ')'); g.addColorStop(1, 'rgba(255,253,246,' + a + ')');
+    ctx.fillStyle = g; ctx.fillRect(5, 0, W - 10, H - 6);
   }
   function basket() {   // かごの ふち（あみめ）
     ctx.fillStyle = '#c99a5a'; ctx.fillRect(0, 0, 5, H); ctx.fillRect(W - 5, 0, 5, H); ctx.fillRect(0, H - 6, W, 6);
@@ -662,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H); backdrop(); basket();
     if (rec.play === 3) { tsDraw(); dropperDraw(); return; }
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
-    if (canDrop) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 52); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 46, rOf(nextL), nextL, 1);
+    if (canDrop && !(dly.on && dly.left <= 0)) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 52); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 46, rOf(nextL), nextL, 1);
       if (rec.play === 4) { const ty = rOf(nextL) * 2 + 62, tx = MOVE_ARROW[nextL]; ctx.font = '800 15px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tx).width + 14; ctx.globalAlpha = .55; ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(aimX - tw / 2, ty - 11, tw, 22, 11) : ctx.rect(aimX - tw / 2, ty - 11, tw, 22); ctx.fill(); ctx.fillStyle = '#5a3a2e'; ctx.fillText(tx, aimX, ty + 1); ctx.globalAlpha = 1; } }
     dropperDraw();
     for (const b of balls) { const m = b.melt; if (rec.play === 4 && m === 0 && b.sq >= 0 && !reduced()) { const t = b.sq, sy = 1 - .15 * b.amp * Math.exp(-10 * t) * Math.cos(2 * Math.PI * 10 * t); ctx.save(); ctx.translate(b.x, b.y + b.r); ctx.scale(1 / Math.sqrt(sy), sy); piece(ctx, 0, -b.r, b.r, b.l, 1, 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); ctx.restore(); continue; } piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); }   // もふっ
@@ -701,7 +753,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (rec.snd) { mkAc(); }
   }
   $('mute').addEventListener('click', () => { applySound(!rec.snd); say(L(rec.snd ? 'おとを ならすよ。' : 'おとを けしたよ。', rec.snd ? 'Sound is on.' : 'Sound is off.')); if (rec.snd) tone(2, 'merge'); });
-  function reset() { if (rec.play === 3) { tsReset(); say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); return; } buildLadder(); if (rec.play !== 2) say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
+  function reset() {
+    if (dly.on && !dly.done) { say(L('きょうの まるいろは、さいしょから やりなおせないよ。「れんしゅう」なら なんかいでも どうぞ。', 'Today’s Maruiro cannot be restarted. Practice as many times as you like.')); return; }
+    if (dly.on) { startPractice(); return; }
+    pracPts = 0; drawDayHud();
+    if (rec.play === 3) { tsReset(); say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); return; } buildLadder(); if (rec.play !== 2) say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
   const MODE_T = [['かたち：かお', 'Shapes: faces'], ['かたち：もの', 'Shapes: things'], ['かたち：さかな', 'Shapes: fish']];
   function drawMode() { const b = $('mode'); b.setAttribute('aria-pressed', String(rec.mode !== 0)); b.textContent = L(MODE_T[rec.mode][0], MODE_T[rec.mode][1]); }
   $('mode').addEventListener('click', () => { rec.mode = rec.mode === 1 ? 2 : rec.mode === 2 ? 0 : 1; if (rec.mode === 2) buildLadder(); save(); drawMode(); drawZukan(); drawBest(); say(L(rec.mode === 1 ? 'まるふわの せかいの ものに かえたよ。' : rec.mode === 2 ? 'つった さかなに かえたよ。' : 'まるい かおに かえたよ。', rec.mode === 1 ? 'Switched to things from Marufuwa’s world.' : rec.mode === 2 ? 'Switched to the fish you caught.' : 'Switched to round faces.')); });
@@ -726,10 +782,120 @@ document.addEventListener('DOMContentLoaded', () => {
     const host = fl ? $('flood').querySelector('.field') : document.querySelector('main > .field'); host.style.position = 'relative'; host.prepend(cheerEl); cheerEl.hidden = true;
     if (fl) floodStart(0);
   }
-  function freshPlay() { if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
-  const goPlay = n => { rec.play = n; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 4 ? 'あそびかたを「おやつ」に かえたよ。さいしょから。' : rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 4 ? 'Switched to Treats. Starting fresh.' : rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); };
+  function freshPlay() { if (!dly.on) pracPts = 0; drawDayHud(); if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
+  const goPlay = n => leaveDaily(() => goPlayNow(n));
+  const goPlayNow = n => { dly.on = false; dly.done = false; setPlaying(false); rec.play = n; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 4 ? 'あそびかたを「おやつ」に かえたよ。さいしょから。' : rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 4 ? 'Switched to Treats. Starting fresh.' : rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); };
   $('play').addEventListener('click', () => goPlay((rec.play + 1) % 5));
   $('rst').addEventListener('click', reset);
+
+  // ─── きょうの まるいろ（1日1回）／れんしゅう ───
+  const OY_DOT = ['#ff7fa8', '#d9a35f', '#ffb0cf', '#ff9fc4', '#ffe27a', '#fffaf2', '#fff1f6'];
+  const OY_IRO = ['ももいろ', 'きつねいろ', 'さくらいろ', 'ピンク', 'たまごいろ', 'しろ', 'ミルクいろ'], OY_IRO_EN = ['pink', 'golden brown', 'cherry pink', 'pink', 'custard yellow', 'white', 'milk white'];
+  const scEl = $('score-tx'), menuB = $('b-menu'), dayDlg = $('daydlg');
+  function addPts(p, l) { if (rec.play !== 4) return; if (dly.on) { if (dly.done) return; dly.score += p; if (l > dly.maxL) dly.maxL = l; } else pracPts += p; drawNums(); }
+  function setPlaying(v) { playing = !!v && rec.play === 4; document.body.classList.toggle('playing', playing); menuB.hidden = !playing; }
+  function drawNums() { const n = $('score-n'), k = $('left-n'); if (n) n.textContent = String(dly.on ? dly.score : pracPts); if (k) k.textContent = L('のこり ' + dly.left + 'こ', dly.left + ' left'); }   // おとす・くっつく たびは かずだけ（ボタンや きろくは さわらない）
+  function drawDayHud() {
+    const show = rec.play === 4; $('dayhud').hidden = !show; $('dayrow').hidden = !show;   // おやつ だけ（つみき・そろえる・いろひろげ・そだてるは 今までどおり）
+    if (!show) return;
+    const r = dayRec(), bd = $('b-day');
+    bd.setAttribute('aria-pressed', String(dly.on)); $('b-prac').setAttribute('aria-pressed', String(!dly.on));
+    bd.replaceChildren(document.createTextNode(L('きょうの まるいろ', 'Today’s Maruiro'))); const sm = document.createElement('small'); sm.textContent = r ? L('すんだよ ' + r.score + 'てん', 'done · ' + r.score + ' pts') : L('みんな おなじ ' + DAY_N + 'こ', 'same ' + DAY_N + ' for all'); bd.append(sm);
+    const lab = document.createElement('i'), b = document.createElement('b'); lab.textContent = dly.on ? L('きょうの てん', 'Today’s score') : L('れんしゅうの てん', 'Practice score'); b.id = 'score-n'; b.setAttribute('data-noruby', '');
+    scEl.replaceChildren(lab, b);
+    if (dly.on && !dly.done) { const n = document.createElement('i'); n.id = 'left-n'; n.setAttribute('data-noruby', ''); scEl.append(n); }
+    drawNums();
+  }
+  // きょうの とちゅうで ほかへ いく とき：ページの なかの「やめる？」で きいてから、いまの てんで おしまいに する（だまって きえない・ボタンで やりなおせない。アプリ内ブラウザは confirm が 出ない ことが あるので じぶんで つくる）
+  function leaveDaily(next) {
+    if (!(dly.on && !dly.done && dly.left < DAY_N)) { next(); return; }
+    if (dly.left <= 0) { finishDaily(true); next(); return; }   // もう ぜんぶ おとした あとは きかずに おしまい（きいて いる あいだに カードが かさならない）
+    const q = $('quitdlg'), close = () => { try { q.close(); } catch (e) { q.removeAttribute('open'); } };
+    $('quit-yes').onclick = () => { close(); finishDaily(true); next(); };
+    $('quit-no').onclick = () => { close(); renderPlays(); };
+    try { q.showModal(); } catch (e) { q.setAttribute('open', ''); }
+  }
+  function startDaily() {
+    const r = dayRec(); if (r) { showCard(r); say(L('きょうの まるいろは もう あそんだよ。また あした。「れんしゅう」は なんかいでも どうぞ。', 'You have played today’s Maruiro. See you tomorrow! Practice as much as you like.')); return; }
+    if (rec.play !== 4) { rec.play = 4; save(); drawPlay(); drawZukan(); drawBest(); }
+    const d = ymd(); Object.assign(dly, { on: true, done: false, d, left: DAY_N, score: 0, maxL: -1, calm: 0, lastT: stats.t, r: mul(hashStr('maruiro-bounce:' + d)) });
+    setPlaying(false); freshPlay(); drawDayHud();
+    say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」 おやつは ' + DAY_N + 'こ。おとしきったら おしまい。', 'Marufuwa: “Today’s pieces are the same for everyone.” ' + DAY_N + ' treats. When all are dropped, it is over.'));
+    cv.focus({ preventScroll: true });
+  }
+  function startPractice() {
+    if (!dly.on) { say(L('いまは れんしゅうだよ。はじめから するときは「さいしょから」を おしてね。', 'You are practicing now. Press “Start over” to begin again.')); return; }   // れんしゅう中に もう一度 おしても 盤を けさない
+    leaveDaily(practiceNow);
+  }
+  function practiceNow() {
+    Object.assign(dly, { on: false, done: false }); setPlaying(false); freshPlay(); drawDayHud();
+    say(L('れんしゅう：なんかいでも どうぞ（てんは のこらないよ）。じゅんばんは まいかい ちがうよ。', 'Practice: play as many times as you like (the score is not kept). The order changes every time.'));
+  }
+  function finishDaily(quiet) {
+    dly.done = true; const r0 = dayRec(), r = r0 || { d: dly.d || ymd(), score: dly.score, big: dly.maxL };
+    if (!r0) { try { localStorage.setItem(KEY_D, JSON.stringify(r)); } catch (e) {} }
+    setPlaying(false); drawDayHud(); if (!quiet) tone(0, 'perfect');
+    say(L('きょうの まるいろ、おしまい！ きょうの てんは ' + r.score + '。また あした。', 'Today’s Maruiro is done! Your score: ' + r.score + '. See you tomorrow.'));
+    if (quiet) return;
+    showCard(r);
+  }
+  const loadImg = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+  async function makeCard(r) {
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1350; const x = c.getContext('2d');
+    const F = (w, s) => w + ' ' + s + 'px "Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",sans-serif';
+    const tx = (s, px, y, f, col, al) => { x.font = f; x.fillStyle = col; x.textAlign = al || 'center'; x.textBaseline = 'middle'; x.fillText(s, px, y); };
+    const g = x.createLinearGradient(0, 0, 0, 1350); g.addColorStop(0, '#bfe9fb'); g.addColorStop(1, '#fff3df'); x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
+    x.beginPath(); x.roundRect ? x.roundRect(54, 54, 972, 1242, 56) : x.rect(54, 54, 972, 1242); x.fillStyle = '#fffdf7'; x.fill(); x.lineWidth = 8; x.strokeStyle = '#cfae7e'; x.stroke();
+    const [y0, m0, d0] = r.d.split('-').map(Number);
+    tx(L('きょうの まるいろ', 'Today’s Maruiro'), 540, 165, F(800, 84), '#27424e');
+    tx(L(y0 + '年' + m0 + '月' + d0 + '日', y0 + '-' + String(m0).padStart(2, '0') + '-' + String(d0).padStart(2, '0')), 540, 252, F(700, 46), '#3d5a68');   // カードは さいしょから 漢字で（ひらがなと まざらない ように）
+    tx(L('今日の点', 'Today’s score'), 540, 350, F(800, 50), '#3d5a68');
+    tx(String(r.score), 540, 500, F(900, 190), '#c9466e');
+    if (r.big >= 0) {
+      const im = await loadImg('../img/oyatsu/oyatsu_' + OY_FILE[r.big] + '.webp'); if (im) x.drawImage(im, 150, 640, 240, 240);
+      tx(L('いちばん大きくなったおやつ', 'Biggest treat'), 430, 690, F(700, 40), '#3d5a68', 'left');
+      tx(L(OY_JA[r.big], OY_EN[r.big]), 430, 770, F(800, 66), '#27424e', 'left');
+      x.beginPath(); x.arc(454, 845, 22, 0, 7); x.fillStyle = OY_DOT[r.big]; x.fill(); x.lineWidth = 5; x.strokeStyle = '#8a6a52'; x.stroke();   // いろは 小さい まるで みせる（字は くろ）
+      tx(L(OY_IRO[r.big], OY_IRO_EN[r.big]), 490, 845, F(700, 46), '#27424e', 'left');
+    } else tx(L('いちばん大きくなったおやつ：まだ ないよ', 'Biggest treat: none yet'), 540, 760, F(700, 44), '#3d5a68');
+    tx(L('「きょうの つみきは みんな おなじ」', '“Today’s pieces are the same for everyone.”'), 540, 965, F(800, isEn() ? 38 : 48), '#27424e');
+    const mf = await loadImg('../img/game-smile.webp'); if (mf) x.drawImage(mf, 100, 1000, 168, 224);
+    tx(L('まるいろ（ブラウザ・無料）', 'Maruiro (browser game, free)'), 300, 1070, F(800, 46), '#27424e', 'left');   // iPhone の べつの アプリ「まるふわまるいろ」と とりちがえない なまえ
+    tx('TikTok  @marufuwa_no_machi', 300, 1145, F(800, 44), '#14506b', 'left');
+    tx('aohozomi.github.io/marufuwa-tsuri/maruiro/', 540, 1252, F(800, 42), '#14506b');   // URL は いちばん したに 1ぎょうで 大きく（スマホで 見ても よめる）
+    return new Promise(res => c.toBlob(res, 'image/png'));
+  }
+  const EMO = ['🍬', '🍪', '🥮', '🍩', '🍮', '🍰', '🍦'], GAME_URL = 'https://aohozomi.github.io/marufuwa-tsuri/maruiro/';
+  function resultText(r) {   // 10/27 参謀 追加2：もじで コピーできる けっか（えもじは どの くにでも おなじに みえる）。とどかなかった おおきさは ⬜
+    const [, m0, d0] = r.d.split('-').map(Number), big = Number.isFinite(r.big) ? r.big : -1, row = EMO.slice(0, big + 1).join('') + '⬜'.repeat(6 - big);
+    const bigJ = big >= 0 ? EMO[big] + ' ' + OY_JA[big] : 'まだ ないよ', bigE = big >= 0 ? EMO[big] + ' ' + OY_EN[big] : 'none yet';
+    const lines = isEn() ? ['Maruiro ' + m0 + '/' + d0, row, 'Biggest treat: ' + bigE, r.score.toLocaleString('en-US') + ' pts', GAME_URL]
+      : ['まるいろ ' + m0 + '/' + d0, row, 'いちばん大きいおやつ：' + bigJ, r.score.toLocaleString('ja-JP') + 'てん', GAME_URL];
+    return lines.join('\n');
+  }
+  async function copyText(t) {
+    try { await navigator.clipboard.writeText(t); return true; } catch (e) {}
+    try { const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-9999px;top:0'; (dayDlg.open ? dayDlg : document.body).append(ta); /* showModal の あいだは ダイアログの なかで ないと えらべない */ ta.select(); ta.setSelectionRange(0, 99999); const ok = document.execCommand('copy'); ta.remove(); return ok; } catch (e) { return false; }
+  }
+  let cardURL = '';
+  async function showCard(r) {
+    const st = $('day-st'); st.textContent = L('カードを つくっているよ…', 'Making your card…');
+    const txt = resultText(r); $('day-text').textContent = txt;
+    $('day-copy').onclick = async () => { st.textContent = (await copyText(txt)) ? L('コピーしたよ。すきな ところに はりつけて みせてね。', 'Copied! Paste it anywhere to share.') : L('コピーが できなかったよ。うえの もじを ながおしして コピーしてね。', 'Could not copy. Press and hold the text above to copy it.'); };
+    try { if (!dayDlg.open) dayDlg.showModal(); } catch (e) { dayDlg.setAttribute('open', ''); }
+    const blob = await makeCard(r); if (!blob) { st.textContent = L('カードが つくれなかったよ。', 'Could not make the card.'); return; }
+    if (cardURL) URL.revokeObjectURL(cardURL); cardURL = URL.createObjectURL(blob);
+    const file = new File([blob], 'maruiro-' + r.d + '.png', { type: 'image/png' });
+    $('day-img').src = cardURL; $('day-img').alt = L('きょうの まるいろの カード。' + r.score + 'てん。', 'Today’s Maruiro card. ' + r.score + ' points.');
+    $('day-save').href = cardURL; $('day-save').download = file.name;
+    const sh = $('day-share'); sh.hidden = !(navigator.share && navigator.canShare && navigator.canShare({ files: [file] }));
+    sh.onclick = async () => { try { await navigator.share({ files: [file], text: txt }); st.textContent = L('おくる がめんを とじたよ。', 'Closed the share screen.'); } catch (e) { st.textContent = e.name === 'AbortError' ? L('やめたよ。', 'Cancelled.') : L('「ほぞん」を つかってね。', 'Please use “Save”.'); } };
+    st.textContent = L('かってに とうこうは しないよ。「ほぞん」で のこせるよ（がぞうを ながおし しても ほぞん できるよ）。', 'Nothing is posted by itself. Use “Save” to keep it (or press and hold the picture).');
+  }
+  $('b-day').addEventListener('click', startDaily); $('b-prac').addEventListener('click', startPractice);
+  menuB.addEventListener('click', () => setPlaying(false));
+  $('day-close').addEventListener('click', () => { try { dayDlg.close(); } catch (e) { dayDlg.removeAttribute('open'); } });
+  $('day-note').textContent = L('「きょうの まるいろ」は 1にち 1かい。みんな おなじ じゅんばんの おやつ ' + DAY_N + 'こを おとしきったら おしまいで、てんと カードが のこります。てんは この たんまつの なかだけで、そとへは おくりません（じゅんいも ありません）。「れんしゅう」は なんかいでも あそべます（てんは のこりません）。', 'Today’s Maruiro is once a day: the same ' + DAY_N + ' treats for everyone, and when all are dropped it ends and leaves a score and a card. The score stays on this device only and is never sent anywhere (there is no ranking). Practice can be played any number of times (the score is not kept).');
 
   // ─── うごかす（フレームごと・ひらいて いる ときだけ）───
   let acc = 0, last = 0;
@@ -741,7 +907,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.addEventListener('visibilitychange', () => { last = 0; });
   // ながおしで「もじの せんたく」「コールアウト」「メニュー」が 出ない（ばん・HUD・ボタン・みだし）。ノートの 文は えらべる まま
-  const noSel = e => { if (e.target.closest && e.target.closest('.note')) return; e.preventDefault(); };
+  const noSel = e => { const t = e.target && e.target.nodeType === 3 ? e.target.parentElement : e.target; if (t && t.closest && t.closest('.note,#day-text')) return; e.preventDefault(); };   // 文字の うえから えらび はじめても   // コピー用の 文も ながおしで えらべる
   document.addEventListener('selectstart', noSel); $('room').addEventListener('contextmenu', noSel); $('room').addEventListener('dragstart', e => e.preventDefault());
   cv.addEventListener('pointerdown', e => { if (e.cancelable) e.preventDefault(); }, { passive: false }); cv.addEventListener('touchstart', e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
   // BGM：ひろば・おへや・カフェと おなじ 曲（snd/bgm/ の あさ・ひる・ゆうがた・よる）。はじめは OFF・「BGM：ON/OFF」ボタン・おとが OFF の まま おすと おとも つく
@@ -760,8 +926,8 @@ document.addEventListener('DOMContentLoaded', () => {
   save(); if (rec.snd) { const h = $('mutehint'); h.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); h.hidden = false; const hide = () => { h.style.visibility = 'hidden'; }; addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
   addEventListener('pointerdown', () => { if (rec.snd) mkAc(); }, { once: true });
   if (rec.play === 3) tsReset();
-  drawPlay(); drawBest(); drawSnd(); drawMode(); setAim(W / 2); requestAnimationFrame(frame);
-  say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”'));
+  drawPlay(); drawBest(); drawSnd(); drawMode(); drawDayHud(); setAim(W / 2); requestAnimationFrame(frame);
+  say(rec.play === 4 ? L('「きょうの まるいろ」は 1にち 1かい。「れんしゅう」は なんかいでも どうぞ。', '“Today’s Maruiro” is once a day. Practice as much as you like.') : L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”'));   // おやつの れんしゅうは まいかい ちがう じゅんばん なので、ひとことは「きょうの まるいろ」を はじめた ときに
 
   // ─── いろひろげ（Flood-It）：8×8・耳の 4いろ・ひだりうえから ひろがる。てかず・じかん・てんすう なし。ばんは 日づけで きまる（きょうの いろ）───
   const FC = ['#8fd3f4', '#9fe0a6', '#ffc27d', '#c9a6f2'], FN = ['みずいろ', 'ミント', 'アプリコット', 'ラベンダー'], FN_EN = ['sky blue', 'mint', 'apricot', 'lavender'], FG = ['○', '△', '□', '☆'], N = 8;
