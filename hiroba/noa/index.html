@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<title>ノアの へや｜まるふわの ひろば</title>
+<meta name="description" content="月城ノアの へや（じゅんびちゅう）。かべがみを もらったり、ノアの どうがを みたり できるよ。">
+<meta name="theme-color" content="#0f1c33">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ノアの へや｜まるふわの ひろば">
+<meta property="og:description" content="月城ノアの はいしんの へや。かべがみを もらったり、ノアの どうがを みたり できるよ。">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/hiroba/noa/">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<link rel="icon" type="image/png" sizes="32x32" href="../../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../../img/icon-180.png">
+<script>
+try { var sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d = document.documentElement; if (sv.large === true) d.dataset.large = 'true'; if (sv.calm === true) d.dataset.calm = 'true'; } catch (e) {}
+</script>
+<style>
+/* 10/27 指示書 1：月城ノアの はいしんの へや。うごきは「はいしんちゅう」の ランプと モニターの ひかりだけ（CSS だけ・かるく） */
+:root{color-scheme:dark;--ink:#eef1fb;--soft:#b9c3e0;--card:#1b2647e6;--line:#4e5f94;--pink:#ff6b8a;--btn1:#fdfeff;--btn2:#e3eaf6;--side:#6f82ad;--bink:#1f2f55}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:#0f1630}
+main{max-width:720px;margin:0 auto;padding:10px 14px 40px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 6px}
+.back{display:inline-flex;align-items:center;min-height:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid #fff;box-shadow:0 3px 0 var(--side);color:var(--bink);font-weight:800;text-decoration:none}
+h1{margin:4px 0 0;font-size:1.5rem;line-height:1.4}
+.lead{margin:0 0 10px;color:var(--soft);font-size:.95rem}
+/* へや：天の へやの 絵が とどくまでは、よぞらに ノアが たつ だけ（つくりものの 机や モニターは おかない）。うごきは なし */
+.room{position:relative;width:100%;aspect-ratio:4/3;border-radius:24px;overflow:hidden;border:3px solid #33406e;background:#121a38 url(room_sky.webp) center/cover no-repeat;box-shadow:0 10px 26px #0006}
+.noa{position:absolute;left:50%;bottom:0;height:96%;width:auto;transform:translateX(-50%);filter:drop-shadow(0 6px 10px #0008)}
+.soon{position:absolute;right:10px;top:10px;padding:2px 12px;border-radius:12px;background:#0b1028cc;border:1px solid var(--line);color:var(--soft);font-weight:800;font-size:.8rem}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:4px solid #ffd25e;outline-offset:3px}
+/* できること（3つだけ） */
+.acts{display:grid;gap:10px;margin:14px 0 0}
+.act{display:flex;align-items:center;gap:10px;min-height:60px;padding:8px 16px;border-radius:24px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid #fff;box-shadow:0 4px 0 var(--side);color:var(--bink);font:inherit;font-weight:900;font-size:1.1rem;text-decoration:none;cursor:pointer;text-align:left;width:100%}
+.act b{font-size:1.6rem;line-height:1}.act small{display:block;font-weight:700;font-size:.82rem;color:#3d4f7a}
+details.wp{border-radius:24px;background:var(--card);border:2px solid var(--line);padding:0}
+details.wp>summary{list-style:none}details.wp>summary::-webkit-details-marker{display:none}
+.wp-body{padding:10px 14px 14px}
+.wp-body img{display:block;width:100%;height:auto;border-radius:14px;border:2px solid var(--line)}
+.dls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.dl{flex:1 1 30%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:56px;padding:6px 10px;border-radius:18px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid #fff;box-shadow:0 3px 0 var(--side);color:var(--bink);font-weight:900;text-decoration:none;line-height:1.3}
+.dl small{font-weight:700;font-size:.72rem;color:#3d4f7a}
+.terms{margin:8px 0 0;padding:10px 14px;border-radius:16px;background:#0f1630cc;border:1px solid var(--line);font-size:.9rem}
+.terms h2{margin:0 0 4px;font-size:1rem}.terms p{margin:4px 0}.terms ul{margin:4px 0;padding-left:1.3em}
+.copy{margin:6px 0 0;color:var(--soft);font-size:.82rem}
+.note{margin:14px 0 0;color:var(--soft);font-size:.82rem}
+dialog.ext-dlg{border:3px solid var(--line);border-radius:20px;padding:14px 16px;width:min(92vw,400px);background:#1b2647;color:var(--ink);text-align:center}dialog.ext-dlg::backdrop{background:#0008}
+.ext-dlg h2{margin:0 0 6px;font-size:1.15rem}.ext-row{display:flex;gap:10px;justify-content:center}.ext-row .dl{flex:0 1 140px;font:inherit;font-weight:900;cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><a class="back" href="../">← ひろばへ</a></div>
+  <h1>🎙️ ノアの へや</h1>
+  <p class="lead">ノアに あいに きてね。へやは いま じゅんびちゅう。</p>
+
+  <div class="room" role="img" aria-label="よぞらの したに、月城ノアが たって いる">
+    <img class="noa" src="noa_stand.webp" alt="" width="520" height="893">
+    <span class="soon">へやは いま じゅんびちゅう</span>
+  </div>
+
+  <div class="acts">
+    <details class="wp">
+      <summary class="act"><b aria-hidden="true">🖼️</b><span>かべがみを もらう<small>パソコン（2K・4K）と スマホ</small></span></summary>
+      <div class="wp-body">
+        <img src="wallpaper_preview.webp" alt="かべがみの みほん：よぞらの したで、ノアと まるふわが ならんで いる" width="640" height="360" loading="lazy">
+        <div class="dls">
+          <a class="dl" href="../../wallpaper/noa_marufuwa_night_2k_2560x1440.jpg" download>PC（2K）<small>2560×1440</small></a>
+          <a class="dl" href="../../wallpaper/noa_marufuwa_night_4k_3840x2160.jpg" download>PC（4K）<small>3840×2160</small></a>
+          <a class="dl" href="../../wallpaper/noa_marufuwa_night_phone_1320x2868.jpg" download>スマホ<small>1320×2868</small></a>
+        </div>
+        <div class="terms">
+          <h2>この かべがみに ついて</h2>
+          <p>じぶんで つかう ぶんには、じゆうに つかって だいじょうぶです。スマホや パソコンの かべがみに して ください。</p>
+          <p>つぎの ことは、ごめんなさい。</p>
+          <ul>
+            <li>この えを うったり、グッズに したり しないで ください</li>
+            <li>じぶんが かいた ことに しないで ください</li>
+            <li>この えを つかって、べつの キャラクターを つくらないで ください</li>
+            <li>AIの がくしゅうに つかわないで ください</li>
+          </ul>
+          <p class="copy">© 2026 Ao Hozumi　／　こうかい：2026年10月</p>
+        </div>
+      </div>
+    </details>
+    <a class="act ext" data-what="おみせ（BOOTH）" href="https://hozumi-ao.booth.pm/items/9036945?utm_source=hiroba_noa" target="_blank" rel="noopener noreferrer"><b aria-hidden="true">🧸</b><span>アクスタを みる<small>ノアと まるふわ 70mm（BOOTH が ひらくよ）</small></span></a>
+    <a class="act ext" data-what="TikTok" href="https://www.tiktok.com/@marufuwa_no_machi" target="_blank" rel="noopener noreferrer"><b aria-hidden="true">🎥</b><span>ノアの どうがを みる<small>TikTok @marufuwa_no_machi（ひらくよ）</small></span></a>
+  </div>
+  <p class="note">アクスタと どうがの ボタンは、そとの ページが ひらくよ。ひらく まえに きくよ。おうちの ひとと いっしょにね。</p>
+</main>
+<dialog id="ext" class="ext-dlg" aria-labelledby="ext-t">
+  <h2 id="ext-t">そとの ページが ひらくよ</h2>
+  <p id="ext-tx"></p>
+  <div class="ext-row"><a id="ext-go" class="dl" href="#" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="ext-no" class="dl">やめる</button></div>
+</dialog>
+<script>
+// そとの ページ（おみせ・TikTok）は ひらく まえに きく（おうちの かたへ の やくそく：かいものは おうちの ひとと）
+(() => {
+  const d = document.getElementById('ext'), tx = document.getElementById('ext-tx'), go = document.getElementById('ext-go');
+  const close = () => { try { d.close(); } catch (e) { d.removeAttribute('open'); } };
+  document.querySelectorAll('a.ext').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault(); go.href = a.href; tx.textContent = a.dataset.what + ' の ページが ひらくよ。おうちの ひとと いっしょに みてね。';
+    try { d.showModal(); } catch (x) { d.setAttribute('open', ''); }
+  }));
+  go.addEventListener('click', () => setTimeout(close, 0)); document.getElementById('ext-no').addEventListener('click', close);
+})();
+</script>
+<script defer src="../../tsuri-ruby-dict.js"></script>
+<script defer src="../../tsuri-ruby.js"></script>
+</body>
+</html>

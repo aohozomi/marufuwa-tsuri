@@ -112,6 +112,10 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 /* きょうの ラッキーさかな（10/23 参謀：「また くる りゆう」を さいしょの がめんで 見える ように）。おすと つりばへ */
 .lucky-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;box-sizing:border-box;min-height:64px;margin:0 0 10px;padding:8px 16px;border-radius:22px;background:linear-gradient(180deg,#fffbe8,#ffeeb0);border:3px solid #fff;box-shadow:0 4px 0 #d9a520,0 6px 12px #24465322;color:#4a2a00;text-decoration:none;line-height:1.35;text-align:center}
 .lucky-chip[hidden]{display:none}
+.first-guide{margin:0 0 10px;padding:10px 12px 12px;border-radius:20px;background:#fffdf7;border:3px solid #cfd9ee;box-shadow:0 4px 0 #8a9cc4;text-align:center;color:#1f2f55}   /* 10/27 指示書 3-2：はじめての 人には 2つの ボタンだけ */
+.first-guide p{margin:0 0 8px;font-weight:900;font-size:1.1rem}
+.first-guide .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.first-guide button{min-height:52px;padding:6px 16px;font-size:1.05rem;font-weight:900}
 .lucky-chip small{font-size:.9rem;font-weight:800;opacity:.9}
 .lucky-chip b{font-size:1.45rem;font-weight:900}   /* 10/27 参謀 追加3②：「あした また くる りゆう」は 大きく（すみの 小さい 札 → えの すぐ うえ／いきさきの いちばん うえ） */
 /* まちレベル（10/7 マスター「レベルの概念を 右上に」）：ちいさな 金の ふだ。おすと くわしく */
@@ -270,6 +274,7 @@ button.zk.slot.empty::before{display:none}
 button[data-machi=omise],button[data-dest=machi]{--c1:#fff0f5;--c2:#ffc0d4;--side:#df7f9f;--ink:#5a1f33}
 button[data-machi=bijutsu]{--c1:#eaf6ff;--c2:#a9d8f5;--side:#4a9fca;--ink:#0f3a55}
 .machi-list button[hidden]{display:none}   /* おすすめの へやは 中身（data/osusume.json）が 入るまで 入口ごと かくす */
+button[data-machi=noa]{--c1:#f6efff;--c2:#d5c0f7;--side:#9a7ad6;--ink:#3b2466}
 button[data-machi=maruiro]{--c1:#f0fff4;--c2:#9fe3b8;--side:#4cae7a;--ink:#0f4a2a}
 button[data-machi=camp]{--c1:#fff1e0;--c2:#ffc98a;--side:#d9863a;--ink:#5a2e08}
 button[data-machi=ido]{--c1:#e9f7ff;--c2:#a9dcf5;--side:#4a9fca;--ink:#0f3a55}
@@ -445,7 +450,7 @@ button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ff
 #places button small,#places-wait button small{font-weight:700;font-size:1.13rem;opacity:1}
 button[data-dest=tsuri]{--c1:#e6f7ff;--c2:#86d3f3;--side:#3f9fd0;--ink:#0d3d57}
 button[data-dest=oheya]{--c1:#fff0ec;--c2:#ffb8a8;--side:#df806f;--ink:#5a1f14}
-#places button[data-dest],#places #go-shindan{--c1:#fdfeff;--c2:#e3eaf6;--side:#6f82ad;--ink:#1f2f55}   /* 10/27 参謀 追加3①：7しょくの にじいろ → しろと こんの 1しょく（えに 目が いく）。みわけは アイコン */
+#places button[data-dest],#places #go-shindan,#places #go-noa{--c1:#fdfeff;--c2:#e3eaf6;--side:#6f82ad;--ink:#1f2f55}   /* 10/27 参謀 追加3①：7しょくの にじいろ → しろと こんの 1しょく（えに 目が いく）。みわけは アイコン */
 #places-wait{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 14px}
 #places-wait button{min-height:68px;--c1:#fff8d8;--c2:#ffe59a;--side:#d39a1c;--ink:#593700;border-style:dashed}
 #places-wait button b{font-size:1.4rem}
@@ -710,6 +715,7 @@ body.calm .cloud.c2{left:28%}
   </div>
   </div>
   <div class="side">
+  <div id="first-guide" class="first-guide" hidden><p>はじめて？ つりばか、ノアの へやから どうぞ</p><div class="row"><button type="button" id="fg-tsuri"><span aria-hidden="true">🎣</span>つりばへ</button><button type="button" id="fg-noa"><span aria-hidden="true">🎙️</span>ノアの へやへ</button></div></div>
   <p id="status" role="status" aria-live="polite"></p>
   <ul id="facts" class="facts" aria-label="いまの ひろばの ようす"></ul>
   <div id="invite" role="group" aria-labelledby="invite-q" hidden>
@@ -724,6 +730,7 @@ body.calm .cloud.c2{left:28%}
     <button type="button" data-dest="park"><b aria-hidden="true">🎡</b>パークへ<small>あそびば</small></button>
     <button type="button" data-dest="machi"><b aria-hidden="true">🛍️</b>まちかど<small>おみせ・まるいろ・いど</small></button>
     <button type="button" data-dest="maruiro"><b aria-hidden="true">🔵</b>まるいろ<small>まるい こを おとして あそぼう</small></button>   <!-- 10/17 参謀15弾：おちもの パズルを ひろばから 1回で -->
+    <button type="button" id="go-noa" onclick="location.href='noa/'"><b aria-hidden="true">🎙️</b>ノアの へや<small>はいしんの へやを のぞこう</small></button>   <!-- 10/27 指示書 1-2：ノアの へや（ひろばの トップにも） -->
     <button type="button" id="go-shindan" onclick="location.href='../shindan/'"><b aria-hidden="true">🎨</b>いろしんだん<small>3もんで きょうの きもち</small></button>   <!-- 10/15 参謀：診断への 入口が 見当たらない → ひろばの いきさきに -->
   </nav>
 
@@ -832,6 +839,7 @@ body.calm .cloud.c2{left:28%}
     <button type="button" data-machi="maruiro"><b aria-hidden="true">🔵</b>まるいろ<small>まるい こを おとして あそぼう</small></button>
     <button type="button" data-machi="camp"><b aria-hidden="true">🔥</b>キャンプば<small>よるの たきびで ゆっくり</small></button>
     <button type="button" data-machi="ido"><b aria-hidden="true">💧</b>いど<small>のぞいて みよう</small></button>
+    <button type="button" data-machi="noa"><b aria-hidden="true">🎙️</b>ノアの へや<small>はいしんの へやを のぞいて みよう</small></button>
     <button type="button" data-machi="osusume" hidden><b aria-hidden="true">⭐</b>おすすめの へや<small>おはなしを きく ひとが いるよ</small></button>
   </div>
   <button class="close" type="button" id="close-machi">とじる</button>
@@ -1650,7 +1658,8 @@ window.addEventListener('load', function luckyChip() {   // 英語の しくみ�
     const measureGap = () => { const top = document.querySelector('.top'); if (!top) return 0; const tb = top.getBoundingClientRect().bottom; let g = 0; ['tap-hint', 'mutehint'].forEach(id => { const h = $(id); if (h && !h.hidden) g = Math.max(g, h.getBoundingClientRect().bottom - tb + 10); }); return Math.max(0, Math.ceil(g)); };
     const place = () => { const wide = matchMedia('(min-width:900px) and (min-height:560px)').matches, side = document.querySelector('.stage > .side'), vp = $('viewport');
       if (wide && side) { if (side.firstElementChild !== el) side.prepend(el); } else if (vp && vp.previousElementSibling !== el) vp.before(el);
-      if (gapPx === null) gapPx = measureGap(); el.style.marginTop = wide ? '' : gapPx + 'px'; };   // 札が 絵の うえの ときは、ひらいた ときに 出て いる 案内の ぶんだけ あける（そのあとは かえない＝案内が きえても 絵が ずれない・案内が ない 人には あけない）   // パソコン＝いきさきの いちばん うえ／スマホ＝えの すぐ うえ
+      if (gapPx === null) gapPx = measureGap(); el.style.marginTop = wide ? '' : gapPx + 'px';
+      const fg = $('first-guide'), st = $('status'); if (fg) { if (wide) { if (st && fg.nextElementSibling !== st) st.before(fg); } else if (fg.previousElementSibling !== el) el.after(fg); } };   // はじめての 案内も おなじ ところへ（スマホは 絵の うえ）   // 札が 絵の うえの ときは、ひらいた ときに 出て いる 案内の ぶんだけ あける（そのあとは かえない＝案内が きえても 絵が ずれない・案内が ない 人には あけない）   // パソコン＝いきさきの いちばん うえ／スマホ＝えの すぐ うえ
     place(); addEventListener('resize', place);
 
   } catch {}
@@ -1709,6 +1718,24 @@ function spawnFriend(id, home, opt = {}) {   // ひろばを あるく 子を 1�
   return a;
 }
 const friends = chooseFriends().map((id, i) => spawnFriend(id, slotAt(i)));
+// 月城ノア（10/27 指示書 3-1：itch で「ひろばで ノアに あえる」と 知らせて いる）。PALS の なかまとは べつに 1にん いる（図鑑・つり・てがみ・おさそいには 出ない）。はなしかけると 5つの ひとことを じゅんばんに、1つは ノアの へやへの さそい
+const NOA_LINES = ['＊きょうも きて くれたんだ', 'わたしの へや、みて いく？ いまは かたづけちゅう だけどね', 'へやを いま かたづけて いるの。できたら みに きてね', 'まるふわ？ さっき その へんに いたよ', 'ゆっくり して いって'];
+const noa = (() => { const home = nearestFree(330, 470), a = makeActor('noa', 'ノア', BASE + 'hiroba/noa/noa_walk.webp', 112, 233 / 400, 'friend noa'); a.x = home.x; a.y = home.y; a.home = home; a.el.setAttribute('aria-hidden', 'true'); a.talkN = 0; a.speed = 26; a.state = 'idle'; a.timer = 3; a.talking = 0; return a; })();
+function noaTick(dt) {   // ノアは いえの まわりを ゆっくり あるく（はなして いる あいだは とまる）
+  if (noa.talking > 0) { noa.talking -= dt; noa.moving = false; return; }
+  if (reduce()) { noa.moving = false; return; }
+  if (noa.state === 'walk') { stepActor(noa, dt); if (!noa.path.length) { noa.state = 'idle'; noa.timer = 4 + Math.random() * 6; noa.moving = false; } return; }
+  if ((noa.timer -= dt) > 0) return;
+  for (let i = 0; i < 6; i++) { const tx = noa.home.x + (Math.random() * 2 - 1) * 40, ty = noa.home.y + (Math.random() * 2 - 1) * 26; if (isFree(tx, ty) && dist({ x: tx, y: ty }, player) > 40) { noa.path = findPath(noa, { x: tx, y: ty }); noa.state = 'walk'; return; } }
+  noa.timer = 3;
+}
+function noaTalk() {
+  lastInput = T;
+  const say = () => { const line = NOA_LINES[noa.talkN++ % NOA_LINES.length].replace('＊', (HELLO[curTime] || 'こんにちは') + '。'); noa.talking = 5; noa.path = []; noa.state = 'idle'; speak(noa, line, Math.min(7000, Math.max(3600, 1600 + line.length * 85))); hop(noa); if (line.includes('へや')) narrate('ノアの へやは、いきさきの「ノアの へや」から いけるよ。'); };
+  if (dist(player, noa) < 60) { say(); return; }
+  const dx = player.x - noa.x, dy = player.y - noa.y, d = Math.hypot(dx, dy) || 1, spot = nearestFree(noa.x + dx / d * 44, noa.y + dy / d * 44);
+  narrate('ノアの ところへ いくよ'); walkTo(spot.x, spot.y, say);
+}
 { const nowMs = Date.now(); friends.forEach(f => { own.seenAt[f.id] = nowMs; }); saveOwn(); }   // いま ひろばに いる 子（「さいきん あって いない」の 数えかた）
 const byId = id => actors.find(a => a.id === id);
 // すいそうの へやに よぶ ともだち（さいしょの 2ひき）
@@ -2680,7 +2707,7 @@ scene.addEventListener('click', e => {
   if (meteor) { meteorTap(); return; }
   const careEl = t.closest('.care-ico'); if (careEl) { e.stopPropagation(); careTo(byId(careEl.dataset.id)); return; }
   const actorEl = t.closest('.actor');
-  if (actorEl) { if (actorEl.dataset.id === 'me') tapMascot(); else talkTo(byId(actorEl.dataset.id)); return; }
+  if (actorEl) { if (actorEl.dataset.id === 'me') tapMascot(); else if (actorEl.dataset.id === 'noa') noaTalk(); else talkTo(byId(actorEl.dataset.id)); return; }
   const destEl = t.closest('[data-dest]') ? pickDest(e, t) : null; if (destEl) { goDest(destEl.dataset.dest); return; }
   const secretEl = t.closest('[data-secret]'); if (secretEl && !(t.tagName === 'IMG' && Number.isFinite(e.clientX) && !imgOpaqueAt(t, e.clientX, e.clientY))) { secretTap(secretEl.dataset.secret, secretEl); return; }   // 絵の 木は 描かれて いる 所だけ（すきとおった 所は 歩く）
   cancelTrip(false);
@@ -2708,13 +2735,14 @@ function nearestThing() {
   let best = null, bd = Infinity;
   friends.forEach(f => { const d = dist(player, f); if (d < 64 && d < bd) { bd = d; best = { kind: 'friend', f, name: f.name }; } });
   Object.entries(DEST).forEach(([id, d]) => { const dd = dist(player, d.at); if (dd < 44 && dd < bd) { bd = dd; best = { kind: 'dest', id, name: d.name }; } });
+  { const d = dist(player, noa); if (d < 64 && d < bd) { bd = d; best = { kind: 'noa', name: 'ノア' }; } }
   if (!best && dist(player, { x: 180, y: 396 }) < 78) best = { kind: 'fountain', name: 'ふんすい' };
   return best;
 }
 function interactNearest() {
   const t = nearestThing();
   if (!t) { narrate('ちかくには なにも ないよ。したの ボタンで いきたい ところを えらべるよ'); return; }
-  if (t.kind === 'friend') { viaKeyFlag = true; greet(t.f, true); viaKeyFlag = false; } else if (t.kind === 'dest') goDest(t.id); else secretTap('fountain');
+  if (t.kind === 'friend') { viaKeyFlag = true; greet(t.f, true); viaKeyFlag = false; } else if (t.kind === 'noa') noaTalk(); else if (t.kind === 'dest') goDest(t.id); else secretTap('fountain');
 }
 
 // ─── いちばん ながい ときの もの：ひとりで いる ときに、ともだちが あいに きて くれる ───
@@ -2929,6 +2957,7 @@ function update(dt) {
   animateActor(player, dt);
   if (party.length) trailPush();
   friends.forEach(f => { updateFriend(f, dt); animateActor(f, dt); });
+  noaTick(dt); animateActor(noa, dt);
   tickTogether(dt);
   if (T > nextPasser) { nextPasser = T + passerGap(); spawnPasser(); }   // 通りすがりの 子
   if (inviteF && (dist(player, inviteF) > 150 || !friends.includes(inviteF))) closeInvite();
@@ -3456,7 +3485,7 @@ function checkOsusume() {   // data/osusume.json に 1人でも 入ったら 入
 }
 const machiName = () => { const el = typeof propEl === 'function' ? propEl('machi') : null; return el && el.dataset.art === 'sky' ? S('てんくうの しろ', 'Sky castle') : S('まちかど', 'Town corner'); };   // 白い城の 絵の ときは 窓も「てんくうの しろ」（10/7 マスター「天空の城が まちかど やぞ」）
 function openMachi() { checkOsusume(); lastInput = T; const dlg = $('machi'); $('machi-title').textContent = machiName(); if (!dlg.open) dlg.showModal(); narrate(machiName() + S('。どこへ いく？ おみせ・びじゅつかん・おすすめの へや。', '. Where to? The shop, the art gallery or the recommended room.')); }
-$('machi').addEventListener('click', e => { const b = e.target.closest('button[data-machi]'); if (!b) return; const w = b.dataset.machi; $('machi').close(); if (w === 'shiro' || w === 'omise') lvVisit(w); if (w === 'shiro') { location.href = 'shiro/'; return; } if (w === 'omise') openOmise(); else goInside(w); });
+$('machi').addEventListener('click', e => { const b = e.target.closest('button[data-machi]'); if (!b) return; const w = b.dataset.machi; $('machi').close(); if (w === 'noa') { location.href = 'noa/'; return; } if (w === 'shiro' || w === 'omise') lvVisit(w); if (w === 'shiro') { location.href = 'shiro/'; return; } if (w === 'omise') openOmise(); else goInside(w); });
 $('lv-btn').addEventListener('click', openLv); $('close-lv').addEventListener('click', () => $('lvdlg').close());
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => lvPaint(false)); else lvPaint(false);   // しろの なか（10/7 マスター「ドラクエみたいに 城内を たんけん」）
 if (new URLSearchParams(location.search).get('go') === 'omise') addEventListener('load', () => setTimeout(() => { try { openOmise(); } catch (e) {} }, 700));   // しろの なかの とびらから おみせへ
@@ -3617,7 +3646,8 @@ if (own.last && DEST[own.last] && Date.now() - own.leftAt < 6 * 3600 * 1000) { c
 own.last = ''; saveOwn(); render();
 setTimeout(() => {
   const weather = rainy ? 'あめ' : 'はれ';
-  narrate(own.visits <= 1 ? 'ひろばへ ようこそ。ゆびで さわると、まるふわが あるくよ。したの ボタンで、いきたい ところへ いけるよ。' : 'ひろばに ついたよ。');   // いま・てんき・ともだち は 右の 縦の 箇条書き（#facts）
+  if (own.visits <= 1) { const fg = $('first-guide'); fg.hidden = false; $('fg-tsuri').onclick = () => { fg.hidden = true; goDest('tsuri'); }; $('fg-noa').onclick = () => { location.href = 'noa/'; }; }
+  narrate(own.visits <= 1 ? 'ひろばへ ようこそ。' : 'ひろばに ついたよ。');   // いま・てんき・ともだち は 右の 縦の 箇条書き（#facts）
 }, 500);
 if (seasonEndsSoon()) setTimeout(() => narrate('この きせつも もうすぐ おわり。' + AGAIN), 5200);   // おわりの 1しゅうかん（せかさない・見のがしても なにも へらない）
 if (RETURNING && own.welcomeDay !== TODAY_NO) { own.welcomeDay = TODAY_NO; saveOwn(); if (!PASSER_OFF) nextPasser = Math.min(nextPasser, 12 + Math.random() * 8); }   // べつの 日に もどったら あたらしい 子が すこし はやく あそびに くる（1日 1かい）
