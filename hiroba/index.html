@@ -110,10 +110,10 @@ main{word-break:keep-all;overflow-wrap:break-word;max-width:560px;margin:10px au
 #tap-hint:not([hidden])~.mutegrp .mutehint{top:calc(100% + 40px)}   /* 「どこかを さわると…」が 出て いる あいだは、ミュートの 案内を 1だん 下に（かさならない・10/6 Claude） */
 .mutegrp{position:relative;display:flex;align-items:center;gap:6px;margin-left:auto}
 /* きょうの ラッキーさかな（10/23 参謀：「また くる りゆう」を さいしょの がめんで 見える ように）。おすと つりばへ */
-.lucky-chip{flex:1 1 200px;display:flex;flex-direction:column;align-items:flex-start;min-height:46px;padding:5px 14px;border-radius:16px;background:linear-gradient(180deg,#fffbe8,#ffeeb0);border:2px solid #fff;box-shadow:0 3px 0 #d9a520;color:#4a2a00;text-decoration:none;line-height:1.3}
+.lucky-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;box-sizing:border-box;min-height:64px;margin:0 0 10px;padding:8px 16px;border-radius:22px;background:linear-gradient(180deg,#fffbe8,#ffeeb0);border:3px solid #fff;box-shadow:0 4px 0 #d9a520,0 6px 12px #24465322;color:#4a2a00;text-decoration:none;line-height:1.35;text-align:center}
 .lucky-chip[hidden]{display:none}
-.lucky-chip small{font-size:.72rem;font-weight:700;opacity:.85}
-.lucky-chip b{font-size:.95rem;font-weight:900}
+.lucky-chip small{font-size:.9rem;font-weight:800;opacity:.9}
+.lucky-chip b{font-size:1.45rem;font-weight:900}   /* 10/27 参謀 追加3②：「あした また くる りゆう」は 大きく（すみの 小さい 札 → えの すぐ うえ／いきさきの いちばん うえ） */
 /* まちレベル（10/7 マスター「レベルの概念を 右上に」）：ちいさな 金の ふだ。おすと くわしく */
 .lvbtn{font:inherit;font-weight:900;font-size:.82rem;min-height:44px;min-width:44px;padding:4px 12px;border-radius:999px;color:#4a2a00;background:linear-gradient(180deg,#fff1b8,#ffd25e);border:2px solid #fff;box-shadow:0 3px 0 #d39a1c;cursor:pointer;white-space:nowrap}
 .lvbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #d39a1c}
@@ -363,6 +363,7 @@ html[data-calm=true] .prop[data-art=sky]{animation:none}
 .door{transform-box:fill-box;transform-origin:0 50%;transition:transform .3s ease-out}
 .prop.open .door{transform:scaleX(.25)}
 .mark{position:absolute;left:50%;top:-6%;transform:translateX(-50%);z-index:2;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;line-height:1;background:#ffffffe6;border:3px solid #fff;border-radius:50%;box-shadow:0 3px 0 #9cc9e0,0 6px 8px #24465333;animation:markbob 2.2s ease-in-out infinite;pointer-events:none}
+.mark{opacity:.55;transition:opacity .35s}.prop.near .mark,.prop:hover .mark{opacity:1}   /* 10/27 参謀 追加3③：しるしが えを よごさない ように */
 .prop[data-id=pier] .mark{left:74%}
 .prop[data-id=cafe] .mark{left:88%;top:-14%}
 .prop[data-id=bowling] .mark,.prop[data-id=kuru] .mark,.prop[data-id=gym] .mark,.prop[data-id=drive] .mark,.prop[data-id=tug] .mark{left:90%;top:-16%}   /* 看板の もじに かぶせず 右上に */
@@ -444,6 +445,7 @@ button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ff
 #places button small,#places-wait button small{font-weight:700;font-size:1.13rem;opacity:1}
 button[data-dest=tsuri]{--c1:#e6f7ff;--c2:#86d3f3;--side:#3f9fd0;--ink:#0d3d57}
 button[data-dest=oheya]{--c1:#fff0ec;--c2:#ffb8a8;--side:#df806f;--ink:#5a1f14}
+#places button[data-dest],#places #go-shindan{--c1:#fdfeff;--c2:#e3eaf6;--side:#6f82ad;--ink:#1f2f55}   /* 10/27 参謀 追加3①：7しょくの にじいろ → しろと こんの 1しょく（えに 目が いく）。みわけは アイコン */
 #places-wait{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 14px}
 #places-wait button{min-height:68px;--c1:#fff8d8;--c2:#ffe59a;--side:#d39a1c;--ink:#593700;border-style:dashed}
 #places-wait button b{font-size:1.4rem}
@@ -1644,6 +1646,13 @@ window.addEventListener('load', function luckyChip() {   // 英語の しくみ�
     el.innerHTML = '<small>' + (en ? 'Today’s lucky fish' : 'きょうの ラッキーさかな') + '</small><b>🐟 ' + nm + '</b><small>' + (en ? 'Changes tomorrow · tap to fish' : 'あしたは かわるよ・おすと つりばへ') + '</small>';
     el.setAttribute('aria-label', en ? 'Today’s lucky fish: ' + nm + '. It changes tomorrow. Go fishing.' : 'きょうの ラッキーさかなは ' + nm + '。あしたは かわるよ。つりばへ いく');
     el.hidden = false;
+    let gapPx = null;
+    const measureGap = () => { const top = document.querySelector('.top'); if (!top) return 0; const tb = top.getBoundingClientRect().bottom; let g = 0; ['tap-hint', 'mutehint'].forEach(id => { const h = $(id); if (h && !h.hidden) g = Math.max(g, h.getBoundingClientRect().bottom - tb + 10); }); return Math.max(0, Math.ceil(g)); };
+    const place = () => { const wide = matchMedia('(min-width:900px) and (min-height:560px)').matches, side = document.querySelector('.stage > .side'), vp = $('viewport');
+      if (wide && side) { if (side.firstElementChild !== el) side.prepend(el); } else if (vp && vp.previousElementSibling !== el) vp.before(el);
+      if (gapPx === null) gapPx = measureGap(); el.style.marginTop = wide ? '' : gapPx + 'px'; };   // 札が 絵の うえの ときは、ひらいた ときに 出て いる 案内の ぶんだけ あける（そのあとは かえない＝案内が きえても 絵が ずれない・案内が ない 人には あけない）   // パソコン＝いきさきの いちばん うえ／スマホ＝えの すぐ うえ
+    place(); addEventListener('resize', place);
+
   } catch {}
 });
 // あんないの ペンギンの「まめちしき」（さかなの まめちしき 30こ・共有ファイル tsuri-mame.js）。つった さかなが あれば その さかなの ものから
@@ -2953,7 +2962,10 @@ function update(dt) {
   if (curTime === 'n' && T > nextMeteor) { nextMeteor = T + 50 + Math.random() * 50; if (!reduce()) shootingStar(false); }
 }
 let last = 0;
-function frame(t) { requestAnimationFrame(frame); const dt = Math.min(.05, (t - last) / 1000 || 0); last = t; if (document.hidden || api.paused || (window.TsuriTank && window.TsuriTank.isOpen && window.TsuriTank.isOpen())) return; update(dt); render(); }
+function frame(t) { requestAnimationFrame(frame); const dt = Math.min(.05, (t - last) / 1000 || 0); last = t; if (document.hidden || api.paused || (window.TsuriTank && window.TsuriTank.isOpen && window.TsuriTank.isOpen())) return; update(dt); render(); markNear(dt); }
+// まるふわが ちかくに いる ばしょの しるしだけ はっきり（0.2びょうに 1かい）
+let markT = 0;
+function markNear(dt) { if ((markT += dt) < .2) return; markT = 0; for (const p of PROPS) { if (!p.mark) continue; const el = propEl(p.id); if (!el) continue; const near = Math.hypot(player.x - p.x, player.y - (p.y - p.h * .3)) < Math.max(80, p.w * .8); if (el.classList.contains('near') !== near) el.classList.toggle('near', near); } }
 
 // ─── きねんかん「ありがとうの ほしぞら」──あそんで くれた 人の ほしが ならぶ。なまえは thanks.json（ただの ファイル）から。サーバー なし ───
 //   ・ゲームの 中では「見る」だけ。なまえを うつ 所は ない。外への リンクも ない（リンクは おとなの ページに）。
