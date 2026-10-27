@@ -1010,6 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function reset() {
     if (dly.on && !dly.done) { say(L('きょうの まるいろは、さいしょから やりなおせないよ。「れんしゅう」なら なんかいでも どうぞ。', 'Today’s Maruiro cannot be restarted. Practice as many times as you like.')); return; }
     if (dly.on) { startPractice(); return; }
+    if (rec.play === 4) { pops = []; clearTimeout(cheerT); cheerT = 0; cheerEl.hidden = true; }
     pracPts = 0; drawDayHud();
     if (rec.play === 3) { tsReset(); say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); return; } buildLadder(); if (rec.play !== 2) say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); syncDropButton(); say(L('さいしょから はじめたよ。', 'Starting over.')); }
   const MODE_T = [['かたち：かお', 'Shapes: faces'], ['かたち：もの', 'Shapes: things'], ['かたち：さかな', 'Shapes: fish']];
