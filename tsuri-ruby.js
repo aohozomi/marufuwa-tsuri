@@ -72,8 +72,8 @@
 
   // ---- ブラウザ：画面の もじを かえる ----
   const q = new URLSearchParams(location.search);
-  // もじの しゅるい：「かんじ＋ふりがな」（はじめから）／「ひらがなだけ」（幼児・低学年向け。漢字を 一切 出さない）。ほんたいの きろく（save.hira）を よむ
-  const hiraOnly = () => { try { const d = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1') || '{}'); return !!(d && d.hira === true); } catch { return false; } };
+  // もじの しゅるい：「ひらがなだけ」（はじめから。漢字を 一切 出さない）／「かんじ＋ふりがな」。ほんたいの きろく（save.hira）を よむ
+  const hiraOnly = () => { try { const d = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1') || '{}'); return !(d && d.hira === false); } catch { return true; } };   // 10/27 参謀 総点検12：はじめは ひらがなだけ（「もじ」で かんじ＋ふりがなを えらんだ ときだけ かんじ）
   let enabled = !(q.get('noruby') === '1' || hiraOnly());
   let HIRA_MODE = !enabled && q.get('noruby') !== '1', hiraObs = null;
   const isEn = () => !!(root.TsuriEn && root.TsuriEn.lang === 'en');

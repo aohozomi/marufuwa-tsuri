@@ -18,6 +18,11 @@
     'わたしのへや、みていく？いまはかたづけちゅうだけどね': 'Want to see my room? I’m still tidying it, though.', 'へやをいまかたづけているの。できたらみにきてね': 'I’m tidying my room right now. Come see it when it’s ready.',
     'まるふわ？さっきそのへんにいたよ': 'Marufuwa? I saw them around here a moment ago.', 'ゆっくりしていって': 'Take your time here.',
     'ノアのところへいくよ': 'Walking over to Noa', 'ノアのへやは、いきさきの「ノアのへや」からいけるよ。': 'You can go to Noa’s Room from the “Noa’s Room” button.',
+    'さかなをつりにいこう': 'Let’s go fishing', 'すいそうのさかなをみよう': 'See the fish in the tank', 'あそんでくれたみんなのほし': 'Stars for everyone who played', 'ピンをたおそう': 'Knock down the pins', 'くるくるまわってあそぼう': 'Spin and play', 'いまはじゅんびちゅう': 'Getting ready now', 'タイヤをひっぱってあそぼう': 'Pull the tire and play', 'くるまではしろう': 'Go for a drive', 'まるいこをおとしてあそぼう': 'Drop round friends and play', 'のぞいてみよう': 'Take a peek', 'てがみがとどくよ': 'Letters arrive here', 'まるふわのアプリ': 'The Marufuwa app', 'ひとやすみしよう': 'Take a break', 'おみせ・びじゅつかん・おすすめ': 'Shop, museum and picks',
+    'ノアのへやは、ひだりしたのちいさないえだよ。': 'Noa’s Room is the little house at the bottom left.',
+    'わたしのへや、みていく？ひだりしたのちいさないえだよ': 'Want to see my room? It’s the little house at the bottom left.', 'へや、かたづけたよ。ゆっくりみにきてね': 'I tidied my room. Come and take a look.',
+    'まるふわのいろいろ（グッズ・どうが）': 'More Marufuwa (goods and videos)', 'おとのせっていは、つりびよりとおなじものをつかうよ。きろくはこのスマホやパソコンのなかだけにのこるよ。': 'Sound settings are shared with the fishing game. Your records stay only on this phone or computer.',
+    'がいとう': 'Street lamp', 'かだん': 'Flower bed', 'もん': 'Gate', 'ひろばへようこそ。': 'Welcome to the plaza.', 'やどやのなか。ランプのあかりのしたで、まるふわがえほんをよんでいる': 'Inside the inn. Marufuwa is reading a picture book under the lamp light.',
     'じゅんびちゅうのばしょ': 'Getting ready', 'じゅんびちゅうのばしょ（ちかぢか）': 'Getting ready (coming soon)',
     'ここはまだじゅんびちゅう。ちかぢかあそべるよ。たのしみにまっててね': "Still getting ready. You'll be able to play soon. Look forward to it!",
     'ここもじゅんびちゅう。ちかぢかあそべるよ。おたのしみに': 'This one is getting ready, too. Coming soon. Stay tuned!',
@@ -201,6 +206,6 @@
     [/^(\d+)がつにきてくれたよ$/, (_, m) => `Came in ${['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][+m] || m}`],
   ];
   // かんばん（SVG）は せまい ので みじかく
-  const short = { 'つりば': 'Fishing', 'じゅんびちゅう': 'Getting ready…', 'おへや': 'Room', 'ありがとう': 'Thanks' };
+  const short = { 'つりば': 'Fishing', 'じゅんびちゅう': 'Getting ready…', 'おへや': 'Room', 'ありがとう': 'Thanks', 'ノアの へや': 'Noa’s Room', 'ノアのへや': 'Noa’s Room' };
   window.TsuriEn.add({ ex, rules, short });
 })();

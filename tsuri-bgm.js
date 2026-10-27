@@ -110,7 +110,7 @@
       o = o || {};
       const b = document.createElement('button'); b.type = 'button'; b.className = o.className || 'bgm-btn'; if (o.id) b.id = o.id;
       b.title = 'ひろば・おへや・ながめる で ながれる、しずかな BGM';
-      const paint = () => { b.textContent = (isEn() ? 'BGM: ' : 'BGM：') + (on ? 'ON' : 'OFF'); b.setAttribute('aria-pressed', String(on)); };
+      const paint = () => { b.textContent = isEn() ? 'BGM: ' + (on ? 'ON' : 'OFF') : 'BGM：' + (on ? 'あり' : 'なし'); b.setAttribute('aria-pressed', String(on)); };
       b.addEventListener('click', () => {
         const next = !on;
         if (next && typeof o.enableSound === 'function' && !soundOk(o.sound)) { try { o.enableSound(); } catch {} }

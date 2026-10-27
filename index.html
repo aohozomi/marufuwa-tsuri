@@ -7,7 +7,7 @@
 <title>まるふわ びより｜のんびり つりと ちいさな まち・ブラウザゲーム</title>
 <meta name="description" content="まるふわと なかまと、のんびり つり。いそがなくて だいじょうぶ。にがしても、へらない。">
 <meta name="theme-color" content="#b9edf5">
-<meta name="apple-itunes-app" content="app-id=6816003504, affiliate-data=pt=129401810&amp;ct=smartbanner_game">
+<meta name="apple-itunes-app" content="app-id=6816003504">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="img/favicon-48.png">
 <link rel="apple-touch-icon" href="img/icon-180.png">
@@ -951,7 +951,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <path d="M0 780 Q400 730 800 790 T1600 770 V900 H0Z" fill="#a7dba0"/>
   </svg>
   <h1 class="logo" aria-label="まるふわ びより"><span aria-hidden="true">ま</span><span aria-hidden="true">る</span><span aria-hidden="true">ふ</span><span aria-hidden="true">わ</span><i aria-hidden="true">🎣</i><span aria-hidden="true">び</span><span aria-hidden="true">よ</span><span aria-hidden="true">り</span></h1>
-  <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <ruby>急<rt aria-hidden="true">いそ</rt></ruby>がなくて <ruby>大丈夫<rt aria-hidden="true">だいじょうぶ</rt></ruby>・<ruby>逃<rt aria-hidden="true">に</rt></ruby>がしても <ruby>減<rt aria-hidden="true">へ</rt></ruby>らない<br><small><span class="lead-town"><span class="ic" aria-hidden="true">🏘</span> つり・おさんぽ・ミニゲームの ちいさな まち</span><span class="lead-time"><br><span class="ic" aria-hidden="true">⏱</span> 1ぴき 10〜20<ruby>秒<rt aria-hidden="true">びょう</rt></ruby>・<ruby>無料<rt aria-hidden="true">むりょう</rt></ruby></span></small></p>
+  <p class="lead" id="lead-text"><span class="ic" aria-hidden="true">🐟</span> <span data-noruby>いそがなくて だいじょうぶ・にがしても へらない</span><br><small><span class="lead-town"><span class="ic" aria-hidden="true">🏘</span> つり・おさんぽ・ミニゲームの ちいさな まち</span><span class="lead-time"><br><span class="ic" aria-hidden="true">⏱</span> <span data-noruby>1ぴき 10〜20びょう・むりょう</span></span></small></p>
   <div id="ibasho" role="region">
     <p id="ibasho-text"><span class="ib-morning">おはよう。きょうも、ここに いて いいよ。</span><span class="ib-night">ねむれない？　ゆっくり ながめよう。</span></p>
     <div class="ibasho-actions">
@@ -961,7 +961,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <button id="ibasho-close" type="button" aria-label="とじる">×</button>
   </div>
   <div class="hud record">
-    <button id="sound" type="button" aria-pressed="false">おと：OFF</button>
+    <button id="sound" type="button" aria-pressed="false">おと：なし</button>
     <span>つれた かず <strong id="total">0</strong></span>
     <span><i id="seen-ring" class="seen-ring" aria-hidden="true"></i>ずかん <strong id="seen">0</strong> / <span id="all">30</span></span>
     <div class="level" id="level-box" role="group" aria-label="つりびと レベル"><span>つりびと レベル <strong id="level">1</strong> <small id="level-next" class="level-next"></small></span><span class="level-bar" aria-hidden="true"><i id="level-fill"></i></span></div>
@@ -1118,7 +1118,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
         <button id="send-gift" class="give" type="button" hidden>さかなを おくる</button>
       </div>
     </details>
-    <button id="easy" type="button" aria-pressed="false">らくちん：OFF</button>
+    <button id="easy" type="button" aria-pressed="false">らくちん</button>
     <button id="gaze" type="button" aria-pressed="false">ながめる</button>
     <button id="sleep" type="button">おやすみタイマー：なし</button>
     <button id="fullscreen" type="button">ぜんがめん</button>
@@ -1132,17 +1132,17 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   <p id="nosave" class="note" role="status" style="font-weight:800" hidden></p>
 
   <p class="note" id="about-note"><span class="ic" aria-hidden="true">🕐</span> <ruby>時間<rt aria-hidden="true">じかん</rt></ruby>で <ruby>出<rt aria-hidden="true">で</rt></ruby>る <ruby>魚<rt aria-hidden="true">さかな</rt></ruby>が <ruby>変<rt aria-hidden="true">か</rt></ruby>わる（<ruby>朝<rt aria-hidden="true">あさ</rt></ruby>・<ruby>昼<rt aria-hidden="true">ひる</rt></ruby>・<ruby>夕<rt aria-hidden="true">ゆう</rt></ruby>・<ruby>夜<rt aria-hidden="true">よる</rt></ruby>）<br>
-  <span class="ic" aria-hidden="true">💾</span> <ruby>記録<rt aria-hidden="true">きろく</rt></ruby>は この <ruby>端末<rt aria-hidden="true">たんまつ</rt></ruby>だけ・ログイン <ruby>不要<rt aria-hidden="true">ふよう</rt></ruby><br>
-  <span class="ic" aria-hidden="true">🎨</span> <ruby>絵<rt aria-hidden="true">え</rt></ruby>は <ruby>順番<rt aria-hidden="true">じゅんばん</rt></ruby>に <ruby>本物<rt aria-hidden="true">ほんもの</rt></ruby>に <ruby>入<rt aria-hidden="true">い</rt></ruby>れかえ<ruby>中<rt aria-hidden="true">ちゅう</rt></ruby></p>
+  <span class="ic" aria-hidden="true">💾</span> <span data-noruby>きろくは この スマホや パソコンの なかだけ。なまえも メールも いらないよ</span></p>
   <div class="hud keep">
     <button id="open-keep" type="button" style="flex:1">きろくを のこす・もどす</button>
     <a class="pill quiet" href="anshin/" style="flex:1">おうちの かたへ</a>
+    <a class="pill quiet" href="links/?from=tsuri" style="flex:1 1 100%">まるふわの いろいろ（グッズ・どうが）</a>   <!-- 10/27 参謀 総点検★1：ほんたいから いりぐち（links/）へ -->
     <button id="open-home" type="button" style="flex:1 1 100%">ホームがめんに おく</button>
   </div>
 
   <dialog id="keep" aria-labelledby="keep-title">
     <h2 id="keep-title">きろくを のこす・もどす</h2>
-    <p class="count"><ruby>記録<rt aria-hidden="true">きろく</rt></ruby>は この <ruby>端末<rt aria-hidden="true">たんまつ</rt></ruby>の <ruby>中<rt aria-hidden="true">なか</rt></ruby>だけに あるよ。<br>したの <ruby>文字<rt aria-hidden="true">もじ</rt></ruby>を どこかに <ruby>保存<rt aria-hidden="true">ほぞん</rt></ruby>して おくと、<ruby>消<rt aria-hidden="true">き</rt></ruby>えても <ruby>戻<rt aria-hidden="true">もど</rt></ruby>せるよ。</p>
+    <p class="count">きろくは この スマホや パソコンの なかに あるよ。<br>したの もじを どこかに うつして おくと、あとで そのまま つづけられるよ。</p>
     <label for="keep-code" style="font-weight:800;font-size:.9rem">きろくの もじ</label>
     <textarea id="keep-code" rows="5" spellcheck="false" autocomplete="off" style="width:100%;font:inherit;font-size:.8rem;border:2px solid #b9d1db;border-radius:14px;padding:8px;margin:4px 0 10px;word-break:break-all"></textarea>
     <div class="photo-actions">
@@ -1530,7 +1530,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (ownOk(other.own) && !ownOk(save.own)) { save.own = {c: other.own.c, a: other.own.a, ear: other.own.ear, item: other.own.item}; changed = true; }   // じぶんの こ（あれば のこす）
     if (typeof other.avatar === 'string' && !save.avatar && /^[a-z]{2,12}$/.test(other.avatar)) { save.avatar = other.avatar; changed = true; }   // じぶんの キャラ（あとで えらべば うわがき）
     if (other.modeTip === true && save.modeTip !== true) { save.modeTip = true; changed = true; }
-    if (other.hira === true && save.hira !== true && save.hira === undefined) { save.hira = true; changed = true; }   // ひらがなだけ（あとで えらべば うわがき）
+    if (typeof other.hira === 'boolean' && save.hira === undefined) { save.hira = other.hira; changed = true; }   // 10/27：はじめは ひらがな に なったので「かんじ＋ふりがな」（false）も ひきつぐ   // ひらがなだけ（あとで えらべば うわがき）
     if (other.homeTip === true && save.homeTip !== true) { save.homeTip = true; changed = true; }
     if (other.plopHint === true && save.plopHint !== true) { save.plopHint = true; changed = true; }   // さいしょの「ぽちゃん」は 1かい きり
     if (Number.isInteger(other.bookSeen) && other.bookSeen > (Number.isInteger(save.bookSeen) ? save.bookSeen : 0)) { save.bookSeen = other.bookSeen; changed = true; }
@@ -1794,7 +1794,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     new MutationObserver(syncArt).observe(scene, {attributes: true, attributeFilter: ['data-area', 'data-time']});
     syncArt(); addEventListener('load', syncArt); }
   // ─── アプリへの ごあんない（10/13・収益の導線）：釣れた 直後に、カードの 下へ ひかえめに 1行。1回の 訪問に 最大1回・すぐ とじられる・せかす ことば／数字なし・外へ ひらく まえに かくにん（href は「ひらく」を 出す まで つけない）・動きは つけない ───
-  const nudge = { shown: false, el: $('app-nudge'), url: 'https://apps.apple.com/jp/app/id6816003504?pt=129401810&ct=fishing_result&mt=8' };
+  const nudge = { shown: false, el: $('app-nudge'), url: 'https://apps.apple.com/jp/app/id6816003504' };
   function nudgePaint() {
     const n = nudge.el; if (!n) return;
     n.setAttribute('aria-label', L('アプリの ごあんない', 'About the app'));
@@ -1991,8 +1991,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const buzzOn = () => typeof save.buzz === 'boolean' ? save.buzz : !reduce();
   function buzz(pattern) { try { if (canBuzz && buzzOn()) navigator.vibrate(pattern); } catch {} }
   const natureOn = () => save.ikimono !== false;   // けしきの いきもの（tsuri-ikimono.js）。はじめは でている
-  function drawNature() { const b = $('nature'); if (b) { const on = natureOn(); b.textContent = on ? 'けしきの いきもの：ON' : 'けしきの いきもの：OFF'; b.setAttribute('aria-pressed', String(on)); } scene.dataset.ikimono = natureOn() ? 'on' : 'off'; }
-  function drawBuzz() { const b = $('buzz'); if (!b) return; const on = buzzOn(); b.textContent = on ? 'ふるえ：ON' : 'ふるえ：OFF'; b.setAttribute('aria-pressed', String(on)); }
+  function drawNature() { const b = $('nature'); if (b) { const on = natureOn(); b.textContent = on ? 'けしきの いきもの：あり' : 'けしきの いきもの：なし'; b.setAttribute('aria-pressed', String(on)); } scene.dataset.ikimono = natureOn() ? 'on' : 'off'; }
+  function drawBuzz() { const b = $('buzz'); if (!b) return; const on = buzzOn(); b.textContent = on ? 'ふるえ：あり' : 'ふるえ：なし'; b.setAttribute('aria-pressed', String(on)); }
   function assistBox() {   // 「つかいやすく する」。ひらいた／とじた は おぼえる。まえから らくちんの 人は ひらいた ままで はじめる
     const box = document.createElement('details'), head = document.createElement('summary'), now = document.createElement('span'), body = document.createElement('div');
     box.className = 'time-box assist'; box.id = 'assist'; now.id = 'assist-now'; head.append('つかいやすく する（いま：', now, '）'); body.className = 'assist-body';
@@ -2028,8 +2028,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function drawYomi() {
     const b = $('snd-yomi'); if (!b) return; const ok = yomiAvail(); b.hidden = !ok; if (!ok) { b.removeAttribute('aria-label'); return; }   // English・こえが ない とき：ボタンは かくす（よみあげの せつめいも のこさない）
-    const on = save.yomi === true; b.textContent = 'よみあげ：' + (on ? 'ON' : 'OFF'); b.setAttribute('aria-pressed', String(on));
-    b.setAttribute('aria-label', b.textContent + '。がめんを こえで よむ（この たんまつの なかだけ）。スクリーンリーダーの ひとは OFF が おすすめ');
+    const on = save.yomi === true; b.textContent = 'よみあげ：' + (on ? 'あり' : 'なし'); b.setAttribute('aria-pressed', String(on));
+    b.setAttribute('aria-label', b.textContent + '。がめんを こえで よむ（この たんまつの なかだけ）。スクリーンリーダーの ひとは「なし」が おすすめ');
   }
   if (speech) { try { speech.addEventListener('voiceschanged', yomiPick); } catch {} }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawYomi);   // English の ひょうが そろって から（はじめは EN でないと みえる）
@@ -2143,8 +2143,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const bgmWaiting = () => { try { return !!(window.TsuriBgm && TsuriBgm.on() && !TsuriBgm.state().playing); } catch { return false; } };
   const audioLocked = () => !!save.sound && (!(audio && audio.state === 'running') || bgmWaiting());   // ならして くれない（ブラウザ）か、BGM が まだ はじまって いない あいだは「ON」と ひょうじ しない   // おとは ON だが ブラウザが まだ ならして くれない（さわる まえ）
   function drawMute() { const b = $('mute-top'); if (!b) return; const on = !!save.sound, lock = audioLocked(); b.setAttribute('aria-pressed', String(on)); b.dataset.locked = String(lock);
-    b.textContent = lock ? L('🔈 タップで おとが でるよ', '🔈 Tap to hear sound') : L(on ? '🔊 おと：ON' : '🔇 おと：OFF', on ? '🔊 Sound: ON' : '🔇 Sound: OFF'); if (lock) b.setAttribute('aria-label', L('おとは ON。さわると なります', 'Sound is on. It plays after you tap.')); else b.removeAttribute('aria-label'); }   // ONと ひょうじ して ならない うそを なくす   // ボタンの えは「いまの じょうたい」（ON＝🔊・OFF＝🔇）。おすと きりかわる
-  function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：ON' : audioDecided() ? 'おと：OFF' : 'おと：OFF（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
+    b.textContent = lock ? L('🔈 タップで おとが でるよ', '🔈 Tap to hear sound') : L(on ? '🔊 おと：あり' : '🔇 おと：なし', on ? '🔊 Sound: ON' : '🔇 Sound: OFF'); if (lock) b.setAttribute('aria-label', L('おとは あり。さわると なります', 'Sound is on. It plays after you tap.')); else b.removeAttribute('aria-label'); }   // ONと ひょうじ して ならない うそを なくす   // ボタンの えは「いまの じょうたい」（ON＝🔊・OFF＝🔇）。おすと きりかわる
+  function drawSound() { drawMute(); const on = !!save.sound; $('sound').textContent = on ? 'おと：あり' : audioDecided() ? 'おと：なし' : 'おと：なし（つけるのが おすすめ）'; $('sound').setAttribute('aria-pressed', String(on)); }
   $('sound').addEventListener('click', () => { save.sound = !save.sound; save.audioSet = true; store(); try { dispatchEvent(new Event('storage')); } catch {} drawSound();   /* おへや（すいそう）など ほかの ぶひんにも「おとが かわった」と しらせる */ if (!save.sound) stopAmbient(); if (save.sound) { sleepMuted = false; startAmbient(); chord([440, 523], .09, 'sine', .035, 'ui'); say((sndOn('guide') ? L('おとを つけたよ。「ピコン」で おしてね。', 'Sound is on. Press at the “ping”.') : L('おとを つけたよ。', 'Sound is on.')) + (IOS ? L(' きこえない ときは、よこの マナー スイッチを みてね。', ' If you cannot hear it, check the silent switch on the side.') : '')); } else say(L('おとを けしたよ。', 'Sound is off.')); });
   // およぎの くせ。さかなに よって、わの うごきかたが ちがう。p は 1しゅうの なかの いま（0〜1）、かえす あたいは わの おおきさ（1〜0）
   const TARGET = .3;
@@ -2454,7 +2454,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     drawToday(); drawBadge(); drawSeatHint();
     $('seen').textContent = $('book-seen').textContent = String(seenCount()); $('seen-ring').style.setProperty('--p', Math.round(Math.min(1, seenCount() / BASE) * 100) + '%');
     const xp = save.xp || 0, lv = levelOf(xp), a = xpNeed(lv), b = xpNeed(lv + 1);
-    $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%'; { const nx = $('level-next'), m = Math.max(1, Math.ceil((b - xp) / 10)); if (nx) nx.textContent = L('つぎまで あと 約' + m + 'ひき', 'about ' + m + ' more fish'); } /* 10/16 参謀：「あと◯匹」の数字（1ぴき=10xp で換算） */
+    $('level').textContent = String(lv); $('level-fill').style.width = Math.round((xp - a) / (b - a) * 100) + '%'; { const nx = $('level-next'), m = Math.max(1, Math.ceil((b - xp) / 10)); if (nx) nx.textContent = L('つぎの レベルまで、のんびり', 'Next level: take your time');   /* 10/27 参謀 総点検17・ダメ出し：かずで せかさない */ } /* 10/16 参謀：「あと◯匹」の数字（1ぴき=10xp で換算） */
     drawMini();   // さいしょの 1ぴきまでは 出さない（かずを みせない）
   }
 
@@ -3072,8 +3072,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function drawAreas() {
     if ($('area-now')) $('area-now').textContent = areaName(save.area);
-    drawAreaNav(); $('areas').dataset.n = String(areasShown().length); syncTabs($('areas'), areasShown().map(area => ({k: area.id, text: (save.total < area.need ? '🔒' : '') + area.name, small: save.total >= area.need ? '' : 'あと ' + (area.need - save.total) + 'ひき', disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。あと ' + (area.need - save.total) + ' ひきで いけるよ', T(area.name) + '. ' + (area.need - save.total) + ' more to unlock') : '', pressed: save.area === area.id, click: () => {
-      if (save.total < area.need) { say(L('あと ' + (area.need - save.total) + 'ひきで いけるよ。', (area.need - save.total) + ' more catches to unlock this spot.')); return; }   // まだ いけない：ことばだけ
+    drawAreaNav(); $('areas').dataset.n = String(areasShown().length); syncTabs($('areas'), areasShown().map(area => ({k: area.id, text: (save.total < area.need ? '🔒' : '') + area.name, small: save.total >= area.need ? '' : L('そのうち ひらくよ', 'Opens later'),   /* 10/27 参謀 総点検17：のこりの かずは 出さない */ disabled: !(phase === 'idle' || phase === 'caught'), locked: save.total < area.need, label: save.total < area.need ? L(area.name + '。そのうち ひらくよ', T(area.name) + '. Opens later') : '', pressed: save.area === area.id, click: () => {
+      if (save.total < area.need) { say(L('いまは しずかに して いるよ。また きてね。', 'It is quiet there for now. Come back later.')); return; }   // まだ いけない：ことばだけ
       if (save.area === area.id) return;
       save.area = area.id; store(); scene.dataset.area = area.id; $('held').hidden = $('held-friend').hidden = true; callPals(); restartAmbient();
       setPhase('idle'); face('blue'); button.textContent = 'なげる'; button.dataset.hot = 'false';
@@ -3100,11 +3100,11 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   $('go-area').addEventListener('click', event => { event.stopPropagation(); switchArea(AREAS.find(a => a.id === $('go-area').dataset.area)); });
   const areaIdx = () => AREAS.findIndex(a => a.id === save.area), areaOpen = a => !!a && save.total >= a.need;
-  function lockedSay(a) { say(L('あと ' + (a.need - save.total) + 'ひき つったら いけるよ。', (a.need - save.total) + ' more catches and you can go there.')); }
+  function lockedSay(a) { say(L('いまは しずかに して いるよ。また きてね。', 'It is quiet there for now. Come back later.')); }
   const NEXT_POS = {R: [13.8, 36], H: [88.8, 36], B: [13, 37], M: [13.7, 37], S: [91, 37], T: [15.7, 37]};   // 奥の 気配の いち（景色の %）
   function drawAreaNav() {   // 気配の 入口・← →・したの ボタンの もじ
     const i = areaIdx(), nx = AREAS[i + 1], pv = AREAS[i - 1], g = $('next-go'), ep = $('edge-prev'), en = $('edge-next');
-    g.hidden = !nx; if (nx) { const pos = NEXT_POS[nx.id] || [15, 36]; g.style.left = pos[0] + '%'; g.style.top = pos[1] + '%'; g.dataset.locked = String(!areaOpen(nx)); g.setAttribute('aria-label', areaOpen(nx) ? L(nx.name + 'へ いく', 'Go to ' + T(nx.name)) : L(nx.name + '。あと ' + (nx.need - save.total) + 'ひきで いけるよ', T(nx.name) + '. ' + (nx.need - save.total) + ' more to unlock')); }
+    g.hidden = !nx; if (nx) { const pos = NEXT_POS[nx.id] || [15, 36]; g.style.left = pos[0] + '%'; g.style.top = pos[1] + '%'; g.dataset.locked = String(!areaOpen(nx)); g.setAttribute('aria-label', areaOpen(nx) ? L(nx.name + 'へ いく', 'Go to ' + T(nx.name)) : L(nx.name + '。そのうち ひらくよ', T(nx.name) + '. Opens later')); }
     ep.hidden = !areaOpen(pv); en.hidden = !areaOpen(nx);
     if (pv) ep.setAttribute('aria-label', L('まえの つりば：' + pv.name, 'Previous spot: ' + T(pv.name))); if (nx) en.setAttribute('aria-label', L('つぎの つりば：' + nx.name, 'Next spot: ' + T(nx.name)));
     $('area-open').textContent = L('つりばを かえる ▸', 'Change spot ▸'); placeNav(); clearTimeout(placeT); placeT = setTimeout(() => { try { placeNav(); } catch {} }, 900);   // キャラが いちに つく（0.7びょう）まで まって もういちど
@@ -3161,7 +3161,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   }
   function drawAreaPick() { drawShorePick();
     const box = $('areapick-list'); box.replaceChildren();
-    AREAS.forEach(a => { const b = document.createElement('button'), open = areaOpen(a); b.type = 'button'; b.setAttribute('aria-pressed', String(save.area === a.id)); if (!open) b.setAttribute('aria-disabled', 'true'); b.textContent = (open ? '' : '🔒') + L(a.name, T(a.name)) + (open ? '' : L('　あと ' + (a.need - save.total) + 'ひき', '  ' + (a.need - save.total) + ' to go'));
+    AREAS.forEach(a => { const b = document.createElement('button'), open = areaOpen(a); b.type = 'button'; b.setAttribute('aria-pressed', String(save.area === a.id)); if (!open) b.setAttribute('aria-disabled', 'true'); b.textContent = (open ? '' : '🔒') + L(a.name, T(a.name)) + (open ? '' : L('　そのうち ひらくよ', '  Opens later'));
       b.addEventListener('click', () => { if (!open) { lockedSay(a); return; } if (switchArea(a)) $('areapick').close(); }); box.append(b); });
     $('areapick-title').textContent = L('つりばを かえる', 'Change spot'); $('areapick-close').textContent = L('とじる', 'Close');
   }
@@ -3233,7 +3233,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     if (!EN()) return;
     const ic = t => '<span class="ic" aria-hidden="true">' + t + '</span> ', lead = $('lead-text'), about = $('about-note');
     if (lead) lead.innerHTML = ic('🐟') + 'No rush. No timers. Let a fish go, and nothing is lost.<br><small>' + ic('⏱') + '10–20 sec per fish · Free</small>';
-    if (about) about.innerHTML = ic('🕐') + 'Fish change with the time of day<br>' + ic('💾') + 'Saved on this device · no login<br>' + ic('🎨') + 'Art is being swapped for the real thing, one by one';
+    if (about) about.innerHTML = ic('🕐') + 'Fish change with the time of day<br>' + ic('💾') + 'Saved on this phone or computer only · no name or email needed';
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paintExplain); else paintExplain();
   function paintKbd() { const kb = $('kbd-note'); if (kb) kb.textContent = L('⌨ 1〜3 ばしょ／Space・Enter なげる・ひく／G ながめる／Esc もどる', '⌨ 1–3 seat / Space·Enter cast & reel / G gaze / Esc back'); }
@@ -3647,7 +3647,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   {   // しゃしんの まどの ボタン：がぞうを コピー／ともだちに おしえる（どちらも 自分で おした ときだけ・かってに おくらない）
     const row = $('photo-x').parentElement, copy = document.createElement('button'), invite = document.createElement('button');
     const nameBtn = document.createElement('button'); nameBtn.id = 'photo-name'; nameBtn.type = 'button'; nameBtn.className = 'pill'; nameBtn.hidden = true; nameBtn.setAttribute('aria-pressed', 'false');
-    const paintName = () => { const on = save.nameOnCard === true; nameBtn.textContent = L('バケツの なまえを のせる：' + (on ? 'ON' : 'OFF'), 'Show bucket name: ' + (on ? 'ON' : 'OFF')); nameBtn.setAttribute('aria-pressed', String(on)); nameBtn.setAttribute('aria-label', nameBtn.textContent + L('。ほんとうの なまえは のせないでね', '. Please do not use your real name')); };
+    const paintName = () => { const on = save.nameOnCard === true; nameBtn.textContent = L('バケツの なまえを のせる：' + (on ? 'あり' : 'なし'), 'Show bucket name: ' + (on ? 'ON' : 'OFF')); nameBtn.setAttribute('aria-pressed', String(on)); nameBtn.setAttribute('aria-label', nameBtn.textContent + L('。ほんとうの なまえは のせないでね', '. Please do not use your real name')); };
     paintPhotoName = paintName;
     nameBtn.addEventListener('click', async () => {
       const st = $('photo-status'); save.nameOnCard = save.nameOnCard !== true; store(); paintName();
@@ -4744,7 +4744,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const sndPrefOn = b => b.dflt ? save[b.key] !== false : save[b.key] === true;
   function drawSndPrefs() {
     const h = $('assist-snd-h'); if (h) h.textContent = L('おとの せってい', 'Sound settings');
-    SND_BTN.forEach(b => { const el = $(b.id); if (!el) return; const on = sndPrefOn(b); el.textContent = L(b.ja + '：' + (on ? 'ON' : 'OFF'), b.en + ': ' + (on ? 'ON' : 'OFF')); el.setAttribute('aria-pressed', String(on)); el.setAttribute('aria-label', el.textContent + L('。', '. ') + L(b.hint[0], b.hint[1])); });   // 見えている ことばを ふくめる（こえで「あんないの おと」と いって おせる）
+    SND_BTN.forEach(b => { const el = $(b.id); if (!el) return; const on = sndPrefOn(b); el.textContent = L(b.ja + '：' + (on ? 'あり' : 'なし'), b.en + ': ' + (on ? 'ON' : 'OFF')); el.setAttribute('aria-pressed', String(on)); el.setAttribute('aria-label', el.textContent + L('。', '. ') + L(b.hint[0], b.hint[1])); });   // 見えている ことばを ふくめる（こえで「あんないの おと」と いって おせる）
   }
   SND_BTN.forEach(b => $(b.id) && $(b.id).addEventListener('click', () => {
     save[b.key] = !sndPrefOn(b); store(); drawSndPrefs(); drawEasy();
@@ -4766,8 +4766,8 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   const osReduce = () => (window.__realMatchMedia || matchMedia.bind(window))('(prefers-reduced-motion: reduce)').matches;
   function drawCalm() {
     const b = $('calm'); if (!b) return; const os = osReduce(), on = os || save.calm === true;
-    b.textContent = L('うごきを へらす：' + (on ? 'ON' : 'OFF') + (os ? '（スマホの せってい）' : ''), 'Reduce motion: ' + (on ? 'ON' : 'OFF') + (os ? ' (phone setting)' : ''));
-    b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', L('うごきを へらす。いまは ' + (on ? 'ON' : 'OFF') + (os ? '。スマホの せっていで ONに なって いるよ' : ''), 'Reduce motion. Currently ' + (on ? 'on' : 'off') + (os ? '. Turned on by your phone settings' : '')));
+    b.textContent = L('うごきを へらす：' + (on ? 'あり' : 'なし') + (os ? '（スマホの せってい）' : ''), 'Reduce motion: ' + (on ? 'ON' : 'OFF') + (os ? ' (phone setting)' : ''));
+    b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', L('うごきを へらす。いまは ' + (on ? 'あり' : 'なし') + (os ? '。スマホの せっていで ありに なって いるよ' : ''), 'Reduce motion. Currently ' + (on ? 'on' : 'off') + (os ? '. Turned on by your phone settings' : '')));
   }
   $('calm') && $('calm').addEventListener('click', () => {
     if (osReduce()) { say(L('スマホの せっていで、うごきは へらして いるよ。', 'Motion is already reduced by your phone settings.')); return; }
@@ -4782,13 +4782,13 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   function drawLarge() {
     const b = $('large'); if (!b) return; const on = save.large === true;
     document.documentElement.dataset.large = String(on);
-    b.textContent = L('もじを おおきく：' + (on ? 'ON' : 'OFF'), 'Larger text: ' + (on ? 'ON' : 'OFF')); b.setAttribute('aria-pressed', String(on));
+    b.textContent = L('もじを おおきく：' + (on ? 'あり' : 'なし'), 'Larger text: ' + (on ? 'ON' : 'OFF')); b.setAttribute('aria-pressed', String(on));
   }
   $('large') && $('large').addEventListener('click', () => { save.large = !save.large; store(); drawLarge(); say(L(save.large ? 'もじを おおきく したよ。' : 'もじを もとの おおきさに したよ。', save.large ? 'Text is larger now.' : 'Text is back to normal size.')); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawLarge); else drawLarge();
-  // もじ：「かんじ＋ふりがな」（はじめから）／「ひらがなだけ」（幼児・低学年向け・漢字を 一切 出さない＝もとの ひらがな）。save.hira（tsuri-ruby.js が よむ）。かえたら よみこみなおす
-  function drawRuby() { const b = $('ruby'); if (!b) return; b.hidden = EN(); const hira = save.hira === true; b.textContent = L('もじ：' + (hira ? 'ひらがなだけ' : 'かんじ＋ふりがな'), 'Text: ' + (hira ? 'Hiragana only' : 'Kanji + furigana')); b.setAttribute('aria-pressed', String(hira)); }
-  $('ruby') && $('ruby').addEventListener('click', () => { save.hira = !(save.hira === true); store(); drawRuby(); try { if (window.TsuriRuby && TsuriRuby.setHira) TsuriRuby.setHira(save.hira === true); } catch {} say(L(save.hira ? 'ひらがなだけに したよ。' : 'かんじと ふりがなに もどしたよ。', save.hira ? 'Hiragana only.' : 'Kanji with furigana.')); });   // よみこみ なおさずに その場で はんえい
+  // もじ：「ひらがなだけ」（はじめから・10/27 参謀 総点検12）／「かんじ＋ふりがな」（幼児・低学年向け・漢字を 一切 出さない＝もとの ひらがな）。save.hira（tsuri-ruby.js が よむ）。かえたら よみこみなおす
+  function drawRuby() { const b = $('ruby'); if (!b) return; b.hidden = EN(); const hira = save.hira !== false; b.textContent = L('もじ：' + (hira ? 'ひらがなだけ' : 'かんじ＋ふりがな'), 'Text: ' + (hira ? 'Hiragana only' : 'Kanji + furigana')); b.setAttribute('aria-pressed', String(hira)); }
+  $('ruby') && $('ruby').addEventListener('click', () => { save.hira = !(save.hira !== false); store(); drawRuby(); try { if (window.TsuriRuby && TsuriRuby.setHira) TsuriRuby.setHira(save.hira !== false); } catch {} say(L(save.hira !== false ? 'ひらがなだけに したよ。' : 'かんじと ふりがなに もどしたよ。', save.hira ? 'Hiragana only.' : 'Kanji with furigana.')); });   // よみこみ なおさずに その場で はんえい
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', drawRuby); else drawRuby();
   { const dr = () => { const r = $('renshu-go'); if (r) r.textContent = L('つりの れんしゅうじょ ▸', 'Practice pond ▸'); }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dr); else dr(); }
   drawBuzz(); drawNature(); drawEasy();

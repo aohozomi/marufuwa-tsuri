@@ -148,7 +148,7 @@ html.pagebg-fb[data-night=true] main{background:rgba(15,28,51,.92);box-shadow:0 
   <p class="avg" id="avg"></p>
 
   <div class="row">
-    <button type="button" id="guide" aria-pressed="true">🔊 おと：ON</button>
+    <button type="button" id="guide" aria-pressed="true">🔊 おと：あり</button>
     <p class="note" id="tap-note">どこかを さわると おとが なるよ</p>
   </div>
   <details id="more">
@@ -156,7 +156,7 @@ html.pagebg-fb[data-night=true] main{background:rgba(15,28,51,.92);box-shadow:0 
     <div class="grp"><h3 id="g-swim">およぎ</h3><div class="row" id="swims" role="group" aria-labelledby="g-swim"></div></div>
     <div class="grp"><h3 id="g-quirk">くせ</h3><div class="row" id="quirks" role="group" aria-labelledby="g-quirk"></div></div>
     <div class="grp"><h3 id="g-speed">わの はやさ</h3><div class="row" id="speeds" role="group" aria-labelledby="g-speed"></div></div>
-    <div class="grp"><h3 id="g-slow">ゆったり</h3><div class="row"><button type="button" id="slow" aria-pressed="false">ゆったり：OFF</button></div>
+    <div class="grp"><h3 id="g-slow">ゆったり</h3><div class="row"><button type="button" id="slow" aria-pressed="false">ゆったり：なし</button></div>
       <p class="note" id="slow-note">「ピコン」が はやめに なって、おす まどが ひろく なるよ。</p></div>
     <p class="note" id="calm-note" hidden>「うごきを へらす」の ときは、わを だしません。まとが ひかった ときと、おとで しらせます。</p>
     <div class="grp"><h3 id="g-star">さかなの つよさ</h3><div class="row" id="stars" role="group" aria-labelledby="g-star"></div>
@@ -365,7 +365,7 @@ html.pagebg-fb[data-night=true] main{background:rgba(15,28,51,.92);box-shadow:0 
     set('reset', 'れんぞくの きろくを けす', 'Erase my records');
     set('foot', 'きろくは この たんまつの なかだけ。ほかの ひとには みえないし、じゅんいも ないよ。つりびよりの きろくは かえないよ。', 'Records stay on this device only. Nobody else sees them and there is no ranking. Your real game progress is never changed.');
     drawGuide(); set('tap-note', 'どこかを さわると おとが なるよ', 'Tap anywhere and a sound plays');
-    $('slow').textContent = T('ゆったり：', 'Extra time: ') + (S.slow ? 'ON' : 'OFF'); $('slow').setAttribute('aria-pressed', String(S.slow));
+    $('slow').textContent = (S.slow ? T('ゆったり：あり', 'Extra time: ON') : T('ゆったり：なし', 'Extra time: OFF')); $('slow').setAttribute('aria-pressed', String(S.slow));
     $('calm-note').hidden = !calm();
     drawGroups(); drawStats(); drawMeter(); drawTag();
   }
@@ -380,13 +380,13 @@ html.pagebg-fb[data-night=true] main{background:rgba(15,28,51,.92);box-shadow:0 
   // ---- つなぎ ----
   document.querySelectorAll('#levels button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.mode; document.querySelectorAll('#levels button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); newRound(); save(); say(T(LEVELS[S.mode].ja + 'で れんしゅう するよ。', 'Practicing in ' + LEVELS[S.mode].en + ' mode.')); }));
   $('hit').addEventListener('click', pull);
-  function drawGuide() { $('guide').textContent = (S.guide ? '🔊 ' : '🔇 ') + T('おと：', 'Sound: ') + (S.guide ? 'ON' : 'OFF'); $('guide').setAttribute('aria-pressed', String(S.guide)); }
+  function drawGuide() { $('guide').textContent = (S.guide ? '🔊 ' : '🔇 ') + (S.guide ? T('おと：あり', 'Sound: ON') : T('おと：なし', 'Sound: OFF')); $('guide').setAttribute('aria-pressed', String(S.guide)); }
   // 最初の タップで おとを ならす（ブラウザは 1回 さわるまで おとを だせない）。1行の ご案内は 最初の タップまで
   let tapped = false;
   const firstTap = ev => { if (tapped) return; tapped = true; const n = $('tap-note'); if (n) n.hidden = true; if (S.guide && !(ev && ev.target && ev.target.closest && ev.target.closest('#guide'))) { ac(); pikon(); } };
   document.addEventListener('pointerdown', firstTap, {capture: true}); document.addEventListener('keydown', firstTap, {capture: true});
   $('guide').addEventListener('click', () => { S.guide = !S.guide; drawGuide(); if (S.guide) { ac(); pikon(); } startGuide(); save(); say(S.guide ? T('おとの あんないを つけたよ。「ピコン」で おしてね。', 'Sound guide on. Press at the “ping”.') : T('おとの あんないを けしたよ。', 'Sound guide off.')); });
-  $('slow').addEventListener('click', () => { S.slow = !S.slow; $('slow').textContent = T('ゆったり：', 'Extra time: ') + (S.slow ? 'ON' : 'OFF'); $('slow').setAttribute('aria-pressed', String(S.slow)); startGuide(); save(); say(S.slow ? T('ゆったりに したよ。', 'Extra time is on.') : T('ゆったりを けしたよ。', 'Extra time is off.')); });
+  $('slow').addEventListener('click', () => { S.slow = !S.slow; $('slow').textContent = (S.slow ? T('ゆったり：あり', 'Extra time: ON') : T('ゆったり：なし', 'Extra time: OFF')); $('slow').setAttribute('aria-pressed', String(S.slow)); startGuide(); save(); say(S.slow ? T('ゆったりに したよ。', 'Extra time is on.') : T('ゆったりを けしたよ。', 'Extra time is off.')); });
   let resetTimer = 0;
   $('reset').addEventListener('click', () => {
     const b = $('reset');

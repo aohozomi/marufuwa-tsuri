@@ -9,6 +9,7 @@
   window.TSURI_VER = v;
   function show() {
     if (document.getElementById('tsuri-ver')) return;
+    if (!/[?&]ver=1(&|$)/.test(location.search)) { var mt = document.createElement('meta'); mt.name = 'marufuwa-ver'; mt.content = 'v' + v; (document.head || document.documentElement).appendChild(mt); return; }   // 10/27 参謀 総点検19：がめんには 出さない（?ver=1 の ときだけ 出す）
     var el = document.createElement('div');
     el.id = 'tsuri-ver'; el.textContent = 'v' + v; el.setAttribute('aria-hidden', 'true');
     el.style.cssText = 'position:fixed;right:6px;bottom:4px;font:11px/1.2 system-ui,sans-serif;color:#2f2a3d;background:rgba(255,255,255,.6);padding:2px 6px;border-radius:6px;opacity:.7;z-index:2147483000;pointer-events:none';

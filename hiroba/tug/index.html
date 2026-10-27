@@ -73,7 +73,8 @@ canvas#cv:focus-visible,button:focus-visible,summary:focus-visible,.back:focus-v
 [hidden]{display:none!important}
 /* 「どこかを さわると…」は ゆかを おさない（さいしょの タップで がめんが ずれて、おした ボタンが ぬけるのを ふせぐ） */
 .ps-row .ps-grp{position:relative}
-.ps-row .ps-hint{position:absolute;right:0;top:100%;z-index:5;white-space:nowrap;padding:2px 10px;border-radius:12px;background:var(--plate);border:2px solid var(--line);font-size:.8rem;color:var(--ink2)}
+.ps-row .ps-hint{position:absolute;right:0;top:100%;max-width:calc(100vw - 24px);z-index:5;white-space:nowrap;padding:2px 10px;border-radius:12px;background:var(--plate);border:2px solid var(--line);font-size:.8rem;color:var(--ink2)}
+@media (max-width:560px){.ps-row .ps-hint{position:static;white-space:normal}}   /* 10/27 ダメ出し：せまい 画面では ふだを うかせず ならべる（左右へ はみださない） */
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 :root[data-calm=true] *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 </style>

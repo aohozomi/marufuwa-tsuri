@@ -47,7 +47,7 @@
 
   function drawBtn() {
     if (!btn) return; const on = soundOn();
-    btn.setAttribute('aria-pressed', String(on)); btn.textContent = L(on ? '🔊 おと：ON' : '🔇 おと：OFF', on ? '🔊 Sound: ON' : '🔇 Sound: OFF');
+    btn.setAttribute('aria-pressed', String(on)); btn.textContent = L(on ? '🔊 おと：あり' : '🔇 おと：なし', on ? '🔊 Sound: ON' : '🔇 Sound: OFF');
   }
   function applyBgm() { const B = window.TsuriBgm; if (B && bgmMine) { try { B.set(soundOn()); } catch (e) {} } }
   function setMute(m) { rec.mute = m ? 1 : 0; save(); drawBtn(); applyBgm(); if (!m) mkAc(); }
@@ -65,7 +65,7 @@
   function init(o) {
     opts = o || {}; if (init.done) return api; init.done = true;
     const style = document.createElement('style');
-    style.textContent = '.ps-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.ps-grp{display:flex;align-items:center;gap:6px}.ps-btn{min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid #9bc9da;background:linear-gradient(#fff,#dff1f7);color:#14506b;font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}.ps-btn:focus-visible{outline:4px solid #286b88;outline-offset:2px}.ps-hint{padding:3px 10px;border-radius:12px;background:#fffdf7;border:2px solid #cfae7e;font-weight:800;font-size:.8rem;color:#27424e;white-space:nowrap}.ps-hint[hidden]{display:none}';
+    style.textContent = '.ps-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.ps-grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;min-width:0}.ps-btn{white-space:nowrap;min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid #9bc9da;background:linear-gradient(#fff,#dff1f7);color:#14506b;font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}.ps-btn:focus-visible{outline:4px solid #286b88;outline-offset:2px}.ps-hint{padding:3px 10px;border-radius:12px;background:#fffdf7;border:2px solid #cfae7e;font-weight:800;font-size:.8rem;color:#27424e;white-space:nowrap}.ps-hint[hidden]{display:none}';
     document.head.append(style);
     const row = document.createElement('div'), grp = document.createElement('span'); row.className = 'ps-row'; grp.className = 'ps-grp';
     hintEl = document.createElement('span'); hintEl.className = 'ps-hint'; hintEl.hidden = true; hintEl.setAttribute('aria-hidden', 'true');
@@ -76,7 +76,7 @@
     // さいしょの タップ／キーまで だけ「どこかを さわると おとが なるよ」（おとが ONの ときだけ・すぐ きえる）
     save();   // 古い mute を むしして migrated:1 に そろえる
     if (soundOn()) { hintEl.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); hintEl.hidden = false; const hide = () => { hintEl.style.visibility = 'hidden'; };   /* 10/14：hidden（display:none）だと 帯の 高さ分 中身が つまり、最初の タップが 空ぶりする。場所は のこして 透明に */ addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
-    const E = window.TsuriEn; const reg = () => { const T = window.TsuriEn; if (T && T.lang === 'en' && typeof T.add === 'function' && !reg.done) { reg.done = true; T.add({ ex: { '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', 'どこかを さわると おとが なるよ': 'Tap anywhere to hear sounds' } }); } };
+    const E = window.TsuriEn; const reg = () => { const T = window.TsuriEn; if (T && T.lang === 'en' && typeof T.add === 'function' && !reg.done) { reg.done = true; T.add({ ex: { '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', '🔊 おと：あり': '🔊 Sound: ON', '🔇 おと：なし': '🔇 Sound: OFF', 'どこかを さわると おとが なるよ': 'Tap anywhere to hear sounds' } }); } };
     reg(); addEventListener('load', reg);
     addEventListener('pointerdown', () => { if (soundOn()) mkAc(); }, { once: true }); addEventListener('keydown', () => { if (soundOn()) mkAc(); }, { once: true });
     if (opts.tap) document.addEventListener('click', e => { const el = e.target && e.target.closest && e.target.closest('button, a[href], summary, [role=button]'); if (el && el.id !== 'ps-mute') tapSound(); }, true);

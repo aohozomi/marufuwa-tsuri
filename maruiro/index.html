@@ -39,13 +39,14 @@ try {
 .room .note{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 #cv,#fl,.ctl button,.mutebtn,.fbtns button,.ctl2 button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
 .ctl button,.ctl2 button,.fbtns button,.mutebtn,.back{touch-action:manipulation}
+.mutebtn{white-space:nowrap}.mutehint[hidden]{display:none}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100vh;color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",system-ui,sans-serif;line-height:1.7;background:linear-gradient(var(--sky1),var(--sky2));padding:8px}
 :root[data-inapp=x] body{padding-bottom:84px}
 .room{max-width:560px;margin:0 auto;background:var(--wall);border:3px solid var(--wood2);border-radius:22px;padding:12px 12px 18px;box-shadow:0 8px 24px #0b2a4a33}
 .toprow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.mutegrp{display:flex;align-items:center;gap:6px}
-.mutehint{padding:3px 10px;border-radius:12px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.8rem;color:var(--ink);white-space:nowrap}
+.mutegrp{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:100%;min-width:0;margin-left:auto}
+.mutehint{padding:3px 10px;border-radius:12px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.8rem;color:var(--ink);white-space:normal}
 .mutebtn{min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation}
 .back{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid var(--btn-line);color:var(--link);font-weight:800;text-decoration:none}
 h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
@@ -78,7 +79,7 @@ h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
 .fbtns button[disabled]{opacity:1;filter:saturate(.7)}
 .ctl{display:flex;gap:8px;margin:10px 0 6px;justify-content:center}
 .ctl button,.ctl2 button{min-height:44px;min-width:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation}
-.ctl button{flex:1 1 0;max-width:160px}
+.ctl button{flex:1 1 0;max-width:160px;white-space:nowrap;padding-left:8px;padding-right:8px}
 .ctl2{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .ctl button:active,.ctl2 button:active{transform:translateY(1px)}
 button:focus-visible,a:focus-visible{outline:4px solid #286b88;outline-offset:2px}
@@ -104,7 +105,7 @@ dialog.daydlg{border:3px solid var(--wood2);border-radius:20px;padding:12px 14px
 </head>
 <body>
 <main class="room" id="room">
-  <div class="toprow"><a class="back" id="back" href="../hiroba/index.html">← ひろばへ</a><span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">どこかを さわると おとが なるよ</span><button type="button" id="mute" class="mutebtn" aria-pressed="true">🔊 おと：ON</button></span></div>
+  <div class="toprow"><a class="back" id="back" href="../hiroba/index.html">← ひろばへ</a><span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">どこかを さわると おとが なるよ</span><button type="button" id="mute" class="mutebtn" aria-pressed="true">🔊 おと：あり</button></span></div>
   <h1>まるふわ まるいろ</h1>
   <p class="lead">ふたつ くみを まわして、ならべよう。</p>
   <div class="dayrow" id="dayrow" role="group" aria-label="きょうの まるいろ と れんしゅう"><button type="button" id="b-day" aria-pressed="false">きょうの まるいろ</button><button type="button" id="b-prac" aria-pressed="true">れんしゅう</button></div>
@@ -135,7 +136,7 @@ dialog.daydlg{border:3px solid var(--wood2);border-radius:20px;padding:12px 14px
   </div>
   <p class="msg" id="msg" role="status" aria-live="polite"></p>
   <p class="note" id="app-note" style="font-size:.8rem;margin:6px 0 0">ここは ブラウザの おちもの「まるいろ」。iPhone の「まるふわまるいろ」は、まるい こを そだてる べつの ゲームだよ。</p>
-  <details class="more" id="howto"><summary>あそびかた・おうちの かたへ</summary><p class="note" id="howto-tx"></p><p class="note" id="day-note"></p><p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」と「きょうの まるいろ」の てんだけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。</p></details>
+  <details class="more" id="howto"><summary>あそびかた・おうちの かたへ</summary><p class="note" id="howto-tx"></p><p class="note" id="day-note"></p><p class="note">おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」と「きょうの まるいろ」の てんだけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから「あり」です（いちばん うえの「おと」の ボタンで ぜんぶ とまります。「うごきを へらす」の ときは はじめは「なし」）。てんめつは しません。</p></details>
 </main>
 <dialog id="quitdlg" class="daydlg" aria-labelledby="quitdlg-t">
   <h2 id="quitdlg-t">きょうの まるいろを やめる？</h2>
@@ -168,9 +169,9 @@ dialog.daydlg{border:3px solid var(--wood2);border-radius:20px;padding:12px 14px
     'いちばん おおきい まる：まだ ないよ': 'Biggest circle so far: none yet',
     'いちばん おおきい まる：': 'Biggest circle so far: ',
     '◀ ひだり': '◀ Left', 'みぎ ▶': 'Right ▶', 'おとす': 'Drop', 'ひだりへ': 'Move left', 'みぎへ': 'Move right',
-    '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', 'おと：OFF': 'Sound: OFF', 'おと：ON': 'Sound: ON', 'さいしょから': 'Start over',
+    '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', '🔊 おと：あり': '🔊 Sound: ON', '🔇 おと：なし': '🔇 Sound: OFF', 'おと：OFF': 'Sound: OFF', 'おと：ON': 'Sound: ON', 'さいしょから': 'Start over',
     'まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ': 'The Maruiro board. Move with the left and right arrow keys and drop with Space or Enter. With a finger, slide and let go to drop.',
-    'おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」と「きょうの まるいろ」の てんだけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから ON です（いちばん うえの「おとを けす」で ぜんぶ とまります。「うごきを へらす」の ときは はじめは OFF）。てんめつは しません。': 'For grown-ups: there is no time limit, no game over and no ranking. If it fills up past the red line, the topmost friend floats up to the sky (“See you!”) and play goes on. The only records are “the biggest circle so far” and the “Today’s Maruiro” score, kept on this device only (nothing is sent anywhere). Sounds are soft and under 1200 Hz, and start ON (the “Mute sound” button at the top stops everything; with “reduce motion” they start OFF). Nothing flashes.',
+    'おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」と「きょうの まるいろ」の てんだけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから「あり」です（いちばん うえの「おと」の ボタンで ぜんぶ とまります。「うごきを へらす」の ときは はじめは「なし」）。てんめつは しません。': 'For grown-ups: there is no time limit, no game over and no ranking. If it fills up past the red line, the topmost friend floats up to the sky (“See you!”) and play goes on. The only records are “the biggest circle so far” and the “Today’s Maruiro” score, kept on this device only (nothing is sent anywhere). Sounds are soft and under 1200 Hz, and start ON (the “Mute sound” button at the top stops everything; with “reduce motion” they start OFF). Nothing flashes.',
     'いっぱいに なったので、いちばん うえの こが ぷかぷか そらへ とんでいくよ。「またね」。そのまま つづけて だいじょうぶ。': 'It filled up, so the topmost friend floated up to the sky. “See you!” Keep going — it’s okay.',
     'いちばん おおきい まるが ふたつ あわさって、ふわっと きえたよ。また はじめよう。': 'Two of the biggest circles joined and floated away. Let’s begin again.',
     'おおきく なったよ！': 'It got bigger!',
@@ -365,6 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── せかい ───
   let lastDrop = null, dbgNoMerge = false, balls = [], aimX = W / 2, nextL = pickLevel(), canDrop = true, cooldown = 0, over = 0, lastMsg = '';
+  let afterL = pickLevel(), pops = [], mch = 0, mchT = -9, mchDrop = -1;   // 10/27 マスター「まるいろの ゲーム性も おもしろく」：つぎの つぎ（すみに 見せる・じゅんばんは かわらない）／てんの ふきだし／れんさ
   const stats = { drops: 0, merges: 0, melts: 0, top: 0, maxL: -1, t: 0, clears: 0, chain: 0, maxChain: 0 };
   let chainAlive = 0;
   let uid = 0;
@@ -377,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!canDrop) return false;
     if (dly.on && (dly.done || dly.left <= 0)) { say(L('きょうの おやつは ぜんぶ おとしたよ。', 'You have dropped all of today’s treats.')); return false; }
     const l = nextL; setAim(x === undefined ? aimX : x);
-    addBall(aimX, rOf(l) + 46, l, 0, 20); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; lastDrop = balls[balls.length - 1]; nextL = pickLevel(); setAim(aimX); tone(0, 'drop');
+    addBall(aimX, rOf(l) + 46, l, 0, 20); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; lastDrop = balls[balls.length - 1]; nextL = afterL; afterL = pickLevel(); setAim(aimX); tone(0, 'drop');
     if (dly.on) { dly.left--; dly.lastT = stats.t; dly.calm = 0; drawNums(); }
     lastDropT = stats.t; if (!playing && rec.play === 4) setPlaying(true);
     return true;
@@ -630,7 +632,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const a = act[i], c = act[j]; if (!mergeOn || dbgNoMerge || gone.has(a) || gone.has(c) || a.l !== c.l) continue;
       if (Math.hypot(c.x - a.x, c.y - a.y) <= a.r + c.r + .8) {
         gone.add(a); gone.add(c); stats.merges++;
-        addPts(a.l >= 6 ? DAY_TOP : DAY_PTS[a.l + 1], a.l >= 6 ? 6 : a.l + 1);
+        { const base = a.l >= 6 ? DAY_TOP : DAY_PTS[a.l + 1];
+          if (rec.play === 4) { if (stats.t - mchT < 1.1 && mchDrop === stats.drops) mch++; else mch = 1; mchT = stats.t; mchDrop = stats.drops; }   // ひとつ おとして つづけて くっつくと れんさ
+          const bonus = rec.play === 4 && mch >= 2 ? (mch - 1) * 2 : 0;   // れんさの おまけ（2れんさ +2・3れんさ +4…）
+          addPts(base + bonus, a.l >= 6 ? 6 : a.l + 1);
+          if (rec.play === 4) { const px = (a.x + c.x) / 2; let py = (a.y + c.y) / 2 - Math.max(a.r, c.r); for (let k = 0; k < 6 && pops.some(q => q.t < .8 && Math.abs(q.x - px) < 40 && Math.abs(q.y - py) < 22); k++) py -= 22;   // ちかくに ふきだしが あれば うえへ ずらす
+            pops.push({ x: px, y: py, t: 0, tx: '+' + (base + bonus), sub: mch >= 2 ? L(mch + 'れんさ', mch + ' in a row') : '' }); if (pops.length > 8) pops.shift(); if (mch >= 2) cheer(mch); } }
         if (a.l >= 6) { stats.top++; tone(6, 'merge'); say(L('いちばん おおきい まるが ふたつ あわさって、ふわっと きえたよ。また はじめよう。', 'Two of the biggest circles joined and floated away. Let’s begin again.')); }
         else { const nl = a.l + 1; born.push({ x: (a.x + c.x) / 2, y: (a.y + c.y) / 2, l: nl, vx: (a.vx + c.vx) / 2, vy: (a.vy + c.vy) / 2 }); }
       }
@@ -649,6 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
       dly.calm = balls.every(b => b.melt > 0 || Math.hypot(b.vx, b.vy) < 20) ? dly.calm + dt : 0;
       if (dly.calm > 1.2 || stats.t - dly.lastT > 8) finishDaily();
     }
+    for (const q of pops) q.t += dt; pops = pops.filter(q => q.t < 1.1);
     if (playing && !dly.on && stats.t - lastDropT > 15) setPlaying(false);   // れんしゅうで しばらく おとさない ときは メニューを もどす
     // いっぱい：あかい せんの うえで じっと して いる まるが つづく と、したの だんが ふわっと とける（ゲームオーバーは ない）
     const crowded = balls.some(b => b.melt === 0 && b.age > 1.5 && ((b.still > .4 && b.y - b.r < LINE) || b.y < b.r * .5)) || balls.length > 60;   // おしあって うえまで つまった ときも
@@ -713,11 +721,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const px = Math.min(1200, Math.ceil(cw * dpr / 120) * 120); if (px > cv.width || !draw.sized) { draw.sized = true; cv.width = px; cv.height = Math.round(px * H / W); }   // iPhone：バーの 出し入れで 高さが かわる たびに 作りなおすと 絵の メモリが たりなくなり 盤が まっしろに なる → 大きく する ときだけ 作りなおす（上限 1200）
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H); backdrop(); basket();
     if (rec.play === 3) { tsDraw(); dropperDraw(); return; }
+    if (rec.play === 4 && !(dly.on && dly.left <= 1)) {   // つぎの つぎ（みぎうえの すみ・ちいさく）
+      ctx.save(); ctx.globalAlpha = .92; ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = '#d9b88a'; ctx.lineWidth = 1.5; const bx = aimX > W - 100 || walkX > W - 100 ? 6 : W - 58; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, 6, 52, 66, 12) : ctx.rect(bx, 6, 52, 66); ctx.fill(); ctx.stroke();   // まるふわが みぎに いる ときは ひだりうえへ
+      ctx.globalAlpha = 1; ctx.fillStyle = '#5a3a2e'; ctx.font = '900 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(L('つぎ', 'Next'), bx + 26, 20); piece(ctx, bx + 26, 48, 16, afterL, 1); ctx.restore();
+    }
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
     if (canDrop && !(dly.on && dly.left <= 0)) { ctx.strokeStyle = cssv('--guide') || '#b98a5a'; ctx.globalAlpha = .35; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(aimX, rOf(nextL) * 2 + 52); ctx.lineTo(aimX, H); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; piece(ctx, aimX, rOf(nextL) + 46, rOf(nextL), nextL, 1);
       if (rec.play === 4) { const ty = rOf(nextL) * 2 + 62, tx = MOVE_ARROW[nextL]; ctx.font = '800 15px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tx).width + 14; ctx.globalAlpha = .55; ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(aimX - tw / 2, ty - 11, tw, 22, 11) : ctx.rect(aimX - tw / 2, ty - 11, tw, 22); ctx.fill(); ctx.fillStyle = '#5a3a2e'; ctx.fillText(tx, aimX, ty + 1); ctx.globalAlpha = 1; } }
     dropperDraw();
     for (const b of balls) { const m = b.melt; if (rec.play === 4 && m === 0 && b.sq >= 0 && !reduced()) { const t = b.sq, sy = 1 - .15 * b.amp * Math.exp(-10 * t) * Math.cos(2 * Math.PI * 10 * t); ctx.save(); ctx.translate(b.x, b.y + b.r); ctx.scale(1 / Math.sqrt(sy), sy); piece(ctx, 0, -b.r, b.r, b.l, 1, 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); ctx.restore(); continue; } piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); }   // もふっ
+    for (const q of pops) {   // てんの ふきだし（ふわっと うえへ・きえる）
+      const k = q.t / 1.1, y = q.y - (reduced() ? 0 : 26 * k); ctx.save(); ctx.globalAlpha = Math.max(0, 1 - k * k); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+      ctx.font = '900 18px sans-serif'; ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.strokeText(q.tx, q.x, y); ctx.fillStyle = '#c9466e'; ctx.fillText(q.tx, q.x, y);
+      if (q.sub) { ctx.font = '800 12px sans-serif'; ctx.lineWidth = 3; ctx.strokeText(q.sub, q.x, y + 16); ctx.fillStyle = '#2f6f9f'; ctx.fillText(q.sub, q.x, y + 16); }
+      ctx.restore();
+    }
   }
   const nm = l => rec.play === 4 ? (isEn() ? OY_EN[l] : OY_JA[l]) : rec.mode === 2 ? (isEn() ? FISH_EN : FISH_JA)[fishId(l)] : rec.mode === 1 ? (isEn() ? ITEMS_EN[l] : ITEMS[l]) : (isEn() ? window.MaruiroEN.names[l] : NAMES[l]);
   const bestCtx = $('best-cv').getContext('2d');
@@ -747,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'ArrowLeft') { e.preventDefault(); setAim(aimX - 6); } else if (e.key === 'ArrowRight') { e.preventDefault(); setAim(aimX + 6); }
     else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); dropBall(); }
   });
-  function drawSnd() { const b = $('mute'); b.setAttribute('aria-pressed', String(rec.snd)); b.textContent = L(rec.snd ? '🔊 おと：ON' : '🔇 おと：OFF', rec.snd ? '🔊 Sound: ON' : '🔇 Sound: OFF'); }
+  function drawSnd() { const b = $('mute'); b.setAttribute('aria-pressed', String(rec.snd)); b.textContent = L(rec.snd ? '🔊 おと：あり' : '🔇 おと：なし', rec.snd ? '🔊 Sound: ON' : '🔇 Sound: OFF'); }
   function applySound(on) {   // こうかおんと BGM を いっしょに（おとの ON/OFF を おぼえる）
     rec.snd = !!on; save(); drawSnd(); const B = window.TsuriBgm; if (B && bgmMine) { try { B.set(rec.snd); } catch (e) {} }
     if (rec.snd) { mkAc(); }
@@ -767,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ['ひだりうえの まるふわから、えらんだ いろが ひろがるよ。ぜんぶ おなじ いろに なったら ぴったり！ てかずも じかんも かぞえないよ。ばんは きょうの いろ。', 'Colors spread from the top-left Marufuwa as you pick. When everything is one color, it is a perfect fit! No move count and no timer. The board is today’s colors.'],
     ['ふたつ くみの まるい こが おちてくるよ。左右に うごかして、まわして、おいてね。同じ いろ・同じ おおきさが ふれると おおきく、よこ 1れつが そろうと おさんぽに いって「またね」。つづけて きえたら「なかよし」。ちがう いろも 3びょう ふれると なじむよ。じかんぎれも ゲームオーバーも ないよ。きょうの つみきは みんな おなじ。', 'Round pairs fall down. Move them, rotate them, and set them. Same color and size merge into a bigger one; a full row goes for a walk (“See you!”), and when more vanish in a row, it is “Best friends”. Different colors blend after 3 seconds. No time limit, no game over. Today everyone gets the same order.']
   ,
-    ['うえから おやつが おちてくるよ。ひだりみぎに うごかして、はなして ね。おなじ おやつが ふれると、ひとつ おおきく なるよ。ぷにぷにの シールだから、ぽよーんと よく はずむよ。つぎの おやつが おちても、まえの こは まだ はずんでるかも。のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。', 'Treats fall from above. Move left and right, then let go. When two of the same treat touch, they become one bigger one. They are bouncy jelly stickers, so they spring about a lot. There is no timer and no game over.']
+    ['うえから おやつが おちてくるよ。ひだりみぎに うごかして、はなして ね。おなじ おやつが ふれると、ひとつ おおきく なるよ。ぷにぷにの シールだから、ぽよーんと よく はずむよ。つぎの おやつが おちても、まえの こは まだ はずんでるかも。うえの すみに「つぎ」の おやつが みえるよ。ひとつ おとして つづけて くっつくと「れんさ」で てんが すこし ふえるよ。のんびり どうぞ。じかんぎれも ゲームオーバーも ないよ。', 'Treats fall from above. Move left and right, then let go. When two of the same treat touch, they become one bigger one. They are bouncy jelly stickers, so they spring about a lot. The next treat is shown in a top corner. If one drop makes several joins in a row, that is a chain and you get a few extra points. There is no timer and no game over.']
   ], SHORT = [['つんで、あわせよう。', 'Stack and join.'], ['3つ そろえて、きえよう。', 'Match three.'], ['いろを ひろげよう。', 'Spread the color.'], ['ふたつ くみを まわして、ならべよう。', 'Rotate pairs and set them.'], ['おやつを おとして、ぷにっと あわせよう。', 'Drop treats and join them.']], PLAYS = [['あそびかた：そだてる', 'How to play: Grow'], ['あそびかた：そろえる', 'How to play: Match'], ['あそびかた：いろひろげ', 'How to play: Spread'], ['あそびかた：つみき', 'How to play: Blocks'], ['あそびかた：おやつ', 'How to play: Treats']];
 
   const PLAY_B = [['そだてる', 'Grow'], ['そろえる', 'Match'], ['いろひろげ', 'Spread'], ['つみき', 'Blocks'], ['おやつ', 'Treats']];
@@ -782,7 +800,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const host = fl ? $('flood').querySelector('.field') : document.querySelector('main > .field'); host.style.position = 'relative'; host.prepend(cheerEl); cheerEl.hidden = true;
     if (fl) floodStart(0);
   }
-  function freshPlay() { if (!dly.on) pracPts = 0; drawDayHud(); if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
+  function freshPlay() { if (!dly.on) pracPts = 0; drawDayHud(); if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); afterL = pickLevel(); pops = []; mch = 0; canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
   const goPlay = n => leaveDaily(() => goPlayNow(n));
   const goPlayNow = n => { dly.on = false; dly.done = false; setPlaying(false); rec.play = n; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 4 ? 'あそびかたを「おやつ」に かえたよ。さいしょから。' : rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 4 ? 'Switched to Treats. Starting fresh.' : rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); };
   $('play').addEventListener('click', () => goPlay((rec.play + 1) % 5));

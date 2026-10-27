@@ -140,7 +140,7 @@
   }
 
   const toggle = document.createElement('button'); toggle.id = 'tooku-toggle'; toggle.type = 'button';
-  function draw() { scene.dataset.tooku = String(on); if (!on) stopWater(); toggle.textContent = on ? 'とおく：ON' : 'とおく：OFF'; toggle.setAttribute('aria-pressed', String(on)); if (on) build(); }
+  function draw() { scene.dataset.tooku = String(on); if (!on) stopWater(); toggle.textContent = on ? 'とおく：あり' : 'とおく：なし'; toggle.setAttribute('aria-pressed', String(on)); if (on) build(); }
   toggle.addEventListener('click', () => { on = !on; try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {} draw(); const s = document.getElementById('status'); if (s) s.textContent = on ? 'とおくから みて いるよ。ひろい みずうみで、のんびり。' : 'ちかくに もどったよ。'; });
   if (sub) { const gaze = document.getElementById('gaze'); gaze ? gaze.before(toggle) : sub.append(toggle); }
   draw();
