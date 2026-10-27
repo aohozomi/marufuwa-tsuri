@@ -180,7 +180,7 @@
     'ひらがな・カタカナ・アルファベット・すうじでかいてね。': 'Please use letters and numbers.', 'ひらがな・カタカナでかいてね。': 'Please use letters and numbers.',
     'そのなまえはつかえないよ。べつのなまえをえらんでね。': "That name can't be used. Please choose another one.",
     'もらったよ': 'Received', 'だれか': 'Someone', 'あと': 'Only ', 'ひき': ' left',
-    'てがみがとどいたよ': 'A letter has arrived', 'てがみがとどいているよ': 'A letter is waiting for you',
+    'てがみがとどいたよ': 'A letter has arrived', 'てがみがとどいているよ': 'You have a letter',
     // おくりものを うけとる 画面（index.html giftOpen／giftTake）
     'うけとる': 'Accept', 'あとで': 'Later', 'うけとったよ！ありがとう': 'Received! Thank you.', 'もううけとったよ': 'Already received',
     'うけとると、バケツの「もらったさかな」にはいるよ。': 'Once you accept, it goes into “Fish you received” in your bucket.',

@@ -3123,6 +3123,20 @@ function svgText(svgEl, cs, w, h) {   // いろの へんすう（var(--x)）を
   return new XMLSerializer().serializeToString(c).replace(/var\(--([a-z0-9-]+)\s*(?:,\s*([^)]*))?\)/gi, (m, name, fallback) => cs.getPropertyValue('--' + name).trim() || (fallback || '').trim() || 'none');
 }
 function roundPath(ctx, x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); }
+/* 10/27：キャンバスの filter が きかない ブラウザ（WebKit で 確認）でも、よるの くらさを 写す。きかない ときは brightness() の ぶんだけ くろを かさねる（saturate などは かけない） */
+let photoCanFilter = null, photoOff = null;
+function photoFilterWorks() { if (photoCanFilter !== null) return photoCanFilter; try { const c = document.createElement('canvas'); c.width = c.height = 2; const x = c.getContext('2d'); x.filter = 'brightness(.5)'; x.fillStyle = '#fff'; x.fillRect(0, 0, 2, 2); photoCanFilter = x.getImageData(0, 0, 1, 1).data[0] < 200; } catch { photoCanFilter = false; } return photoCanFilter; }
+function drawToned(ctx, img, x, y, w, h, f) {
+  f = (f || '').trim();
+  if (!f || f === 'none' || photoFilterWorks()) { if (f && f !== 'none' && 'filter' in ctx) ctx.filter = f; ctx.drawImage(img, x, y, w, h); ctx.filter = 'none'; return; }
+  let b = 1; for (const m of f.matchAll(/brightness\(\s*([\d.]+)(%?)\s*\)/g)) b *= parseFloat(m[1]) / (m[2] ? 100 : 1);
+  if (!(b < .995)) { ctx.drawImage(img, x, y, w, h); return; }
+  const t = ctx.getTransform(), sx = Math.hypot(t.a, t.b) || 1, sy = Math.hypot(t.c, t.d) || 1, cw = Math.max(1, Math.min(4096, Math.ceil(w * sx))), ch = Math.max(1, Math.min(4096, Math.ceil(h * sy)));
+  const off = photoOff || (photoOff = document.createElement('canvas')); off.width = cw; off.height = ch; const ox = off.getContext('2d');   // 1まいを つかいまわす（iPhone の キャンバスの メモリ）
+  if (!ox) { ctx.drawImage(img, x, y, w, h); return; }
+  ox.drawImage(img, 0, 0, cw, ch); ox.globalCompositeOperation = 'source-atop'; ox.fillStyle = 'rgba(0,0,0,' + Math.min(1, 1 - b).toFixed(3) + ')'; ox.fillRect(0, 0, cw, ch);
+  ctx.drawImage(off, x, y, w, h);
+}
 async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cache }。ふだんの しゃしんは 引数なし（PNG）。動画の 材料づくりでは JPEG・おびを 時間の 名前に・ぴょん／ながれぼしも 描く
   measure();
   try { await inlineSvgImages(scene); } catch {}
@@ -3141,13 +3155,14 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   ctx.save(); ctx.fillStyle = '#fff'; roundPath(ctx, PX - 8, PY - 8, PVW * S + 16, H * S + 16, 46); ctx.fill();
   roundPath(ctx, PX, PY, PVW * S, H * S, 38); ctx.clip(); ctx.translate(PX - CAMX * S, PY); ctx.scale(S, S);
   const rainy = scene.dataset.rain === 'true', dimF = css.getPropertyValue('--dim').trim() || 'brightness(1)';
-  if (hasFilter) ctx.filter = dimF + (rainy ? ' brightness(.93) saturate(.9)' : '');
+  const bgF = dimF + (rainy ? ' brightness(.93) saturate(.9)' : '');
   { const stops = [...document.querySelectorAll('#bd-sky stop')]; if (stops.length) { const g = ctx.createLinearGradient(0, 0, 0, H); stops.forEach(st => { const cs2 = getComputedStyle(st); let off = parseFloat(st.getAttribute('offset')); if (String(st.getAttribute('offset') || '').includes('%')) off /= 100; g.addColorStop(Math.max(0, Math.min(1, isFinite(off) ? off : 0)), cs2.stopColor || st.getAttribute('stop-color') || '#bfe6f9'); }); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); } }   // 10/27：ページでは ひろばの うしろの 空（#backdrop）が すけて 見えて いる → 写真にも 同じ 空を ぬる
   if (scene.dataset.art === 'on' && $('art')) { for (const im of $('art').querySelectorAll('img')) ctx.drawImage(im, 0, 0, W, H); }   // 絵の さしかえが ある 時は その 絵を 写す
-  else ctx.drawImage(await svgImg(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H);
+  else drawToned(ctx, await svgImg(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H, bgF);
   ctx.filter = 'none';
   // おひさま・おつきさま・くも
-  const orb = css.getPropertyValue('--orb').trim() || '#fff2a8', night = curTime === 'n';
+  const orb = css.getPropertyValue('--orb').trim() || '#fff2a8', night = curTime === 'n', orbEl = scene.querySelector('.orb'), orbShown = !!orbEl && parseFloat(getComputedStyle(orbEl).opacity) > 0;   /* 10/27：ページで .orb が 見えない ときは 写さない（太陽は #bg の 絵の ほうに ある・よるは 月なし＝ページと おなじ） */
+  if (orbShown) {
   ctx.save(); ctx.shadowColor = '#fff6c0'; ctx.shadowBlur = 26; const og = ctx.createRadialGradient(295, 52, 2, 300, 58, 24);
   if (night) {   // よるの 月：本物の 月齢（ひかる がわ・わりあい）
     const m = moonNowRaw(), k = Math.min(1, Math.max(0, m.illum)); og.addColorStop(0, '#fff'); og.addColorStop(.6, '#fff6cf'); og.addColorStop(1, '#f0e4b0'); ctx.shadowBlur = 8 + 18 * k;
@@ -3157,6 +3172,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
     else { ctx.strokeStyle = 'rgba(223,230,255,.6)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(300, 58, 22.5, 0, Math.PI * 2); ctx.stroke(); }
     ctx.restore();
   } else { ctx.fillStyle = orb; ctx.beginPath(); ctx.arc(300, 58, 23, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+  }
   const sceneBox = scene.getBoundingClientRect(), k = sceneBox.width / W;
   const unit = el => { const r = el.getBoundingClientRect(); return { x: (r.left - sceneBox.left) / k, y: (r.top - sceneBox.top) / k, w: r.width / k, h: r.height / k }; };
   for (const c of scene.querySelectorAll('.cloud')) { const u = unit(c); ctx.save(); ctx.globalAlpha = parseFloat(getComputedStyle(c).opacity) || .9; ctx.drawImage(await svgImg(svgText(c, css, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.restore(); }
@@ -3175,21 +3191,20 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
     if (el.classList.contains('plush')) { drawPlush(el); continue; }
     const u = unit(el);
     if (el.classList.contains('prop')) {
-      const ai = el.querySelector('img.art-prop') || (!el.querySelector('svg') ? el.querySelector('img') : null); if (ai && ai.complete && ai.naturalWidth) { /* 絵だけの 置き物（てんくうの しろ など）も 写す（10/15 参謀「しろが 写って いない」） */ if (hasFilter) ctx.filter = dimF; ctx.drawImage(ai, u.x, u.y, u.w, u.h); ctx.filter = 'none'; continue; }   // 絵に さしかえた 置き物
+      const ai = el.querySelector('img.art-prop') || (!el.querySelector('svg') ? el.querySelector('img') : null); if (ai && ai.complete && ai.naturalWidth) { /* 絵だけの 置き物（てんくうの しろ など）も 写す（10/15 参謀「しろが 写って いない」） */ const aiF = getComputedStyle(ai).filter; /* 10/27：ページと おなじ くらさ＝置き物の --tone（外灯は かけない）＋ 絵 じしんの filter（てんくうの しろの よる・ゆうがた） */ drawToned(ctx, ai, u.x, u.y, u.w, u.h, ((aiF && aiF !== 'none' ? aiF : '') + ' ' + (/^lamp/.test(el.dataset.id || '') ? '' : (getComputedStyle(el).getPropertyValue('--tone').trim() || '') + ' ' + dimF)).trim()); continue; }   // 絵に さしかえた 置き物
       if (el.dataset.id === 'inn') {
-        const im = await loadInnImageCapture(); if (hasFilter) ctx.filter = ((getComputedStyle(el).getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim();
-        ctx.drawImage(im, u.x, u.y, u.w, u.h); ctx.filter = 'none';
+        const im = await loadInnImageCapture();
+        drawToned(ctx, im, u.x, u.y, u.w, u.h, ((getComputedStyle(el).getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim());
         const sign = el.querySelector('.inn-sign-label'); if (sign) { const su = unit(sign), k = sceneBox.width / W; ctx.save(); ctx.fillStyle = '#503721'; ctx.font = `900 ${parseFloat(getComputedStyle(sign).fontSize) / k}px system-ui,"Yu Gothic UI","Hiragino Sans",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = '#f8e7bd'; ctx.shadowOffsetY = 1 / k; ctx.fillText(sign.textContent, su.x + su.w / 2, su.y + su.h / 2); ctx.restore(); }
         continue;
       }
       const svg = el.querySelector('svg'); if (!svg) continue;
       const ecs = getComputedStyle(el), lamp = /^lamp/.test(el.dataset.id || '');
-      if (hasFilter && !lamp) ctx.filter = ((ecs.getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim();
-      ctx.drawImage(await svgImg(svgText(svg, ecs, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h); ctx.filter = 'none';
+      drawToned(ctx, await svgImg(svgText(svg, ecs, u.w * K3, u.h * K3)), u.x, u.y, u.w, u.h, lamp ? '' : ((ecs.getPropertyValue('--tone').trim() || 'brightness(1)') + ' ' + dimF).trim());
     } else {
       if (getComputedStyle(el).opacity === '0') continue;
       ctx.save(); ctx.fillStyle = '#0b2a4a2e'; ctx.beginPath(); ctx.ellipse(u.x + u.w / 2, u.y + u.h * .97, u.w * .36, u.h * .06, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-      if (hasFilter) ctx.filter = dimF; ctx.drawImage(el.querySelector('img'), u.x, u.y, u.w, u.h); ctx.filter = 'none';
+      drawToned(ctx, el.querySelector('img'), u.x, u.y, u.w, u.h, dimF);
     }
   }
   if (scene.dataset.art === 'on' && $('art-front')) { for (const im of $('art-front').querySelectorAll('img')) ctx.drawImage(im, 0, 0, W, H); }   // 前景の 絵（キャラの 手前）

@@ -422,12 +422,11 @@ html[data-clip] #main-button{display:block !important;position:fixed;left:0;bott
 body.gazing .topmute{display:none}
 #today{margin:2px 0 10px;text-align:center;font-size:.85rem;line-height:1.7;font-weight:700}
 #today[hidden]{display:none}
-/* てがみ（tsuri-tegami.js）：ひさしぶりに もどった ときと よなかに、景色の すみに ✉。おさなくても いい・その日 いちどだけ・ごほうびは なし */
-#scene #tegami{position:absolute;z-index:5;left:3%;top:5%;width:max(14%,46px);min-height:46px;aspect-ratio:1/1;padding:0;font-size:clamp(1.4rem,7vw,2.1rem);line-height:1;animation:tegami-bob 2.8s ease-in-out infinite}
-#scene #tegami[hidden]{display:none}
-@keyframes tegami-bob{50%{translate:0 -3px}}
-@media(prefers-reduced-motion:reduce){#scene #tegami{animation:none}}
-body.gazing #tegami{display:none}
+/* てがみ（tsuri-tegami.js）：ひさしぶりに もどった ときと よなかに、景色の そとに ✉。おさなくても いい・その日 いちどだけ・ごほうびは なし */
+#tegami{--c1:#fff;--c2:#fffaf0;--side:#b98a4e;--ink:#5a3a00;border-color:#d9b27a;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin:6px 0;font-weight:800}   /* 10/27 天の回答：景色の そとの 1ぎょう（ゆれない・ほかと かさならない）。さいしょの 1がめんに 入るよう「なげる」の すぐ した・おしらせと わかる クリームいろ */
+#tegami .tg-ic{flex:none}
+#tegami[hidden]{display:none}
+body.gazing #tegami,body[data-phase=waiting] #tegami,body[data-phase=bite] #tegami,body[data-phase=reel] #tegami{display:none}   /* つって いる あいだは かくす（「ひろばへ いく」と おなじ） */
 #letter-from{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0 8px}
 #letter-face{width:72px;height:72px;object-fit:contain}
 #letter-name{margin:0;font-weight:800}
@@ -1043,7 +1042,6 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     <div id="light" aria-hidden="true"></div>
     <div id="rain" aria-hidden="true"></div>
     <button id="star" type="button" hidden aria-label="ながれぼしに ねがいごとを する">★</button>
-    <button id="tegami" type="button" hidden aria-label="てがみが とどいて いるよ">✉️</button>
     <template id="bucket-art"><svg viewBox="0 0 60 60" aria-hidden="true"><ellipse cx="31" cy="53" rx="24" ry="6" fill="#00000030"/><path d="M12 22 L17 50 Q30 56 43 50 L48 22Z" fill="url(#pail)"/><path d="M12 22 L17 50 Q22 53 26 53 L22 22Z" fill="#ffffff55"/><ellipse cx="30" cy="22" rx="18" ry="6.5" fill="#ffe27a" stroke="#b9891c" stroke-width="2"/><ellipse cx="30" cy="23" rx="14" ry="4.4" fill="#7fd0f2"/><path d="M12 22 Q30 -6 48 22" fill="none" stroke="#9a7a3a" stroke-width="3" stroke-linecap="round"/><defs><linearGradient id="pail" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd34d"/><stop offset="1" stop-color="#e0a61c"/></linearGradient></defs></svg></template>
     <button class="spot" type="button" data-spot="0" aria-label="ひだりの ばしょで つる"></button>
     <button class="spot" type="button" data-spot="1" aria-label="まんなかの ばしょで つる"></button>
@@ -1102,6 +1100,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   </div>
 
   <button id="area-open" type="button" class="area-open">つりばを かえる ▸</button>
+  <button id="tegami" type="button" hidden><svg class="tg-ic" viewBox="0 0 30 22" width="30" height="22" aria-hidden="true"><rect x="1.5" y="1.5" width="27" height="19" rx="3" fill="#fff" stroke="#9a6230" stroke-width="2"/><path d="M2.5 3 L15 12.5 L27.5 3" fill="none" stroke="#9a6230" stroke-width="2" stroke-linejoin="round"/><path d="M15 17.6c-2.6-1.8-4-3.1-4-4.6 0-1.1.9-1.9 1.9-1.9.9 0 1.6.5 2.1 1.2.5-.7 1.2-1.2 2.1-1.2 1 0 1.9.8 1.9 1.9 0 1.5-1.4 2.8-4 4.6z" fill="#e8543f"/></svg><span>てがみが とどいて いるよ</span></button>
   <p class="shore-label" id="shore-label"></p>
   <p class="mini-progress" id="mini-progress" hidden></p>
   <p class="push-hint" id="quiet-hint" hidden></p>
@@ -1126,7 +1125,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
   <a class="pill plaza plaza-big" id="plaza-go" href="hiroba/">ひろばへ いく</a>
   <div id="watch-row" role="group" aria-label="ながめる・おやすみ"><button type="button" id="watch-gaze" class="pill">🌙 ながめる</button><button type="button" id="watch-sleep" class="pill">⏲️ おやすみタイマー</button></div>   <!-- 10/18 参謀A-2：ねる まえに ながす 画面を トップに -->
   <script>/* 10/6（Claude）：「つりばを かえる」「水ぎわの ラベル」「おしえる 一行」を「なげる」の したへ。さいしょの 1がめんに けしきと なげる が いっしょに はいる。よみあげ・タブの じゅんばんも この じゅん（ページを ひらいた ときに 1かい だけ・あとで うごかさない） */
-  (function(){var a=document.querySelector('.actions');if(!a)return;var ref=a.nextSibling;['plaza-go','watch-row','area-open','shore-label','mini-progress','quiet-hint','seat-hint','push-hint'].forEach(function(id){var e=document.getElementById(id);if(e)a.parentNode.insertBefore(e,ref);});})();</script>
+  (function(){var a=document.querySelector('.actions');if(!a)return;var ref=a.nextSibling;['tegami','plaza-go','watch-row','area-open','shore-label','mini-progress','quiet-hint','seat-hint','push-hint'].forEach(function(id){var e=document.getElementById(id);if(e)a.parentNode.insertBefore(e,ref);});})();</script>
   <p id="status" role="status" aria-live="polite">「なげる」を おしてね。</p>
   <p id="today" class="note today" hidden></p>
   <p id="nosave" class="note" role="status" style="font-weight:800" hidden></p>
@@ -3916,7 +3915,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     hint.append(text, close); document.querySelector('.actions').after(hint);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', homeHint); else homeHint();
-  // てがみ（総司令部の 文の束 tsuri-tegami.js）：2日 いじょう あいて もどった とき「ひさしぶり」、よなか（1〜4じ）は「よなか」の てがみ。景色の すみに ✉ を 出す だけ。
+  // てがみ（総司令部の 文の束 tsuri-tegami.js）：2日 いじょう あいて もどった とき「ひさしぶり」、よなか（1〜4じ）は「よなか」の てがみ。「なげる」の したに ✉ の 1ぎょうを 出す だけ。
   // ひらくのも ひらかないのも じゆう。ひらいた ひは もう 出さない（save.tegami＝その日の かず）。ごほうびは ない・日数は 出さない・せめない
   const letterBox = $('letter'), tegami = $('tegami');
   let letterNow = null;
@@ -3938,6 +3937,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
     letterBox.showModal();
   });
   $('close-letter').addEventListener('click', () => letterBox.close());
+  letterBox.addEventListener('close', () => setTimeout(() => { const f = document.activeElement; if (tegami.hidden && (!f || f === document.body || letterBox.contains(f))) $('main-button').focus(); }));   // ✉ は きえて いるので、とじたら「なげる」へ もどる
 
   // もらった とき。かたちが ちがう ものは なにも おこさない（エラーも みせない）。ばんごうを しらない ときは、やさしく おわる。もじは ぜんぶ じぶんの ひょう（さかな・なかま・ひとこと）から
   function dropGiftParam() { try { const u = new URL(location.href); u.searchParams.delete('gift'); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch {} }   // こうしんしても ふたたび はいらない
