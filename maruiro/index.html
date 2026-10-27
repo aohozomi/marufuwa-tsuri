@@ -838,13 +838,48 @@ document.addEventListener('DOMContentLoaded', () => {
       } else ctx.drawImage(dropper, walkX - w / 2, 2 + bob, w, h);
     }
   }
+  function popTextBounds(ctx, text, font, size, stroke, dy = 0) {
+    ctx.save(); ctx.font = font; const m = ctx.measureText(text); ctx.restore();
+    const actual = ['actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent'].every(k => Number.isFinite(m[k])) && m.actualBoundingBoxLeft + m.actualBoundingBoxRight > 0 && m.actualBoundingBoxAscent + m.actualBoundingBoxDescent > 0;
+    const width = Number.isFinite(m.width) && m.width > 0 ? m.width : size * Math.max(1, String(text).length) * .65;
+    const left = actual ? m.actualBoundingBoxLeft : width / 2, right = actual ? m.actualBoundingBoxRight : width / 2;
+    const ascent = actual ? m.actualBoundingBoxAscent : size * .55, descent = actual ? m.actualBoundingBoxDescent : size * .55, edge = stroke / 2;
+    return { left: -left - edge, right: right + edge, top: dy - ascent - edge, bottom: dy + descent + edge };
+  }
+  function popBounds(ctx, text, sub) {
+    const a = popTextBounds(ctx, text, '900 18px sans-serif', 18, 4);
+    if (!sub) return a;
+    const b = popTextBounds(ctx, sub, '800 12px sans-serif', 12, 3, 16);
+    return { left: Math.min(a.left, b.left), right: Math.max(a.right, b.right), top: Math.min(a.top, b.top), bottom: Math.max(a.bottom, b.bottom) };
+  }
+  function placePop(x, y, bounds, obstacles) {   // もとの位置から いちばん ちかい あき場所を えらぶ（描画だけ）
+    const minX = 4 - bounds.left, maxX = W - 4 - bounds.right, minY = 4 - bounds.top, maxY = H - 4 - bounds.bottom, gap = 3;
+    const blocked = obstacles.map(o => ({ left: o.left - gap, right: o.right + gap, top: o.top - gap, bottom: o.bottom + gap }));
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v)), baseX = clamp(x, minX, maxX), baseY = clamp(y, minY, maxY);
+    const rectAt = (cx, cy) => ({ left: cx + bounds.left, right: cx + bounds.right, top: cy + bounds.top, bottom: cy + bounds.bottom });
+    const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    const free = (cx, cy) => cx >= minX && cx <= maxX && cy >= minY && cy <= maxY && blocked.every(o => !overlaps(rectAt(cx, cy), o));
+    if (free(baseX, baseY)) return { x: baseX, y: baseY, rect: rectAt(baseX, baseY) };
+    const xs = [baseX, minX, maxX], ys = [baseY, minY, maxY];
+    for (const o of blocked) { xs.push(o.left - bounds.right, o.right - bounds.left); ys.push(o.top - bounds.bottom, o.bottom - bounds.top); }
+    const unique = a => [...new Set(a.filter(Number.isFinite))];
+    let best = null, bestD = Infinity;
+    const consider = (cx, cy) => {
+      if (!free(cx, cy)) return;
+      const d = (cx - x) ** 2 + (cy - y) ** 2;
+      if (d < bestD - 1e-7 || Math.abs(d - bestD) <= 1e-7 && (!best || cy < best.y || cy === best.y && cx < best.x)) { best = { x: cx, y: cy, rect: rectAt(cx, cy) }; bestD = d; }
+    };
+    for (const cx of unique(xs)) for (const cy of unique(ys)) consider(cx, cy);
+    return best || { x: baseX, y: baseY, rect: rectAt(baseX, baseY) };
+  }
   function draw() {
     const dpr = Math.min(3, window.devicePixelRatio || 1), cw = cv.clientWidth || 300; drawScale = cw / W;
     const px = Math.min(1200, Math.ceil(cw * dpr / 120) * 120); if (px > cv.width || !draw.sized) { draw.sized = true; cv.width = px; cv.height = Math.round(px * H / W); }   // iPhone：バーの 出し入れで 高さが かわる たびに 作りなおすと 絵の メモリが たりなくなり 盤が まっしろに なる → 大きく する ときだけ 作りなおす（上限 1200）
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H); backdrop(); basket();
+    let popNextBox = null;
     if (rec.play === 3) { tsDraw(); dropperDraw(); return; }
     if (rec.play === 4 && !(dly.on && dly.left <= 1)) {   // つぎの つぎ（みぎうえの すみ・ちいさく）
-      ctx.save(); ctx.globalAlpha = .92; ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = '#d9b88a'; ctx.lineWidth = 1.5; const bx = aimX > W - 100 || walkX > W - 100 ? 6 : W - 58; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, 6, 52, 66, 12) : ctx.rect(bx, 6, 52, 66); ctx.fill(); ctx.stroke();   // まるふわが みぎに いる ときは ひだりうえへ
+      ctx.save(); ctx.globalAlpha = .92; ctx.fillStyle = '#fffaf0'; ctx.strokeStyle = '#d9b88a'; ctx.lineWidth = 1.5; const bx = aimX > W - 100 || walkX > W - 100 ? 6 : W - 58, edge = 1.5 / 2; popNextBox = { left: bx - edge, top: 6 - edge, right: bx + 52 + edge, bottom: 72 + edge }; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, 6, 52, 66, 12) : ctx.rect(bx, 6, 52, 66); ctx.fill(); ctx.stroke();   // まるふわが みぎに いる ときは ひだりうえへ
       ctx.globalAlpha = 1; ctx.fillStyle = '#5a3a2e'; ctx.font = '900 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(L('つぎ', 'Next'), bx + 26, 20); piece(ctx, bx + 26, 48, 16, afterL, 1); ctx.restore();
     }
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
@@ -852,11 +887,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (rec.play === 4) { const ty = rOf(nextL) * 2 + 62, tx = MOVE_ARROW[nextL]; ctx.font = '800 15px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tx).width + 14; ctx.globalAlpha = .55; ctx.fillStyle = '#fffaf0'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(aimX - tw / 2, ty - 11, tw, 22, 11) : ctx.rect(aimX - tw / 2, ty - 11, tw, 22); ctx.fill(); ctx.fillStyle = '#5a3a2e'; ctx.fillText(tx, aimX, ty + 1); ctx.globalAlpha = 1; } }
     dropperDraw();
     for (const b of balls) { const m = b.melt; if (rec.play === 4 && m === 0 && b.sq >= 0 && !reduced()) { const t = b.sq, sy = 1 - .15 * b.amp * Math.exp(-10 * t) * Math.cos(2 * Math.PI * 10 * t); ctx.save(); ctx.translate(b.x, b.y + b.r); ctx.scale(1 / Math.sqrt(sy), sy); piece(ctx, 0, -b.r, b.r, b.l, 1, 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); ctx.restore(); continue; } piece(ctx, b.x, b.y, b.r, b.l, m > 0 ? Math.max(0, 1 - m) : 1, m > 0 ? 1 - .25 * m : 1 + .2 * Math.sin(Math.min(1, b.pop) * Math.PI / 1.4 + 0.2)); }   // もふっ
+    const popObstacles = popNextBox ? [popNextBox] : [], placedPops = [];
     for (const q of pops) {   // てんの ふきだし（ふわっと うえへ・きえる）
-      const k = q.t / 1.1, y = q.y - (reduced() ? 0 : 26 * k); ctx.save(); ctx.globalAlpha = Math.max(0, 1 - k * k); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-      ctx.font = '900 18px sans-serif'; ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.strokeText(q.tx, q.x, y); ctx.fillStyle = '#c9466e'; ctx.fillText(q.tx, q.x, y);
-      if (q.sub) { ctx.font = '800 12px sans-serif'; ctx.lineWidth = 3; ctx.strokeText(q.sub, q.x, y + 16); ctx.fillStyle = '#2f6f9f'; ctx.fillText(q.sub, q.x, y + 16); }
-      ctx.restore();
+      const k = q.t / 1.1, targetY = q.y - (reduced() ? 0 : 26 * k); ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+      const bounds = popBounds(ctx, q.tx, q.sub), placed = placePop(q.x, targetY, bounds, [...popObstacles, ...placedPops]), px = placed.x, y = placed.y;
+      ctx.globalAlpha = Math.max(0, 1 - k * k); ctx.font = '900 18px sans-serif'; ctx.lineWidth = 4; ctx.strokeStyle = '#fffaf0'; ctx.strokeText(q.tx, px, y); ctx.fillStyle = '#c9466e'; ctx.fillText(q.tx, px, y);
+      if (q.sub) { ctx.font = '800 12px sans-serif'; ctx.lineWidth = 3; ctx.strokeText(q.sub, px, y + 16); ctx.fillStyle = '#2f6f9f'; ctx.fillText(q.sub, px, y + 16); }
+      ctx.restore(); placedPops.push(placed.rect);
     }
   }
   const nm = l => rec.play === 4 ? (isEn() ? OY_EN[l] : OY_JA[l]) : rec.mode === 2 ? (isEn() ? FISH_EN : FISH_JA)[fishId(l)] : rec.mode === 1 ? (isEn() ? ITEMS_EN[l] : ITEMS[l]) : (isEn() ? window.MaruiroEN.names[l] : NAMES[l]);
