@@ -186,6 +186,8 @@ body.playing .theme-kicker{display:none!important}
   box-shadow:0 4px 0 rgba(157,129,63,.38),0 7px 13px rgba(47,77,56,.15),0 1px 0 rgba(255,255,255,.9) inset
 }
 #bd:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(157,129,63,.38),0 3px 7px rgba(47,77,56,.12),0 1px 0 rgba(255,255,255,.9) inset}
+#bd[aria-disabled='true']{background:linear-gradient(155deg,#eef1e9 0%,#e2e9df 72%,#eee8d7 100%);border-color:#c7c4b4;color:#66746b;box-shadow:0 2px 0 rgba(126,122,101,.24),0 4px 9px rgba(47,77,56,.09);cursor:default}
+#bd[aria-disabled='true']:active{transform:none;box-shadow:0 2px 0 rgba(126,122,101,.24),0 4px 9px rgba(47,77,56,.09)}
 @media(max-width:640px){
   h1{font-size:clamp(1.75rem,8vw,2.125rem)}
   #score-tx{gap:8px;min-height:58px;padding:4px 12px}
@@ -306,7 +308,7 @@ body.playing .theme-kicker{display:none!important}
     'うえから まるい こを おとして、おなじ いろが ふれあうと、ひとつ おおきい まるに なるよ。じかんぎれも ゲームオーバーも ないから、のんびり どうぞ。': 'Drop round friends from the top. When two of the same color touch, they become one bigger circle. No time limit and no game over — take it easy.',
     'いちばん おおきい まる：まだ ないよ': 'Biggest circle so far: none yet',
     'いちばん おおきい まる：': 'Biggest circle so far: ',
-    '◀ ひだり': '◀ Left', 'みぎ ▶': 'Right ▶', 'おとす': 'Drop', 'ひだりへ': 'Move left', 'みぎへ': 'Move right',
+    '◀ ひだり': '◀ Left', 'みぎ ▶': 'Right ▶', 'おとす': 'Drop', 'まって': 'Wait…', 'ひだりへ': 'Move left', 'みぎへ': 'Move right',
     '🔊 おと：ON': '🔊 Sound: ON', '🔇 おと：OFF': '🔇 Sound: OFF', '🔊 おと：あり': '🔊 Sound: ON', '🔇 おと：なし': '🔇 Sound: OFF', 'おと：OFF': 'Sound: OFF', 'おと：ON': 'Sound: ON', 'さいしょから': 'Start over',
     'まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ': 'The Maruiro board. Move with the left and right arrow keys and drop with Space or Enter. With a finger, slide and let go to drop.',
     'おうちの かたへ：じかんぎれ・ゲームオーバー・じゅんいは ありません。あかい せんを こえて いっぱいに なると、いちばん うえの こが ぷかぷか そらへ とんでいって（またね）、そのまま つづけられます。きろくは「いちばん おおきく なった まる」と「きょうの まるいろ」の てんだけで、この たんまつの なかに しか のこりません（そとへは つながりません）。おとは 1200Hz いかの やわらかい おとで、はじめから「あり」です（いちばん うえの「おと」の ボタンで ぜんぶ とまります。「うごきを へらす」の ときは はじめは「なし」）。てんめつは しません。': 'For grown-ups: there is no time limit, no game over and no ranking. If it fills up past the red line, the topmost friend floats up to the sky (“See you!”) and play goes on. The only records are “the biggest circle so far” and the “Today’s Maruiro” score, kept on this device only (nothing is sent anywhere). Sounds are soft and under 1200 Hz, and start ON (the “Mute sound” button at the top stops everything; with “reduce motion” they start OFF). Nothing flashes.',
@@ -513,6 +515,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const aimMin = () => rOf(nextL) + 3, aimMax = () => W - rOf(nextL) - 3;
   const setAim = x => { aimX = Math.max(aimMin(), Math.min(aimMax(), x)); };
 
+  let dropButtonState = '';
+  function syncDropButton() {
+    const button = $('bd');
+    if (!button) return;
+    const paused = !!(window.MaruiroPolish && window.MaruiroPolish.paused);
+    const ready = !paused && rec.play !== 2 && (rec.play === 3
+      ? tsCanDrop()
+      : canDrop && !(dly.on && (dly.done || dly.left <= 0)));
+    const state = (ready ? 'ready' : 'wait') + (isEn() ? ':en' : ':ja');
+    if (state === dropButtonState) return;
+    dropButtonState = state;
+    button.textContent = ready ? L('おとす', 'Drop') : L('まって', 'Wait…');
+    button.setAttribute('aria-disabled', String(!ready));
+  };
+
   function addBall(x, y, l, vx = 0, vy = 0, pop = 0) { const b = { id: ++uid, x, y, vx, vy, l, r: rOf(l), m: rOf(l) * rOf(l), age: 0, melt: 0, pop, still: 0, sq: -1, amp: 1 }; balls.push(b); return b; }
   function dropBall(x) {
     if (!canDrop) return false;
@@ -520,6 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const l = nextL; setAim(x === undefined ? aimX : x);
     addBall(aimX, rOf(l) + 46, l, 0, 20); stats.drops++; chainAlive = 0; canDrop = false; cooldown = .45; lastDrop = balls[balls.length - 1]; nextL = afterL; afterL = pickLevel(); setAim(aimX); tone(0, 'drop');
     if (dly.on) { dly.left--; dly.lastT = stats.t; dly.calm = 0; drawNums(); }
+    syncDropButton();
     lastDropT = stats.t; if (!playing && rec.play === 4) setPlaying(true);
     return true;
   }
@@ -583,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const tsPair = () => ({ a: { c: Math.floor(rnd() * 4), s: rnd() < .15 ? 1 : 0 }, b: { c: Math.floor(rnd() * 4), s: rnd() < .15 ? 1 : 0 } });
   function tsReset() {
-    reorder(); ts.g = Array.from({ length: TR }, () => Array(TC).fill(null)); ts.cur = null; ts.ghosts = []; ts.blend = new Map(); ts.chain = 0; ts.wait = 0; ts.spawnIn = .3; ts.resolving = false; ts.next = tsPair(); ts.want = 3; cheerEl.hidden = true; ts.st = { pieces: 0, merges: 0, lines: 0, blends: 0, walks: 0, maxChain: 0, rounds: 0 };
+    reorder(); ts.g = Array.from({ length: TR }, () => Array(TC).fill(null)); ts.cur = null; ts.ghosts = []; ts.blend = new Map(); ts.chain = 0; ts.wait = 0; ts.spawnIn = .3; ts.resolving = false; ts.next = tsPair(); ts.want = 3; cheerEl.hidden = true; ts.st = { pieces: 0, merges: 0, lines: 0, blends: 0, walks: 0, maxChain: 0, rounds: 0 }; syncDropButton();
   }
   const tsEmpty = (r, c) => r >= 0 && r < TR && c >= 0 && c < TC && !ts.g[r][c];
   const tsCellsOf = p => [[p.r, p.c, p.a], [p.r + OFFS[p.o][0], p.c + OFFS[p.o][1], p.b]];
@@ -610,7 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function tsLock() {
     const p = ts.cur; if (!p) return; ts.cur = null;
     tsCellsOf(p).forEach(([r, c, x]) => { const cell = tsCell(x.c, x.s); cell.sq = 0; cell.amp = chainAmp(0); ts.g[r][c] = cell; });
-    ts.st.pieces++; ts.chain = 0; ts.resolving = true; ts.wait = .28; tone(0, 'drop');
+    ts.st.pieces++; ts.chain = 0; ts.resolving = true; ts.wait = .28; tone(0, 'drop'); syncDropButton();
   }
   const tsCanDrop = () => !!ts.cur && !ts.resolving && ts.cur.age >= .45;   // 450ms たって「かつ」まえの こが おちきる（かたづく）まで
   function tsHardDrop() { const p = ts.cur; if (!tsCanDrop()) return false; while (tsFits({ ...p, r: p.r + 1 })) p.r++; tsLock(); return true; }
@@ -673,11 +691,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ts.ghosts = ts.ghosts.filter(g => (g.t += dt) < 1.4); if (ts.edge) { ts.edge.t += dt; if (ts.edge.t > .4) ts.edge = null; }
     if (ts.resolving) { ts.wait -= dt; if (ts.wait <= 0) tsResolveStage(); return; }
     if (!ts.cur) { ts.spawnIn -= dt; if (ts.spawnIn <= 0) tsSpawn(); if (!ts.resolving && tsBlend(dt)) { ts.resolving = true; ts.wait = .3; } return; }
-    const p = ts.cur; p.age += dt; p.f += dt;
+    const p = ts.cur, wasReady = tsCanDrop(); p.age += dt; p.f += dt;
     // よこいどう：ゆびで きめた れつへ 1こずつ
     if (p.c !== ts.want && p.f >= 0 && (p.mv = (p.mv || 0) + dt) >= .07) { p.mv = 0; tsMove(ts.want > p.c ? 1 : -1); }
     if (p.f >= FALL) { p.f = 0; if (tsFits({ ...p, r: p.r + 1 })) p.r++; else tsLock(); }
     if (tsBlend(dt)) { ts.resolving = true; ts.wait = .3; }
+    if (!wasReady && tsCanDrop()) syncDropButton();
   }
   function tsDraw() {
     const cs = (cell, x, y, sx, sy) => { if (!cell) return; ringOver = EARC[cell.c]; plateOver = EARL[cell.c]; const rad = TW * (.30 + .085 * cell.s); ctx.save(); ctx.translate(x, y + rad); ctx.scale(sx || 1, sy || 1); piece(ctx, 0, -rad, rad, SIZE_L[cell.s], 1, 1); ctx.restore(); ringOver = null; plateOver = null; };
@@ -728,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function step(dt) {
     stats.t += dt;
     if (cooldown > 0) cooldown -= dt;
-    if (!canDrop && cooldown <= 0 && (!lastDrop || lastDrop.touched || lastDrop.melt > 0 || !balls.includes(lastDrop))) canDrop = true;   // 450ms たって「かつ」まえの こが ぶつかる／おちきる まで（どちらかだけでは 出さない）
+    if (!canDrop && cooldown <= 0 && (!lastDrop || lastDrop.touched || lastDrop.melt > 0 || !balls.includes(lastDrop))) { canDrop = true; syncDropButton(); }   // 450ms たって「かつ」まえの こが ぶつかる／おちきる まで（どちらかだけでは 出さない）
     const act = balls.filter(b => b.melt === 0), oyP = rec.play === 4, bn = l => reduced() ? BOUNCE[l] * .5 : BOUNCE[l];
     for (const b of balls) {
       b.age += dt; if (b.pop > 0) b.pop = Math.max(0, b.pop - dt * 2.6);
@@ -964,7 +983,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dly.on && !dly.done) { say(L('きょうの まるいろは、さいしょから やりなおせないよ。「れんしゅう」なら なんかいでも どうぞ。', 'Today’s Maruiro cannot be restarted. Practice as many times as you like.')); return; }
     if (dly.on) { startPractice(); return; }
     pracPts = 0; drawDayHud();
-    if (rec.play === 3) { tsReset(); say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); return; } buildLadder(); if (rec.play !== 2) say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); say(L('さいしょから はじめたよ。', 'Starting over.')); }
+    if (rec.play === 3) { tsReset(); say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); return; } buildLadder(); if (rec.play !== 2) say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”')); if (rec.play === 2) { floodStart(fl.n); say(L('おなじ ばんを もういちど。', 'The same board once more.')); return; } reorder(); balls = []; over = 0; nextL = pickLevel(); canDrop = true; cooldown = 0; setAim(W / 2); syncDropButton(); say(L('さいしょから はじめたよ。', 'Starting over.')); }
   const MODE_T = [['かたち：かお', 'Shapes: faces'], ['かたち：もの', 'Shapes: things'], ['かたち：さかな', 'Shapes: fish']];
   function drawMode() { const b = $('mode'); b.setAttribute('aria-pressed', String(rec.mode !== 0)); b.textContent = L(MODE_T[rec.mode][0], MODE_T[rec.mode][1]); }
   $('mode').addEventListener('click', () => { rec.mode = rec.mode === 1 ? 2 : rec.mode === 2 ? 0 : 1; if (rec.mode === 2) buildLadder(); save(); drawMode(); drawZukan(); drawBest(); say(L(rec.mode === 1 ? 'まるふわの せかいの ものに かえたよ。' : rec.mode === 2 ? 'つった さかなに かえたよ。' : 'まるい かおに かえたよ。', rec.mode === 1 ? 'Switched to things from Marufuwa’s world.' : rec.mode === 2 ? 'Switched to the fish you caught.' : 'Switched to round faces.')); });
@@ -992,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cheerEl.hidden = true;
     if (fl) floodStart(0);
   }
-  function freshPlay() { if (!dly.on) pracPts = 0; drawDayHud(); if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); afterL = pickLevel(); pops = []; mch = 0; canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
+  function freshPlay() { if (!dly.on) pracPts = 0; drawDayHud(); if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); afterL = pickLevel(); pops = []; mch = 0; canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; syncDropButton(); }
   const goPlay = n => leaveDaily(() => goPlayNow(n));
   const goPlayNow = n => { dly.on = false; dly.done = false; setPlaying(false); rec.play = n; save(); drawPlay(); drawZukan(); drawBest(); freshPlay(); say(L(rec.play === 4 ? 'あそびかたを「おやつ」に かえたよ。さいしょから。' : rec.play === 3 ? 'あそびかたを「つみき」に かえたよ。' : rec.play === 2 ? 'あそびかたを「いろひろげ」に かえたよ。' : rec.play === 1 ? 'あそびかたを「そろえる」に かえたよ。さいしょから。' : 'あそびかたを「そだてる」に かえたよ。さいしょから。', rec.play === 4 ? 'Switched to Treats. Starting fresh.' : rec.play === 3 ? 'Switched to Blocks.' : rec.play === 2 ? 'Switched to Spread.' : rec.play === 1 ? 'Switched to Match. Starting fresh.' : 'Switched to Grow. Starting fresh.')); };
   $('play').addEventListener('click', () => goPlay((rec.play + 1) % 5));
@@ -1042,7 +1061,7 @@ document.addEventListener('DOMContentLoaded', () => {
     say(L('れんしゅう：なんかいでも どうぞ（てんは のこらないよ）。じゅんばんは まいかい ちがうよ。', 'Practice: play as many times as you like (the score is not kept). The order changes every time.'));
   }
   function finishDaily(quiet) {
-    dly.done = true; const r0 = dayRec(), r = r0 || { d: dly.d || ymd(), score: dly.score, big: dly.maxL };
+    dly.done = true; syncDropButton(); const r0 = dayRec(), r = r0 || { d: dly.d || ymd(), score: dly.score, big: dly.maxL };
     if (!r0) { try { localStorage.setItem(KEY_D, JSON.stringify(r)); } catch (e) {} }
     setPlaying(false); drawDayHud(); if (!quiet) tone(0, 'perfect');
     say(L('きょうの まるいろ、おしまい！ きょうの てんは ' + r.score + '。また あした。', 'Today’s Maruiro is done! Your score: ' + r.score + '. See you tomorrow.'));
@@ -1108,6 +1127,10 @@ document.addEventListener('DOMContentLoaded', () => {
   menuB.addEventListener('click', () => setPlaying(false));
   $('day-close').addEventListener('click', () => { try { dayDlg.close(); } catch (e) { dayDlg.removeAttribute('open'); } });
   $('day-note').textContent = L('「きょうの まるいろ」は 1にち 1かい。みんな おなじ じゅんばんの おやつ ' + DAY_N + 'こを おとしきったら おしまいで、てんと カードが のこります。てんは この たんまつの なかだけで、そとへは おくりません（じゅんいも ありません）。「れんしゅう」は なんかいでも あそべます（てんは のこりません）。', 'Today’s Maruiro is once a day: the same ' + DAY_N + ' treats for everyone, and when all are dropped it ends and leaves a score and a card. The score stays on this device only and is never sent anywhere (there is no ranking). Practice can be played any number of times (the score is not kept).');
+
+  const pauseButton = $('maruiro-polish-rest'), pauseDialog = $('maruiro-polish-dialog');
+  if (pauseButton) pauseButton.addEventListener('click', syncDropButton);
+  if (pauseDialog) pauseDialog.addEventListener('close', syncDropButton);
 
   // ─── うごかす（フレームごと・ひらいて いる ときだけ）───
   let acc = 0, last = 0;
@@ -1178,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   addEventListener('resize', () => { if (rec.play === 2) floodDraw(); });
   $('next').addEventListener('click', () => { floodStart(fl.n + 1); });
-  drawPlay(); drawBest(); drawSnd(); drawMode(); drawDayHud(); setAim(W / 2); requestAnimationFrame(frame);
+  drawPlay(); drawBest(); drawSnd(); drawMode(); drawDayHud(); setAim(W / 2); syncDropButton(); requestAnimationFrame(frame);
   say(rec.play === 4 ? L('「きょうの まるいろ」は 1にち 1かい。「れんしゅう」は なんかいでも どうぞ。', '“Today’s Maruiro” is once a day. Practice as much as you like.') : rec.play === 2 ? L('きょうの いろ。すきな いろを おしてね。', 'Today\u2019s colors. Pick any color.') : L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”'));   // おやつの れんしゅうは まいかい ちがう じゅんばん なので、ひとことは「きょうの まるいろ」を はじめた ときに
   // けんさ用（ゲームの うごきには つかわない）
   window.Maruiro = {
