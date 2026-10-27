@@ -191,6 +191,19 @@ body.playing .theme-kicker{display:none!important}
   #score-tx #score-n{font-size:2.25rem}
   #bd{min-height:52px;font-size:1rem}
 }
+
+/* 10/27 414x760: 操作は常に手元へ。盤面を動かす自動スクロールは使わない。 */
+@media(max-width:999px){
+  body{padding-bottom:104px}
+  .toprow{position:sticky;top:8px;z-index:24;padding:4px;border-radius:24px;background:rgba(250,253,243,.96);box-shadow:0 3px 14px rgba(45,77,55,.08)}
+  .mutehint{display:none!important}
+  body.playing .toprow{display:flex!important;margin-bottom:8px}
+  body.playing #cv{width:min(100%,calc((100dvh - 300px)*300/420));min-width:0}
+  body:not(.playing) #cv{width:min(100%,calc(48dvh*300/420));min-width:0}
+  .ctl,.fbtns{position:fixed;left:50%;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:28;width:min(calc(100% - 24px),530px);margin:0;padding:8px;gap:6px;border:1px solid #cabb8f;border-radius:27px;background:rgba(250,253,243,.97);box-shadow:0 5px 24px rgba(47,78,55,.2)}
+  .ctl button{min-height:52px;padding-left:6px;padding-right:6px}
+  .dayhud{gap:6px}
+}
 </style>
 </head>
 <body>
@@ -1130,8 +1143,6 @@ document.addEventListener('DOMContentLoaded', () => {
 <script defer src="../tsuri-en.js"></script>
 <script defer src="../tsuri-ruby-dict.js"></script>
 <script defer src="../tsuri-ruby.js"></script>
-<script>/* 10/18 参謀19弾：スマホで ボタンが がめんの そとに でる ときは、ひらいた とき ばんと ボタンが ちょうど はいる ところまで そっと ずらす（いちどだけ） */
-addEventListener('load', () => setTimeout(() => { try { const d = document.getElementById('bd'), f = document.querySelector('main > .field'); if (!d || !f || innerWidth >= 1000 || location.hash) return; const db = d.getBoundingClientRect().bottom; if (db <= innerHeight) return; const top = f.getBoundingClientRect().top + scrollY - 8; if (scrollY > 40) return; scrollTo({top: Math.min(top, db + scrollY - innerHeight + 12), behavior: 'auto'}); } catch (e) {} }, 450));
-</script>
+
 </body>
 </html>
