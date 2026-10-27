@@ -207,6 +207,35 @@ body.playing .theme-kicker{display:none!important}
   .ctl button{min-height:52px;padding-left:6px;padding-right:6px}
   .dayhud{gap:6px}
 }
+
+/* PCプレイ時：既存の作品情報と出口を右側のプレイ欄に戻し、盤面と操作をひとまとまりにする。 */
+@media (min-width:1000px) and (min-height:560px) and (hover:hover) and (pointer:fine){
+  body.playing main.room .toprow:not([hidden]){
+    display:flex!important;align-items:center;margin:0 0 8px;padding:0 0 8px;
+    border-bottom:1px solid rgba(145,166,133,.35);flex-wrap:nowrap;gap:4px
+  }
+  body.playing main.room .toprow .back:not([hidden]){flex:0 1 auto;min-width:0;padding-left:8px;padding-right:8px;font-size:.88rem;white-space:nowrap}
+  body.playing main.room .toprow .mutegrp:not([hidden]){flex:0 0 auto;min-width:0;max-width:none;flex-wrap:nowrap;gap:4px}
+  body.playing main.room .toprow .mutehint:not([hidden]){display:none!important}
+  body.playing main.room .toprow .mutebtn:not([hidden]){flex:0 0 auto;min-width:44px;padding-left:8px;padding-right:8px;font-size:.88rem}
+  body.playing main.room .theme-kicker:not([hidden]){display:block!important;margin:0 0 2px;font-size:.68rem}
+  body.playing main.room h1:not([hidden]){display:block!important;margin:0 0 4px;font-size:clamp(2rem,3.1vw,2.625rem)}
+  body.playing main.room .lead:not([hidden]){display:block!important;margin:0 0 8px;font-size:.9rem;line-height:1.5}
+  body.playing main.room .hud:not([hidden]){
+    display:flex!important;align-items:center;gap:8px;margin:2px 0 8px;padding:8px 0;
+    border-top:1px solid rgba(145,166,133,.3);border-bottom:1px solid rgba(145,166,133,.3)
+  }
+  body.playing main.room .dayhud:not([hidden]){justify-content:space-between;gap:8px;width:100%;margin:2px 0 4px}
+  body.playing main.room #score-tx:not([hidden]){flex:1 1 auto;justify-content:center}
+  body.playing main.room #cheer-slot:not([hidden]){min-height:44px;margin:2px 0 4px}
+  body.playing main.room .ctl:not([hidden]){
+    display:flex;gap:8px;margin:8px 0 4px;padding:8px;
+    border:1px solid rgba(174,190,151,.7);border-radius:24px;
+    background:linear-gradient(145deg,rgba(255,255,249,.88),rgba(231,241,228,.76));
+    box-shadow:0 3px 10px rgba(57,83,62,.09),0 1px 0 rgba(255,255,255,.9) inset
+  }
+  body.playing main.room .ctl button:not([hidden]){min-height:56px;max-width:none}
+}
 </style>
 </head>
 <body>
