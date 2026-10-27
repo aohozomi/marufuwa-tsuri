@@ -101,11 +101,102 @@ dialog.daydlg{border:3px solid var(--wood2);border-radius:20px;padding:12px 14px
 .daytext{margin:0 0 8px;padding:8px 12px;border-radius:12px;background:var(--plate);border:2px solid var(--line);text-align:left;font:inherit;font-size:.9rem;font-weight:700;line-height:1.5;white-space:pre-wrap;word-break:break-all;-webkit-user-select:text;user-select:text}
 .dayacts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.daypill{display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:96px;padding:4px 18px;border-radius:24px;border:2px solid var(--btn-line);background:linear-gradient(var(--btn1),var(--btn2));color:var(--link);font:inherit;font-weight:800;cursor:pointer;text-decoration:none}
 .more{margin:8px 0 0}.more summary{display:inline-flex;align-items:center;min-height:44px;padding:4px 16px;border-radius:22px;border:2px solid var(--btn-line,#9bc9da);background:linear-gradient(var(--btn1,#fff),var(--btn2,#dff1f7));color:var(--link,#14506b);font-weight:800;cursor:pointer;list-style:none;-webkit-user-select:none;user-select:none}.more summary::-webkit-details-marker{display:none}.more[open] summary{margin-bottom:6px}.more summary:focus-visible{outline:4px solid #286b88;outline-offset:2px}
+:root,
+:root[data-time=a],
+:root[data-time=h],
+:root[data-time=y],
+:root[data-time=n]{
+  --ink:#315247;--ink2:#62796e;--plate:#fffef8;--wall:#f5f6ea;
+  --wood2:#b89a60;--line:#d8c78f;--btn1:#fffef9;--btn2:#e7f1e8;
+  --btn-line:#a9c9b7;--link:#315b4c;--sky1:#deefe5;--sky2:#f6f0dc;
+  --field:#f8f6ec;--fieldline:#c4ad70;--guide:#9b8040;--lineclr:#c76f62
+}
+:root[data-time=a]{--sky1:#f4e0ca;--sky2:#f8f1e1}
+:root[data-time=h]{--sky1:#dcefe5;--sky2:#f6f2df}
+:root[data-time=y]{--sky1:#eedac6;--sky2:#f4e8d5}
+:root[data-time=n]{--sky1:#253d4c;--sky2:#465b60}
+body{
+  background:radial-gradient(ellipse at 50% -10%,rgba(255,255,255,.9),transparent 42rem),linear-gradient(180deg,var(--sky1),var(--sky2))
+}
+.room{
+  position:relative;isolation:isolate;max-width:560px;
+  border:3px solid transparent;border-radius:38px 38px 30px 30px;
+  background:linear-gradient(155deg,rgba(255,255,249,.98),rgba(241,246,233,.97)) padding-box,
+    linear-gradient(135deg,#fffef7 0%,#b7d3c1 46%,#d6bd7e 100%) border-box;
+  box-shadow:0 14px 34px rgba(49,78,62,.16),0 2px 8px rgba(255,255,255,.88) inset,0 0 0 1px rgba(255,255,255,.65)
+}
+.room::before{
+  content:"";position:absolute;z-index:0;pointer-events:none;top:5px;left:13%;width:74%;height:48px;
+  border:1px solid rgba(255,255,255,.82);border-bottom:0;border-radius:50% 50% 0 0 / 100% 100% 0 0;
+  box-shadow:0 3px 8px rgba(142,174,150,.12);opacity:.74
+}
+.room>*{position:relative;z-index:1}
+h1{color:#345b4b;font-size:1.55rem;font-weight:900;letter-spacing:.025em;line-height:1.32}
+.lead{color:#61766b}
+.zukan,.watch span,.dayhud b{
+  background:linear-gradient(145deg,#fffef9,#f0f4e7);border-color:#d6c58f;
+  box-shadow:0 2px 7px rgba(69,91,70,.08),0 1px 0 rgba(255,255,255,.9) inset
+}
+.best{color:#3f5e50}
+#best-cv{filter:drop-shadow(0 2px 3px rgba(73,92,66,.14))}
+.plays button,.dayrow button,.ctl button,.ctl2 button,.mutebtn,.back,.menubtn,.more summary,.daypill{
+  border-color:var(--btn-line);background:linear-gradient(180deg,#fffefb 0%,#e8f2e9 100%);
+  color:#345b4c;box-shadow:0 2px 0 rgba(104,137,111,.16),0 1px 0 rgba(255,255,255,.95) inset
+}
+.plays button,.ctl button,.ctl2 button{min-height:48px}
+.dayrow button{min-height:52px}
+.plays button[aria-pressed=true],.dayrow button[aria-pressed=true]{
+  background:linear-gradient(145deg,#4d8068,#376b56);border-color:#376b56;color:#fff;
+  box-shadow:0 3px 8px rgba(49,91,69,.2),0 1px 0 rgba(255,255,255,.22) inset
+}
+#b-day{border-color:#d6bd7d}
+#b-day[aria-pressed=true]{
+  background:linear-gradient(145deg,#f1dda1,#ddc071);border-color:#b69b56;color:#3e5946;
+  box-shadow:0 3px 8px rgba(142,117,53,.2),0 1px 0 rgba(255,255,255,.58) inset
+}
+.dayhud b{color:#315247;border-color:#c9b578}
+.msg{color:#3c604f}
+#cv{
+  border:4px double #c2a968;border-radius:24px;
+  background:linear-gradient(145deg,#f7f5e9,#eaf1e5);
+  box-shadow:0 8px 18px rgba(47,70,53,.17),0 0 0 1px rgba(255,255,255,.7)
+}
+#fl{box-shadow:0 8px 18px rgba(47,70,53,.15)}
+button:focus-visible,a:focus-visible,#cv:focus-visible{outline:4px solid #987e42;outline-offset:3px}
+dialog.daydlg{border-color:#b89a60;border-radius:24px;box-shadow:0 18px 46px rgba(33,53,42,.25)}
+.daytext{border-color:#d6c58f;background:linear-gradient(145deg,#fffef9,#f0f4e7)}
+.theme-kicker{margin:2px 0 1px;color:#8d7741;font-size:.72rem;font-weight:900;letter-spacing:.17em;line-height:1.2}
+h1{margin:0 0 2px;color:#315746;font-size:clamp(2.125rem,3.4vw,2.625rem);font-weight:900;letter-spacing:.015em;line-height:1.08}
+body.playing .theme-kicker{display:none!important}
+#score-tx{
+  gap:10px;min-height:62px;padding:5px 16px;border:2px solid #c8b174;border-radius:24px;
+  background:linear-gradient(145deg,#fffef8,#eaf2e6);box-shadow:0 4px 10px rgba(76,92,61,.12),0 1px 0 rgba(255,255,255,.9) inset
+}
+#score-tx i{color:#526e5e;font-size:.92rem;font-style:normal;font-weight:800}
+#score-tx #score-n{
+  min-width:1.35em;padding:0;border:0;border-radius:0;background:none;box-shadow:none;
+  color:#315247;font-size:2.5rem;line-height:1;font-variant-numeric:tabular-nums
+}
+#score-tx #left-n{color:#526e5e;font-size:.88rem}
+#bd{
+  min-width:64px;min-height:58px;border:2px solid #b69b59;border-radius:20px;
+  background:linear-gradient(155deg,#e0f3e5 0%,#b8ddc5 72%,#f2dfa1 100%);
+  color:#294e3d;font-size:1.1rem;font-weight:900;
+  box-shadow:0 4px 0 rgba(157,129,63,.38),0 7px 13px rgba(47,77,56,.15),0 1px 0 rgba(255,255,255,.9) inset
+}
+#bd:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(157,129,63,.38),0 3px 7px rgba(47,77,56,.12),0 1px 0 rgba(255,255,255,.9) inset}
+@media(max-width:640px){
+  h1{font-size:clamp(1.75rem,8vw,2.125rem)}
+  #score-tx{gap:8px;min-height:58px;padding:4px 12px}
+  #score-tx #score-n{font-size:2.25rem}
+  #bd{min-height:52px;font-size:1rem}
+}
 </style>
 </head>
 <body>
 <main class="room" id="room">
   <div class="toprow"><a class="back" id="back" href="../hiroba/index.html">← ひろばへ</a><span class="mutegrp"><span class="mutehint" id="mutehint" hidden aria-hidden="true">どこかを さわると おとが なるよ</span><button type="button" id="mute" class="mutebtn" aria-pressed="true">🔊 おと：あり</button></span></div>
+  <p class="theme-kicker">ひかりの おにわ</p>
   <h1>まるふわ まるいろ</h1>
   <p class="lead">ふたつ くみを まわして、ならべよう。</p>
   <div class="dayrow" id="dayrow" role="group" aria-label="きょうの まるいろ と れんしゅう"><button type="button" id="b-day" aria-pressed="false">きょうの まるいろ</button><button type="button" id="b-prac" aria-pressed="true">れんしゅう</button></div>
@@ -155,6 +246,7 @@ dialog.daydlg{border:3px solid var(--wood2);border-radius:20px;padding:12px 14px
 // English（tsuri-en.js の E.add）
 (() => {
   const EX = {
+    'ひかりの おにわ': 'Garden of Light',
     'まるふわ まるいろ': 'Marufuwa Maruiro', 'あそびかた': 'How to play', 'まわす': 'Rotate', 'あそびかた・おうちの かたへ': 'How to play / For grown-ups', 'どこかを さわると おとが なるよ': 'Tap anywhere to hear sounds',
     '← ひろばへ': '← Back to the Plaza',
     'きょうの まるいろ': 'Today’s Maruiro', 'れんしゅう': 'Practice', 'メニュー': 'Menu', 'コピー': 'Copy', 'ほぞん': 'Save', 'おくる': 'Share', 'とじる': 'Close', 'きょうの まるいろ と れんしゅう': 'Today’s Maruiro and practice', 'れんしゅうの てん': 'Practice score', 'きょうの てん': 'Today’s score', 'きょうの まるいろを やめる？': 'Stop today’s Maruiro?', 'いまの てんで おしまいに なるよ（あしたまで あそべないよ）。': 'It will end with your current score (you can play again tomorrow).', 'やめる': 'Stop', 'つづける': 'Keep playing',
@@ -189,6 +281,7 @@ dialog.daydlg{border:3px solid var(--wood2);border-radius:20px;padding:12px 14px
   addEventListener('load', () => { reg(); title(); });
 })();
 </script>
+<script src="polish-v1.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
@@ -293,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function oyatsu(c, x, y, r, l, a, scale) {
     c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
     const im = oyImg(l);
-    if (im.complete && im.naturalWidth > 0) { const w = r * 2.3; c.drawImage(im, -w / 2, -w / 2, w, w); c.restore(); return; }
+    if (im.complete && im.naturalWidth > 0) { const w = r * 2.3; c.shadowColor = 'rgba(39,66,62,.26)'; c.shadowBlur = Math.max(4, r * .12); c.shadowOffsetY = 2; c.drawImage(im, -w / 2, -w / 2, w, w); c.restore(); return; }
     const k = r / 36, sh = SHAPES[l];
     c.scale(k, k);
     c.save(); c.shadowColor = 'rgba(70,40,90,.3)'; c.shadowBlur = 10; c.shadowOffsetY = 4;
@@ -495,7 +588,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const lower = r1 > r2 || (r1 === r2 && c1 <= c2) ? [r1, c1] : [r2, c2], other = lower[0] === r1 && lower[1] === c1 ? [r2, c2] : [r1, c1];
     if (a.s >= 2) { tsGhost(a, r1, c1); tsGhost(b, r2, c2); ts.g[r1][c1] = null; ts.g[r2][c2] = null; tone(6, 'merge'); }
     else { const m = tsCell(color, a.s + 1); m.pop = 0; m.pamp = chainAmp(ts.chain + 1); dropJump = 1; dropTint = (ts.chain + 1) % 4; ts.g[lower[0]][lower[1]] = m; ts.g[other[0]][other[1]] = null; tone(SIZE_L[m.s], 'merge'); }
-    ts.st.merges++; watchSay(SIZE_L[Math.min(2, a.s + 1)]);
+    ts.st.merges++;
+    if (window.MaruiroPolish) window.MaruiroPolish.burst((lower[1] + .5) * TW, TY0 + (lower[0] + .5) * TH, ts.chain + 1, 0);
+    watchSay(SIZE_L[Math.min(2, a.s + 1)]);
   }
   function tsLines() {   // よこ 7こ ぜんぶ そろった れつが おさんぽ
     let n = 0;
@@ -635,6 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { const base = a.l >= 6 ? DAY_TOP : DAY_PTS[a.l + 1];
           if (rec.play === 4) { if (stats.t - mchT < 1.1 && mchDrop === stats.drops) mch++; else mch = 1; mchT = stats.t; mchDrop = stats.drops; }   // ひとつ おとして つづけて くっつくと れんさ
           const bonus = rec.play === 4 && mch >= 2 ? (mch - 1) * 2 : 0;   // れんさの おまけ（2れんさ +2・3れんさ +4…）
+          if (window.MaruiroPolish) window.MaruiroPolish.burst((a.x + c.x) / 2, (a.y + c.y) / 2, rec.play === 4 ? mch : 1, rec.play === 4 ? base + bonus : 0);
           addPts(base + bonus, a.l >= 6 ? 6 : a.l + 1);
           if (rec.play === 4) { const px = (a.x + c.x) / 2; let py = (a.y + c.y) / 2 - Math.max(a.r, c.r); for (let k = 0; k < 6 && pops.some(q => q.t < .8 && Math.abs(q.x - px) < 40 && Math.abs(q.y - py) < 22); k++) py -= 22;   // ちかくに ふきだしが あれば うえへ ずらす
             pops.push({ x: px, y: py, t: 0, tx: '+' + (base + bonus), sub: mch >= 2 ? L(mch + 'れんさ', mch + ' in a row') : '' }); if (pops.length > 8) pops.shift(); if (mch >= 2) cheer(mch); } }
@@ -657,7 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (dly.calm > 1.2 || stats.t - dly.lastT > 8) finishDaily();
     }
     for (const q of pops) q.t += dt; pops = pops.filter(q => q.t < 1.1);
-    if (playing && !dly.on && stats.t - lastDropT > 15) setPlaying(false);   // れんしゅうで しばらく おとさない ときは メニューを もどす
+    // れんしゅう中も画面は保つ。メニューへは本人のボタン操作だけで戻る。
     // いっぱい：あかい せんの うえで じっと して いる まるが つづく と、したの だんが ふわっと とける（ゲームオーバーは ない）
     const crowded = balls.some(b => b.melt === 0 && b.age > 1.5 && ((b.still > .4 && b.y - b.r < LINE) || b.y < b.r * .5)) || balls.length > 60;   // おしあって うえまで つまった ときも
     over = crowded ? over + dt : Math.max(0, over - dt * 2);
@@ -674,12 +770,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── ばめん：ひろばの「かご」（時間で かわる そらと おか）・うえで まるふわが あるいて ぽとんと おとす ───
   const dropper = new Image(); dropper.src = '../img/game-blue.webp';
   let walkX = W / 2, walkT = 0;
-  // ばんの うしろの え（天）：img/bg/maruiro_field_{asa,hiru,yuu,yoru}.webp を じかんたいで しく。無ければ（よめなければ）いまの コード描き。HAZE＝駒の 輪郭が えに しずまない ための うすい 白の もや（0で なし）
+  // ばんの うしろの え（天）：img/bg/maruiro_glasshouse_{asa,hiru,yuu,yoru}_v1.webp を じかんたいで しく。無ければ（よめなければ）いまの コード描き。HAZE＝駒の 輪郭が えに しずまない ための うすい 白の もや（0で なし）
   const FIELD_KEY = { a: 'asa', h: 'hiru', y: 'yuu', n: 'yoru' }, fieldImgs = {}, HAZE = .08;
-  const fieldLoad = k => { if (!fieldImgs[k]) { const im = new Image(); im.src = '../img/bg/maruiro_field_' + k + '.webp'; fieldImgs[k] = im; } const im = fieldImgs[k]; return im.complete && im.naturalWidth > 0 ? im : null; };
+  const fieldLoad = k => { if (!fieldImgs[k]) { const im = new Image(); im.src = '../img/bg/maruiro_glasshouse_' + k + '_v1.webp'; fieldImgs[k] = im; } const im = fieldImgs[k]; return im.complete && im.naturalWidth > 0 ? im : null; };
   // 朝・昼・夕の えが 届くまでは「夜の え」を ぜんぶの じかんに つかい、うえに あかるい かさね＋空の もやを かけて ひるらしく（え が 届いたら その ファイルが そのまま つかわれる）
   let fieldFallback = false;
-  const fieldImg = () => { const k = FIELD_KEY[timeKey()] || 'hiru', own = fieldLoad(k); if (own) { fieldFallback = false; return own; } const y = k === 'yoru' ? null : fieldLoad('yoru'); fieldFallback = !!y; return y; };
+  const fieldImg = () => { fieldFallback = false; return fieldLoad(FIELD_KEY[timeKey()] || 'hiru'); };   // 4じかんの えが そろったので、ひるに よるの えを さきよみしない
   function backdrop() {
     const fi = fieldImg();
     if (fi) { const k = Math.max(W / fi.naturalWidth, H / fi.naturalHeight), w = fi.naturalWidth * k, h = fi.naturalHeight * k; ctx.drawImage(fi, (W - w) / 2, (H - h) / 2, w, h);
@@ -696,14 +792,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // 10/27 参謀 ②：ばんの なかだけ うすく あかるい そうを しいて、おやつを うきたたせる（じかんたいの せは そのまま・よるほど こく）
   function boardVeil() {
-    const t = timeKey(), a = t === 'n' ? .22 : t === 'y' ? .16 : .12, g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, 'rgba(255,253,246,' + (a * .55) + ')'); g.addColorStop(.25, 'rgba(255,253,246,' + a + ')'); g.addColorStop(1, 'rgba(255,253,246,' + a + ')');
-    ctx.fillStyle = g; ctx.fillRect(5, 0, W - 10, H - 6);
+    const t = timeKey(), a = t === 'n' ? .055 : t === 'y' ? .035 : .025, g = ctx.createLinearGradient(0, LINE * .6, 0, H);
+    g.addColorStop(0, 'rgba(255,252,239,' + (a * .35) + ')'); g.addColorStop(.22, 'rgba(255,252,239,' + a + ')'); g.addColorStop(1, 'rgba(255,252,239,' + a + ')');
+    ctx.save(); ctx.fillStyle = g; ctx.fillRect(5, 0, W - 10, H - 6);
+    ctx.strokeStyle = 'rgba(255,255,246,.38)'; ctx.lineWidth = 1; ctx.strokeRect(5.5, .5, W - 11, H - 7); ctx.restore();
   }
   function basket() {   // かごの ふち（あみめ）
-    ctx.fillStyle = '#c99a5a'; ctx.fillRect(0, 0, 5, H); ctx.fillRect(W - 5, 0, 5, H); ctx.fillRect(0, H - 6, W, 6);
-    ctx.strokeStyle = 'rgba(90,58,34,.55)'; ctx.lineWidth = 1.2; for (let y = 8; y < H; y += 10) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(5, y + 4); ctx.moveTo(W - 5, y); ctx.lineTo(W, y + 4); ctx.stroke(); }
-    for (let x = 6; x < W; x += 10) { ctx.beginPath(); ctx.moveTo(x, H - 6); ctx.lineTo(x + 4, H); ctx.stroke(); }
+    ctx.save();
+    const left = ctx.createLinearGradient(0, 0, 5, 0); left.addColorStop(0, '#8f7747'); left.addColorStop(.2, '#e8d18d'); left.addColorStop(.52, '#b99a5b'); left.addColorStop(.82, '#fff0b9'); left.addColorStop(1, '#937847');
+    const right = ctx.createLinearGradient(W - 5, 0, W, 0); right.addColorStop(0, '#937847'); right.addColorStop(.2, '#fff0b9'); right.addColorStop(.52, '#b99a5b'); right.addColorStop(.82, '#e8d18d'); right.addColorStop(1, '#8f7747');
+    const base = ctx.createLinearGradient(0, H - 6, 0, H); base.addColorStop(0, '#f5e4ae'); base.addColorStop(.35, '#c4a461'); base.addColorStop(.78, '#997c49'); base.addColorStop(1, '#ead294');
+    ctx.fillStyle = left; ctx.fillRect(0, 0, 5, H); ctx.fillStyle = right; ctx.fillRect(W - 5, 0, 5, H); ctx.fillStyle = base; ctx.fillRect(0, H - 6, W, 6);
+    ctx.strokeStyle = 'rgba(91,72,39,.48)'; ctx.lineWidth = .75;
+    for (let y = 8; y < H - 4; y += 10) { ctx.beginPath(); ctx.moveTo(.5, y); ctx.lineTo(4.5, y + 3); ctx.moveTo(W - 4.5, y); ctx.lineTo(W - .5, y + 3); ctx.stroke(); }
+    for (let x = 7; x < W - 4; x += 10) { ctx.beginPath(); ctx.moveTo(x, H - 5.5); ctx.lineTo(x + 3, H - .5); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(255,255,239,.78)'; ctx.lineWidth = .65; ctx.beginPath();
+    ctx.moveTo(1.25, .5); ctx.lineTo(1.25, H - .5); ctx.moveTo(W - 1.25, .5); ctx.lineTo(W - 1.25, H - .5);
+    ctx.moveTo(.5, H - 1.25); ctx.lineTo(W - .5, H - 1.25); ctx.stroke(); ctx.restore();
   }
   function dropperDraw() {   // まるふわが ひだり・みぎへ あるく（あたまの うえに いる）
     const mv = Math.abs(aimX - walkX) > .8; walkX += (aimX - walkX) * .25; walkT += mv ? .35 : 0;
@@ -759,6 +864,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('bd').addEventListener('click', () => { if (rec.play === 3) tsHardDrop(); else dropBall(); });
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b && ['rst', 'play', 'mode', 'next'].includes(b.id)) tone(0, 'click'); });
   document.addEventListener('keydown', e => {
+    if (window.MaruiroPolish && window.MaruiroPolish.paused) return;
     const tg = e.target; if (tg && (tg.tagName === 'BUTTON' || tg.tagName === 'A')) return;
     if (rec.play === 3) { if (e.key === 'ArrowLeft') { e.preventDefault(); tsMove(-1); } else if (e.key === 'ArrowRight') { e.preventDefault(); tsMove(1); } else if (e.key === 'ArrowUp' || e.key === 'z' || e.key === 'x') { e.preventDefault(); tsRotate(); } else if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); tsHardDrop(); } return; }
     if (rec.play === 2) { if (/^[1-4]$/.test(e.key)) { e.preventDefault(); floodPress(Number(e.key) - 1); } return; }
@@ -838,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (rec.play !== 4) { rec.play = 4; save(); drawPlay(); drawZukan(); drawBest(); }
     const d = ymd(); Object.assign(dly, { on: true, done: false, d, left: DAY_N, score: 0, maxL: -1, calm: 0, lastT: stats.t, r: mul(hashStr('maruiro-bounce:' + d)) });
     setPlaying(false); freshPlay(); drawDayHud();
-    say(L('まるふわ：「きょうの つみきは、みんな おなじだよ」 おやつは ' + DAY_N + 'こ。おとしきったら おしまい。', 'Marufuwa: “Today’s pieces are the same for everyone.” ' + DAY_N + ' treats. When all are dropped, it is over.'));
+    say(L('まるふわ：「きょうの おやつは、みんな おなじだよ」 おやつは ' + DAY_N + 'こ。おとしきったら おしまい。', 'Marufuwa: “Today’s pieces are the same for everyone.” ' + DAY_N + ' treats. When all are dropped, it is over.'));
     cv.focus({ preventScroll: true });
   }
   function startPractice() {
@@ -862,7 +968,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const c = document.createElement('canvas'); c.width = 1080; c.height = 1350; const x = c.getContext('2d');
     const F = (w, s) => w + ' ' + s + 'px "Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans JP",sans-serif';
     const tx = (s, px, y, f, col, al) => { x.font = f; x.fillStyle = col; x.textAlign = al || 'center'; x.textBaseline = 'middle'; x.fillText(s, px, y); };
-    const g = x.createLinearGradient(0, 0, 0, 1350); g.addColorStop(0, '#bfe9fb'); g.addColorStop(1, '#fff3df'); x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
+    if (!window.MaruiroPolish || !window.MaruiroPolish.drawCardBase(x, fieldImg())) {
+      const g = x.createLinearGradient(0, 0, 0, 1350); g.addColorStop(0, '#bfe9fb'); g.addColorStop(1, '#fff3df'); x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
+    }
     x.beginPath(); x.roundRect ? x.roundRect(54, 54, 972, 1242, 56) : x.rect(54, 54, 972, 1242); x.fillStyle = '#fffdf7'; x.fill(); x.lineWidth = 8; x.strokeStyle = '#cfae7e'; x.stroke();
     const [y0, m0, d0] = r.d.split('-').map(Number);
     tx(L('きょうの まるいろ', 'Today’s Maruiro'), 540, 165, F(800, 84), '#27424e');
@@ -876,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
       x.beginPath(); x.arc(454, 845, 22, 0, 7); x.fillStyle = OY_DOT[r.big]; x.fill(); x.lineWidth = 5; x.strokeStyle = '#8a6a52'; x.stroke();   // いろは 小さい まるで みせる（字は くろ）
       tx(L(OY_IRO[r.big], OY_IRO_EN[r.big]), 490, 845, F(700, 46), '#27424e', 'left');
     } else tx(L('いちばん大きくなったおやつ：まだ ないよ', 'Biggest treat: none yet'), 540, 760, F(700, 44), '#3d5a68');
-    tx(L('「きょうの つみきは みんな おなじ」', '“Today’s pieces are the same for everyone.”'), 540, 965, F(800, isEn() ? 38 : 48), '#27424e');
+    tx(L('「きょうの おやつは みんな おなじ」', '“Today’s treats are the same for everyone.”'), 540, 965, F(800, isEn() ? 38 : 48), '#27424e');
     const mf = await loadImg('../img/game-smile.webp'); if (mf) x.drawImage(mf, 100, 1000, 168, 224);
     tx(L('まるいろ（ブラウザ・無料）', 'Maruiro (browser game, free)'), 300, 1070, F(800, 46), '#27424e', 'left');   // iPhone の べつの アプリ「まるふわまるいろ」と とりちがえない なまえ
     tx('TikTok  @marufuwa_no_machi', 300, 1145, F(800, 44), '#14506b', 'left');
@@ -920,6 +1028,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function frame(now) {
     requestAnimationFrame(frame);   // さきに つぎを たのむ（とちゅうで しっぱい しても うごきが とまらない）
     try {
+      if (window.MaruiroPolish && window.MaruiroPolish.paused) { acc = 0; last = now; return; }
       if (rec.play === 2) { last = 0; return; }
       if (rec.play === 3) { if (last) { acc += Math.min(.05, (now - last) / 1000); while (acc >= 1 / 60) { tsStep(1 / 60); acc -= 1 / 60; } } last = now; draw(); return; }
       if (last) { acc += Math.min(.05, (now - last) / 1000); while (acc >= 1 / 60) { step(1 / 60); acc -= 1 / 60; } }
@@ -999,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     flood: { state: () => ({ n: fl.n, solved: fl.solved, board: fl.b.map(r => r.join('')).join('/'), today: fl.today }), press: floodPress, next: () => floodStart(fl.n + 1), restart: () => floodStart(fl.n), start: n => floodStart(n || 0) },
     setMode: v => { rec.mode = v === 2 ? 2 : v === 0 ? 0 : 1; buildLadder(); save(); drawMode(); drawZukan(); drawBest(); },
     fishIds: () => [0, 1, 2, 3, 4, 5, 6].map(fishId), order: n => { reorder(); const o = []; for (let i = 0; i < n; i++) o.push(pickLevel()); reorder(); return o.join(''); },
-    fieldBgOk: () => !!fieldImg(), fieldBgUrl: () => '../img/bg/maruiro_field_' + (fieldLoad(FIELD_KEY[timeKey()] || 'hiru') ? (FIELD_KEY[timeKey()] || 'hiru') : 'yoru') + '.webp', fieldFallback: () => fieldFallback, onigiriD: ONIGIRI_D, useOniImg, oniImgOk: () => oniImg.complete && oniImg.naturalWidth > 0, tone: (l, k) => tone(l, k),
+    fieldBgOk: () => !!fieldImg(), fieldBgUrl: () => '../img/bg/maruiro_glasshouse_' + (FIELD_KEY[timeKey()] || 'hiru') + '_v1.webp', fieldFallback: () => fieldFallback, onigiriD: ONIGIRI_D, useOniImg, oniImgOk: () => oniImg.complete && oniImg.naturalWidth > 0, tone: (l, k) => tone(l, k),
     ts: { st: () => ({ ...ts.st, chain: ts.chain, resolving: ts.resolving, cur: ts.cur ? { r: ts.cur.r, c: ts.cur.c, o: ts.cur.o, age: ts.cur.age } : null, next: !!ts.next, ghosts: ts.ghosts.length }), grid: () => ts.g.map(r => r.map(c => c ? c.c + '' + c.s : '.').join('')).join('/'),
       setGrid: rows => { ts.g = rows.map(r => r.split('').map(ch => ch === '.' ? null : tsCell(Number(ch), 0))); }, setCell: (r, c, col, sz) => { ts.g[r][c] = col === null ? null : tsCell(col, sz); },
       move: dc => tsMove(dc), rotate: () => tsRotate(), drop: () => tsHardDrop(), canDrop: () => tsCanDrop(), step: n => { for (let i = 0; i < (n || 1); i++) tsStep(1 / 60); }, spawn: () => tsSpawn(), setCur: (r, c, o, a, b) => { ts.cur = { r, c, o, a, b, age: 1, f: 0 }; ts.resolving = false; },
@@ -1018,11 +1127,9 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="../tsuri-town.js"></script>
 <script defer src="../tsuri-bgm.js"></script>
-<script defer src="../tsuri-pagebg.js"></script>
 <script defer src="../tsuri-en.js"></script>
 <script defer src="../tsuri-ruby-dict.js"></script>
 <script defer src="../tsuri-ruby.js"></script>
-<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageBg) PageBg.init('maruiro', { blur: 22 }); });</script>
 <script>/* 10/18 参謀19弾：スマホで ボタンが がめんの そとに でる ときは、ひらいた とき ばんと ボタンが ちょうど はいる ところまで そっと ずらす（いちどだけ） */
 addEventListener('load', () => setTimeout(() => { try { const d = document.getElementById('bd'), f = document.querySelector('main > .field'); if (!d || !f || innerWidth >= 1000 || location.hash) return; const db = d.getBoundingClientRect().bottom; if (db <= innerHeight) return; const top = f.getBoundingClientRect().top + scrollY - 8; if (scrollY > 40) return; scrollTo({top: Math.min(top, db + scrollY - innerHeight + 12), behavior: 'auto'}); } catch (e) {} }, 450));
 </script>
