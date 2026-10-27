@@ -710,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function draw() {
     const dpr = Math.min(3, window.devicePixelRatio || 1), cw = cv.clientWidth || 300; drawScale = cw / W;
-    const px = Math.round(cw * dpr); if (cv.width !== px) { cv.width = px; cv.height = Math.round(px * H / W); }
+    const px = Math.min(1200, Math.ceil(cw * dpr / 120) * 120); if (px > cv.width || !draw.sized) { draw.sized = true; cv.width = px; cv.height = Math.round(px * H / W); }   // iPhone：バーの 出し入れで 高さが かわる たびに 作りなおすと 絵の メモリが たりなくなり 盤が まっしろに なる → 大きく する ときだけ 作りなおす（上限 1200）
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.clearRect(0, 0, W, H); backdrop(); basket();
     if (rec.play === 3) { tsDraw(); dropperDraw(); return; }
     ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.strokeStyle = cssv('--lineclr') || '#e8543f'; ctx.globalAlpha = .75; ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
@@ -900,10 +900,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── うごかす（フレームごと・ひらいて いる ときだけ）───
   let acc = 0, last = 0;
   function frame(now) {
-    if (rec.play === 2) { last = 0; requestAnimationFrame(frame); return; }
-    if (rec.play === 3) { if (last) { acc += Math.min(.05, (now - last) / 1000); while (acc >= 1 / 60) { tsStep(1 / 60); acc -= 1 / 60; } } last = now; draw(); requestAnimationFrame(frame); return; }
-    if (last) { acc += Math.min(.05, (now - last) / 1000); while (acc >= 1 / 60) { step(1 / 60); acc -= 1 / 60; } }
-    last = now; draw(); requestAnimationFrame(frame);
+    requestAnimationFrame(frame);   // さきに つぎを たのむ（とちゅうで しっぱい しても うごきが とまらない）
+    try {
+      if (rec.play === 2) { last = 0; return; }
+      if (rec.play === 3) { if (last) { acc += Math.min(.05, (now - last) / 1000); while (acc >= 1 / 60) { tsStep(1 / 60); acc -= 1 / 60; } } last = now; draw(); return; }
+      if (last) { acc += Math.min(.05, (now - last) / 1000); while (acc >= 1 / 60) { step(1 / 60); acc -= 1 / 60; } }
+      last = now; draw();
+    } catch (e) { acc = 0; if (!frame.err) { frame.err = String(e && e.message || e); console.error('maruiro frame', e); setPlaying(false); say(L('うまく うごかなかったよ。ページを ひらきなおしてね。（' + frame.err + '）', 'Something went wrong. Please reload the page. (' + frame.err + ')')); } }   // iPhone で 盤が まっしろに なった とき、なにが おきたか みえる ように
   }
   document.addEventListener('visibilitychange', () => { last = 0; });
   // ながおしで「もじの せんたく」「コールアウト」「メニュー」が 出ない（ばん・HUD・ボタン・みだし）。ノートの 文は えらべる まま
