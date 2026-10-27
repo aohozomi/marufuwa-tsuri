@@ -411,7 +411,9 @@
         fxCtx.fill();
       }
     }
-    if (effect.chain >= 2) drawChainLabel(effect, x, y, rect, scale, quietNow ? 1 : Math.max(0, 1 - t * 1.2));
+    // 得点つきのおやつ合体は本体のふきだしが連鎖と得点を示す。文字を二重にしない。
+    // 得点ふきだしのないつみき（points=0）には、従来どおり連鎖名を添える。
+    if (effect.chain >= 2 && effect.points === 0) drawChainLabel(effect, x, y, rect, scale, quietNow ? 1 : Math.max(0, 1 - t * 1.2));
     fxCtx.restore();
   }
 
