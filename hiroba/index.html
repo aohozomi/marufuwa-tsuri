@@ -3111,12 +3111,15 @@ async function inlineSvgImages(rootEl) {
 }
 function svgText(svgEl, cs, w, h) {   // いろの へんすう（var(--x)）を その ばで 実際の いろに して、えに できる かたちに する
   const c = svgEl.cloneNode(true); c.setAttribute('width', String(Math.round(w))); c.setAttribute('height', String(Math.round(h)));
+  const svgDrop = []; { const oa = svgEl.querySelectorAll('*'), ca = c.querySelectorAll('*');   // 10/27：写真の 空が 昼でも 夜に なる → 画像いがいも、いま 見えて いない もの（よるの 空・ほし など）は 外す
+    oa.forEach((o, n) => { if (!ca[n] || o.tagName.toLowerCase() === 'image' || o.closest('defs,clipPath,mask,pattern,linearGradient,radialGradient,filter,symbol') || /^(defs|stop|clippath|mask|pattern|lineargradient|radialgradient|filter|symbol|style|title|desc)$/i.test(o.tagName)) return;   /* 部品（グラデーション・きりぬき など）は そのまま */ try { const st = getComputedStyle(o); if (st.display === 'none' || st.visibility === 'hidden' || parseFloat(st.opacity) === 0) svgDrop.push(ca[n]); else if (parseFloat(st.opacity) < 1) ca[n].setAttribute('opacity', st.opacity); } catch {} }); }
   // 中の 写真：いま 見えて いない もの（ひる／よるの 片方・かげ）は 外す（ページの CSS は 絵に ついて いかない ので、ここで 決める）。見えて いる ものは data: の 文字に する
   const origs = svgEl.querySelectorAll('image'), clones = c.querySelectorAll('image');
   clones.forEach((im, i) => {
     const o = origs[i]; if (o) { let hid = false; try { const s = getComputedStyle(o); hid = s.display === 'none' || s.visibility === 'hidden' || parseFloat(s.opacity) === 0; if (!hid && parseFloat(s.opacity) < 1) im.setAttribute('opacity', s.opacity); } catch {} if (hid) { im.remove(); return; } }
     const href = im.getAttribute('href') || im.getAttribute('xlink:href'), d = href && svgImgData.get(href); if (d) { im.setAttribute('href', d); im.removeAttribute('xlink:href'); }
   });
+  svgDrop.forEach(e => e.remove());
   return new XMLSerializer().serializeToString(c).replace(/var\(--([a-z0-9-]+)\s*(?:,\s*([^)]*))?\)/gi, (m, name, fallback) => cs.getPropertyValue('--' + name).trim() || (fallback || '').trim() || 'none');
 }
 function roundPath(ctx, x, y, w, h, r) { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); }
@@ -3139,6 +3142,7 @@ async function makePhoto(o = {}) {   // o: { type, quality, video, caption, cach
   roundPath(ctx, PX, PY, PVW * S, H * S, 38); ctx.clip(); ctx.translate(PX - CAMX * S, PY); ctx.scale(S, S);
   const rainy = scene.dataset.rain === 'true', dimF = css.getPropertyValue('--dim').trim() || 'brightness(1)';
   if (hasFilter) ctx.filter = dimF + (rainy ? ' brightness(.93) saturate(.9)' : '');
+  { const stops = [...document.querySelectorAll('#bd-sky stop')]; if (stops.length) { const g = ctx.createLinearGradient(0, 0, 0, H); stops.forEach(st => { const cs2 = getComputedStyle(st); let off = parseFloat(st.getAttribute('offset')); if (String(st.getAttribute('offset') || '').includes('%')) off /= 100; g.addColorStop(Math.max(0, Math.min(1, isFinite(off) ? off : 0)), cs2.stopColor || st.getAttribute('stop-color') || '#bfe6f9'); }); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); } }   // 10/27：ページでは ひろばの うしろの 空（#backdrop）が すけて 見えて いる → 写真にも 同じ 空を ぬる
   if (scene.dataset.art === 'on' && $('art')) { for (const im of $('art').querySelectorAll('img')) ctx.drawImage(im, 0, 0, W, H); }   // 絵の さしかえが ある 時は その 絵を 写す
   else ctx.drawImage(await svgImg(svgText($('bg'), css, W * K3, H * K3)), 0, 0, W, H);
   ctx.filter = 'none';
