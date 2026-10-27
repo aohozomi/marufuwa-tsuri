@@ -995,7 +995,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b && ['rst', 'play', 'mode', 'next'].includes(b.id)) tone(0, 'click'); });
   document.addEventListener('keydown', e => {
     if (window.MaruiroPolish && window.MaruiroPolish.paused) return;
-    const tg = e.target; if (tg && (tg.tagName === 'BUTTON' || tg.tagName === 'A')) return;
+    const tg = e.target, treatAimKey = rec.play === 4 && tg && tg.tagName === 'BUTTON' && ['bl', 'bd', 'br'].includes(tg.id) && (e.key === 'ArrowLeft' || e.key === 'ArrowRight');
+    if (tg && (tg.tagName === 'BUTTON' || tg.tagName === 'A') && !treatAimKey) return;
     if (rec.play === 3) { if (e.key === 'ArrowLeft') { e.preventDefault(); tsMove(-1); } else if (e.key === 'ArrowRight') { e.preventDefault(); tsMove(1); } else if (e.key === 'ArrowUp' || e.key === 'z' || e.key === 'x') { e.preventDefault(); tsRotate(); } else if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); tsHardDrop(); } return; }
     if (rec.play === 2) { if (/^[1-4]$/.test(e.key)) { e.preventDefault(); floodPress(Number(e.key) - 1); } return; }
     if (e.key === 'ArrowLeft') { e.preventDefault(); setAim(aimX - 6); } else if (e.key === 'ArrowRight') { e.preventDefault(); setAim(aimX + 6); }
