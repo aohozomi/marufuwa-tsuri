@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function oyatsu(c, x, y, r, l, a, scale) {
     c.save(); c.globalAlpha = a; c.translate(x, y); if (scale && scale !== 1) c.scale(scale, scale);
     const im = oyImg(l);
-    if (im.complete && im.naturalWidth > 0) { const w = r * 2.3; c.shadowColor = 'rgba(39,66,62,.26)'; c.shadowBlur = Math.max(4, r * .12); c.shadowOffsetY = 2; c.drawImage(im, -w / 2, -w / 2, w, w); c.restore(); return; }
+    if (im.complete && im.naturalWidth > 0) { const w = r * 2.3; let shadowScale = 1; if (typeof c.getTransform === 'function') { try { const m = c.getTransform(), det = m.a * m.d - m.b * m.c, k = Math.sqrt(Math.abs(det)); if (Number.isFinite(k) && k > 0) shadowScale = k; } catch (e) {} } c.shadowColor = 'rgba(39,66,62,.32)'; c.shadowBlur = Math.max(4, r * .16) * shadowScale; c.shadowOffsetY = 3 * shadowScale; c.drawImage(im, -w / 2, -w / 2, w, w); c.restore(); return; }
     const k = r / 36, sh = SHAPES[l];
     c.scale(k, k);
     c.save(); c.shadowColor = 'rgba(70,40,90,.3)'; c.shadowBlur = 10; c.shadowOffsetY = 4;
