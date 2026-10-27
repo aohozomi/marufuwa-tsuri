@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="google" content="notranslate">
 <title>ノアの へや｜まるふわの ひろば</title>
-<meta name="description" content="月城ノアの へや（じゅんびちゅう）。かべがみを もらったり、ノアの どうがを みたり できるよ。">
+<meta name="description" content="月城ノアの はいしんの へや。かべがみを もらったり、ノアの どうがを みたり できるよ。">
 <meta name="theme-color" content="#0f1c33">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ノアの へや｜まるふわの ひろば">
@@ -29,10 +29,14 @@ main{max-width:720px;margin:0 auto;padding:10px 14px 40px}
 .back{display:inline-flex;align-items:center;min-height:44px;padding:4px 14px;border-radius:22px;background:linear-gradient(var(--btn1),var(--btn2));border:2px solid #fff;box-shadow:0 3px 0 var(--side);color:var(--bink);font-weight:800;text-decoration:none}
 h1{margin:4px 0 0;font-size:1.5rem;line-height:1.4}
 .lead{margin:0 0 10px;color:var(--soft);font-size:.95rem}
-/* へや：天の へやの 絵が とどくまでは、よぞらに ノアが たつ だけ（つくりものの 机や モニターは おかない）。うごきは なし */
-.room{position:relative;width:100%;aspect-ratio:4/3;border-radius:24px;overflow:hidden;border:3px solid #33406e;background:#121a38 url(room_sky.webp) center/cover no-repeat;box-shadow:0 10px 26px #0006}
-.noa{position:absolute;left:50%;bottom:0;height:96%;width:auto;transform:translateX(-50%);filter:drop-shadow(0 6px 10px #0008)}
-.soon{position:absolute;right:10px;top:10px;padding:2px 12px;border-radius:12px;background:#0b1028cc;border:1px solid var(--line);color:var(--soft);font-weight:800;font-size:.8rem}
+/* はいしんの へや：背景と ノアは べつの 絵。棚・モニターは 下の ボタンと おなじ 行き先。 */
+.room{position:relative;width:100%;aspect-ratio:16/9;border-radius:24px;overflow:hidden;border:3px solid #33406e;background:#121a38 url(noa_room_bg_v1_1280.webp) center/cover no-repeat;box-shadow:0 10px 26px #0006}
+.noa{position:absolute;left:40%;bottom:10%;height:77%;width:auto;max-width:24%;object-fit:contain;object-position:center bottom;transform:translateX(-50%);filter:drop-shadow(0 6px 10px #0008);pointer-events:none}
+.room-caption{position:absolute;right:8px;top:8px;max-width:65%;padding:2px 9px;border-radius:12px;background:#0b1028dd;border:1px solid var(--line);color:var(--ink);font-weight:800;font-size:.75rem;pointer-events:none}
+.room-spot{position:absolute;display:block;min-width:44px;min-height:44px;border:2px solid transparent;border-radius:10px;background:transparent;cursor:pointer}
+.room-spot:hover,.room-spot:focus-visible{border-color:#ffe8a6;background:#ffe8a61a;box-shadow:0 0 0 2px #10162dcc}
+.room-acrylic{left:11.8%;top:16.6%;width:8.8%;height:14.8%}
+.room-monitor{left:83.1%;top:11.1%;width:16.5%;height:36.9%}
 a:focus-visible,button:focus-visible,summary:focus-visible{outline:4px solid #ffd25e;outline-offset:3px}
 /* できること（3つだけ） */
 .acts{display:grid;gap:10px;margin:14px 0 0}
@@ -57,11 +61,13 @@ dialog.ext-dlg{border:3px solid var(--line);border-radius:20px;padding:14px 16px
 <main>
   <div class="top"><a class="back" href="../">← ひろばへ</a></div>
   <h1>🎙️ ノアの へや</h1>
-  <p class="lead">ノアに あいに きてね。へやは いま じゅんびちゅう。</p>
+  <p class="lead">ノアに あいに きてね。たなの アクスタや モニターにも さわれるよ。</p>
 
-  <div class="room" role="img" aria-label="よぞらの したに、月城ノアが たって いる">
-    <img class="noa" src="noa_stand.webp" alt="" width="520" height="893">
-    <span class="soon">へやは いま じゅんびちゅう</span>
+  <div class="room" role="group" aria-label="月城ノアの はいしんの へや。ひだりの たなに アクスタ、みぎに モニター">
+    <img class="noa" src="noa_stand.webp" alt="月城ノア" width="520" height="893">
+    <span class="room-caption">ノアの はいしんの へや</span>
+    <a class="room-spot room-acrylic ext" data-what="おみせ（BOOTH）" href="https://hozumi-ao.booth.pm/items/9036945?utm_source=hiroba_noa" target="_blank" rel="noopener noreferrer" aria-label="たなの アクスタを みる（BOOTH）"></a>
+    <a class="room-spot room-monitor ext" data-what="TikTok" href="https://www.tiktok.com/@marufuwa_no_machi" target="_blank" rel="noopener noreferrer" aria-label="モニターから ノアの どうがを みる（TikTok）"></a>
   </div>
 
   <div class="acts">
