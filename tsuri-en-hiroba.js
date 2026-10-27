@@ -23,6 +23,7 @@
     'わたしのへや、みていく？ひだりしたのちいさないえだよ': 'Want to see my room? It’s the little house at the bottom left.', 'へや、かたづけたよ。ゆっくりみにきてね': 'I tidied my room. Come and take a look.',
     'まるふわのいろいろ（グッズ・どうが）': 'More Marufuwa (goods and videos)', 'おとのせっていは、つりびよりとおなじものをつかうよ。きろくはこのスマホやパソコンのなかだけにのこるよ。': 'Sound settings are shared with the fishing game. Your records stay only on this phone or computer.',
     'がいとう': 'Street lamp', 'かだん': 'Flower bed', 'もん': 'Gate', 'ひろばへようこそ。': 'Welcome to the plaza.', 'やどやのなか。ランプのあかりのしたで、まるふわがえほんをよんでいる': 'Inside the inn. Marufuwa is reading a picture book under the lamp light.',
+    'とったしゃしん': 'Photo you took',
     'じゅんびちゅうのばしょ': 'Getting ready', 'じゅんびちゅうのばしょ（ちかぢか）': 'Getting ready (coming soon)',
     'ここはまだじゅんびちゅう。ちかぢかあそべるよ。たのしみにまっててね': "Still getting ready. You'll be able to play soon. Look forward to it!",
     'ここもじゅんびちゅう。ちかぢかあそべるよ。おたのしみに': 'This one is getting ready, too. Coming soon. Stay tuned!',
