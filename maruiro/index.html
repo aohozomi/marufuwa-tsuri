@@ -58,6 +58,7 @@ h1{margin:6px 0 2px;font-size:1.45rem;line-height:1.4}
 .zukan i{font-style:normal;color:var(--ink2);font-size:.8rem;align-self:center}
 .best{display:flex;align-items:center;gap:6px;font-size:.9rem;font-weight:800;margin:0}
 .field{display:flex;justify-content:center}
+#cheer-slot{display:flex;align-items:center;justify-content:center;min-height:44px}#cheer{position:absolute;left:8px;top:8px;z-index:2;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:22px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.85rem;pointer-events:none;white-space:nowrap}#cheer img{width:36px;height:36px;flex:none;object-fit:contain}#cheer-slot #cheer{position:static;padding:2px 10px 2px 4px}#cheer-slot #cheer img{width:30px;height:30px}
 [hidden]{display:none!important}
 #cv{display:block;width:min(100%,calc((100dvh - 380px)*300/420));min-width:200px;aspect-ratio:300/420;border-radius:18px;border:3px solid var(--fieldline);background:var(--field);touch-action:none;cursor:pointer}
 #cv:focus-visible{outline:4px solid #286b88;outline-offset:3px}
@@ -195,6 +196,8 @@ body.playing .theme-kicker{display:none!important}
 /* 10/27 414x760: 操作は常に手元へ。盤面を動かす自動スクロールは使わない。 */
 @media(max-width:999px){
   body{padding-bottom:104px}
+  body.playing{padding-bottom:60px}
+  .room > #flood{z-index:2}
   .toprow{position:sticky;top:8px;z-index:24;padding:4px;border-radius:24px;background:rgba(250,253,243,.96);box-shadow:0 3px 14px rgba(45,77,55,.08)}
   .mutehint{display:none!important}
   body.playing .toprow{display:flex!important;margin-bottom:8px}
@@ -220,12 +223,13 @@ body.playing .theme-kicker{display:none!important}
   </div>
   <div class="watch" id="watch" aria-hidden="true"><img alt="" width="34" height="34" style="object-fit:contain"><span id="watch-tx" hidden></span></div>
   <div class="dayhud" id="dayhud"><span id="score-tx"></span><button type="button" id="b-menu" class="menubtn" hidden>メニュー</button></div>
-  <div class="field" style="position:relative"><div id="cheer" hidden style="position:absolute;left:8px;top:8px;z-index:2;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:22px;background:var(--plate);border:2px solid var(--line);font-weight:800;font-size:.85rem;pointer-events:none"><img alt="" width="36" height="36" style="object-fit:contain"><span></span></div><canvas id="cv" tabindex="0" role="application" aria-label="まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ"></canvas></div>
+  <div class="field" style="position:relative"><canvas id="cv" tabindex="0" role="application" aria-label="まるいろの ばめん。ひだり・みぎの やじるしで うごかして、スペースか エンターで おとす。ゆびで さわって うごかして、はなすと おちるよ"></canvas></div>
   <section id="flood" hidden aria-labelledby="h-fl">
     <h2 id="h-fl" class="sr">いろひろげ</h2>
     <div class="field"><canvas id="fl" role="img" aria-label="いろひろげの ばん。8×8の まるい まるふわ。ひだりうえから おなじ いろが ひろがるよ" style="display:block;width:min(100%,calc((100dvh - 330px)));min-width:200px;aspect-ratio:1/1;border-radius:18px;border:3px solid var(--fieldline);background:var(--field)"></canvas></div>
     <div class="fbtns" id="fbtns"></div>
   </section>
+  <div id="cheer-slot" hidden><div id="cheer" hidden><img alt="" width="36" height="36"><span></span></div></div>
   <div class="ctl">
     <button type="button" id="bl" aria-label="ひだりへ">◀ ひだり</button>
     <button type="button" id="brot" hidden data-noruby>まわす</button>
@@ -914,9 +918,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const b = $('play'), pl = rec.play; b.setAttribute('aria-pressed', String(pl !== 0)); b.textContent = L(PLAYS[pl][0], PLAYS[pl][1]);
     document.querySelector('.lead').textContent = L(SHORT[pl][0], SHORT[pl][1]); $('howto-tx').textContent = L(LEADS[pl][0], LEADS[pl][1]);
     $('brot').hidden = pl !== 3; $('best-wrap').style.display = pl === 3 ? 'none' : '';
-    const fl = pl === 2; document.querySelector('.field').parentElement; $('flood').hidden = !fl; document.querySelector('.hud').hidden = fl; document.querySelector('.ctl').hidden = fl; $('mode').hidden = fl || pl === 4; $('next').hidden = !fl;
+    const fl = pl === 2; $('flood').hidden = !fl; document.querySelector('.hud').hidden = fl; document.querySelector('.ctl').hidden = fl; $('mode').hidden = fl || pl === 4; $('next').hidden = !fl;
     document.querySelectorAll('main > .field').forEach(f => { f.hidden = fl; });
-    const host = fl ? $('flood').querySelector('.field') : document.querySelector('main > .field'); host.style.position = 'relative'; host.prepend(cheerEl); cheerEl.hidden = true;
+    const cheerSlot = $('cheer-slot'); cheerSlot.hidden = pl !== 4;
+    if (pl === 4) cheerSlot.append(cheerEl);
+    else { const host = fl ? $('flood').querySelector('.field') : document.querySelector('main > .field'); host.style.position = 'relative'; host.prepend(cheerEl); }
+    cheerEl.hidden = true;
     if (fl) floodStart(0);
   }
   function freshPlay() { if (!dly.on) pracPts = 0; drawDayHud(); if (rec.play === 3) tsReset(); reorder(); balls = []; stats.chain = 0; chainAlive = 0; over = 0; nextL = pickLevel(); afterL = pickLevel(); pops = []; mch = 0; canDrop = true; cooldown = 0; setAim(W / 2); cheerEl.hidden = true; }
@@ -1069,8 +1076,6 @@ document.addEventListener('DOMContentLoaded', () => {
   save(); if (rec.snd) { const h = $('mutehint'); h.textContent = L('どこかを さわると おとが なるよ', 'Tap anywhere to hear sounds'); h.hidden = false; const hide = () => { h.style.visibility = 'hidden'; }; addEventListener('pointerdown', hide, { once: true }); addEventListener('keydown', hide, { once: true }); }
   addEventListener('pointerdown', () => { if (rec.snd) mkAc(); }, { once: true });
   if (rec.play === 3) tsReset();
-  drawPlay(); drawBest(); drawSnd(); drawMode(); drawDayHud(); setAim(W / 2); requestAnimationFrame(frame);
-  say(rec.play === 4 ? L('「きょうの まるいろ」は 1にち 1かい。「れんしゅう」は なんかいでも どうぞ。', '“Today’s Maruiro” is once a day. Practice as much as you like.') : L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”'));   // おやつの れんしゅうは まいかい ちがう じゅんばん なので、ひとことは「きょうの まるいろ」を はじめた ときに
 
   // ─── いろひろげ（Flood-It）：8×8・耳の 4いろ・ひだりうえから ひろがる。てかず・じかん・てんすう なし。ばんは 日づけで きまる（きょうの いろ）───
   const FC = ['#8fd3f4', '#9fe0a6', '#ffc27d', '#c9a6f2'], FN = ['みずいろ', 'ミント', 'アプリコット', 'ラベンダー'], FN_EN = ['sky blue', 'mint', 'apricot', 'lavender'], FG = ['○', '△', '□', '☆'], N = 8;
@@ -1107,6 +1112,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   addEventListener('resize', () => { if (rec.play === 2) floodDraw(); });
   $('next').addEventListener('click', () => { floodStart(fl.n + 1); });
+  drawPlay(); drawBest(); drawSnd(); drawMode(); drawDayHud(); setAim(W / 2); requestAnimationFrame(frame);
+  say(rec.play === 4 ? L('「きょうの まるいろ」は 1にち 1かい。「れんしゅう」は なんかいでも どうぞ。', '“Today’s Maruiro” is once a day. Practice as much as you like.') : rec.play === 2 ? L('きょうの いろ。すきな いろを おしてね。', 'Today\u2019s colors. Pick any color.') : L('まるふわ：「きょうの つみきは、みんな おなじだよ」', 'Marufuwa: “Today’s pieces are the same for everyone.”'));   // おやつの れんしゅうは まいかい ちがう じゅんばん なので、ひとことは「きょうの まるいろ」を はじめた ときに
   // けんさ用（ゲームの うごきには つかわない）
   window.Maruiro = {
     W, H, LINE, R, version: 1,
