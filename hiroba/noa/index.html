@@ -32,6 +32,15 @@ h1{margin:4px 0 0;font-size:1.5rem;line-height:1.4}
 /* はいしんの へや：背景と ノアは べつの 絵。棚・モニターは 下の ボタンと おなじ 行き先。 */
 .room{position:relative;width:100%;aspect-ratio:16/9;border-radius:24px;overflow:hidden;border:3px solid #33406e;background:#121a38 url(noa_room_bg_v1_1280.webp) center/cover no-repeat;box-shadow:0 10px 26px #0006}
 .noa{position:absolute;left:40%;bottom:10%;height:77%;width:auto;max-width:24%;object-fit:contain;object-position:center bottom;transform:translateX(-50%);filter:drop-shadow(0 6px 10px #0008);pointer-events:none}
+/* ノアを さわると しゃべる：ふきだしは いつも 出す（おとが なくても よめる）・こえは おとが ON の ときだけ */
+.noa-tap{position:absolute;left:40%;bottom:10%;height:77%;width:16%;min-width:44px;transform:translateX(-50%);border:0;border-radius:40% 40% 12px 12px;background:transparent;cursor:pointer;padding:0}
+.noa-tap:focus-visible{outline:4px solid #ffd25e;outline-offset:2px}
+.noa.hop{animation:noahop .45s ease-out}
+@keyframes noahop{0%,100%{transform:translateX(-50%)}40%{transform:translateX(-50%) translateY(-2.5%)}}
+:root[data-calm=true] .noa.hop{animation:none}
+@media (prefers-reduced-motion:reduce){.noa.hop{animation:none}}
+.noa-say{position:absolute;left:49%;top:20%;max-width:44%;padding:6px 12px;border-radius:16px 16px 16px 4px;background:#fdfeffee;border:2px solid #fff;box-shadow:0 3px 0 var(--side);color:var(--bink);font-weight:800;font-size:clamp(.78rem,2.6vw,1rem);line-height:1.5;pointer-events:none}
+.noa-say[hidden]{display:none}
 .room-caption{position:absolute;right:8px;top:8px;max-width:65%;padding:2px 9px;border-radius:12px;background:#0b1028dd;border:1px solid var(--line);color:var(--ink);font-weight:800;font-size:.75rem;pointer-events:none}
 .room-spot{position:absolute;display:block;min-width:44px;min-height:44px;border:2px solid transparent;border-radius:10px;background:transparent;cursor:pointer}
 .room-spot:hover,.room-spot:focus-visible{border-color:#ffe8a6;background:#ffe8a61a;box-shadow:0 0 0 2px #10162dcc}
@@ -64,10 +73,12 @@ dialog.ext-dlg{border:3px solid var(--line);border-radius:20px;padding:14px 16px
 <main>
   <div class="top"><a class="back" href="../">← ひろばへ</a></div>
   <h1>🎙️ ノアの へや</h1>
-  <p class="lead">ノアに あいに きてね。たなの アクスタや モニターにも さわれるよ。</p>
+  <p class="lead">ノアに あいに きてね。ノアを さわると おはなし するよ。たなの アクスタや モニターにも さわれるよ。</p>
 
   <div class="room" role="group" aria-label="月城ノアの はいしんの へや。ひだりの たなに アクスタ、みぎに モニター">
     <img class="noa" src="noa_stand.webp" alt="月城ノア" width="520" height="893">
+    <button type="button" class="noa-tap" id="noa-tap" aria-label="ノアに はなしかける"></button>
+    <p class="noa-say" id="noa-say" role="status" hidden></p>
     <span class="room-caption">ノアの はいしんの へや</span>
     <a class="room-spot room-acrylic ext" data-what="おみせ（BOOTH）" href="https://hozumi-ao.booth.pm/items/9036945?utm_source=hiroba_noa" target="_blank" rel="noopener noreferrer" aria-label="たなの アクスタを みる（BOOTH）"></a>
     <a class="room-spot room-monitor ext" data-what="TikTok" href="https://www.tiktok.com/@marufuwa_no_machi" target="_blank" rel="noopener noreferrer" aria-label="モニターから ノアの どうがを みる（TikTok）"></a>
@@ -168,6 +179,29 @@ dialog.ext-dlg{border:3px solid var(--line);border-radius:20px;padding:14px 16px
     try { d.showModal(); } catch (x) { d.setAttribute('open', ''); }
   }));
   go.addEventListener('click', () => setTimeout(close, 0)); document.getElementById('ext-no').addEventListener('click', close);
+})();
+</script>
+<script>
+// ノアの こえ（10/27）。こえの ファイルが まだ ない／ならせない ときも、ふきだしは 出す。おなじ セリフを つづけない
+(() => {
+  const LINES = [
+    ['きてくれたんだ。ゆっくり していってね。', 'voice/noa_01.m4a'],
+    ['おつかれさま。きょうも よく がんばったね。', 'voice/noa_02.m4a'],
+    ['つきが きれいだね。いっしょに みよっか。', 'voice/noa_03.m4a'],
+    ['ふふっ。くすぐったいよ。', 'voice/noa_04.m4a'],
+    ['むりしないでね。ここは いつでも あいてるから。', 'voice/noa_05.m4a'],
+    ['まるふわも、きみに あいたがってたよ。', 'voice/noa_06.m4a'],
+  ];
+  const tap = document.getElementById('noa-tap'), say = document.getElementById('noa-say'), noa = document.querySelector('.noa');
+  const soundOn = () => { try { const m = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}; return !(m.audioSet === true && m.sound !== true); } catch (e) { return true; } };   // ひろばと おなじ：じぶんで けした 人だけ ならさない
+  let last = -1, au = null, hideT = 0;
+  tap.addEventListener('click', () => {
+    let i; do { i = Math.floor(Math.random() * LINES.length); } while (LINES.length > 1 && i === last); last = i;
+    say.textContent = LINES[i][0]; say.hidden = false; clearTimeout(hideT); hideT = setTimeout(() => { say.hidden = true; }, 5000);
+    noa.classList.remove('hop'); void noa.offsetWidth; noa.classList.add('hop');
+    if (au) { au.pause(); au = null; }
+    if (soundOn()) { au = new Audio(LINES[i][1]); au.volume = 0.9; au.play().catch(() => {}); }
+  });
 })();
 </script>
 <script defer src="../../tsuri-ruby-dict.js"></script>
