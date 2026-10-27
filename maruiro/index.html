@@ -210,6 +210,21 @@ body.playing .theme-kicker{display:none!important}
   .dayhud{gap:6px}
 }
 
+/* 360px以下のおやつプレイ：得点・休憩・メニューを1行にまとめ、盤面の高さを確保。 */
+@media(max-width:360px){
+  body.playing main.room:has(.dayhud:not([hidden])) .toprow:not([hidden]){justify-content:space-between;gap:4px;flex-wrap:nowrap}
+  body.playing main.room:has(.dayhud:not([hidden])) .toprow .back:not([hidden]){box-sizing:border-box;flex:0 0 auto;min-width:44px;min-height:44px;padding:4px 6px;font-size:12px;white-space:nowrap}
+  body.playing main.room:has(.dayhud:not([hidden])) .toprow .mutegrp:not([hidden]){box-sizing:border-box;flex:0 0 auto;min-width:0;max-width:none;flex-wrap:nowrap;gap:4px;margin-left:0}
+  body.playing main.room:has(.dayhud:not([hidden])) .toprow .mutebtn:not([hidden]){box-sizing:border-box;flex:0 0 auto;min-width:44px;min-height:44px;padding:4px 6px;font-size:12px;white-space:nowrap}
+  body.playing main.room .dayhud:not([hidden]){width:100%;box-sizing:border-box;justify-content:space-between;flex-wrap:nowrap;gap:4px;margin:2px 0 4px;font-size:12px}
+  body.playing main.room .dayhud:not([hidden]) #score-tx{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:4px;row-gap:0;flex:1 1 auto;min-width:0;min-height:52px;padding:3px 6px;box-sizing:border-box}
+  body.playing main.room .dayhud:not([hidden]) #score-tx>i:first-child{grid-area:1/1/2/4;font-size:12px;line-height:1.1;white-space:nowrap}
+  body.playing main.room .dayhud:not([hidden]) #score-tx #score-n{grid-row:2;grid-column:2;font-size:1.75rem}
+  body.playing main.room .dayhud:not([hidden]) #score-tx #left-n{grid-row:2;grid-column:3;font-size:12px;white-space:nowrap}
+  body.playing main.room .dayhud:not([hidden]) .polish-rest-btn,body.playing main.room .dayhud:not([hidden]) .menubtn{box-sizing:border-box;flex:0 0 auto;min-width:44px;min-height:44px;padding:4px 8px;font-size:12px;white-space:nowrap}
+  body.playing main.room .dayhud:not([hidden])+.field>#cv{width:min(100%,calc((100dvh - 250px)*300/420));min-width:0}
+}
+
 /* PCプレイ時：既存の作品情報と出口を右側のプレイ欄に戻し、盤面と操作をひとまとまりにする。 */
 @media (min-width:1000px) and (min-height:560px) and (hover:hover) and (pointer:fine){
   body.playing main.room .toprow:not([hidden]){
