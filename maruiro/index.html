@@ -1035,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const OY_IRO = ['ももいろ', 'きつねいろ', 'さくらいろ', 'ピンク', 'たまごいろ', 'しろ', 'ミルクいろ'], OY_IRO_EN = ['pink', 'golden brown', 'cherry pink', 'pink', 'custard yellow', 'white', 'milk white'];
   const scEl = $('score-tx'), menuB = $('b-menu'), dayDlg = $('daydlg');
   function addPts(p, l) { if (rec.play !== 4) return; if (dly.on) { if (dly.done) return; dly.score += p; if (l > dly.maxL) dly.maxL = l; } else pracPts += p; drawNums(); }
-  function setPlaying(v) { playing = !!v && rec.play === 4; document.body.classList.toggle('playing', playing); menuB.hidden = !playing; }
+  function setPlaying(v) { playing = !!v && rec.play === 4; document.body.classList.toggle('playing', playing); menuB.hidden = !playing; menuB.textContent = L('メニュー', 'Menu'); }
   function drawNums() { const n = $('score-n'), k = $('left-n'); if (n) n.textContent = String(dly.on ? dly.score : pracPts); if (k) k.textContent = L('のこり ' + dly.left + 'こ', dly.left + ' left'); }   // おとす・くっつく たびは かずだけ（ボタンや きろくは さわらない）
   function drawDayHud() {
     const show = rec.play === 4; $('dayhud').hidden = !show; $('dayrow').hidden = !show;   // おやつ だけ（つみき・そろえる・いろひろげ・そだてるは 今までどおり）
@@ -1137,7 +1137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     st.textContent = L('かってに とうこうは しないよ。「ほぞん」で のこせるよ（がぞうを ながおし しても ほぞん できるよ）。', 'Nothing is posted by itself. Use “Save” to keep it (or press and hold the picture).');
   }
   $('b-day').addEventListener('click', startDaily); $('b-prac').addEventListener('click', startPractice);
-  menuB.addEventListener('click', () => setPlaying(false));
+  menuB.addEventListener('click', () => { if (playing) { setPlaying(false); menuB.hidden = false; menuB.textContent = L('つづける', 'Keep playing'); menuB.focus({ preventScroll: true }); return; } setPlaying(true); cv.focus({ preventScroll: true }); });
   $('day-close').addEventListener('click', () => { try { dayDlg.close(); } catch (e) { dayDlg.removeAttribute('open'); } });
   $('day-note').textContent = L('「きょうの まるいろ」は 1にち 1かい。みんな おなじ じゅんばんの おやつ ' + DAY_N + 'こを おとしきったら おしまいで、てんと カードが のこります。てんは この たんまつの なかだけで、そとへは おくりません（じゅんいも ありません）。「れんしゅう」は なんかいでも あそべます（てんは のこりません）。', 'Today’s Maruiro is once a day: the same ' + DAY_N + ' treats for everyone, and when all are dropped it ends and leaves a score and a card. The score stays on this device only and is never sent anywhere (there is no ranking). Practice can be played any number of times (the score is not kept).');
 
