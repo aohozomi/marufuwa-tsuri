@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="google" content="notranslate">
+<title>OBS への いれかた｜まるふわ びより</title>
+<meta name="description" content="まるふわの はいしん そざい（離席画面・待機画面・透過PNG）を OBS に いれる 3つの てじゅん。">
+<meta name="theme-color" content="#b9edf5">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OBS への いれかた｜まるふわ びより">
+<meta property="og:description" content="まるふわの はいしん そざい（離席画面・待機画面・透過PNG）を OBS に いれる 3つの てじゅん。">
+<meta property="og:url" content="https://aohozomi.github.io/marufuwa-tsuri/links/stream/obs/">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ひるの つりばで、まるふわが つりざおを もって すわっている。きしには ねこと うさぎ">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aohozomi.github.io/marufuwa-tsuri/og-v3.jpg">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../../../img/icon-180.png">
+<script>
+try {
+  var h = new Date().getHours(), sv = JSON.parse(localStorage.getItem('marufuwa-tsuri-v1')) || {}, d = document.documentElement, qs = new URLSearchParams(location.search);
+  var mp = {asa: 'a', hiru: 'h', yuu: 'y', yoru: 'n', a: 'a', h: 'h', y: 'y', n: 'n'}, tt = mp[qs.get('time')] || (typeof sv.time === 'string' && mp[sv.time]) || (h >= 5 && h < 10 ? 'a' : h >= 10 && h < 16 ? 'h' : h >= 16 && h < 19 ? 'y' : 'n');
+  if (matchMedia('(prefers-color-scheme: dark)').matches || tt === 'n') { d.dataset.night = 'true'; d.dataset.time = 'n'; var tc = document.querySelector('meta[name=theme-color]'); if (tc) tc.content = '#0f1c33'; }
+  if (sv.large === true) d.dataset.large = 'true';
+  if (sv.calm === true) d.dataset.calm = 'true';
+  if ((qs.get('lang') || localStorage.getItem('marufuwa-lang-v1')) === 'en') { d.lang = 'en'; window.TsuriEn = {lang: 'en'}; }
+} catch (e) {}
+</script>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:#244653;background:#edf6fa;color-scheme:light;touch-action:manipulation;--ink:#244653;--soft:#506874;--line:#b9cbd4;--card:#ffffffe6;--ok:#1d6b46;--ng:#9b2c2c}
+:root[data-night=true]{color:#e8f1f8;background:#0f1c33;color-scheme:dark;--ink:#e8f1f8;--soft:#a9bfd2;--line:#4a6b8c;--card:#1a3250f2;--ok:#7fe0aa;--ng:#ff9a9a}
+:root[data-large=true]{font-size:125%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+.skip{position:absolute;left:8px;top:-80px;z-index:200;padding:12px 16px;border-radius:14px;background:#fff;color:#0b4a6b;font-weight:800;text-decoration:none;border:3px solid #0b4a6b}
+.skip:focus{top:8px}
+main{max-width:560px;margin:0 auto;padding:18px 16px calc(40px + env(safe-area-inset-bottom));word-break:keep-all;overflow-wrap:break-word}
+.back{display:inline-flex;align-items:center;min-height:48px;min-width:44px;padding:6px 16px;margin:0 0 8px;border-radius:999px;border:3px solid #fff;background:linear-gradient(180deg,#ffffffd9,#bfe6f9b3);box-shadow:0 4px 0 #9cc9e0;color:#244653;font-weight:800;text-decoration:none}
+h1{margin:6px 0 6px;font-size:1.35rem;line-height:1.45}
+.lead{margin:0 0 16px;font-size:.98rem;line-height:1.8;text-wrap:balance}
+section{margin:0 0 12px;padding:12px 14px;border-radius:18px;background:var(--card);border:2px solid var(--line)}
+h2{margin:0 0 6px;font-size:1.05rem;line-height:1.5}
+ul{margin:0;padding-left:1.2em}
+li{margin:4px 0;line-height:1.7;font-size:.95rem}
+.ok{color:var(--ok);font-weight:900}
+.ng{color:var(--ng);font-weight:900}
+.mark{display:inline-block;min-width:1.4em;text-align:center}
+.copybox{margin:8px 0 6px;padding:10px 12px;border-radius:12px;border:2px dashed var(--line);font-size:.92rem;line-height:1.7;user-select:all;-webkit-user-select:all}
+.btn{--side:#9cc9e0;display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:44px;padding:6px 18px;font:inherit;font-weight:800;color:#244653;text-decoration:none;cursor:pointer;border:3px solid #fff;border-radius:999px;background:linear-gradient(180deg,#ffffffd9,#bfe6f9b3);box-shadow:0 4px 0 var(--side),0 8px 12px #2446532b}
+.btn:active{transform:translateY(3px)}
+.btn:focus-visible,a:focus-visible,.confirm a:focus-visible,.confirm button:focus-visible{outline:3px solid #0b4a6b;outline-offset:0;box-shadow:0 0 0 6px #fff}
+:root[data-night=true] .btn,:root[data-night=true] .back{filter:brightness(.9)}
+.confirm{margin:8px 0 0;padding:12px;border-radius:16px;background:var(--card);border:3px solid var(--line);text-align:center}
+.confirm[hidden]{display:none}
+.confirm p{margin:0 0 8px;font-weight:800}
+.confirm .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.confirm a,.confirm button{min-height:48px;min-width:110px;padding:6px 16px;display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:800;border-radius:999px;cursor:pointer;text-decoration:none}
+.confirm a{background:#a83a63;color:#fff;border:3px solid #fff}
+.confirm button{background:#fff;color:#244653;border:3px solid #b9cbd4}
+:root[data-night=true] .confirm button{background:#1a3250;color:#e8f1f8;border-color:#4a6b8c}
+.small{font-size:.82rem;color:var(--soft);line-height:1.7;margin:6px 0 0}
+:root[data-calm=true] .btn{transition:none}
+@media(prefers-reduced-motion:reduce){.btn:active{transform:none}}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+.back{position:sticky;top:8px;z-index:20}main{padding-top:8px}
+.shop{list-style:none;padding:0;margin:6px 0 0}.shop li{margin:6px 0}.shop a{display:flex;flex-direction:column;justify-content:center;min-height:52px;padding:8px 12px;border-radius:14px;border:2px solid var(--line);background:#fff;color:inherit;text-decoration:none;font-weight:800;line-height:1.5}:root[data-night=true] .shop a{background:#132744}.shop small{font-weight:600;font-size:.82rem;color:var(--soft)}.shop .pr{font-weight:700;font-size:.85rem;color:var(--ok)}
+.ext-dlg{max-width:min(92vw,400px);border:3px solid var(--line);border-radius:20px;padding:14px 16px;background:#fff;color:#244653;text-align:center}.ext-dlg::backdrop{background:#0006}.ext-dlg p{margin:0 0 8px;font-weight:800;line-height:1.6}#ext-t{font-size:1.1rem}.ext-dlg .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.ext-b{min-height:52px;min-width:120px;padding:8px 18px;display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:900;border-radius:18px;border:2px solid #9cc9e0;background:linear-gradient(#fff,#e3f2fa);color:#0b4a6b;text-decoration:none;cursor:pointer}
+.step{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.num{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#2a8cc0;color:#fff;font-weight:900}.step p{margin:4px 0 0;line-height:1.7}
+kbd{font:inherit;font-weight:800;padding:0 6px;border-radius:6px;border:1.5px solid var(--line);background:var(--card);white-space:nowrap}
+</style>
+</head>
+<body>
+<a class="skip" id="skip" href="#main">ほんぶんへ とぶ</a>
+<main id="main">
+  <!-- 10/28 参謀 作業キュー D-4・指示書「配信者に使ってもらう」⑤：配信者が いちばん しりたいのは「どう いれるか」。3ステップだけ -->
+  <a class="back" id="back" href="../">はいしんの ページに もどる</a>
+  <h1 id="title" tabindex="-1">OBS への いれかた</h1>
+  <p class="lead" id="lead">まるふわの 離席画面・待機画面・透過PNG は、OBS Studio に 3ステップで はいります。</p>
+  <section aria-labelledby="h-steps"><h2 id="h-steps">3つの てじゅん</h2>
+    <div class="step"><span class="num" aria-hidden="true">1</span><p id="s1">OBS Studio を ひらいて、したの <span style="white-space:nowrap">「ソース」の</span> <kbd>＋</kbd> を おす。</p></div>
+    <div class="step"><span class="num" aria-hidden="true">2</span><p id="s2">うごく がめん（MP4・WebM）は <kbd>メディアソース</kbd>、え（PNG）は <kbd>画像</kbd> を えらぶ。</p></div>
+    <div class="step"><span class="num" aria-hidden="true">3</span><p id="s3">ダウンロードした ファイルを えらぶ。うごく がめんは <kbd>ループ</kbd> に チェックを いれる。</p></div>
+  </section>
+  <section aria-labelledby="h-tips"><h2 id="h-tips">しって おくと べんり</h2>
+    <ul>
+      <li id="t1">そざいは 1920×1080 で つくって います。OBS の キャンバスも 1920×1080 だと ぴったり です。</li>
+      <li id="t2">すけて いる（透過）WebM と PNG は、ゲーム画面や カメラの うえに そのまま かさねられます。MP4 は はいけいつき です。</li>
+      <li id="t3">HTML の どうぐ（投票ボード・順番待ちボード・セトリ画像メーカー など）は、<kbd>ブラウザ</kbd> ソースで つかいます。くわしくは 商品の せつめいを みてね。</li>
+      <li id="t4">OBS の バージョンに よって、ボタンの なまえが すこし ちがう ことが あります。</li>
+    </ul>
+  </section>
+  <p class="small"><a class="btn" id="back2" href="../">そざいの いちらんへ もどる</a></p>
+</main>
+<script defer src="../../../tsuri-pagebg.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => { if (window.PageBg) PageBg.init('stream'); });</script>
+<script>
+(function () {
+  'use strict';
+  const EN = document.documentElement.lang === 'en';
+  if (!EN) return;
+  const set = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
+  document.title = 'Adding assets to OBS | Marufuwa Fishing Days';
+  set('skip', 'Skip to the content'); set('back', 'Back to the streaming page'); set('title', 'Adding assets to OBS');
+  set('lead', 'Marufuwa BRB screens, waiting screens and transparent PNGs go into OBS Studio in 3 steps.');
+  set('h-steps', '3 steps');
+  set('s1', 'Open OBS Studio and press “+” under Sources.');
+  set('s2', 'Pick “Media Source” for moving screens (MP4 / WebM) or “Image” for pictures (PNG).');
+  set('s3', 'Choose the downloaded file. For moving screens, tick “Loop”.');
+  set('h-tips', 'Good to know');
+  set('t1', 'Assets are made at 1920×1080. An OBS canvas of 1920×1080 fits exactly.');
+  set('t2', 'Transparent WebM and PNG files layer straight over your game or camera. MP4 files have a background.');
+  set('t3', 'HTML tools (poll board, queue board, setlist maker and so on) use a “Browser” source. See each item’s description for details.');
+  set('t4', 'Button names can differ slightly between OBS versions.');
+  set('back2', 'Back to the asset list');
+})();
+</script>
+<script>
+(function () {
+  try {
+    var en = document.documentElement.lang === 'en', KEY = 'marufuwa-lang-v1';
+    var go = function () {
+      var row = document.createElement('div'); row.className = 'lang-row'; row.style.cssText = 'text-align:center;margin:14px 0 8px';
+      var b = document.createElement('button'); b.type = 'button'; b.id = 'lang-toggle';
+      b.textContent = en ? '日本語（にほんご）' : 'English'; b.setAttribute('lang', en ? 'ja' : 'en');
+      b.style.cssText = 'font-size:.85rem;min-height:44px;padding:8px 18px;border-radius:999px;border:1.5px solid currentColor;background:transparent;color:inherit;opacity:.85;cursor:pointer';
+      b.addEventListener('click', function () {
+        try { localStorage.setItem(KEY, en ? 'ja' : 'en'); } catch (e) {}
+        var u = new URL(location.href); u.searchParams.delete('lang'); location.replace(u.toString());
+      });
+      row.appendChild(b); (document.querySelector('main') || document.body).appendChild(row);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
