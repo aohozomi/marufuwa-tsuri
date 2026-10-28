@@ -56,6 +56,8 @@
       "ほかのかいしゃのこうこくはいれていません。わたしたちがつくったアプリ（まるふわまるいろ）のあんないがでることがあります。おすと、ひらくまえにかくにんがでます。ダウンロードやかいものはおうちのひとと。ひろばの「ノアのへや」には、わたしたちのおみせ（BOOTHのアクスタ）とTikTokへのボタンがあります。これもひらく前にかくにんが出ます。": "We show no ads from other companies. A notice about our own app (Marufuwa Maruiro) may appear; pressing it asks first. Please download or buy things together with a grown-up. Noa’s Room in the plaza has buttons to our shop (an acrylic stand on BOOTH) and to TikTok; these also ask first.",
       "BOOTHのショップ（hozumi-ao.booth.pm）": "our BOOTH shop (hozumi-ao.booth.pm)",
       "の「おといあわせ」からおくってください。": ": please use its “Contact” form.",
+      "XのDMからもおくれます：": "Direct messages on X work too: ",
+      "ひとりでつくっているので、おへんじにすうじつかかることがあります。": "One person makes all of this, so a reply may take a few days.",
       "「まるふわのいろいろ」（links/。つりばとひろばのしたからひらけます）… TikTok・BOOTH（グッズ）・App Store・LINEスタンプ・X・itch.io（えいごのページ）へのボタンがあります。どれもおすとまず「そとのページがひらくよ。おうちのひとといっしょにみてね」ときいて、「ひらく」をおしたときだけひらきます。": "“More Marufuwa” (links/, reachable from the bottom of the fishing game and the plaza) … has buttons to TikTok, BOOTH (goods), the App Store, LINE stickers, X and itch.io (English page). Each first asks “This opens an outside page. Please look at it with a grown-up,” and opens only when you press “Open”.",
       "「ノアのへや」（ひろば）… BOOTHのアクスタとTikTokへのボタンがあります。おすとまずかくにんがでます。": "Noa’s Room (plaza) … has buttons to the acrylic stand on BOOTH and to TikTok. Each first shows a check.",
       "「バケツのなまえをのせる」…はじめは「なし」です。「あり」にしたときだけ、しゃしんのえのなかにバケツのなまえをかきます。Xにかくぶんしょうやリンクにははいりません。いつでも「なし」にもどせます。": "“Show bucket name” … off at first. Only when you turn it on is the bucket name written inside the photo picture. It is never put into the text or link for X. You can turn it off any time.",

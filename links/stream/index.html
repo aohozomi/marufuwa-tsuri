@@ -71,7 +71,7 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
 .back{position:sticky;top:8px;z-index:20}main{padding-top:8px}
-.shop{list-style:none;padding:0;margin:6px 0 0}.shop li{margin:6px 0}.shop a{display:flex;flex-direction:column;justify-content:center;min-height:52px;padding:8px 12px;border-radius:14px;border:2px solid var(--line);background:#fff;color:inherit;text-decoration:none;font-weight:800;line-height:1.5}:root[data-night=true] .shop a{background:#132744}.shop small{font-weight:600;font-size:.82rem;color:var(--soft)}.shop .pr{font-weight:700;font-size:.85rem;color:var(--ok)}
+.shop{list-style:none;padding:0;margin:6px 0 0}.shop li{margin:6px 0}.shop a{display:flex;flex-direction:column;justify-content:center;min-height:52px;padding:8px 12px;border-radius:14px;border:2px solid var(--line);background:#fff;color:inherit;text-decoration:none;font-weight:800;line-height:1.5}:root[data-night=true] .shop a{background:#132744}.shop small{font-weight:600;font-size:.82rem;color:var(--soft)}.shop .pr{display:block;font-weight:700;font-size:.85rem;color:var(--ok)}.nw{white-space:nowrap}.cond{margin:0 0 12px;padding:10px 14px;border-radius:14px;background:var(--card);border:2px solid var(--line);font-size:.92rem;font-weight:700;line-height:1.7;color:var(--ink)}
 .ext-dlg{max-width:min(92vw,400px);border:3px solid var(--line);border-radius:20px;padding:14px 16px;background:#fff;color:#244653;text-align:center}.ext-dlg::backdrop{background:#0006}.ext-dlg p{margin:0 0 8px;font-weight:800;line-height:1.6}#ext-t{font-size:1.1rem}.ext-dlg .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.ext-b{min-height:52px;min-width:120px;padding:8px 18px;display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:900;border-radius:18px;border:2px solid #9cc9e0;background:linear-gradient(#fff,#e3f2fa);color:#0b4a6b;text-decoration:none;cursor:pointer}
 </style>
 </head>
@@ -83,26 +83,26 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   <p class="lead" id="lead">まるふわ びよりは、はいしんや どうがで つかって だいじょうぶです。れんらくも いりません。きまりは この ページに まとめました。</p>
 
   <!-- 10/28 参謀 作業キュー A-3・A-4・D-1・D-3：むりょうを さきに。BOOTH は 商品ごとの リンク（utm_source=stream）。そとへ ひらく まえに きく（法 第16条） -->
+  <p class="cond" id="t-cond">つかえる はんいは、しょうひんごとに ちがいます。かう・もらう まえに、それぞれの BOOTH の ページで たしかめてね。</p>
   <section aria-labelledby="h-free"><h2 id="h-free">むりょうで ためせる そざい</h2>
-    <p class="small" id="t-cond" style="margin-top:0">BOOTH の そざいは、しょうよう OK・クレジット ふよう・かこう OK です（そざいを そのまま くばりなおす・うる のは だめ）。</p>
     <ul class="shop">
       <li><a href="https://hozumi-ao.booth.pm/items/8838391?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f1">歌枠セトリ画像メーカー</span> <span class="pr" id="r-f1">むりょう</span></span><small id="u-f1">うたわくの さいごに</small></a></li>
       <li><a href="https://hozumi-ao.booth.pm/items/8858666?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f2">植物が育つ待機画面 お試し版</span> <span class="pr" id="r-f2">むりょう</span></span><small id="u-f2">はいしんの まえと あとに</small></a></li>
-      <li><a href="https://hozumi-ao.booth.pm/items/8896841?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f3">まるふわマスコット（耳の色が変わる子）</span> <span class="pr" id="r-f3">むりょう あり・ぜんぶは ¥300</span></span><small id="u-f3">サムネイルや アイコンに</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8896841?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f3">まるふわマスコット<span class="nw">（耳の色が変わる子）</span></span> <span class="pr" id="r-f3">むりょう あり・ぜんぶは ¥300</span></span><small id="u-f3">サムネイルや アイコンに</small></a></li>
       <li><a href="https://hozumi-ao.booth.pm/items/8894357?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f4">動く離席画面 まるふわ猫のいたずら</span> <span class="pr" id="r-f4">むりょう あり・ぜんぶは ¥500</span></span><small id="u-f4">ちょっと せきを はずすとき</small></a></li>
       <li><a href="https://hozumi-ao.booth.pm/items/8848038?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f5">めくる棚 図鑑メーカー</span> <span class="pr" id="r-f5">むりょう あり・ぜんぶは ¥500</span></span><small id="u-f5">そざいを ずかんの ように みせるとき</small></a></li>
     </ul>
   </section>
-  <section aria-labelledby="h-paid"><h2 id="h-paid">ゆうりょうの そざい（¥500〜¥800）</h2>
+  <section aria-labelledby="h-paid"><h2 id="h-paid">ゆうりょうの そざい<span class="nw">（¥500〜¥800）</span></h2>
     <ul class="shop">
       <li><a href="https://hozumi-ao.booth.pm/items/8838241?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p1">猫が動く離席画面 ちいさな事件</span> <span class="pr" id="r-p1">¥500</span></span><small id="u-p1">ちょっと せきを はずすとき</small></a></li>
       <li><a href="https://hozumi-ao.booth.pm/items/8855405?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p2">離席中の、窓の雨</span> <span class="pr" id="r-p2">¥500</span></span><small id="u-p2">しずかに せきを はずすとき</small></a></li>
       <li><a href="https://hozumi-ao.booth.pm/items/8894277?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p3">まるふわマスコット どうぶつの仲間たち10体</span> <span class="pr" id="r-p3">¥500</span></span><small id="u-p3">サムネイルや たちえに</small></a></li>
-      <li><a href="https://hozumi-ao.booth.pm/items/8835366?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p4">投票ボード（OBS・わんコメ）</span> <span class="pr" id="r-p4">¥800</span></span><small id="u-p4">しちょうしゃに えらんで もらうとき</small></a></li>
-      <li><a href="https://hozumi-ao.booth.pm/items/8833125?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p5">順番待ちボード（OBS・わんコメ）</span> <span class="pr" id="r-p5">¥800</span></span><small id="u-p5">さんかがたの はいしんで</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8835366?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p4">投票ボード<span class="nw">（OBS・わんコメ）</span></span> <span class="pr" id="r-p4">¥800</span></span><small id="u-p4">しちょうしゃに えらんで もらうとき</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8833125?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p5">順番待ちボード<span class="nw">（OBS・わんコメ）</span></span> <span class="pr" id="r-p5">¥800</span></span><small id="u-p5">さんかがたの はいしんで</small></a></li>
     </ul>
     <p class="small"><a class="btn" id="a-obs" href="obs/">OBS への いれかた（3ステップ）</a></p>
-    <p class="small"><a id="a-booth" class="btn" href="https://hozumi-ao.booth.pm/?utm_source=stream" target="_blank" rel="noopener noreferrer">BOOTH の おみせを みる（そとの ページ）</a></p>
+    <p class="small"><a id="a-booth" class="btn" href="https://hozumi-ao.booth.pm/?utm_source=stream" target="_blank" rel="noopener noreferrer">BOOTH の おみせへ（そと）</a></p>
   </section>
   <section aria-labelledby="h-ok"><h2 id="h-ok">つかって OK</h2><ul>
     <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only" id="sr-ok1">OK：</span><span id="t-ok1">ゲームの がめんと おとを、はいしん・どうが（ゲームじっきょう・つりはいしん・さぎょうはいしん など）で うつして OK。</span></li>
@@ -111,7 +111,7 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   </ul></section>
 
   <!-- 10/27 指示書 2-2：ゲームの がめん・しゃしんカードは 今までどおり じゆう（しゅうきゃく）。くばる かべがみ・キャラクターの え そのものには じょうけん -->
-  <section aria-labelledby="h-chara"><h2 id="h-chara">かべがみ・キャラクターの え</h2><ul>
+  <section aria-labelledby="h-chara"><h2 id="h-chara">この サイトで くばって いる かべがみ・キャラクターの え</h2><ul>
     <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only">OK：</span><span>くばって いる かべがみや キャラクターの えは、じぶんで たのしむ ぶんには じゆうに つかって OK（スマホや パソコンの かべがみ など）。</span></li>
     <li><span class="ng mark" aria-hidden="true">×</span><span class="sr-only">だめ：</span><span>それ いがい（うる・グッズに する・くばりなおす・かえて つかう・べつの キャラクターに する・AIの がくしゅうに つかう）は ごめんなさい。くわしくは <a href="../../anshin/#riyou">おうちの かたへ</a>。</span></li>
   </ul></section>
@@ -132,8 +132,7 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
       <li><span class="ng mark" aria-hidden="true">×</span><span class="sr-only" id="sr-b4">だめ：</span><span id="t-b4">「さぎょうよう BGM」「ヒーリング ミュージック」の ように、きょくを おもな なかみに した どうがに しない。</span></li>
     </ul>
     <p class="small" id="t-bgm1">くわしくは OpenTracks の ライセンスを みてね。</p>
-    <button type="button" class="btn" id="b-lic" aria-expanded="false" aria-controls="c-lic">ライセンスの ページ（そと）</button>
-    <div class="confirm" id="c-lic" hidden role="group" aria-labelledby="q-lic"><p id="q-lic">そとの ページを ひらきます。いいですか？</p><div class="row"><a id="a-lic" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="n-lic">やめる</button></div></div>
+    <a class="btn" id="b-lic" href="https://opentracks.com/help/articles/license/" target="_blank" rel="noopener noreferrer">ライセンスの ページ（そと）</a>
   </section>
 
   <section aria-labelledby="h-se"><h2 id="h-se">こうかおん</h2>
@@ -151,7 +150,6 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
 /* はいしん・どうがで つかう かたへ（ジョブズ2・2026-10-02）。通信なし・ほぞんなし。外へ ひらく 1つは「いいですか？」を 出してから（リンクは その とき はじめて つく）。 */
 (function () {
   'use strict';
-  const LICENSE = 'https://opentracks.com/help/articles/license/';
   const GAME = 'まるふわ びより（むりょう・ログインなし）https://aohozomi.github.io/marufuwa-tsuri/';
   const EN = new URLSearchParams(location.search).get('lang') === 'en' || (() => { try { return localStorage.getItem('marufuwa-lang-v1') === 'en'; } catch (e) { return false; } })();
   const T = (ja, en) => EN ? en : ja;
@@ -177,11 +175,11 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   set('t-b4', '「さぎょうよう BGM」「ヒーリング ミュージック」の ように、きょくを おもな なかみに した どうがに しない。', 'Do not make “study/work BGM” or “healing music” videos where the music is the main content.');
   set('t-bgm1', 'くわしくは OpenTracks の ライセンスを みてね。', 'See the OpenTracks license for details.');
   set('b-lic', 'ライセンスの ページ（そと）', 'License page (outside)');
-  set('q-lic', 'そとの ページを ひらきます。いいですか？', 'This opens an outside page. Is that OK?'); set('a-lic', 'ひらく', 'Open'); set('n-lic', 'やめる', 'Cancel');
+  set('q-lic', 'そとの ページを ひらきます。いいですか？', 'This opens an outside page. Is that OK?'); set('a-lic', 'ひらく', 'Open'); if (EN) set('n-lic', 'やめる', 'Cancel');
   set('h-se', 'こうかおん', 'Sound effects'); set('t-se', 'ゲームの こうかおん（なげる・ぴったり・つれた など）は、この ゲームの ために つくった おとです。はいしんで そのまま ながして だいじょうぶです。', 'The game’s sound effects (cast, “just right”, caught, and so on) were made for this game. You can leave them on in your stream.');
-  set('h-free', 'むりょうで ためせる そざい', 'Free assets to try'); set('a-obs', 'OBS への いれかた（3ステップ）', 'How to add them to OBS (3 steps)'); set('h-paid', 'ゆうりょうの そざい（¥500〜¥800）', 'Paid assets (¥500–¥800)'); set('a-booth', 'BOOTH の おみせを みる（そとの ページ）', 'See the BOOTH shop (outside page)');
-  set('t-cond', 'BOOTH の そざいは、しょうよう OK・クレジット ふよう・かこう OK です（そざいを そのまま くばりなおす・うる のは だめ）。', 'BOOTH assets: commercial use OK, no credit needed, edits OK (do not redistribute or resell the files themselves).');
-  set('n-f1', '歌枠セトリ画像メーカー', 'Karaoke setlist image maker'); set('r-f1', 'むりょう', 'free'); set('u-f1', 'うたわくの さいごに', 'at the end of a karaoke stream'); set('n-f2', '植物が育つ待機画面 お試し版', 'Growing-plant waiting screens (trial)'); set('r-f2', 'むりょう', 'free'); set('u-f2', 'はいしんの まえと あとに', 'before and after a stream'); set('n-f3', 'まるふわマスコット（耳の色が変わる子）', 'Marufuwa mascot (ear colors change)'); set('r-f3', 'むりょう あり・ぜんぶは ¥300', 'free part · full set ¥300'); set('u-f3', 'サムネイルや アイコンに', 'for thumbnails and icons'); set('n-f4', '動く離席画面 まるふわ猫のいたずら', 'Animated BRB screen: Marufuwa cat mischief'); set('r-f4', 'むりょう あり・ぜんぶは ¥500', 'free part · full set ¥500'); set('u-f4', 'ちょっと せきを はずすとき', 'when you step away for a moment'); set('n-f5', 'めくる棚 図鑑メーカー', 'Flip-shelf picture-book maker'); set('r-f5', 'むりょう あり・ぜんぶは ¥500', 'free part · full ¥500'); set('u-f5', 'そざいを ずかんの ように みせるとき', 'to show items like a picture book'); set('n-p1', '猫が動く離席画面 ちいさな事件', 'Cat BRB screen: a tiny incident'); set('r-p1', '¥500', '¥500'); set('u-p1', 'ちょっと せきを はずすとき', 'when you step away for a moment'); set('n-p2', '離席中の、窓の雨', 'Rain on the window (BRB screen)'); set('r-p2', '¥500', '¥500'); set('u-p2', 'しずかに せきを はずすとき', 'a quiet “be right back”'); set('n-p3', 'まるふわマスコット どうぶつの仲間たち10体', 'Marufuwa mascots: 10 animal friends'); set('r-p3', '¥500', '¥500'); set('u-p3', 'サムネイルや たちえに', 'for thumbnails and stand-ins'); set('n-p4', '投票ボード（OBS・わんコメ）', 'Poll board (OBS / OneComme)'); set('r-p4', '¥800', '¥800'); set('u-p4', 'しちょうしゃに えらんで もらうとき', 'when viewers choose'); set('n-p5', '順番待ちボード（OBS・わんコメ）', 'Queue board (OBS / OneComme)'); set('r-p5', '¥800', '¥800'); set('u-p5', 'さんかがたの はいしんで', 'for join-in streams');
+  set('h-free', 'むりょうで ためせる そざい', 'Free assets to try'); set('a-obs', 'OBS への いれかた（3ステップ）', 'How to add them to OBS (3 steps)'); if (EN) set('h-paid', '', 'Paid assets (¥500–¥800)'); set('a-booth', 'BOOTH の おみせへ（そと）', 'BOOTH shop (outside)');
+  set('t-cond', 'つかえる はんいは、しょうひんごとに ちがいます。かう・もらう まえに、それぞれの BOOTH の ページで たしかめてね。', 'What you may do differs by item. Please check each BOOTH page before you get it.');
+  if (EN) set('n-f1', '歌枠セトリ画像メーカー', 'Karaoke setlist image maker'); set('r-f1', 'むりょう', 'free'); set('u-f1', 'うたわくの さいごに', 'at the end of a karaoke stream'); if (EN) set('n-f2', '植物が育つ待機画面 お試し版', 'Growing-plant waiting screens (trial)'); set('r-f2', 'むりょう', 'free'); set('u-f2', 'はいしんの まえと あとに', 'before and after a stream'); if (EN) set('n-f3', 'まるふわマスコット（耳の色が変わる子）', 'Marufuwa mascot (ear colors change)'); set('r-f3', 'むりょう あり・ぜんぶは ¥300', 'free part · full set ¥300'); set('u-f3', 'サムネイルや アイコンに', 'for thumbnails and icons'); if (EN) set('n-f4', '動く離席画面 まるふわ猫のいたずら', 'Animated BRB screen: Marufuwa cat mischief'); set('r-f4', 'むりょう あり・ぜんぶは ¥500', 'free part · full set ¥500'); set('u-f4', 'ちょっと せきを はずすとき', 'when you step away for a moment'); if (EN) set('n-f5', 'めくる棚 図鑑メーカー', 'Flip-shelf picture-book maker'); set('r-f5', 'むりょう あり・ぜんぶは ¥500', 'free part · full set ¥500'); set('u-f5', 'そざいを ずかんの ように みせるとき', 'to show items like a picture book'); if (EN) set('n-p1', '猫が動く離席画面 ちいさな事件', 'Cat BRB screen: a tiny incident'); set('r-p1', '¥500', '¥500'); set('u-p1', 'ちょっと せきを はずすとき', 'when you step away for a moment'); if (EN) set('n-p2', '離席中の、窓の雨', 'Rain on the window (BRB screen)'); set('r-p2', '¥500', '¥500'); set('u-p2', 'しずかに せきを はずすとき', 'a quiet “be right back”'); if (EN) set('n-p3', 'まるふわマスコット どうぶつの仲間たち10体', 'Marufuwa mascots: 10 animal friends'); set('r-p3', '¥500', '¥500'); set('u-p3', 'サムネイルや たちえに', 'for thumbnails and character portraits'); if (EN) set('n-p4', '投票ボード（OBS・わんコメ）', 'Poll board (OBS / OneComme)'); set('r-p4', '¥800', '¥800'); set('u-p4', 'しちょうしゃに えらんで もらうとき', 'when viewers choose'); if (EN) set('n-p5', '順番待ちボード（OBS・わんコメ）', 'Queue board (OBS / OneComme)'); set('r-p5', '¥800', '¥800'); set('u-p5', 'さんかがたの はいしんで', 'for join-in streams');
   const say = t => { const l = $('live'); l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); };
   $('copy').addEventListener('click', async () => {
     const text = $('copytext').textContent; let ok = false;
@@ -189,12 +187,6 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
     if (!ok) { try { const r = document.createRange(); r.selectNodeContents($('copytext')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {} }
     say(ok ? T('コピー しました。', 'Copied.') : T('もじを えらびました。コピーして ください。', 'Text selected. Please copy it.'));
   });
-  const b = $('b-lic'), box = $('c-lic'), a = $('a-lic');
-  function close(back) { box.hidden = true; a.removeAttribute('href'); b.setAttribute('aria-expanded', 'false'); if (back) b.focus(); }
-  b.addEventListener('click', () => { if (!box.hidden) { close(false); return; } a.href = LICENSE; box.hidden = false; b.setAttribute('aria-expanded', 'true'); a.focus(); say($('q-lic').textContent); });
-  $('n-lic').addEventListener('click', () => close(true));
-  a.addEventListener('click', () => { setTimeout(() => close(false), 50); });
-  box.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); close(true); } });
 })();
 </script>
 <script>
@@ -210,7 +202,7 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
       e.preventDefault(); go.href = a.href;
       var host = ''; try { host = new URL(a.href).hostname.replace(/^www\./, ''); } catch (x) {}
       document.getElementById('ext-t').textContent = en() ? 'This opens an outside page' : 'そとの ページが ひらくよ';
-      document.getElementById('ext-tx').textContent = en() ? host + ' will open. You do not have to go.' : host + ' が ひらくよ。いかなくても ぜんぜん だいじょうぶ。';
+      document.getElementById('ext-tx').textContent = en() ? host + ' will open. Please look at it with a grown-up. You do not have to go.' : host + ' が ひらくよ。おうちの ひとと いっしょに みてね。いかなくても ぜんぜん だいじょうぶ。';
       go.textContent = en() ? 'Open' : 'ひらく'; no.textContent = en() ? 'Go back' : 'やめて もどる';
       try { d.showModal(); } catch (x) { d.setAttribute('open', ''); }
       try { no.focus(); } catch (x) {}

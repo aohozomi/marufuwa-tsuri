@@ -73,7 +73,7 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
 .back{position:sticky;top:8px;z-index:20}main{padding-top:8px}
 .shop{list-style:none;padding:0;margin:6px 0 0}.shop li{margin:6px 0}.shop a{display:flex;flex-direction:column;justify-content:center;min-height:52px;padding:8px 12px;border-radius:14px;border:2px solid var(--line);background:#fff;color:inherit;text-decoration:none;font-weight:800;line-height:1.5}:root[data-night=true] .shop a{background:#132744}.shop small{font-weight:600;font-size:.82rem;color:var(--soft)}.shop .pr{font-weight:700;font-size:.85rem;color:var(--ok)}
 .ext-dlg{max-width:min(92vw,400px);border:3px solid var(--line);border-radius:20px;padding:14px 16px;background:#fff;color:#244653;text-align:center}.ext-dlg::backdrop{background:#0006}.ext-dlg p{margin:0 0 8px;font-weight:800;line-height:1.6}#ext-t{font-size:1.1rem}.ext-dlg .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.ext-b{min-height:52px;min-width:120px;padding:8px 18px;display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:900;border-radius:18px;border:2px solid #9cc9e0;background:linear-gradient(#fff,#e3f2fa);color:#0b4a6b;text-decoration:none;cursor:pointer}
-.step{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.num{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#2a8cc0;color:#fff;font-weight:900}.step p{margin:4px 0 0;line-height:1.7}
+.nw{white-space:nowrap}:root[lang=en] main{word-break:normal}.step{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.num{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#2a8cc0;color:#fff;font-weight:900}.step p{margin:4px 0 0;line-height:1.7}
 kbd{font:inherit;font-weight:800;padding:0 6px;border-radius:6px;border:1.5px solid var(--line);background:var(--card);white-space:nowrap}
 </style>
 </head>
@@ -86,14 +86,14 @@ kbd{font:inherit;font-weight:800;padding:0 6px;border-radius:6px;border:1.5px so
   <p class="lead" id="lead">まるふわの 離席画面・待機画面・透過PNG は、OBS Studio に 3ステップで はいります。</p>
   <section aria-labelledby="h-steps"><h2 id="h-steps">3つの てじゅん</h2>
     <div class="step"><span class="num" aria-hidden="true">1</span><p id="s1">OBS Studio を ひらいて、したの <span style="white-space:nowrap">「ソース」の</span> <kbd>＋</kbd> を おす。</p></div>
-    <div class="step"><span class="num" aria-hidden="true">2</span><p id="s2">うごく がめん（MP4・WebM）は <kbd>メディアソース</kbd>、え（PNG）は <kbd>画像</kbd> を えらぶ。</p></div>
+    <div class="step"><span class="num" aria-hidden="true">2</span><p id="s2">うごく <span class="nw">がめん（MP4）</span>は <kbd>メディアソース</kbd>、<wbr><wbr>え<span class="nw">（PNG）は</span> <kbd>画像</kbd> を えらぶ。</p></div>
     <div class="step"><span class="num" aria-hidden="true">3</span><p id="s3">ダウンロードした ファイルを えらぶ。うごく がめんは <kbd>ループ</kbd> に チェックを いれる。</p></div>
   </section>
   <section aria-labelledby="h-tips"><h2 id="h-tips">しって おくと べんり</h2>
     <ul>
-      <li id="t1">そざいは 1920×1080 で つくって います。OBS の キャンバスも 1920×1080 だと ぴったり です。</li>
-      <li id="t2">すけて いる（透過）WebM と PNG は、ゲーム画面や カメラの うえに そのまま かさねられます。MP4 は はいけいつき です。</li>
-      <li id="t3">HTML の どうぐ（投票ボード・順番待ちボード・セトリ画像メーカー など）は、<kbd>ブラウザ</kbd> ソースで つかいます。くわしくは 商品の せつめいを みてね。</li>
+      <li id="t1">おおきさや ばしょは、OBS の がめんの なかで ドラッグして あわせられます。</li>
+      <li id="t2">すけて いる <span class="nw">（透過）PNG</span> は、ゲーム画面や カメラの うえに そのまま かさねられます。MP4 は はいけいつき です。</li>
+      <li id="t3">HTML の どうぐ（投票ボード・順番待ちボード）は、<kbd>ブラウザ</kbd> ソースで つかいます。くわしくは 商品の せつめいを みてね。</li>
       <li id="t4">OBS の バージョンに よって、ボタンの なまえが すこし ちがう ことが あります。</li>
     </ul>
   </section>
@@ -112,12 +112,12 @@ kbd{font:inherit;font-weight:800;padding:0 6px;border-radius:6px;border:1.5px so
   set('lead', 'Marufuwa BRB screens, waiting screens and transparent PNGs go into OBS Studio in 3 steps.');
   set('h-steps', '3 steps');
   set('s1', 'Open OBS Studio and press “+” under Sources.');
-  set('s2', 'Pick “Media Source” for moving screens (MP4 / WebM) or “Image” for pictures (PNG).');
+  set('s2', 'Pick “Media Source” for moving screens (MP4) or “Image” for pictures (PNG).');
   set('s3', 'Choose the downloaded file. For moving screens, tick “Loop”.');
   set('h-tips', 'Good to know');
-  set('t1', 'Assets are made at 1920×1080. An OBS canvas of 1920×1080 fits exactly.');
-  set('t2', 'Transparent WebM and PNG files layer straight over your game or camera. MP4 files have a background.');
-  set('t3', 'HTML tools (poll board, queue board, setlist maker and so on) use a “Browser” source. See each item’s description for details.');
+  set('t1', 'You can drag to change the size and position inside the OBS preview.');
+  set('t2', 'Transparent PNG files layer straight over your game or camera. MP4 files have a background.');
+  set('t3', 'HTML tools (poll board, queue board) use a “Browser” source. See each item’s description for details.');
   set('t4', 'Button names can differ slightly between OBS versions.');
   set('back2', 'Back to the asset list');
 })();
