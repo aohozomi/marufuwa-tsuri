@@ -1,0 +1,63 @@
+/* 小さい画面でも、遊びに必要な操作を手元に残す。 */
+@media (max-width:999px) {
+  .ps-hint { display:none!important; }
+  .stagewrap > canvas#cv {
+    width:min(100%,calc(48dvh * 5 / 8),calc((100dvh - 320px) * 5 / 8));
+    min-width:0; max-height:48vh; max-height:48dvh;
+  }
+  #acts.acts {
+    position:sticky; bottom:0; z-index:10;
+    display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:6px;
+    padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));
+    background:var(--wall);
+  }
+  #acts.acts > button { min-width:0; padding-inline:6px; font-size:.9rem; white-space:normal; }
+  #acts.acts > #go { font-size:1rem; }
+  body:has(#scene) { padding-top:8px; padding-bottom:16px; }
+  main.room:has(#scene) { display:grid; grid-template-columns:1fr 1fr; column-gap:8px; padding-top:8px; }
+  main.room:has(#scene) > * { grid-column:1 / -1; }
+  main.room:has(#scene) > h1 { grid-column:1; align-self:center; margin:4px 0; font-size:1.2rem; line-height:1.25; }
+  main.room:has(#scene) > .lead { grid-column:2; margin:4px 0; font-size:.82rem; line-height:1.45; }
+  #stage.stage { width:min(100%,calc(48dvh * 4 / 3)); margin-inline:auto; }
+  #cap.cap { min-height:0; padding:6px 8px; font-size:.88rem; line-height:1.45; }
+  #pick, #seated:not([hidden]) {
+    position:sticky; bottom:0; z-index:10;
+    padding:4px 0 calc(8px + env(safe-area-inset-bottom,0px)); background:var(--wall);
+  }
+  #pick > h2 { margin-top:4px; font-size:.95rem; }
+  #menu.menu { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-block:4px; }
+  #menu.menu li { min-width:0; }
+  #menu.menu button { min-width:0; padding-inline:6px; gap:5px; font-size:.9rem; line-height:1.4; }
+  #menu.menu button i { width:16px; height:16px; }
+  .ctl, .fbtns {
+    position:sticky; left:auto; bottom:calc(8px + env(safe-area-inset-bottom,0px));
+    transform:none; width:100%;
+  }
+  body:has(.ctl) { overflow-anchor:none; }
+  body.playing .field > #cv { max-width:calc(48dvh * 300 / 420); min-width:0; }
+}
+@media (max-width:360px) and (max-height:640px) {
+  .stagewrap > canvas#cv { width:min(100%,calc((100dvh - 400px) * 5 / 8)); }
+}
+@media (max-width:899px) {
+  .pad {
+    position:sticky; bottom:0; z-index:10;
+    grid-template-rows:repeat(3,minmax(48px,1fr));
+    padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));
+    background:var(--bg);
+  }
+  .stage:has(#g) { max-height:48vh; max-height:48dvh; }
+}
+@media (min-width:1000px) and (min-height:560px) and (hover:hover) and (pointer:fine) {
+  body:has(#scene) { padding:12px; }
+  main.room:has(#scene) {
+    max-width:1100px; display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(320px,400px);
+    column-gap:24px; align-items:start;
+  }
+  main.room:has(#scene) > * { grid-column:2; }
+  main.room:has(#scene) > #stage {
+    grid-column:1; grid-row:1 / span 12; align-self:center;
+    width:min(100%,calc(48dvh * 4 / 3)); margin-inline:auto;
+  }
+}
