@@ -310,7 +310,8 @@ button:focus-visible,a:focus-visible{outline:3px solid #ffe27a;outline-offset:2p
         try { localStorage.setItem(KEY, en ? 'ja' : 'en'); } catch (e) {}
         var u = new URL(location.href); u.searchParams.delete('lang'); location.replace(u.toString());
       });
-      row.appendChild(b); (document.querySelector('main') || document.body).appendChild(row);
+      row.appendChild(b); var top = document.querySelector('.top');   // 10/28 作業キュー B-1：スマホで さいしょから みえる うえの おびへ（したの はしだと 画面の そと）
+      if (top) { row.style.cssText = 'margin:0'; top.appendChild(row); } else (document.querySelector('main') || document.body).appendChild(row);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
   } catch (e) {}

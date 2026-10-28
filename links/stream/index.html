@@ -71,6 +71,8 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
 @media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
 .back{position:sticky;top:8px;z-index:20}main{padding-top:8px}
+.shop{list-style:none;padding:0;margin:6px 0 0}.shop li{margin:6px 0}.shop a{display:flex;flex-direction:column;justify-content:center;min-height:52px;padding:8px 12px;border-radius:14px;border:2px solid var(--line);background:#fff;color:inherit;text-decoration:none;font-weight:800;line-height:1.5}:root[data-night=true] .shop a{background:#132744}.shop small{font-weight:600;font-size:.82rem;color:var(--soft)}.shop .pr{font-weight:700;font-size:.85rem;color:var(--ok)}
+.ext-dlg{max-width:min(92vw,400px);border:3px solid var(--line);border-radius:20px;padding:14px 16px;background:#fff;color:#244653;text-align:center}.ext-dlg::backdrop{background:#0006}.ext-dlg p{margin:0 0 8px;font-weight:800;line-height:1.6}#ext-t{font-size:1.1rem}.ext-dlg .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.ext-b{min-height:52px;min-width:120px;padding:8px 18px;display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:900;border-radius:18px;border:2px solid #9cc9e0;background:linear-gradient(#fff,#e3f2fa);color:#0b4a6b;text-decoration:none;cursor:pointer}
 </style>
 </head>
 <body>
@@ -80,6 +82,27 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   <h1 id="title" tabindex="-1">はいしん・どうがで つかう かたへ</h1>
   <p class="lead" id="lead">まるふわ びよりは、はいしんや どうがで つかって だいじょうぶです。れんらくも いりません。きまりは この ページに まとめました。</p>
 
+  <!-- 10/28 参謀 作業キュー A-3・A-4・D-1・D-3：むりょうを さきに。BOOTH は 商品ごとの リンク（utm_source=stream）。そとへ ひらく まえに きく（法 第16条） -->
+  <section aria-labelledby="h-free"><h2 id="h-free">むりょうで ためせる そざい</h2>
+    <p class="small" id="t-cond" style="margin-top:0">BOOTH の そざいは、しょうよう OK・クレジット ふよう・かこう OK です（そざいを そのまま くばりなおす・うる のは だめ）。</p>
+    <ul class="shop">
+      <li><a href="https://hozumi-ao.booth.pm/items/8838391?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f1">歌枠セトリ画像メーカー</span> <span class="pr" id="r-f1">むりょう</span></span><small id="u-f1">うたわくの さいごに</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8858666?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f2">植物が育つ待機画面 お試し版</span> <span class="pr" id="r-f2">むりょう</span></span><small id="u-f2">はいしんの まえと あとに</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8896841?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f3">まるふわマスコット（耳の色が変わる子）</span> <span class="pr" id="r-f3">むりょう あり・ぜんぶは ¥300</span></span><small id="u-f3">サムネイルや アイコンに</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8894357?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f4">動く離席画面 まるふわ猫のいたずら</span> <span class="pr" id="r-f4">むりょう あり・ぜんぶは ¥500</span></span><small id="u-f4">ちょっと せきを はずすとき</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8848038?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-f5">めくる棚 図鑑メーカー</span> <span class="pr" id="r-f5">むりょう あり・ぜんぶは ¥500</span></span><small id="u-f5">そざいを ずかんの ように みせるとき</small></a></li>
+    </ul>
+  </section>
+  <section aria-labelledby="h-paid"><h2 id="h-paid">ゆうりょうの そざい（¥500〜¥800）</h2>
+    <ul class="shop">
+      <li><a href="https://hozumi-ao.booth.pm/items/8838241?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p1">猫が動く離席画面 ちいさな事件</span> <span class="pr" id="r-p1">¥500</span></span><small id="u-p1">ちょっと せきを はずすとき</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8855405?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p2">離席中の、窓の雨</span> <span class="pr" id="r-p2">¥500</span></span><small id="u-p2">しずかに せきを はずすとき</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8894277?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p3">まるふわマスコット どうぶつの仲間たち10体</span> <span class="pr" id="r-p3">¥500</span></span><small id="u-p3">サムネイルや たちえに</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8835366?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p4">投票ボード（OBS・わんコメ）</span> <span class="pr" id="r-p4">¥800</span></span><small id="u-p4">しちょうしゃに えらんで もらうとき</small></a></li>
+      <li><a href="https://hozumi-ao.booth.pm/items/8833125?utm_source=stream" target="_blank" rel="noopener noreferrer"><span><span id="n-p5">順番待ちボード（OBS・わんコメ）</span> <span class="pr" id="r-p5">¥800</span></span><small id="u-p5">さんかがたの はいしんで</small></a></li>
+    </ul>
+    <p class="small"><a id="a-booth" class="btn" href="https://hozumi-ao.booth.pm/?utm_source=stream" target="_blank" rel="noopener noreferrer">BOOTH の おみせを みる（そとの ページ）</a></p>
+  </section>
   <section aria-labelledby="h-ok"><h2 id="h-ok">つかって OK</h2><ul>
     <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only" id="sr-ok1">OK：</span><span id="t-ok1">ゲームの がめんと おとを、はいしん・どうが（ゲームじっきょう・つりはいしん・さぎょうはいしん など）で うつして OK。</span></li>
     <li><span class="ok mark" aria-hidden="true">○</span><span class="sr-only" id="sr-ok2">OK：</span><span id="t-ok2">ゲームの しゃしんカードの がぞうは、じゆうに はって OK（ブログ・SNS・どうがの サムネイル など）。</span></li>
@@ -115,15 +138,11 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   <section aria-labelledby="h-se"><h2 id="h-se">こうかおん</h2>
     <p class="small" id="t-se" style="margin-top:0">ゲームの こうかおん（なげる・ぴったり・つれた など）は、この ゲームの ために つくった おとです。はいしんで そのまま ながして だいじょうぶです。</p>
   </section>
-  <!-- 10/14 参謀：このページに来るのは配信者。BOOTH の配信ツールをここから繋ぐ -->
-  <section aria-labelledby="h-booth"><h2 id="h-booth">はいしんで つかえる そざいも あります</h2>
-    <ul>
-      <li id="t-bo1">うごく りせきがめん（むりょう あり）</li>
-      <li id="t-bo2">とうひょうボード・じゅんばんまちボード（OBS・わんコメ たいおう）</li>
-      <li id="t-bo3">うたわく セトリ がぞう メーカー（むりょう）</li>
-    </ul>
-    <p class="small"><a id="a-booth" href="https://hozumi-ao.booth.pm/" target="_blank" rel="noopener noreferrer">BOOTH で みる（そとの ページ）</a></p>
-  </section>
+  <dialog id="ext" class="ext-dlg" aria-labelledby="ext-t">
+    <p id="ext-t">そとの ページが ひらくよ</p>
+    <p id="ext-tx" class="ext-tx"></p>
+    <div class="row"><a id="ext-go" class="ext-b" href="#" target="_blank" rel="noopener noreferrer">ひらく</a><button type="button" id="ext-no" class="ext-b">やめて もどる</button></div>
+  </dialog>
 </main>
 <script defer src="../../tsuri-ruby-dict.js"></script>
 <script defer src="../../tsuri-ruby.js"></script>
@@ -159,7 +178,9 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   set('b-lic', 'ライセンスの ページ（そと）', 'License page (outside)');
   set('q-lic', 'そとの ページを ひらきます。いいですか？', 'This opens an outside page. Is that OK?'); set('a-lic', 'ひらく', 'Open'); set('n-lic', 'やめる', 'Cancel');
   set('h-se', 'こうかおん', 'Sound effects'); set('t-se', 'ゲームの こうかおん（なげる・ぴったり・つれた など）は、この ゲームの ために つくった おとです。はいしんで そのまま ながして だいじょうぶです。', 'The game’s sound effects (cast, “just right”, caught, and so on) were made for this game. You can leave them on in your stream.');
-  set('h-booth', 'はいしんで つかえる そざいも あります', 'Stream assets are available too'); set('t-bo1', 'うごく りせきがめん（むりょう あり）', 'Animated “be right back” screens (free ones available)'); set('t-bo2', 'とうひょうボード・じゅんばんまちボード（OBS・わんコメ たいおう）', 'Poll board and queue board (OBS / OneComme)'); set('t-bo3', 'うたわく セトリ がぞう メーカー（むりょう）', 'Karaoke setlist image maker (free)'); set('a-booth', 'BOOTH で みる（そとの ページ）', 'See them on BOOTH (outside page)');
+  set('h-free', 'むりょうで ためせる そざい', 'Free assets to try'); set('h-paid', 'ゆうりょうの そざい（¥500〜¥800）', 'Paid assets (¥500–¥800)'); set('a-booth', 'BOOTH の おみせを みる（そとの ページ）', 'See the BOOTH shop (outside page)');
+  set('t-cond', 'BOOTH の そざいは、しょうよう OK・クレジット ふよう・かこう OK です（そざいを そのまま くばりなおす・うる のは だめ）。', 'BOOTH assets: commercial use OK, no credit needed, edits OK (do not redistribute or resell the files themselves).');
+  set('n-f1', '歌枠セトリ画像メーカー', 'Karaoke setlist image maker'); set('r-f1', 'むりょう', 'free'); set('u-f1', 'うたわくの さいごに', 'at the end of a karaoke stream'); set('n-f2', '植物が育つ待機画面 お試し版', 'Growing-plant waiting screens (trial)'); set('r-f2', 'むりょう', 'free'); set('u-f2', 'はいしんの まえと あとに', 'before and after a stream'); set('n-f3', 'まるふわマスコット（耳の色が変わる子）', 'Marufuwa mascot (ear colors change)'); set('r-f3', 'むりょう あり・ぜんぶは ¥300', 'free part · full set ¥300'); set('u-f3', 'サムネイルや アイコンに', 'for thumbnails and icons'); set('n-f4', '動く離席画面 まるふわ猫のいたずら', 'Animated BRB screen: Marufuwa cat mischief'); set('r-f4', 'むりょう あり・ぜんぶは ¥500', 'free part · full set ¥500'); set('u-f4', 'ちょっと せきを はずすとき', 'when you step away for a moment'); set('n-f5', 'めくる棚 図鑑メーカー', 'Flip-shelf picture-book maker'); set('r-f5', 'むりょう あり・ぜんぶは ¥500', 'free part · full ¥500'); set('u-f5', 'そざいを ずかんの ように みせるとき', 'to show items like a picture book'); set('n-p1', '猫が動く離席画面 ちいさな事件', 'Cat BRB screen: a tiny incident'); set('r-p1', '¥500', '¥500'); set('u-p1', 'ちょっと せきを はずすとき', 'when you step away for a moment'); set('n-p2', '離席中の、窓の雨', 'Rain on the window (BRB screen)'); set('r-p2', '¥500', '¥500'); set('u-p2', 'しずかに せきを はずすとき', 'a quiet “be right back”'); set('n-p3', 'まるふわマスコット どうぶつの仲間たち10体', 'Marufuwa mascots: 10 animal friends'); set('r-p3', '¥500', '¥500'); set('u-p3', 'サムネイルや たちえに', 'for thumbnails and stand-ins'); set('n-p4', '投票ボード（OBS・わんコメ）', 'Poll board (OBS / OneComme)'); set('r-p4', '¥800', '¥800'); set('u-p4', 'しちょうしゃに えらんで もらうとき', 'when viewers choose'); set('n-p5', '順番待ちボード（OBS・わんコメ）', 'Queue board (OBS / OneComme)'); set('r-p5', '¥800', '¥800'); set('u-p5', 'さんかがたの はいしんで', 'for join-in streams');
   const say = t => { const l = $('live'); l.textContent = ''; setTimeout(() => { l.textContent = t; }, 30); };
   $('copy').addEventListener('click', async () => {
     const text = $('copytext').textContent; let ok = false;
@@ -173,6 +194,28 @@ li{margin:4px 0;line-height:1.7;font-size:.95rem}
   $('n-lic').addEventListener('click', () => close(true));
   a.addEventListener('click', () => { setTimeout(() => close(false), 50); });
   box.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); close(true); } });
+})();
+</script>
+<script>
+/* 10/28：そとの ページ（BOOTH）は ひらく まえに きく（links/ と おなじ かた・法 第16条） */
+(function () {
+  var d = document.getElementById('ext'), go = document.getElementById('ext-go'), no = document.getElementById('ext-no');
+  if (!d) return;
+  var en = function () { return document.documentElement.lang === 'en'; };
+  var close = function () { try { d.close(); } catch (e) { d.removeAttribute('open'); } };
+  document.querySelectorAll('main a[target="_blank"]').forEach(function (a) {
+    if (d.contains(a) || a.closest('.confirm')) return;
+    a.addEventListener('click', function (e) {
+      e.preventDefault(); go.href = a.href;
+      var host = ''; try { host = new URL(a.href).hostname.replace(/^www\./, ''); } catch (x) {}
+      document.getElementById('ext-t').textContent = en() ? 'This opens an outside page' : 'そとの ページが ひらくよ';
+      document.getElementById('ext-tx').textContent = en() ? host + ' will open. You do not have to go.' : host + ' が ひらくよ。いかなくても ぜんぜん だいじょうぶ。';
+      go.textContent = en() ? 'Open' : 'ひらく'; no.textContent = en() ? 'Go back' : 'やめて もどる';
+      try { d.showModal(); } catch (x) { d.setAttribute('open', ''); }
+      try { no.focus(); } catch (x) {}
+    });
+  });
+  go.addEventListener('click', function () { setTimeout(close, 0); }); no.addEventListener('click', close);
 })();
 </script>
 <script defer src="../../tsuri-pagebg.js"></script>
