@@ -144,7 +144,7 @@ main{position:relative;background:#f4fbff;border-radius:32px;margin-top:10px;mar
 /* つりびと レベル：つった さかなで ふえる。へらない・くらべない・じょうげん なし */
 .hud.record{flex-wrap:wrap}
 .level{flex:1 1 100%;display:flex;align-items:center;gap:12px;font-size:.95rem;margin-top:2px}
-.level-next{font-size:.78rem;color:#5a7a8a;font-weight:700;margin-left:4px}   /* 10/16 参謀：「あと◯匹」 */
+.level-next{font-size:.78rem;color:#3f5f6f;font-weight:700;margin-left:4px}   /* 10/16 参謀：「あと◯匹」／10/29 ジョブズ2：うすい（ひる 4.4・よる 3.4）→ こく（ひる 6.5）。よるは したの .note と おなじ いろ */
 .level-bar{flex:1;height:10px;border-radius:6px;background:#d5e6ed;overflow:hidden}
 .level-bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#7fd0f2,#ffd34d);transition:width .6s ease}
 @media(prefers-reduced-motion:reduce){.level-bar i{transition:none}}
@@ -888,7 +888,7 @@ dialog h2:focus{outline:none}   /* ひらいた とき みだしに フォーカ
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) .pill.quiet{--c1:#46688c;--c2:#2f4d70;--side:#1c3350;--ink:#eaf3fb;border-color:#a9c4da;filter:none;box-shadow:0 5px 0 var(--side),0 10px 14px #0006,inset 0 -7px 10px #00000030,inset 0 4px 6px #ffffff33}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) .pill.quiet::before{background:linear-gradient(#ffffff40,#ffffff00)}
 :root[data-night=true] :is(main > :not(#scene),#bucket,#book,#shop,#keep,#photo,#gear,#nakama,#trophy,#give,#gift,#letter,#homescreen,#restore) button:focus-visible{outline-color:#a9dcff}
-:root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] #bucket-list small,:root[data-night=true] #gift-list small{color:#a9bfd2}
+:root[data-night=true] .menu-label,:root[data-night=true] .note,:root[data-night=true] .level-next,:root[data-night=true] #bucket-list small,:root[data-night=true] #gift-list small{color:#a9bfd2}
 :root[data-night=true] #bucket-list div,:root[data-night=true] #gift-list div,:root[data-night=true] #book-grid div{background:#1a3250;border-color:#2d4d70}
 :root[data-night=true] #book-grid div[data-seen=false]{background:#16283f;color:#9db3c6}
 :root[data-night=true] #nakama-card,:root[data-night=true] #nakama-grid .nk{background:#1a3250;border-color:#2d4d70;color:#e8f1f8}

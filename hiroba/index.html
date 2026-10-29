@@ -449,7 +449,7 @@ button.pulse{animation:snapPulse 1.2s ease-in-out infinite;outline:3px solid #ff
 #status{min-height:3.4em;margin:10px 4px 6px;text-align:center;font-size:1.15rem;line-height:1.6;font-weight:700}
 /* いきさき */
 #places{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:6px 0 12px}
-#trip-banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:900;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 20px;border-radius:18px;background:#ffffffe8;border:3px solid #fff;box-shadow:0 6px 18px #24465333;color:#244653;text-align:center;max-width:86%}   /* 10/16 参謀：あるいて いる あいだ、まんなかに 大きく */
+#trip-banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:900;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 20px;border-radius:18px;background:#ffffffe8;border:3px solid #fff;box-shadow:0 6px 18px #24465333;color:#244653;text-align:center;width:max-content;max-width:86%;word-break:keep-all;overflow-wrap:anywhere}   /* 10/29：#scene の そと（#viewport）に おく。なかまの ふきだしより うえに でるのは わざと（いきさきの あんないが だいじ） */   /* 10/16 参謀：あるいて いる あいだ、まんなかに 大きく */
 #trip-banner b{font-size:1.25rem;line-height:1.4}#trip-banner small{font-size:.85rem;color:#506874}#trip-banner[hidden]{display:none}
 #places button,#places-wait button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:82px;padding:8px 6px;font-size:1.25rem;line-height:1.3;border-radius:26px;text-align:center}
 #places button::before,#places-wait button::before{left:8%;right:8%;height:30%}
@@ -2510,7 +2510,7 @@ function goDest(id) {
   if (trip && trip.id === id && player.path.length) { player.path = []; player.then = null; player.moving = false; player.x = d.at.x; player.y = d.at.y; tripBanner(''); arrive(id); return; }   // 10/16 参謀：もういちど おしたら すぐ つく（まてない ひとの にげみち）
   lastInput = T; trip = { id }; sfx.ui(); setHl(id); if (id === 'oheya') loadArt();   // おへやへ いく 前に 魚の 絵を 用意
   narrate(d.name + 'へ あるいて いくよ');
-  tripBanner(S(d.name + 'へ むかって いるよ…', 'Heading to ' + ((LV_NAME[id] && LV_NAME[id][1]) || d.name) + '…') + '\n' + S('もういちど おすと すぐ つくよ', 'Press again to arrive now'));   // 10/16 参謀：押した あとの 反応が 右上の 小さい 文字だけで、初見は「反応が ない」と 思う → まんなかに 大きく
+  tripBanner(S(d.name + 'へ むかって\u00a0いるよ…', 'Heading to ' + ((LV_NAME[id] && LV_NAME[id][1]) || d.name) + '…') + '\n' + S('もういちど おすと すぐ つくよ', 'Press again to arrive now'));   // 10/16 参謀：押した あとの 反応が 右上の 小さい 文字だけで、初見は「反応が ない」と 思う → まんなかに 大きく
   walkTo(d.at.x, d.at.y, () => { tripBanner(''); arrive(id); });
   if (player.path.length && !reduce()) { let len = 0, prev = player; for (const q of player.path) { len += dist(prev, q); prev = q; } player.speed = Math.max(190, len / 3.5); }   // 10/11：行き先への移動は 少し はやく。10/16 参謀の実測「8〜18秒」→ 道のりの 長さから、どこへ 行っても 3.5秒 いないに つく 速さに（最低 190）
 }
@@ -2518,7 +2518,7 @@ function goDest(id) {
 function tripBanner(text) {
   let b = document.getElementById('trip-banner');
   if (!text) { if (b) b.hidden = true; return; }
-  if (!b) { b = document.createElement('div'); b.id = 'trip-banner'; b.setAttribute('aria-hidden', 'true'); scene.appendChild(b); }
+  if (!b) { b = document.createElement('div'); b.id = 'trip-banner'; b.setAttribute('aria-hidden', 'true'); (scene.parentElement || scene).appendChild(b); }   /* 10/29 ジョブズ2：スマホは scene が よこに ずれて いて、まんなかに おくと みぎが きれた → みえて いる わく（#viewport）の まんなかに */
   b.textContent = ''; text.split('\n').forEach((ln, i) => { const p = document.createElement(i ? 'small' : 'b'); p.textContent = ln; b.appendChild(p); });
   b.hidden = false;
 }
