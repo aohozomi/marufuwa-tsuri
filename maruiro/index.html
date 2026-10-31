@@ -204,7 +204,7 @@ body.playing .theme-kicker{display:none!important}
   .mutehint{display:none!important}
   body.playing .toprow{display:flex!important;margin-bottom:8px}
   body.playing #cv{width:min(100%,calc((100dvh - 300px)*300/420));min-width:0}
-  body:not(.playing) #cv{width:min(100%,calc(48dvh*300/420));min-width:0}
+  body:not(.playing) #cv{width:min(100%,calc((100dvh - 180px)*300/420));min-width:0}   /* 10/31 マスター「画面小さい」：48dvh→上の札と下のボタンをのぞいた高さいっぱい */
   .ctl,.fbtns{position:fixed;left:50%;bottom:calc(8px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:28;width:min(calc(100% - 24px),530px);margin:0;padding:8px;gap:6px;border:1px solid #cabb8f;border-radius:27px;background:rgba(250,253,243,.97);box-shadow:0 5px 24px rgba(47,78,55,.2)}
   .ctl button{min-height:52px;padding-left:6px;padding-right:6px}
   .dayhud{gap:6px}
@@ -985,8 +985,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── そうさ ───
   const toX = e => { const r = cv.getBoundingClientRect(); return (e.clientX - r.left) / r.width * W; };
   let down = false;
-  cv.addEventListener('pointerdown', e => { if (rec.play === 3) { down = true; ts.dragged = false; try { cv.setPointerCapture(e.pointerId); } catch (x) {} ts.want = Math.max(0, Math.min(TC - 1, Math.floor(toX(e) / TW))); cv.focus({ preventScroll: true }); return; } down = true; try { cv.setPointerCapture(e.pointerId); } catch (x) {} setAim(toX(e)); cv.focus({ preventScroll: true }); if (e.pointerType === 'touch') say(L('ゆびを はなすと おちるよ。', 'Let go to drop.')); });
-  cv.addEventListener('pointermove', e => { if (rec.play === 3) { if (down) { const c = Math.max(0, Math.min(TC - 1, Math.floor(toX(e) / TW))); if (c !== ts.want) { ts.want = c; ts.dragged = true; } } return; } if (down || e.pointerType === 'mouse') setAim(toX(e)); });
+  cv.addEventListener('pointerdown', e => { if (rec.play === 3) { down = true; ts.dragged = false; try { cv.setPointerCapture(e.pointerId); } catch (x) {} ts.x0 = toX(e); ts.c0 = ts.cur ? ts.cur.c : ts.want; ts.n0 = ts.st.pieces; cv.focus({ preventScroll: true }); return; } down = true; try { cv.setPointerCapture(e.pointerId); } catch (x) {} setAim(toX(e)); cv.focus({ preventScroll: true }); if (e.pointerType === 'touch') say(L('ゆびを はなすと おちるよ。', 'Let go to drop.')); });
+  cv.addEventListener('pointermove', e => { if (rec.play === 3) { if (down) { if (ts.n0 !== ts.st.pieces) { ts.n0 = ts.st.pieces; ts.x0 = toX(e); ts.c0 = ts.cur ? ts.cur.c : ts.want; }   /* ゆびを つけたまま つぎの こが でたら、そこから かぞえなおす */ const d = (toX(e) - ts.x0) / (TW * .8), c = Math.max(0, Math.min(TC - 1, ts.c0 + Math.trunc(d)));   /* 10/31 さわった所へ とばず、ゆびを うごかした ぶんだけ（1れつ＝0.8ます）うごく */ if (c !== ts.want) { ts.want = c; ts.dragged = true; } } return; } if (down || e.pointerType === 'mouse') setAim(toX(e)); });
   cv.addEventListener('pointerup', e => { if (!down) return; down = false; if (rec.play === 3) { if (ts.dragged) tsHardDrop(); else tsRotate(); ts.dragged = false; return; } setAim(toX(e)); dropBall(); });
   cv.addEventListener('pointercancel', () => { down = false; });
   const hold = (btn, fn) => { let t = 0; const stop = () => { clearInterval(t); t = 0; }; btn.addEventListener('pointerdown', e => { if (e.cancelable) e.preventDefault(); fn(); stop(); t = setInterval(fn, rec.play === 3 ? 160 : 60); }); ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(n => btn.addEventListener(n, stop)); btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }); };

@@ -303,7 +303,7 @@ button[data-machi=osusume]{--c1:#fff8dc;--c2:#ffe27a;--side:#d9a520;--ink:#5a420
 #scene[data-dim=true]{--dim:brightness(.7) saturate(.9)}
 
 /* ひろばの がめん（360×560 の せかいを、はばに あわせて ひろげる） */
-#viewport{position:relative;width:min(100%,calc((100vh - 232px)*.6429));width:min(100%,calc((100dvh - 232px)*.6429));min-width:min(100%,300px);margin:0 auto;aspect-ratio:360/560;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:var(--sky2);isolation:isolate}
+#viewport{position:relative;width:min(100%,calc((100vh - 232px)*.6429));width:min(100%,calc((100dvh - 232px)*.6429));min-width:min(100%,300px);margin:0 auto;aspect-ratio:360/560;border:2px solid #bfdce8;border-radius:28px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:pan-y;-webkit-tap-highlight-color:transparent;background:var(--sky2);isolation:isolate}
 #viewport{contain:layout paint;clip-path:inset(0 round 26px)}
 #scene{position:absolute;left:0;top:0;width:200%;height:100%;will-change:transform}   /* 世界は 窓の 2倍幅（W=720）・かめらが よこに うごかす（--cam） */
 #park-sign{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:60;pointer-events:none;padding:4px 14px;border-radius:14px;background:#fffffff2;border:2px solid #ffd9e6;font-weight:900;font-size:.9rem;color:#244653;white-space:nowrap}
@@ -2754,6 +2754,15 @@ scene.addEventListener('keydown', e => {
   else if (key === 'Escape') { if (trip && !trip.leaving) { cancelTrip(true); } else if (player.path.length) { player.path = []; player.then = null; } }
 });
 scene.addEventListener('keyup', e => keys.delete(normKey(e.key)));
+// 10/31 マスター「よこに うごこうと したら がめんが きりかわる」：町の 中で よこに すべらせた ゆびは 町で うけとり（TikTok などの「もどる」に わたさない）、その むきへ あるく
+{ let sx = null, sy = 0, done = false;
+  viewport.addEventListener('touchstart', e => { if (e.touches.length !== 1) { sx = null; return; } sx = e.touches[0].clientX; sy = e.touches[0].clientY; done = false; }, { passive: true });
+  viewport.addEventListener('touchmove', e => {
+    if (sx === null) return; const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy;
+    if (Math.abs(dx) > Math.abs(dy) && e.cancelable) e.preventDefault();
+    if (!done && Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy) * 1.5) { done = true; lastInput = T; startOnGesture(); cancelTrip(false); const spot = nearestFree(clamp(player.x + Math.sign(dx) * 170, 8, W - 8), player.y); sfx.tap(); tapRing(spot.x, spot.y); walkTo(spot.x, spot.y); }
+  }, { passive: false });
+  viewport.addEventListener('touchend', () => { sx = null; }, { passive: true }); viewport.addEventListener('touchcancel', () => { sx = null; }, { passive: true }); }
 scene.addEventListener('blur', () => keys.clear());
 function nearestThing() {
   let best = null, bd = Infinity;
