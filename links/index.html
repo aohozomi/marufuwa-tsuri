@@ -140,7 +140,7 @@ h1{margin:0 0 6px;font-size:1.4rem;line-height:1.4}
   var close = function () { try { d.close(); } catch (e) { d.removeAttribute('open'); } };
   document.querySelectorAll('.go a[target="_blank"]').forEach(function (a) {
     a.addEventListener('click', function (e) {
-      e.preventDefault(); go.href = a.href;
+      e.preventDefault(); go.href = a.href; go.target = a.id === 'b-app' ? '_self' : '_blank';
       var host = ''; try { host = new URL(a.href).hostname.replace(/^www\./, ''); } catch (x) {}
       document.getElementById('ext-t').textContent = en() ? 'This opens an outside page' : 'そとの ページが ひらくよ';
       tx.textContent = en() ? host + ' will open. Please look at it with a grown-up. You do not have to go.' : host + ' が ひらくよ。おうちの ひとと いっしょに みてね。いかなくても ぜんぜん だいじょうぶ。';
